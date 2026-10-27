@@ -165,7 +165,7 @@ page. Nothing is wrong — continue.
 ## Step 4 — Assign a rating
 
 PAIN is a judgment about the effect exploitation would have on your agency customers. DefectDojo
-never derives one. Ratings are assigned with a [Rules Engine 2.0](/automation/rules_engine_2/) rule.
+never derives one. Ratings are assigned with a [Triage Engine](/automation/triage_engine/about/) rule.
 
 Go to **Act > Triage Engine > Rules**, choose **New Rule**, and wire three nodes left to right:
 
@@ -180,11 +180,11 @@ node. Filtering on a single `finding.id` is the most legible thing to put on scr
 a production rule filters on severity, exploit evidence and `finding.pain_rating` `is not set`
 instead.
 
-![A complete PAIN rating rule in the Rules Engine 2.0 editor](images/13-pain-rating-rule.jpg)
+![A complete PAIN rating rule in the Triage Engine editor](images/13-pain-rating-rule.jpg)
 
 **Simulate mode will not protect your findings.** Simulate holds back outbound sends only — alerts,
 tickets, messages and webhooks. Every Finding edit in a graph happens for real in simulate mode, and
-that includes this one. See [Mode: Simulate or Live](/automation/rules_engine_2/about/#mode-simulate-or-live).
+that includes this one. See [Mode: Simulate or Live](/automation/triage_engine/about/#mode-simulate-or-live).
 
 That matters more here than on most nodes, because **a PAIN rating cannot be cleared**. The action
 offers only N1 to N5, and `pain_rating` is not writable through the finding API, so there is no
@@ -254,7 +254,7 @@ A rule filtering on one `finding.id` proves the mechanism. Running a boundary ne
 a queue of findings waiting for an impact decision, and an escalation path for the ratings that
 warrant one. Both ship as templates — see
 [FedRAMP rule templates](../pain_ratings/#fedramp-rule-templates) for what each one does, and
-[Building Rules](/automation/rules_engine_2/building_rules/) for how adoption works.
+[Building Rules](/automation/triage_engine/building_rules/) for how adoption works.
 
 An adopted template arrives disabled and in simulate mode. Before it will do anything:
 

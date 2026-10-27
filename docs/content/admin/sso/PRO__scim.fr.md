@@ -131,7 +131,7 @@ Si vous voulez que votre fournisseur d'identité gère aussi les superusers, act
 
 ## Dépannage
 
-**Le test de connexion signale « not found ».** SCIM est désactivé, ou l'instance n'est pas licenciée pour cela. Vérifiez que **Enable SCIM Provisioning** est activé et que votre abonnement inclut le SSO. L'ensemble de l'adresse SCIM se comporte comme si elle n'existait pas tant que les deux conditions ne sont pas réunies.
+**Le test de connexion signale « not found ».** SCIM est désactivé. Vérifiez que **Enable SCIM Provisioning** est activé et enregistré. D'ici là, l'ensemble de l'adresse SCIM se comporte comme si elle n'existait pas.
 
 **Le test de connexion signale un échec d'authentification.** Le jeton est incorrect, ou il a été révoqué. Générez-en un nouveau et mettez à jour votre fournisseur d'identité. Dans Okta, vérifiez que la valeur commence par `Bearer ` et un espace ; dans Entra, vérifiez que ce n'est pas le cas.
 

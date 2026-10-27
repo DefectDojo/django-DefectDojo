@@ -80,6 +80,13 @@ For more information on user roles, see our [Introduction To Roles](/admin/user_
 
 Asset views contain a variety of tables and charts to interpret an Asset’s status at a glance. This includes: 
 
+- **Count cards**
+    - A row of cards at the top of the page for Engagements, Tests, Findings, and Endpoints (or Locations, when Locations are enabled). Each card shows its total, and its menu opens the matching list or import. Under each total, a footer shows what makes up that count, with one figure for what needs attention. Hover over or focus a figure to see what it counts. The figure that needs attention turns amber or red when it is above zero.
+    - **Engagements**: open, closed, and overdue (open with an end date that has passed).
+    - **Tests**: when the Asset was last scanned (the most recent update to any of its Tests), the imports and reimports in the last 30 days, and the Findings created in the last 30 days.
+    - **Findings**: direct and indirect Findings (see [Direct and indirect vulnerabilities](/asset_modelling/pro_hierarchy/asset_hierarchy/#direct-and-indirect-vulnerabilities)), and the active Findings past their SLA.
+    - **Endpoints**: vulnerable (an open Finding still affects it), not vulnerable (everything else, including Endpoints no Finding has touched), and those still affected by an active Critical Finding. With Locations enabled, the card counts active, mitigated, and critical Locations instead.
+    - Every figure counts only what you have permission to view.
 - **Open Finding Severity**
     - A list of open Findings within the Asset, grouped by severity
 - **Asset Overview**
@@ -112,6 +119,15 @@ All ensuing fields that can be edited are also available when the Asset is being
 Changing the Organization field moves the Asset, along with its Engagements, Tests, Findings and any child Assets, to the selected Organization. Before saving that change, DefectDojo asks you to confirm the move and names both the current and the new Organization. [You can reorganize later](/asset_modelling/pro_hierarchy/reorganize_later/) lists everything a move changes.
 
 ![image](images/assets_ss2.png)
+
+### Change a Field in Place
+
+A few fields can also be changed on the Asset page itself, without opening Edit Asset: the **Name** and **Tags** in the page header, and **Business Criticality**, **Platform**, **Lifecycle** and **Description** wherever the page layout shows them. Click a highlighted value to open a small editor under it. **Enter**, or clicking anywhere else, keeps the change (marked **Unsaved**) and **Esc** puts the value back; change as many fields as you like, then **Save Changes** in the card at the bottom of the page saves them all at once.
+
+* **Business Criticality**, **Platform** and **Lifecycle** can be cleared as well as changed. Platform and Lifecycle offer the options configured under [Editable Platform, Lifecycle and Origin Lists](/asset_modelling/pro__asset_attribute_options/).
+* If someone else changed the Asset after you opened the page, nothing is overwritten: DefectDojo shows **Asset Changed** and offers **Reload** or **Keep Editing**.
+
+Only users who can edit the Asset (a Maintainer or above on it, or its Organization) can open a value. Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place) for the rules every page shares.
 
 ### Bulk Edit Assets
 
@@ -308,7 +324,9 @@ Adding and withdrawing an alias requires edit permission on the Asset.
 ### Turning Asset Identity on and off
 
 Aliases are controlled by the **Asset Identity** feature on the
-[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. It is off by default. A self-hosted
+install can turn it on by default by setting `DD_ASSET_IDENTITY_DEFAULT_ON=True`, and a choice made on
+the Feature Flags page still wins. While it is off, Connectors map
 Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
 **Type** field are hidden. Existing aliases stay readable through the API either way.
 

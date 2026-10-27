@@ -67,6 +67,7 @@ from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools import tool_issue_updater
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
+from dojo.tools.utils import drop_ambiguous_repeated_unique_ids
 from dojo.utils import max_safe
 from dojo.vulnerability.manager import VulnerabilityIdManager
 
@@ -387,10 +388,34 @@ class BaseImporter(ImporterOptions):
             msg = "A test must be supplied to parse the file"
             raise ValidationError(msg)
         try:
-            return parser.get_findings(scan, self.test)
+            findings = parser.get_findings(scan, self.test)
         except ValueError as e:
             logger.warning(e)
             raise ValidationError(e)
+        return self.finalize_parsed_findings(findings)
+
+    def group_parsed_findings(self, findings: list[Finding]) -> list[Finding]:
+        """
+        Regroup one report's parsed findings before anything else reads them. Override seam.
+
+        Runs once per parsed report (per test, for parsers that return several), before
+        hashing and before repeated tool ids are dropped. Open source keeps the parser's own
+        grouping, so this returns ``findings`` unchanged.
+        """
+        return findings
+
+    def finalize_parsed_findings(self, findings: list[Finding] | None) -> list[Finding] | None:
+        """
+        Apply the importer's rules to one report's parsed findings: regroup, then drop repeated tool ids.
+
+        A parser whose reports can carry one tool id on several findings (SARIF reports a result's
+        id at each of its locations) marks the findings it emits, and an id that still repeats
+        after regrouping cannot identify one finding, so it is cleared on every finding that
+        carries it (``dojo.tools.utils.drop_ambiguous_repeated_unique_ids``).
+        """
+        if findings is None:
+            return findings
+        return drop_ambiguous_repeated_unique_ids(self.group_parsed_findings(findings))
 
     def parse_dynamic_test_type_tests(
         self,
@@ -461,7 +486,7 @@ class BaseImporter(ImporterOptions):
         # Aggregate all of the findings into a single place
         parsed_findings = []
         for test_raw in tests:
-            parsed_findings.extend(test_raw.findings)
+            parsed_findings.extend(self.finalize_parsed_findings(test_raw.findings) or [])
         return parsed_findings
 
     def parse_findings_dynamic_test_type(

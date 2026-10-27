@@ -170,6 +170,7 @@ env = environ.FileAwareEnv(
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_OS_MESSAGE_ENABLED=(bool, True),  # show the open-source "Upgrade to Pro" / OS message promo banner
+    DD_GITHUB_STAR_PROMPT_ENABLED=(bool, True),  # occasionally ask established users to star DefectDojo on GitHub
     # Some security policies require allowing users to have only one active session
     DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -596,6 +597,7 @@ REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 OS_MESSAGE_ENABLED = env("DD_OS_MESSAGE_ENABLED")
+GITHUB_STAR_PROMPT_ENABLED = env("DD_GITHUB_STAR_PROMPT_ENABLED")
 
 DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 
@@ -2256,6 +2258,7 @@ VULNERABILITY_URLS = {
     "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
     "SSA:": "https://vulners.com/slackware/",  # e.g. https://www.tenable.com/plugins/nessus/240171 --> https://vulners.com/slackware/SSA-2025-169-02
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
+    "SSB-": "https://productcert.siemens.com/productcert/html/",  # e.g. https://productcert.siemens.com/productcert/html/ssb-091449.html
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
     "SVD-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SVD-2025-0103

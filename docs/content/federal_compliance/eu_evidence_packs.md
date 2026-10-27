@@ -9,6 +9,8 @@ DefectDojo Pro includes authored catalogs for vulnerability-related obligations 
 Resilience Act (CRA) and Digital Operational Resilience Act (DORA). A regulatory assessment
 collects the operational facts DefectDojo already holds, gives an assessor space to document the
 remaining evidence, and produces a dated evidence pack.
+To set up an instance and your products for the CRA step by step, see
+[Setting Up EU CRA](../eu_cra_setup).
 
 DefectDojo does not determine whether a regulation applies to an organization, product, or
 service. The catalogs and evidence states are aids to assessment. Confirm applicability,
@@ -101,6 +103,8 @@ DefectDojo computes evidence only where it has suitable operational facts.
 | EPSS and KEV enrichment runs | Trustworthy vulnerability information sources |
 | Asset business criticality | ICT asset classification |
 | Published PSIRT advisories | Public disclosure of fixed vulnerabilities |
+| CRA Article 14 reports | Article 14 early warnings, notifications and final reports |
+| The Asset's regulatory profile | Coordinated vulnerability disclosure policy and reporting contact |
 
 Where DefectDojo holds no record for an obligation, the result stays unknown and its note names
 the evidence to record. Other obligations are manual by design.
@@ -116,7 +120,11 @@ time zone.
 | VH-1 Identify and document vulnerabilities and components | The Asset has SBOM components, and the newest component record was created inside the period. | Partially satisfied if the newest component record is older than the period. Not satisfied if the Asset has no SBOM components. |
 | VH-2 Remediate vulnerabilities without delay | The Asset has an SLA configuration that enforces at least one severity, no more than 5% of the findings open on the evidence date are past their SLA, and no risk acceptance has expired without being handled. | Not satisfied if no SLA is enforced. Partially satisfied if more than 5% of open findings are past SLA or an expired risk acceptance is unhandled. |
 | VH-3 Perform regular security testing and review | At least one test with a target end date inside the period is a static analysis test type, or has "scan", "vulnerability", "penetration", or "sast" in its test type name, title, or scan type. | Not satisfied. |
-| VH-4 Disclose fixed vulnerabilities after an update | At least one PSIRT advisory counts toward the Asset (see below). | Unknown, with the note "No published advisories were linked in the period; confirm whether disclosure was required." |
+| VH-4 Disclose fixed vulnerabilities after an update | At least one PSIRT advisory counts toward the Asset (see below). | Unknown, with a note. With PSIRT enabled the note is "No published advisories were linked in the period; confirm whether disclosure was required." Without PSIRT, DefectDojo publishes no advisories, and the note asks for the public disclosure of each vulnerability fixed in the period. |
+| VH-5 Maintain coordinated vulnerability disclosure | The Asset's [regulatory profile](../regulatory_profile/) records a **Disclosure Policy URL**. | Unknown, with a note asking for the policy. |
+| VH-6 Provide a vulnerability reporting contact | The Asset's regulatory profile records a **Security Contact**. | Unknown, with a note asking for the contact. |
+| SP-1 Document an appropriate support period | Never fully satisfied: the published support statement is a document DefectDojo does not hold. | Partially satisfied when the regulatory profile records a **Support Period End**. The computed facts show `support_period_end`, `support_period_ended` (the end is before the evidence date) and a note asking for the published statement. Unknown, with a note, when no end is recorded. |
+| RP-1 to RP-6 Article 14 early warning, notification and final report | Every [CRA Article 14 report](../cra_article14_reporting/) stage of that kind for the Asset that fell due, or was submitted, in the period was submitted by its deadline. RP-1 to RP-3 read actively exploited vulnerability reports, RP-4 to RP-6 severe incident reports, each for its early warning, notification and final report in turn. | Not satisfied if any such stage was submitted late, or was still unsubmitted past its deadline on the evidence date. Unknown, with a note, if no such stage fell in the period. |
 
 Open findings exclude false positives, duplicates, and out-of-scope findings. VH-2 also reports
 the share of findings closed within SLA during the period, the mean time to remediate by
@@ -134,12 +142,12 @@ A PSIRT advisory counts toward VH-4 for an Asset when all three of these hold:
   hand** when someone targets the Asset, or its whole Organization, as a recipient. An exclusion
   on the Asset or its Organization removes it from the recipients either way.
 
-If the PSIRT Advisory Engine is unavailable, VH-4 stays unknown with the note "The PSIRT Advisory
-Engine is unavailable; record disclosure evidence manually."
+For RP-1 to RP-6, a stage submitted after the evidence date counts as unsubmitted, so a closed
+period is not changed by a submission recorded later. DefectDojo only knows the reports someone
+started, so a period with none stays unknown rather than satisfied.
 
-The remaining CRA obligations stay unknown until an assessor sets them. VH-5, VH-6, SP-1, and
-RP-1 to RP-6 carry a note that says what evidence to record. VH-7, VH-8, SP-2, RP-7, and DD-1 note
-that no automated check is registered for them.
+The remaining CRA obligations stay unknown until an assessor sets them. VH-7, VH-8, SP-2, RP-7,
+and DD-1 note that no automated check is registered for them.
 
 ### Reading the computed facts
 
@@ -150,8 +158,12 @@ also record the evidence date they used (`as_of`).
 ![Computed facts for VH-1](images/31-vh1-computed-facts.png)
 
 For VH-4, `published_advisory_count` is the number of advisories that count toward the Asset and
-`advisory_ids` lists them. When none count, the facts also carry `manual_required: true` and the
-note.
+`advisory_ids` lists them. When none count, the facts also carry `manual_required: true`, the
+note, and `fixed_vulnerability_ids`: the vulnerability IDs of the Asset's findings mitigated in
+the period, which are the disclosures the assessor has to account for.
+
+For RP-1 to RP-6, `on_time`, `late` and `missed` count the stages, and `reports` lists the
+reference codes of the reports they belong to.
 
 ![Computed facts for VH-4 with one counted advisory](images/32-vh4-computed-facts.png)
 

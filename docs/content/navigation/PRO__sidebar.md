@@ -7,7 +7,7 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and (at the bottom) your account, alerts and the light/dark switch. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
+The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and a footer. The footer shows your username on a row of its own and, under it, one row of icon buttons: alerts, [What's New](#whats-new), Ask Sensei and the Production/Sandbox switch, each when it applies to your instance and account (hover a button for its name). Your username opens the account menu: User Profile, API v2 Token (when your instance has API tokens enabled), the API docs, External Tools and Documentation, then your preferences (**Language**, when your instance offers more than one, and the switch between light and dark mode), then Logout. When the sidebar is collapsed to its icon strip, the footer stacks the same buttons in one column. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
 
 The menu groups every page in the product into six sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you browse follow in their own section. It is the only layout; the classic sidebar has been removed (see [The classic sidebar](#the-classic-sidebar)).
 
@@ -59,6 +59,18 @@ Pins are stored per user on the server, so they survive a browser reset and foll
 ## Your preferences follow you
 
 The shape you give the shell is stored per user on the server, not just in the browser: pinned pages, folded sections, whether the rail is collapsed, and the light/dark choice. Clearing your browser or signing in on a new machine brings it all back on the next sign-in. The first time you sign in on an instance that has this, whatever shape your browser already had is imported automatically, so nothing resets.
+
+## Alerts
+
+The bell in the sidebar footer opens your notification inbox: unread alerts grouped by the record they are about, with the number of unread alerts on the bell. See [Notification Inbox](/admin/notifications/about_notifications/#notification-inbox-pro).
+
+## What's New
+
+The gift button in the sidebar footer, beside **Alerts**, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. A number on the button counts the highlights you have not opened yet. Opening the panel clears it, and it stays cleared until the next release arrives. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.
+
+Below the highlights, **Badged in the Menu** lists every sidebar entry that carries a `NEW` or `BETA` badge right now (see [Menu Badges](/navigation/pro__menu_badges/)), each linking to its page, and **Full Changelog** opens the complete release notes on this site.
+
+An air-gapped instance never contacts the documentation site: the panel shows the release notes bundled with its version and says so, without the changelog link. The bundled notes are also what you see when the documentation site cannot be reached. The panel follows the **What's New Panel** feature flag, which is on by default; turning it off removes the button. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
 ## Collapsing the sidebar
 
