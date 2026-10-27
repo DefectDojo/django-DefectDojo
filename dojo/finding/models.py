@@ -1071,7 +1071,10 @@ class Finding(BaseModel):
             if self.duplicate_finding is not None:
                 return Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by("title")
-            return []
+            # Orphaned duplicate (flagged duplicate with no duplicate_finding link):
+            # return an empty QuerySet rather than a list so callers can chain
+            # QuerySet methods such as .filter() without crashing.
+            return Finding.objects.none()
         return self.original_finding.all().order_by("title")
 
     def get_scanner_confidence_text(self):
