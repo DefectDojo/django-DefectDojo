@@ -4,7 +4,7 @@ description: "How to set up the CrowdStrike Falcon Upstream Connector for Defect
 weight: 41
 audience: pro
 ---
-The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR detections** from the Falcon platform, as two separate finding types (`CrowdStrike:Spotlight` and `CrowdStrike:Detections`). DefectDojo creates a Record for each Falcon **host**. Detections also include **Identity Protection** alerts, which go to one extra Record, **CrowdStrike Identity Protection**. DefectDojo creates that Record only when your Falcon tenant has Identity Protection alerts.
+The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR detections** from the Falcon platform, as two separate finding types (`CrowdStrike:Spotlight` and `CrowdStrike:Detections`). DefectDojo creates a Record for each Falcon **host**. Detections also include **Identity Protection** alerts, which go to one extra Record, **CrowdStrike Identity Protection (connection _N_)**, where _N_ is the connection's number. DefectDojo creates that Record only when your Falcon tenant has Identity Protection alerts.
 
 #### Prerequisites
 
