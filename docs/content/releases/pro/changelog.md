@@ -20,7 +20,22 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 27, 2026: v3.4.301
+
+Enhancements:
+* **(UI)** Each tab in a page layout's tab group can be set to hide when it has nothing to show, so a record no longer opens on an empty tab. The option is on each tab row in the Tabs widget's **Configure Widget** dialog. Tiles on detail pages and dashboards now share the header band, title and spacing of the section cards around them. See [Customizing Page Layouts](/navigation/pro__page_layouts/#hiding-empty-tabs).
+* **(Performance)** The dashboard priority histogram, Top-N records and Command Center tallies read less data. See [Command Center](/metrics_reports/dashboards/command-center/).
+
+Bug fixes:
+* **(SSO)** Signing in through an OAuth or OIDC provider works again. In v3.4.300 these sign-ins returned a server error once a provider was chosen. SAML sign-in was not affected. See [Single Sign-On](/admin/sso/).
+* **(Importers)** A background import that fails leaves its Test's status at **Failed** until the next import, instead of reporting **Processed**, and the status reads **Post Processing - Deduplication** while deduplication runs. See [DefectDojo API v2](/automation/api/api-v2-docs/#background-import-responses-api-background_import).
+* **(Reporting)** A report that reaches the time limit while drawing a chart, a widget or an image fails with the time-out reason, instead of staying **Processing** or completing with a placeholder. A refused template save names the **Template Blocks** and **Theme** fields the way the form does. See [Report Builder](/metrics_reports/reports/report-builder/).
+* **(Dashboards)** The Command Center finishes loading on large datasets, because a scheduled refresh waits for the previous load to finish. On the Insights pages, the filter bar keeps its own height and its "Some data may be hidden" warning stays in view. See [Command Center](/metrics_reports/dashboards/command-center/) and [Pro Metrics Overview](/metrics_reports/pro_metrics/pro__overview/).
+* **(API)** A 400 response raised by a model or importer check reads as plain sentences. A delete blocked by other records answers 409 with how many records still refer to it and which kinds they are, instead of listing each one. See [DefectDojo API v2](/automation/api/api-v2-docs/).
+
 ### October 26, 2026: v3.4.300
+
+**NOTE: OAuth and OIDC sign-in does not work in v3.4.300: choosing one of these providers on the sign-in page returns a server error. SAML sign-in is not affected. Upgrade to [v3.4.301](#october-27-2026-v34301), which fixes it.**
 
 New features:
 * **(Findings)** A Finding's **Title**, **Tags**, **Severity**, **Assignees**, **Planned Remediation Date** and **Description** can be changed on the Finding page itself, without opening the Edit Finding form. Changes are held until you save, several fields can be changed and saved together, and a change someone else made since the page loaded is never overwritten. The same in-place editing is on the Engagement and Asset pages. Requires the **Inline Editing** feature flag, on by default. See [Editing Findings](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
