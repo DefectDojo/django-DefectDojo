@@ -118,7 +118,7 @@ class _ChunkRows:
         self.meta_endpoint_ids.append(endpoint_id)
 
     def add_finding_ref(self, reference: LocationFindingReference, endpoint_id: int | None) -> None:
-        """Queue a finding reference, keyed on its unique (location, finding)."""
+        """Queue a finding reference, keyed on (location, finding); each row belongs to its finding's own test."""
         if reference.location.id in self.shared_location_ids:
             key = (reference.location.id, reference.finding_id)
             if key in self._seen_finding_refs:
@@ -755,7 +755,7 @@ class Command(BaseCommand):
         """
         Upsert the queued finding references and empty the queue.
 
-        Upsert on (location, finding) so a re-run syncs the status/auditor/
+        Upsert on (location, finding, test) so a re-run syncs the status/auditor/
         audit_time when the source Endpoint_Status has moved on. `created` is
         deliberately absent from update_fields: the original creation timestamp
         is preserved on repeat runs.
@@ -768,7 +768,7 @@ class Command(BaseCommand):
             conflict_kwargs={
                 "update_conflicts": True,
                 "update_fields": ["status", "auditor", "audit_time", "updated"],
-                "unique_fields": ["location", "finding"],
+                "unique_fields": ["location", "finding", "test"],
             },
         )
 
@@ -810,6 +810,7 @@ class Command(BaseCommand):
         rows.add_finding_ref(LocationFindingReference(
             location=location,
             finding_id=finding.id,
+            test_id=finding.test_id,
             status=status,
             auditor_id=endpoint_status.mitigated_by_id,
             audit_time=endpoint_status.mitigated_time or endpoint_status.last_modified,

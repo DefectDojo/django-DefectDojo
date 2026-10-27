@@ -291,8 +291,10 @@ The full set of `widget_data` actions:
 
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
-| `count` | POST | `model`, `filters` | `{count}` |
+| `count` | POST | `model`, `filters`, `aggregation?` | `{count}` |
 | `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?` | `{labels, series, ...}` |
+
+`aggregation` is `count` (rows, the default) for every model. For `finding` it can also be `distinct_cwe`, the number of unique CWEs (a CWE of 0 or none is not counted), or `distinct_vulnerability_id`, the number of unique vulnerability IDs. A finding with both a CWE and a CVE counts in both. With a `group_by`, a CWE that appears at two severities counts under each, so the per-group numbers can add up to more than the total.
 | `dimensions` | GET | `?model=` | valid group-by dimensions |
 | `top_records` | POST | `model`, `filters`, `metric`, `limit?`, `sort?` | `{labels, series, ...}` |
 | `record_metrics` | GET | `?model=` | valid records-mode metrics |

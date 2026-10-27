@@ -23,6 +23,7 @@ interactive. On the top of API v2 docs is a link that generates an OpenAPI v3 sp
 To interact with the documentation, a valid Authorization header value
 is needed. Open **API v2 Token** from the same menu (**API v2 Key** in the Open Source UI), or go to `/api/key-v2`,
 to see your API Key (`Token <api_key>`), and copy the header value provided.
+In DefectDojo Pro the page reads the key again whenever its browser tab comes back into view, so a key replaced in another tab or by an administrator shows up there with an **API Key Changed** notice, rather than a key that no longer works.
 
 ![image](images/api_v2_2.png)
 
@@ -44,13 +45,18 @@ For example:
 
     Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
 
+### Service user tokens
+
+In DefectDojo Pro, a [service user](/admin/user_management/pro__service_users/) holds a token that starts with `ddsu_`. It is sent the same way, `Authorization: Token ddsu_<token>`, and can also be exchanged for a one-hour access token with the OAuth 2.0 client credentials grant at `POST /api/v2/oauth/token/`, sent as `Authorization: Bearer <access_token>`.
+
 ### Alternative authentication method
 
 If you use [an alternative authentication method](/admin/sso/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
-With API tokens disabled, the DefectDojo Pro **API v2 Token** page shows the reason, "API tokens are disabled.", instead of a key.
+With API tokens disabled, DefectDojo Pro hides the token controls: **API v2 Token** leaves the account menu (an old link to the page shows Not Found), **Force Token Reset** leaves each user's menu, **Reset API Tokens** leaves the Users list's bulk actions, the API Access walkthrough cannot be started, and the **MCP Service** page says that an AI provider cannot connect, because the MCP server signs in with an API token.
+With only the `api/v2/api-token-auth/` endpoint disabled, the **API v2 Token** page leaves out the instructions for that endpoint and keeps everything else.
 
 ### Token management
 

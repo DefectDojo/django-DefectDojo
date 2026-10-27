@@ -272,12 +272,15 @@ class Test_Import(TimeStampedModel):
         from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
             Finding,
             _get_annotations_for_statistics,
-            _get_statistics_for_queryset,
+            _get_statistics_by_group,
         )
-        stats = {}
-        for action in IMPORT_ACTIONS:
-            stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
-        return stats
+        by_action = _get_statistics_by_group(
+            Finding.objects.filter(test_import_finding_action__test_import=self),
+            _get_annotations_for_statistics,
+            group_field="test_import_finding_action__action",
+            groups=[action for action, _label in IMPORT_ACTIONS],
+        )
+        return {label.lower(): by_action[action] for action, label in IMPORT_ACTIONS}
 
 
 class Test_Import_Finding_Action(TimeStampedModel):

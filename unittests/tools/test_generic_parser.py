@@ -3,6 +3,7 @@ import datetime as dt
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
+from dojo.tools.utils import AMBIGUOUS_WHEN_REPEATED, drop_repeated_unique_ids
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -845,18 +846,49 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         The shipped algorithm for this scan type is hash-only, so classic matching never
         reads the field, but it is stored and consumed as a vendor identity by anything
         that does (an operator-configured unique-id algorithm, Pro's identity ledger).
-        A repeated value would merge visibly different findings there, so it is dropped
-        at parse time; a genuinely unique id is kept.
+        A repeated value would merge visibly different findings there, so the importer
+        drops it; a genuinely unique id is kept. The parser flags its JSON test so the
+        importer applies the drop, and this applies the same rule to the parser's output.
         """
         with (get_unit_tests_scans_path("generic") / "generic_repeated_unique_ids.json").open(encoding="utf-8") as file:
-            parser = GenericParser()
-            findings = parser.get_findings(file, Test())
+            tests = GenericParser().get_tests("Generic Findings Import", file)
+        self.assertEqual(1, len(tests))
+        self.assertTrue(all(getattr(f, AMBIGUOUS_WHEN_REPEATED, False) for f in tests[0].findings))
+        findings = drop_repeated_unique_ids(tests[0].findings)
         self.assertEqual(4, len(findings))
         dropped = [f for f in findings if f.unique_id_from_tool is None]
         self.assertEqual(3, len(dropped))
         kept = [f for f in findings if f.unique_id_from_tool is not None]
         self.assertEqual(1, len(kept))
         self.assertEqual("dep-lodash-4.17.20", kept[0].unique_id_from_tool)
+
+    # Regression: a JSON finding whose component_name exceeded the Finding column
+    # width reached the database and failed the import with a 500 (DataError:
+    # value too long for type character varying(500)) instead of a 400.
+    def test_parse_json_field_longer_than_model_max_length_raises_value_error(self):
+        field = Finding._meta.get_field("component_name")
+        for length, should_raise in ((field.max_length, False), (field.max_length + 1, True)):
+            with self.subTest(length=length):
+                content = json.dumps({"findings": [{
+                    "title": "Polyfill Detected",
+                    "severity": "Low",
+                    "description": "component_name carries a very long URL",
+                    "component_name": "https://example.com/page/?q=" + "x" * (length - len("https://example.com/page/?q=")),
+                }]})
+                file = TestFile("findings.json", content)
+                parser = GenericParser()
+                if should_raise:
+                    with self.assertRaises(ValueError) as cm:
+                        parser.get_findings(file, self.test)
+                    message = str(cm.exception)
+                    self.assertIn("component_name", message, msg=f"expected the field name in the error, got: {message}")
+                    self.assertIn(str(field.max_length), message, msg=f"expected the max length in the error, got: {message}")
+                else:
+                    findings = parser.get_findings(file, self.test)
+                    self.assertEqual(
+                        length, len(findings[0].component_name),
+                        msg=f"expected component_name of exactly {length} chars to be accepted, got {len(findings[0].component_name)}",
+                    )
 
 
 # Regression: the generic CSV parser read "FALSE" as true for known_exploited /

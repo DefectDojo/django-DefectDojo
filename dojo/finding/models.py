@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.functions import Upper
 from django.urls import reverse
 from django.utils import timezone
@@ -757,9 +757,11 @@ class Finding(BaseModel):
         for files in old_files:
             copy.files.add(files.copy())
         if locations_enabled():
-            old_location_refs = self.locations.all()
-            for location_ref in old_location_refs:
-                location_ref.copy(copy)
+            # One row per location: a location several tests reported is copied once, onto the
+            # copy's own test (see copy_location_references).
+            from dojo.location.utils import copy_location_references  # noqa: PLC0415 -- circular import
+
+            copy_location_references(self, copy)
         else:
             # TODO: Delete this after the move to Locations
             # Copy the endpoint_status
@@ -802,8 +804,18 @@ class Finding(BaseModel):
         # cannot form. It also clears the through rows, so the tagulous pre_delete handler
         # then finds nothing left to decrement (no double counting).
         from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
-        super().delete(*args, **kwargs)
+        with transaction.atomic():
+            # Lock this finding's row before the cascade touches any child row, the order the
+            # bulk delete uses (lock_findings_for_delete). The cascade otherwise deleted the
+            # child rows (Test_Import_Finding_Action, ...) first and reached the finding row
+            # last, so against a bulk delete holding the finding and waiting on those children
+            # the two deadlocked (Postgres 40P01, "while deleting tuple ... in relation
+            # dojo_test_import_finding_action"). Now this delete waits for the bulk delete to
+            # commit; if that removed the finding, there is nothing left to delete.
+            if not finding_helper.lock_findings_for_delete([self.pk]):
+                return
+            bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
+            super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
                 Engagement,

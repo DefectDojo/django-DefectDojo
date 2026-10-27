@@ -85,6 +85,10 @@ When you open one of the six pages, DefectDojo picks the first of these that app
 3. The instance-wide shared default, if an administrator has set one.
 4. The layout shipped with DefectDojo.
 
+## Fields you can change in place
+
+On the Finding, Engagement and Asset pages, a field tile or a row of the details table can be changed where it sits when the field supports it and you can edit the record: the value is highlighted on hover, and a click opens its editor. On a Finding that is Severity, Assignees, Planned Remediation Date and Description; on an Engagement, Status, Lead, Start Date, End Date and Description; on an Asset, Business Criticality, Platform, Lifecycle and Description. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
+
 ## Widgets with nothing to show
 
 A widget is left out of the page when it has nothing to display, for example a tab for a feature that is turned off, or a table for a record that has no rows. The remaining widgets close the gap, so you do not get holes in the page.
@@ -92,6 +96,23 @@ A widget is left out of the page when it has nothing to display, for example a t
 This affects only what is drawn. Your layout is unchanged, and the widget reappears when there is something in it.
 
 In edit mode those widgets are shown as labelled placeholders that say why they are not appearing, so you can still position them.
+
+### Hiding empty tabs
+
+Some tabs in a tab group always show, even when they are empty, such as a table with no rows or a Notes feed with no notes. You can choose to hide them on records where they have nothing to show, one tab at a time:
+
+1. In edit mode, open **Configure Widget** on the tab group.
+2. Each tab's row has an eye button beside its delete button. Click it to switch between the open eye (the tab always shows) and the crossed-out eye (the tab is hidden when it is empty). Hover over the button to see what a click will do.
+3. Click **Submit**.
+
+Leave the eye open on a tab whose own button adds its first item, such as Notes or Files: hiding an empty Notes tab also hides **Add Note**.
+
+The eye is locked in two cases, and hovering over it says why:
+
+- **Crossed out and locked**: the tab already hides itself when it has nothing to show.
+- **Open and locked**: the tab cannot tell when it is empty (some charts and composite panels), so it always shows.
+
+A hidden tab comes back as soon as the record has something for it, the next time the page loads. In edit mode every tab is shown, with a note on the ones that are hidden outside edit mode.
 
 ## When customization is restricted
 

@@ -27,7 +27,7 @@ The DefectDojo Model Context Protocol (MCP) Server enables Large Language Models
 ### Prerequisites
 
 - DefectDojo instance with MCP Server enabled (v2.51.2 or later)
-- Valid DefectDojo API token with appropriate permissions
+- Valid DefectDojo API token with appropriate permissions (an instance with API tokens disabled, `DD_API_TOKENS_ENABLED=False`, cannot be reached through the MCP Server)
 - AI provider: Claude, ChatGPT, Gemini, or custom MCP-compatible client
 
 #### Enabling the MCP Server

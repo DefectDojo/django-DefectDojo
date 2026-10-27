@@ -15,6 +15,8 @@ Your Identity Provider needs to know where to POST the SAML response after a use
 https://<your-instance>.cloud.defectdojo.com/saml2/acs/
 ```
 
+On a self-hosted instance it is the same path on your own hostname: `https://<your-hostname>/saml2/acs/`.
+
 A few things to know about this endpoint:
 
 - **The endpoint accepts `POST` requests only.** Opening the ACS URL directly in a browser issues a GET and will return an **HTTP 405 Method Not Allowed**. This is expected behavior — it does not mean SAML is broken or misconfigured. The endpoint is designed to be invoked by your IdP as part of the SAML redirect flow, not by a browser typing the URL.
@@ -51,7 +53,9 @@ A few things to know about this endpoint:
    - The same attribute may feed more than one field — for example an email claim used for both **Email** and **Username**. The reverse is not allowed: each DefectDojo field may be mapped from only one attribute.
    - A row with only one half filled in is rejected on save, and the offending cell is highlighted. Rows you add but never fill in are discarded rather than treated as errors.
 
-8. **Remote SAML Metadata** — the URL where your SAML Identity Provider metadata is hosted.
+8. **IdP metadata** — supply one of the two, not both:
+   - **Remote SAML Metadata** (the default) — the URL where your SAML Identity Provider metadata is hosted. DefectDojo fetches it, so the instance must be able to reach that URL. Prefer this when it can, because the IdP keeps the metadata current.
+   - **Local SAML Metadata** — check **Use Local SAML Metadata** and upload the metadata XML file downloaded from your IdP (up to 1 MB). Use this when the instance cannot reach the IdP's metadata URL, for example a self-hosted instance with no outbound internet access. DefectDojo stores the file as `saml_metadata.xml` in its media directory and shows it on the form the next time you open it. Upload a new file whenever the IdP's signing certificate changes.
 
 9. Check **Enable SAML** at the bottom of the form to activate SAML login. A **Login With SAML** button will appear on the DefectDojo login page.
 
@@ -90,6 +94,19 @@ If group mapping appears to do nothing — users log in successfully but no grou
 If no group with a matching name exists, DefectDojo will automatically create one and assign its members the **Reader** role. Note that this Reader role governs the member's access *to the group itself* — it does not grant any access to underlying Assets, Organizations, or other organizational assets. Those permissions are configured separately, and a newly auto-created group still has none of them until a Superuser assigns the group a role on the relevant Assets or Organizations.
 
 To activate group mapping, check the **Enable Group Mapping** checkbox at the bottom of the form.
+
+## AWS IAM Identity Center
+
+IAM Identity Center can act as the SAML IdP through a customer managed SAML 2.0 application.
+
+1. In the IAM Identity Center console, add a **customer managed** application of type **SAML 2.0**.
+2. Under **IAM Identity Center metadata**, download the **IAM Identity Center SAML metadata file**. Upload it to DefectDojo as **Local SAML Metadata** (step 8 of [Setup](#setup)), which works whether or not the instance can reach AWS.
+3. Under **Application metadata**, enter the values manually: set **Application ACS URL** to DefectDojo's [ACS URL](#acs-url-assertion-consumer-service) and **Application SAML audience** to the **Entity ID** you set in DefectDojo.
+4. Under **Attribute mappings**, map the subject and the attributes DefectDojo reads. For example, send `${user:email}` as the subject and as an `email` attribute, and `${user:givenName}` and `${user:familyName}` as first and last name. Then map those attribute names to **Username**, **Email**, **First Name** and **Last Name** in DefectDojo's **Attribute Mapping**.
+5. For group mapping, add an attribute such as `groups` mapped to `${user:groups}`, and enter the same name as DefectDojo's **Group Name Attribute**. DefectDojo names its groups after the exact values in the assertion, so turn on **Enable SAML Debugging** for a test login and check what Identity Center sends before you write the **Group Limiter Regex Expression**.
+6. Assign the users or groups who should have access to the application in IAM Identity Center.
+
+To provision and deprovision users from your directory as well, see [SCIM Provisioning](/admin/sso/pro__scim/).
 
 ## Default access for SSO-provisioned users
 

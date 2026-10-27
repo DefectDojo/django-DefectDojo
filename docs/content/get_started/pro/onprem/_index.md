@@ -8,4 +8,4 @@ audience: pro
 
 Run DefectDojo Pro in your own environment instead of the hosted product. The pages in this section cover sizing the deployment, the two self-hosted models (Docker Compose and Kubernetes with the Helm chart), upgrading, FIPS 140-3 mode, backups, and reaching external services through a forward proxy.
 
-Start with [Self-Hosting DefectDojo Pro](/get_started/pro/onprem/installation_options/) for the deployment models and prerequisites, then follow the install guide for your platform.
+Start with [Self-Hosting DefectDojo Pro](/get_started/pro/onprem/installation_options/) for the deployment models and prerequisites, then follow the install guide for your platform. Deploying on a private network, with FIPS images or mirrored images? Read [Planning a Private Deployment](/get_started/pro/onprem/private_deployment/) first.

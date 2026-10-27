@@ -75,6 +75,10 @@ The chip clears on the next Sync that imports anything. The usual causes are the
 missing records: a credential whose scope was narrowed, or a filter in the tool that now excludes
 everything.
 
+With the **Ingestion Health** feature turned on, a Connector that has a baseline shows how many
+Findings it usually returns in place of the chip, and the quiet period can be acknowledged with a
+reason. See [Ingestion Health](/connectors/upstream/ingestion_health/).
+
 ## Discover Operations
 
 The first step a DefectDojo Connector needs to take is to **Discover** your tool's environment to see how you're organizing your scan data.

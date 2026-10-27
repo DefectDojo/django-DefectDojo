@@ -9,6 +9,8 @@ DefectDojo Pro includes authored catalogs for vulnerability-related obligations 
 Resilience Act (CRA) and Digital Operational Resilience Act (DORA). A regulatory assessment
 collects the operational facts DefectDojo already holds, gives an assessor space to document the
 remaining evidence, and produces a dated evidence pack.
+To set up an instance and your products for the CRA step by step, see
+[Setting Up EU CRA](../eu_cra_setup).
 
 DefectDojo does not determine whether a regulation applies to an organization, product, or
 service. The catalogs and evidence states are aids to assessment. Confirm applicability,
@@ -121,6 +123,7 @@ time zone.
 | VH-4 Disclose fixed vulnerabilities after an update | At least one PSIRT advisory counts toward the Asset (see below). | Unknown, with a note. With PSIRT enabled the note is "No published advisories were linked in the period; confirm whether disclosure was required." Without PSIRT, DefectDojo publishes no advisories, and the note asks for the public disclosure of each vulnerability fixed in the period. |
 | VH-5 Maintain coordinated vulnerability disclosure | The Asset's [regulatory profile](../regulatory_profile/) records a **Disclosure Policy URL**. | Unknown, with a note asking for the policy. |
 | VH-6 Provide a vulnerability reporting contact | The Asset's regulatory profile records a **Security Contact**. | Unknown, with a note asking for the contact. |
+| SP-1 Document an appropriate support period | Never fully satisfied: the published support statement is a document DefectDojo does not hold. | Partially satisfied when the regulatory profile records a **Support Period End**. The computed facts show `support_period_end`, `support_period_ended` (the end is before the evidence date) and a note asking for the published statement. Unknown, with a note, when no end is recorded. |
 | RP-1 to RP-6 Article 14 early warning, notification and final report | Every [CRA Article 14 report](../cra_article14_reporting/) stage of that kind for the Asset that fell due, or was submitted, in the period was submitted by its deadline. RP-1 to RP-3 read actively exploited vulnerability reports, RP-4 to RP-6 severe incident reports, each for its early warning, notification and final report in turn. | Not satisfied if any such stage was submitted late, or was still unsubmitted past its deadline on the evidence date. Unknown, with a note, if no such stage fell in the period. |
 
 Open findings exclude false positives, duplicates, and out-of-scope findings. VH-2 also reports
@@ -143,9 +146,8 @@ For RP-1 to RP-6, a stage submitted after the evidence date counts as unsubmitte
 period is not changed by a submission recorded later. DefectDojo only knows the reports someone
 started, so a period with none stays unknown rather than satisfied.
 
-The remaining CRA obligations stay unknown until an assessor sets them. SP-1 carries a note that
-says what evidence to record. VH-7, VH-8, SP-2, RP-7, and DD-1 note that no automated check is
-registered for them.
+The remaining CRA obligations stay unknown until an assessor sets them. VH-7, VH-8, SP-2, RP-7,
+and DD-1 note that no automated check is registered for them.
 
 ### Reading the computed facts
 
