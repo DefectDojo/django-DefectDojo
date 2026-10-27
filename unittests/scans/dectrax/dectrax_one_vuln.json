@@ -1,0 +1,23 @@
+{
+  "dectrax_version": "1.0",
+  "generated_at": "2026-10-27T12:00:00Z",
+  "incidents": [
+    {
+      "id": "DECTRAX-INC-2026-001",
+      "title": "Decoy SSH Credential Abuse & Reconnaissance",
+      "severity": "HIGH",
+      "description": "Adversary attempted interactive authentication against canary SSH daemon with decoy administrator credentials.",
+      "deception_type": "Decoy Service",
+      "protocol": "SSH",
+      "attacker_ip": "185.220.101.5",
+      "target_ip": "10.0.1.15",
+      "target_port": 22,
+      "cwe": 287,
+      "mitre_attack_id": "T1110.001",
+      "mitigation": "Automated firewall interdiction initiated. Revoke leaked credentials and isolate originating endpoint.",
+      "active_defense_status": "Contained",
+      "detected_at": "2026-10-27T11:45:00Z",
+      "tags": ["canary-token", "brute-force"]
+    }
+  ]
+}
