@@ -146,7 +146,9 @@ A row whose feature is turned off on your instance (Jira, GitHub, questionnaires
 | A green ✔ (read-only view) | Granted. |
 | A red ✘ (read-only view) | Not granted. |
 
-In each row, the leftmost permission (**View**, or **Manage** on member rows) gates the rest of the row. You have to grant it before the other cells in that row become available, because a role cannot meaningfully edit or delete what it cannot see. Clearing the gate clears the rest of the row with it.
+In each row of the Object, Group & Member and Global Feature tables, the leftmost permission (**View**, or **Manage** on member rows) gates the rest of the row. You have to grant it before the other cells in that row become available, because a role cannot meaningfully edit or delete what it cannot see. Clearing the gate clears the rest of the row with it.
+
+The **Configuration Permissions** table has no gate. Each cell is its own grant, so a role can carry **Add** on Users without **View**, and clearing one cell leaves the rest of the row as it is.
 
 ## Editing, cloning, and deleting
 
