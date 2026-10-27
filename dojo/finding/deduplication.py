@@ -358,6 +358,32 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
     return False
 
 
+def _comparable_locations(finding):
+    """A finding's URL locations (or legacy endpoints) and the equality check that compares them."""
+    if locations_enabled():
+        urls = finding_locations(finding.locations.all()) if finding.pk else unsaved_url_locations(finding)
+        return urls, are_location_urls_equal
+    endpoints = finding.endpoints.all() if finding.pk else getattr(finding, "unsaved_endpoints", [])
+    return get_endpoints_as_url(endpoints), are_urls_equal
+
+
+def locations_covered(new_finding, existing_finding) -> bool:
+    """
+    Whether every location ``new_finding`` reports is already on ``existing_finding``.
+
+    Compared on ``DEDUPE_ALGO_ENDPOINT_FIELDS``, like ``are_locations_duplicates``. A finding that
+    reports no location, or deduplication with endpoint comparison switched off, counts as covered.
+    """
+    fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+    if not fields:
+        return True
+    new_urls, equal = _comparable_locations(new_finding)
+    if not new_urls:
+        return True
+    existing_urls, _ = _comparable_locations(existing_finding)
+    return all(any(equal(new, old, fields) for old in existing_urls) for new in new_urls)
+
+
 def build_candidate_scope_queryset(test, mode="deduplication", service=None, *, candidate_qs=None):
     """
     Build a queryset for candidate finding.
