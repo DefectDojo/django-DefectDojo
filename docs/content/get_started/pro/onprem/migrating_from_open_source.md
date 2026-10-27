@@ -24,7 +24,7 @@ Because you host the deployment, your data stays inside your own environment for
 | How often | Once per cutover, in a scheduled window | As often as you need, until you cut over |
 | Secrets, settings and history | Cross with the dump | Do not cross |
 | Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords or roles. Users join no group, except the default group when their email matches its pattern. |
-| The source during the move | Frozen with read-only mode from the final dump | Keeps running until the final Sync, then frozen with read-only mode |
+| The source during the move | Frozen with read-only mode from the final dump | Read-only during each Sync, and open between Syncs |
 
 Take the dump path if you want an exact copy, and you can schedule a window. Users, groups, settings and history come across as they are. The target must be empty.
 
@@ -291,7 +291,8 @@ Confirm the following before you add the connector.
 3. Enter the URL of the source in **Location URL** and the superuser API key in **API Token**.
 4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field.
 5. Turn on **Enable Auto-Mapping**. Each source Product then gets a Product of the same name, under a Product Type of the same name. Do not skip this: mapping a Record by hand cannot create a Product.
-6. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails.
+6. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Sync**. Pick a recurring frequency if you want to sync on a schedule until you cut over.
+7. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails.
 
 The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page covers the shared parts of the form: the schedule and the label.
 
@@ -299,17 +300,17 @@ The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page cover
 
 Run [Discover](/connectors/upstream/manage_operations/#discover-operations). The connector creates one Record per Product on the source. With Auto-Mapping on, every Record is mapped at once. Without it, you can map a Record by hand only to a Product that already exists in DefectDojo Pro. Ignore a Record on the [Records page](/connectors/upstream/manage_records/) to leave that Product on the source.
 
-Discover also fills the **Migration Preflight** card with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The card opens folded. Click **View Details** to see the rest, and **Hide Details** to fold it again. Read it before the first Sync:
+Discover also fills the **Migration Preflight** card with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The card shows the number of findings, the estimated duration and the number of warnings. Click **View More** to open the full report. Read it before the first Sync:
 
 * **Warnings** lists the scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`.
-* **Counts** shows the totals. **View Details** adds the counts of each Product. Keep them to check the result of the Sync.
-* **To Be Created** (after **View Details**) lists the users and the reference data that the Sync creates.
-* **Not Migrated** (after **View Details**) lists the settings that you set up in DefectDojo Pro yourself.
+* **Counts** shows the totals and the counts of each Product. Keep them to check the result of the Sync.
+* **To Be Created** lists the users and the reference data that the Sync creates.
+* **Not Migrated** lists the settings that you set up in DefectDojo Pro yourself.
 * **Estimated Duration** tells you how long the first Sync takes.
 
 ### Step 3: Sync
 
-Run [Sync](/connectors/upstream/manage_operations/#sync-operations). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. A large estate takes a while. The [Operations page](/connectors/upstream/manage_operations/) shows each run.
+Run [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.0 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. A large estate takes a while. The [Operations page](/connectors/upstream/manage_operations/) shows each run.
 
 The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
 
@@ -326,15 +327,15 @@ Compare the two instances once the first Sync ends:
 
 ### Step 5: Repeat until you cut over
 
-Run Sync on the schedule you set, or by hand. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro.
+Run Sync again by hand, or on the recurring frequency you set. If the connection deleted itself after the first Sync, add it again: the new connection continues where the old one stopped. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro.
 
-On cutover day, turn on read-only mode in the open source instance before the final Sync. The connector only reads, so it keeps working while the source is read-only.
+Each Sync locks the source with read-only mode while it reads, and unlocks it at the end. On 3.4.300 the source has no read-only mode, so stop all writes by hand before the final Sync: pause CI pipelines, scheduled imports, and anything else that pushes findings.
 
-Read-only mode is available in DefectDojo 3.5.0 and later. On 3.4.300, stop all writes by hand before the final Sync: pause CI pipelines, scheduled imports, and anything else that pushes findings.
+On cutover day:
 
-1. Go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**.
-2. Wait until **Configuration > Celery Status** shows no queued tasks. Then run `celery --app=dojo inspect active` in the Celery worker container, and wait until it reports `empty` for every worker. Tasks that started before the lock still write until they finish.
-3. Run one last Sync. Check the finding counts as in Step 3, and validate the result.
+1. Optional, for a fully quiet source: go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes.
+2. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync turns read-only mode off when it ends.
+3. Turn read-only mode on again in **System Settings** to keep the source frozen.
 4. Point CI jobs, scripts, and integrations at your Pro deployment's `/api/v2/` API. Automate against `/api/v2/` only. Paths under `/api/vue/` belong to the Pro UI and reject API tokens.
 5. Retire the open source instance. If you keep it running, revoke the superuser API key first. Read-only mode blocks that change, so turn it off, revoke the key, and turn it on again.
 
@@ -352,8 +353,8 @@ The open source instance keeps running until that day, so your team loses no wor
 - First Sync run, finding counts checked, and validated
 - SSO, notifications and tool credentials set up in DefectDojo Pro
 - Users activated and given roles
-- Read-only mode turned on in the source, with no Celery task queued or running
 - Final Sync run, finding counts checked, and validated
+- Read-only mode turned on again in the source
 - Automation pointed at the Pro deployment, and the source retired or its key revoked
 
 ## Questions or support

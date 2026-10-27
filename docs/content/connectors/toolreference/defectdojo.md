@@ -24,7 +24,7 @@ The source must meet three requirements:
 
 The export API answers only a superuser. The export does not filter by permissions, and private notes cross. Its manifest lists every Product Type, every Product and every user of the instance. Only a superuser can read all of that in one place. A token of any other user gets a 403. The connector reports that when you save the configuration.
 
-Create a user on the source for the connector alone, for example `defectdojo-migration`. Make it a superuser and create an API key for it. The connector only reads with that key. If the key expires within 30 days, the [preflight report](#the-preflight-report) warns you. Revoke the key after the cutover.
+Create a user on the source for the connector alone, for example `defectdojo-migration`. Make it a superuser and create an API key for it. The connector reads the source with that key, and it turns read-only mode on and off with it. See [Read-only mode during a Sync](#read-only-mode-during-a-sync). If the key expires within 30 days, the [preflight report](#the-preflight-report) warns you. Revoke the key after the cutover.
 
 #### Connector Mappings
 
@@ -33,7 +33,8 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 3. Enter the superuser API key in **API Token**.
 4. Keep the defaults of the fields in the table below, or change them.
 5. Turn on **Enable Auto-Mapping**. See [Records](#records) for the reason.
-6. Click **Submit**.
+6. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Sync**.
+7. Click **Submit**.
 
 | Field | Default | What it does |
 |---|---|---|
@@ -43,9 +44,23 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 | **Include Files** | On | Imports the files of findings, engagements and tests, and the proof of each risk acceptance. |
 | **Provenance** | References | **References** adds a `Migrated from <source>/finding/<id>` line to the references of each finding. **None** leaves it out. |
 | **Minimum Severity** | Info | Skips findings below this severity. **Info** imports every finding. |
-| **Maximum File Size (Bytes)** | `10485760` (10 MiB) | The largest file the connector imports, in bytes. The highest value is `25165824` (24 MiB). A larger file stays on the source. |
+| **Maximum File Size (MB)** | `10` | The largest file the connector imports, in megabytes. The highest value is `24`. A larger file stays on the source. |
+| **Frequency** (Discovery and Synchronization) | One-Time | **One-Time** runs Discover or Sync only when you click its button. Pick a recurring frequency to run it on a schedule instead. |
+| **Delete the Connection After the Sync** | Off | Shown when the Synchronization frequency is **One-Time**. When a Sync ends without errors and DefectDojo Pro has imported its findings, the connection is deleted. The Products, findings and everything else the Sync brought stay. |
 
 When you submit, DefectDojo Pro checks the token and the version of the source. If either check fails, it tells you why.
+
+If you delete the connection, or the Sync deletes it, and you add a new one for the same source later, the new connection continues where the old one stopped. It updates the objects the old one imported and makes no copies.
+
+#### Read-only mode during a Sync
+
+DefectDojo 3.5.0 and later have a read-only mode. On such a source, the connector turns read-only mode on when a Sync starts, and turns it off when the Sync ends, also when the Sync fails. While it is on, nobody can change the source, so the Sync reads one consistent state. Discover does not change the mode.
+
+* If read-only mode was already on when the Sync started, the Sync still turns it off at the end. To keep the source frozen after the last Sync, turn read-only mode on again in **Configuration > System Settings**.
+* If the connector stops in the middle of a Sync, for example on a restart, the source stays read-only until the next Sync ends, or until a superuser turns it off in **System Settings**.
+* A task that started on the source before the lock still writes until it ends.
+
+A source on 3.4.300 has no read-only mode. The preflight report warns about it, and people can still change the source while a Sync reads it.
 
 #### Records
 
@@ -61,16 +76,16 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is in the **Migration Preflight** card. The card is on the connector's tile on **Connect > Upstream**, and on its **Manage Records and Operations** page. Before the first Discover, the card says "Run a discovery to see the preflight report."
 
-The card opens folded. It shows the warnings, the totals and the estimated duration. Click **View Details** to see the rest. The button then reads **Hide Details**. The rows of the table below that need **View Details** say so.
+The card shows a short summary: the number of findings, the estimated duration and the number of warnings. Click **View More** to open the full report in a window that scrolls. The table below lists its sections.
 
 | Section | What it shows |
 |---|---|
-| **Source** | Needs **View Details**. The URL and the version of the source. **Mode** is **Verbatim**: the connector copies each record as it is on the source. **Locations** shows if the source has the Locations feature on. |
-| **Token** | Needs **View Details**. The user of the API token, if that user is a superuser, and when the token expires. |
-| **Warnings** | **Unknown Scan Types** lists the source scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`. Other warnings say that the token expires soon, or how many files are over the size limit. |
-| **Counts** | The totals of the source. **View Details** adds the counts of each Product: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
-| **To Be Created** | Needs **View Details**. The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
-| **Not Migrated** | Needs **View Details**. The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
+| **Source** | The URL and the version of the source. **Mode** is **Verbatim**: the connector copies each record as it is on the source. **Locations** shows if the source has the Locations feature on. |
+| **Token** | The user of the API token, if that user is a superuser, and when the token expires. |
+| **Warnings** | **Unknown Scan Types** lists the source scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`. Other warnings say that the token expires soon, how many files are over the size limit, or that the source has no read-only mode. |
+| **Counts** | The totals of the source, and the counts of each Product: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
+| **To Be Created** | The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
+| **Not Migrated** | The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
 | **Estimated Duration** | How long a Sync of every finding takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
 
 The counts cover every Product on the source, also the Products you ignore.
@@ -100,7 +115,7 @@ Each test keeps its scan type. If DefectDojo Pro has no parser for that scan typ
 * **Groups, roles and memberships.** Only the owners of each Product become members. Activate the user accounts you need and give them roles.
 * **The product manager, technical contact and team manager fields.** The owners become members instead, and the three fields stay empty.
 * **The creator of a finding group.**
-* **Files over Maximum File Size (Bytes).** They stay on the source. The preflight report counts them. The connector also skips a file that does not fit its transfer limits, and logs a warning.
+* **Files over Maximum File Size (MB).** They stay on the source. The preflight report counts them. The connector also skips a file that does not fit its transfer limits, and logs a warning.
 * **Duplicates**, unless you turn on **Include Duplicate Findings**.
 * **The Pro data of a DefectDojo Pro source.** Only the open source data crosses. The priority and risk scores, asset types, custom fields, groups and roles, and history stay on the source.
 
