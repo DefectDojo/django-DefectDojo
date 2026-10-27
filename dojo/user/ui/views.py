@@ -54,7 +54,13 @@ from dojo.user.ui.forms import (
     UserContactInfoForm,
 )
 from dojo.user.utils import user_may_delete_account
-from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
+from dojo.utils import (
+    add_breadcrumb,
+    get_page_items,
+    get_setting,
+    get_system_setting,
+    restricted_delete_message,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -497,7 +503,7 @@ def delete_user(request, uid):
                     except RestrictedError as err:
                         messages.add_message(request,
                                             messages.WARNING,
-                                            _("User cannot be deleted: %(error)s") % {"error": err},
+                                            _("User cannot be deleted: %(error)s") % {"error": restricted_delete_message(err)},
                                             extra_tags="alert-warning")
                     return HttpResponseRedirect(reverse("users"))
 

@@ -23,7 +23,7 @@ from dojo.product_attributes.ui.forms import (
     ProductOriginForm,
     ProductPlatformForm,
 )
-from dojo.utils import add_breadcrumb, get_page_items
+from dojo.utils import add_breadcrumb, get_page_items, restricted_delete_message
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +124,8 @@ def _edit(request, kind, pk):
                                  extra_tags="alert-success")
         except RestrictedError as err:
             messages.add_message(request, messages.WARNING,
-                                 f"{cfg['label']} cannot be deleted: {err}",
+                                 _("%(label)s cannot be deleted: %(reason)s") % {
+                                     "label": cfg["label"], "reason": restricted_delete_message(err)},
                                  extra_tags="alert-warning")
         return HttpResponseRedirect(reverse(cfg["list_url"]))
     add_breadcrumb(title=f"Edit {cfg['label']}", top_level=False, request=request)

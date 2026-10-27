@@ -13,7 +13,7 @@ from dojo.authorization.authorization import user_has_configuration_permission_o
 from dojo.development_environment.models import Development_Environment
 from dojo.development_environment.ui.forms import Delete_Dev_EnvironmentForm, Development_EnvironmentForm
 from dojo.filters import DevelopmentEnvironmentFilter
-from dojo.utils import add_breadcrumb, get_page_items
+from dojo.utils import add_breadcrumb, get_page_items, restricted_delete_message
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ def edit_dev_env(request, deid):
             except RestrictedError as err:
                 messages.add_message(request,
                                         messages.WARNING,
-                                        f"Environment cannot be deleted: {err}",
+                                        _("Environment cannot be deleted: %(reason)s") % {"reason": restricted_delete_message(err)},
                                         extra_tags="alert-warning")
             return HttpResponseRedirect(reverse("dev_env"))
 
