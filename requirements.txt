@@ -4,7 +4,7 @@ anyio==4.15.1
 appdirs==1.4.4
 argon2-cffi==25.1.0
 argon2-cffi-bindings==26.1.0
-asgiref==3.12.1
+asgiref==3.13.0
 asteval==1.0.10
 attrs==26.1.0
 azure-core==1.41.0
