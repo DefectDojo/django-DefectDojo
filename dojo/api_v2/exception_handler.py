@@ -5,7 +5,6 @@ from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
 from django.utils.log import log_response
 from django.utils.translation import gettext as _
-from django.utils.translation import ngettext
 from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
@@ -22,6 +21,7 @@ from dojo.endpoint.models import EndpointDeprecatedError
 from dojo.location.api.deprecation import sunset_body
 from dojo.models import System_Settings
 from dojo.product_announcements import ErrorPageProductAnnouncement
+from dojo.utils import restricted_delete_message
 
 logger = logging.getLogger(__name__)
 
@@ -123,23 +123,10 @@ def custom_exception_handler(exc, context):
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {"message": _("JSON request content is malformed")}
     elif isinstance(exc, RestrictedError):
-        # An object cannot be deleted because it has dependent objects. str() of the error is a tuple repr that
-        # names every one of them, so the message counts them and names only their kinds (what to reassign).
+        # An object cannot be deleted because it has dependent objects; say how many and of which kinds.
         response = Response()
         response.status_code = HTTP_409_CONFLICT
-        response.data = {}
-        restricted = list(exc.restricted_objects or ())
-        if restricted:
-            message = ngettext(
-                "It cannot be deleted while %(count)s other record still refers to it.",
-                "It cannot be deleted while %(count)s other records still refer to it.",
-                len(restricted),
-            ) % {"count": len(restricted)}
-            kinds = sorted({str(obj._meta.verbose_name) for obj in restricted})
-            message += " " + _("Records that refer to it: %(kinds)s.") % {"kinds": ", ".join(kinds)}
-            response.data["message"] = message
-        else:
-            response.data["message"] = _("It cannot be deleted while other records still refer to it.")
+        response.data = {"message": restricted_delete_message(exc)}
     elif isinstance(exc, ValidationError):
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
