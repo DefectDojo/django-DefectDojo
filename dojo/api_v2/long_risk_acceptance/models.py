@@ -24,6 +24,7 @@ class RiskAcceptanceEngagement(models.Model):
     expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_("(readonly) When the risk acceptance expiration was handled (manually or by the daily job)."))
     reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name=_("Reactivate findings on expiration"), help_text=_("Reactivate findings when risk acceptance expires?"))
     risk_status = models.CharField(max_length=50, default="Risks Pending", choices=STATUS_CHOICES)
+    risk_level = models.CharField(max_length=50, default="VERY CRITICAL", choices=(("TOLERABLE", "TOLERABLE"), ("MODERATE", "MODERATE"), ("CRITICAL", "CRITICAL"), ("VERY CRITICAL", "VERY CRITICAL")))
     owner = models.ForeignKey("Dojo_User", editable=True, null=True, on_delete=models.RESTRICT, help_text=_("User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance."))
     notes = models.ManyToManyField("Notes", editable=False)
     path = models.FileField(upload_to='long_risk_acceptance/%Y/%m/%d',
@@ -32,6 +33,27 @@ class RiskAcceptanceEngagement(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    @property
+    def economic_impact(self):
+        sumary = 0
+        for ec in self.riskacceptanceengagementeconomicimpact_set.all():
+            if ec.economic_impact is not None:
+                sumary += ec.economic_impact
+        return sumary
+
+    def save(self, *args, **kwargs):
+        from dojo.models import GeneralSettings
+        economic_impact = self.economic_impact
+        rule_risk_level = GeneralSettings.get_value("RULE_RISK_LEVEL", {"TOLERABLE": 1500, "MODERATE": 2, "CRITICAL": 3700, "VERY CRITICAL": 8800})
+        if economic_impact >= rule_risk_level["VERY CRITICAL"]:
+            self.risk_level = "VERY CRITICAL"
+        elif economic_impact >= rule_risk_level["CRITICAL"]:
+            self.risk_level = "CRITICAL"
+        elif economic_impact >= rule_risk_level["MODERATE"]:
+            self.risk_level = "MODERATE"
+        else:
+            self.risk_level = "TOLERABLE"
+        super().save(*args, **kwargs)
 
         
     def add_note(

@@ -4756,6 +4756,9 @@ class Notifications(models.Model):
     long_risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_("Long Risk Acceptance Expiration"),
         help_text=_("Get notified when a long risk acceptance is about to expire"))
+    long_risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
+            verbose_name=_("Long Risk Acceptance Request"),
+            help_text=_("Get notified when a long risk acceptance is requested"))
 
     class Meta:
         constraints = [
@@ -4807,6 +4810,7 @@ class Notifications(models.Model):
                 result.long_risk_acceptance_expiration = {*result.long_risk_acceptance_expiration, *notifications.long_risk_acceptance_expiration}
                 result.long_risk_acceptance_approved = {*result.long_risk_acceptance_approved, *notifications.long_risk_acceptance_approved}
                 result.long_risk_acceptance_rejected = {*result.long_risk_acceptance_rejected, *notifications.long_risk_acceptance_rejected}
+                result.long_risk_acceptance_request = {*result.long_risk_acceptance_request, *notifications.long_risk_acceptance_request}
                 result.cross_approval_created = {*result.cross_approval_created, *notifications.cross_approval_created}
                 result.cross_approval_approved = {*result.cross_approval_approved, *notifications.cross_approval_approved}
                 result.cross_approval_rejected = {*result.cross_approval_rejected, *notifications.cross_approval_rejected}

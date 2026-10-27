@@ -19,9 +19,32 @@
 		{% endif %}
 	{% endblock %}
 
+	{% block risk_evaluation %}
+	<div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid #ffc107;">
+	{% for risk in long_risk_acceptance.riskacceptanceengagementeconomicimpact_set.all %}
+		<p style="margin: 8px 0; padding-left: 10px; border-left: 2px solid #ffc107; color: #555;">
+			<strong>Title:</strong> {{ risk.title }}</br>
+			<strong>Description:</strong> {{ risk.description }}<br/>
+			<strong>Control Effectiveness:</strong> {{ risk.control_effectiveness }}%<br/>
+			<strong>Economic Impact:</strong> {{ risk.economic_impact }} MM<br/>
+		</p>
+	{% endfor %}
+	</div>
+	{% endblock %}
+
 	{% block risk %}
 		<div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 3px solid #ffc107;">
-			<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Status:{% endblocktranslate %}</strong> <span style="color: #666;">{{ long_risk_acceptance.status }}</span></p>
+			{% if long_risk_acceptance.risk_level == "VERY CRITICAL" %}
+			<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Risk Level:{% endblocktranslate %}</strong> <span style="color: #aa0a0a;">{{ long_risk_acceptance.risk_level }} ◉ </span></p>
+			{% elif long_risk_acceptance.risk_level == "CRITICAL" %}
+			<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Risk Level:{% endblocktranslate %}</strong> <span style="color: #c05e1d;">{{ long_risk_acceptance.risk_level }} ◉ </span></p>
+			{% elif long_risk_acceptance.risk_level == "MODERATE" %}
+			<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Risk Level:{% endblocktranslate %}</strong> <span style="color: #b4b218;">{{ long_risk_acceptance.risk_level }} ◉ </span></p>
+			{% elif long_risk_acceptance.risk_level == "TOLERABLE" %}
+			<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Risk Level:{% endblocktranslate %}</strong> <span style="color: #258308;">{{ long_risk_acceptance.risk_level }} ◉ </span></p>
+			{% endif %}
+
+			<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Status:{% endblocktranslate %}</strong> <span style="color: #666;">{{ long_risk_acceptance.risk_status }}</span></p>
 			
 			{% if long_risk_acceptance.product %}
 				<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Product:{% endblocktranslate %}</strong> <span style="color: #666;">{{ long_risk_acceptance.product.name }}</span></p>
@@ -31,10 +54,6 @@
 				<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Owner:{% endblocktranslate %}</strong> <span style="color: #666;">{{ long_risk_acceptance.owner.username }}</span></p>
 			{% endif %}
 			
-			{% if long_risk_acceptance.accepted_by %}
-				<p style="margin: 10px 0;"><strong style="color: #333;">{% blocktranslate %}Accepted By:{% endblocktranslate %}</strong> <span style="color: #666;">{{ long_risk_acceptance.accepted_by.username }}</span></p>
-			{% endif %}
-
 			<div style="background-color: #f0f0f0; padding: 15px; border-radius: 4px; border-left: 3px solid #ffc107; margin-top: 15px;">
 				<p style="margin: 0; color: #333;"><strong>{% blocktranslate %}Total Affected Findings:{% endblocktranslate %}</strong> <span style="color: #d9534f; font-size: 18px; font-weight: bold;">{{ findings_count|default:"0" }}</span></p>
 			</div>
