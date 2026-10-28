@@ -89,9 +89,9 @@ The response is shaped like this (truncated):
 {
   "fields": {
     "finding": [
-      {"path": "title", "label": "Title"},
-      {"path": "severity", "label": "Severity"},
-      {"path": "age_days", "label": "Age (days)"}
+      {"path": "title", "label": "Title", "group": "finding", "block_types": "both"},
+      {"path": "severity", "label": "Severity", "group": "finding", "block_types": "both"},
+      {"path": "age_days", "label": "Age (Days)", "group": "dates", "block_types": "both"}
     ],
     "asset": [ ... ]
   },
@@ -100,6 +100,8 @@ The response is shaped like this (truncated):
   }
 }
 ```
+
+Each entry's `group`, where present, is a key naming the heading the report builder lists the field under (`finding`, `threatIntel`, `asset`, `organization`, `engagement`, `test`, `engagementAndTest`, `findings`, `dates` or `people`). It only arranges the picker, so a script can ignore it. Entries of the `organization`, `asset`, `engagement`, `test` and `finding` models carry it; the other models' entries do not.
 
 Use only the `path` values returned here for a block's `fields` list. Some paths are long-form or markdown and are intended for **detail** blocks rather than narrow tabular columns — `field_options` is the authoritative list, so confirm against it rather than hardcoding an exhaustive set.
 

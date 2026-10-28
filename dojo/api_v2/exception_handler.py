@@ -1,6 +1,11 @@
 import logging
 
-from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.core.exceptions import (
+    NON_FIELD_ERRORS,
+    RequestDataTooBig,
+    TooManyFieldsSent,
+    ValidationError,
+)
 from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
 from django.utils.log import log_response
@@ -13,6 +18,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_409_CONFLICT,
     HTTP_410_GONE,
+    HTTP_413_REQUEST_ENTITY_TOO_LARGE,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.views import exception_handler
@@ -43,6 +49,16 @@ UNIQUE_VIOLATION_RESPONSE_MESSAGE = (
     "The request conflicts with an existing record because a unique field value "
     "already exists. Retrieve or update the existing record instead of creating "
     "a new one."
+)
+
+# Returned for a request whose body is larger than DATA_UPLOAD_MAX_MEMORY_SIZE or
+# that carries more form fields than DATA_UPLOAD_MAX_NUMBER_FIELDS. The message
+# echoes none of the oversized payload and points at the operator-tunable limits.
+UPLOAD_LIMIT_RESPONSE_MESSAGE = (
+    "The request exceeded the server's upload limits (the body is too large, or it "
+    "carries too many form fields). Reduce the size of the request, or ask your "
+    "administrator to raise DD_DATA_UPLOAD_MAX_MEMORY_SIZE / "
+    "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS."
 )
 
 
@@ -168,6 +184,26 @@ def custom_exception_handler(exc, context):
         )
         response = Response(sunset_body())
         response.status_code = HTTP_410_GONE
+    elif isinstance(exc, (RequestDataTooBig, TooManyFieldsSent)):
+        # Django's request parser raises these SuspiciousOperation subclasses while
+        # a view (or a permission check) first evaluates request.data: the body is
+        # over DATA_UPLOAD_MAX_MEMORY_SIZE, or there are more form fields than
+        # DATA_UPLOAD_MAX_NUMBER_FIELDS. DRF's default handler returns None for
+        # them, so without this branch they fall through to the generic 500 below
+        # and page on-call through error reporting for a request the caller can
+        # fix. Answer 413 with an actionable message, and log at info so an
+        # expected client-side limit does not read as an outage.
+        # (The import/reimport permission classes catch these earlier and raise a
+        # ValidationError; this branch covers every other write path, e.g. a
+        # finding PATCH, where request.data is only parsed inside the handler.)
+        logger.info(
+            "request exceeded upload limits on %s: %s",
+            (context or {}).get("request", "unknown request"),
+            type(exc).__name__,
+        )
+        response = Response()
+        response.status_code = HTTP_413_REQUEST_ENTITY_TOO_LARGE
+        response.data = {"message": UPLOAD_LIMIT_RESPONSE_MESSAGE}
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
             exception_message = str(exc.args[0])

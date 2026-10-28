@@ -20,6 +20,35 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 28, 2026: v3.4.302
+
+New features:
+* **(AI)** AI Guardrails checks every Claude Code prompt and tool call against a policy you control. A policy can block a prompt that holds personal data, redact secrets from file contents and command output before the model sees them, stop or ask about a risky command, or log a match. Developers get the policy through Claude Code's managed settings, and each checked call is listed under **Prompt Activity**. **Create Starter Policy** on **Settings > AI Guardrails** adds a baseline policy in monitor mode. Requires the **AI Inventory and Governance** feature flag, off by default, and only superusers can see or change guardrails. See [AI Guardrails for Claude Code](/triage_findings/findings_workflows/pro__ai_guardrails/).
+* **(Connectors)** Ingestion Health flags a Connector whose Syncs keep succeeding with zero Findings while it usually imports some. The Connector's tile reads **Returned 0 Findings Against a Baseline of *n***, where the baseline is the median Findings per Sync over the last 30 days, and a user who can edit the Connector can acknowledge it with a reason that stays on record. The next Sync that imports Findings clears it. Requires the **Ingestion Health** feature flag, off by default. See [Ingestion Health](/connectors/upstream/ingestion_health/).
+
+Enhancements:
+* **(Assets)** Every count card at the top of the Asset page shows what makes up its total, plus one figure for what needs attention, which turns amber or red above zero: open, closed and overdue Engagements; last scanned, imports in the last 30 days and new Findings for Tests; direct, indirect and past-SLA Findings; and vulnerable, not vulnerable and critical Endpoints or Locations. See [Assets](/asset_modelling/engagements_tests/pro__assets/#asset-view).
+* **(Tables)** **Sort** in the filter bar takes any number of sort levels. Drag a level by its grip, or press Up or Down, to reorder it, and **Reset to Default** clears the sort. On the Findings, Assets, Organizations, Engagements and Tests lists, the **Columns** picker and **Sort** list their fields under the same headings as **Add Filter**. See [Customizing Tables](/navigation/pro__table_customization/#filtering-with-the-filter-bar).
+* **(UI)** Icons in the sidebar, top bar, breadcrumbs, table headers and buttons are drawn in a quieter tone than the labels beside them.
+* **(Performance)** Opening a Finding no longer runs a query for each finding group in its Test, and API requests with `?prefetch=test` load a Test's finding groups and their Jira issues once.
+
+Bug fixes:
+* **(Triage Engine)** Switching a rule's schedule from **Single Run** to **Repeated Run** starts it at the top of the hour, and the minute can no longer be cleared, so the rule saves instead of failing with an invalid cron expression. This applies to every schedule dialog. See [Scheduling Rules](/automation/rules_engine/scheduling/#repeated-run).
+* **(Reporting)** A report left **Processing** past its time limit, for example because its worker stopped, is marked failed with the timed-out reason. In the template editor, a role with **Report Template Add** but not Edit can preview a new block and see its chart keys. A template block entry with no block is refused with a 400 instead of a server error. See [Report Builder](/metrics_reports/reports/report-builder/#generated-reports).
+* **(Deduplication)** With Locations on, Findings in different files are no longer marked duplicates of each other on scan types whose deduplication fields include `file_path`. The upgrade recomputes the stored hashes for those scan types; Findings already marked duplicate are not changed. Marking an open Finding as a duplicate of a mitigated one is refused, as automatic deduplication already does, **Set as original** works on a duplicate that has lost its original, and deleting a single Finding no longer deadlocks with the duplicate cleanup. See [About Deduplication](/triage_findings/finding_deduplication/about_deduplication/).
+* **(Importers)** Reimport no longer adds a newly reported host to a Finding marked false positive, out of scope or risk accepted for a different host. An import that loses its database connection names the database error and its SQLSTATE in the error response. See [Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/#reimport-deduplication).
+* **(Findings)** **Add Finding From Template** fills the description, mitigation, impact, CVSS v3 vector and vulnerability IDs from the template, not only its title, severity, CWE and tags.
+* **(Assets)** An Asset's **Technologies** tab lists only that Asset's technologies. See [Assets](/asset_modelling/engagements_tests/pro__assets/#asset-view).
+* **(Settings)** A new SLA configuration starts with the default day counts filled in, so it can be saved with only a name. See [Assign Priority, Risk and SLAs](/asset_modelling/pro_hierarchy/priority_sla/#working-with-slas).
+* **(Sensei)** Agent targets can be onboarded from the hub's **Add Accounts** menu, under **Add Agent Targets**. The item is disabled with the reason when the license has no agent-target quota or the quota is used up. The menu's connect-first items read **Connect a Source-Control Provider First** and **Connect a Cloud Provider First** in every language. See [AI Agent Red Teaming](/sensei/ai_agent_redteam/#onboard-an-agent-target).
+* **(Licensing)** A replacement license can be saved on the License Manager page while the instance is over its license limit.
+* **(Tables)** A filter being edited is no longer cleared when the table's settings refresh in the background.
+* **(API)** The API token page shows the current key after the token is regenerated in another tab or reset by an administrator, and hides token controls when the instance has API tokens turned off. Concurrent requests for the OpenAPI schema no longer fail with a server error, and a request larger than the upload limits answers 413 instead of 500. See [DefectDojo API v2](/automation/api/api-v2-docs/#token-management).
+* **(UI)** On a multi-step create form, **Next** is the main button until every step has been reached, and the held **Submit** explains why it is disabled. A user, environment, or Asset platform, lifecycle or origin that cannot be deleted says how many records still refer to it and which kinds, instead of listing each one. A webhook receiver's URL and secret buttons wrap at phone width.
+
+Upgrade notes:
+* **(Deployment)** On instances with Locations on, the upgrade recomputes deduplication hashes for scan types whose deduplication fields include `file_path`, which can lengthen the migration. `DD_REHASH_MIGRATION_WORKERS` sets how many processes run it, up to four by default. See [Upgrading DefectDojo Pro (On-Premise)](/get_started/pro/onprem/upgrading/).
+
 ### October 27, 2026: v3.4.301
 
 Enhancements:

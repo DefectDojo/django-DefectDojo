@@ -29,7 +29,7 @@ Separately, a **runtime-check API** lets your own agent ask DefectDojo to vet a 
 
 ## Onboard an agent target
 
-Use **Add Target** in the hub's **AI Agents** tab, give the target a label, link it to an Asset, and configure how the attacker reaches it.
+Use **Add Accounts → Onboard Agent Target** in the hub header (the **Add Agent Targets** group), give the target a label, link it to an Asset, and configure how the attacker reaches it. The menu is the same on every capability tab, and an agent target needs no connection first. When the license has no agent-target quota, or the quota is used up, the item is disabled and says which, so the form is never filled in only to be refused on save.
 
 | Field | Meaning |
 |-------|---------|
@@ -119,7 +119,7 @@ curl -s -X POST https://<your-dojo>/api/v2/agentsec/runtime/check/ \
 
 ## Quotas
 
-AI Agent Red Teaming meters against the **agent-target quota** (`sensei_agent_target_limit`), shown as an **Onboarded Agent Targets** card at the top of the hub. Onboarding is blocked when the limit is reached. The attacker's LLM usage is attributed to the Sensei cost ledger like the rest of Sensei's AI spend.
+AI Agent Red Teaming meters against the **agent-target quota** (`sensei_agent_target_limit`), shown as an **Onboarded Agent Targets** card at the top of the hub. Onboarding is blocked when the limit is reached: the **Onboard Agent Target** menu item reads **No Agent-Target Quota on This License** or **Agent-Target Quota Exhausted** instead, and is disabled. The attacker's LLM usage is attributed to the Sensei cost ledger like the rest of Sensei's AI spend.
 
 ## Troubleshooting
 
