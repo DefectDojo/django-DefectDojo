@@ -74,6 +74,7 @@ def _get_findings(exclusion, active_only=True):
     if active_only:
         finding_filters.append(Q(active=True))
     findings = Finding.objects.filter(*finding_filters).prefetch_related("tags", "notes")
+    findings = findings.exclude(risk_status="On Blacklist")
     findings = _filter_findings_by_component(findings, exclusion)
     findings = _filter_findings_by_where(findings, exclusion)
 

@@ -241,6 +241,7 @@ class CrossApprovalHelpersTest(SimpleTestCase):
         )
         findings = MagicMock()
         findings.prefetch_related.return_value = findings
+        findings.exclude.return_value = findings
         findings.filter.return_value = findings
         findings.distinct.return_value = findings
         findings.__iter__ = Mock(return_value=iter([
@@ -261,6 +262,7 @@ class CrossApprovalHelpersTest(SimpleTestCase):
             result = _get_findings(exclusion)
 
         self.assertEqual(result, [matching_finding, matching_by_severity])
+        findings.exclude.assert_called_once_with(risk_status="On Blacklist")
         self.assertEqual(findings.filter.call_count, 2)
         findings.distinct.assert_called_once_with()
         self.assertIn("tags__name__iexact", str(findings.filter.call_args_list[1].args[0]))
