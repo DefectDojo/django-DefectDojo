@@ -66,6 +66,14 @@ Review asks someone to *look*. Assignment makes someone *responsible*, and it do
 
 You can only assign a Finding to somebody who can already see it. Assignment does not grant access.
 
+### When a Finding closes
+
+An assignment is finished once its Finding closes: the Finding is mitigated, risk accepted, or marked False Positive, Out of Scope or Duplicate, or it is otherwise made inactive.
+
+* The Finding's assignees are cleared. They leave the **Assignees** column, the assignee filter, the Finding page and the reports' **Assignees** column, and the Finding leaves their My Work queue.
+* Reopening the Finding does not bring them back. Assign someone again if the reopened Finding needs an owner.
+* A closed Finding cannot be assigned. Saving new assignees on one is refused with a message saying so, the bulk editor skips the closed Findings in a selection and names them, and a Triage Engine rule that sets assignees leaves closed Findings alone.
+
 The [Triage Engine](/automation/rules_engine/) can set assignees automatically: choose **Set Users** and the **assignees** field.
 
 Assignment is controlled by the **Work Assignment** [feature flag](/admin/feature_flags/pro__feature_flags/).
