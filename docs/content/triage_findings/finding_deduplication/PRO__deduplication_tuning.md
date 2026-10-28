@@ -41,7 +41,9 @@ Two rules are enforced when you save a field selection, for the reasons in [Set-
 
 The editor shows the tool's **Default Configuration** for that matching kind: the algorithm and hash fields a new install starts with. Use it to check what a tool shipped with before you change it, or to see how far an edited tool has moved from it.
 
-To go back to the default, select **Reset to Default**. This fills in the default algorithm and hash fields (and, for Reimport, turns **Track Findings as Locations Change** back off), but saves nothing. Review the impact and confirm it like any other change. Resetting the hash fields re-hashes the tool's existing findings in the background, the same as any other field change. The button is unavailable when the form already matches the default.
+To go back to the default, select **Reset to Default**. This fills in the default algorithm and hash fields (and, for Reimport, turns **Track Findings as Locations Change** back off), but saves nothing. Review the impact and confirm it like any other change. Resetting the hash fields re-hashes the tool's existing findings in the background, the same as any other field change. When the default algorithm is Unique ID From Tool, which hides the field picker, the reset still puts the stored hash fields back. The button is unavailable when the form already matches the default.
+
+Once a reset is saved, the tool no longer shows as **Changed** for that matching kind and drops out of the **Changed From Defaults** filter, provided its grouping is also at the default.
 
 Where the default comes from:
 
