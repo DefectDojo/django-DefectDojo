@@ -37,8 +37,10 @@ from rest_framework.test import APIClient, APITestCase
 
 from dojo.api_v2.exception_handler import custom_exception_handler
 from dojo.models import Finding
+from unittests.dojo_test_case import versioned_fixtures
 
 
+@versioned_fixtures
 class UploadLimitExceptionHandlerTest(APITestCase):
 
     """Coverage of the handler's upload-limit branch, called directly."""
@@ -88,6 +90,7 @@ class UploadLimitExceptionHandlerTest(APITestCase):
                 )
 
 
+@versioned_fixtures
 class UploadLimitApiTest(APITestCase):
 
     """Coverage through a real finding PATCH and the configured handler."""
