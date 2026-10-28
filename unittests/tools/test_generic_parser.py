@@ -1,6 +1,8 @@
 import datetime
 import json
 
+from django.test import override_settings
+
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
@@ -966,3 +968,76 @@ class TestGenericCSVParserCellValues(DojoTestCase):
                 self.assertEqual(fix_available, finding.fix_available)
                 self.assertEqual(cvssv3_score, finding.cvssv3_score)
                 self.assertEqual(cwe, finding.cwe)
+
+
+class TestGenericJSONParserPackage(DojoTestCase):
+
+    """The purl, purl_type and namespace fields that build a finding's dependency location."""
+
+    def _dependency_locations(self, finding):
+        return [location for location in finding.unsaved_locations if location.type == "dependency"]
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_purl_builds_the_dependency_location(self):
+        with (get_unit_tests_scans_path("generic") / "generic_purl.json").open(encoding="utf-8") as file:
+            findings = {f.title: f for f in GenericParser().get_findings(file, Test())}
+        self.assertEqual(3, len(findings))
+
+        from_purl = findings["Vulnerable component sent as a purl"]
+        # The purl fills in the component the finding did not name.
+        self.assertEqual("commons-collections", from_purl.component_name)
+        self.assertEqual("3.2.1", from_purl.component_version)
+        (dependency,) = self._dependency_locations(from_purl)
+        self.assertEqual("pkg:maven/commons-collections/commons-collections@3.2.1", dependency.data["purl"])
+        self.assertEqual("code/pom.xml", dependency.data["file_path"])
+
+        from_parts = findings["Vulnerable component sent as purl parts"]
+        (dependency,) = self._dependency_locations(from_parts)
+        self.assertEqual("", dependency.data["purl"])
+        self.assertEqual("npm", dependency.data["purl_type"])
+        self.assertEqual("lodash", dependency.data["name"])
+        self.assertEqual("4.17.20", dependency.data["version"])
+
+        without_package = findings["Vulnerable component without package coordinates"]
+        (dependency,) = self._dependency_locations(without_package)
+        self.assertEqual("", dependency.data["purl"])
+        self.assertEqual("", dependency.data["purl_type"])
+        self.assertEqual("openssl", dependency.data["name"])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_purl_keeps_explicit_component_fields(self):
+        content = json.dumps({"findings": [{
+            "title": "t", "severity": "High", "description": "d",
+            "component_name": "commons-collections:commons-collections", "component_version": "3.2.1-patched",
+            "purl": "pkg:maven/commons-collections/commons-collections@3.2.1",
+        }]})
+        (finding,) = GenericParser().get_findings(TestFile("findings.json", content), Test())
+        self.assertEqual("commons-collections:commons-collections", finding.component_name)
+        self.assertEqual("3.2.1-patched", finding.component_version)
+        (dependency,) = self._dependency_locations(finding)
+        self.assertEqual("pkg:maven/commons-collections/commons-collections@3.2.1", dependency.data["purl"])
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_parse_json_purl_without_locations_still_sets_the_component(self):
+        content = json.dumps({"findings": [{
+            "title": "t", "severity": "High", "description": "d",
+            "purl": "pkg:npm/%40angular/core@16.0.0",
+        }]})
+        (finding,) = GenericParser().get_findings(TestFile("findings.json", content), Test())
+        self.assertEqual("core", finding.component_name)
+        self.assertEqual("16.0.0", finding.component_version)
+        self.assertEqual([], getattr(finding, "unsaved_locations", []))
+
+    def test_parse_json_rejects_bad_package_fields(self):
+        for package, message in [
+            ({"purl": "commons-collections"}, "purl is not a valid Package URL"),
+            ({"purl": 42}, "Package fields must be strings: ['purl']"),
+            ({"purl_type": ["maven"]}, "Package fields must be strings: ['purl_type']"),
+            (
+                {"purl": "pkg:maven/a/b@1", "purl_type": "npm", "namespace": "x"},
+                "purl cannot be combined with ['namespace', 'purl_type']",
+            ),
+        ]:
+            content = json.dumps({"findings": [{"title": "t", "severity": "High", "description": "d", **package}]})
+            with self.subTest(package=package), self.assertRaisesMessage(ValueError, message):
+                GenericParser().get_findings(TestFile("findings.json", content), Test())

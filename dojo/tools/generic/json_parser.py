@@ -5,6 +5,7 @@ from functools import cache
 import dateutil
 from django.core.files.base import ContentFile
 from django.db.models import CharField
+from packageurl import PackageURL
 
 from dojo.finding.cwe import cwe_number
 from dojo.location.feature import locations_enabled
@@ -12,6 +13,11 @@ from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
 from dojo.tools.utils import mark_unique_ids_ambiguous_when_repeated
+
+# Package coordinates a finding may carry for its dependency location. ``purl`` is a full
+# Package URL; ``purl_type`` and ``namespace`` complete ``component_name`` and
+# ``component_version`` when the tool reports the parts instead.
+PACKAGE_FIELDS = ("purl", "purl_type", "namespace")
 
 # Accepted fields that map to a numeric column on Finding, and the type they hold.
 NUMERIC_FIELDS = {
@@ -96,6 +102,9 @@ class GenericJSONParser:
             if "cwes" in item:
                 unsaved_cwes = item["cwes"]
                 del item["cwes"]
+            # remove the package coordinates from the dictionary: they are not Finding
+            # fields, they describe the dependency location built further down.
+            package = {key: item.pop(key) for key in PACKAGE_FIELDS if key in item}
             # check for required keys
             required = {"title", "severity", "description"}
 
@@ -170,6 +179,14 @@ class GenericJSONParser:
                 raise ValueError(msg)
 
             self._normalize_numeric_fields(item)
+            purl = self._parse_package(package)
+            if purl:
+                # The purl names the component, so a report that sends only the purl still
+                # gets a component on the finding. Explicit component fields win.
+                if not item.get("component_name"):
+                    item["component_name"] = purl.name
+                if not item.get("component_version") and purl.version:
+                    item["component_version"] = purl.version
             # A value wider than its column would only fail at INSERT time, deep in the
             # importer, as a DataError the API reports as a 500. Reject it here instead: the
             # importer turns the ValueError into a 400 naming the field and the limit.
@@ -213,9 +230,12 @@ class GenericJSONParser:
                 component_name = item.get("component_name")
                 component_version = item.get("component_version")
                 file_path = item.get("file_path")
-                if component_name or component_version or file_path:
+                if purl or component_name or component_version or file_path:
                     finding.unsaved_locations.append(
                         LocationData.dependency(
+                            purl=purl.to_string() if purl else "",
+                            purl_type=package.get("purl_type", ""),
+                            namespace=package.get("namespace", ""),
                             name=component_name,
                             version=component_version,
                             file_path=file_path,
@@ -271,6 +291,32 @@ class GenericJSONParser:
         # report rather than storing it as if it named a single finding.
         mark_unique_ids_ambiguous_when_repeated(test_internal.findings)
         return test_internal
+
+    def _parse_package(self, package):
+        """
+        Validate the package coordinates of a finding and return its purl, if it sent one.
+
+        A bad value would otherwise be dropped silently when the dependency location is
+        built, so it is rejected here as a ValueError, which the importer reports as a 400.
+        """
+        not_strings = sorted(key for key, value in package.items() if not isinstance(value, str))
+        if not_strings:
+            msg = f"Package fields must be strings: {not_strings}"
+            raise ValueError(msg)
+        package_url = package.get("purl", "").strip()
+        if not package_url:
+            return None
+        # A purl already carries its type and namespace, and only the purl is kept when
+        # both are sent, so a second, possibly different, source is refused.
+        conflicting = sorted(key for key in ("purl_type", "namespace") if package.get(key))
+        if conflicting:
+            msg = f"purl cannot be combined with {conflicting}: the purl already sets them"
+            raise ValueError(msg)
+        try:
+            return PackageURL.from_string(package_url)
+        except ValueError as error:
+            msg = f"purl is not a valid Package URL ({package_url!r}): {error}"
+            raise ValueError(msg) from error
 
     def _normalize_numeric_fields(self, item):
         """
