@@ -12,7 +12,6 @@ from urllib.parse import urlparse
 logger = logging.getLogger(__name__)
 CONTROL_CHARS_RE = re.compile(r"[\x00-\x1F\x7F]")
 HTML_TAG_RE = re.compile(r"<[^>]+>")
-SAFE_FLOW_NAME_RE = re.compile(r"^[\w\s\-\.\(\)#áéíóúÁÉÍÓÚñÑ]+$")
 
 
 # ...existing code...
@@ -337,17 +336,12 @@ class InputFlowSerializer(serializers.ModelSerializer):
         read_only_fields = ["id","created", "updated", "engagement_name"]
 
     def validate_flowName(self, value):
-        value = validate_safe_text(
+        return validate_safe_text(
             value,
             field_name="flowName",
             max_length=255,
             allow_blank=False
         )
-
-        if not SAFE_FLOW_NAME_RE.match(value):
-            raise serializers.ValidationError("flowName contains invalid characters.")
-
-        return value
 
     def validate(self, attrs):
         engagement = attrs.get("engagement", getattr(self.instance, "engagement", None))
@@ -478,9 +472,6 @@ def validate_safe_url(value):
         raise serializers.ValidationError("url is too long.")
 
     parsed = urlparse(value)
-
-    if parsed.scheme not in ("http", "https"):
-        raise serializers.ValidationError("Only http and https URLs are allowed.")
 
     if not parsed.netloc:
         raise serializers.ValidationError("Invalid URL.")

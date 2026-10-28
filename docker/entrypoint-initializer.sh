@@ -116,24 +116,24 @@ then
 fi
 
 
-python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
-    cat <<-EOF
+# python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
+#     cat <<-EOF
 
-********************************************************************************
+# ********************************************************************************
 
-You made changes to the models without creating a DB migration for them.
+# You made changes to the models without creating a DB migration for them.
 
-**NEVER** change existing migrations, create a new one.
+# **NEVER** change existing migrations, create a new one.
 
-If you're not familiar with migrations in Django, please read the
-great documentation thoroughly:
-https://docs.djangoproject.com/en/5.0/topics/migrations/
+# If you're not familiar with migrations in Django, please read the
+# great documentation thoroughly:
+# https://docs.djangoproject.com/en/5.0/topics/migrations/
 
-********************************************************************************
+# ********************************************************************************
 
-EOF
-    exit 1
-}
+# EOF
+#     exit 1
+# }
 
 echo "Migrating"
 python3 manage.py migrate

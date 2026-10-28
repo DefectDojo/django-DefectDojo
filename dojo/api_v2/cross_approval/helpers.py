@@ -112,10 +112,12 @@ def apply_cross_approval_exclusion(exclusion_id):
     request_owner = _request_owner(exclusion.request)
     for finding in _get_findings(exclusion):
         finding.tags.add("white_list", request_owner)
-        finding.active = False
-        finding.risk_status = Constants.ON_WHITELIST.value
         finding.notes.add(note)
-        finding.save(update_fields=["active", "risk_status"])
+        finding.update_fields(
+            active=False,
+            risk_status=Constants.ON_WHITELIST.value,
+            sla_expiration_date=exclusion.expired_date
+        )
 
 
 def revert_cross_approval_exclusion(exclusion, exclude_request_id=None):

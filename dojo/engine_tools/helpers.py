@@ -169,9 +169,16 @@ def add_findings_to_whitelist(
             finding.tags.add("white_list")
         finding.active = False
         finding.notes.add(note)
+        finding.sla_expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
         finding.risk_status = Constants.ON_WHITELIST.value
 
-    Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
+    Finding.objects.bulk_update(
+        findings_to_update,
+        [
+            "active",
+            "risk_status",
+            "sla_expiration_date",
+        ], 1000)
     logger.info(f"{findings_to_update.count()} findings added to whitelist.")
 
 
@@ -306,6 +313,7 @@ def send_mail_to_cybersecurity(
 def remove_finding_from_list(finding: Finding, note: Notes, type: str) -> Finding:
     finding.risk_status = Constants.RISK_ACTIVE.value
     finding.notes.add(note)
+    finding.set_sla_expiration_date()
 
     if type == "white_list":
         if not finding.is_mitigated:
@@ -467,11 +475,12 @@ def add_findings_to_exclusion(
             finding.tags.add(type_finding)
         finding.notes.add(note)
         finding.risk_status = Constants.EXCLUSION_TYPE.value.get(type_finding)
-        finding.set_sla_expiration_date() if type_finding == "zero_day" else None
+        if type_finding == "zero_day":
+            finding.set_sla_expiration_date() 
+        elif type_finding == "white_list":
+            finding.sla_expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
 
-    update_fields = ["risk_status"]
-    if type_finding == "zero_day":
-        update_fields = ["risk_status", "sla_expiration_date"]
+    update_fields = ["risk_status", "sla_expiration_date"]
     Finding.objects.bulk_update(findings_to_update, update_fields, 1000)
     findings_to_update_count = findings_to_update.count()
     logger.info(f"{findings_to_update_count} findings added to {Constants.EXCLUSION_TYPE.value.get(type_finding)}.")

@@ -168,7 +168,14 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                 elif dict_findings["risk_status"] == "Transfer Rejected":
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False if finding.is_mitigated and finding.mitigated is not None else True
-                finding.save()
+                    finding.save()
+                    return
+                finding.update_fields(
+                    risk_status=finding.risk_status,
+                    active=finding.active,
+                    sla_expiration_date=transfer_finding_obj.expiration_date
+
+                )
         else:
             logger.warning(f"Finding not Found: {finding.id}")
 

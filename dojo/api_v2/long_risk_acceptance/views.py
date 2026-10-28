@@ -152,7 +152,7 @@ class RiskAcceptanceEngagementViewSet(prefetch.PrefetchListMixin,
             RiskAcceptanceEngagementRequestSerializer(data=request.query_params).is_valid(raise_exception=True)
             event = request.query_params.get("event") 
             helper_ra_engagement.async_apply_rule_long_risk_acceptance.apply_async(
-                args=(ra_engagement.id, request.user.id, event))
+                args=(ra_engagement.id, request.user.id, event, True))
             return http_response.ok(message="Render Rule Applied")
         except Exception as e:
             return http_response.error(
@@ -329,6 +329,7 @@ class EconomicImpactViewSet(prefetch.PrefetchListMixin,
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
+        "risk_acceptance_engagement"
     ]
     pagination_class = LimitOffsetPagination
 

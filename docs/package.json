@@ -23,10 +23,10 @@
   },
   "devDependencies": {
     "prettier": "3.6.2",
-    "vite": "8.0.16"
+    "vite": "8.1.6"
   },
   "overrides": {
-    "brace-expansion": "5.0.8"
+    "brace-expansion": "5.0.12"
   },
   "engines": {
     "node": "22.19.0"
