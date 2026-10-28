@@ -444,6 +444,24 @@ class CrossApprovalRequestValidationViewTest(SimpleTestCase):
         queryset.filter.assert_any_call(owner__icontains="x86")
         queryset.distinct.assert_called_once_with()
 
+    def test_retry_delete_queryset_only_includes_deleting_requests(self):
+        request = Request(APIRequestFactory().delete(
+            "/api/v2/crossapproval_requests/?retry=true",
+        ))
+        queryset = MagicMock()
+        queryset.filter.return_value = queryset
+        queryset.distinct.return_value = queryset
+        view = CrossApprovalRequestViewSet()
+        view.request = request
+        view.action = "destroy"
+
+        with patch.object(CrossApprovalRequestViewSet, "queryset", queryset):
+            result = view.get_queryset()
+
+        self.assertEqual(result, queryset)
+        queryset.filter.assert_called_once_with(status="deleting")
+        queryset.exclude.assert_not_called()
+
     def test_invalid_request_id_filter_returns_empty_queryset(self):
         request = Request(APIRequestFactory().get(
             "/api/v2/crossapproval_requests/",
@@ -782,6 +800,19 @@ class CrossApprovalRequestWorkflowViewTest(SimpleTestCase):
             on_commit.assert_called_once()
             on_commit.call_args.args[0]()
             delete_task.delay.assert_called_once_with(7, True)
+
+    def test_retry_destroy_requeues_deleting_approved_request(self):
+        logs = SimpleNamespace(
+            filter=Mock(return_value=SimpleNamespace(exists=Mock(return_value=True))),
+        )
+        instance = SimpleNamespace(pk=7, status="deleting", logs=logs, save=Mock())
+        view = CrossApprovalRequestViewSet()
+
+        with patch("dojo.api_v2.cross_approval.views.delete_cross_approval_request_task") as delete_task:
+            view.perform_destroy(instance)
+
+        delete_task.delay.assert_called_once_with(7, True)
+        instance.save.assert_not_called()
 
     def test_delete_task_reverts_exclusions_before_deleting_request(self):
         exclusion = SimpleNamespace(pk=3)

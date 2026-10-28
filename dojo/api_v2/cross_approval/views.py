@@ -35,7 +35,16 @@ class CrossApprovalRequestViewSet(DeletePreviewModelMixin, ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        queryset = super().get_queryset().exclude(status="deleting")
+        queryset = super().get_queryset()
+        retry_delete = (
+            getattr(self, "action", None) == "destroy"
+            and self.request
+            and self.request.query_params.get("retry", "").lower() == "true"
+        )
+        if retry_delete:
+            queryset = queryset.filter(status="deleting")
+        else:
+            queryset = queryset.exclude(status="deleting")
         request_id = self.request.query_params.get("id") if self.request else None
         vulnerability_id = self.request.query_params.get("cve") if self.request else None
         status = self.request.query_params.get("status") if self.request else None
@@ -353,6 +362,11 @@ class CrossApprovalRequestViewSet(DeletePreviewModelMixin, ModelViewSet):
         return Response(self.get_serializer(instance).data)
 
     def perform_destroy(self, instance):
+        if instance.status == "deleting":
+            was_approved = instance.logs.filter(current_status="approved").exists()
+            delete_cross_approval_request_task.delay(instance.pk, was_approved)
+            return
+
         with transaction.atomic():
             was_approved = instance.status == "approved"
             instance.status = "deleting"
