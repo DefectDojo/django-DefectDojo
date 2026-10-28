@@ -179,7 +179,7 @@ vine==5.1.0
 vobject==0.9.9
 vulners==4.4.0
 watchdog==6.0.0
-wcwidth==0.9.3
+wcwidth==0.9.4
 webencodings==0.6.1
 whitenoise==5.2.0
 wrapt==2.5.1
