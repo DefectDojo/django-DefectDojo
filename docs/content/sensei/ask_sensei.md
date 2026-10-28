@@ -100,9 +100,11 @@ switched on. See [Fixing Findings with Sensei](/sensei/fixing_findings/) for how
 onboarded, reviewed and merged.
 
 Ask "what changed since I last looked?" (or over any number of days) to see what moved since your
-previous question: findings that arrived (and how many are critical or high), findings newly on
+last visit: findings that arrived (and how many are critical or high), findings newly on
 the known exploited vulnerabilities list, findings closed, and the pull requests Sensei opened and
-merged. The answer says which window its numbers cover.
+merged. Your last visit is the newest question you asked at least an hour earlier, so questions
+asked close together count as one visit. The numbers cover whole days from that visit, rounded up,
+and the answer says how many days that is.
 
 ## Changing findings from an answer
 
