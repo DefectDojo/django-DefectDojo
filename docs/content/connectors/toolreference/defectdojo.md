@@ -34,7 +34,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 4. Keep the defaults of the fields in the table below, or change them.
 5. Turn on **Enable Auto-Mapping**. See [Records](#records) for the reason.
 6. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Sync**.
-7. Click **Submit**. With **One-Time** in **Frequency**, Discover starts at once and the connection's records page opens. The preflight report appears on it when Discover ends.
+7. Click **Submit**. With **One-Time** in **Frequency**, Discover starts at once and the connection's migration page opens. The preflight report appears on it when Discover ends.
 
 | Field | Default | What it does |
 |---|---|---|
@@ -76,21 +76,21 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 #### The preflight report
 
-Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is in the **Migration Preflight** card. The card is on the connector's tile on **Connect > Upstream**, and on its **Manage Records and Operations** page. Before the first Discover, the card says "Run a discovery to see the preflight report."
+Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is on the connection's migration page. To open the page, click **Open Migration** on the **Migration Preflight** card of the connector's tile on **Connect > Upstream**, or choose **Open Migration** in its **Manage Configuration** menu. Before the first Discover, the page says "Run a discovery to see the preflight report."
 
-The card shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. During a Sync it also shows **Migrating: X of Y Findings**, and then **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the Sync, the card also shows **Connection Deleted**. Click **View More** to open the full report in a window that scrolls. The table below lists its sections.
+The top of the page shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. **Sync** is beside it, and its gear menu holds **Discover**, **Edit Configuration** and **Manage Records and Operations**. During a Sync the summary also shows **Migrating: X of Y Findings**, and then **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the Sync, it also shows **Connection Deleted**. The tile's card shows the same summary. Below the summary, the page shows the report in sections, and **History** lists every Discover and Sync. The table below lists the report sections.
 
-In **View More**, each source Product has an **Include** box. Clear it before the Sync to leave that Product on the source. If Auto-Mapping created an empty Product for it, that Product is deleted. Select the box again to bring the Product back. The boxes are locked while a Sync runs.
+In the **Products** section, each source Product has an **Include** box. Clear it before the Sync to leave that Product on the source. If Auto-Mapping created an empty Product for it, that Product is deleted. Select the box again to bring the Product back. The boxes are locked while a Sync runs.
 
 | Section | What it shows |
 |---|---|
 | **Source** | The URL and the version of the source. **Mode** is **Verbatim**: the connector copies each record as it is on the source. **Locations** shows if the source has the Locations feature on. |
 | **Token** | The user of the API token, if that user is a superuser, and when the token expires. |
 | **Warnings** | **Unknown Scan Types** lists the source scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`. Other warnings say that the token expires soon, how many files are over the size limit, or that the source has no read-only mode. |
-| **Counts** | The totals of the source, and the counts of each Product: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
+| **Products** | The totals of the source, and one row for each source Product with its **Include** box and its counts: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
 | **To Be Created** | The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
 | **Not Migrated** | The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
-| **Estimated Duration** | How long a Sync of every finding takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
+| **Estimated Duration** | In the summary at the top: how long a Sync of every finding takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
 
 The counts cover every Product on the source, also the Products you ignore.
 
@@ -139,6 +139,6 @@ If a Sync stops in the middle of a Product, the next Sync imports that Product a
 
 #### Check the finding count after a Sync
 
-A Sync operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background. For a large Product, the import goes on for some minutes after **Success**. The preflight card shows **Migration Complete** when the import ends.
+A Sync operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background. For a large Product, the import goes on for some minutes after **Success**. The migration page shows **Migration Complete** when the import ends.
 
 Before you trust a Sync, open each Product and check its finding count. Compare it with the findings count of that Product in the preflight report. The count in DefectDojo Pro is lower by the findings that your fields skip. Duplicates, findings below **Minimum Severity** and, with **Include Inactive Findings** off, inactive findings are not imported.

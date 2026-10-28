@@ -292,7 +292,7 @@ Confirm the following before you add the connector.
 4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field.
 5. Turn on **Enable Auto-Mapping**. Each source Product then gets a Product of the same name, under a Product Type of the same name. Do not skip this: mapping a Record by hand cannot create a Product.
 6. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Sync**. Pick a recurring frequency if you want to sync on a schedule until you cut over.
-7. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. With **One-Time**, Discover then starts at once and the connection's records page opens.
+7. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. With **One-Time**, Discover then starts at once and the connection's migration page opens.
 
 The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page covers the shared parts of the form: the schedule and the label.
 
@@ -300,19 +300,19 @@ The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page cover
 
 With a recurring frequency, run [Discover](/connectors/upstream/manage_operations/#discover-operations) yourself. The connector creates one Record per Product on the source. With Auto-Mapping on, every Record is mapped at once. Without it, you can map a Record by hand only to a Product that already exists in DefectDojo Pro.
 
-Discover also fills the **Migration Preflight** card with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The card shows the number of findings, the estimated duration and the number of warnings. Click **View More** to open the full report. To leave a source Product behind, clear its **Include** box there. Read the report before the first Sync:
+Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
 
 * **Warnings** lists the scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`.
-* **Counts** shows the totals and the counts of each Product. Keep them to check the result of the Sync.
+* **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync.
 * **To Be Created** lists the users and the reference data that the Sync creates.
 * **Not Migrated** lists the settings that you set up in DefectDojo Pro yourself.
 * **Estimated Duration** tells you how long the first Sync takes.
 
 ### Step 3: Sync
 
-Run [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.0 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. A large estate takes a while. The [Operations page](/connectors/upstream/manage_operations/) shows each run.
+Click **Sync** on the migration page (see [Sync](/connectors/upstream/manage_operations/#sync-operations)). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.0 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. A large estate takes a while. **History** on the migration page shows each run.
 
-The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. The preflight card shows **Migrating: X of Y Findings** during that time, and **Migration Complete** when it ends. A notification then sums up the migration. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
+The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. The migration page shows **Migrating: X of Y Findings** during that time, and **Migration Complete** when it ends. A notification then sums up the migration. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
 
 ### Step 4: Validate your data
 
