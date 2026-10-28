@@ -34,7 +34,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 4. Keep the defaults of the fields in the table below, or change them.
 5. Turn on **Enable Auto-Mapping**. See [Records](#records) for the reason.
 6. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Sync**.
-7. Click **Submit**.
+7. Click **Submit**. With **One-Time** in **Frequency**, Discover starts at once and the connection's records page opens. The preflight report appears on it when Discover ends.
 
 | Field | Default | What it does |
 |---|---|---|
@@ -47,6 +47,8 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 | **Maximum File Size (MB)** | `10` | The largest file the connector imports, in megabytes. The highest value is `24`. A larger file stays on the source. |
 | **Frequency** (Discovery and Synchronization) | One-Time | **One-Time** runs Discover or Sync only when you click its button. Pick a recurring frequency to run it on a schedule instead. |
 | **Delete the Connection After the Sync** | Off | Shown when the Synchronization frequency is **One-Time**. When a Sync ends without errors and DefectDojo Pro has imported its findings, the connection is deleted. The Products, findings and everything else the Sync brought stay. |
+
+When a One-Time Sync ends and DefectDojo Pro has imported its findings, one notification sums up the migration: the findings it brought, the users it created inactive, and the settings to set up again. It uses the **Connector health warning** notification, so it follows your settings for that notification, and it stays in the alerts after the connection is deleted.
 
 When you submit, DefectDojo Pro checks the token and the version of the source. If either check fails, it tells you why.
 
@@ -76,7 +78,9 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is in the **Migration Preflight** card. The card is on the connector's tile on **Connect > Upstream**, and on its **Manage Records and Operations** page. Before the first Discover, the card says "Run a discovery to see the preflight report."
 
-The card shows a short summary: the number of findings, the estimated duration and the number of warnings. Click **View More** to open the full report in a window that scrolls. The table below lists its sections.
+The card shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. During a Sync it also shows **Migrating: X of Y Findings**, and then **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. Click **View More** to open the full report in a window that scrolls. The table below lists its sections.
+
+In **View More**, each source Product has an **Include** box. Clear it before the Sync to leave that Product on the source. If Auto-Mapping created an empty Product for it, that Product is deleted. Select the box again to bring the Product back. The boxes are locked while a Sync runs.
 
 | Section | What it shows |
 |---|---|
@@ -135,6 +139,6 @@ If a Sync stops in the middle of a Product, the next Sync imports that Product a
 
 #### Check the finding count after a Sync
 
-A Sync operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background. For a large Product, the import goes on for some minutes after **Success**.
+A Sync operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background. For a large Product, the import goes on for some minutes after **Success**. The preflight card shows **Migration Complete** when the import ends.
 
 Before you trust a Sync, open each Product and check its finding count. Compare it with the findings count of that Product in the preflight report. The count in DefectDojo Pro is lower by the findings that your fields skip. Duplicates, findings below **Minimum Severity** and, with **Include Inactive Findings** off, inactive findings are not imported.
