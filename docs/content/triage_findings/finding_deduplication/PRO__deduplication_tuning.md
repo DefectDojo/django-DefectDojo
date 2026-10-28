@@ -37,6 +37,22 @@ In a tool's row, select the algorithm shown under the matching kind you want to 
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
 
+### Resetting a tool to its default
+
+The editor shows the tool's **Default Configuration** for that matching kind: the algorithm and hash fields a new install starts with. Use it to check what a tool shipped with before you change it, or to see how far an edited tool has moved from it.
+
+To go back to the default, select **Reset to Default**. This fills in the default algorithm and hash fields (and, for Reimport, turns **Track Findings as Locations Change** back off), but saves nothing. Review the impact and confirm it like any other change. Resetting the hash fields re-hashes the tool's existing findings in the background, the same as any other field change. The button is unavailable when the form already matches the default.
+
+Where the default comes from:
+
+- **A parser that ships with DefectDojo** uses the algorithm and hash fields it ships with, including any `DD_HASHCODE_FIELDS_PER_SCANNER` override your deployment sets.
+- **A dynamically named test type**, such as `My Scanner (SARIF)`, uses the default of the parser named in the parentheses.
+- **A Universal Parser** uses Hash Code on Title, Severity and Description, which is what it is given when it is created.
+- **Cross Tool** defaults to **Disabled** for every tool.
+- **A tool no parser defines** uses the legacy Hash Code fields: Title, CWE, Line, File Path and Description.
+
+A pool override has no default of its own, so its editor shows none.
+
 > **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows. [Grouping](#grouping-what-counts-as-one-finding) is the one exception: it can be set for a pool.
 
 ## Grouping: what counts as one finding
