@@ -50,9 +50,9 @@ the other way round.
 
 A new conversation, on the page or in the panel, opens on a home view before you ask anything:
 
-- **What Changed** since your last question: new findings and how many are critical, findings
-  newly on the CISA known exploited vulnerabilities list, findings closed, and the pull requests
-  Sensei opened and merged. With no earlier question, it covers the last seven days.
+- **What Changed** since your last visit, in whole days: new findings and how many are critical,
+  findings newly on the CISA known exploited vulnerabilities list, findings closed, and the pull
+  requests Sensei opened and merged. With no earlier visit, it covers the last seven days.
 - **Top Fixes**: the Root Causes that clear the most risk, exploited ones first, each with its own
   **Fix With Sensei** button (see [Fixes, not findings](#fixes-not-findings)). This list needs
   [Root Cause Correlation](/triage_findings/finding_correlation/pro__root_cause_correlation/)
