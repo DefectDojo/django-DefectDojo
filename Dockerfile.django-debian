@@ -70,15 +70,16 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
-# Upgrade the system trust store in its own layer. Release builds reuse the layer
-# above from the build cache, so an OS security fix to ca-certificates (here the
-# eMudhra key compromise, 2026-10-20) would otherwise never reach the image.
-# Bump CA_REFRESH to force this layer to rebuild for the next trust-store fix.
-ARG CA_REFRESH=2026-10-20
+# Upgrade the system trust store and shared libraries in their own layer. Release
+# builds reuse the layer above from the build cache, so an OS update to these
+# packages (ca-certificates here after the eMudhra key compromise, 2026-10-20)
+# would otherwise never reach the image.
+# Bump OS_REFRESH to force this layer to rebuild for the next package update.
+ARG OS_REFRESH=2026-10-28
 RUN \
-  echo "trust store refresh ${CA_REFRESH}" && \
+  echo "OS package refresh ${OS_REFRESH}" && \
   apt-get -y update && \
-  apt-get -y install --no-install-recommends --only-upgrade ca-certificates && \
+  apt-get -y install --no-install-recommends --only-upgrade ca-certificates libbrotli1 libbrotli-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
