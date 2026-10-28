@@ -78,7 +78,7 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is in the **Migration Preflight** card. The card is on the connector's tile on **Connect > Upstream**, and on its **Manage Records and Operations** page. Before the first Discover, the card says "Run a discovery to see the preflight report."
 
-The card shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. During a Sync it also shows **Migrating: X of Y Findings**, and then **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. Click **View More** to open the full report in a window that scrolls. The table below lists its sections.
+The card shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. During a Sync it also shows **Migrating: X of Y Findings**, and then **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the Sync, the card also shows **Connection Deleted**. Click **View More** to open the full report in a window that scrolls. The table below lists its sections.
 
 In **View More**, each source Product has an **Include** box. Clear it before the Sync to leave that Product on the source. If Auto-Mapping created an empty Product for it, that Product is deleted. Select the box again to bring the Product back. The boxes are locked while a Sync runs.
 
