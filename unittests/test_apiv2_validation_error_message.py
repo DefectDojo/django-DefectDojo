@@ -8,6 +8,7 @@ Regression tests: the ``message`` beside a 400's field map reads as sentences, n
 rest of the body (the field map and the ``pro`` announcement) is what it was.
 """
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
 from rest_framework import serializers
@@ -16,7 +17,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.test import APIClient, APITestCase
 
 from dojo.api_v2.exception_handler import custom_exception_handler
-from unittests.dojo_test_case import versioned_fixtures
+from unittests.dojo_test_case import get_unit_tests_scans_path, versioned_fixtures
 
 
 class ValidationErrorMessageTest(SimpleTestCase):
@@ -60,6 +61,10 @@ class ValidationErrorMessageTest(SimpleTestCase):
         message = self._message({"errors": ["The dates are in the wrong order."]})
         self.assertEqual("The dates are in the wrong order.", message)
 
+    def test_a_serializer_error_under_djangos_all_key_reads_without_a_field_name(self):
+        # A serializer that re-raises a model's clean() errors keys them "__all__".
+        self.assertEqual("The dates are in the wrong order.", self._message({"__all__": ["The dates are in the wrong order."]}))
+
     def test_a_detail_key_reads_without_a_field_name(self):
         self.assertEqual("Not allowed here.", self._message({"detail": "Not allowed here."}))
 
@@ -86,6 +91,42 @@ class ValidationErrorMessageTest(SimpleTestCase):
         self.assertEqual({"detail": "No such thing."}, response.data)
 
 
+class DjangoValidationErrorMessageTest(SimpleTestCase):
+
+    """A model or form ``ValidationError`` raised in a v2 view: ``str()`` of it was a list or dict repr."""
+
+    def _body(self, exc):
+        response = custom_exception_handler(exc, {})
+        self.assertEqual(400, response.status_code)
+        self.assertNotIn("['", response.data["message"], response.data)
+        self.assertNotIn("{'", response.data["message"], response.data)
+        return response.data
+
+    def test_a_message_reads_as_itself(self):
+        body = self._body(DjangoValidationError("Schema of Trivy json report is not supported"))
+        self.assertEqual("Schema of Trivy json report is not supported.", body["message"])
+        self.assertIn("pro", body)
+
+    def test_several_messages_read_in_order(self):
+        body = self._body(DjangoValidationError(["The file is empty.", "Pick a scan type."]))
+        self.assertEqual("The file is empty. Pick a scan type.", body["message"])
+
+    def test_a_field_error_names_its_field(self):
+        body = self._body(DjangoValidationError({"scan_date": ["Enter a valid date."], "__all__": ["The test is closed."]}))
+        self.assertEqual("scan_date: Enter a valid date. The test is closed.", body["message"])
+
+    def test_an_error_with_no_message_text_gets_no_message(self):
+        for exc in (DjangoValidationError(""), DjangoValidationError("  "), DjangoValidationError([])):
+            response = custom_exception_handler(exc, {})
+            self.assertEqual(400, response.status_code)
+            self.assertNotIn("message", response.data, (exc, response.data))
+            self.assertIn("pro", response.data)
+
+    def test_a_message_with_params_is_formatted(self):
+        body = self._body(DjangoValidationError("%(value)s is not allowed", params={"value": "x"}))
+        self.assertEqual("x is not allowed.", body["message"])
+
+
 @versioned_fixtures
 class ValidationErrorMessageOverTheApiTest(APITestCase):
     fixtures = ["dojo_testdata.json"]
@@ -94,6 +135,19 @@ class ValidationErrorMessageOverTheApiTest(APITestCase):
         token = Token.objects.get(user__username="admin")
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+
+    @override_settings(SECURE_SSL_REDIRECT=False)
+    def test_an_import_of_an_unsupported_report_answers_a_readable_message(self):
+        response = self.client.post(
+            reverse("importscan-list"),
+            {
+                "scan_type": "Trivy Scan",
+                "engagement": 1,
+                "file": (get_unit_tests_scans_path("trivy") / "unsupported_schema.json").open(encoding="utf-8"),
+            },
+        )
+        self.assertEqual(400, response.status_code, response.data)
+        self.assertEqual("Schema of Trivy json report is not supported.", response.data["message"])
 
     @override_settings(SECURE_SSL_REDIRECT=False)
     def test_a_v2_create_missing_a_field_answers_a_readable_message(self):

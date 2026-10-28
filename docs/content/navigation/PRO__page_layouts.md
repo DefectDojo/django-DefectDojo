@@ -97,6 +97,23 @@ This affects only what is drawn. Your layout is unchanged, and the widget reappe
 
 In edit mode those widgets are shown as labelled placeholders that say why they are not appearing, so you can still position them.
 
+### Hiding empty tabs
+
+Some tabs in a tab group always show, even when they are empty, such as a table with no rows or a Notes feed with no notes. You can choose to hide them on records where they have nothing to show, one tab at a time:
+
+1. In edit mode, open **Configure Widget** on the tab group.
+2. Each tab's row has an eye button beside its delete button. Click it to switch between the open eye (the tab always shows) and the crossed-out eye (the tab is hidden when it is empty). Hover over the button to see what a click will do.
+3. Click **Submit**.
+
+Leave the eye open on a tab whose own button adds its first item, such as Notes or Files: hiding an empty Notes tab also hides **Add Note**.
+
+The eye is locked in two cases, and hovering over it says why:
+
+- **Crossed out and locked**: the tab already hides itself when it has nothing to show.
+- **Open and locked**: the tab cannot tell when it is empty (some charts and composite panels), so it always shows.
+
+A hidden tab comes back as soon as the record has something for it, the next time the page loads. In edit mode every tab is shown, with a note on the ones that are hidden outside edit mode.
+
 ## When customization is restricted
 
 An administrator can turn on **Restrict Layout Customization** in **Settings > UI Defaults > Layout Defaults**. With it on:

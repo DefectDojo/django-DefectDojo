@@ -521,7 +521,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.9.61](https://img.shields.io/badge/Version-1.9.61-informational?style=flat-square) ![AppVersion: 3.4.300](https://img.shields.io/badge/AppVersion-3.4.300-informational?style=flat-square)
+![Version: 1.9.62](https://img.shields.io/badge/Version-1.9.62-informational?style=flat-square) ![AppVersion: 3.4.301](https://img.shields.io/badge/AppVersion-3.4.301-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 

@@ -60,7 +60,7 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.finding.ui.views import (
     duplicate_cluster,
     reset_finding_duplicate_status_internal,
-    set_finding_as_original_internal,
+    set_finding_as_original_with_reason,
 )
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
@@ -695,16 +695,16 @@ class FindingViewSet(
                 "new_fid", OpenApiTypes.INT, OpenApiParameter.PATH,
             ),
         ],
-        responses={status.HTTP_204_NO_CONTENT: ""},
+        responses={status.HTTP_204_NO_CONTENT: "", status.HTTP_400_BAD_REQUEST: OpenApiTypes.OBJECT},
     )
     @action(
         detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def set_finding_as_original(self, request, pk, new_fid):
         self.get_object()
-        success = set_finding_as_original_internal(request.user, pk, new_fid)
-        if not success:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        refusal = set_finding_as_original_with_reason(request.user, pk, new_fid)
+        if refusal:
+            return Response({"detail": refusal}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(

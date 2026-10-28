@@ -20,6 +20,65 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## October 2026: v3.4
 
+### October 27, 2026: v3.4.301
+
+Enhancements:
+* **(UI)** Each tab in a page layout's tab group can be set to hide when it has nothing to show, so a record no longer opens on an empty tab. The option is on each tab row in the Tabs widget's **Configure Widget** dialog. Tiles on detail pages and dashboards now share the header band, title and spacing of the section cards around them. See [Customizing Page Layouts](/navigation/pro__page_layouts/#hiding-empty-tabs).
+* **(Performance)** The dashboard priority histogram, Top-N records and Command Center tallies read less data. See [Command Center](/metrics_reports/dashboards/command-center/).
+
+Bug fixes:
+* **(SSO)** Signing in through an OAuth or OIDC provider works again. In v3.4.300 these sign-ins returned a server error once a provider was chosen. SAML sign-in was not affected. See [Single Sign-On](/admin/sso/).
+* **(Importers)** A background import that fails leaves its Test's status at **Failed** until the next import, instead of reporting **Processed**, and the status reads **Post Processing - Deduplication** while deduplication runs. See [DefectDojo API v2](/automation/api/api-v2-docs/#background-import-responses-api-background_import).
+* **(Reporting)** A report that reaches the time limit while drawing a chart, a widget or an image fails with the time-out reason, instead of staying **Processing** or completing with a placeholder. A refused template save names the **Template Blocks** and **Theme** fields the way the form does. See [Report Builder](/metrics_reports/reports/report-builder/).
+* **(Dashboards)** The Command Center finishes loading on large datasets, because a scheduled refresh waits for the previous load to finish. On the Insights pages, the filter bar keeps its own height and its "Some data may be hidden" warning stays in view. See [Command Center](/metrics_reports/dashboards/command-center/) and [Pro Metrics Overview](/metrics_reports/pro_metrics/pro__overview/).
+* **(API)** A 400 response raised by a model or importer check reads as plain sentences. A delete blocked by other records answers 409 with how many records still refer to it and which kinds they are, instead of listing each one. See [DefectDojo API v2](/automation/api/api-v2-docs/).
+
+### October 26, 2026: v3.4.300
+
+**NOTE: OAuth and OIDC sign-in does not work in v3.4.300: choosing one of these providers on the sign-in page returns a server error. SAML sign-in is not affected. Upgrade to [v3.4.301](#october-27-2026-v34301), which fixes it.**
+
+New features:
+* **(Findings)** A Finding's **Title**, **Tags**, **Severity**, **Assignees**, **Planned Remediation Date** and **Description** can be changed on the Finding page itself, without opening the Edit Finding form. Changes are held until you save, several fields can be changed and saved together, and a change someone else made since the page loaded is never overwritten. The same in-place editing is on the Engagement and Asset pages. Requires the **Inline Editing** feature flag, on by default. See [Editing Findings](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
+* **(Notifications)** The bell in the sidebar footer opens a notification inbox: unread alerts grouped by the record they are about, with **All**, **Mentions**, **Assigned**, **Watching** and **System** tabs, the option to mute a record, and read state carried to the Alerts Page. The counts refresh on their own, and **Load Older** pages through the rest. The inbox is now generally available. See [About Notifications](/admin/notifications/about_notifications/#notification-inbox-pro).
+* **(API)** Service users are API-only accounts with no email or password that never sign in, each holding one token shown once at creation, and authorized through memberships, groups and a global role on their own page. Requires the **Service Users** feature flag, off by default. See [Service Users](/admin/user_management/pro__service_users/).
+* **(Deduplication)** Each scan type can set how its Findings are grouped: as the parser produces them (the default), one Finding per location, or one Finding per vulnerability, where every location of a vulnerability becomes one Finding that stays open until each location is fixed. The location-based options need the **Locations** feature. See [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/#grouping-what-counts-as-one-finding).
+* **(Triage Engine)** Rules can be exported, imported and restored: move a set of rules between instances with a compatibility check, restore an earlier version of a rule, and manage rules through the API. See [Sharing and Versions](/automation/triage_engine/sharing_and_versions/).
+* **(Connectors)** Unmanaged device discovery lists the devices your EDR sees on the network with no agent of their own, as CrowdStrike Falcon Discover and Microsoft Defender for Endpoint report them. Each device is a candidate and becomes neither an Asset nor a Finding on its own. Requires the **Unmanaged Devices** feature flag, off by default, turned on per connection with **Report Unmanaged Devices**. See [Unmanaged Devices](/asset_modelling/pro__unmanaged_devices/).
+
+Enhancements:
+* **(Connectors)** A connector's label can be renamed without re-homing its Engagements. See [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/).
+* **(Connectors)** [Tenable](/connectors/toolreference/tenable_io/) groups records by asset and adds WAS scan-configuration grouping and a WAS tag filter, [Checkmarx One](/connectors/toolreference/checkmarx_one/) tags Findings with their triage state and exploitable path and carries their comments, [Qualys](/connectors/toolreference/qualys/) sets each Finding's date from when it was first found, and [Wiz](/connectors/toolreference/wiz/) reports a runtime reachability verdict. Connector-owned tags and the triage comment stay current on reimport, and a connector whose filters match nothing shows a warning.
+* **(Jira)** Findings can be unlinked from Jira in a bulk edit. See [Bulk Editing Findings](/triage_findings/findings_workflows/pro__bulk_edit_findings/).
+* **(Triage Engine)** Rules can be scoped to hosts, IP addresses and CIDR networks.
+* **(Dashboards)** The Count and Graph widgets can measure unique CWEs or unique vulnerability IDs instead of rows, such as unique CWEs by severity for one Asset, and roll the measure up across child Assets. See [Customizable Dashboards](/metrics_reports/dashboards/custom-dashboards/).
+* **(API)** A new API exports an Asset and everything under it as a manifest plus an NDJSON stream. See [Product export](/automation/api/product_export/).
+* **(Locations)** Each location reference records the Test that reported it. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/).
+* **(Navigation)** The sidebar footer has an account row and a single row of icon buttons (alerts, What's New, Ask Sensei and the Production/Sandbox switch), and the account menu holds the language and light/dark choices. The What's New panel remembers the release you have seen, per account, and **Hide Walkthroughs** is on the lightbulb's list. See [The Sidebar Menu](/navigation/pro__sidebar/).
+* **(Settings)** The All Settings page is compacted into group cards. See [The Sidebar Menu](/navigation/pro__sidebar/#all-settings).
+* **(Threat Intelligence)** A Finding's Threat Intelligence tile shows pending enrichment and KEV status. See [EPSS / KEV](/triage_findings/finding_scoring/epss_kev/).
+* **(Performance)** The Findings and Engagements lists no longer run a query per row, tag filters match with EXISTS instead of a DISTINCT join, bulk deletes and an import's finding groups run as one set-based operation, import and reimport requests cost a fixed few queries, and dashboard tile counts, the import list and a user's History tab read less. Connector configuration saves and deletes cost a fixed few queries.
+
+Bug fixes:
+* **(Findings)** A Finding keeps its Locations when the Pro UI edit form is saved.
+* **(Risk Acceptance)** A Finding stays in a single risk acceptance when one is reinstated or approved, including under concurrent writes. Reinstating leaves out Findings accepted elsewhere since the expiry, and Jira is told after the change commits. See [Risk Acceptances](/triage_findings/findings_workflows/pro__risk_acceptance/).
+* **(Reporting)** Report failure reasons are translated, and a report that reaches the time limit says so. A template's block ordering is checked when it is saved, with a missing sort field named under **Order By**, the template editor is tidied, and **Add Existing Block** follows the permission that saves the template. See [Report Builder](/metrics_reports/reports/report-builder/).
+* **(Importers)** The import form's help is corrected for Scan Date (the mitigated date), asynchronous import and a disabled Close Old Findings, and the **Do Not Reactivate** option on reimport is explained. See [Add Findings form](/import_data/import_scan_files/pro__import_scan_ui/).
+* **(Parsers)** The generic importer rejects a field value wider than its Finding column with a 400, instead of failing the import without a clear reason. See [Generic Findings Import](/supported_tools/parsers/file/generic/).
+* **(Connectors)** The GitHub connector resolves repositories by URL and owner/name instead of display name, Cycode accepts numeric project IDs, and Qualys WAS leaves an empty filter block out of searches that have no criteria. See [GitHub](/connectors/toolreference/github/).
+* **(Sensei)** A pasted repository access token no longer outranks the repository's connection and can be replaced or removed, reachability scans fetch private Go modules from the same organization, and a fix is applied to every active code location of a Finding in one change. See [Fixing Findings with Sensei](/sensei/fixing_findings/).
+* **(Compliance)** The CRA scope widget counts every Finding in scope, and the CRA evidence pack's support-period obligation reads each Asset's **Support Period End**. See [CRA Article 14 Reporting](/federal_compliance/cra_article14_reporting/).
+* **(Permissions)** Group writes and the group edit page are offered only where the group role allows them, an empty group counts as 0 members, the **Add File** action shows for users who can add files, and a page re-checks its per-record permissions when only the route's parameters change.
+* **(Notifications)** Relabeled Organization and Asset links in notifications open their Pro UI pages.
+* **(API)** The message beside a 400 response's field map reads as sentences.
+* **(UI)** A failed save, delete or import shows one toast with the server's reason, the user page's Metadata and Contact cards stack on a phone, a keyboard-focused table row has a quieter outline, the Markdown source toggle lines up with the first line of text, the UI switches back to an offered language when the one on screen is not offered, and popovers show their line breaks as text.
+
+Upgrade notes:
+* **(Deployment)** A self-hosted instance can sign in to PostgreSQL with a cloud identity token instead of a password. See [Passwordless Database Authentication](/get_started/pro/onprem/passwordless_database/).
+* **(Deployment)** On shutdown, a running import is allowed to finish before the worker stops, and the import pool's memory recycling is sized for the pool. See [DefectDojo Pro Installation Guide (Kubernetes / Helm)](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/).
+* **(Deployment)** Operators can default Asset Identity on for new instances with `DD_ASSET_IDENTITY_DEFAULT_ON`. See [Assets](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off).
+* **(Deployment)** Databases from before 3.0 upgrade without failing or losing the default group. See [Upgrading DefectDojo Pro (On-Premise)](/get_started/pro/onprem/upgrading/).
+* **(Helm)** The initializer runs with the media volume's group. See [DefectDojo Pro Installation Guide (Kubernetes / Helm)](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/).
+
 ### October 22, 2026: v3.4.202
 
 New features:
