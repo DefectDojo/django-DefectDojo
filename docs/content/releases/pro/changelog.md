@@ -64,7 +64,7 @@ Bug fixes:
 
 ### October 26, 2026: v3.4.300
 
-**NOTE: OAuth and OIDC sign-in does not work in v3.4.300: choosing one of these providers on the sign-in page returns a server error. SAML sign-in is not affected. Upgrade to [v3.4.301](#october-27-2026-v34301), which fixes it.**
+**NOTE: v3.4.300 was revoked: Signing in through an OAuth or OIDC provider returns a server error. SAML sign-in is not affected. Upgrade to [v3.4.301](#october-27-2026-v34301).**
 
 New features:
 * **(Findings)** A Finding's **Title**, **Tags**, **Severity**, **Assignees**, **Planned Remediation Date** and **Description** can be changed on the Finding page itself, without opening the Edit Finding form. Changes are held until you save, several fields can be changed and saved together, and a change someone else made since the page loaded is never overwritten. The same in-place editing is on the Engagement and Asset pages. Requires the **Inline Editing** feature flag, on by default. See [Editing Findings](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
