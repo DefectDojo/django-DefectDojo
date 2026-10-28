@@ -165,7 +165,10 @@ page. Nothing is wrong — continue.
 ## Step 4 — Assign a rating
 
 PAIN is a judgment about the effect exploitation would have on your agency customers. DefectDojo
-never derives one. Ratings are assigned with a [Triage Engine](/automation/triage_engine/about/) rule.
+never derives one. A person can rate a single finding by hand on its edit form (see
+[Rating findings by hand](../pain_ratings/#rating-findings-by-hand)), which is the quickest way to
+watch one deadline move. This walkthrough uses a [Triage Engine](/automation/triage_engine/about/)
+rule instead, because a rule is how ratings are applied across a boundary.
 
 Go to **Act > Triage Engine > Rules**, choose **New Rule**, and wire three nodes left to right:
 
@@ -186,10 +189,10 @@ instead.
 tickets, messages and webhooks. Every Finding edit in a graph happens for real in simulate mode, and
 that includes this one. See [Mode: Simulate or Live](/automation/triage_engine/about/#mode-simulate-or-live).
 
-That matters more here than on most nodes, because **a PAIN rating cannot be cleared**. The action
-offers only N1 to N5, and `pain_rating` is not writable through the finding API, so there is no
-supported way to return a finding to unrated. Treat any rule containing **Set Potential Agency Impact
-(PAIN)** as live from the moment you press **Run Now**, and check the filter value before you do.
+That matters here because the rule action offers only N1 to N5: **a rule cannot return a finding to
+unrated**. Undoing a wrong rating is a manual step, either clearing the field on **Edit Finding** or
+choosing **Unrated** in **Bulk Edit**. Treat any rule containing **Set Potential Agency Impact (PAIN)**
+as live from the moment you press **Run Now**, and check the filter value before you do.
 
 **Preview** is the safe check for a broad rule — it runs the real engine inside a transaction it then
 rolls back, writing nothing. It will not help you here, though: preview caps how many items it looks
@@ -322,20 +325,20 @@ Asset's **Compliance** tab. See [The POA&M Ledger](../poam_ledger).
 | A rule reports nothing affected | The finding already holds that rating | Expected — choose a different rating |
 | **Run Now** does nothing and no run appears | The rule is disabled | Enable it, save, then run |
 | A simulate run rated the finding anyway | Simulate holds back outbound sends only, not Finding edits | Expected — treat any rule with a PAIN node as live |
-| A rated finding cannot be returned to unrated | By design | Nothing clears a rating; re-run at a different one |
+| A rated finding cannot be returned to unrated by a rule | The rule action offers N1 to N5 only | Clear the rating on **Edit Finding**, or choose **Unrated** in **Bulk Edit** |
+| No PAIN field on **Edit Finding** | Your role lacks **Rate Potential Agency Impact (PAIN)** | Ask an administrator for a role that carries it |
 | The POA&M date did not change | It was frozen when the item was created | Delete the items and re-sync after rating |
 
 ## What is not surfaced today
 
 So nobody spends time hunting for these:
 
-* **The rating is not displayed on the finding.** There is no Details row, table column or filter for
-  it. Its visible effect is the deadline; its audit trail is the rule run history.
-* **`pain_rating` is not part of the finding REST API,** so it cannot be read back or exported
-  through `/api/v2/findings/`. It *is* available as `finding.pain_rating` in Rules Engine filter
-  conditions.
-* **`exploit_maturity` is likewise absent from the finding REST API,** though unlike the rating it is
-  visible in the product: add the **Exploit Maturity** column to the findings list, or filter on it,
-  to see which findings the backfill has reached.
+* **`exploit_maturity` is absent from the finding REST API,** though it is visible in the product:
+  add the **Exploit Maturity** column to the findings list, or filter on it, to see which findings
+  the backfill has reached.
+
+The rating itself is surfaced everywhere from 3.5.0: on the finding's Details panel, as a findings
+list column and filter, and as `pain_rating` on `/api/v2/findings/`. See
+[Rating findings by hand](../pain_ratings/#rating-findings-by-hand).
 
 None of these affect whether deadlines are computed correctly, which is what this page checks.
