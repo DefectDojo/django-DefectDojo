@@ -18,7 +18,7 @@ My Work gathers everything that needs you into one list and sorts it by deadline
 | **Assigned to Me** | An active Finding assigned to you personally. |
 | **Review Requested** | A Finding where you were asked to review and nobody has claimed the review yet. |
 | **Review Claimed** | A Finding whose review you claimed. |
-| **Acceptance Expiring** | A Risk Acceptance you own or are assigned to that expires within the next 30 days, or expired in the last 30 days. |
+| **Acceptance Expiring** | A Risk Acceptance you own or are assigned to that expires within the next 30 days, or that has expired and nobody has handled yet. An expired one stays in **Overdue** until it is handled. |
 | **Remediation Action** | An open remediation action assigned to you. Shown when Remediation Center is enabled. |
 
 Each item shows its reason as a tag. A Finding that is both assigned to you and waiting on your review appears once, with its review reason.
