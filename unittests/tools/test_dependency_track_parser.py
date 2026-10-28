@@ -219,3 +219,14 @@ class TestDependencyTrackParser(DojoTestCase):
         # The component version does not parse, so no range can be compared; with a single affected
         # range the fix is still unambiguous and is used as a fallback.
         self.assertIn("Upgrade to 3.0.0 or later", findings[0].mitigation)
+
+    def test_dependency_track_parser_findings_with_cwes_only(self):
+        with (get_unit_tests_scans_path("dependency_track") / "findings_with_cwes_only.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(2, len(findings))
+        # FPF 1.5 (Dependency-Track v5) has no 'cweId', only the 'cwes' list; its first entry is used,
+        # which is what 'cweId' used to contain.
+        self.assertEqual(917, findings[0].cwe)
+        # Without any CWE, the default CWE-1035 is still used.
+        self.assertEqual(1035, findings[1].cwe)
