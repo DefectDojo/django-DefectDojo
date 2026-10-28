@@ -290,7 +290,8 @@ class FindingExclusionViewsTestCase(DojoTestCase):
     def test_expire_finding_exclusion_keeps_expired_status_when_notification_fails(self):
         with patch('dojo.engine_tools.helpers.create_notification', side_effect=RuntimeError('notification failed')), \
                 patch('dojo.engine_tools.helpers.get_reviewers_members', return_value=[]), \
-                patch('dojo.engine_tools.helpers.get_approvers_members', return_value=[]):
+            patch('dojo.engine_tools.helpers.get_approvers_members', return_value=[]), \
+            patch('dojo.engine_tools.helpers.get_user', return_value=self.user):
             self.client.force_login(self.user)
             self.exclusion2.type = 'white_list'
             self.exclusion2.save()
