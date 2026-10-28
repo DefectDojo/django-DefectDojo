@@ -51,6 +51,35 @@ Answered** under an answer to see every query it ran.
 An answer is kept as it was shown. Reopening a conversation next month shows what you saw then,
 not what the data says now. Ask again for current numbers.
 
+## Fixes, not findings
+
+Ask "what should I fix first?" and Sensei answers with fixes rather than findings. A fix is a
+[Root Cause](/triage_findings/finding_correlation/pro__root_cause_correlation/): one change, such
+as one library upgrade, that clears every finding it explains, across every Asset. The answer
+lists the top fixes with what to change, how many findings and Assets each one clears, and how
+many of those findings are on the CISA known exploited vulnerabilities list. Fixes for exploited
+findings come first; the rest follow the Root Causes page's own ranking. The answer also says how
+many findings the listed fixes clear between them, counting a finding that two fixes share once.
+
+Each fix has a **Fix With Sensei** button. It shows the plan first, as the Root Causes page does:
+how many pull requests Sensei can open, in which repositories, why the rest of the findings are
+left out (an Asset not onboarded to Sensei, no file to patch, a fix already in progress, Writer
+access missing), and what is left of the fix quota. Nothing is spent until you confirm. Sensei
+then opens one pull request per finding it can fix, in the repository linked to the finding's
+Asset. A finding in an answer's list of findings has its own **Fix** button when you can edit
+it, and an answer can also offer to fix specific findings it found. Fixes are always started
+with a click, never by voice. Once a fix starts, the conversation says how many pull requests
+Sensei is preparing, with a link to follow them in Sensei.
+
+Root-cause fixes need [Root Cause Correlation](/triage_findings/finding_correlation/pro__root_cause_correlation/)
+switched on. See [Fixing Findings with Sensei](/sensei/fixing_findings/) for how Sensei fixes are
+onboarded, reviewed and merged.
+
+Ask "what changed since I last looked?" (or over any number of days) to see what moved since your
+previous question: findings that arrived (and how many are critical or high), findings newly on
+the known exploited vulnerabilities list, findings closed, and the pull requests Sensei opened and
+merged. The answer says which window its numbers cover.
+
 ## Changing findings from an answer
 
 An answer can offer to change findings: mark them **verified**, **false positive**, **out of
