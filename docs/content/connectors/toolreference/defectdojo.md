@@ -33,7 +33,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 3. Enter the superuser API key in **API Token**.
 4. Keep the defaults of the fields in the table below, or change them.
 5. Turn on **Enable Auto-Mapping**. See [Records](#records) for the reason.
-6. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Sync**.
+6. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Migration**.
 7. Click **Submit**. With **One-Time** in **Frequency**, Discover starts at once and the connection's migration page opens. The preflight report appears on it when Discover ends.
 
 | Field | Default | What it does |
@@ -46,7 +46,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 | **Minimum Severity** | Info | Skips findings below this severity. **Info** imports every finding. |
 | **Maximum File Size (MB)** | `10` | The largest file the connector imports, in megabytes. The highest value is `24`. A larger file stays on the source. |
 | **Frequency** (Discovery and Synchronization) | One-Time | **One-Time** runs Discover or Sync only when you click its button. Pick a recurring frequency to run it on a schedule instead. |
-| **Delete the Connection After the Sync** | Off | Shown when the Synchronization frequency is **One-Time**. When a Sync ends without errors and DefectDojo Pro has imported its findings, the connection is deleted. The Products, findings and everything else the Sync brought stay. |
+| **Delete the Connection After the Migration** | Off | Shown when the Synchronization frequency is **One-Time**. When the migration ends without errors and DefectDojo Pro has imported its findings, the connection is deleted. The Products, findings and everything else the Sync brought stay. |
 
 When a One-Time Sync ends and DefectDojo Pro has imported its findings, one notification sums up the migration: the findings it brought, the users it created inactive, and the settings to set up again. It uses the **Connector health warning** notification, so it follows your settings for that notification, and it stays in the alerts after the connection is deleted.
 
@@ -78,7 +78,9 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is on the connection's migration page. To open the page, click **Open Migration** on the connector's tile on **Connect > Upstream**, above **Manage Configuration**. After a save on **Edit Configuration**, the page opens too. Before the first Discover, the page says "Run a discovery to see the preflight report."
 
-The top of the page shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. **Sync** is beside it, and its gear menu holds **Discover**, **Edit Configuration** and **Manage Records and Operations**. During a Sync the summary also shows **Migrating: X of Y Findings**, and then **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the Sync, it also shows **Connection Deleted**. Below the summary, the page shows the report in sections, and **History** lists every Discover and Sync. The table below lists the report sections.
+The top of the page shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. **Begin Migration** is beside it and runs a Sync, and the gear menu holds **Discover**, **Edit Configuration** and **Manage Records and Operations**. During a migration a progress bar counts the imported findings against the expected ones. Then the summary shows **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the migration, it also shows **Connection Deleted**.
+
+If an import stops before every finding arrives (for example, when a worker process is killed), the page shows **Migration Stalled** once no import has worked on it for 45 minutes. Click **Begin Migration** again to finish it: findings that already arrived are matched, not duplicated. A stalled migration sends no summary and never deletes its connection. Below the summary, the page shows the report in sections, and **History** lists every Discover and Sync. The table below lists the report sections.
 
 In the **Products** section, each source Product has an **Include** box. Clear it before the Sync to leave that Product on the source. If Auto-Mapping created an empty Product for it, that Product is deleted. Select the box again to bring the Product back. The boxes are locked while a Sync runs.
 
