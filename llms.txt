@@ -345,7 +345,7 @@ Key facts:
 ## Metrics and Reports
 
 - [DefectDojo Main Dashboard (Open Source)](https://docs.defectdojo.com/metrics_reports/dashboards/introduction_dashboard/): Working with the front page of DefectDojo
-- [My Work (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/pro__my_work/): A per-user queue of the Findings and Risk Acceptances waiting on you
+- [My Work (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/pro__my_work/): A per-user queue of the Findings, reviews, Risk Acceptances and remediation actions waiting on you, ordered by deadline
 - [Customizable Dashboards (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards/): Build personalized dashboards in DefectDojo Pro from widgets arranged on a drag-and-drop grid
 - [Automating Dashboards with the API (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards-api/): Discover the widget catalog, create and update dashboard layouts, and render widget data via the DefectDojo Pro REST API
 - [Building Dashboards with an LLM (Pro)](https://docs.defectdojo.com/metrics_reports/dashboards/custom-dashboards-llm/): Use Claude or another LLM to design, create, and set up DefectDojo Pro customizable dashboards via the API
