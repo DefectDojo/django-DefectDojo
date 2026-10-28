@@ -52,13 +52,15 @@ You need permission to delete an object to archive it.
 3. Enter a reason. It is recorded with the archive and shown on the **Archived** page and in the audit log.
 4. Tick the box to confirm you understand the data is deleted after the retention period, then choose **Archive**.
 
-To archive several Findings at once, select them in a Findings list and choose **Archive** from the bulk actions.
+The object disappears straight away. Everything under it is archived in the background, so a large Asset or Organization can take a few minutes to finish. Until it does, its archive shows **Archiving** on the **Archived** page.
+
+To archive several Findings at once, select them in a Findings list and choose **Archive** from the bulk actions. The selected Findings form one archive and are restored together.
 
 ## Restoring archived data
 
 The **Archived** page lists every archive you have permission to restore. For each one it shows what was archived, who archived it and why, when, how it was archived (user interface, API or Triage Engine rule) and its purge date.
 
-Expand an archive to browse the objects it holds. Choose **Unarchive** from its menu to restore it. Restoring brings back the whole tree that was archived together.
+Expand an archive to browse the objects it holds. Choose **Unarchive** from its menu to restore it. Restoring brings back the whole tree that was archived together. It runs in the background: the archive shows **Restoring** until everything is back, then leaves the list. An archive that is still archiving or restoring cannot be restored until that finishes.
 
 An object archived on its own before its parent was archived keeps its own archive. Restoring the parent does not restore it, so restore it separately from the **Archived** page.
 
@@ -66,7 +68,7 @@ An object archived on its own before its parent was archived keeps its own archi
 
 Triage Engine has two actions for retention, available while Archive is turned on:
 
-- **Archive Findings** archives each Finding that reaches it, with the reason you set. Each Finding gets its own archive, so you can restore them one at a time.
+- **Archive Findings** archives the Findings that reach it, with the reason you set. Each rule run makes one archive holding every Finding it archived, and restoring that archive brings them all back.
 - **Delete Findings Permanently** deletes each Finding that reaches it. This cannot be undone.
 
 Both actions require you to tick a confirmation in the node before the rule can be saved.
@@ -82,8 +84,8 @@ A typical retention rule runs on a schedule and archives Findings older than a s
 Each of `/api/v2/product_types/`, `/api/v2/products/`, `/api/v2/engagements/`, `/api/v2/tests/` and `/api/v2/findings/` has two actions for a single object:
 
 - `GET {id}/archive_preview/` returns what an archive would hide and the purge date.
-- `POST {id}/archive/` archives the object. The body is `{"reason": "...", "acknowledge_retention": true}`. Without `acknowledge_retention: true` the request is refused with `400` and `"code": "acknowledge_required"`.
+- `POST {id}/archive/` archives the object. The body is `{"reason": "...", "acknowledge_retention": true}`. Without `acknowledge_retention: true` the request is refused with `400` and `"code": "acknowledge_required"`. It returns `202` with the archive record: the object is hidden already, and the record's `state` is `archiving` until everything under it is archived, then `archived`.
 
-Archives are listed at `/api/v2/archive/records/`. `GET /api/v2/archive/records/{id}/tree/?model=finding` browses an archive's contents, and `POST /api/v2/archive/records/{id}/unarchive/` restores it.
+Archives are listed at `/api/v2/archive/records/`. `GET /api/v2/archive/records/{id}/tree/?model=finding` browses an archive's contents, and `POST /api/v2/archive/records/{id}/unarchive/` starts restoring it and returns `202` with the record in state `restoring`. The record is deleted once everything is back. Restoring an archive that is still archiving or restoring is refused with `400` and `"code": "archive_busy"`.
 
 A new Asset or Organization cannot reuse the name of an archived one. Restore the archived one or choose another name.
