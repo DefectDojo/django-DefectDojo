@@ -19,7 +19,7 @@ Requesting a review sets the Finding to **Under Review** and notifies the review
 
 When a review has been requested from several people, any one of them can take it:
 
-* On the Finding, use **Claim Review** in the Finding menu, or the button in the review banner, then submit the **Take Review** form. From [My Work](/metrics_reports/dashboards/pro__my_work/), the **Take Review** next step opens the same form.
+* On the Finding, use **Claim Review** in the Finding menu, or the button in the review banner, then submit the **Claim Review** form. From [My Work](/metrics_reports/dashboards/pro__my_work/), the **Claim Review** next step opens the same form.
 * The Finding then shows who holds the review, on the Finding itself, as a **Claimed By** column in Finding lists, and in that person's [My Work](/metrics_reports/dashboards/pro__my_work/) queue.
 
 Once a review is claimed:

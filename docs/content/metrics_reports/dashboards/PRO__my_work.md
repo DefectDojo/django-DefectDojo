@@ -41,11 +41,11 @@ Inside a section, the most urgent item comes first, then the most severe. **Show
 
 ### Counters
 
-The row of counters at the top shows how many items are **Overdue**, how many are **Due This Week**, how many **Reviews Waiting** on you, and how many reviews you are **Waiting on Others** for. Select **Reviews Waiting** or **Waiting on Others** to show only reviews.
+The row of counters at the top shows how many items are **Overdue**, how many are **Due in 7 Days**, how many **Reviews Waiting** on you, and how many reviews you are **Waiting on Others** for. Select **Reviews Waiting** or **Waiting on Others** to show only reviews.
 
 ### Filtering by kind
 
-The selector above the sections narrows the page to one kind of work: **All**, **Findings**, **Reviews**, **Acceptances** or, when Remediation Center is enabled, **Remediation**. Each option shows how many items it holds.
+The selector above the sections narrows the page to one kind of work: **All**, **Findings**, **Reviews**, **Acceptances** or, when Remediation Center is enabled, **Remediation**. Each option shows how many items it holds. On narrower screens the selector is a dropdown.
 
 ## List, Grid and Board views
 
@@ -53,7 +53,7 @@ The buttons at the top right switch between three layouts. My Work remembers you
 
 * **List View** shows each section as a table: severity, title, asset, reason, due date and next step.
 * **Grid View** shows each item as a card.
-* **Board View** shows the deadline sections side by side as columns of cards, each column scrolling on its own. The board is read-only: cards do not move between columns, because a column is set by the item's deadline. Board View is not offered on narrow screens.
+* **Board View** shows the deadline sections side by side as columns of cards, each column scrolling on its own. The board is read-only: cards do not move between columns, because a column is set by the item's deadline. When the columns do not fit the window, the board scrolls sideways. Board View is not offered on narrow screens.
 
 ## Next steps
 
@@ -62,7 +62,7 @@ Each item carries a **Next Step** button for the most likely action:
 | Item | Next step |
 | --- | --- |
 | Assigned Finding | **Close Finding** |
-| Review you can claim | **Take Review** |
+| Review you can claim | **Claim Review** |
 | Review you hold | **Clear Review** |
 | Risk Acceptance | **Edit Risk Acceptance** |
 | Remediation action | **Change Status** |
@@ -71,7 +71,7 @@ Each button opens the same form you would reach from the Finding, Risk Acceptanc
 
 ## Working through the queue
 
-**Start Triage** opens [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/) on the Findings in My Work, most urgent first. **Back to My Work** returns you here.
+**Start Triage** opens [Keyboard Triage](/triage_findings/findings_workflows/pro__keyboard_triage/) on the Findings assigned to you, most urgent first. It appears under **All** and **Findings**, when Keyboard Triage is enabled and you can edit Findings. **Back to My Work** returns you here.
 
 ## My Team's Queue
 
