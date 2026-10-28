@@ -1,12 +1,12 @@
 ---
-title: "Source DefectDojo"
-description: "How to set up the Source DefectDojo Upstream Connector, which pulls another DefectDojo instance into DefectDojo Pro"
+title: "DefectDojo Migration"
+description: "How to set up the DefectDojo Migration Upstream Connector, which pulls another DefectDojo instance into DefectDojo Pro"
 weight: 48
 audience: pro
 ---
-The Source DefectDojo connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. The source can also be a DefectDojo Pro instance on a release that serves the export API. The connector reads the source over its [export API](/automation/api/product_export/). It changes nothing on the source.
+The DefectDojo Migration connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. The source can also be a DefectDojo Pro instance on a release that serves the export API. The connector reads the source over its [export API](/automation/api/product_export/). It changes nothing on the source.
 
-Use it to move an open source estate into DefectDojo Pro, or to consolidate two instances. You set it up in the Connectors UI, like every other Upstream Connector. On **Connect > Upstream**, its tile is **Source DefectDojo**. You can run it again and again until you cut over. For the full migration procedure, and for the database dump path, see [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/).
+Use it to move an open source estate into DefectDojo Pro, or to consolidate two instances. You set it up in the Connectors UI, like every other Upstream Connector. On **Connect > Upstream**, its tile is **DefectDojo Migration**. You can run it again and again until you cut over. For the full migration procedure, and for the database dump path, see [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/).
 
 This page uses the open source names Product Type and Product. In DefectDojo Pro, they can show as Organization and Asset.
 
@@ -28,7 +28,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 
 #### Connector Mappings
 
-1. Open **Connect > Upstream**, and click **Add Configuration** on the **Source DefectDojo** tile.
+1. Open **Connect > Upstream**, and click **Add Configuration** on the **DefectDojo Migration** tile.
 2. Enter the URL of the source in **Location URL**, for example `https://dojo.example.com`. The URL must start with `https://`.
 3. Enter the superuser API key in **API Token**.
 4. Keep the defaults of the fields in the table below, or change them.

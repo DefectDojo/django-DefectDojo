@@ -270,7 +270,7 @@ A dry run is worth the time. Migrate a recent copy first, validate it, and then 
 
 ## Path 2: The DefectDojo connector
 
-The DefectDojo connector pulls the open source instance into DefectDojo Pro over the source's [export API](/automation/api/product_export/). It runs from the Connectors UI, like every other [Upstream Connector](/connectors/upstream/about/), and its tile is **Source DefectDojo**. It reads the source and changes nothing on it. The [Source DefectDojo connector reference](/connectors/toolreference/defectdojo/) lists every option, what crosses and what does not.
+The DefectDojo Migration connector pulls the open source instance into DefectDojo Pro over the source's [export API](/automation/api/product_export/). It runs from the Connectors UI, like every other [Upstream Connector](/connectors/upstream/about/), and its tile is **DefectDojo Migration**. It reads the source. The only change it makes there is read-only mode, which it turns on for each Sync and off at the end. The [DefectDojo Migration connector reference](/connectors/toolreference/defectdojo/) lists every option, what crosses and what does not.
 
 The connector ships in a coming DefectDojo Pro release.
 
@@ -287,7 +287,7 @@ Confirm the following before you add the connector.
 ### Step 1: Add the connector
 
 1. In the Pro UI, open **Connect > Upstream**.
-2. Click **Add Configuration** on the **Source DefectDojo** tile.
+2. Click **Add Configuration** on the **DefectDojo Migration** tile.
 3. Enter the URL of the source in **Location URL** and the superuser API key in **API Token**.
 4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field.
 5. Turn on **Enable Auto-Mapping**. Each source Product then gets a Product of the same name, under a Product Type of the same name. Do not skip this: mapping a Record by hand cannot create a Product.
