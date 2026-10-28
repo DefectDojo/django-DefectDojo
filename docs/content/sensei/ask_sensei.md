@@ -19,9 +19,11 @@ change only on findings that user can edit.
 
 ## Asking a question
 
-Open the assistant in any of three ways:
+Open the assistant in any of these ways:
 
 - the **Ask Sensei** button in the sidebar footer;
+- **Ask Sensei** under **SENSEI + AI** in the sidebar, which opens the assistant as a page of its
+  own (see [The Ask Sensei page](#the-ask-sensei-page));
 - the command palette (**Cmd+K** or **Ctrl+K**): type a question and pick **Ask Sensei**, the
   first result;
 - from a record: **Explain With Sensei** on a finding's menu, or **Summarize With Sensei** on an
@@ -36,6 +38,28 @@ only the person who asked can open them, whatever the other person's role. Delet
 
 **Simple Answers**, at the top of the panel, asks for short, text-first answers with fewer
 charts.
+
+### The Ask Sensei page
+
+Two buttons in the panel's header give answers more room. **Expand to Full Width** widens the
+panel across the whole window, so a chart and a list sit side by side; the panel stays that
+width until you narrow it again. **Open as a Page** opens the same conversation at
+`/ui/sensei/ask`, with your conversations listed beside it. The panel and the page share one
+conversation: a question asked on the page is there when you open the panel on another page, and
+the other way round.
+
+A new conversation, on the page or in the panel, opens on a home view before you ask anything:
+
+- **What Changed** since your last visit, in whole days: new findings and how many are critical,
+  findings newly on the CISA known exploited vulnerabilities list, findings closed, and the pull
+  requests Sensei opened and merged. With no earlier visit, it covers the last seven days.
+- **Top Fixes**: the Root Causes that clear the most risk, exploited ones first, each with its own
+  **Fix With Sensei** button (see [Fixes, not findings](#fixes-not-findings)). This list needs
+  [Root Cause Correlation](/triage_findings/finding_correlation/pro__root_cause_correlation/)
+  switched on.
+
+The home view reads your data with your permissions, the same way an answer does, but asks the
+AI model nothing, so opening it does not use an answer from the license's allowance.
 
 ## Where the numbers come from
 
