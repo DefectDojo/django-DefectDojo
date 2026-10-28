@@ -130,7 +130,7 @@ psycopg-pool==3.3.3
 py==1.11.0
 pyarrow==26.0.0
 pycparser==3.12
-pycryptodome==4.1.0
+pycryptodome==4.2.0
 pycurl==7.48.0
 pydantic==2.14.0
 pydantic_core==2.50.0
