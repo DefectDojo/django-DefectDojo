@@ -13,7 +13,7 @@ different languages, and neither setting affects the other.
 Where you choose depends on which interface you are in:
 
 - **DefectDojo Pro**: open the account menu from your username at the bottom of the sidebar,
-  choose **Language**, and pick from the list. The interface switches as soon as you choose,
+  choose **Language** (the language in use is shown beside it), and pick from the list. The interface switches as soon as you choose,
   with no reload.
 - **DefectDojo (open source)**: the **Language** field on your profile page, saved with the rest
   of the form.
