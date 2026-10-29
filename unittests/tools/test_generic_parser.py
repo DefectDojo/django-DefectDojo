@@ -1028,16 +1028,43 @@ class TestGenericJSONParserPackage(DojoTestCase):
         self.assertEqual("16.0.0", finding.component_version)
         self.assertEqual([], getattr(finding, "unsaved_locations", []))
 
-    def test_parse_json_rejects_bad_package_fields(self):
-        for package, message in [
-            ({"purl": "commons-collections"}, "purl is not a valid Package URL"),
-            ({"purl": 42}, "Package fields must be strings: ['purl']"),
-            ({"purl_type": ["maven"]}, "Package fields must be strings: ['purl_type']"),
+    def _parse_one(self, **fields):
+        content = json.dumps({"findings": [{"title": "t", "severity": "High", "description": "d", **fields}]})
+        (finding,) = GenericParser().get_findings(TestFile("findings.json", content), Test())
+        return finding
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_unusable_package_fields_never_fail_the_import(self):
+        # Each case imports the finding and builds the location the remaining fields describe.
+        for fields, expected in [
+            ({"purl": "commons-collections"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/a@1?x"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": None, "purl_type": None, "namespace": None}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": 42, "purl_type": ["maven"], "namespace": {"a": 1}}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "   ", "purl_type": " npm "}, {"purl": "", "purl_type": "npm", "namespace": ""}),
+            ({"purl_type": "Maven", "namespace": "g"}, {"purl": "", "purl_type": "maven", "namespace": "g"}),
+            ({"purl_type": "not a type!"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl_type": "1abc"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            # An unusable purl falls back to the parts sent beside it.
+            ({"purl": "not-a-purl", "purl_type": "npm"}, {"purl": "", "purl_type": "npm", "namespace": ""}),
+            # A valid purl takes precedence over parts that disagree with it.
             (
                 {"purl": "pkg:maven/a/b@1", "purl_type": "npm", "namespace": "x"},
-                "purl cannot be combined with ['namespace', 'purl_type']",
+                {"purl": "pkg:maven/a/b@1", "purl_type": "", "namespace": ""},
             ),
         ]:
-            content = json.dumps({"findings": [{"title": "t", "severity": "High", "description": "d", **package}]})
-            with self.subTest(package=package), self.assertRaisesMessage(ValueError, message):
-                GenericParser().get_findings(TestFile("findings.json", content), Test())
+            with self.subTest(fields=fields):
+                finding = self._parse_one(component_name="lib", component_version="1.0", **fields)
+                self.assertEqual("lib", finding.component_name)
+                (dependency,) = self._dependency_locations(finding)
+                self.assertEqual(expected, {key: dependency.data[key] for key in expected})
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_purl_too_wide_for_the_component_columns(self):
+        # The purl still builds the location; the component fields it cannot fill stay empty.
+        name = "n" * 600
+        finding = self._parse_one(purl=f"pkg:npm/{name}@{'9' * 150}")
+        self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
+        (dependency,) = self._dependency_locations(finding)
+        self.assertTrue(dependency.data["purl"].startswith(f"pkg:npm/{name}@"))

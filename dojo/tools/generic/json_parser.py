@@ -1,5 +1,7 @@
 import base64
+import logging
 import math
+import re
 from functools import cache
 
 import dateutil
@@ -18,6 +20,11 @@ from dojo.tools.utils import mark_unique_ids_ambiguous_when_repeated
 # Package URL; ``purl_type`` and ``namespace`` complete ``component_name`` and
 # ``component_version`` when the tool reports the parts instead.
 PACKAGE_FIELDS = ("purl", "purl_type", "namespace")
+
+# A Package URL type: ASCII letters, digits, ".", "+" and "-", not starting with a digit.
+PURL_TYPE = re.compile(r"[a-z.+-][a-z0-9.+-]*")
+
+logger = logging.getLogger(__name__)
 
 # Accepted fields that map to a numeric column on Finding, and the type they hold.
 NUMERIC_FIELDS = {
@@ -179,14 +186,15 @@ class GenericJSONParser:
                 raise ValueError(msg)
 
             self._normalize_numeric_fields(item)
-            purl = self._parse_package(package)
+            purl, purl_type, namespace = self._parse_package(package)
             if purl:
                 # The purl names the component, so a report that sends only the purl still
-                # gets a component on the finding. Explicit component fields win.
-                if not item.get("component_name"):
-                    item["component_name"] = purl.name
-                if not item.get("component_version") and purl.version:
-                    item["component_version"] = purl.version
+                # gets a component on the finding. Explicit component fields win, and a
+                # value too wide for its column is left out rather than failing the import.
+                max_lengths = _finding_max_lengths()
+                for field, value in (("component_name", purl.name), ("component_version", purl.version)):
+                    if not item.get(field) and value and len(value) <= max_lengths[field]:
+                        item[field] = value
             # A value wider than its column would only fail at INSERT time, deep in the
             # importer, as a DataError the API reports as a 500. Reject it here instead: the
             # importer turns the ValueError into a 400 naming the field and the limit.
@@ -234,8 +242,8 @@ class GenericJSONParser:
                     finding.unsaved_locations.append(
                         LocationData.dependency(
                             purl=purl.to_string() if purl else "",
-                            purl_type=package.get("purl_type", ""),
-                            namespace=package.get("namespace", ""),
+                            purl_type=purl_type,
+                            namespace=namespace,
                             name=component_name,
                             version=component_version,
                             file_path=file_path,
@@ -294,29 +302,45 @@ class GenericJSONParser:
 
     def _parse_package(self, package):
         """
-        Validate the package coordinates of a finding and return its purl, if it sent one.
+        Read the package coordinates of a finding, returning ``(purl, purl_type, namespace)``.
 
-        A bad value would otherwise be dropped silently when the dependency location is
-        built, so it is rejected here as a ValueError, which the importer reports as a 400.
+        Never raises. The package fields only refine the dependency location, so a value that
+        cannot be used is dropped with a warning and the finding imports as it would without
+        it: a null or blank value counts as absent, a purl that does not parse falls back to
+        ``purl_type`` and ``namespace``, and a ``purl_type`` outside the Package URL grammar
+        falls back to the generic type. A valid purl already names its type and namespace, so
+        it takes precedence over the two parts.
         """
-        not_strings = sorted(key for key, value in package.items() if not isinstance(value, str))
-        if not_strings:
-            msg = f"Package fields must be strings: {not_strings}"
-            raise ValueError(msg)
-        package_url = package.get("purl", "").strip()
-        if not package_url:
-            return None
-        # A purl already carries its type and namespace, and only the purl is kept when
-        # both are sent, so a second, possibly different, source is refused.
-        conflicting = sorted(key for key in ("purl_type", "namespace") if package.get(key))
-        if conflicting:
-            msg = f"purl cannot be combined with {conflicting}: the purl already sets them"
-            raise ValueError(msg)
-        try:
-            return PackageURL.from_string(package_url)
-        except ValueError as error:
-            msg = f"purl is not a valid Package URL ({package_url!r}): {error}"
-            raise ValueError(msg) from error
+        values = {}
+        for key, value in package.items():
+            if value is None:
+                continue
+            if not isinstance(value, str):
+                logger.warning("Generic Findings Import: ignoring %s, which is not a string: %.200r", key, value)
+                continue
+            if value := value.strip():
+                values[key] = value
+
+        if package_url := values.get("purl"):
+            try:
+                purl = PackageURL.from_string(package_url)
+                # The location stores the normalized string and parses it again, so it has to
+                # survive that second parse too.
+                PackageURL.from_string(purl.to_string())
+            # Any failure, not only ValueError: an unusable purl must never fail the import.
+            except Exception as error:
+                logger.warning("Generic Findings Import: ignoring purl %.200r, not a valid Package URL: %s", package_url, error)
+            else:
+                ignored = sorted(key for key in ("purl_type", "namespace") if key in values)
+                if ignored:
+                    logger.info("Generic Findings Import: ignoring %s, the purl already sets them", ignored)
+                return purl, "", ""
+
+        purl_type = values.get("purl_type", "").lower()
+        if purl_type and not PURL_TYPE.fullmatch(purl_type):
+            logger.warning("Generic Findings Import: ignoring purl_type %.200r, not a valid Package URL type", purl_type)
+            purl_type = ""
+        return None, purl_type, values.get("namespace", "")
 
     def _normalize_numeric_fields(self, item):
         """

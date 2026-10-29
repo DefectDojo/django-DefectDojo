@@ -158,7 +158,7 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 | `file_path` | String (max 4000 characters)<br>`"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
 | `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. With Locations enabled, together with `component_version` and `file_path` it also creates a dependency location on the finding. Send a Package URL in `purl`, not here (see [Package details](#package-details)). |
 | `component_version` | String (max 100 characters)<br>`"5.6.0"` | The affected version of `component_name`. A blank or whitespace-only value is stored as empty. |
-| `purl` | String<br>`"pkg:maven/commons-collections/commons-collections@3.2.1"` | The component as a [Package URL](https://github.com/package-url/purl-spec). With Locations enabled, the dependency location uses it as-is. Fills in `component_name` and `component_version` when they are not set. Cannot be combined with `purl_type` or `namespace`. See [Package details](#package-details). |
+| `purl` | String<br>`"pkg:maven/commons-collections/commons-collections@3.2.1"` | The component as a [Package URL](https://github.com/package-url/purl-spec). With Locations enabled, the dependency location uses it as-is. Fills in `component_name` and `component_version` when they are not set. Takes precedence over `purl_type` and `namespace`. See [Package details](#package-details). |
 | `purl_type` | String<br>`"maven"`, `"npm"`, `"pypi"` | The package ecosystem of `component_name`, for a tool that reports the parts instead of a `purl`. Without it (and without `purl`) the dependency location gets the type `generic`. |
 | `namespace` | String<br>`"commons-collections"` | The package namespace of `component_name` (a Maven group ID, an npm scope), used with `purl_type`. |
 | `static_finding` | Boolean<br>`true` | Defaults to `false`. When `file_path` is set, DefectDojo marks a new finding as static regardless of this value. |
@@ -242,7 +242,17 @@ Send the package details in one of two ways:
 ]
 ```
 
-Both findings produce the dependency `pkg:maven/commons-collections/commons-collections@3.2.1`. The import stops on a `purl` that is not a valid Package URL, a `purl` sent together with `purl_type` or `namespace`, or a package field that is not a string.
+Both findings produce the dependency `pkg:maven/commons-collections/commons-collections@3.2.1`.
+
+A package field never stops the import. A value that cannot be used is left out, logged as a warning, and the finding imports as if it had not been sent:
+
+- A `null`, blank or non-string value counts as absent.
+- A `purl` that is not a valid Package URL is ignored. `purl_type` and `namespace`, if sent, are used instead.
+- A `purl_type` that is not a valid Package URL type (letters, digits, `.`, `+` and `-`, not starting with a digit) is ignored, so the type is `generic`. It is read in lowercase.
+- A valid `purl` sent with `purl_type` or `namespace` wins, and the other two are ignored.
+- A name or version in the `purl` that is longer than `component_name` or `component_version` allows is not copied into them. The dependency location still uses the full `purl`.
+
+When `component_name` or `component_version` is set and differs from the `purl`, the finding keeps those fields and the dependency location follows the `purl`.
 
 Other package details, such as hashes, license and component type, are not read from this format. To import them, use a [CycloneDX](/supported_tools/parsers/file/cyclonedx/) SBOM.
 
