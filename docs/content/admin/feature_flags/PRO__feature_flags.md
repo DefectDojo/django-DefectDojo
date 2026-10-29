@@ -13,14 +13,23 @@ The Feature Flags page is visible to **superusers** only. Other users, including
 
 Go to **Settings > Feature Flags** in the left sidebar.
 
-The page lists every optional feature with:
+The header shows how many features are on, for example **26 of 56 Enabled**, and holds a search box that filters every feature by name or description.
 
-* **Name** — the feature, with a **BETA** tag when it is still in beta
-* **Description** — what the feature does
+Features are grouped by area, one card per area: **Findings and Triage**, **Assets and Locations** (or **Products and Locations** when relabeling is off), **Compliance and Regulatory**, **Connectors and Ingestion**, **AI and MCP**, **Interface and Workspace**, and **System and Support**. Each card shows how many of its features are listed, and the **MCP Server** row closes the **AI and MCP** card with its toolsets under it.
+
+Each feature row shows:
+
+* **Name**: the feature, with **NEW**, **BETA** and warning tags such as **Restart Recommended** where they apply
 * **Documentation link**: a link to that feature's documentation. Every feature on the page has one, and the [Feature reference](#feature-reference) below lists them all.
-* **Toggle** — whether the feature is currently on
+* **Description**: what the feature does, on one line. Hover the row, or move keyboard focus into it, to read the whole description in place. On a phone the whole description always shows.
+* **Toggle**: whether the feature is currently on
 
-Use the search box to filter the list by feature name or description.
+The column beside the cards has two lists:
+
+* **Areas** lists every area with how many of its features are on. Click an area to scroll to its card.
+* **Show** narrows every card to **All**, **On**, **Off**, **New**, **Beta**, or **With Warnings** (features that need a restart, can lose data, or disable integrations). Each choice shows how many features it matches, and it combines with the search box.
+
+On a narrow screen the two lists sit above the cards and start folded, so the features come first.
 
 ### Features that are not listed
 
