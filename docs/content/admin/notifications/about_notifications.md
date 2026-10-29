@@ -127,6 +127,17 @@ None of these messages arrives once per run. A Connector with a dead credential 
 
 The notification is on **🔔 Alerts** by default. Set it to Email, Slack or Teams on your notification settings page, under **Connections**. A Connector that is set up correctly but has never seen any data is a separate case, and it warns you when you save it rather than later.
 
+## Ingestion Health Notifications (Pro)
+
+With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, the **Ingestion Health Warning** notification covers the two ways a source falls short that no other message reports:
+
+* **A Connector's volume drops.** A Sync succeeds and imports Findings, but far fewer than the Connector's 30-day baseline.
+* **A Connector or a scheduled Triage Engine rule goes stale.** Its schedule fired three times in a row without it running.
+
+It is sent once per anomaly, never once per check, to superusers and to everyone who can see that kind of source (the Connector View or Rule View permission). Zero results and failed runs stay on the **Connector Health Warning** above, so no condition sends two messages.
+
+The notification is on **🔔 Alerts** by default. Set it to Email, Slack, Teams or a webhook on your notification settings page, under **Connections**; the setting is shown while Ingestion Health is on.
+
 ## Open-Source Considerations
 
 ### Specific overrides
