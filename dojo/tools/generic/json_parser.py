@@ -54,6 +54,18 @@ def to_number(value, converter):
     return number if math.isfinite(number) else None
 
 
+def _stripped(value):
+    """Return a string value with surrounding whitespace removed, and any other value unchanged."""
+    return value.strip() if isinstance(value, str) else value
+
+
+def _purl_parts(purl):
+    """Every decoded string a Package URL carries: its components and its qualifier keys and values."""
+    qualifiers = purl.qualifiers if isinstance(purl.qualifiers, dict) else {}
+    parts = (purl.type, purl.namespace, purl.name, purl.version, purl.subpath, *qualifiers.keys(), *qualifiers.values())
+    return [part for part in parts if isinstance(part, str)]
+
+
 @cache
 def _finding_max_lengths() -> dict[str, int]:
     """
@@ -189,12 +201,21 @@ class GenericJSONParser:
             purl, purl_type, namespace = self._parse_package(package)
             if purl:
                 # The purl names the component, so a report that sends only the purl still
-                # gets a component on the finding. Explicit component fields win, and a
-                # value too wide for its column is left out rather than failing the import.
+                # gets a component on the finding. Explicit component fields win, a blank one
+                # counts as unset, the version is only taken for the package the purl names
+                # (never next to a different component_name), and a value too wide for its
+                # column is left out rather than failing the import.
                 max_lengths = _finding_max_lengths()
-                for field, value in (("component_name", purl.name), ("component_version", purl.version)):
-                    if not item.get(field) and value and len(value) <= max_lengths[field]:
-                        item[field] = value
+                name = _stripped(item.get("component_name"))
+                if not name and purl.name and len(purl.name) <= max_lengths["component_name"]:
+                    item["component_name"] = name = purl.name
+                if (
+                    name == purl.name
+                    and not _stripped(item.get("component_version"))
+                    and purl.version
+                    and len(purl.version) <= max_lengths["component_version"]
+                ):
+                    item["component_version"] = purl.version
             # A value wider than its column would only fail at INSERT time, deep in the
             # importer, as a DataError the API reports as a 500. Reject it here instead: the
             # importer turns the ValueError into a 400 naming the field and the limit.
@@ -238,6 +259,10 @@ class GenericJSONParser:
                 component_name = item.get("component_name")
                 component_version = item.get("component_version")
                 file_path = item.get("file_path")
+                if not (purl or component_name or component_version or file_path) and (purl_type or namespace):
+                    logger.warning(
+                        "Generic Findings Import: ignoring purl_type and namespace, the finding names no component",
+                    )
                 if purl or component_name or component_version or file_path:
                     finding.unsaved_locations.append(
                         LocationData.dependency(
@@ -309,7 +334,8 @@ class GenericJSONParser:
         it: a null or blank value counts as absent, a purl that does not parse falls back to
         ``purl_type`` and ``namespace``, and a ``purl_type`` outside the Package URL grammar
         falls back to the generic type. A valid purl already names its type and namespace, so
-        it takes precedence over the two parts.
+        it takes precedence over the two parts. A NUL character, which PostgreSQL cannot store
+        in a text column, makes a value unusable too, including one percent-encoded in a purl.
         """
         values = {}
         for key, value in package.items():
@@ -317,6 +343,9 @@ class GenericJSONParser:
                 continue
             if not isinstance(value, str):
                 logger.warning("Generic Findings Import: ignoring %s, which is not a string: %.200r", key, value)
+                continue
+            if "\x00" in value:
+                logger.warning("Generic Findings Import: ignoring %s, which contains a NUL character", key)
                 continue
             if value := value.strip():
                 values[key] = value
@@ -327,13 +356,16 @@ class GenericJSONParser:
                 # The location stores the normalized string and parses it again, so it has to
                 # survive that second parse too.
                 PackageURL.from_string(purl.to_string())
+                if any("\x00" in part for part in _purl_parts(purl)):
+                    msg = "a component decodes to a NUL character"
+                    raise ValueError(msg)
             # Any failure, not only ValueError: an unusable purl must never fail the import.
             except Exception as error:
                 logger.warning("Generic Findings Import: ignoring purl %.200r, not a valid Package URL: %s", package_url, error)
             else:
                 ignored = sorted(key for key in ("purl_type", "namespace") if key in values)
                 if ignored:
-                    logger.info("Generic Findings Import: ignoring %s, the purl already sets them", ignored)
+                    logger.warning("Generic Findings Import: ignoring %s, the purl already sets them", ignored)
                 return purl, "", ""
 
         purl_type = values.get("purl_type", "").lower()

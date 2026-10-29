@@ -1045,6 +1045,14 @@ class TestGenericJSONParserPackage(DojoTestCase):
             ({"purl_type": "Maven", "namespace": "g"}, {"purl": "", "purl_type": "maven", "namespace": "g"}),
             ({"purl_type": "not a type!"}, {"purl": "", "purl_type": "", "namespace": ""}),
             ({"purl_type": "1abc"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            # Parses, but its normalized string does not parse again.
+            ({"purl": "pkg:npm/%2F %2F#@~"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            # A NUL character cannot be stored, sent plainly or percent-encoded in any purl part.
+            ({"purl": "pkg:npm/a%00b@1.0"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/%00scope/ab@1"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/ab@1?k=%00"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/ab@1#a%00b"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl_type": "npm", "namespace": "a\u0000b"}, {"purl": "", "purl_type": "npm", "namespace": ""}),
             # An unusable purl falls back to the parts sent beside it.
             ({"purl": "not-a-purl", "purl_type": "npm"}, {"purl": "", "purl_type": "npm", "namespace": ""}),
             # A valid purl takes precedence over parts that disagree with it.
@@ -1068,3 +1076,29 @@ class TestGenericJSONParserPackage(DojoTestCase):
         self.assertIsNone(finding.component_version)
         (dependency,) = self._dependency_locations(finding)
         self.assertTrue(dependency.data["purl"].startswith(f"pkg:npm/{name}@"))
+
+    def test_parse_json_purl_with_nul_does_not_fill_the_component(self):
+        finding = self._parse_one(purl="pkg:npm/a%00b@1.0")
+        self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
+
+    def test_parse_json_purl_fills_the_version_only_for_its_own_package(self):
+        for fields, name, version in [
+            # A different component keeps its own (missing) version.
+            ({"component_name": "foo", "purl": "pkg:npm/bar@2.0"}, "foo", None),
+            # The same component gets the purl's version.
+            ({"component_name": "lodash", "purl": "pkg:npm/lodash@4.17.20"}, "lodash", "4.17.20"),
+            # Blank component fields count as unset, so the purl fills both.
+            ({"component_name": "   ", "component_version": " ", "purl": "pkg:npm/lodash@4.17.20"}, "lodash", "4.17.20"),
+        ]:
+            with self.subTest(fields=fields):
+                finding = self._parse_one(**fields)
+                self.assertEqual(name, finding.component_name)
+                self.assertEqual(version, finding.component_version)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_package_parts_without_a_component_are_logged(self):
+        with self.assertLogs("dojo.tools.generic.json_parser", "WARNING") as logs:
+            finding = self._parse_one(purl_type="npm", namespace="@x")
+        self.assertEqual([], self._dependency_locations(finding))
+        self.assertIn("the finding names no component", "\n".join(logs.output))
