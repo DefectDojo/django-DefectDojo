@@ -88,7 +88,7 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
     - **Endpoints**: vulnerable (an open Finding still affects it), not vulnerable (everything else, including Endpoints no Finding has touched), and those still affected by an active Critical Finding. With Locations enabled, the card counts active, mitigated, and critical Locations instead.
     - Every figure counts only what you have permission to view.
 - **Open Finding Severity**
-    - A list of open Findings within the Asset, grouped by severity
+    - One bar of the Asset's open Findings split by severity, with each severity's count and share underneath. The panel header shows the total open count, and each severity links to the Asset's open Findings at that severity.
 - **Asset Overview**
     - A breakdown of various features of the Asset, including Description, Components, Contacts, [User Groups](/admin/user_management/create_user_group/
 ), Members, Technologies, and Regulations.
