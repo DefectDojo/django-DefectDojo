@@ -179,7 +179,7 @@ Key facts:
 - [Upstream Connectors](https://docs.defectdojo.com/connectors/upstream/about/): Seamlessly connect DefectDojo to your security tools suite
 - [Add or Edit Upstream Connectors](https://docs.defectdojo.com/connectors/upstream/add_edit/): Connect to a supported security tool
 - [Connector Field Mappings](https://docs.defectdojo.com/connectors/upstream/connector_field_mappings/): Change how a Connector's findings map onto DefectDojo fields, including what deduplication uses
-- [Ingestion Health](https://docs.defectdojo.com/connectors/upstream/ingestion_health/): Flag a Connector whose Syncs keep succeeding with zero Findings against its usual volume, and acknowledge it with a reason
+- [Ingestion Health](https://docs.defectdojo.com/connectors/upstream/ingestion_health/): See every Connector and scheduled Triage Engine rule that feeds DefectDojo, flag the ones that go quiet, fall short or stop running, and acknowledge them with a reason
 - [Location Inventory from Connectors](https://docs.defectdojo.com/connectors/upstream/location_inventory/): Let asset connectors populate Locations directly on their mapped asset
 - [Managing Operations](https://docs.defectdojo.com/connectors/upstream/manage_operations/): Check the status of your Connector's Discover & Sync Operations
 - [Managing Records](https://docs.defectdojo.com/connectors/upstream/manage_records/): Direct the flow of data from your tool into DefectDojo
