@@ -48,9 +48,9 @@ A few things to know about this endpoint:
 
    - **SAML Attribute** is free text and must match the attribute name your IdP actually emits. Some IdPs (e.g. Entra ID / Azure AD) send fully qualified claim URIs such as `http://schemas.microsoft.com/identity/claims/emailaddress` rather than friendly names. If you are not sure what your IdP sends, enable **Enable SAML Debugging** (see [Troubleshooting](#troubleshooting)) and inspect the assertion in the logs.
    - **DefectDojo Field** is chosen from a list: **Username**, **First Name**, **Last Name** and **Email**.
-   - At minimum, map the attribute that corresponds to **Username**. DefectDojo looks users up by username when matching SAML logins to existing accounts.
-   - Mapping an attribute to **Email** is strongly recommended: DefectDojo uses the email address for notifications, and to match an incoming login to an existing account by email.
-   - The same attribute may feed more than one field — for example an email claim used for both **Email** and **Username**. The reverse is not allowed: each DefectDojo field may be mapped from only one attribute.
+   - A mapping fills user fields. It never decides which account a login lands on: DefectDojo always signs the login in to the account whose username equals the SAML `NameID` (see [Which account a login lands on](#which-account-a-login-lands-on)). A **Username** mapping is not used for that.
+   - Mapping an attribute to **Email** is strongly recommended: DefectDojo uses the email address for notifications.
+   - The same attribute may feed more than one field. The reverse is not allowed: each DefectDojo field may be mapped from only one attribute.
    - A row with only one half filled in is rejected on save, and the offending cell is highlighted. Rows you add but never fill in are discarded rather than treated as errors.
 
 8. **IdP metadata** — supply one of the two, not both:
@@ -102,7 +102,7 @@ IAM Identity Center can act as the SAML IdP through a customer managed SAML 2.0 
 1. In the IAM Identity Center console, add a **customer managed** application of type **SAML 2.0**.
 2. Under **IAM Identity Center metadata**, download the **IAM Identity Center SAML metadata file**. Upload it to DefectDojo as **Local SAML Metadata** (step 8 of [Setup](#setup)), which works whether or not the instance can reach AWS.
 3. Under **Application metadata**, enter the values manually: set **Application ACS URL** to DefectDojo's [ACS URL](#acs-url-assertion-consumer-service) and **Application SAML audience** to the **Entity ID** you set in DefectDojo.
-4. Under **Attribute mappings**, map the subject and the attributes DefectDojo reads. For example, send `${user:email}` as the subject and as an `email` attribute, and `${user:givenName}` and `${user:familyName}` as first and last name. Then map those attribute names to **Username**, **Email**, **First Name** and **Last Name** in DefectDojo's **Attribute Mapping**.
+4. Under **Attribute mappings**, map the subject and the attributes DefectDojo reads. For example, send `${user:email}` as the subject and as an `email` attribute, and `${user:givenName}` and `${user:familyName}` as first and last name. Then map those attribute names to **Email**, **First Name** and **Last Name** in DefectDojo's **Attribute Mapping**. The subject is the `NameID`, so it decides which DefectDojo account each person signs in to.
 5. For group mapping, add an attribute such as `groups` mapped to `${user:groups}`, and enter the same name as DefectDojo's **Group Name Attribute**. DefectDojo names its groups after the exact values in the assertion, so turn on **Enable SAML Debugging** for a test login and check what Identity Center sends before you write the **Group Limiter Regex Expression**.
 6. Assign the users or groups who should have access to the application in IAM Identity Center.
 
@@ -140,6 +140,14 @@ DefectDojo Cloud does not have the same level of SAML customization as DefectDoj
 
 If you need to match users on an attribute other than NameID (such as `uid` or `email`), configure your Identity Provider to send the desired value as the NameID rather than adjusting DefectDojo settings.
 
+### Which account a login lands on
+
+A SAML login lands on the DefectDojo account whose username equals the `NameID` in the assertion. A mapped attribute never changes that, including one mapped to **Username**: the Attribute Mapping only fills fields such as the email address and the names.
+
+- Have your IdP send each person's DefectDojo username as the `NameID`. Many organizations use the email address as the DefectDojo username and send the email as the `NameID`.
+- Use a persistent `NameID` format. **Transient** issues a new `NameID` on every login, so it never matches an existing account.
+- With **Create Unknown User** on, a `NameID` that matches no username creates a new account. A `NameID` that differs from the username a person already has therefore creates a second account rather than signing them in to the first.
+
 ## Troubleshooting
 
 ### SAML Debugging output
@@ -158,12 +166,12 @@ Turn this option **off** after you've finished troubleshooting — SAML debug lo
 
 If the SAML assertion parses successfully (no XML or signature errors) but DefectDojo refuses the login, the most common cause is a **username mismatch** between the IdP and DefectDojo.
 
-DefectDojo looks up the user **by username** when matching a SAML login to an existing account. If the value your IdP sends as the `username` attribute does not match an existing DefectDojo user's username, the lookup fails — even though the rest of the assertion is valid.
+DefectDojo looks up the user **by the SAML `NameID`**, which must equal an existing DefectDojo username (see [Which account a login lands on](#which-account-a-login-lands-on)). If the `NameID` your IdP sends does not match, the lookup fails even though the rest of the assertion is valid. Mapping a different attribute to **Username** does not help: a mapped attribute is never used to find the account.
 
 Two remedies, pick whichever fits your environment:
 
-- **Drop `username` from the Attribute Mapping** and let DefectDojo fall back to using the SAML `NameID` as the username instead. This is appropriate if your DefectDojo usernames already match the NameID format your IdP emits.
-- **Align the usernames.** Make sure the usernames in DefectDojo are exactly what your IdP sends in the `username` claim. For most organizations the easiest convention is to make DefectDojo usernames equal to the user's email address, and have the IdP send the email as the `username` claim.
+- **Change what the IdP sends as the `NameID`** so it equals the DefectDojo username, for example the user's email address.
+- **Align the usernames.** Make sure the usernames in DefectDojo are exactly the `NameID` values your IdP sends. For most organizations the easiest convention is to make DefectDojo usernames equal to the user's email address, and have the IdP send the email as the `NameID`.
 
 If you're not sure what the IdP is actually sending, enable **Enable SAML Debugging** (above) and inspect the parsed attributes in the logs.
 
