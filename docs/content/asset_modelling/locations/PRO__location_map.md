@@ -29,6 +29,7 @@ Each dashed region holds one kind of location:
 - Dependencies
 - Cloud Resources
 - Container Images, when the **Container Image Locations** flag is also on. See [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
+- Domains, IP Addresses and Certificates, when the **External Asset Discovery** flag is also on. See [Domain, IP Address and Certificate Locations](/asset_modelling/locations/pro__attack_surface_locations/).
 
 Chips at the top of the page count the locations in each type, for example "11 URLs".
 
