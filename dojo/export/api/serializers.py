@@ -15,6 +15,8 @@ from dojo.product.api.serializer import ProductSerializer
 from dojo.product_type.api.serializer import ProductTypeSerializer
 from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
 from dojo.test.api.serializer import TestSerializer
+from dojo.tool_config.api.serializer import ToolConfigurationSerializer
+from dojo.tool_config.models import Tool_Configuration
 from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
 
 MAX_FILE_BYTES_DEFAULT = 10485760
@@ -128,6 +130,13 @@ class ExportRiskAcceptanceSerializer(RiskAcceptanceSerializer):
 
     def get_proof(self, obj) -> dict | None:
         return export_proof(obj, self.context["max_file_bytes"])
+
+
+class ExportToolConfigurationSerializer(ToolConfigurationSerializer):
+    class Meta:
+        model = Tool_Configuration
+        exclude = ("extras",)
+        extra_kwargs = ToolConfigurationSerializer.Meta.extra_kwargs
 
 
 class ExportUserContactInfoSerializer(UserContactInfoSerializer):

@@ -27,6 +27,7 @@ from dojo.export.api.serializers import (
     ExportProductSerializer,
     ExportRiskAcceptanceSerializer,
     ExportTestSerializer,
+    ExportToolConfigurationSerializer,
     ExportUserSerializer,
     file_size,
 )
@@ -55,7 +56,6 @@ from dojo.product_attributes.api.serializer import (
 )
 from dojo.regulations.api.serializer import RegulationSerializer
 from dojo.test.api.serializer import TestTypeSerializer
-from dojo.tool_config.api.serializer import ToolConfigurationSerializer
 from dojo.tool_type.api.serializer import ToolTypeSerializer
 from dojo.user.authentication import token_expires_at
 from dojo.utils import get_system_setting
@@ -78,7 +78,7 @@ REFERENCE_SERIALIZERS = {
     "product_origins": ProductOriginSerializer,
     "finding_templates": FindingTemplateSerializer,
     "tool_types": ToolTypeSerializer,
-    "tool_configurations": ToolConfigurationSerializer,
+    "tool_configurations": ExportToolConfigurationSerializer,
 }
 
 

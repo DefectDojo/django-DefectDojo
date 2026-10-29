@@ -573,14 +573,16 @@ class TestExportManifest(DojoAPITestCase):
         )
 
     def test_tool_configurations_carry_no_secret(self):
-        secrets = {"password": "hunter2", "ssh": "PRIVATE-KEY-MATERIAL", "api_key": "TOKEN-VALUE"}
+        secrets = {
+            "password": "hunter2", "ssh": "PRIVATE-KEY-MATERIAL", "api_key": "TOKEN-VALUE", "extras": "ORG-TOKEN",
+        }
         Tool_Configuration.objects.filter(id=1).update(**secrets)
-        reference = self.client.get(self.url).json()["reference"]
-        self.assertTrue(reference["tool_configurations"])
-        for entry in reference["tool_configurations"]:
-            for field in ("password", "ssh", "api_key"):
+        manifest = self.client.get(self.url).json()
+        self.assertTrue(manifest["reference"]["tool_configurations"])
+        for entry in manifest["reference"]["tool_configurations"]:
+            for field in secrets:
                 self.assertNotIn(field, entry)
-        body = json.dumps(reference["tool_configurations"])
+        body = json.dumps(manifest)
         for value in secrets.values():
             self.assertNotIn(value, body)
 
