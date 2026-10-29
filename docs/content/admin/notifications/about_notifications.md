@@ -129,12 +129,13 @@ The notification is on **🔔 Alerts** by default. Set it to Email, Slack or Tea
 
 ## Ingestion Health Notifications (Pro)
 
-With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, the **Ingestion Health Warning** notification covers the two ways a source falls short that no other message reports:
+With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, the **Ingestion Health Warning** notification covers the ways a source falls short that no other message reports:
 
-* **A Connector's volume drops.** A Sync succeeds and imports Findings, but far fewer than the Connector's 30-day baseline.
-* **A Connector or a scheduled Triage Engine rule goes stale.** Its schedule fired three times in a row without it running.
+* **A Connector's or API import stream's volume drops.** A run succeeds and imports Findings, but far fewer than the source's 30-day baseline.
+* **An API import stream returns no Findings.** Its last import submitted none, against a baseline above zero.
+* **A source goes stale.** A Connector's or scheduled Triage Engine rule's schedule fired three times in a row without it running, or an API import stream has gone far longer than usual without an import.
 
-It is sent once per anomaly, never once per check, to superusers and to everyone who can see that kind of source (the Connector View or Rule View permission). Zero results and failed runs stay on the **Connector Health Warning** above, so no condition sends two messages.
+It is sent once per anomaly, never once per check, to superusers and to everyone who can see that source (the Connector View or Rule View permission, or for an API import stream, access to its Asset). A Connector's zero results and failed runs stay on the **Connector Health Warning** above, so no condition sends two messages.
 
 The notification is on **🔔 Alerts** by default. Set it to Email, Slack, Teams or a webhook on your notification settings page, under **Connections**; the setting is shown while Ingestion Health is on.
 
