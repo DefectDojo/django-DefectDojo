@@ -47,7 +47,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 | **Frequency** (Discovery and Synchronization) | One-Time | **One-Time** runs Discover or Sync only when you click its button. **Daily**, **Weekly** (on the weekday you pick) and **Monthly** (on the first day of each month) run it on a schedule instead, at the time you pick. |
 | **Delete the Connection After the Migration** | Off | Shown when the Synchronization frequency is **One-Time**. When the migration ends without errors and DefectDojo Pro has imported its findings, the connection is deleted. The Products, findings and everything else the Sync brought stay. |
 
-When a One-Time Sync ends and DefectDojo Pro has imported its findings, one notification sums up the migration: the findings it brought, the users it created inactive, and the settings to set up again. It uses the **Connector health warning** notification, so it follows your settings for that notification, and it stays in the alerts after the connection is deleted.
+When a One-Time Sync ends and DefectDojo Pro has imported its findings, one notification sums up the migration: the findings it brought, the users it created inactive, the users that were superusers on the source but are not superusers in DefectDojo Pro, and the settings to set up again. It uses the **Connector health warning** notification, so it follows your settings for that notification, and it stays in the alerts after the connection is deleted.
 
 When you submit, DefectDojo Pro checks the token and the version of the source. If either check fails, it tells you why.
 
@@ -87,10 +87,10 @@ In the **Products** section, each source Product has an **Include** box. Clear i
 |---|---|
 | **Source** | The URL and the version of the source. **Mode** is **Verbatim**: the connector copies each record as it is on the source. **Locations** shows if the source has the Locations feature on. |
 | **Token** | The user of the API token, if that user is a superuser, and when the token expires. |
-| **Warnings** | **Unknown Scan Types** lists the source scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`. Other warnings say that the token expires soon, how many files are over the size limit, or that the source has no read-only mode. |
+| **Warnings** | **Unknown Scan Types** lists the source scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`. Other warnings say that the token expires soon, how many files are over the size limit, or that the source has no read-only mode. A warning also names each SLA configuration, regulation and note type that DefectDojo Pro already has under the same name, with other values. DefectDojo Pro keeps its own values for them. |
 | **Products** | The totals of the source, and one row for each source Product with its **Include** box and its counts: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
 | **To Be Created** | The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
-| **Not Migrated** | The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
+| **Not Migrated** | What never crosses: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords, system settings, groups, the audit trail and Jira issue links. |
 | **Estimated Duration** | In the summary at the top: how long a Sync of the findings in the included Products takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
 
 The counts cover every Product on the source, also the Products you ignore.
@@ -99,23 +99,24 @@ The counts cover every Product on the source, also the Products you ignore.
 
 Each Sync imports every mapped Record. For each Product the connector sends:
 
-* **The Product and its Product Type.** Description, tags, business criticality, SLA configuration, lifecycle, platform, origin, regulations and metadata.
+* **The Product and its Product Type.** Description, tags, business criticality, SLA configuration, lifecycle, platform, origin, regulations, user records and metadata. If DefectDojo Pro has no lifecycle, platform or origin with the source value, the connector creates it with the source name, icon and order.
 * **The owners of the Product, as members.** The source Product's product manager, technical contact and team manager become members of the Product. They get the Maintainer role. DefectDojo Pro finds each of them by email address.
-* **Every engagement and every test**, with their fields, notes and files. A test with no findings still crosses. An engagement with no tests crosses too.
-* **Every finding**, with every column. A finding also brings its tags, vulnerability ids, CWEs and endpoints with their status. Its notes, files, request and response pairs and metadata come too. It lands in the engagement and the test it came from.
+* **Every engagement and every test**, with their fields, notes and files. The engagement fields include the first contact date, the reason, the tracker and test strategy links, the threat model, API test, pen test and check list boxes, the progress, the threat model path and whether the engagement is active. A test brings its percent complete. A test with no findings still crosses. An engagement with no tests crosses too.
+* **Every finding**, with every column. A finding also brings its tags, vulnerability ids, CWEs and endpoints with their status and tags. Its notes, files, request and response pairs and metadata come too. It lands in the engagement and the test it came from.
+* **The edit history of each note.** Each earlier text of a note crosses with its time and editor.
 * **Risk acceptances**, with their notes and their proof file, linked to the same findings.
 * **Finding groups**, with the same member findings.
 * **Users.** Every user of the source crosses, also the users of a Product you ignore. A finding field that names a user, for example the reporter, points at these accounts.
-* **Reference data**: SLA configurations, development environments, regulations and note types.
+* **Reference data**: SLA configurations, development environments, regulations and note types. If DefectDojo Pro already has one with the same name, it keeps its own values. The preflight report warns when those values differ from the source.
 
-A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated or it logs in. If DefectDojo Pro already has a user with that username, the connector uses it and changes nothing on it. Users join no group, except the default group when their email matches its pattern.
+A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated or it logs in. If DefectDojo Pro already has a user with that username, the connector uses it and changes nothing on it. Users join no group, except the default group when their email matches its pattern. The migration summary names the users that were superusers on the source, so you can decide who gets that role.
 
 Each test keeps its scan type. If DefectDojo Pro has no parser for that scan type, the test gets the scan type `DefectDojo - Connectors Import`. A custom scan type is the usual case. A test with no scan type on the source gets it too. The deduplication hash of each finding stays equal to the hash on the source. Deduplication in DefectDojo Pro gives the same result as on the source.
 
 #### What does not cross
 
 * **Secrets and settings.** Single Sign-On, JIRA instances and credentials, tool configurations and credentials, notification preferences, API tokens, passwords and system settings. Configure them in DefectDojo Pro yourself.
-* **History.** The audit trail of the source stays on the source.
+* **History.** The audit trail of the source stays on the source. Only the edit history of notes crosses.
 * **JIRA issue links.**
 * **Groups, roles and memberships.** Only the owners of each Product become members. Activate the user accounts you need and give them roles.
 * **The product manager, technical contact and team manager fields.** The owners become members instead, and the three fields stay empty.
