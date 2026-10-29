@@ -1,6 +1,8 @@
 import datetime
 import json
 
+from django.test import override_settings
+
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
@@ -966,3 +968,137 @@ class TestGenericCSVParserCellValues(DojoTestCase):
                 self.assertEqual(fix_available, finding.fix_available)
                 self.assertEqual(cvssv3_score, finding.cvssv3_score)
                 self.assertEqual(cwe, finding.cwe)
+
+
+class TestGenericJSONParserPackage(DojoTestCase):
+
+    """The purl, purl_type and namespace fields that build a finding's dependency location."""
+
+    def _dependency_locations(self, finding):
+        return [location for location in finding.unsaved_locations if location.type == "dependency"]
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_purl_builds_the_dependency_location(self):
+        with (get_unit_tests_scans_path("generic") / "generic_purl.json").open(encoding="utf-8") as file:
+            findings = {f.title: f for f in GenericParser().get_findings(file, Test())}
+        self.assertEqual(3, len(findings))
+
+        from_purl = findings["Vulnerable component sent as a purl"]
+        # The purl fills in the component the finding did not name.
+        self.assertEqual("commons-collections", from_purl.component_name)
+        self.assertEqual("3.2.1", from_purl.component_version)
+        (dependency,) = self._dependency_locations(from_purl)
+        self.assertEqual("pkg:maven/commons-collections/commons-collections@3.2.1", dependency.data["purl"])
+        self.assertEqual("code/pom.xml", dependency.data["file_path"])
+
+        from_parts = findings["Vulnerable component sent as purl parts"]
+        (dependency,) = self._dependency_locations(from_parts)
+        self.assertEqual("", dependency.data["purl"])
+        self.assertEqual("npm", dependency.data["purl_type"])
+        self.assertEqual("lodash", dependency.data["name"])
+        self.assertEqual("4.17.20", dependency.data["version"])
+
+        without_package = findings["Vulnerable component without package coordinates"]
+        (dependency,) = self._dependency_locations(without_package)
+        self.assertEqual("", dependency.data["purl"])
+        self.assertEqual("", dependency.data["purl_type"])
+        self.assertEqual("openssl", dependency.data["name"])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_purl_keeps_explicit_component_fields(self):
+        content = json.dumps({"findings": [{
+            "title": "t", "severity": "High", "description": "d",
+            "component_name": "commons-collections:commons-collections", "component_version": "3.2.1-patched",
+            "purl": "pkg:maven/commons-collections/commons-collections@3.2.1",
+        }]})
+        (finding,) = GenericParser().get_findings(TestFile("findings.json", content), Test())
+        self.assertEqual("commons-collections:commons-collections", finding.component_name)
+        self.assertEqual("3.2.1-patched", finding.component_version)
+        (dependency,) = self._dependency_locations(finding)
+        self.assertEqual("pkg:maven/commons-collections/commons-collections@3.2.1", dependency.data["purl"])
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_parse_json_purl_without_locations_still_sets_the_component(self):
+        content = json.dumps({"findings": [{
+            "title": "t", "severity": "High", "description": "d",
+            "purl": "pkg:npm/%40angular/core@16.0.0",
+        }]})
+        (finding,) = GenericParser().get_findings(TestFile("findings.json", content), Test())
+        self.assertEqual("core", finding.component_name)
+        self.assertEqual("16.0.0", finding.component_version)
+        self.assertEqual([], getattr(finding, "unsaved_locations", []))
+
+    def _parse_one(self, **fields):
+        content = json.dumps({"findings": [{"title": "t", "severity": "High", "description": "d", **fields}]})
+        (finding,) = GenericParser().get_findings(TestFile("findings.json", content), Test())
+        return finding
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_unusable_package_fields_never_fail_the_import(self):
+        # Each case imports the finding and builds the location the remaining fields describe.
+        for fields, expected in [
+            ({"purl": "commons-collections"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/a@1?x"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": None, "purl_type": None, "namespace": None}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": 42, "purl_type": ["maven"], "namespace": {"a": 1}}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "   ", "purl_type": " npm "}, {"purl": "", "purl_type": "npm", "namespace": ""}),
+            ({"purl_type": "Maven", "namespace": "g"}, {"purl": "", "purl_type": "maven", "namespace": "g"}),
+            ({"purl_type": "not a type!"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl_type": "1abc"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            # Parses, but its normalized string does not parse again.
+            ({"purl": "pkg:npm/%2F %2F#@~"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            # A NUL character cannot be stored, sent plainly or percent-encoded in any purl part.
+            ({"purl": "pkg:npm/a%00b@1.0"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/%00scope/ab@1"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/ab@1?k=%00"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl": "pkg:npm/ab@1#a%00b"}, {"purl": "", "purl_type": "", "namespace": ""}),
+            ({"purl_type": "npm", "namespace": "a\u0000b"}, {"purl": "", "purl_type": "npm", "namespace": ""}),
+            # An unusable purl falls back to the parts sent beside it.
+            ({"purl": "not-a-purl", "purl_type": "npm"}, {"purl": "", "purl_type": "npm", "namespace": ""}),
+            # A valid purl takes precedence over parts that disagree with it.
+            (
+                {"purl": "pkg:maven/a/b@1", "purl_type": "npm", "namespace": "x"},
+                {"purl": "pkg:maven/a/b@1", "purl_type": "", "namespace": ""},
+            ),
+        ]:
+            with self.subTest(fields=fields):
+                finding = self._parse_one(component_name="lib", component_version="1.0", **fields)
+                self.assertEqual("lib", finding.component_name)
+                (dependency,) = self._dependency_locations(finding)
+                self.assertEqual(expected, {key: dependency.data[key] for key in expected})
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_purl_too_wide_for_the_component_columns(self):
+        # The purl still builds the location; the component fields it cannot fill stay empty.
+        name = "n" * 600
+        finding = self._parse_one(purl=f"pkg:npm/{name}@{'9' * 150}")
+        self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
+        (dependency,) = self._dependency_locations(finding)
+        self.assertTrue(dependency.data["purl"].startswith(f"pkg:npm/{name}@"))
+
+    def test_parse_json_purl_with_nul_does_not_fill_the_component(self):
+        finding = self._parse_one(purl="pkg:npm/a%00b@1.0")
+        self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
+
+    def test_parse_json_purl_fills_the_version_only_for_its_own_package(self):
+        for fields, name, version in [
+            # A different component keeps its own (missing) version.
+            ({"component_name": "foo", "purl": "pkg:npm/bar@2.0"}, "foo", None),
+            # The same component gets the purl's version.
+            ({"component_name": "lodash", "purl": "pkg:npm/lodash@4.17.20"}, "lodash", "4.17.20"),
+            # Blank component fields count as unset, so the purl fills both.
+            ({"component_name": "   ", "component_version": " ", "purl": "pkg:npm/lodash@4.17.20"}, "lodash", "4.17.20"),
+        ]:
+            with self.subTest(fields=fields):
+                finding = self._parse_one(**fields)
+                self.assertEqual(name, finding.component_name)
+                self.assertEqual(version, finding.component_version)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_package_parts_without_a_component_are_logged(self):
+        with self.assertLogs("dojo.tools.generic.json_parser", "WARNING") as logs:
+            finding = self._parse_one(purl_type="npm", namespace="@x")
+        self.assertEqual([], self._dependency_locations(finding))
+        self.assertIn("the finding names no component", "\n".join(logs.output))
