@@ -201,7 +201,7 @@ def split_cvss(value, _temp):
         _temp["CVSS_value"] = float(value)
 
 
-def parse_finding(host, tree):
+def parse_finding(host, glossary):
     ret_rows = []
     issue_row = {}
 
@@ -265,8 +265,7 @@ def parse_finding(host, tree):
                 # DefectDojo does not support cvssv2
                 temp["CVSS_vector"] = None
 
-        search = f".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{gid}']"
-        vuln_item = tree.find(search)
+        vuln_item = glossary.get(gid)
         if vuln_item is not None:
             finding = Finding()
             # Vuln name
@@ -373,6 +372,21 @@ def qualys_parser(qualys_xml_file):
     host_list = tree.find("HOST_LIST")
     finding_list = []
     if host_list is not None:
+        glossary = vuln_details_by_id(tree)
         for host in host_list:
-            finding_list += parse_finding(host, tree)
+            finding_list += parse_finding(host, glossary)
     return finding_list
+
+
+def vuln_details_by_id(tree):
+    """
+    The report's glossary entries by QID, read once per report.
+
+    Looking a QID up with a search from the document root walks every host before it reaches the
+    glossary, so doing that for each finding made a parse cost findings x report size. The first
+    entry for an id wins, as that search returned it.
+    """
+    glossary = {}
+    for vuln_item in tree.iterfind(".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS"):
+        glossary.setdefault(vuln_item.get("id"), vuln_item)
+    return glossary

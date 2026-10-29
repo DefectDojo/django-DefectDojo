@@ -1,4 +1,8 @@
 import datetime
+import io
+import re
+from unittest import mock
+from xml.etree import ElementTree as ET
 
 from django.test import override_settings
 
@@ -7,7 +11,61 @@ from dojo.tools.qualys.parser import QualysParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
+def _report_with_hosts(count):
+    """The sample report with its hosts repeated to ``count`` hosts, each with its own address."""
+    sample = (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").read_text(encoding="utf-8")
+    head, rest = sample.split("<HOST_LIST>", 1)
+    hosts, tail = rest.split("</HOST_LIST>", 1)
+    blocks = re.findall(r"<HOST>.*?</HOST>", hosts, flags=re.DOTALL)
+    repeated = [
+        re.sub(r"<IP>[^<]*</IP>", f"<IP>192.0.2.{index + 1}</IP>", blocks[index % len(blocks)], count=1)
+        for index in range(count)
+    ]
+    return _named(f"{head}<HOST_LIST>{''.join(repeated)}</HOST_LIST>{tail}")
+
+
+def _named(content):
+    report = io.BytesIO(content.encode())
+    report.name = "report.xml"
+    return report
+
+
 class TestQualysParser(DojoTestCase):
+
+    def test_glossary_is_searched_once_per_report_not_once_per_finding(self):
+        # Every finding used to look its QID up with a search from the document root, which walks
+        # all the hosts before it reaches the glossary: the parse was findings x document size.
+        searches = []
+        for method in ("find", "findall", "iterfind"):
+            original = getattr(ET.ElementTree, method)
+
+            def counting(self, path, namespaces=None, *, _original=original):
+                if "GLOSSARY" in path:
+                    searches.append(path)
+                return _original(self, path, namespaces)
+
+            patcher = mock.patch.object(ET.ElementTree, method, counting)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+        small = QualysParser().get_findings(_report_with_hosts(2), Test())
+        small_searches = len(searches)
+        searches.clear()
+        large = QualysParser().get_findings(_report_with_hosts(14), Test())
+
+        self.assertGreater(len(large), len(small))
+        self.assertEqual(small_searches, len(searches))
+
+    def test_repeated_glossary_entry_keeps_the_first(self):
+        sample = (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").read_text(encoding="utf-8")
+        details = re.search(r"<VULN_DETAILS id=\"qid_6\">.*?</VULN_DETAILS>", sample, flags=re.DOTALL).group(0)
+        shadow = re.sub(r"<TITLE><!\[CDATA\[[^\]]*\]\]></TITLE>", "<TITLE><![CDATA[Shadowed]]></TITLE>", details, count=1)
+        report = _named(sample.replace("</VULN_DETAILS_LIST>", f"{shadow}</VULN_DETAILS_LIST>", 1))
+
+        titles = {finding.title for finding in QualysParser().get_findings(report, Test())}
+
+        self.assertIn("QID-6 | DNS Host Name", titles)
+        self.assertNotIn("QID-6 | Shadowed", titles)
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_no_vuln_has_no_findings_first_seen(self):
