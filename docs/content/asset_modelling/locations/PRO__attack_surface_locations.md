@@ -7,7 +7,7 @@ audience: pro
 
 Three location types describe what an organization exposes to the internet: **Domains**, **IP Addresses** and **Certificates**. They sit beside URLs, Dependencies, Source Code, Cloud Resources and Container Images, and parsers and connectors that support them report them.
 
-> These location types require the Locations feature and are enabled as the **Attack Surface Discovery** flag (beta) on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/). Domains, IP addresses and certificates reported while the flag is off are still stored, and they appear as soon as the flag is turned on.
+> These location types require the Locations feature and are enabled as the **External Asset Discovery** flag (beta) on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/). Domains, IP addresses and certificates reported while the flag is off are still stored, and they appear as soon as the flag is turned on.
 
 ## What Each Type Records
 
