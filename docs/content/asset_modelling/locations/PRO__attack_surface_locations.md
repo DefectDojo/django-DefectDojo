@@ -46,6 +46,7 @@ A certificate location is one X.509 certificate.
 
 ## Where to Find Them
 
+- **Domains**, **IP Addresses** and **Certificates** under **Explore > Attack Surface** in the sidebar each list the locations of one type.
 - **All Locations** lists domains, IP addresses and certificates with their type, alongside every other location.
 - The asset **location map** draws three regions: **Domains** grouped by apex domain, **IP Addresses** grouped by network, and **Certificates** grouped by issuer and named by their common name. A group the source did not report, such as an address with no known network, collects under a placeholder.
 - The general locations resource returns them at `/api/v3/locations?type=domain`, `?type=ip` and `?type=cert`.
