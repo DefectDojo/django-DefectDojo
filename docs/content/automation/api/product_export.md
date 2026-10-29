@@ -43,7 +43,7 @@ The response is one JSON object with these keys:
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `finding_templates`, `tool_types`, `tool_configurations` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. |
+| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `tool_types`, `tool_configurations` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. It holds `description`, `tags` (a list of names), `business_criticality`, `sla_configuration` (an SLA id) and three user ids: `product_manager`, `technical_contact`, `team_manager`. Each value is the one `/api/v2/products/` returns, and it is `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
@@ -52,13 +52,6 @@ The response is one JSON object with these keys:
 The initializer reloads the settings fixture when first boot runs again, and that load writes a new `install_id`.
 First boot runs again only when the `DD_ADMIN_USER` account does not exist.
 That re-initialization also resets every other system setting.
-
-### Tool configurations
-
-Each entry of `reference.tool_configurations` has `id`, `name`, `description`, `url`, `authentication_type`, `username`, `auth_title` and `tool_type`.
-`tool_type` is the id of an entry in `reference.tool_types`.
-An entry never has `password`, `ssh`, `api_key` or `extras`. The instance does not send these fields, even to a superuser.
-The importing side must ask for these values again.
 
 The keys of `counts` are in [Counts](#counts). An example product entry, with Locations off:
 
@@ -75,6 +68,13 @@ The manifest takes one parameter:
 An empty value, as in `?max_file_bytes=`, uses the default.
 Any other value that is not a whole number of 0 or more gets a 400.
 To count `files_over_cap`, the server reads the size of every file in storage. On an instance with many files, the manifest can take some time.
+
+### Tool configurations
+
+Each entry of `reference.tool_configurations` has `id`, `name`, `description`, `url`, `authentication_type`, `username`, `auth_title` and `tool_type`.
+`tool_type` is the id of an entry in `reference.tool_types`.
+An entry never has `password`, `ssh`, `api_key` or `extras`. The instance does not send these fields, even to a superuser.
+The importing side must ask for these values again.
 
 ## The product stream: `GET /api/v2/export/products/{id}/`
 
@@ -121,6 +121,10 @@ An example `header` line, shortened:
 {"type": "header", "schema": 1, "generated_at": "...", "max_file_bytes": 10485760, "source": {"version": "...", "install_id": "...", "url": "...", "locations_enabled": true}, "product": {"id": 2, "name": "Security How-to", "prod_type": {"id": 2, "name": "ebooks", ...}, ...}, "engagement_presets": [...], "api_scan_configurations": [...]}
 ```
 
+User fields, for example `lead`, `reporter` and `mitigated_by`, stay user ids.
+Look them up in the manifest's `reference.users`.
+Notes are nested on each line, with their author.
+
 ### Presets and API scan configurations
 
 The `header` line carries the engagement presets and the API scan configurations of the product.
@@ -148,10 +152,6 @@ Each entry of `api_scan_configurations` has these keys:
 | `service_key_1`, `service_key_2`, `service_key_3` | The service keys. Each one is `null` when it is not set. |
 
 An entry has no `product` key. The header already names the product.
-
-User fields, for example `lead`, `reporter` and `mitigated_by`, stay user ids.
-Look them up in the manifest's `reference.users`.
-Notes are nested on each line, with their author.
 
 ### Finding lines
 
