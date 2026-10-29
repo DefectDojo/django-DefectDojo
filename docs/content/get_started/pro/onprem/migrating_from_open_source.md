@@ -331,10 +331,10 @@ The connector creates every user inactive, with no password. No password crosses
 To activate users and send them an invitation:
 
 1. Sign in as a superuser, or as a user with the Global Owner role.
-2. Open **Settings > Users & Permissions > Users**, and select the users you need. Do not select your own account.
+2. Open **Settings > Users & Permissions > Users**. The page shows **Active Users** first, so it hides the migrated users. Choose **Inactive Users** in the view list above the table. Then select the users you need. Do not select your own account.
 3. Click **Activate and Invite**, and confirm. Each active user takes a license seat.
 
-Do not use the **Active** box on **Edit User** for this. The box activates a user, but it sends no link. To send the link to such a user, select the user and click **Activate and Invite**.
+Do not use the **Active** box on **Edit User** for this. The box activates a user, but it sends no link. To send the link to such a user, choose **All Users**, select the user, and click **Activate and Invite**.
 
 For each selected user, DefectDojo Pro does the following:
 
@@ -342,7 +342,7 @@ For each selected user, DefectDojo Pro does the following:
 * It emails the user a link to set a password, if the user has no password.
 * It skips service users, and it skips users that are active and have a password.
 
-The user opens the link and chooses a password. The link stops working when the user sets a password or signs in. It also stops after 3 days, or after the time you set in `DD_PASSWORD_RESET_TIMEOUT`. To make a new link, click **Activate and Invite** again.
+The user opens the link and chooses a password. The link stops working when the user sets a password or signs in. It also stops after 3 days, or after the time you set in `DD_PASSWORD_RESET_TIMEOUT`. To make a new link, choose **All Users**, select the user, and click **Activate and Invite** again.
 
 If an email cannot go out, DefectDojo Pro still activates the user. The **Pass On These Links** window then lists each such user with the link and a copy button. An email cannot go out in these cases:
 
@@ -350,11 +350,11 @@ If an email cannot go out, DefectDojo Pro still activates the user. The **Pass O
 * The deployment has no working email server, or the send fails.
 * The address reached its mail limit.
 
-Copy each link and send it to its user yourself. A link works like a password, so send it only to that user. The window shows the links once. If you close it before you copy them, click **Activate and Invite** again for the same users.
+Copy each link and send it to its user yourself. A link works like a password, so send it only to that user. The window shows the links once. If you close it before you copy them, choose **All Users**, select the same users, and click **Activate and Invite** again.
 
 How each sign-in method treats a migrated user:
 
-* **Password.** The user signs in with the new password. The **Forgot Password?** link on the login page works only for a user that already has a password. Until the user sets one with the link, **Forgot Password?** sends nothing.
+* **Password.** The user signs in with the new password. The **Forgot Password?** link on the login page works only for a user that already has a password, and only while **Allow Password Reset** is on in [Login Settings](/admin/sso/pro__login_settings/). Until the user sets one with the link, **Forgot Password?** sends nothing.
 * **OAuth and OIDC.** Social sign-in finds the user by email address, and only after you activate the user. Before that, the sign-in stops with this message: "This account came from a migration and is not active yet. Ask an administrator to activate it." SSO creates no second account for the user, and it never activates anyone.
 * **SAML.** SAML finds the user by username, and it refuses a user that is not active. Activate the users before they sign in with SAML.
 
