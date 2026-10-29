@@ -32,6 +32,6 @@ The assessment comes from the host's Spotlight vulnerabilities, so it needs the 
 
 #### Unmanaged Devices
 
-With [Unmanaged Devices](/asset_modelling/pro__unmanaged_devices/) turned on and **Report Unmanaged Devices** enabled on the connection, each sync also reads the hosts Falcon Discover classifies as unmanaged: devices Falcon sensors observed on the network that have no sensor of their own. They are listed under **Unmanaged Devices** with their hostname, addresses, OS, how Falcon found them (passive or active) and Falcon's confidence that each is real.
+With [Asset Discovery](/asset_modelling/pro__unmanaged_devices/) turned on and **Report Unmanaged Devices** enabled on the connection, each sync also reads the hosts Falcon Discover classifies as unmanaged: devices Falcon sensors observed on the network that have no sensor of their own. They are listed under **Asset Discovery** with their hostname, addresses, OS, how Falcon found them (passive or active) and Falcon's confidence that each is real.
 
 This needs a Falcon Discover subscription and the **Assets: Read** scope on the API client. A client without them logs a warning and syncs everything else normally.
