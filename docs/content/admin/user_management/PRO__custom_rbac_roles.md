@@ -202,6 +202,18 @@ Upgrading from a version where Configuration Permissions were set on the User an
 
 An instance with its own authentication backend (a subclass of Django's `ModelBackend` named in `AUTHENTICATION_BACKENDS`) must give that class the `RoleAwarePermissionsMixin` from `pro.authorization.backends`, or `manage.py check` refuses to start: without it the backend would keep answering settings-page checks from the old per-user rows.
 
+## Seeing what a user or group holds
+
+Because Global Roles add up, the permissions someone actually holds can come from several roles at once, some of them through a Group. The **Permissions** column on the **All Users** and **All Groups** tables shows the result. Select **View** on a row to open the permission grid for that user or group, read-only:
+
+* Each Global Role the user or group holds is listed above the grid with its own color, and with how it is held: **Assigned directly**, or **Through group** followed by the group's name.
+* Every granted permission is a checked box filled with the color of the role that grants it. A permission that two roles both grant is split between their colors, and hovering it names every role behind it.
+* An empty box is a permission none of the roles grant.
+
+The grid covers Global Roles only. A role held on a single Organization or Asset applies to that record alone and is listed on its Permissions dialog instead. A superuser holds every permission whatever roles they have, so their dialog says so instead of drawing the grid. An inactive user's dialog notes that none of the permissions apply until the user is reactivated.
+
+The column is offered to superusers and Global Owners, the same people who can read and assign Global Roles.
+
 ## Role history
 
 Custom roles keep an audit trail. Open **Role History** from a role's **⋮** menu to see which permissions were granted or revoked, by whom, and when, alongside changes to who holds the role.
