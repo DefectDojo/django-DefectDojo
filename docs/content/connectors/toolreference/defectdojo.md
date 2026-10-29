@@ -91,7 +91,7 @@ In the **Products** section, each source Product has an **Include** box. Clear i
 | **Products** | The totals of the source, and one row for each source Product with its **Include** box and its counts: engagements, tests, findings, endpoints, notes, files, risk acceptances and finding groups. |
 | **To Be Created** | The users and the reference data that DefectDojo Pro does not have yet: SLA configurations, environments, regulations and note types. A source user whose username already exists in DefectDojo Pro is reused. The card counts those users. |
 | **Not Migrated** | The settings that never cross: Single Sign-On, Jira, tool configurations, notifications, API tokens, passwords and system settings. |
-| **Estimated Duration** | In the summary at the top: how long a Sync of every finding takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
+| **Estimated Duration** | In the summary at the top: how long a Sync of the findings in the included Products takes. Before the first Sync, the estimate uses a default rate. Then it uses the rate of the last successful Sync. |
 
 The counts cover every Product on the source, also the Products you ignore.
 
