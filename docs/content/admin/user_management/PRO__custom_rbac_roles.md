@@ -206,8 +206,8 @@ An instance with its own authentication backend (a subclass of Django's `ModelBa
 
 Because Global Roles add up, the permissions someone actually holds can come from several roles at once, some of them through a Group. The **Permissions** column on the **All Users** and **All Groups** tables shows the result. Select **View** on a row to open the permission grid for that user or group, read-only:
 
-* Each Global Role the user or group holds is listed above the grid with its own color, and with how it is held: **Assigned directly**, or **Through group** followed by the group's name.
-* Every granted permission is a checked box filled with the color of the role that grants it. A permission that two roles both grant is split between their colors, and hovering it names every role behind it.
+* Each Global Role the user or group holds is listed above the grid with a letter (**A**, **B**, **C** and on), and with how it is held: **Assigned directly**, or **Through group** followed by the group's name.
+* Every granted permission shows the letter of each role that grants it, side by side, so a permission that three roles grant shows three letters. Hovering it names every role behind it, and the group a role comes through.
 * An empty box is a permission none of the roles grant.
 
 The grid covers Global Roles only. A role held on a single Organization or Asset applies to that record alone and is listed on its Permissions dialog instead. A superuser holds every permission whatever roles they have, so their dialog says so instead of drawing the grid. An inactive user's dialog notes that none of the permissions apply until the user is reactivated.
