@@ -166,6 +166,7 @@ Key facts:
 - [Container Image Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__container_image_locations/): Container Image locations model the image a finding was found in, identified by registry, repository and digest, and the assets that run it
 - [AI Inventory (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__ai_inventory/): See the AI in every scanned repository: coding assistants, MCP servers, models, AI packages, AI services, agent skills and AI provider keys
 - [Exporting an AIBOM (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__exporting_an_aibom/): Export an Asset's AI inventory as a CycloneDX 1.6 AI bill of materials, with evidence and authorization decisions
+- [Domain, IP Address and Certificate Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__attack_surface_locations/): Domain, IP address and certificate locations describe an organization's internet-facing attack surface: the DNS names, addresses and TLS certificates that parsers and connectors report
 - [Knowledge Check (Pro)](https://docs.defectdojo.com/asset_modelling/locations/quiz/): Test what you know about Locations with 19 multiple-choice questions
 - [Components (Pro)](https://docs.defectdojo.com/asset_modelling/components/pro__components/): Tracking third-party libraries and software components in DefectDojo Pro
 - [Services](https://docs.defectdojo.com/asset_modelling/components/services/): Tracking Microservices
