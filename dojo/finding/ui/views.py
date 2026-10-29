@@ -34,6 +34,7 @@ from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
     do_false_positive_history_batch,
+    manual_duplicate_hides_open_finding,
     match_finding_to_existing_findings,
 )
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
@@ -3070,6 +3071,21 @@ def get_missing_mandatory_notetypes(finding):
     return Note_Type.objects.filter(id__in=notes_to_be_added)
 
 
+ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE = (
+    "Marking finding as duplicate/original failed as they are not in the same engagement "
+    "and deduplication_on_engagement is enabled for at least one of them"
+)
+
+
+def duplicate_onto_mitigated_message(duplicate, original):
+    """The refusal shown when a manual duplicate mark would hide an open finding under a mitigated one."""
+    return _(
+        "Finding %(original)s is mitigated, so marking finding %(duplicate)s as its duplicate would hide "
+        "a finding that is still open. Reopen finding %(original)s first, or mark it as a duplicate of "
+        "finding %(duplicate)s instead.",
+    ) % {"original": original.id, "duplicate": duplicate.id}
+
+
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
 
@@ -3085,13 +3101,24 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
             messages.add_message(
                 request,
                 messages.ERROR,
-                ("Marking finding as duplicate/original failed as they are not in the same engagement "
-                 "and deduplication_on_engagement is enabled for at least one of them"),
+                ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE,
                 extra_tags="alert-danger",
             )
             return redirect_to_return_url_or_else(
                 request, reverse("view_finding", args=(duplicate.id,)),
             )
+
+    if manual_duplicate_hides_open_finding(duplicate, original):
+        root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+        messages.add_message(
+            request,
+            messages.ERROR,
+            duplicate_onto_mitigated_message(duplicate, root),
+            extra_tags="alert-danger",
+        )
+        return redirect_to_return_url_or_else(
+            request, reverse("view_finding", args=(duplicate.id,)),
+        )
 
     duplicate.duplicate = True
     duplicate.active = False
@@ -3160,6 +3187,16 @@ def reset_finding_duplicate_status(request, duplicate_id):
 
 
 def set_finding_as_original_internal(user, finding_id, new_original_id):
+    """Make ``new_original`` the original of ``finding``'s cluster. True on success, False when refused."""
+    return set_finding_as_original_with_reason(user, finding_id, new_original_id) is None
+
+
+def set_finding_as_original_with_reason(user, finding_id, new_original_id):
+    """
+    Make ``new_original`` the original of ``finding``'s cluster.
+
+    Returns None on success, or the message explaining why it was refused.
+    """
     finding = get_object_or_404(Finding, id=finding_id)
     new_original = get_object_or_404(
         Finding.objects.filter(test__engagement__product=finding.test.engagement.product),
@@ -3169,7 +3206,12 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     if finding.test.engagement != new_original.test.engagement:
         if (finding.test.engagement.deduplication_on_engagement
                 or new_original.test.engagement.deduplication_on_engagement):
-            return False
+            return ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE
+
+    # The finding itself, and the cluster root it currently points at, both end up under new_original.
+    for moved in (finding, finding.duplicate_finding if finding.duplicate else None):
+        if moved is not None and moved != new_original and manual_duplicate_hides_open_finding(moved, new_original):
+            return duplicate_onto_mitigated_message(moved, new_original)
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
@@ -3216,20 +3258,19 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     new_original.duplicate_finding = None
     new_original.save(dedupe_option=False)
 
-    return True
+    return None
 
 
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
-    success = set_finding_as_original_internal(
+    refusal = set_finding_as_original_with_reason(
         request.user, finding_id, new_original_id,
     )
-    if not success:
+    if refusal:
         messages.add_message(
             request,
             messages.ERROR,
-            ("Marking finding as duplicate/original failed as they are not in the same engagement "
-             "and deduplication_on_engagement is enabled for at least one of them"),
+            refusal,
             extra_tags="alert-danger",
         )
 

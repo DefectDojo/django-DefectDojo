@@ -1,6 +1,11 @@
 import logging
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import (
+    NON_FIELD_ERRORS,
+    RequestDataTooBig,
+    TooManyFieldsSent,
+    ValidationError,
+)
 from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
 from django.utils.log import log_response
@@ -13,6 +18,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_409_CONFLICT,
     HTTP_410_GONE,
+    HTTP_413_REQUEST_ENTITY_TOO_LARGE,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.views import exception_handler
@@ -21,6 +27,7 @@ from dojo.endpoint.models import EndpointDeprecatedError
 from dojo.location.api.deprecation import sunset_body
 from dojo.models import System_Settings
 from dojo.product_announcements import ErrorPageProductAnnouncement
+from dojo.utils import restricted_delete_message
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +49,16 @@ UNIQUE_VIOLATION_RESPONSE_MESSAGE = (
     "The request conflicts with an existing record because a unique field value "
     "already exists. Retrieve or update the existing record instead of creating "
     "a new one."
+)
+
+# Returned for a request whose body is larger than DATA_UPLOAD_MAX_MEMORY_SIZE or
+# that carries more form fields than DATA_UPLOAD_MAX_NUMBER_FIELDS. The message
+# echoes none of the oversized payload and points at the operator-tunable limits.
+UPLOAD_LIMIT_RESPONSE_MESSAGE = (
+    "The request exceeded the server's upload limits (the body is too large, or it "
+    "carries too many form fields). Reduce the size of the request, or ask your "
+    "administrator to raise DD_DATA_UPLOAD_MAX_MEMORY_SIZE / "
+    "DD_DATA_UPLOAD_MAX_NUMBER_FIELDS."
 )
 
 
@@ -85,18 +102,18 @@ def _log_server_error(exc, context, response):
 
 # A message that does not end a sentence gets a period, so the next field's message does not run on from it.
 SENTENCE_ENDS = (".", "!", "?", "\u3002", "\uff01", "\uff1f")
-# Keys of an error map that hold messages rather than name a field: DRF's non-field key, and a "detail" a view
-# raised itself.
-UNNAMED_ERROR_KEYS = frozenset({"detail"})
+# Keys of an error map that hold messages rather than name a field: DRF's non-field key, Django's ("__all__"),
+# and a "detail" a view raised itself.
+UNNAMED_ERROR_KEYS = frozenset({"detail", NON_FIELD_ERRORS})
 
 
 def _readable_validation_message(detail, path=()):
     """
-    The messages of a serializer ``ValidationError`` as plain sentences.
+    The messages of a serializer or Django ``ValidationError`` as plain sentences.
 
     Each field's messages follow its name (a nested field's dotted path); messages that name no field
-    (``non_field_errors``, ``detail``) read without one. ``str()`` of the error would be a Python repr of
-    ``ErrorDetail`` objects instead.
+    (``non_field_errors``, Django's ``__all__``, ``detail``) read without one. ``str()`` of the error would be a
+    Python repr instead.
     """
     if isinstance(detail, dict):
         unnamed = UNNAMED_ERROR_KEYS | {api_settings.NON_FIELD_ERRORS_KEY}
@@ -122,16 +139,19 @@ def custom_exception_handler(exc, context):
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {"message": _("JSON request content is malformed")}
     elif isinstance(exc, RestrictedError):
-        # An object cannot be deleted because it has dependent objects.
+        # An object cannot be deleted because it has dependent objects; say how many and of which kinds.
         response = Response()
         response.status_code = HTTP_409_CONFLICT
-        response.data = {}
-        response.data["message"] = str(exc)
+        response.data = {"message": restricted_delete_message(exc)}
     elif isinstance(exc, ValidationError):
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {}
-        response.data["message"] = str(exc)
+        # Its messages as sentences, each field's after its name; str() of the error is a list or dict repr.
+        # An error with no message text gets no "message", as an empty serializer error map does.
+        messages = exc.message_dict if hasattr(exc, "error_dict") else exc.messages
+        if message := _readable_validation_message(messages):
+            response.data["message"] = message
         ErrorPageProductAnnouncement(response=response)
     elif isinstance(exc, IntegrityError) and _is_unique_violation(exc):
         # The row the caller wanted to create already exists. Serializers built
@@ -164,6 +184,26 @@ def custom_exception_handler(exc, context):
         )
         response = Response(sunset_body())
         response.status_code = HTTP_410_GONE
+    elif isinstance(exc, (RequestDataTooBig, TooManyFieldsSent)):
+        # Django's request parser raises these SuspiciousOperation subclasses while
+        # a view (or a permission check) first evaluates request.data: the body is
+        # over DATA_UPLOAD_MAX_MEMORY_SIZE, or there are more form fields than
+        # DATA_UPLOAD_MAX_NUMBER_FIELDS. DRF's default handler returns None for
+        # them, so without this branch they fall through to the generic 500 below
+        # and page on-call through error reporting for a request the caller can
+        # fix. Answer 413 with an actionable message, and log at info so an
+        # expected client-side limit does not read as an outage.
+        # (The import/reimport permission classes catch these earlier and raise a
+        # ValidationError; this branch covers every other write path, e.g. a
+        # finding PATCH, where request.data is only parsed inside the handler.)
+        logger.info(
+            "request exceeded upload limits on %s: %s",
+            (context or {}).get("request", "unknown request"),
+            type(exc).__name__,
+        )
+        response = Response()
+        response.status_code = HTTP_413_REQUEST_ENTITY_TOO_LARGE
+        response.data = {"message": UPLOAD_LIMIT_RESPONSE_MESSAGE}
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
             exception_message = str(exc.args[0])

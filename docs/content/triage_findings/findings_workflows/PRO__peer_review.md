@@ -19,13 +19,13 @@ Requesting a review sets the Finding to **Under Review** and notifies the review
 
 When a review has been requested from several people, any one of them can take it:
 
-* On the Finding, use **Claim Review** in the Finding menu, or the button in the review banner.
+* On the Finding, use **Claim Review** in the Finding menu, or the button in the review banner, then submit the **Claim Review** form. From [My Work](/metrics_reports/dashboards/pro__my_work/), the **Claim Review** next step opens the same form.
 * The Finding then shows who holds the review, on the Finding itself, as a **Claimed By** column in Finding lists, and in that person's [My Work](/metrics_reports/dashboards/pro__my_work/) queue.
 
 Once a review is claimed:
 
 * Only the person holding it, the person who requested it, or a superuser can **Clear Review**. Other eligible reviewers are told who holds it instead.
-* The holder can hand it back with **Release Review**, which returns it to the pool without ending the review.
+* The holder can hand it back with **Release Review** and its form, which returns it to the pool without ending the review.
 
 If two people claim at the same moment, one succeeds and the other is told who won — the review can only ever be held by one person.
 
@@ -65,6 +65,14 @@ Review asks someone to *look*. Assignment makes someone *responsible*, and it do
 * Each person's assignments appear in their [My Work](/metrics_reports/dashboards/pro__my_work/) queue.
 
 You can only assign a Finding to somebody who can already see it. Assignment does not grant access.
+
+### When a Finding closes
+
+An assignment is finished once its Finding closes: the Finding is mitigated, risk accepted, or marked False Positive, Out of Scope or Duplicate, or it is otherwise made inactive.
+
+* The Finding's assignees are cleared. They leave the **Assignees** column, the assignee filter, the Finding page and the reports' **Assignees** column, and the Finding leaves their My Work queue.
+* Reopening the Finding does not bring them back. Assign someone again if the reopened Finding needs an owner.
+* A closed Finding cannot be assigned. Saving new assignees on one is refused with a message saying so, the bulk editor skips the closed Findings in a selection and names them, and a Triage Engine rule that sets assignees leaves closed Findings alone.
 
 The [Triage Engine](/automation/rules_engine/) can set assignees automatically: choose **Set Users** and the **assignees** field.
 

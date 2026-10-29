@@ -280,9 +280,27 @@ You can use SLAs as a way to represent your organizations remediation policies. 
 * In **DefectDojo Pro**, SLA performance is also tracked on the [Executive and Remediation Insights](/metrics_reports/pro_metrics/pro__overview/) dashboards under **Overview > Insights**.
 * SLA compliance can also be surfaced on a custom [dashboard](/metrics_reports/dashboards/custom-dashboards/) in **DefectDojo Pro** — for example with an SLA Burndown or a filtered Count widget.
 
+### How SLA days are counted
+
+Every SLA count in DefectDojo Pro (the SLA column on the Findings and Finding Groups lists, a
+Finding's SLA row, the Within SLA and Outside of SLA counts on the Insights dashboards, the Past SLA
+charts and the dashboard widgets) uses the same calendar and the same rule:
+
+* **Today is your date.** The Pro UI counts from the date in your browser's time zone, so the
+  number of days matches the SLA Expiration Date you see.  The API, notifications and scheduled
+  reports count from the instance's time zone.
+* **A Finding due today is within SLA.** Its SLA column reads **Due Today** with a ✅ green check.
+  It moves outside of SLA the next day, at -1.
+* **The Insights drill-downs split the count exactly.** **Within SLA** opens the active Findings with
+  0 or more SLA days left, and **Outside of SLA** opens those below 0, so every active Finding with
+  an SLA appears in one of the two lists.
+* **A Finding Group shows its fewest SLA days.** While the group has an open Finding, the SLA column
+  counts only its open Findings; once every Finding in it is Mitigated, it shows the fewest days any
+  of them had left when it was closed.
+
 ### Mitigated Within SLA status
 
-If a Finding is successfully Mitigated by the SLA deadline, the Finding will record a ✅ green check mark in the Mitigated Within SLA column.
+If a Finding is successfully Mitigated by the SLA deadline, the Finding will record a ✅ green check mark in the Mitigated Within SLA column.  A Finding Mitigated on the day its SLA expires is within SLA: the date it was Mitigated on is compared with its SLA Expiration Date, in your time zone.
 
 ![image](images/sla_mitigated_within.png)
 
