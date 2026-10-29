@@ -44,7 +44,7 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 | **Provenance** | References | **References** adds a `Migrated from <source>/finding/<id>` line to the references of each finding. **None** leaves it out. |
 | **Minimum Severity** | Info | Skips findings below this severity. **Info** imports every finding. |
 | **Maximum File Size (MB)** | `10` | The largest file the connector imports, in megabytes. The highest value is `24`. A larger file stays on the source. |
-| **Frequency** (Discovery and Synchronization) | One-Time | **One-Time** runs Discover or Sync only when you click its button. Pick a recurring frequency to run it on a schedule instead. |
+| **Frequency** (Discovery and Synchronization) | One-Time | **One-Time** runs Discover or Sync only when you click its button. **Daily**, **Weekly** (on the weekday you pick) and **Monthly** (on the first day of each month) run it on a schedule instead, at the time you pick. |
 | **Delete the Connection After the Migration** | Off | Shown when the Synchronization frequency is **One-Time**. When the migration ends without errors and DefectDojo Pro has imported its findings, the connection is deleted. The Products, findings and everything else the Sync brought stay. |
 
 When a One-Time Sync ends and DefectDojo Pro has imported its findings, one notification sums up the migration: the findings it brought, the users it created inactive, and the settings to set up again. It uses the **Connector health warning** notification, so it follows your settings for that notification, and it stays in the alerts after the connection is deleted.
@@ -65,11 +65,11 @@ A source on 3.4.300 has no read-only mode. The preflight report warns about it, 
 
 #### Records
 
-Discover creates one Record per Product on the source. The Record carries the Product's name and Product Type. It also carries the tags, the business criticality, the SLA configuration and the owner emails. Mapping applies them to the Product. The Records list does not show them.
+Discover creates one Record per Product on the source. The Record carries the Product's name and Product Type. It also carries the tags, the business criticality, the SLA configuration and the owner emails. Mapping applies them to the Product.
 
 **Auto-Mapping** is always on for this connector. Each Record gets a Product of the same name, under a Product Type of the same name. If DefectDojo Pro already has a Product of that name, the Record maps to it. The [Managing Records](/connectors/upstream/manage_records/#how-auto-mapping-chooses-the-product) page explains the order.
 
-To move a source Product into a Product with another name that already exists in DefectDojo Pro, edit its Record on the records page (**Edit Record**) before you begin the migration. To leave a source Product behind, clear its **Include** box on the migration page.
+To leave a source Product behind, clear its **Include** box on the migration page. This connector has no records page: the migration page replaces it.
 
 A Record is keyed on the install id of the source and the id of the Product. If the source moves to a new hostname, update the **Location URL** field. The Records stay the same.
 
@@ -77,7 +77,7 @@ A Record is keyed on the install id of the source and the id of the Product. If 
 
 Each Discover also stores a preflight report. It shows what a Sync brings before you run one. The report is on the connection's migration page. To open the page, click **Open Migration** on the connector's tile on **Connect > Upstream**, above **Manage Configuration**. After a save on **Edit Configuration**, the page opens too. Before the first Discover, the page says "Run a discovery to see the preflight report."
 
-The top of the page shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. **Begin Migration** is beside it and runs a Sync, and the gear menu holds **Discover**, **Edit Configuration** and **Manage Records and Operations**. During a migration a progress bar counts the imported findings against the expected ones. Then the summary shows **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the migration, it also shows **Connection Deleted**.
+The top of the page shows a short summary: the number of findings in the Products you include, the estimated duration and the number of warnings. **Begin Migration** is beside it and runs a Sync, and the gear menu holds **Discover** and **Edit Configuration**. During a migration a progress bar counts the imported findings against the expected ones. Then the summary shows **Migration Complete** once DefectDojo Pro has imported every finding, or **Migration Failed**. If the connection deletes itself after the migration, it also shows **Connection Deleted**.
 
 If an import stops before every finding arrives (for example, when a worker process is killed), the page shows **Migration Stalled** once no import has worked on it for 45 minutes. Click **Begin Migration** again to finish it: findings that already arrived are matched, not duplicated. A stalled migration sends no summary and never deletes its connection. Below the summary, the page shows the report in sections, and **History** lists every Discover and Sync. The table below lists the report sections.
 

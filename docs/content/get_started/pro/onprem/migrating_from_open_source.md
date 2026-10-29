@@ -290,7 +290,7 @@ Confirm the following before you add the connector.
 2. Click **Add Configuration** on the **DefectDojo Migration** tile.
 3. Enter the URL of the source in **Location URL** and the superuser API key in **API Token**.
 4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field. Auto-Mapping is always on for this connector: each source Product gets a Product of the same name, under a Product Type of the same name.
-5. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Migration**. Pick a recurring frequency if you want to sync on a schedule until you cut over.
+5. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Migration**. Pick **Daily**, **Weekly** or **Monthly** if you want to sync on a schedule until you cut over.
 6. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. With **One-Time**, Discover then starts at once and the connection's migration page opens.
 
 The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page covers the shared parts of the form: the schedule and the label.
@@ -347,7 +347,7 @@ The open source instance keeps running until that day, so your team loses no wor
 - Open source instance on 3.4.300 or later, served over HTTPS
 - Superuser created on the source for the connector, with an API v2 key
 - Connector added in **Connect > Upstream**
-- Discover run, with every Record mapped or ignored
+- Discover run, with **Include** cleared on every Product to leave behind
 - Preflight report read: warnings, counts, what is created and what does not cross
 - First Sync run, finding counts checked, and validated
 - SSO, notifications and tool credentials set up in DefectDojo Pro
