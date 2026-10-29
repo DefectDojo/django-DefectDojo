@@ -21,6 +21,8 @@ from dojo.authorization.api_permissions import IsSuperUser
 from dojo.development_environment.api.serializer import DevelopmentEnvironmentSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
+    ExportAPIScanConfigurationSerializer,
+    ExportEngagementPresetSerializer,
     ExportEngagementSerializer,
     ExportFindingSerializer,
     ExportParamsSerializer,
@@ -39,10 +41,12 @@ from dojo.models import (
     Dojo_User,
     Endpoint,
     Engagement,
+    Engagement_Presets,
     FileUpload,
     Finding,
     Finding_Group,
     Product,
+    Product_API_Scan_Configuration,
     Product_Type,
     Risk_Acceptance,
     Test,
@@ -164,6 +168,13 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
         "max_file_bytes": max_file_bytes,
         "source": source_block(),
         "product": ExportProductSerializer(product, context=context).data,
+        "engagement_presets": ExportEngagementPresetSerializer(
+            Engagement_Presets.objects.filter(product=product).order_by("id").prefetch_related("test_type", "network_locations"),
+            many=True,
+        ).data,
+        "api_scan_configurations": ExportAPIScanConfigurationSerializer(
+            Product_API_Scan_Configuration.objects.filter(product=product).order_by("id"), many=True,
+        ).data,
     })
     counts = dict.fromkeys(COUNT_KEYS, 0)
     finding_groups = set()

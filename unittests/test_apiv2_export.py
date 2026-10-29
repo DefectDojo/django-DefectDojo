@@ -32,12 +32,15 @@ from dojo.models import (
     Dojo_User,
     DojoMeta,
     Engagement,
+    Engagement_Presets,
     FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
+    Network_Locations,
     Notes,
     Product,
+    Product_API_Scan_Configuration,
     Product_Platform,
     Risk_Acceptance,
     System_Settings,
@@ -203,6 +206,11 @@ class TestProductExportStream(DojoAPITestCase):
     @classmethod
     def setUpTestData(cls):
         seed_product(cls)
+        cls.preset = Engagement_Presets.objects.create(title="Quarterly", notes="n", scope="s", product_id=2)
+        cls.preset.test_type.add(*Test_Type.objects.filter(name__in=["ZAP Scan", "BURP Scan"]))
+        cls.preset.network_locations.add(Network_Locations.objects.create(location="VPN"))
+        Engagement_Presets.objects.create(title="Other", scope="", product_id=1)
+        Product_API_Scan_Configuration.objects.create(product_id=1, tool_configuration_id=3, service_key_1="other")
         cls.url = reverse("export-product", args=[2])
         client = APIClient()
         client.force_authenticate(cls.admin)
@@ -303,6 +311,27 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertNotIn("findings_list", header["product"])
         self.assertNotIn("findings_count", header["product"])
         datetime.fromisoformat(header["generated_at"])
+
+    def test_header_carries_engagement_presets_and_api_scan_configurations(self):
+        header = self.lines[0]
+        (preset,) = header["engagement_presets"]
+        self.assertEqual(self.preset.id, preset["id"])
+        self.assertEqual(("Quarterly", "n", "s"), (preset["title"], preset["notes"], preset["scope"]))
+        self.assertEqual(["BURP Scan", "ZAP Scan"], sorted(preset["test_type"]))
+        self.assertEqual(["VPN"], preset["network_locations"])
+        self.assertNotIn("product", preset)
+        self.assertEqual(
+            [{"id": 1, "tool_configuration": 3, "service_key_1": "dojo_sonar_key", "service_key_2": None, "service_key_3": None}],
+            header["api_scan_configurations"],
+        )
+        empty = ndjson_lines(self.client.get(reverse("export-product", args=[3])))[0]
+        self.assertEqual(([], []), (empty["engagement_presets"], empty["api_scan_configurations"]))
+
+    def test_the_stream_adds_no_new_line_type(self):
+        self.assertEqual(
+            {"header", "engagement", "test", "finding", "risk_acceptance", "end"},
+            {line["type"] for line in self.lines},
+        )
 
     def test_line_order_is_flat_by_type_then_id(self):
         rank = {"engagement": 0, "test": 1, "finding": 2, "risk_acceptance": 3}

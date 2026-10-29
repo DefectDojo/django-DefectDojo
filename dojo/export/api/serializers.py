@@ -9,7 +9,7 @@ from dojo.engagement.api.serializer import EngagementSerializer
 from dojo.finding.api.serializer import BurpRawRequestResponseMultiSerializer, FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
-from dojo.models import FileUpload, Finding, Risk_Acceptance
+from dojo.models import Engagement_Presets, FileUpload, Finding, Product_API_Scan_Configuration, Risk_Acceptance
 from dojo.notes.api.serializer import NoteSerializer
 from dojo.product.api.serializer import ProductSerializer
 from dojo.product_type.api.serializer import ProductTypeSerializer
@@ -137,6 +137,21 @@ class ExportToolConfigurationSerializer(ToolConfigurationSerializer):
         model = Tool_Configuration
         exclude = ("extras",)
         extra_kwargs = ToolConfigurationSerializer.Meta.extra_kwargs
+
+
+class ExportEngagementPresetSerializer(serializers.ModelSerializer):
+    test_type = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    network_locations = serializers.SlugRelatedField(slug_field="location", many=True, read_only=True)
+
+    class Meta:
+        model = Engagement_Presets
+        exclude = ("product",)
+
+
+class ExportAPIScanConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_API_Scan_Configuration
+        exclude = ("product",)
 
 
 class ExportUserContactInfoSerializer(UserContactInfoSerializer):
