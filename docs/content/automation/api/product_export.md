@@ -43,7 +43,7 @@ The response is one JSON object with these keys:
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. |
+| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `finding_templates`, `tool_types`, `tool_configurations` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. It holds `description`, `tags` (a list of names), `business_criticality`, `sla_configuration` (an SLA id) and three user ids: `product_manager`, `technical_contact`, `team_manager`. Each value is the one `/api/v2/products/` returns, and it is `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
@@ -52,6 +52,13 @@ The response is one JSON object with these keys:
 The initializer reloads the settings fixture when first boot runs again, and that load writes a new `install_id`.
 First boot runs again only when the `DD_ADMIN_USER` account does not exist.
 That re-initialization also resets every other system setting.
+
+### Tool configurations
+
+Each entry of `reference.tool_configurations` has `id`, `name`, `description`, `url`, `authentication_type`, `username`, `auth_title` and `tool_type`.
+`tool_type` is the id of an entry in `reference.tool_types`.
+An entry never has `password`, `ssh`, `api_key` or `extras`. The instance does not send these fields, even to a superuser.
+The importing side must ask for these values again.
 
 The keys of `counts` are in [Counts](#counts). An example product entry, with Locations off:
 
@@ -101,7 +108,7 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 
 | `type` | What the line holds |
 |--------|---------------------|
-| `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest) and `product`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. |
+| `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest), `product`, `engagement_presets` and `api_scan_configurations`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. See [Presets and API scan configurations](#presets-and-api-scan-configurations) for the other two. |
 | `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it. `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
 | `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. |
 | `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
@@ -111,8 +118,36 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 An example `header` line, shortened:
 
 ```text
-{"type": "header", "schema": 1, "generated_at": "...", "max_file_bytes": 10485760, "source": {"version": "...", "install_id": "...", "url": "...", "locations_enabled": true}, "product": {"id": 2, "name": "Security How-to", "prod_type": {"id": 2, "name": "ebooks", ...}, ...}}
+{"type": "header", "schema": 1, "generated_at": "...", "max_file_bytes": 10485760, "source": {"version": "...", "install_id": "...", "url": "...", "locations_enabled": true}, "product": {"id": 2, "name": "Security How-to", "prod_type": {"id": 2, "name": "ebooks", ...}, ...}, "engagement_presets": [...], "api_scan_configurations": [...]}
 ```
+
+### Presets and API scan configurations
+
+The `header` line carries the engagement presets and the API scan configurations of the product.
+Each key is a list, sorted by id. The list is empty when the product has none.
+The stream has no separate line type for them.
+
+Each entry of `engagement_presets` has these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The preset id. The `preset` field of an engagement line holds this id. |
+| `title` | The preset title. |
+| `notes` | The preset notes. |
+| `scope` | The scope of the preset. |
+| `created` | The time the preset was created. |
+| `test_type` | A list of test type names, not ids. |
+| `network_locations` | A list of network locations, as strings. |
+
+Each entry of `api_scan_configurations` has these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The configuration id. The `api_scan_configuration` field of a test line holds this id. |
+| `tool_configuration` | The id of an entry in the manifest's `reference.tool_configurations`. |
+| `service_key_1`, `service_key_2`, `service_key_3` | The service keys. Each one is `null` when it is not set. |
+
+An entry has no `product` key. The header already names the product.
 
 User fields, for example `lead`, `reporter` and `mitigated_by`, stay user ids.
 Look them up in the manifest's `reference.users`.
@@ -204,11 +239,12 @@ An example `end` line:
 - Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
 - JIRA issue keys and JIRA project settings.
 - Product members and product groups.
-- Engagement presets, report types and CI/CD infrastructure. Their ids stay on the engagement line: `preset`, `report_type`, `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
-- API scan configurations and the tool configurations they use. The `api_scan_configuration` id stays on the test line.
+- Report types and CI/CD infrastructure. Their ids stay on the engagement line: `report_type`, `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
+- The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
 - Contacts, for example an engagement's `requester`. The id stays on the engagement line.
 - Test import history, check lists, languages, technologies and benchmarks.
-- Secrets and instance settings: SSO, JIRA and tool credentials, notifications, API keys and passwords.
+- User passwords and password hashes. A user entry has no `password` field.
+- Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys.
 
 A `duplicate_finding` id can point to a finding in another product. That id dangles in the export of this product.
 An `accepted_findings` id on a risk acceptance line can point to a finding in another product in the same way.
