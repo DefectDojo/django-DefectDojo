@@ -23,12 +23,13 @@ Because you host the deployment, your data stays inside your own environment for
 | Who runs it | You, from a restore host with the PostgreSQL client tools | You, from the Connectors UI |
 | How often | Once per cutover, in a scheduled window | As often as you need, until you cut over |
 | Secrets, settings and history | Cross with the dump | Do not cross |
-| Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords or roles. Users join no group, except the default group when their email matches its pattern. |
+| Finding templates, engagement presets, API scan configurations and tool configurations | Cross with the dump | Cross, but tool configurations arrive without their credentials |
+| Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords, groups or global roles. The users in the Authorized Users list of a Product or Product Type become its members. They get the Writer role, or Maintainer for a staff user. Users join no group, except the default group when their email matches its pattern. |
 | The source during the move | Frozen with read-only mode from the final dump | Read-only during each Sync, and open between Syncs |
 
 Take the dump path if you want an exact copy, and you can schedule a window. Users, groups, settings and history come across as they are. The target must be empty.
 
-Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets, instance settings and history do not cross with the connector. You set up SSO, notifications and tool credentials in DefectDojo Pro yourself.
+Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets, instance settings and history do not cross with the connector. Tool configurations cross without their credentials. You set up SSO, notifications and tool credentials in DefectDojo Pro yourself.
 
 ## Path 1: The database dump
 
@@ -281,8 +282,9 @@ Confirm the following before you add the connector.
 * **The open source version.** Upgrade the open source instance to 3.4.300 or later. That release added the export API. The connector refuses an older source.
 * **HTTPS.** Serve the open source instance over HTTPS, on a URL your Pro deployment can reach. The connector refuses a plain `http://` URL.
 * **A superuser API key.** Create a superuser on the source for the connector alone, and an API v2 key for it. The export API answers only a superuser. Revoke the key after the cutover.
-* **What does not cross.** Secrets and settings stay on the source: SSO, JIRA, tool configurations, notifications, API tokens, passwords and system settings. So do history, JIRA issue links, groups and roles. Files over the size limit stay too. Duplicates stay, unless you ask for them. Plan to set up SSO, notifications and tool credentials in DefectDojo Pro yourself.
+* **What does not cross.** Secrets and settings stay on the source: SSO, JIRA, the credentials of tool configurations, notifications, API tokens, passwords and system settings. So do history, JIRA issue links, groups and global roles. Files over the size limit stay too. Duplicates stay, unless you ask for them. Plan to set up SSO, notifications and tool credentials in DefectDojo Pro yourself.
 * **The owner fields.** The product manager, technical contact and team manager of a Product become members of the Product in DefectDojo Pro. The three fields stay empty.
+* **Access.** The users in the Authorized Users list of a Product become members of the Product. The users in the list of its Product Type become members of the Product Type. A user that was staff on the source gets the Maintainer role. Every other user gets the Writer role. A user that is already a member keeps the membership.
 
 ### Step 1: Add the connector
 
@@ -309,7 +311,7 @@ Discover also fills the connection's migration page with the [preflight report](
 
 ### Step 3: Sync
 
-Click **Begin Migration** on the migration page. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.0 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. A large estate takes a while. **History** on the migration page shows each run.
+Click **Begin Migration** on the migration page. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.0 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. It also brings the finding templates and the tool configurations without credentials. It brings the engagement presets and API scan configurations of each Product too. A large estate takes a while. **History** on the migration page shows each run.
 
 The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. The migration page shows a progress bar during that time, and **Migration Complete** when it ends. If it shows **Migration Stalled**, click **Begin Migration** again to finish the import. A notification then sums up the migration. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
 
@@ -317,12 +319,13 @@ The operation shows **Success** when the connector has sent the data. DefectDojo
 
 Compare the two instances once the first Sync ends:
 
-1. Check that every Product Type and every Product you mapped is present, with its description and tags. The owners of each source Product are members of it, with the Maintainer role.
+1. Check that every Product Type and every Product you mapped is present, with its description and tags. The owners of each source Product are members of it, with the Maintainer role. So are the users in its Authorized Users list, with the Writer role, or Maintainer for a staff user.
 2. Open a Product and check its engagements and tests, with their names and dates.
 3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. A scan type that the preflight report listed as unknown is in a test of type `DefectDojo - Connectors Import`.
 4. Check the risk acceptances and the finding groups of a Product that has them.
-5. Check that the users are present. They arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
-6. Report any discrepancies to your DefectDojo contact.
+5. Check the finding templates, and the engagement presets and API scan configurations of a Product that has them. Enter the credentials of each tool configuration, because they do not cross.
+6. Check that the users are present. They arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
+7. Report any discrepancies to your DefectDojo contact.
 
 ### How Migrated Users Sign In
 
