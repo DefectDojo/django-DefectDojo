@@ -112,17 +112,17 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 ### Step 4: Arrange, then save
 
-Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+Drag widgets to rearrange them and drag a corner to resize. Each widget's title bar holds a **Widget Actions** menu (the three dots beside the refresh button). While editing it offers **Edit Widget** to reconfigure the widget, **Title Style** to set the title's weight and size, **Duplicate Widget** to copy it, and **Remove Widget**, which asks for confirmation. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
 
-Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
+Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Choose **Edit Widget** from its menu to rename it and change the one filter that differs.
 
-A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its gear icon to leave the widget's title bar blank.
+A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its **Edit Widget** form to leave the widget's title bar blank.
 
 ### Putting a widget into a report
 
 Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go straight into a document you send out.
 
-Click the export icon on a widget and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates.
+Open a widget's **Widget Actions** menu and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates; a widget that offers nothing else shows no menu while you are viewing.
 
 This **copies** the widget rather than linking to it. Editing the dashboard widget later does not change the report block, and the reverse is also true, so a shared dashboard never depends on who can see which report block.
 
