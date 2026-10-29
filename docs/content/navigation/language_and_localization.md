@@ -44,6 +44,10 @@ separately from the open source ones.
 **Translated**: menus, buttons, headings, form labels, help text, confirmation dialogs, table
 column headers and the messages DefectDojo shows you.
 
+In DefectDojo Pro, a dashboard tile keeps its default title until someone types another, and that
+default is shown in the language of whoever is looking, so one shared dashboard reads in each
+viewer's language. A title someone typed is their own text and stays exactly as written.
+
 Notifications are translated too, and in **your** language rather than the language of whoever
 caused them. If a colleague reading DefectDojo in German does something that notifies you, the
 email you receive is in the language you chose.
