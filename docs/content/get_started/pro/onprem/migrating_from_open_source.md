@@ -289,16 +289,15 @@ Confirm the following before you add the connector.
 1. In the Pro UI, open **Connect > Upstream**.
 2. Click **Add Configuration** on the **DefectDojo Migration** tile.
 3. Enter the URL of the source in **Location URL** and the superuser API key in **API Token**.
-4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field.
-5. Turn on **Enable Auto-Mapping**. Each source Product then gets a Product of the same name, under a Product Type of the same name. Do not skip this: mapping a Record by hand cannot create a Product.
-6. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Migration**. Pick a recurring frequency if you want to sync on a schedule until you cut over.
-7. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. With **One-Time**, Discover then starts at once and the connection's migration page opens.
+4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field. Auto-Mapping is always on for this connector: each source Product gets a Product of the same name, under a Product Type of the same name.
+5. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Migration**. Pick a recurring frequency if you want to sync on a schedule until you cut over.
+6. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. With **One-Time**, Discover then starts at once and the connection's migration page opens.
 
 The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page covers the shared parts of the form: the schedule and the label.
 
 ### Step 2: Discover and map
 
-With a recurring frequency, run [Discover](/connectors/upstream/manage_operations/#discover-operations) yourself. The connector creates one Record per Product on the source. With Auto-Mapping on, every Record is mapped at once. Without it, you can map a Record by hand only to a Product that already exists in DefectDojo Pro.
+With a recurring frequency, run [Discover](/connectors/upstream/manage_operations/#discover-operations) yourself. The connector creates one Record per Product on the source, and Auto-Mapping maps every Record at once.
 
 Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
 
@@ -347,7 +346,7 @@ The open source instance keeps running until that day, so your team loses no wor
 
 - Open source instance on 3.4.300 or later, served over HTTPS
 - Superuser created on the source for the connector, with an API v2 key
-- Connector added in **Connect > Upstream**, with Auto-Mapping on
+- Connector added in **Connect > Upstream**
 - Discover run, with every Record mapped or ignored
 - Preflight report read: warnings, counts, what is created and what does not cross
 - First Sync run, finding counts checked, and validated

@@ -31,10 +31,9 @@ Create a user on the source for the connector alone, for example `defectdojo-mig
 1. Open **Connect > Upstream**, and click **Add Configuration** on the **DefectDojo Migration** tile.
 2. Enter the URL of the source in **Location URL**, for example `https://dojo.example.com`. The URL must start with `https://`.
 3. Enter the superuser API key in **API Token**.
-4. Keep the defaults of the fields in the table below, or change them.
-5. Turn on **Enable Auto-Mapping**. See [Records](#records) for the reason.
-6. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Migration**.
-7. Click **Submit**. With **One-Time** in **Frequency**, Discover starts at once and the connection's migration page opens. The preflight report appears on it when Discover ends.
+4. Keep the defaults of the fields in the table below, or change them. Auto-Mapping is always on for this connector, so the form does not offer it. See [Records](#records).
+5. For a migration you run once, keep **One-Time** in both **Frequency** fields. To delete the connection when the migration is done, turn on **Delete the Connection After the Migration**.
+6. Click **Submit**. With **One-Time** in **Frequency**, Discover starts at once and the connection's migration page opens. The preflight report appears on it when Discover ends.
 
 | Field | Default | What it does |
 |---|---|---|
@@ -68,9 +67,9 @@ A source on 3.4.300 has no read-only mode. The preflight report warns about it, 
 
 Discover creates one Record per Product on the source. The Record carries the Product's name and Product Type. It also carries the tags, the business criticality, the SLA configuration and the owner emails. Mapping applies them to the Product. The Records list does not show them.
 
-Use **Auto-Mapping**. With it on, each Record gets a Product of the same name, under a Product Type of the same name. If DefectDojo Pro already has a Product of that name, the Record maps to it. The [Managing Records](/connectors/upstream/manage_records/#how-auto-mapping-chooses-the-product) page explains the order.
+**Auto-Mapping** is always on for this connector. Each Record gets a Product of the same name, under a Product Type of the same name. If DefectDojo Pro already has a Product of that name, the Record maps to it. The [Managing Records](/connectors/upstream/manage_records/#how-auto-mapping-chooses-the-product) page explains the order.
 
-Without Auto-Mapping, you can map a Record by hand only to a Product that already exists. Mapping by hand cannot create a Product. If you started without Auto-Mapping, turn it on and run Discover again. Ignore a Record to leave that Product behind.
+To move a source Product into a Product with another name that already exists in DefectDojo Pro, edit its Record on the records page (**Edit Record**) before you begin the migration. To leave a source Product behind, clear its **Include** box on the migration page.
 
 A Record is keyed on the install id of the source and the id of the Product. If the source moves to a new hostname, update the **Location URL** field. The Records stay the same.
 
