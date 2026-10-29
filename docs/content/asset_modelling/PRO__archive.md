@@ -52,7 +52,7 @@ You need permission to delete an object to archive it.
 3. Enter a reason. It is recorded with the archive and shown on the **Archived** page and in the audit log.
 4. Tick the box to confirm you understand the data is deleted after the retention period, then choose **Archive**.
 
-The object disappears straight away. Everything under it is archived in the background, so a large Asset or Organization can take a few minutes to finish. Until it does, its archive shows **Archiving** on the **Archived** page.
+The object disappears straight away. Everything under it is archived in the background, so a large Asset or Organization can take a few minutes to finish. Until it does, its archive shows **Archiving** on the **Archived** page, and the Engagements, Tests and Findings not yet reached are still visible in lists, metrics and the API, and can still be changed. They are hidden as the background work reaches them.
 
 To archive several Findings at once, select them in a Findings list and choose **Archive** from the bulk actions. The selected Findings form one archive and are restored together.
 
@@ -63,6 +63,8 @@ The **Archived** page lists every archive you have permission to restore. For ea
 Expand an archive to browse the objects it holds. Choose **Unarchive** from its menu to restore it. Restoring brings back the whole tree that was archived together. It runs in the background: the archive shows **Restoring** until everything is back, then leaves the list. An archive that is still archiving or restoring cannot be restored until that finishes.
 
 An object archived on its own before its parent was archived keeps its own archive. Restoring the parent does not restore it, so restore it separately from the **Archived** page.
+
+The reverse is refused: an archive cannot be restored while something above it is still archived, because its objects would come back under a parent that stays hidden. Restore the parent's archive first. The API refuses it with `400` and `"code": "parent_archived"`.
 
 ## Removing old Findings with Triage Engine rules
 
