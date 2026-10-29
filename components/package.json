@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "3.4.301",
+  "version": "3.4.303",
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
