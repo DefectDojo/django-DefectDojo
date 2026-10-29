@@ -7,7 +7,7 @@ weight: 2
 
 The **Location Map** opens an Asset's Locations page on a map instead of a table. Every URL, source file, dependency and cloud resource the Asset has is drawn as a set of trees, one dashed region per location type, and each node shows how many active findings sit on it or beneath it.
 
-> The Location Map requires [Locations](/asset_modelling/locations/pro__locations_overview/). It is controlled by the **Location Map** flag on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/), which is on by default. While Locations is off, the Location Map is off too.
+> The Location Map requires [Locations](/asset_modelling/locations/pro__locations_overview/). It is on wherever Locations is on, and there is nothing else to enable. While Locations is off, the Location Map is off too.
 
 ## Where the Map Appears
 
@@ -88,7 +88,3 @@ Under **Canvas**, **Type Boundaries** turns the dashed regions on or off. The **
 ### Adding Locations
 
 **New Location** and **Add Existing** work as they do on the table page, and the map redraws to include what you added. See [Working with URLs](/asset_modelling/locations/pro__working_with_urls/) for the permissions each one needs.
-
-## Turning the Map Off
-
-Turn off **Location Map** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) to go back to the table-only Locations page. The map stores nothing of its own, so nothing is lost either way, and you can turn it back on at any time.

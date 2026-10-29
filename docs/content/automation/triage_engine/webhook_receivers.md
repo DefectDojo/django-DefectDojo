@@ -137,8 +137,6 @@ The **Inbound Webhooks** feature flag, under **Settings > Feature Flags**, is on
 
 Nothing already captured is lost. The gateway keeps each delivery and retries it for about four and a half hours, and senders that retry will try again. When you turn the flag back on, DefectDojo registers any waiting receivers and replays the dead letters that piled up meanwhile.
 
-Turning the Triage Engine off refuses deliveries the same way, whatever this flag says.
-
 ## Permissions
 
 Webhook receivers use the Triage Engine permissions. Viewing needs **Rule View**, creating needs **Rule Add**, changing, rotating, replaying or syncing needs **Rule Edit**, and deleting needs **Rule Delete**.

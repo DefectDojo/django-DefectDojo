@@ -6,7 +6,7 @@ audience: pro
 weight: 13
 slug: command-center
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: the Command Center is the DefectDojo Pro home page. It is on for every user and needs no feature flag. The customizable grids it links to are [Customizable Dashboards](../custom-dashboards/), which keep their own flag.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: the Command Center is the DefectDojo Pro home page. It is on for every user and needs no feature flag. The customizable grids it links to are [Customizable Dashboards](../custom-dashboards/), which are on for every instance too.</span>
 
 The Command Center is one composed screen that answers, in fixed zones, **what's on fire**, **are we winning**, and **is the machine healthy**. Sources stream in from the left, the flow narrows through three numbers wrapped in the posture score, and the outcomes fan out on the right, with the numbers a leader asks for along the bottom. Beside it sits [Customizable Dashboards](../custom-dashboards/): new widget types, seeded preset layouts, and the [dashboards REST API](../custom-dashboards-api/), so with that feature on everything the scene shows can also be laid out, shared, cloned and exported your own way.
 
@@ -64,7 +64,7 @@ With Customizable Dashboards on, three seeded, cloneable layouts are published u
 * **Ops Triage**: queue first. Your work, what breaches next, this week's intake funnel, live activity, backlog aging, and the fixes that clear the most at once.
 * **Platform Health**: the machinery deep dive. The pipeline funnel at full width, the sensors rail, automation throughput, coverage freshness, license headroom.
 
-The sidebar has two dashboard entries: **Home**, which is the scene, and below it the dashboards you keep: **Dashboards** opens the customizable grids when Customizable Dashboards is on, and **Dashboard** opens the classic tile dashboard when it is off.
+The sidebar has two dashboard entries: **Home**, which is the scene, and below it the dashboards you keep: **Dashboards** opens the customizable grids.
 
 ## The daily snapshot backbone
 

@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Triage Engine is a DefectDojo Pro-only feature.</span>
 
-Both engines run side by side. Turning on Triage Engine changes nothing about your existing [Rules Engine](/automation/rules_engine/about/) rules, and there is no deadline by which you must move them.
+Both engines run side by side. Triage Engine changes nothing about your existing [Rules Engine](/automation/rules_engine/about/) rules, and there is no deadline by which you must move them.
 
 When you do want to move them, there is a converter. It translates a Rules Engine rule (a filter plus an ordered list of actions) into an equivalent Triage Engine graph.
 
@@ -78,7 +78,7 @@ A rule whose owner is unset converts, with a warning. Remember that a rule with 
 
 ## A suggested order
 
-1. Turn on Triage Engine and leave your existing rules running.
+1. Leave your existing rules running.
 2. Run the converter with `--dry-run` and read the report.
 3. Convert. Everything lands disabled.
 4. Open each converted rule, check the graph, and leave the mode on **Simulate**.
