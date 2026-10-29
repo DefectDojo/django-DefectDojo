@@ -41,7 +41,7 @@ Because of this, DefectDojo asks you to confirm the retention period every time 
 
 ## Archived data and your license
 
-Archived data counts toward your license until its purge date. Archived Findings, Endpoints and Assets are included in license usage exactly like live ones, and archived rows still take up database storage. Archiving does not free license capacity. To free it, delete the data or wait until it is purged.
+Archived data does not count toward your license. Archived Findings, Endpoints and Assets leave license usage when they are archived and count again if you restore them. Archived rows still take up database storage until they are purged, so a database size limit still includes them.
 
 ## Archiving an object
 
@@ -80,6 +80,14 @@ A typical retention rule runs on a schedule and archives Findings older than a s
 1. **On a Schedule** trigger, for example daily.
 2. **If / Filter**: `Date` **is more than N days ago**, with N set to `365`.
 3. **Archive Findings**, with a reason such as "Retention: older than 365 days".
+
+## Excess duplicates are archived, not deleted
+
+When **Delete Duplicate Findings** is turned on in System Settings, DefectDojo removes the oldest duplicates of a Finding once it has more than **Maximum Duplicates**. While Archive is turned on, those duplicates are archived instead of deleted, so a deduplication run that marked the wrong Findings as duplicates can be undone. With Archive turned off they are deleted, as before.
+
+The duplicates removed on one day share one archive, listed on the **Archived** page with the source **Deduplication**. It is kept for the same retention period as any other archive, counted from the last duplicate added to it.
+
+Before you restore one of these archives, turn off **Delete Duplicate Findings** or raise **Maximum Duplicates**. Otherwise the restored duplicates are still over the maximum, and the next run, within a minute, archives them again. The same applies to any archive that holds duplicates of a Finding that is still live: restoring it can put that Finding over its maximum.
 
 ## API
 
