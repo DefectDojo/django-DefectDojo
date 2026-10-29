@@ -109,7 +109,7 @@ Each Sync imports every mapped Record. For each Product the connector sends:
 * **Users.** Every user of the source crosses, also the users of a Product you ignore. A finding field that names a user, for example the reporter, points at these accounts.
 * **Reference data**: SLA configurations, development environments, regulations and note types. If DefectDojo Pro already has one with the same name, it keeps its own values. The preflight report warns when those values differ from the source.
 
-A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated or it logs in. If DefectDojo Pro already has a user with that username, the connector uses it and changes nothing on it. Users join no group, except the default group when their email matches its pattern. The migration summary names the users that were superusers on the source, so you can decide who gets that role.
+A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated. An administrator activates it with **Activate and Invite**, and the user sets a new password. [How Migrated Users Sign In](/get_started/pro/onprem/migrating_from_open_source/#how-migrated-users-sign-in) explains the steps. If DefectDojo Pro already has a user with that username, the connector uses it and changes nothing on it. Users join no group, except the default group when their email matches its pattern. The migration summary names the users that were superusers on the source, so you can decide who gets that role.
 
 Each test keeps its scan type. If DefectDojo Pro has no parser for that scan type, the test gets the scan type `DefectDojo - Connectors Import`. A custom scan type is the usual case. A test with no scan type on the source gets it too. The deduplication hash of each finding stays equal to the hash on the source. Deduplication in DefectDojo Pro gives the same result as on the source.
 
@@ -118,7 +118,7 @@ Each test keeps its scan type. If DefectDojo Pro has no parser for that scan typ
 * **Secrets and settings.** Single Sign-On, JIRA instances and credentials, tool configurations and credentials, notification preferences, API tokens, passwords and system settings. Configure them in DefectDojo Pro yourself.
 * **History.** The audit trail of the source stays on the source. Only the edit history of notes crosses.
 * **JIRA issue links.**
-* **Groups, roles and memberships.** Only the owners of each Product become members. Activate the user accounts you need and give them roles.
+* **Groups, roles and memberships.** Only the owners of each Product become members. Select the users you need, click **Activate and Invite**, and give them roles. See [How Migrated Users Sign In](/get_started/pro/onprem/migrating_from_open_source/#how-migrated-users-sign-in).
 * **The product manager, technical contact and team manager fields.** The owners become members instead, and the three fields stay empty.
 * **The creator of a finding group.**
 * **Files over Maximum File Size (MB).** They stay on the source. The preflight report counts them. The connector also skips a file that does not fit its transfer limits, and logs a warning.
