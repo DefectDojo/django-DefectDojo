@@ -35,6 +35,7 @@ from dojo.models import (
     FileUpload,
     Finding,
     Finding_Group,
+    Finding_Template,
     Notes,
     Product,
     Product_Platform,
@@ -45,6 +46,8 @@ from dojo.models import (
     UserContactInfo,
 )
 from dojo.system_settings.ui.forms import SystemSettingsForm
+from dojo.tool_config.models import Tool_Configuration
+from dojo.tool_type.models import Tool_Type
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 RAW_REQUEST = b"GET / HTTP/1.1\r\nX: \xff\xfe\r\n"
@@ -527,7 +530,8 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(
             {
                 "sla_configurations", "development_environments", "regulations", "test_types", "note_types",
-                "product_platforms", "product_lifecycles", "product_origins", "users",
+                "product_platforms", "product_lifecycles", "product_origins", "finding_templates", "tool_types",
+                "tool_configurations", "users",
             },
             set(reference),
         )
@@ -543,6 +547,42 @@ class TestExportManifest(DojoAPITestCase):
         self.assertIn("email", user1)
         self.assertFalse(user1["is_superuser"])
         self.assertEqual(Test_Type.objects.count(), len(reference["test_types"]))
+
+    def test_reference_carries_finding_templates_tool_types_and_tool_configurations(self):
+        reference = self.manifest["reference"]
+        for key, model in (
+            ("finding_templates", Finding_Template),
+            ("tool_types", Tool_Type),
+            ("tool_configurations", Tool_Configuration),
+        ):
+            ids = [entry["id"] for entry in reference[key]]
+            self.assertTrue(ids, key)
+            self.assertEqual(list(model.objects.order_by("id").values_list("id", flat=True)), ids, key)
+        template = self.get_results_by_id(reference["finding_templates"], 1)
+        self.assertEqual(Finding_Template.objects.get(id=1).title, template["title"])
+        self.assertEqual(Finding_Template.objects.get(id=1).severity, template["severity"])
+        tool_type = self.get_results_by_id(reference["tool_types"], 1)
+        self.assertEqual("Tool Type 1", tool_type["name"])
+        configuration = self.get_results_by_id(reference["tool_configurations"], 1)
+        self.assertEqual(
+            (1, "Tool Configuration 1", "http://www.example.com", "Password", "user1"),
+            (
+                configuration["tool_type"], configuration["name"], configuration["url"],
+                configuration["authentication_type"], configuration["username"],
+            ),
+        )
+
+    def test_tool_configurations_carry_no_secret(self):
+        secrets = {"password": "hunter2", "ssh": "PRIVATE-KEY-MATERIAL", "api_key": "TOKEN-VALUE"}
+        Tool_Configuration.objects.filter(id=1).update(**secrets)
+        reference = self.client.get(self.url).json()["reference"]
+        self.assertTrue(reference["tool_configurations"])
+        for entry in reference["tool_configurations"]:
+            for field in ("password", "ssh", "api_key"):
+                self.assertNotIn(field, entry)
+        body = json.dumps(reference["tool_configurations"])
+        for value in secrets.values():
+            self.assertNotIn(value, body)
 
     def test_scan_types_are_distinct_and_sorted(self):
         self.assertEqual(

@@ -30,6 +30,7 @@ from dojo.export.api.serializers import (
     ExportUserSerializer,
     file_size,
 )
+from dojo.finding.api.serializer import FindingTemplateSerializer
 from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
@@ -54,6 +55,8 @@ from dojo.product_attributes.api.serializer import (
 )
 from dojo.regulations.api.serializer import RegulationSerializer
 from dojo.test.api.serializer import TestTypeSerializer
+from dojo.tool_config.api.serializer import ToolConfigurationSerializer
+from dojo.tool_type.api.serializer import ToolTypeSerializer
 from dojo.user.authentication import token_expires_at
 from dojo.utils import get_system_setting
 from dojo.vulnerability.queries import vulnerability_id_prefetch
@@ -73,6 +76,9 @@ REFERENCE_SERIALIZERS = {
     "product_platforms": ProductPlatformSerializer,
     "product_lifecycles": ProductLifecycleSerializer,
     "product_origins": ProductOriginSerializer,
+    "finding_templates": FindingTemplateSerializer,
+    "tool_types": ToolTypeSerializer,
+    "tool_configurations": ToolConfigurationSerializer,
 }
 
 
