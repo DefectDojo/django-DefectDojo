@@ -29,6 +29,23 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # Findings locked and re-checked per transaction by _delete_excess_duplicates.
 DUPE_DELETE_CHUNK_SIZE = 1000
 
+# A plugin may set excess duplicates aside instead of deleting them. The handler gets each
+# chunk's queryset inside the chunk's transaction, with the rows already locked, and returns
+# True when it has dealt with them. It must leave them out of Finding.objects, or the next run
+# selects them again. With no handler, or one that returns False, the chunk is deleted.
+_excess_duplicate_handler = None
+
+
+def register_excess_duplicate_handler(func):
+    global _excess_duplicate_handler  # noqa: PLW0603
+    _excess_duplicate_handler = func
+
+
+def _remove_excess_duplicates(findings):
+    if _excess_duplicate_handler is not None and _excess_duplicate_handler(findings):
+        return
+    bulk_delete_findings(findings, order_desc=True)
+
 
 from dojo.notifications.tasks import (  # noqa: E402, F401  -- backward compat
     add_alerts,
@@ -216,7 +233,7 @@ def _delete_excess_duplicates(ids_to_delete):
             if skipped := len(chunk) - len(still_settled):
                 logger.info("skipping %s excess duplicates that an import is writing, or that were saved or deleted since they were selected", skipped)
             if still_settled:
-                bulk_delete_findings(Finding.objects.filter(id__in=still_settled), order_desc=True)
+                _remove_excess_duplicates(Finding.objects.filter(id__in=still_settled))
                 deleted_ids.extend(still_settled)
     return deleted_ids
 
