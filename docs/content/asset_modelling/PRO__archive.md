@@ -41,7 +41,7 @@ Because of this, DefectDojo asks you to confirm the retention period every time 
 
 ## Archived data and your license
 
-Archived data does not count toward your license. Archived Findings, Endpoints and Assets leave license usage when they are archived and count again if you restore them. Archived rows still take up database storage until they are purged, so a database size limit still includes them.
+Archived data does not count toward your license. Archived Findings, Endpoints and Assets leave license usage when they are archived and count again if you restore them. Archived rows still take up database storage until they are purged, so a database size limit still includes them. While your license is over its limit and blocking changes, archiving still works, so it is a way back under the limit. Restoring an archive adds its objects back to your usage, so it is blocked until you are under the limit again.
 
 ## Archiving an object
 
