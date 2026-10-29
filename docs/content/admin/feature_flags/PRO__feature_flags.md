@@ -21,13 +21,13 @@ Each feature row shows:
 
 * **Name**: the feature, with **NEW**, **BETA** and warning tags such as **Restart Recommended** where they apply
 * **Documentation link**: a link to that feature's documentation. Every feature on the page has one, and the [Feature reference](#feature-reference) below lists them all.
-* **Description**: what the feature does, on one line. Hover the row, or move keyboard focus into it, to read the whole description in place. On a phone the whole description always shows.
+* **Description**: what the feature does, on one line. Hover the row, or move keyboard focus into it, to read the whole description in place. On a touch screen the whole description always shows.
 * **Toggle**: whether the feature is currently on
 
 The column beside the cards has two lists:
 
 * **Areas** lists every area with how many of its features are on. Click an area to scroll to its card.
-* **Show** narrows every card to **All**, **On**, **Off**, **New**, **Beta**, or **With Warnings** (features that need a restart, can lose data, or disable integrations). Each choice shows how many features it matches, and it combines with the search box.
+* **Show** narrows every card to **All**, **On**, **Off**, **New**, **Beta**, or **With Warnings** (features that carry a warning tag, such as **Restart Recommended** or **Experimental**). Each choice shows how many features it matches, and it combines with the search box. While a choice other than **All** is active, its name shows in the **Show** header.
 
 On a narrow screen the two lists sit above the cards and start folded, so the features come first.
 
