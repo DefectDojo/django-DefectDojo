@@ -9,9 +9,9 @@ Reorganizing the hierarchy touches many Assets at once: moving an Asset to anoth
 
 A change plan is a list of operations. Creating one writes nothing to your Assets: DefectDojo resolves every name to an ID, checks every operation against the hierarchy rules and your permissions, and records a **diff** of exactly what applying it would change. You review the diff (in the UI, through the API, or as a CSV file in a spreadsheet), then apply the whole plan, and you can undo it later with a new plan that reverses it.
 
-## Turning change plans on
+## Availability
 
-Change plans are released behind the **Change Plans** feature flag, which is off by default and requires the Asset Hierarchy. A superuser turns it on from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Until then the Plans page is hidden, the bulk update form on the Assets list works as before, and the change plan API answers with a `403`.
+Change plans are available on every instance that uses the Asset Hierarchy. The Plans page sits under the Asset Hierarchy in the navigation, the bulk update form on the Assets list shows the same review before it writes, and [hierarchy suggestions](../hierarchy_suggestions/) apply their fixes as change plans. A plan built from a hierarchy suggestion is applied and undone from the suggestion, not from the plans API, which refuses it with the code `advisor_plan`.
 
 ## What a plan can do
 
@@ -20,7 +20,7 @@ Change plans are released behind the **Change Plans** feature flag, which is off
 | `create_organization` | `name`, `org_type` (default `custom`), `parent` | Create an Organization, optionally nested under another of the same type. |
 | `set_organization` | `asset`, `organization`, `move_children` (default `true`) | Move an Asset to another Organization. Its subtree moves along unless `move_children` is `false`. |
 | `set_parent` | `asset`, `parent` | Place an Asset under a parent. `null` removes its parent. |
-| `set_fields` | `asset`, `fields` | Set any of `business_criticality`, `user_records`, `revenue`, `external_audience`, `internet_accessible`, `prioritization_engine`, `sla_configuration` (by name or ID), `asset_type` (a type code), `technical_contact`, `team_manager`, `product_manager`, and add or remove tags with `tags_add` and `tags_remove`. |
+| `set_fields` | `asset`, `fields` | Set any of `business_criticality`, `user_records`, `revenue`, `external_audience`, `internet_accessible`, `prioritization_engine`, `sla_configuration` (by name or ID), `asset_type` (a type code), `lifecycle` (the lifecycle option's value, such as `retirement`, or its ID; `null` clears it), `technical_contact`, `team_manager`, `product_manager`, and add or remove tags with `tags_add` and `tags_remove`. |
 | `add_membership`, `remove_membership` | `asset`, `organization` | Add or remove a secondary Organization membership. Adding one requires non-exclusive Organization memberships to be enabled. |
 
 Plans never delete anything and never touch Engagements.
@@ -62,9 +62,12 @@ The response is the new plan, with status `draft`, its operations (with every na
 | `memberships` | Secondary memberships added or removed, and memberships that become the primary one because an Asset moves into that Organization. |
 | `recalculation` | The Organizations whose Finding priority is recalculated, and how many Assets are re-scored or have their SLA recalculated. |
 | `errors` | Every problem, per operation, with a `code` and a `message`. |
+| `warnings` | What a reviewer should know that does not stop the plan, per operation, with a `code` and a `message`: `sla_mapping_change` (see below) and `locked` (an Asset is still recalculating an earlier SLA or prioritization engine change). |
 | `summary` | Counts of all of the above. |
 
 An operation you are not allowed to perform is listed in `errors` with the code `forbidden`, and its effects are still shown so a reviewer can see what it would do. A plan with any error cannot be applied: fix the operations and create a new plan.
+
+**Criticality and SLA mappings.** When a criticality-to-SLA mapping is enabled for a band, saving an Asset in that band moves it onto the mapped SLA configuration, as long as it still carries the default SLA configuration and its regulatory profile does not lock the SLA. A plan that changes an Asset's business criticality shows that SLA change too, as a `changes` entry with `implied_by: business_criticality` and a `sla_mapping_change` warning, so the review lists every effect. Undo restores the previous SLA configuration along with the criticality.
 
 ## The CSV format
 
@@ -113,10 +116,10 @@ The bulk update form on the Assets list uses the same review: when change plans 
 
 `POST /api/v2/hierarchy/plans/{id}/apply/` (or **Run Plan** on the plan's page) applies a draft plan.
 
-1. **The plan is checked again first.** DefectDojo runs the dry run again, as the person applying it. If any operation is refused now (for example, a permission was removed), the request fails with a `400` listing the errors and nothing is written. If any value recorded in the diff no longer matches the current state, the plan is marked **stale** and the request fails with a `409` (see below).
+1. **The plan is checked again first.** DefectDojo runs the dry run again, as the person applying it. If any operation is refused now (for example, a permission was removed), the request fails with a `400` listing the errors and nothing is written. If the only refusals are Assets still recalculating an earlier SLA or prioritization engine change, the request fails with a `409` whose `locked` list names them; the plan stays a draft, so apply it once the recalculation finishes, or rebuild it without those operations (see below). If any value recorded in the diff no longer matches the current state, the plan is marked **stale** and the request fails with a `409` that lists the drift (see below).
 2. **The plan is then applied in the background.** The plan's status becomes `applying`, and the response is a `202`. Check the plan until its status is `applied` or `failed`. The same check runs again when the background work starts, while holding the hierarchy lock, so a change made in between is caught too.
 3. **Large plans are written in batches.** Organizations are created first; then the moves, in batches of up to 500 Assets that never split one tree; then all the parent changes together, so the hierarchy is checked as a whole and never passes through an invalid state; then the fields, 500 Assets at a time; then the memberships. Every batch that touches the hierarchy takes the hierarchy lock once.
-4. **The audit log groups the whole plan.** Every change a plan makes is recorded under one audit context that carries the plan's ID.
+4. **The audit log groups the whole plan.** Every change a plan makes is recorded under one audit context that carries the plan's ID (and the suggestion's ID for a plan built from a hierarchy suggestion). `GET /api/v2/audit_log/?change_plan=<id>` (or `?suggestion=<id>`) lists exactly those changes.
 5. **Priority is recalculated once** for every affected Organization after the last batch, and owners whose Asset lost a parent link receive one notification.
 
 **If a batch fails**, that batch is rolled back, nothing after it runs, and the plan is marked `failed`. The plan's `result` lists the operations that were applied, the ones in the failed batch, the ones that were never attempted, and the error. Priority is still recalculated for what was applied, and **Undo** reverses exactly the applied part.
@@ -127,7 +130,12 @@ A plan holds at most 10,000 operations, and a CSV upload at most 10,000 rows. Th
 
 A plan records the value every field had when the diff was computed. If something changes before the plan is applied (someone edits an Asset, a new child appears under an Asset the plan moves, or an Organization with a planned name is created), applying it would no longer do what was reviewed. The plan is marked `stale` and the response lists every drifted entry with the recorded value and the current one.
 
-A stale plan is never applied. Create the plan again (on the plan's page, **Re-run Dry Run** does this from the same operations) and review the new diff.
+A stale plan is never applied. Rebuild it to review the current state (on the plan's page, **Re-run Dry Run** does this).
+
+## Discarding and rebuilding
+
+* `POST /api/v2/hierarchy/plans/{id}/discard/` (or **Discard** on the plan's page) marks a draft or stale plan `discarded`. It can no longer be applied, and nothing it lists is changed.
+* `POST /api/v2/hierarchy/plans/{id}/rebuild/` creates a **new draft** from a plan's operations, dry-run against the hierarchy as it is now. The body can name operation indexes to leave out: `{"exclude_ops": [0, 4]}`. Rebuilding a draft or stale plan discards the original. Rebuilding a failed plan reviews the operations it did not apply (**Review the Remaining** on the plan's page), and the failed plan keeps its record.
 
 ## Undo
 
