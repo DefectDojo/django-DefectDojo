@@ -25,12 +25,13 @@ In every case:
 
 ## While viewing as a user
 
-1. Open the user's page and click **View As**.
+1. Open the user's page and click **View As**. A group lead who cannot open users' pages starts it from the group instead: on the group's **Members** tab, choose the member under **View As a Member** and click **View As**.
 2. The application reloads as that user. A bar across the top of the page reads "Viewing as <name>. Read-only." with an **Exit** button.
 
 While the bar is shown:
 
 * Everything is read-only. Controls that would change data are hidden or disabled, and a change sent anyway is refused with "Read-only while viewing as <name>."
+* Sign-in credentials are not available: the user's API token, MFA settings and recovery codes cannot be read while viewing as them.
 * Walkthroughs are turned off, since they record progress.
 * Only the Pro UI is affected. API requests made with an API token, and the Classic UI, still act as you.
 * In the last ten minutes the bar shows the time left.
@@ -41,4 +42,4 @@ The session ends when you click **Exit**, when you sign out, or after one hour. 
 
 ## Audit Log
 
-Each session is recorded as a **View As Session** in the Audit Log: one entry when it starts, naming the actor and the user viewed, and one when it ends, with how it ended (**Exit**, **Logout**, **Expired** or **Revoked**). A session is revoked when the viewed user becomes a Superuser, is deactivated, or when View As User is turned off.
+Each session is recorded as a **View As Session** in the Audit Log: one entry when it starts, naming the actor and the user viewed, and one when it ends, with how it ended (**Exit**, **Logout**, **Expired** or **Revoked**). A session is revoked when the viewed user becomes a Superuser or is deactivated, when View As User is turned off, or when you no longer pass the rules above (they are checked again every minute while the session runs).
