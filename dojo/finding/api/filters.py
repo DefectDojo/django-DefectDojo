@@ -117,6 +117,11 @@ class ApiFindingFilter(DojoFilter):
     test__engagement = NumberInFilter(field_name="test__engagement", lookup_expr="in")
     test__engagement__product = NumberInFilter(field_name="test__engagement__product", lookup_expr="in")
     test__engagement__product__prod_type = NumberInFilter(field_name="test__engagement__product__prod_type", lookup_expr="in")
+    # Short names for the three filters above. A Finding has no engagement / product / prod_type field, so
+    # without these django-filter dropped ?engagement=<id> silently and listed every finding the caller can see.
+    engagement = NumberInFilter(field_name="test__engagement", lookup_expr="in", label="Engagement")
+    product = NumberInFilter(field_name="test__engagement__product", lookup_expr="in", label=labels.ASSET_LABEL)
+    prod_type = NumberInFilter(field_name="test__engagement__product__prod_type", lookup_expr="in", label=labels.ORG_LABEL)
     finding_group = NumberInFilter(method="filter_finding_group")
 
     # ExistsRiskAcceptanceFilter
