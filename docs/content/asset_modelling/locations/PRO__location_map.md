@@ -58,15 +58,15 @@ The page has three panels: actions on the left, the canvas in the middle, and de
 Click a node to select it. The right panel then shows:
 
 - **Type** and **Value** of the node.
-- For a single location: **Status Here** and its **Relationship** to the Asset. Users who can edit Locations on the Asset can change the relationship with **Set a Relationship** and **Save**, or remove it with **Clear**.
+- For a single location: **Status Here** and its **Relationship** to the Asset. Users who can edit Locations on the Asset can change the relationship: pick one under **Set a Relationship** and click **Save**. Picking **Clear** and saving removes it. A Reader sees the relationship but cannot change it.
 - For a group: how many **Locations** and **Children** it has.
-- **Findings**: active findings by severity, split into **Direct** (on this node) and **Beneath** (on nodes under it), with a **Total**.
+- **Findings**: active findings by severity, split into **Direct** (on this node) and **Beneath** (on nodes under it), with a **Total**. A group also shows how many **Locations Beneath** it.
 
 With no node selected, the right panel shows a short **Map Overview**. Click the empty canvas or use **Clear the selection** to deselect.
 
 When a single location is selected, the left panel offers two actions:
 
-- **View Findings** opens the active findings recorded on that location.
+- **View Findings** opens the active findings recorded on that location. To see all of its findings, whatever their status, use the **Total Findings** count in the location list (see [Narrowing the Map with the List](#narrowing-the-map-with-the-list)).
 - **Copy Value** copies the full location value to the clipboard.
 
 A group is drawn from several locations, so these actions apply only to a single location.
@@ -88,7 +88,7 @@ Under **Canvas**, **Type Boundaries** turns the dashed regions on or off. The **
 
 ### Adding Locations
 
-**New Location** and **Add Existing** work as they do on the table page, and the map redraws to include what you added. See [Working with URLs](/asset_modelling/locations/pro__working_with_urls/) for the permissions each one needs.
+**New Location** and **Add Existing** work as they do on the table page, and the map redraws to include what you added. They appear only for users who can add or edit Locations on the Asset, so a Reader does not see them. See [Working with URLs](/asset_modelling/locations/pro__working_with_urls/) for the permissions each one needs.
 
 ## Turning the Map Off
 
