@@ -95,6 +95,15 @@ The exact metadata available will depend on the parser/scanner that revealed the
  
 This metadata improves filtering, reporting, and prioritization across your security program, enabling long-term tracking and trend analysis. Additional details and metadata descriptions can be found [here](/triage_findings/findings_workflows/intro_to_findings/#a-finding-page). 
 
+### Host Operating System
+
+Some infrastructure scanners report the operating system of each scanned host: Nmap (OS detection, `-O`), Nexpose / Rapid7 InsightVM, Qualys Scan, and Qualys Infrastructure Scan (WebGUI XML). When Locations are enabled, DefectDojo stores the reported operating system alongside each affected host of a Finding, as it appeared in that scan.
+
+- **Filtering**: use the **Host OS** filter on a Test's Findings list (or any Findings list) to show only Findings affecting hosts whose operating system contains the entered text, e.g. `windows` or `ubuntu 22`. The match is case-insensitive. In the API, use the `location_os` parameter on `/api/v2/findings/`, or the `host_os_*` parameters on the Location Finding reference endpoint to list the matching hosts themselves.
+- **Matching hosts**: in the hosts popover of a Finding, each host shows its reported operating system, and hosts matching the active Host OS filter are shown in bold.
+- **Reimport**: reimporting a scan updates the stored operating system when the scanner reports a different one. If a report contains no operating system for a host, the previously stored value is kept.
+- Findings from reports without operating system information are unaffected; they simply don't match a Host OS filter.
+
 ### Deduplication
 
 DefectDojo includes deduplication capabilities that help identify and manage Findings representing the same underlying vulnerability. As scan results are imported from one or more tools, DefectDojo uses configurable matching logic to identify Findings that represent the same vulnerability.
