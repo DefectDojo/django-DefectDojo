@@ -4,11 +4,11 @@ description: "How to set up the CrowdStrike Falcon Upstream Connector for Defect
 weight: 41
 audience: pro
 ---
-The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR detections** from the Falcon platform, as two separate finding types (`CrowdStrike:Spotlight` and `CrowdStrike:Detections`). DefectDojo creates a Record for each Falcon **host**.
+The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR detections** from the Falcon platform, as two separate finding types (`CrowdStrike:Spotlight` and `CrowdStrike:Detections`). DefectDojo creates a Record for each Falcon **host**. Detections also include **Identity Protection** alerts, which go to one extra Record, **CrowdStrike Identity Protection (connection _N_)**, where _N_ is the connection's number. DefectDojo creates that Record only when your Falcon tenant has Identity Protection alerts.
 
 #### Prerequisites
 
-A Falcon **API client** (Client ID and secret), created in the Falcon console under **Support \> API Clients and Keys**. Grant it the scopes for the data you want to import: **Hosts: Read** (required, for host discovery), **Vulnerabilities (Spotlight): Read** (for Spotlight findings), and **Alerts: Read** (for EDR detections). The two finding types are independent — if the client lacks a scope, that finding type is skipped rather than failing the sync, so a client without **Alerts: Read** still imports Spotlight vulnerabilities.
+A Falcon **API client** (Client ID and secret), created in the Falcon console under **Support \> API Clients and Keys**. Grant it the scopes for the data you want to import: **Hosts: Read** (required, for host discovery), **Vulnerabilities (Spotlight): Read** (for Spotlight findings), and **Alerts: Read** (for EDR and Identity Protection detections). The two finding types are independent — if the client lacks a scope, that finding type is skipped rather than failing the sync, so a client without **Alerts: Read** still imports Spotlight vulnerabilities.
 
 Create the API client in the CID that holds the hosts you want to import. If you use Falcon Flight Control, create it in the child CID the hosts belong to rather than in the parent CID. When you save the connector, DefectDojo reports how many hosts the client can see, and a client whose CID has no hosts is saved with a No Data Visible warning.
 
@@ -20,7 +20,7 @@ Create the API client in the CID that holds the hosts you want to import. If you
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 5. Optionally, turn on **Report Unmanaged Devices** to also send the hosts Falcon Discover found without a Falcon sensor (see [Unmanaged Devices](#unmanaged-devices)).
 
-Each Falcon host becomes a Record, named for its hostname, OS, and type. Only **open** and **reopened** Spotlight vulnerabilities are imported, so reimport closes remediated findings.
+Each Falcon host becomes a Record, named for its hostname, OS, and type. The **CrowdStrike Identity Protection** Record holds account-level detections that belong to no single host. Map it like a host Record to import them. Only **open** and **reopened** Spotlight vulnerabilities are imported, so reimport closes remediated findings.
 
 #### Asset Exposure
 
