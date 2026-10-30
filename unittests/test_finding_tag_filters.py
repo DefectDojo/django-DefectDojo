@@ -7,6 +7,7 @@ finding list (and to its COUNT), ``tags__and`` grouped every matching row, and
 of SQL per page. Each filter now tests membership with Exists() on the tags through
 table. These tests pin the result sets to the old JOIN semantics and pin the SQL shape.
 """
+from unittest import mock
 from urllib.parse import parse_qsl
 
 from django.contrib.auth.models import User
@@ -402,3 +403,43 @@ class TagExistsTest(DojoTestCase):
                              (Test, "engagement__tags__name"), (Engagement, "product__tags__name"), (Product, "tags__name")]:
             with self.subTest(model=model.__name__, field=field):
                 self.assertIsNotNone(list(model.objects.filter(tag_exists(model, field, "in", ["x"]))))
+
+    def test_matches_on_tag_ids_not_on_names(self):
+        # The planner can only see how common a tag is when the query names its id. Joined by name, it
+        # assumed the average tag and mis-planned popular ones (a 20 s COUNT instead of 2.5 s).
+        finding = Finding.objects.create(
+            title="Tag id finding", severity="High", reporter=User.objects.create(username="tag-id-reporter"),
+            test=Test.objects.create(
+                engagement=Engagement.objects.create(
+                    name="Tag id engagement", target_start=timezone.now(), target_end=timezone.now(),
+                    product=Product.objects.create(
+                        name="Tag id asset", description="x", prod_type=Product_Type.objects.create(name="Tag id org"))),
+                test_type=Test_Type.objects.get_or_create(name="Tag id scan")[0],
+                target_start=timezone.now(), target_end=timezone.now()))
+        finding.tags = ["tag-id-one", "tag-id-two"]
+        finding.save()
+        tag_model = Finding._meta.get_field("tags").related_model
+        wanted = tag_model.objects.get(name="tag-id-one").pk
+        for lookup, value in [("exact", "tag-id-one"), ("in", ["tag-id-one"]), ("icontains", "ID-ONE")]:
+            with self.subTest(lookup=lookup):
+                qs = Finding.objects.filter(tag_exists(Finding, "tags__name", lookup, value))
+                sql = str(qs.query)
+                subquery = sql[sql.index("EXISTS"):]
+                self.assertNotIn(tag_model._meta.db_table, subquery)
+                self.assertIn(f"IN ({wanted})", subquery)
+                self.assertEqual(list(qs), [finding])
+                self.assertNotIn(finding, Finding.objects.exclude(tag_exists(Finding, "tags__name", lookup, value)))
+
+    def test_an_unknown_tag_matches_nothing_and_its_negation_everything(self):
+        everything = Finding.objects.count()
+        self.assertEqual(Finding.objects.filter(tag_exists(Finding, "tags__name", "in", ["no-such-tag"])).count(), 0)
+        self.assertEqual(
+            Finding.objects.filter(~tag_exists(Finding, "tags__name", "in", ["no-such-tag"])).count(), everything)
+
+    def test_a_lookup_matching_many_tags_keeps_the_name_join(self):
+        tag_model = Finding._meta.get_field("tags").related_model
+        tag_model.objects.bulk_create(
+            [tag_model(name=f"many-tags-{n}", slug=f"many-tags-{n}") for n in range(4)])
+        with mock.patch("dojo.filters.TAG_ID_LITERAL_LIMIT", 3):
+            sql = str(Finding.objects.filter(tag_exists(Finding, "tags__name", "icontains", "many-tags")).query)
+        self.assertIn(tag_model._meta.db_table, sql[sql.index("EXISTS"):])
