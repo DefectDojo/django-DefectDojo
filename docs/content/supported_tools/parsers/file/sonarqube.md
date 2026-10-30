@@ -22,6 +22,13 @@ The REST API JSON output can be uploaded to DefectDojo with "SonarQube Scan".
 ### ZIP
 If you have too many findings in one project, you can implement a small script to handle pagination and put all JSON files in a .zip file. This zip file can also be parsed from DefectDojo with "SonarQube Scan". 
 
+### Finding Title
+With "SonarQube Scan detailed", each issue or hotspot is titled with its SonarQube `message`, the same as "SonarQube API Import". Messages longer than 511 characters are truncated. If an issue has no message, the title falls back to `<rule>_<key>`.
+
+"SonarQube Scan" keeps the `<rule>_<key>` title. Its deduplication hash includes the title for findings without a CWE, so titling them by message would close and re-create existing findings on the next reimport. The `rule`, `key` and `message` are included in the description in both modes.
+
+"SonarQube Scan detailed" deduplicates on `unique_id_from_tool` (the SonarQube `key`). Findings it imported before this change keep their `<rule>_<key>` title on reimport; new findings get the message title.
+
 ### Deduplication
 Each issue or hotspot imported from the REST API keeps its SonarQube `key` in `unique_id_from_tool`. "SonarQube Scan" still deduplicates on the hashcode fields listed below by default. If several issues of the same severity are reported in the same file (for example vulnerabilities without a CWE in their message), they can share a hash code and be merged or closed on reimport. To match on the SonarQube key instead, set:
 

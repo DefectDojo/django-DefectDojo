@@ -689,3 +689,58 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[2]
         self.assertEqual("Medium", item.severity)
         my_file_handle.close()
+
+    def test_detailed_parse_json_file_issue_16115_title_from_message(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("sonarqube") / "issue_16115.json",
+        )
+        parser = SonarQubeParser()
+        parser.set_mode("detailed")
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(7, len(findings))
+        with self.subTest(case="message"):
+            item = findings[0]
+            self.assertEqual("Revoke and change this password, as it is compromised.", item.title)
+            self.assertEqual("AZb-issue-16115-1", item.unique_id_from_tool)
+            self.assertEqual("High", item.severity)
+        with self.subTest(case="empty message falls back to rule_key"):
+            item = findings[1]
+            self.assertEqual("java:S1192_AZb-issue-16115-2", item.title)
+            self.assertEqual("AZb-issue-16115-2", item.unique_id_from_tool)
+        with self.subTest(case="long message is truncated"):
+            item = findings[2]
+            self.assertEqual(510, len(item.title))
+            self.assertTrue(item.title.startswith("Make sure this long message is truncated "))
+            self.assertTrue(item.title.endswith("..."))
+            self.assertIn("**rule:** java:S2259", item.description)
+        with self.subTest(case="whitespace-only message falls back to rule_key"):
+            self.assertEqual("java:S108_AZb-issue-16115-4", findings[3].title)
+        with self.subTest(case="missing message falls back to rule_key"):
+            self.assertEqual("java:S2068_AZb-issue-16115-5", findings[4].title)
+        with self.subTest(case="hotspot message"):
+            self.assertEqual("Make sure this weak hash algorithm is not used in a sensitive context here.", findings[5].title)
+        with self.subTest(case="null hotspot message falls back to rule_key"):
+            self.assertEqual("java:S2245_AZb-hotspot-16115-2", findings[6].title)
+        my_file_handle.close()
+
+    def test_parse_json_file_issue_16115_keeps_rule_key_title(self):
+        # "SonarQube Scan" hashes findings without a CWE on their title, so changing it would
+        # close and re-create existing findings on reimport
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("sonarqube") / "issue_16115.json",
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(
+            [
+                "java:S2068_AZb-issue-16115-1",
+                "java:S1192_AZb-issue-16115-2",
+                "java:S2259_AZb-issue-16115-3",
+                "java:S108_AZb-issue-16115-4",
+                "java:S2068_AZb-issue-16115-5",
+                "java:S4790_AZb-hotspot-16115-1",
+                "java:S2245_AZb-hotspot-16115-2",
+            ],
+            [item.title for item in findings],
+        )
+        my_file_handle.close()
