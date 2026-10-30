@@ -155,8 +155,11 @@ class DependencyTrackParser:
         vulnerability_id = [vuln_id, *sorted(aliases - {vuln_id})]
 
         # Default CWE to CWE-1035 Using Components with Known Vulnerabilities if there is no CWE
+        # FPF 1.5 (Dependency-Track v5) dropped 'cweId', which was a copy of the first entry of 'cwes'
         if "cweId" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["cweId"] is not None:
             cwe = dependency_track_finding["vulnerability"]["cweId"]
+        elif dependency_track_finding["vulnerability"].get("cwes") and dependency_track_finding["vulnerability"]["cwes"][0].get("cweId") is not None:
+            cwe = dependency_track_finding["vulnerability"]["cwes"][0]["cweId"]
         else:
             cwe = 1035
 
