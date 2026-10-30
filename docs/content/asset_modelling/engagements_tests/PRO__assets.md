@@ -100,7 +100,8 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 - **Finding Severity Breakdown**
     - A graph of the Findings within the Asset, organized by severity. 
 - **Finding Distribution**
-    - A breakdown of the Findings within the Asset, organized by status (e.g., Active, Mitigated, Static, and Dynamic)
+    - A ring of the Asset's Findings by status: Active, Mitigated, and Other (Findings that are neither active nor mitigated, such as false positives and accepted risks). The three add up to the total, which the panel header shows, and each status in the legend links to the Asset's Findings with that status.
+    - Beside the ring, the share of Findings reported by static and by dynamic tools. Each is measured against the total on its own, because a Finding can be both static and dynamic, or neither.
 - **All Engagements**
     - A list of Engagements contained within the Asset. 
 
