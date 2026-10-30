@@ -24,7 +24,7 @@ from django_extensions.db.models import TimeStampedModel
 from django_tagulous.models import TagField
 from titlecase import titlecase
 
-from dojo.base_models.base import BaseModel
+from dojo.base_models.base import BaseManager, BaseModel
 from dojo.finding.cwe import cwe_label, finding_cwe_labels
 from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
@@ -32,6 +32,7 @@ from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 # re-export that loads this module — so this resolves despite the partial circular load, and
 # keeps their dojo.models.* path for Django migration serialization (used as field defaults).
 from dojo.models import copy_model_util, get_current_date, tomorrow
+from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 from dojo.validators import cvss3_validator, cvss4_validator
 
 if TYPE_CHECKING:
@@ -454,9 +455,18 @@ class Finding(BaseModel):
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedBaseManager()
+    unfiltered = BaseManager()
+
     class Meta:
         ordering = ("numerical_severity", "-date", "title", "epss_score", "epss_percentile")
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_finding_archive_batch"),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("title", weight="A", config="english")
@@ -1562,11 +1572,20 @@ class Vulnerability_Id(models.Model):
     # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
     vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
         ]
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_vulnid_archive_batch"),
             # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
             # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
             models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
@@ -1634,6 +1653,14 @@ class Finding_Group(TimeStampedModel):
     test = models.ForeignKey("dojo.Test", on_delete=models.CASCADE)
     findings = models.ManyToManyField("dojo.Finding")
     creator = models.ForeignKey("dojo.Dojo_User", on_delete=models.RESTRICT)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     def __str__(self):
         return self.name

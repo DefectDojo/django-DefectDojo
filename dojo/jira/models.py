@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
 
+from dojo.query_hooks import HookedManager, UnfilteredManager
+
 
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
@@ -139,6 +141,14 @@ class JIRA_Project(models.Model):
         default=True,
         blank=True)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         app_label = "dojo"
 
@@ -197,7 +207,18 @@ class JIRA_Issue(models.Model):
                                        verbose_name=_("Jira last update"),
                                        help_text=_("The date the linked Jira issue was last modified."))
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
+        indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_jiraissue_archive_batch"),
+        ]
         app_label = "dojo"
 
     def __str__(self):

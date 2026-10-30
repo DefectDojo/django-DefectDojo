@@ -146,6 +146,31 @@ class TestQualysParser(DojoTestCase):
             self.validate_locations(findings)
             self.assertEqual(0, len(findings))
 
+    def test_finding_with_missing_glossary_entry_is_skipped(self):
+        # A QID that matches no GLOSSARY VULN_DETAILS has neither severity nor title to
+        # import; the parser used to raise AttributeError on it and abort the whole import.
+        sample = (get_unit_tests_scans_path("qualys") / "Qualys_Sample_Report.xml").read_text(encoding="utf-8")
+        without_qid_6_entry = re.sub(
+            r"<VULN_DETAILS id=\"qid_6\">.*?</VULN_DETAILS>",
+            "",
+            sample,
+            count=1,
+            flags=re.DOTALL,
+        )
+        report = io.BytesIO(without_qid_6_entry.encode())
+        report.name = "report.xml"
+
+        with self.assertLogs("dojo.tools.qualys.parser", level="WARNING") as logged:
+            findings = QualysParser().get_findings(report, Test())
+
+        # Seven findings report QID 6 in the full sample's 301; each is skipped
+        # while everything else still imports.
+        self.validate_locations(findings)
+        self.assertEqual(294, len(findings))
+        titles = {finding.title for finding in findings}
+        self.assertNotIn("QID-6 | DNS Host Name", titles)
+        self.assertTrue(any("qid_6" in message for message in logged.output))
+
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_multiple_vuln_has_multiple_findings_csv_first_seen(self):
         finding = self.parse_file_with_multiple_vuln_has_multiple_findings_csv()

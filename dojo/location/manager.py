@@ -4,6 +4,7 @@ from django.db.models.functions import Coalesce
 
 from dojo.base_models.base import BaseManager, BaseQuerySet
 from dojo.location.status import rollup_finding_location_status
+from dojo.query_hooks import HookedManagerMixin
 
 
 class LocationQueryset(BaseQuerySet):
@@ -72,3 +73,13 @@ class LocationFindingReferenceManager(BaseManager):
     """LocationFindingReference manager to manipulate all objects with."""
 
     QUERY_SET_CLASS = LocationFindingReferenceQueryset
+
+
+class HookedLocationProductReferenceManager(HookedManagerMixin, LocationProductReferenceManager):
+
+    """LocationProductReference manager that applies the registered default-queryset filters."""
+
+
+class HookedLocationFindingReferenceManager(HookedManagerMixin, LocationFindingReferenceManager):
+
+    """LocationFindingReference manager that applies the registered default-queryset filters."""
