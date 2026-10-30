@@ -14,7 +14,7 @@ DefectDojoについてお困りですか？サポートを受ける方法をい�
 
 オープンソースユーザーは、コミュニティチャンネルを通じてヘルプやアドバイスを受けることができます。
 
-オープンソースユーザーにとって、最も早くヘルプを得る方法は[OWASP Slackチャンネル](https://owasp.org/slack/invite)を利用することです。コミュニティメンバーは**# defectdojoチャンネル**で活発に活動しており、直面している問題の解決を手伝ってくれます。
+オープンソースユーザーにとって、最も早くヘルプを得る方法は[DefectDojo Community Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email)を利用することです。コミュニティメンバーとメンテナーは**#02-help**チャンネルで活発に活動しており、直面している問題の解決を手伝ってくれます。
 
 バグを報告するには、[GitHub](https://github.com/DefectDojo/django-DefectDojo)で課題を作成できます。
 
