@@ -171,6 +171,7 @@ Key facts:
 - [Components (Pro)](https://docs.defectdojo.com/asset_modelling/components/pro__components/): Tracking third-party libraries and software components in DefectDojo Pro
 - [Services](https://docs.defectdojo.com/asset_modelling/components/services/): Tracking Microservices
 - [Custom Fields (Pro)](https://docs.defectdojo.com/asset_modelling/pro__custom_fields/): Define typed custom fields per record type, fill them in on the forms and on each record, and turn them on as typed table columns
+- [Archive (Pro)](https://docs.defectdojo.com/asset_modelling/pro__archive/): Archive Organizations, Assets, Engagements, Tests and Findings instead of deleting them, restore them during the retention period, and remove old Findings automatically with Triage Engine rules
 - [Editable Platform, Lifecycle and Origin Lists (Pro)](https://docs.defectdojo.com/asset_modelling/pro__asset_attribute_options/): Customize the Platform, Lifecycle and Origin dropdown options on your assets
 - [Asset Discovery (Pro)](https://docs.defectdojo.com/asset_modelling/pro__unmanaged_devices/): Devices your EDR sees on the network that have no agent of its own, reported by the CrowdStrike Falcon and Microsoft Defender connectors
 
