@@ -21,6 +21,7 @@ from django.conf import settings
 from ninja.security import APIKeyHeader
 from rest_framework.authtoken.models import Token
 
+from dojo.models import Dojo_User
 from dojo.user.authentication import token_is_expired
 
 if TYPE_CHECKING:
@@ -49,7 +50,7 @@ class TokenAuth(APIKeyHeader):
         except Token.DoesNotExist:
             return None
         user = token.user
-        if not user.is_active or token_is_expired(token):
+        if not user.is_active or token_is_expired(token) or Dojo_User.force_password_reset(user):
             return None
         # Set request.user so downstream authorized-queryset helpers (I8) resolve the right user
         # exactly as they do for session auth.
