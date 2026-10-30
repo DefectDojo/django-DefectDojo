@@ -141,6 +141,92 @@ class LocationData:
         )
 
     @classmethod
+    def domain(
+        cls,
+        *,
+        fqdn: str,
+        apex: str = "",
+    ) -> LocationData:
+        """
+        A DNS name: a subdomain, an apex domain or a wildcard name such as ``*.example.com``.
+        Report it as the scanner or certificate gives it; the consumer lowercases it, drops a
+        trailing dot and converts an internationalized name to its ASCII form, so identity is
+        that normalized name. ``apex`` is the registrable domain the name sits under when the
+        tool knows it, and describes the name rather than identifying it.
+
+        DefectDojo Pro stores domain, ip and cert locations; Community Edition does not register
+        these types and drops them, as it does container images.
+
+        A DNS name is not a host. A machine known by its name is ``host``; a name a
+        recon tool resolved or a certificate covers is ``domain``. Never pass an IP address here.
+        """
+        return cls(type="domain", data={"fqdn": fqdn, "apex": apex})
+
+    @classmethod
+    def ip(
+        cls,
+        *,
+        address: str,
+        asn: int | None = None,
+        asn_organization: str = "",
+        network: str = "",
+        provider: str = "",
+    ) -> LocationData:
+        """
+        An IP address, IPv4 or IPv6, with no port or scheme. Identity is the canonical
+        address, so ``2001:DB8::1`` and ``2001:db8:0:0::1`` are one location. The other keys
+        describe the address when the tool knows them: the announcing ``asn`` and its
+        ``asn_organization``, the registry ``network`` it sits in as CIDR, and the cloud or CDN
+        ``provider`` that serves it. An ``asn`` outside 1 to 4294967295 is stored as unknown. A web
+        service on the address stays a ``url`` location.
+        """
+        return cls(
+            type="ip",
+            data={
+                "address": address,
+                "asn": asn,
+                "asn_organization": asn_organization,
+                "network": network,
+                "provider": provider,
+            },
+        )
+
+    @classmethod
+    def cert(
+        cls,
+        *,
+        sha256: str,
+        subject_cn: str = "",
+        issuer: str = "",
+        serial_number: str = "",
+        not_before: str = "",
+        not_after: str = "",
+        sans: list[str] | str | None = None,
+    ) -> LocationData:
+        """
+        An X.509 certificate, identified by the SHA-256 fingerprint of its DER encoding,
+        written as hex with or without colons. The other keys describe the certificate:
+        the subject common name, the issuer, the serial number, the validity window as
+        ISO 8601 timestamps (read as UTC when they carry no offset; a time that cannot be
+        read is stored as unknown) and the subject alternative names, a list of names or a
+        single name. Report the names a certificate covers as ``domain`` locations too when
+        they matter on their own.
+        """
+        return cls(
+            type="cert",
+            data={
+                "sha256": sha256,
+                "subject_cn": subject_cn,
+                "issuer": issuer,
+                "serial_number": serial_number,
+                "not_before": not_before,
+                "not_after": not_after,
+                # One name passed as a string is one name, not a list of its characters.
+                "sans": [sans] if isinstance(sans, str) else list(sans or []),
+            },
+        )
+
+    @classmethod
     def image(
         cls,
         *,
