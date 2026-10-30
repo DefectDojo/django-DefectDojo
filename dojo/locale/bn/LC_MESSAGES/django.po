@@ -9944,3 +9944,7 @@ msgstr "ফাইল সফলভাবে হালনাগাদ করা �
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "অনুগ্রহ করে ফর্ম ডেটা চেক করে আবার চেষ্টা করুন।"
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub ইন্টিগ্রেশন"
