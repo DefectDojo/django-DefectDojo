@@ -46,7 +46,7 @@ Open **Assets > Needs Attention**.
 * The buttons above the table switch between all Assets, only unplaced ones and only those missing priority data, with a count for each.
 * Narrow the list by missing field, by Organization or by connector.
 * Select Assets and use **Bulk Edit** to move them to another Organization, set Business Criticality, set the SLA configuration or Prioritization Engine, and more. A bulk edit applies to every selected Asset at once, and the list and counts refresh when it finishes.
-* The pencil on a row opens the Asset form, which is where User Records, Revenue and the two checkboxes are set.
+* **Edit Asset** in the ⋮ menu on a row opens the Asset form, which is where User Records, Revenue and the two checkboxes are set.
 
 **Create a Rule From This Filter** opens a new Rules Engine rule. Choose the Asset trigger, add conditions that match what you filtered on, and add the action to apply, such as setting the Organization. New Assets that match are then handled as they arrive. The rule editor does not yet fill in the trigger and conditions for you.
 
