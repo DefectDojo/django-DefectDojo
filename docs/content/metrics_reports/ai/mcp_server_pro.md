@@ -20,15 +20,13 @@ The DefectDojo Model Context Protocol (MCP) Server enables Large Language Models
 - **Executive-Ready Analysis:** Generates reports suitable for technical teams through executive leadership
 - **10X Compound Value:** AI-enhanced analysis provides exponentially more value than manual queries
 
-> **🔑 Important:** The MCP server endpoint is at `/mcp` but all function calls use the base DefectDojo URL. This separation ensures secure, structured access to vulnerability data.
-
 ## Connect To MCP
 
 ### Prerequisites
 
 - DefectDojo instance with MCP Server enabled (v2.51.2 or later)
 - Valid DefectDojo API token with appropriate permissions (an instance with API tokens disabled, `DD_API_TOKENS_ENABLED=False`, cannot be reached through the MCP Server)
-- AI provider: Claude, ChatGPT, Gemini, or custom MCP-compatible client
+- An MCP client that connects to remote servers over Streamable HTTP, such as Claude Code, Claude (claude.ai or Claude Desktop), Cursor, VS Code, Gemini CLI, Codex or ChatGPT
 
 #### Enabling the MCP Server
 
@@ -61,44 +59,33 @@ An unrecognized value falls back to `DEBUG`, and the server logs a warning that 
 
 ### Connection Methods
 
-There are **two different ways** to connect to the DefectDojo MCP server, depending on which AI interface you're using:
+Every connection signs in with a DefectDojo API token and has the same access as the user who owns that token. There are two ways to hand the token to the MCP server.
 
-#### Method 1: Configuration File Method
+#### Method 1: Authorization Header (Recommended)
 
-**Used by:** Claude Desktop, MCP Inspector, and other desktop MCP clients
+**Used by:** every client that can send a request header, which covers Claude Code, Claude custom connectors (claude.ai and Claude Desktop), Cursor, VS Code, Gemini CLI, Codex and MCP Inspector.
 
-**How it works:**
-- Token and connection details are stored in a configuration file
-- Connection is automatic when you start the application
-- No need to paste instructions into conversations
-- MCP server is always available in all conversations
+The client sends `Authorization: Token YOUR_API_TOKEN` with each request to the MCP endpoint. You configure it once and it applies to every conversation, and the token never enters the conversation itself. The [Quick Start Guides](#quick-start-guides-by-ai-provider) below give the configuration for each client.
 
-**Advantages:** Set up once, works everywhere. More secure (token not in chat history).
+#### Method 2: Token in a Prompt
 
-#### Method 2: Manual Prompt Method
+**Used by:** clients that cannot send a header: ChatGPT connectors, and members of a Claude Team or Enterprise organization who need their own access rather than a shared token (see the Claude guide under [Quick Start Guides](#quick-start-guides-by-ai-provider)).
 
-**Used by:** Claude.ai web interface, ChatGPT web interface (with plugins), Gemini web interface
+You paste a short prompt at the start of each conversation, and the AI passes your token as the `token` argument of every tool call. The tools take no URL argument: the MCP server already knows which DefectDojo instance it serves, and it refuses arguments it does not define.
 
-**How it works:**
-- You copy/paste connection instructions at the start of each conversation
-- Or add instructions to a Claude Project for automatic inclusion
-- The AI reads the instructions and connects to the MCP server
-- Each new conversation requires the instructions
+> **⚠️ Warning:** With this method the token ends up in the AI provider's conversation history. Create a dedicated DefectDojo user that has only the access the AI needs, and use that user's token.
 
-**Advantages:** Works in web browsers without installing software.
-
-> **💡 Which method should I use?** Use **Method 1 (Configuration File)** if you have a desktop app that supports it. Use **Method 2 (Manual Prompt)** if you're using a web browser interface.
+When a client sends both, the Authorization header wins and the `token` argument is ignored. A self-hosted install can refuse the `token` argument altogether with `DD_MCP_ACCEPT_TOKEN_ARGUMENT=false`, which leaves Method 1 as the only way in.
 
 ### MCP Server Connection Details
-
-All methods use these core parameters:
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
 | **Transport Type** | `Streamable HTTP` | ⚠️ SSE (Server-Sent Events) is deprecated |
-| **MCP Endpoint URL** | `https://[YOUR-INSTANCE].defectdojo.com/mcp` | Used for establishing MCP connection |
-| **Base URL for Functions** | `https://[YOUR-INSTANCE].defectdojo.com/` | Used in all tool function calls |
+| **MCP Endpoint URL** | `https://[YOUR-INSTANCE].defectdojo.com/mcp` | The only URL a client needs |
 | **Authentication** | `Authorization: Token [YOUR_API_TOKEN]` | ⚠️ Use "Token" prefix, not "Bearer" |
+
+The **MCP** page in the DefectDojo Pro sidebar shows your instance's endpoint and a copy-ready configuration for each client listed below.
 
 ### Toolsets
 
@@ -134,7 +121,7 @@ Add a `toolsets` query parameter to the MCP endpoint URL. Names are comma-separa
 
 Any selection with a `toolsets` parameter also offers `get_instance_info`, a tool that reports the DefectDojo Pro version, which toolsets are enabled (`mcp_toolsets_enabled`), each Feature Flag's state, and whether the instance names its objects **Assets / Organizations** or **Products / Product Types**. Ask your assistant to call it when you are unsure which toolsets an instance provides.
 
-The query string goes wherever your client takes the server URL — for the configuration-file clients in the guides below that is the URL argument, for example `"https://your-instance.defectdojo.com/mcp?toolsets=hierarchy"` in place of the plain `/mcp` URL. `mcp-remote`, Claude Code, Cursor, VS Code and other Streamable HTTP clients pass the query string through unchanged.
+The query string goes wherever your client takes the server URL — in the guides below that is the URL in the command or configuration file, for example `"https://your-instance.defectdojo.com/mcp?toolsets=hierarchy"` in place of the plain `/mcp` URL. Claude Code, Cursor, VS Code and other Streamable HTTP clients pass the query string through unchanged.
 
 #### When a connection is refused
 
@@ -151,185 +138,137 @@ If a toolset is switched off while a session is open, its tools stay listed but 
 
 ## Quick Start Guides by AI Provider
 
-> **💡 Using Claude Code?** Do not configure it by hand. The
+> **💡 Using Claude Code?** The
 > [Claude Code Plugin](../claude_code_plugin/) wires up this MCP server for you
 > in two commands, and adds the write operations these read-only tools do not
-> cover, such as changing finding status and importing scans.
+> cover, such as changing finding status and importing scans. The Claude Code
+> guide below is for adding the MCP server on its own.
+
+Each guide below uses `dojo` as the server name and `https://your-instance.defectdojo.com/mcp` as the endpoint. Replace `YOUR_API_TOKEN` with a DefectDojo API token, and add a `?toolsets=` parameter to the URL if you want more than the `core` tools (see [Toolsets](#toolsets)).
 
 <details>
-<summary><h3>🖥️ Claude Desktop (Method 1: Configuration File)</h3></summary>
+<summary><h3>⌨️ Claude Code (Method 1: Authorization Header)</h3></summary>
 
-**Step 1: Locate your configuration file**
+Run this command in a terminal:
 
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+```bash
+claude mcp add --transport http dojo "https://your-instance.defectdojo.com/mcp" --header "Authorization: Token YOUR_API_TOKEN"
+```
 
-**Step 2: Edit the configuration file**
+See the [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp) for scopes and other options.
 
-Add or update the `mcpServers` section with your DefectDojo instance details:
+</details>
+
+<details>
+<summary><h3>🖥️ Claude: claude.ai and Claude Desktop (Method 1: Authorization Header)</h3></summary>
+
+Claude custom connectors can send request headers. In Claude, add a custom connector:
+
+- **URL:** `https://your-instance.defectdojo.com/mcp`
+- **Request header:** name `Authorization`, value `Token YOUR_API_TOKEN`
+
+A connector added on claude.ai is also available in Claude Desktop. See Anthropic's [custom connectors guide](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp) for where the connector settings are on your plan.
+
+> **⚠️ Team and Enterprise plans:** Only an owner can add the header, and every member then shares the access of that one token. To give each member their own access, add the connector without a header and have each member use [Method 2](#method-2-token-in-a-prompt) with their own token.
+
+</details>
+
+<details>
+<summary><h3>🖱️ Cursor (Method 1: Authorization Header)</h3></summary>
+
+Add this to `.cursor/mcp.json` in your project, or to `~/.cursor/mcp.json` for every project:
 
 ```json
 {
   "mcpServers": {
-    "DefectDojo-MCP": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://your-instance.defectdojo.com/mcp",
-        "--header",
-        "Authorization: Token YOUR_API_TOKEN"
-      ]
+    "dojo": {
+      "url": "https://your-instance.defectdojo.com/mcp",
+      "headers": {
+        "Authorization": "Token YOUR_API_TOKEN"
+      }
     }
   }
 }
 ```
 
-> **⚠️ Critical:** The `--header` flag with authentication is required. Replace `YOUR_API_TOKEN` with your actual DefectDojo API token.
-
-**Step 3: Restart Claude Desktop**
-
-Close and reopen Claude Desktop for the changes to take effect.
-
-**Step 4: Verify Connection**
-
-Start a new conversation and ask: `"Can you connect to DefectDojo?"`
-
-If successful, Claude will confirm it has access to the DefectDojo MCP server tools.
-
-> **✅ Done!** The DefectDojo MCP server is now available in all conversations. No need to paste instructions.
+See the [Cursor MCP documentation](https://cursor.com/docs/context/mcp).
 
 </details>
 
 <details>
-<summary><h3>🌐 Claude.ai Web Interface (Method 2: Manual Prompt)</h3></summary>
+<summary><h3>🧩 VS Code (Method 1: Authorization Header)</h3></summary>
 
-The Claude.ai web interface doesn't support configuration files. You'll need to provide connection instructions in each conversation or use a Claude Project.
+Add this to `.vscode/mcp.json` in your workspace:
 
-#### Option A: Paste Instructions Per Conversation
+```json
+{
+  "servers": {
+    "dojo": {
+      "type": "http",
+      "url": "https://your-instance.defectdojo.com/mcp",
+      "headers": {
+        "Authorization": "Token YOUR_API_TOKEN"
+      }
+    }
+  }
+}
+```
 
-**Step 1: Copy the instructions below**
+See the [VS Code MCP documentation](https://code.visualstudio.com/docs/copilot/customization/mcp-servers). VS Code can also prompt for the token with an `inputs` entry instead of storing it in the file.
+
+</details>
+
+<details>
+<summary><h3>💎 Gemini CLI (Method 1: Authorization Header)</h3></summary>
+
+Add this to `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "dojo": {
+      "httpUrl": "https://your-instance.defectdojo.com/mcp",
+      "headers": {
+        "Authorization": "Token YOUR_API_TOKEN"
+      }
+    }
+  }
+}
+```
+
+Use `httpUrl`, not `url`: `url` selects the deprecated SSE transport. See the [Gemini CLI MCP documentation](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md). The Gemini web app has no custom MCP server support.
+
+</details>
+
+<details>
+<summary><h3>📟 Codex (Method 1: Authorization Header)</h3></summary>
+
+Add this to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.dojo]
+url = "https://your-instance.defectdojo.com/mcp"
+http_headers = { "Authorization" = "Token YOUR_API_TOKEN" }
+```
+
+See the [Codex MCP documentation](https://developers.openai.com/codex/mcp).
+
+</details>
+
+<details>
+<summary><h3>💬 ChatGPT and other clients without headers (Method 2: Token in a Prompt)</h3></summary>
+
+ChatGPT connectors cannot send an Authorization header. Add the MCP endpoint as a connector (see OpenAI's [guide to connecting ChatGPT](https://developers.openai.com/plugins/deploy/connect-chatgpt)), then paste this prompt at the start of each conversation:
 
 ```
-For this project, use the DefectDojo MCP server with these parameters in ALL function calls:
-
-- **URL:** https://your-instance.defectdojo.com/ (base URL, NOT the /mcp endpoint)
+When calling tools from the DefectDojo MCP server, pass this API token as the "token" argument in every call:
 - **Token:** YOUR_API_TOKEN
-- **IMPORTANT:** DO NOT SHOW THE TOKEN IN ANY REQUESTS OR RESPONSES
-
-The MCP server connects to https://your-instance.defectdojo.com/mcp but function calls must use the base URL.
-
-**Do not show any of the API requests or responses.**
+- **IMPORTANT:** Never show or repeat the token in any message, request or response.
 ```
 
-**Step 2: Start a new conversation**
+The same prompt works for a Claude Team or Enterprise member using a connector added without a header. In Claude you can put it in a Project's instructions so every conversation in that Project starts with it.
 
-Paste the instructions at the beginning of your conversation, then ask your security questions.
-
-**Step 3: Repeat for each new conversation**
-
-These instructions must be included at the start of each new conversation.
-
-#### Option B: Use a Claude Project (Recommended)
-
-**Step 1: Create a Claude Project**
-
-- In Claude.ai, click "Projects" in the left sidebar
-- Click "Create Project"
-- Name it "DefectDojo Security Analysis"
-
-**Step 2: Add Custom Instructions to the Project**
-
-In Project Settings → Custom Instructions, paste:
-
-```
-For this project, use the DefectDojo MCP server with these parameters in ALL function calls:
-
-- **URL:** https://your-instance.defectdojo.com/
-- **Token:** YOUR_API_TOKEN
-- **IMPORTANT:** DO NOT SHOW THE TOKEN IN ANY REQUESTS OR RESPONSES
-
-The MCP server connects to https://your-instance.defectdojo.com/mcp but function calls must use the base URL.
-
-Do not show any of the API requests or responses.
-```
-
-**Step 3: Use the Project for all DefectDojo conversations**
-
-All conversations within this project will automatically have access to DefectDojo MCP server.
-
-> **✅ Done!** When working in this Project, Claude automatically has DefectDojo MCP access.
-
-</details>
-
-<details>
-<summary><h3>💬 ChatGPT (Method 2: Manual Prompt)</h3></summary>
-
-> **⚠️ Note:** ChatGPT's MCP support is limited compared to Claude. Native MCP integration may require ChatGPT Plus or Enterprise and specific plugin configurations.
-
-**Step 1: Check MCP Plugin Availability**
-
-In ChatGPT, check if MCP or API connector plugins are available in your plugin store. MCP support varies by subscription tier.
-
-**Step 2: Copy connection instructions**
-
-```
-I need you to connect to a DefectDojo MCP server with these details:
-
-MCP Endpoint: https://your-instance.defectdojo.com/mcp
-Base URL for API calls: https://your-instance.defectdojo.com/
-Authentication: Authorization header with value "Token YOUR_API_TOKEN"
-
-Use this connection to access DefectDojo vulnerability data. The server provides tools for:
-- Getting findings with severity, status, and date filters
-- Accessing products, engagements, tests
-- User and group management
-- Analyzing security trends
-
-Do not show the API token in responses.
-```
-
-**Step 3: Paste at the start of each conversation**
-
-Include these instructions when starting a new conversation about DefectDojo security analysis.
-
-**Alternative: Use Custom GPT**
-
-If you have ChatGPT Plus, create a Custom GPT with DefectDojo connection details in its instructions for reusable access.
-
-</details>
-
-<details>
-<summary><h3>💎 Google Gemini (Method 2: Manual Prompt)</h3></summary>
-
-> **⚠️ Note:** Gemini's MCP support is evolving. Native integration may be limited. Consider using Gemini API with MCP client libraries for full functionality.
-
-**Step 1: Copy connection instructions**
-
-```
-Connect to DefectDojo vulnerability management system via MCP server:
-
-MCP Server: https://your-instance.defectdojo.com/mcp
-API Base URL: https://your-instance.defectdojo.com/
-Authentication: Token YOUR_API_TOKEN (use Authorization header with "Token" prefix)
-
-Available capabilities:
-- Query findings by severity (Critical, High, Medium, Low, Info)
-- Filter by status (Active, Verified, False Positive, etc.)
-- Filter by date ranges (Today, Past 7/30/90 days, etc.)
-- Access products, engagements, tests, users, groups
-- Generate security analysis and reports
-
-Important: Do not display the authentication token in responses.
-```
-
-**Step 2: Start conversation with instructions**
-
-Begin each new Gemini conversation with these instructions when working with DefectDojo data.
-
-**For Advanced Users:**
-
-Consider using the Gemini API with MCP client libraries (Python, JavaScript) for programmatic access with full MCP protocol support.
+> **⚠️ Warning:** The token ends up in the AI provider's conversation history. Use a token from a dedicated DefectDojo user that has only the access the AI needs.
 
 </details>
 
@@ -388,7 +327,7 @@ Once connected, you can explore:
 
 The `core` toolset of the DefectDojo MCP Server provides 18 tools for accessing and analyzing vulnerability data, 6 reference resources, and 2 pre-configured prompts. Each tool includes intelligent parameter handling and returns structured data optimized for LLM analysis. Connections that select toolsets in the URL (see [Toolsets](#toolsets)) also receive `get_instance_info`, and add-on toolsets contribute their own tools on top of the ones listed here.
 
-> **💡 Parameter Note:** All tools accept an optional `token` parameter. If not provided in individual calls, the LLM will use the token from the connection configuration.
+> **💡 Parameter Note:** All tools accept an optional `token` parameter, used only when the client sends no Authorization header (see [Connection Methods](#connection-methods)). No tool takes a URL parameter, and a call with a parameter the tool does not define is refused.
 
 > **💡 Pagination Note:** Every list tool accepts `limit` (1–1000, default 100) and `offset` (minimum 0, default 0). Every `*_by_id` tool takes a single required numeric ID (minimum 1).
 
