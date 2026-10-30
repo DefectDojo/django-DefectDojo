@@ -267,6 +267,11 @@ def parse_finding(host, tree):
 
         search = f".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{gid}']"
         vuln_item = tree.find(search)
+        if vuln_item is None:
+            # A finding whose QID has no GLOSSARY entry has neither severity nor title to
+            # import, so skip it with a warning instead of aborting the whole import.
+            logger.warning("Qualys report has no GLOSSARY entry for QID %s, skipping its finding", gid)
+            continue
         if vuln_item is not None:
             finding = Finding()
             # Vuln name
