@@ -937,6 +937,19 @@
                     },
                     colReorder: true,
                     autoWidth: false,
+                    // Remember column visibility and order across page loads (localStorage, no expiry)
+                    stateSave: true,
+                    stateDuration: 0,
+                    stateSaveParams: function(settings, data) {
+                        // Searching and sorting are handled server-side, only keep column layout
+                        delete data.search;
+                        delete data.order;
+                        delete data.start;
+                        delete data.length;
+                        for (var i = 0; i < data.columns.length; i++) {
+                            delete data.columns[i].search;
+                        }
+                    },
                     "columns": columns,
                     ordering: true,
                     order: [],
