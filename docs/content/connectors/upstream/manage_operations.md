@@ -31,6 +31,12 @@ Each entry on the Operations Page's table is a record of an operation event, wit
 * **Trigger** describes how the event was triggered \- was it a **Scheduled** operation which ran automatically, or a **Manual** operation which was triggered by a DefectDojo user?
 * The **Start \& End Time** of each operation is recorded here, along with the **Duration**.
 
+## When the next run is scheduled
+
+The Connector's tile on the **Upstream Connectors** page and its **Manage Records and Operations** page show when the next Discover and Sync are scheduled, in your browser's time zone: **Next discovery scheduled for** and **Next sync scheduled for** on the tile, and each one under the card it updates (Sync under **Mapped Records**, Discover under **Unmapped Records**).
+
+The time comes from the Connector's schedule, so it says when the run is scheduled, not that it has started. A scheduled run can start a little later than that while other Connectors' runs finish. While the tile shows **Sync Stalled** or **Discovery Stalled**, the next run is not shown, because the schedule cannot promise it. If you would rather not wait for the next scheduled run, use [Run Discover Manually](#run-discover-manually) or run a Sync from the **Mapped Records** card.
+
 ## When a Connector runs but imports nothing
 
 An operation that succeeds is not the same as an operation that found something. If the account

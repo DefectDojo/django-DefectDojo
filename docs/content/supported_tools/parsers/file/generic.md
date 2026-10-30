@@ -156,8 +156,11 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 | `payload` | String<br>`"' OR 1=1 --"` | The input that triggers the issue. |
 | `line` | Integer<br>`42`, `"42"` | Line number in `file_path`. |
 | `file_path` | String (max 4000 characters)<br>`"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
-| `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. With Locations enabled, together with `component_version` and `file_path` it also creates a dependency location on the finding. |
+| `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. In DefectDojo Pro with Locations enabled, together with `component_version` and `file_path` it also creates a dependency location on the finding. Send a Package URL in `purl`, not here (see [Package details](#package-details)). |
 | `component_version` | String (max 100 characters)<br>`"5.6.0"` | The affected version of `component_name`. A blank or whitespace-only value is stored as empty. |
+| `purl` | String<br>`"pkg:maven/commons-collections/commons-collections@3.2.1"` | The component as a [Package URL](https://github.com/package-url/purl-spec). Fills in `component_name` (and `component_version`, for the same package) when they are not set. In DefectDojo Pro with Locations enabled, it also identifies the dependency location, after the normalization the Package URL specification defines. Takes precedence over `purl_type` and `namespace`. See [Package details](#package-details). |
+| `purl_type` | String<br>`"maven"`, `"npm"`, `"pypi"` | The package ecosystem of `component_name`, for a tool that reports the parts instead of a `purl`. Without it (and without `purl`) the dependency location gets the type `generic`. |
+| `namespace` | String<br>`"commons-collections"` | The package namespace of `component_name` (a Maven group ID, an npm scope), usually sent with `purl_type`. Without `purl_type` it is still used, under the type `generic`. |
 | `static_finding` | Boolean<br>`true` | Defaults to `false`. When `file_path` is set, DefectDojo marks a new finding as static regardless of this value. |
 | `dynamic_finding` | Boolean<br>`false` | Defaults to `true`. When `file_path` is set, DefectDojo can override this value for a new finding. |
 | `scanner_confidence` | Integer<br>`3` | Confidence reported by the tool. |
@@ -207,6 +210,55 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
     }
 ]
 ```
+
+#### Package details
+
+In DefectDojo Pro with Locations enabled, a finding that sets `component_name`, `component_version`, `file_path` or `purl` gets a dependency location, identified by a Package URL. The open-source edition stores no dependency locations; there, `purl` only fills in `component_name` and `component_version`. Without package details that Package URL is built from the component fields alone with the type `generic`: `"component_name": "commons-collections"` becomes `pkg:generic/commons-collections`.
+
+Send the package details in one of two ways:
+
+- A full Package URL in `purl`. Do not put a Package URL in `component_name`: it is read as a plain name and ends up inside another Package URL.
+- The parts, in `purl_type` and `namespace`, next to `component_name` and `component_version`.
+
+```JSON
+"findings": [
+    {
+        "title": "Vulnerable component: commons-collections",
+        "severity": "Critical",
+        "description": "Remote code execution in commons-collections.",
+        "file_path": "pom.xml",
+        "purl": "pkg:maven/commons-collections/commons-collections@3.2.1"
+    },
+    {
+        "title": "Vulnerable component: commons-collections",
+        "severity": "Critical",
+        "description": "Remote code execution in commons-collections.",
+        "file_path": "pom.xml",
+        "component_name": "commons-collections",
+        "component_version": "3.2.1",
+        "purl_type": "maven",
+        "namespace": "commons-collections"
+    }
+]
+```
+
+Both findings produce the dependency `pkg:maven/commons-collections/commons-collections@3.2.1`.
+
+A `purl` is normalized the way the Package URL specification defines before it is used, for both the dependency location and the component fields it fills in: `pkg:NPM/Foo@1` becomes `pkg:npm/foo@1`, and `pkg:pypi/Django_Foo@1.0` becomes `pkg:pypi/django-foo@1.0`.
+
+A package field never stops the import. A value that cannot be used is left out, logged as a warning, and the finding imports as if it had not been sent:
+
+- A `null`, blank or non-string value, or one containing a NUL character (sent as is or percent-encoded in a `purl`), counts as absent.
+- A `purl` that is not a valid Package URL is ignored. `purl_type` and `namespace`, if sent, are used instead.
+- A `purl_type` that is not a valid Package URL type (letters, digits, `.`, `+` and `-`, not starting with a digit) is ignored, so the type is `generic`. It is read in lowercase.
+- A valid `purl` sent with `purl_type` or `namespace` wins, and the other two are ignored.
+- `purl_type` and `namespace` on a finding that has no `component_name`, `component_version`, `file_path` or `purl` are ignored: there is no component for them to describe.
+- A name or version in the `purl` that is longer than `component_name` or `component_version` allows is not copied into them.
+- A dependency location with a part too long to store is left off the finding, and the rest of the finding imports.
+
+A blank `component_name` or `component_version` counts as not set, so the `purl` fills it in. When `component_name` is set, the finding keeps it, and the `purl`'s version is only copied into an unset `component_version` when `component_name` is the same name the `purl` carries. The dependency location follows the `purl` either way.
+
+Other package details, such as hashes, license and component type, are not read from this format. To import them, use a [CycloneDX](/supported_tools/parsers/file/cyclonedx/) SBOM.
 
 #### Attached files
 

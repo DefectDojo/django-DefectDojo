@@ -17,7 +17,7 @@ DefectDojo Pro users can also use the [Universal Parser](/import_data/pro/specia
 DefectDojo picks the format from the file name: a name ending in `.csv` is read as CSV, and any other file is read as JSON.
 
 - **CSV** covers the basics: title, severity, description, date, CWE, CVE, a URL, CVSS, EPSS, KEV and fix fields. Rows that share a severity, title and description are merged into one finding. See [CSV format](/supported_tools/parsers/file/generic/#csv-format) and the [example CSV](/supported_tools/parsers/file/generic/#example-csv).
-- **JSON** supports everything CSV does, plus components, SAST source and sink data, tags, several endpoints per finding, attached files, and report-level metadata such as the tool name. See [JSON format](/supported_tools/parsers/file/generic/#json-format) and the [example JSON](/supported_tools/parsers/file/generic/#example-json).
+- **JSON** supports everything CSV does, plus components with their Package URLs, SAST source and sink data, tags, several endpoints per finding, attached files, and report-level metadata such as the tool name. See [JSON format](/supported_tools/parsers/file/generic/#json-format) and the [example JSON](/supported_tools/parsers/file/generic/#example-json).
 
 Use JSON when you can. A JSON report can also set its own Test Type, which matters for deduplication (see below).
 
