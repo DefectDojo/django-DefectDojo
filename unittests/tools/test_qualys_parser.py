@@ -2,7 +2,7 @@ import datetime
 import io
 import re
 from unittest import mock
-from xml.etree import ElementTree as ET
+from xml.etree import ElementPath
 
 from django.test import override_settings
 
@@ -35,18 +35,19 @@ class TestQualysParser(DojoTestCase):
     def test_glossary_is_searched_once_per_report_not_once_per_finding(self):
         # Every finding used to look its QID up with a search from the document root, which walks
         # all the hosts before it reaches the glossary: the parse was findings x document size.
+        # Every find, findall, findtext and iterfind, on an element or on the whole tree, resolves its
+        # path through ElementPath.iterfind, so a per-QID lookup from any starting point is counted.
         searches = []
-        for method in ("find", "findall", "iterfind"):
-            original = getattr(ET.ElementTree, method)
+        original = ElementPath.iterfind
 
-            def counting(self, path, namespaces=None, *, _original=original):
-                if "GLOSSARY" in path:
-                    searches.append(path)
-                return _original(self, path, namespaces)
+        def counting(elem, path, namespaces=None):
+            if "VULN_DETAILS" in path:
+                searches.append(path)
+            return original(elem, path, namespaces)
 
-            patcher = mock.patch.object(ET.ElementTree, method, counting)
-            patcher.start()
-            self.addCleanup(patcher.stop)
+        patcher = mock.patch.object(ElementPath, "iterfind", counting)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
         small = QualysParser().get_findings(_report_with_hosts(2), Test())
         small_searches = len(searches)
