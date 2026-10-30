@@ -2,13 +2,16 @@ from django.urls import reverse
 from django.utils.timezone import now
 from rest_framework.test import APIClient
 
+from dojo.authorization.roles_permissions import Roles
 from dojo.filters import ApiFindingFilter
 from dojo.models import (
     Dojo_User,
     Engagement,
     Finding,
     Product,
+    Product_Member,
     Product_Type,
+    Role,
     Test,
     Test_Type,
 )
@@ -122,3 +125,26 @@ class TestApiFindingRelationFilters(DojoTestCase):
         # A parameter that is not a filter is still ignored rather than rejected.
         unknown = client.get(url, {"engagement": self.eng_b.id, "not_a_filter": "1", "limit": 100}, secure=True)
         self.assertEqual({f["id"] for f in unknown.data["results"]}, self.findings["b"])
+
+    def test_api_does_not_widen_for_a_member_of_one_product(self):
+        # A Reader of product A only. The short names narrow what the caller may already see, so asking for
+        # product B's engagement, product or product type is an empty page, while A's own ids still answer.
+        reader = Dojo_User.objects.create(username="rel_filter_reader")
+        Product_Member.objects.create(user=reader, product=self.product_a, role=Role.objects.get(id=Roles.Reader))
+        self.product_a.authorized_users.add(reader)
+        client = APIClient()
+        client.force_authenticate(user=reader)
+        url = reverse("finding-list")
+        for params in (
+            {"engagement": self.eng_b.id},
+            {"product": self.product_b.id},
+            {"prod_type": self.type_b.id},
+        ):
+            with self.subTest(params=params):
+                response = client.get(url, {**params, "limit": 100}, secure=True)
+                self.assertEqual(response.status_code, 200, response.content[:500])
+                self.assertEqual(response.data["count"], 0)
+                self.assertEqual(response.data["results"], [])
+        own = client.get(url, {"engagement": self.eng_a2.id, "limit": 100}, secure=True)
+        self.assertEqual(own.data["count"], len(self.findings["a2"]))
+        self.assertEqual({f["id"] for f in own.data["results"]}, self.findings["a2"])
