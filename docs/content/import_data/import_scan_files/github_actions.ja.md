@@ -4,7 +4,7 @@ description: 公式の DefectDojo アクションを使用して、GitHub Action
 weight: 3
 ---
 
-公式の [DefectDojo アクション](https://github.com/DefectDojo/defectdojo-action)は、GitHub Actions のワークフローからスキャンレポートを DefectDojo にインポートします。DefectDojo Pro とオープンソース版の両方で動作し、SARIF を含め、DefectDojo がサポートするすべてのレポート形式を読み取ります。
+公式の [DefectDojo アクション](https://github.com/marketplace/actions/defectdojo)は、GitHub Actions のワークフローからスキャンレポートを DefectDojo にインポートします。DefectDojo Pro とオープンソース版の両方で動作し、SARIF を含め、DefectDojo がサポートするすべてのレポート形式を読み取ります。
 
 実行のたびに同じテストへ再インポートされるため、スキャナーが報告しなくなった検出事項はクローズされ、各検出事項は履歴を保持します。このアクションは、ビルド、ブランチ、コミット、リポジトリをテストに記録し、選択した重大度の検出事項がアクティブなまま残っている場合には、ワークフローのステップを失敗させることもできます。
 
