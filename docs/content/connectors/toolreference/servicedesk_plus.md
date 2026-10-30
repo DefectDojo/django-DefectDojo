@@ -77,11 +77,11 @@ DefectDojo sends each value in the shape the ServiceDesk Plus API expects for th
 
 A user-defined field's name (such as `udf_sline_301`) is the key ServiceDesk Plus shows for it under `udf_fields` when you read a request through its API.
 
-**Apply On** decides when a mapping is sent: **Creation** (the default) or **Update**. ServiceDesk Plus does not use the transition options; status changes travel with the update. The fields DefectDojo already sends always take precedence: a custom mapping cannot replace the subject or description, or a priority, status or group set by the other mapping steps.
+**Apply On** decides when a mapping is sent: **Creation** (the default) or **Update**. ServiceDesk Plus does not use the transition options; status changes travel with the update. The fields DefectDojo already sends always take precedence: a custom mapping cannot replace the subject, the description or the request ID, or a priority, status or group set by the other mapping steps.
 
 ### Ticket Template (optional)
 
-Attach a **Ticket Template** in the mapping's **Ticket Template** step to replace the built-in request description, for Findings, Finding Groups or both. ServiceDesk Plus uses the template's description pieces only; the request subject is always the Finding title or the Finding Group name. If a template fails to render, the request is sent with the built-in description instead.
+Attach a **Ticket Template** in the mapping's **Ticket Template** step to replace the built-in request subject and description, for Findings, Finding Groups or both. The template's summary becomes the request subject, shortened to 250 characters, and its description becomes the request description. A part the template leaves blank uses the built-in content: the Finding title or Finding Group name for the subject. If a template fails to render, the request is sent with the built-in subject or description instead, and the failure is listed under Errors.
 
 A few ServiceDesk Plus-specific behaviors to be aware of:
 
