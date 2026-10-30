@@ -80,8 +80,15 @@ For more information on user roles, see our [Introduction To Roles](/admin/user_
 
 Asset views contain a variety of tables and charts to interpret an Asset’s status at a glance. This includes: 
 
+- **Count cards**
+    - A row of cards at the top of the page for Engagements, Tests, Findings, and Endpoints (or Locations, when Locations are enabled). Each card shows its total, and its menu opens the matching list or import. Under each total, a footer shows what makes up that count, with one figure for what needs attention. Hover over or focus a figure to see what it counts. The figure that needs attention turns amber or red when it is above zero.
+    - **Engagements**: open, closed, and overdue (open with an end date that has passed).
+    - **Tests**: when the Asset was last scanned (the most recent update to any of its Tests), the imports and reimports in the last 30 days, and the Findings created in the last 30 days.
+    - **Findings**: direct and indirect Findings (see [Direct and indirect vulnerabilities](/asset_modelling/pro_hierarchy/asset_hierarchy/#direct-and-indirect-vulnerabilities)), and the active Findings past their SLA.
+    - **Endpoints**: vulnerable (an open Finding still affects it), not vulnerable (everything else, including Endpoints no Finding has touched), and those still affected by an active Critical Finding. With Locations enabled, the card counts active, mitigated, and critical Locations instead.
+    - Every figure counts only what you have permission to view.
 - **Open Finding Severity**
-    - A list of open Findings within the Asset, grouped by severity
+    - One bar of the Asset's open Findings split by severity, with each severity's count and share underneath. The panel header shows the total open count, and each severity links to the Asset's open Findings at that severity.
 - **Asset Overview**
     - A breakdown of various features of the Asset, including Description, Components, Contacts, [User Groups](/admin/user_management/create_user_group/
 ), Members, Technologies, and Regulations.
@@ -93,7 +100,8 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 - **Finding Severity Breakdown**
     - A graph of the Findings within the Asset, organized by severity. 
 - **Finding Distribution**
-    - A breakdown of the Findings within the Asset, organized by status (e.g., Active, Mitigated, Static, and Dynamic)
+    - A ring of the Asset's Findings by status: Active, Mitigated, and Other (Findings that are neither active nor mitigated, such as false positives and accepted risks). The three add up to the total, which the panel header shows, and each status in the legend links to the Asset's Findings with that status.
+    - Beside the ring, the share of Findings reported by static and by dynamic tools. Each is measured against the total on its own, because a Finding can be both static and dynamic, or neither.
 - **All Engagements**
     - A list of Engagements contained within the Asset. 
 

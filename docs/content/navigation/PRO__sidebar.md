@@ -7,7 +7,7 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and a footer. The footer shows your username on a row of its own and, under it, one row of icon buttons: alerts, [What's New](#whats-new), Ask Sensei and the Production/Sandbox switch, each when it applies to your instance and account (hover a button for its name). Your username opens the account menu: User Profile, API v2 Token, the API docs, External Tools and Documentation, then your preferences (**Language**, when your instance offers more than one, and the switch between light and dark mode), then Logout. When the sidebar is collapsed to its icon strip, the footer stacks the same buttons in one column. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
+The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and a footer. The footer ends with your account row: your username, your email address under it, and the alerts bell beside them. Above that row, where they apply to your instance and account, sit a **What's New** button while a release has highlights you have not opened (see [What's New](#whats-new)) and a button that says whether you are in Production or the Sandbox and switches to the other. Your username opens the account menu just above the row: User Profile, API v2 Token (when your instance has API tokens enabled), the API docs, External Tools and Documentation, then your preferences (**Language**, with the language in use shown beside it, when your instance offers more than one, and the switch between light and dark mode), then Logout. When the sidebar is collapsed to its icon strip, each of these becomes an icon in one column, with its name on hover. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
 
 The menu groups every page in the product into six sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you browse follow in their own section. It is the only layout; the classic sidebar has been removed (see [The classic sidebar](#the-classic-sidebar)).
 
@@ -28,7 +28,7 @@ You only ever see the entries your account has permission to open, your license 
 
 ## Searching
 
-The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two modes, switched with **Tab**:
+The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two modes, switched with **Tab**. Where Ask Sensei is available to you, the field also carries an **Ask** button that opens the Sensei panel, so asking and searching start in the same place (a wand icon under the search icon when the sidebar is collapsed).
 
 - **Search**: your records (findings, assets, engagements and the rest), through the same engine as the full results page, with the pages whose name matches ranked in. **See All Results** at the end opens that page. See [Global Search](/navigation/pro__global_search/).
 - **Navigate**: pages only, every menu destination your account can currently reach. Its tabs are the sidebar's top-level sections.
@@ -66,7 +66,7 @@ The bell in the sidebar footer opens your notification inbox: unread alerts grou
 
 ## What's New
 
-The gift button in the sidebar footer, beside **Alerts**, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. A number on the button counts the highlights you have not opened yet. Opening the panel clears it, and it stays cleared until the next release arrives. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.
+The **What's New** button in the sidebar footer, which names the release and counts the highlights you have not opened, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. Opening the panel clears the count and removes the button from the footer until the next release arrives; **What's New** in the account menu opens the panel again in the meantime. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.
 
 Below the highlights, **Badged in the Menu** lists every sidebar entry that carries a `NEW` or `BETA` badge right now (see [Menu Badges](/navigation/pro__menu_badges/)), each linking to its page, and **Full Changelog** opens the complete release notes on this site.
 

@@ -117,7 +117,30 @@ def tag_exists(model, field_name, lookup, value):
 
     For a related model's tags (``test__engagement__tags__name``) the subquery runs on
     that model's through table and correlates on the relation's id.
+
+    The matching tags are resolved to their ids first (one indexed read of the tag table),
+    and the subquery tests the through table against those ids. Matching the name through
+    a join instead hides which tag the query is about: the planner then assumes the
+    average number of rows per tag, so for a tag carried by most rows it expected hundreds
+    where there were hundreds of thousands, and chose a plan that probed every one of them
+    (20 s instead of 2.5 s for one COUNT over 400k tagged findings). A lookup that matches
+    more than TAG_ID_LITERAL_LIMIT tags (a short ``icontains`` value) keeps the join.
     """
+    path, tags_field = _tags_field(model, field_name)
+    name_lookup = "name" if lookup == "exact" else f"name__{lookup}"
+    tag_ids = list(tags_field.related_model.objects.filter(**{name_lookup: value}).values_list("pk", flat=True)[
+        :TAG_ID_LITERAL_LIMIT + 1])
+    if len(tag_ids) > TAG_ID_LITERAL_LIMIT:
+        return _tags_exist(path, tags_field, {f"{tags_field.m2m_reverse_field_name()}__{name_lookup}": value})
+    return _tags_exist(path, tags_field, {f"{tags_field.m2m_reverse_field_name()}__in": tag_ids})
+
+
+# How many tag ids tag_exists writes into the query as literals before it matches by name instead.
+TAG_ID_LITERAL_LIMIT = 1000
+
+
+def _tags_field(model, field_name):
+    """The relation path to the tagged model and its tags field, for a ``[<relation>__]tags__name`` field."""
     *path, tags_field_name, name = field_name.split("__")
     if name != "name":
         msg = f"tag_exists expects a <path>__tags__name field, got {field_name}"
@@ -125,13 +148,13 @@ def tag_exists(model, field_name, lookup, value):
     tagged_model = model
     for part in path:
         tagged_model = tagged_model._meta.get_field(part).related_model
-    tags_field = tagged_model._meta.get_field(tags_field_name)
-    tag_lookup = f"{tags_field.m2m_reverse_field_name()}__name"
-    if lookup != "exact":
-        tag_lookup += f"__{lookup}"
+    return path, tagged_model._meta.get_field(tags_field_name)
+
+
+def _tags_exist(path, tags_field, tag_condition):
     outer = "__".join([*path, "pk"]) if path else "pk"
     return Exists(tags_field.remote_field.through.objects.filter(
-        **{tags_field.m2m_field_name(): OuterRef(outer), tag_lookup: value},
+        **{tags_field.m2m_field_name(): OuterRef(outer), **tag_condition},
     ))
 
 
@@ -164,15 +187,26 @@ class TagNameInFilter(TagExistsFilterMixin, CharFieldInFilter):
 
 class TagNameANDFilter(CharFieldFilterANDExpression):
 
-    """Every listed tag must be present: one Exists() per tag instead of GROUP BY ... HAVING COUNT."""
+    """
+    Every listed tag must be present: one Exists() per tag instead of GROUP BY ... HAVING COUNT.
+
+    The listed names are resolved to tag ids in one read (see tag_exists for why the subqueries name
+    ids). A name that is no tag cannot be present, so the whole filter matches nothing.
+    """
 
     multiplies_rows = False
 
     def filter(self, queryset, value):
         if not value:
             return queryset
-        for tag in set(value.split(",")):
-            queryset = queryset.filter(tag_exists(queryset.model, self.field_name, "exact", tag))
+        names = set(value.split(","))
+        path, tags_field = _tags_field(queryset.model, self.field_name)
+        tag_ids = dict(tags_field.related_model.objects.filter(name__in=names).values_list("name", "pk"))
+        if len(tag_ids) < len(names):
+            return queryset.none()
+        for tag_id in tag_ids.values():
+            queryset = queryset.filter(
+                _tags_exist(path, tags_field, {f"{tags_field.m2m_reverse_field_name()}__in": [tag_id]}))
         return queryset
 
 

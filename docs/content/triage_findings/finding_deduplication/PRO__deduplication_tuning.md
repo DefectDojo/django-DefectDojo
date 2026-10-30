@@ -37,6 +37,24 @@ In a tool's row, select the algorithm shown under the matching kind you want to 
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
 
+### Resetting a tool to its default
+
+The editor shows the tool's **Default Configuration** for that matching kind: the algorithm and hash fields a new install starts with. Use it to check what a tool shipped with before you change it, or to see how far an edited tool has moved from it.
+
+To go back to the default, select **Reset to Default**. This fills in the default algorithm and hash fields (and, for Reimport, turns **Track Findings as Locations Change** back off), but saves nothing. Review the impact and confirm it like any other change. Resetting the hash fields re-hashes the tool's existing findings in the background, the same as any other field change. When the default algorithm is Unique ID From Tool, which hides the field picker, the reset still puts the stored hash fields back. The button is unavailable when the form already matches the default.
+
+Once a reset is saved, the tool no longer shows as **Changed** for that matching kind and drops out of the **Changed From Defaults** filter, provided its grouping is also at the default.
+
+Where the default comes from:
+
+- **A parser that ships with DefectDojo** uses the algorithm and hash fields it ships with, including any `DD_HASHCODE_FIELDS_PER_SCANNER` override your deployment sets.
+- **A dynamically named test type**, such as `My Scanner (SARIF)`, uses the default of the parser named in the parentheses.
+- **A Universal Parser** uses Hash Code on Title, Severity and Description, which is what it is given when it is created.
+- **Cross Tool** defaults to **Disabled** for every tool.
+- **A tool no parser defines** uses the legacy Hash Code fields: Title, CWE, Line, File Path and Description.
+
+A pool override has no default of its own, so its editor shows none.
+
 > **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows. [Grouping](#grouping-what-counts-as-one-finding) is the one exception: it can be set for a pool.
 
 ## Grouping: what counts as one finding
@@ -91,6 +109,17 @@ python manage.py consolidate_folded_findings --product <asset id> --apply
 ```
 
 The newest finding of each group survives, and the others' locations move onto it, keeping the test that reported each one. The others become its duplicates.
+
+Consolidation records each finding it folds: the finding it went onto, the locations that moved, and what marking it a duplicate cleared. Moving the tool back to **As the parser groups them** after consolidating does not split anything when you save it, because what the parser makes of a report is only known at the next import. The split happens on the next reimport instead. When it reports a finding that consolidation folded away, that finding becomes active again, its locations (files, URLs or any other kind) move back from the surviving finding with their status history, it is verified again if it was before, and a note on it names the finding it had been folded into. Only findings with a consolidation record come back: a finding you marked as a duplicate yourself stays a duplicate. A folded-away finding is also left alone when the surviving finding is no longer active, for example because it was marked a false positive or risk accepted.
+
+Consolidations run on an earlier release have no record, so a reimport leaves their folded findings closed. To reopen them, run `unfold_consolidated_findings` for the Assets concerned. It lists each finding it would reopen with its reasons, counts the ones it leaves alone (`--verbose` lists those too), and changes nothing until you pass `--apply` (with `--user`, the account the notes are written as):
+
+```bash
+python manage.py unfold_consolidated_findings --product <asset id>
+python manage.py unfold_consolidated_findings --product <asset id> --apply --user <username>
+```
+
+It recognizes these findings by their file and line, so it only handles findings with a code location. A finding on the same line as the finding it duplicates is left alone, because a person marking one finding on that line a duplicate of another leaves the same traces. If a reimport on an earlier release already gave a folded-away finding a new location row of its own, that newer row is removed when the finding is reopened, so its original row, with its history, comes back to it from the surviving finding; the note on the finding names each row removed. Findings without a file are only counted, because nothing on them says which locations they held. Reopen any of these yourself if they should be open. Use `--pool <pool id>` instead of `--product` to cover every Asset in a dedupe pool.
 
 To use a grouping only for some Assets, put them in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) and pick that pool under **Applies To**. Assets outside the pool keep the instance default.
 

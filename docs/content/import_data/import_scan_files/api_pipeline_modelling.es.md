@@ -12,6 +12,8 @@ La API de DefectDojo permite crear soluciones de canalización robustas que ingi
 
 Estas canalizaciones pueden crearse llamando directamente a nuestro endpoint de la API **/reimport** con un archivo de escaneo adjunto, de una forma muy similar a nuestro **Formulario de importación de escaneo**.
 
+En los flujos de trabajo de GitHub Actions, la acción oficial de DefectDojo llama a este endpoint por usted. Consulte [Importar desde GitHub Actions](/import_data/import_scan_files/github_actions/).
+
 ## La API de DefectDojo
 
 La API de DefectDojo está documentada dentro de la propia aplicación mediante el framework OpenAPI. Puede acceder a esta documentación desde el Menú de usuario en la esquina superior derecha, en **'API v2 OpenAPI3'**.

@@ -446,6 +446,31 @@ class TestFindingModelMixin:
         finding.references = "URL: [https://www.example.com](https://www.example.com)"
         self.assertEqual("URL: [https://www.example.com](https://www.example.com)", finding.get_references_with_links())
 
+    def test_duplicate_finding_set_orphaned_duplicate_is_filterable(self):
+        # A finding flagged as a duplicate whose duplicate_finding link is null
+        # (an orphaned duplicate) must still return a QuerySet, not a plain list.
+        # Callers such as set_finding_as_original_internal chain .filter() on the
+        # result, which raised "AttributeError: 'list' object has no attribute
+        # 'filter'" when a list was returned.
+        self.finding.duplicate = True
+        self.finding.duplicate_finding = None
+
+        cluster = self.finding.duplicate_finding_set()
+
+        # The crashing call site chained .filter(...) on the return value.
+        filtered = cluster.filter(test__engagement__product=self.finding.test.engagement.product)
+        self.assertEqual(list(filtered), [])
+
+    def test_duplicate_finding_set_non_duplicate_is_filterable(self):
+        # The non-duplicate branch already returns a QuerySet; pin that contract
+        # so both branches stay filterable.
+        self.finding.duplicate = False
+
+        cluster = self.finding.duplicate_finding_set()
+
+        filtered = cluster.filter(test__engagement__product=self.finding.test.engagement.product)
+        self.assertEqual(list(filtered), [])
+
     # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
     # Capturing current behavior which might not be the desired one yet
     # This test saves vectors without any validation. This is capturing current behavior.

@@ -120,10 +120,43 @@ deadline, three days remaining on the day of capture.
 After rating: with PAIN tiering on and the finding rated N5, the deadline moves to the matrix's
 two-day cell. Nothing else about the finding changed.
 
+## Rating findings by hand
+
+From 3.5.0 a person can set, change or clear a rating directly, which is how a reviewer confirms or
+overrides what a rule proposed:
+
+| Where | How |
+| --- | --- |
+| One finding | **Edit Finding**, then **Optional Fields > Risk and Priority Settings > Potential Agency Impact (PAIN)**. Clear the field to return the finding to unrated. |
+| Many findings | Select them on a findings list and open **Bulk Edit**. Choose a rating, or **Unrated** to clear it. Leaving the field empty leaves every rating as it is. |
+| The API | `pain_rating` on `/api/v2/findings/`: send `1` to `5` to set it, `null` to clear it. It is accepted on create too, so an importer can set a default rating. `pain_evaluated_at` is read-only. |
+
+Setting a rating needs the **Rate Potential Agency Impact (PAIN)** permission, which is separate from
+editing the finding. Every built-in role that can edit findings carries it, and on upgrade so does
+every custom role that can, so nothing changes until an administrator decides otherwise. Built-in
+roles cannot be edited, so to keep ratings with fewer people, create a custom role under
+**Settings > Users & Permissions > Roles** with the finding permissions your reviewers need and
+without **Rate Potential Agency Impact (PAIN)**, and assign it in place of the built-in one. A user
+without the permission can still edit the finding; the rating field is hidden on the form, and a bulk
+edit skips the findings they may not rate and says so.
+
+A hand-set rating behaves exactly like a rule-set one:
+
+* A change stamps **PAIN Evaluated**, and clearing the rating clears it too.
+* Saving the same rating again changes nothing, so resubmitting a form never moves the deadline.
+* The deadline is recalculated on the same save.
+* Every change is recorded in the finding's history with the user who made it.
+
+The rating shows on the finding's Details panel as, for example, *N4 (evaluated Oct. 28, 2026)*. On
+the findings list, add the **PAIN** column, or filter on it. The filter accepts **Unrated**, which
+is the queue of findings waiting for an impact decision. Through the API the same filter is
+`?pain_rating=unrated` or `?pain_rating=4,5`.
+
 ## Rating findings with the Rules Engine
 
-Ratings are assigned through **Triage Engine**. The **Set Potential Agency Impact (PAIN)** action
-writes a rating to every finding that reaches it.
+Ratings can also be assigned through **Triage Engine**, which is the way to rate findings at scale.
+The **Set Potential Agency Impact (PAIN)** action writes a rating to every finding that reaches it.
+Rules are governed by the rule permissions, not by the rating permission above.
 
 ![The Set Potential Agency Impact (PAIN) action in the Triage Engine editor](images/11-rules-engine-set-pain-node.jpg)
 

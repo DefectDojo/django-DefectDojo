@@ -13,14 +13,23 @@ The Feature Flags page is visible to **superusers** only. Other users, including
 
 Go to **Settings > Feature Flags** in the left sidebar.
 
-The page lists every optional feature with:
+The header shows how many features are on, for example **26 of 56 Enabled**, and holds a search box that filters every feature by name or description.
 
-* **Name** — the feature, with a **BETA** tag when it is still in beta
-* **Description** — what the feature does
+Features are grouped by area, one card per area: **Findings and Triage**, **Assets and Locations** (or **Products and Locations** when relabeling is off), **Compliance and Regulatory**, **Connectors and Ingestion**, **AI and MCP**, **Interface and Workspace**, and **System and Support**. Each card shows how many of its features are listed, and the **MCP Server** row closes the **AI and MCP** card with its toolsets under it.
+
+Each feature row shows:
+
+* **Name**: the feature, with **NEW**, **BETA** and warning tags such as **Restart Recommended** where they apply
 * **Documentation link**: a link to that feature's documentation. Every feature on the page has one, and the [Feature reference](#feature-reference) below lists them all.
-* **Toggle** — whether the feature is currently on
+* **Description**: what the feature does, on one line. Hover the row, or move keyboard focus into it, to read the whole description in place. On a touch screen the whole description always shows.
+* **Toggle**: whether the feature is currently on
 
-Use the search box to filter the list by feature name or description.
+The column beside the cards has two lists:
+
+* **Areas** lists every area with how many of its features are on. Click an area to scroll to its card.
+* **Show** narrows every card to **All**, **On**, **Off**, **New**, **Beta**, or **With Warnings** (features that carry a warning tag, such as **Restart Recommended** or **Experimental**). Each choice shows how many features it matches, and it combines with the search box. While a choice other than **All** is active, its name shows in the **Show** header.
+
+On a narrow screen the two lists sit above the cards and start folded, so the features come first.
 
 ### Features that are not listed
 
@@ -132,6 +141,7 @@ Features under **MCP** appear on the Feature Flags page beneath the MCP server s
 | **AI Inventory and Governance** (BETA) | Inventory the AI in every scanned repository: coding assistants and their rules files, MCP servers, models, AI packages, AI service endpoints, agent skills and AI provider keys. Policies mark each component authorized, unauthorized or needs review, unauthorized components become Findings, and each Asset can export an AI bill of materials. Inventories that arrive while this is off are still stored and appear when it is turned on. Requires **Locations**. | Off | [Docs](/asset_modelling/locations/pro__ai_inventory/) |
 | **AI Threat Modeling** | Generate a STRIDE threat model, attacker profiles, attack paths and security requirements from a feature design with Sensei. | On | [Docs](/sensei/threat_modeling/) |
 | **Airgapped instance** | This instance has no route off its network, so it never contacts DefectDojo. The version check, external tools, announcements, threat intel downloads and error and performance diagnostics stop, and both support pages show the DefectDojo support address instead. Load threat intel bundles from a file. The DD_AIRGAPPED environment variable turns this on for the whole deployment. | Off | [Docs](/get_started/pro/onprem/airgapped/) |
+| **Asset Discovery** (BETA) | List the devices your EDR sees on the network that have no agent of its own, as CrowdStrike Falcon Discover and Microsoft Defender for Endpoint report them. Turn it on per connection with Report Unmanaged Devices. The devices are candidates: none becomes an Asset, and none counts toward Total Findings. | Off | [Docs](/asset_modelling/pro__unmanaged_devices/) |
 | **Asset Exposure** (BETA) | Compute whether an asset is reachable from outside, and whether a finding's code is actually deployed in production, from the evidence connectors already collect. Both feed prioritization; exposure can also drive the FedRAMP VDR SLA tiers. | Off | [Docs](/triage_findings/finding_scoring/asset_exposure/) |
 | **Asset Identity** | Let connectors find each Asset by the identifier its source uses instead of by name, and list every identifier it is known by on its Identity card. Records that are already mapped stay where they are. Turning this off goes back to matching by name; the identifiers are kept. | Off | [Docs](/asset_modelling/engagements_tests/pro__assets/#asset-identity-aliases) |
 | **Calendar** | Show the Calendar in the sidebar. The calendar plots engagements and tests on a month view. Turning this off removes the entry; it does not change any engagement or test dates. | On | [Docs](/navigation/pro__sidebar/) |
@@ -146,6 +156,7 @@ Features under **MCP** appear on the Feature Flags page beneath the MCP server s
 | **Customizable Page Layouts** | Customizable widget-grid layouts for the Organization, Asset, Engagement, Test, Finding, and Risk Acceptance view pages. | On | [Docs](/pro/page_layouts/) |
 | **Dashboards 2.0** | The redesigned customizable widget dashboard. | Off | [Docs](/metrics_reports/dashboards/custom-dashboards/) |
 | **EU Evidence Packs** (BETA) | Assess product evidence against authored CRA and DORA obligation catalogs, preserve assessor overrides, and generate dated evidence packs. Requires **Compliance**. | Off | [Docs](/federal_compliance/eu_evidence_packs/) |
+| **External Asset Discovery** (BETA) | Show the domains, IP addresses and certificates your scans and connectors report as Locations, on the location map and in the location lists. Locations that arrive while this is off are still stored and appear when it is turned on. Requires **Locations**. | Off | [Docs](/asset_modelling/locations/pro__attack_surface_locations/) |
 | **FDA Cyber Device Pack** (BETA) | Assess a cyber device against an authored catalog for section 524B of the Federal Food, Drug, and Cosmetic Act, and generate an evidence pack carrying the component inventory, the lifecycle metrics and the exported bill of materials. Requires **Compliance**. | Off | [Docs](/federal_compliance/fda_cyber_device_pack/) |
 | **Framework Presets** (BETA) | Apply a published framework's patch windows and scan cadence as one preset: preview the plan, apply it, revert it, and see when the applied settings drift. Ships with UK Cyber Essentials and the Australian Essential Eight. | Off | [Docs](/asset_modelling/pro_hierarchy/framework_presets/) |
 | **Global Component Deduplication** | Deduplicate Components globally across the instance instead of per Asset. | Off | [Docs](/triage_findings/finding_deduplication/pro__global_component_deduplication/) |
@@ -176,7 +187,6 @@ Features under **MCP** appear on the Feature Flags page beneath the MCP server s
 | **Smart Upload** | Upload scan results without naming the asset or engagement first, and triage what could not be matched from the Unassigned Findings queue. Turning this off removes Smart Upload and Unassigned Findings from the Connect menu. It does not delete anything, and any findings already imported through Smart Upload are unaffected. | On | [Docs](/import_data/pro/specialized_import/smart_upload/) |
 | **Support** | Open a support request, track its status, and vote on what other customers ask for. When off, the Support pages are hidden and this instance sends no support requests to DefectDojo. | On | [Docs](/navigation/pro__support/) |
 | **Triage Engine (formerly Rules Engine 2.0)** (BETA) | Build automation rules as visual node graphs that react to Finding events, with per-run traces and a delivery outbox. | Off | [Docs](/automation/triage_engine/about/) |
-| **Unmanaged Devices** (BETA) | List the devices your EDR sees on the network that have no agent of its own, as CrowdStrike Falcon Discover and Microsoft Defender for Endpoint report them. Turn it on per connection with Report Unmanaged Devices. The devices are candidates: none becomes an Asset, and none counts toward Total Findings. | Off | [Docs](/asset_modelling/pro__unmanaged_devices/) |
 | **Vulnerability Response Policies** (BETA) | Read the response-policy matrix, the unevaluated queue and the escalation queue, and export machine-readable response evidence. | Off | [Docs](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies) |
 
 ## Feature availability

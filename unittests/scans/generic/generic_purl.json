@@ -1,0 +1,28 @@
+{
+  "type": "Dependency Tool",
+  "findings": [
+    {
+      "title": "Vulnerable component sent as a purl",
+      "severity": "Critical",
+      "description": "Only the purl names the component.",
+      "file_path": "code/pom.xml",
+      "purl": "pkg:maven/commons-collections/commons-collections@3.2.1"
+    },
+    {
+      "title": "Vulnerable component sent as purl parts",
+      "severity": "High",
+      "description": "The component fields are completed by a package type and namespace.",
+      "component_name": "lodash",
+      "component_version": "4.17.20",
+      "purl_type": "npm",
+      "namespace": ""
+    },
+    {
+      "title": "Vulnerable component without package coordinates",
+      "severity": "Low",
+      "description": "Falls back to a generic package type.",
+      "component_name": "openssl",
+      "component_version": "1.1.1"
+    }
+  ]
+}
