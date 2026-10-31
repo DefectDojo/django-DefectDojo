@@ -181,7 +181,7 @@ The last category, **Elsewhere in the app**, lists pages that configure DefectDo
 The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
 
 - **[Form Configuration](/navigation/pro__form_configuration/)**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
-- **[Sidebar Preferences](/navigation/pro__sidebar_presets/)**: named presets that hide sidebar entries, shared with everyone or kept to one person, with one shared preset as the instance default. A preset hides, it never denies: direct links and the API keep working.
+- **[Sidebar Presets](/navigation/pro__sidebar_presets/)**: named presets that hide sidebar entries, shared with everyone or kept to one person, with one shared preset as the instance default. A preset hides, it never denies: direct links and the API keep working.
 - **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), [sidebar presets](/navigation/pro__sidebar_presets/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, sidebar presets, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
 ## What moved

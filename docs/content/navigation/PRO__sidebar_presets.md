@@ -7,7 +7,7 @@ audience: pro
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sidebar Presets are a DefectDojo Pro feature.</span>
 
-A **sidebar preset** is a named list of sidebar entries to hide. A team that only triages findings can have a sidebar with the Connect section, the Sensei pages and most of Settings gone; a team that runs integrations can keep those and lose the rest. Presets are built on **Settings > UI Defaults > Sidebar Preferences**, shared with everyone or kept to one person, duplicated like a dashboard or a page layout, and one shared preset can be the instance default. Each person picks the preset that shapes their own sidebar on their User Profile page.
+A **sidebar preset** is a named list of sidebar entries to hide. A team that only triages findings can have a sidebar with the Connect section, the Sensei pages and most of Settings gone; a team that runs integrations can keep those and lose the rest. Presets are built on **Settings > UI Defaults > Sidebar Presets**, shared with everyone or kept to one person, duplicated like a dashboard or a page layout, and one shared preset can be the instance default. Each person picks the preset that shapes their own sidebar on their User Profile page.
 
 A preset follows the user, not the browser: the pick is saved to the account, and the sidebar, the **Cmd+K** / **Ctrl+K** menu search, the [Default Landing Page](/navigation/pro__landing_page/) list, the All Settings directory and the walkthrough lightbulb all read the same preset, so they never disagree about what is there.
 
@@ -25,7 +25,7 @@ Two entries are always shown, whatever a preset says: **Home**, so every section
 
 ## Building a preset
 
-Open **Settings > UI Defaults > Sidebar Preferences**. The page lists the presets you can see on the left (your own, the shared ones, and the instance default first) and opens the selected one in the editor on the right. **New Preset** starts an empty one; **Duplicate**, in a preset's menu, starts from a copy named `<name> (Copy)`.
+Open **Settings > UI Defaults > Sidebar Presets**. The page lists the presets you can see on the left (your own, the shared ones, and the instance default first) and opens the selected one in the editor on the right. **New Preset** starts an empty one; **Duplicate**, in a preset's menu, starts from a copy named `<name> (Copy)`.
 
 The editor shows one card per sidebar section, with a row for each group and each entry and a switch on every row:
 
@@ -50,7 +50,7 @@ While **Restrict Layout Customization** is on (also on the Layout Defaults page)
 
 Each person picks their own preset in one of two places:
 
-- **Use for Me** in a preset's menu on the Sidebar Preferences page.
+- **Use for Me** in a preset's menu on the Sidebar Presets page.
 - The **Sidebar Preset** field on the **User Profile** page (select your username at the bottom of the sidebar, then **User Profile**, under **Navigation**). The first option is the instance default; the rest are your own presets and the shared ones. **Submit** saves it with the rest of the profile.
 
 The sidebar, the menu search and the landing page list change at once, without a reload. If the chosen preset hides the page set as your [Default Landing Page](/navigation/pro__landing_page/), the profile page says so and sign-in opens Home instead.
@@ -59,7 +59,7 @@ The sidebar, the menu search and the landing page list change at once, without a
 
 | Permission | Lets a role |
 | --- | --- |
-| **Sidebar Preset View** | open the Sidebar Preferences page |
+| **Sidebar Preset View** | open the Sidebar Presets page and pick a preset on User Profile |
 | **Sidebar Preset Add** | create presets and duplicate existing ones |
 | **Sidebar Preset Edit** | edit the presets it owns |
 | **Sidebar Preset Delete** | delete the presets it owns |
