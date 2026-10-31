@@ -2090,6 +2090,110 @@ class FilesTest(DojoAPITestCase):
             msg = "Content-Disposition header must contain the filename parameter"
             raise NotImplementedError(msg)
 
+    def _attach_file(self, level, client=None):
+        response = (client or self.client).post(
+            f"/api/v2/{level}/files/",
+            {
+                "title": "original title",
+                "file": SimpleUploadedFile("evidence.txt", b"original content", content_type="text/plain"),
+            },
+        )
+        self.assertEqual(201, response.status_code, response.data)
+        return FileUpload.objects.get(id=response.data["id"])
+
+    def _client_for(self, username):
+        token = Token.objects.get(user=User.objects.get(username=username))
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        return client
+
+    def test_patch_changes_the_title(self):
+        for level in self.url_levels:
+            with self.subTest(level=level):
+                file_upload = self._attach_file(level)
+                stored_name = file_upload.file.name
+                response = self.client.patch(
+                    f"/api/v2/{level}/files/{file_upload.id}/", {"title": "new title"}, format="json",
+                )
+                self.assertEqual(200, response.status_code, response.data)
+                self.assertEqual("new title", response.data["title"])
+                file_upload.refresh_from_db()
+                self.assertEqual("new title", file_upload.title)
+                # The stored file is left alone when only the title changes
+                self.assertEqual(stored_name, file_upload.file.name)
+                self.assertTrue(file_upload.file.storage.exists(stored_name))
+
+    def test_patch_replaces_the_file(self):
+        for level in self.url_levels:
+            with self.subTest(level=level):
+                file_upload = self._attach_file(level)
+                old_name = file_upload.file.name
+                response = self.client.patch(
+                    f"/api/v2/{level}/files/{file_upload.id}/",
+                    {"file": SimpleUploadedFile("evidence.txt", b"replacement content", content_type="text/plain")},
+                    format="multipart",
+                )
+                self.assertEqual(200, response.status_code, response.data)
+                file_upload.refresh_from_db()
+                self.assertEqual("original title", file_upload.title)
+                self.assertNotEqual(old_name, file_upload.file.name)
+                self.assertFalse(file_upload.file.storage.exists(old_name))
+                response = self.client.get(f"/api/v2/{level}/files/download/{file_upload.id}/")
+                self.assertEqual(200, response.status_code)
+                self.assertEqual(b"replacement content", b"".join(response.streaming_content))
+
+    def test_patch_rejects_an_unsupported_extension(self):
+        level = "tests/3"
+        file_upload = self._attach_file(level)
+        old_name = file_upload.file.name
+        response = self.client.patch(
+            f"/api/v2/{level}/files/{file_upload.id}/",
+            {"file": SimpleUploadedFile("payload.exe", b"MZ", content_type="application/octet-stream")},
+            format="multipart",
+        )
+        self.assertEqual(400, response.status_code, response.data)
+        file_upload.refresh_from_db()
+        self.assertEqual(old_name, file_upload.file.name)
+        self.assertTrue(file_upload.file.storage.exists(old_name))
+
+    def test_delete_removes_the_file(self):
+        for level in self.url_levels:
+            with self.subTest(level=level):
+                file_upload = self._attach_file(level)
+                storage, stored_name = file_upload.file.storage, file_upload.file.name
+                response = self.client.delete(f"/api/v2/{level}/files/{file_upload.id}/")
+                self.assertEqual(204, response.status_code, response.content[:1000])
+                self.assertFalse(FileUpload.objects.filter(id=file_upload.id).exists())
+                self.assertFalse(storage.exists(stored_name))
+                response = self.client.get(f"/api/v2/{level}/files/")
+                self.assertNotIn(file_upload.id, [f["id"] for f in response.data["files"]])
+
+    def test_file_of_another_object_cannot_be_changed_or_deleted(self):
+        file_upload = self._attach_file("findings/7")
+        for level in ("tests/3", "engagements/1"):
+            with self.subTest(level=level):
+                url = f"/api/v2/{level}/files/{file_upload.id}/"
+                response = self.client.patch(url, {"title": "hijacked"}, format="json")
+                self.assertEqual(404, response.status_code, response.content[:1000])
+                response = self.client.delete(url)
+                self.assertEqual(404, response.status_code, response.content[:1000])
+        file_upload.refresh_from_db()
+        self.assertEqual("original title", file_upload.title)
+        self.assertTrue(file_upload.file.storage.exists(file_upload.file.name))
+
+    def test_user_without_access_cannot_change_or_delete(self):
+        file_upload = self._attach_file("findings/7")
+        client = self._client_for("user2")
+        # Sanity: finding 7 is not visible to this user
+        self.assertEqual(404, client.get("/api/v2/findings/7/").status_code)
+        url = f"/api/v2/findings/7/files/{file_upload.id}/"
+        response = client.patch(url, {"title": "hijacked"}, format="json")
+        self.assertIn(response.status_code, (403, 404), response.content[:1000])
+        response = client.delete(url)
+        self.assertIn(response.status_code, (403, 404), response.content[:1000])
+        file_upload.refresh_from_db()
+        self.assertEqual("original title", file_upload.title)
+
 
 @versioned_fixtures
 class FindingsTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
