@@ -21,6 +21,10 @@ System notifications are set by a DefectDojo Superuser and cannot be opted out o
 
 Personal Notifications cannot be sent via Microsoft Teams, as Teams only allows for posting Global notifications in a single channel.
 
+### Receive new Findings that match a view (Pro)
+
+To be told about new Findings that match a filtered Findings list rather than every event of a kind, watch the list instead: the eye button in the list's toolbar sends matching new Findings by email or as an in-app alert, however they were added. See [Watching a view](/navigation/pro__table_customization/#watching-a-view).
+
 ### Receive Personal notifications for a specific Asset
 
 In addition to standard personal notifications, DefectDojo Users can also receive notifications for activity on a specific Asset. This is helpful when there are certain Assets which a user needs to monitor more closely.
