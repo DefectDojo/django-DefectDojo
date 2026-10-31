@@ -123,7 +123,7 @@ Two things about scope are worth understanding, and both hold for either kind of
 
 For an event trigger, scope acts as a second gate: the Findings or Assets named in the event are matched against it, and only those that pass enter the graph.
 
-A rule does not have to start in the editor. The eye button on a Findings list (**Watch This View**, see [Customizing Tables](/navigation/pro__table_customization/#watching-a-view)) creates an **On Finding Event** rule whose scope is the list's filters and whose only action sends new matches to the person who watched it. It is an ordinary rule owned by that person: it appears in the Triage Engine list, and it can be opened, edited or deleted there. Pausing or removing the watch from the User Profile page switches the same rule off or deletes it.
+A rule does not have to start in the editor. The eye button on a Findings list (**Watch This View**, see [Customizing Tables](/navigation/pro__table_customization/#watching-a-view)) creates an **On Finding Event** rule whose scope is the list's filters and whose only action sends new matches to the person who watched it. It is an ordinary rule owned by that person: it appears in the Triage Engine list and can be opened and edited there, and switching it off there pauses the watch. It runs only when a new Finding matches its scope. Pausing the watch from the User Profile page switches the same rule off, and removing it deletes the rule, or, once the rule has sent matches, switches it off and keeps it with its run history.
 
 ### Scheduling
 
