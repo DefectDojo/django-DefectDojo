@@ -32,6 +32,13 @@ Users with the **View Group** configuration permission see every Group. A Member
 
 ## Viewing A Group
 
+With Access Administration on (Pro), a Group's page has three tabs:
+
+* **Overview**: the number of members and what the Group reaches in its own right: its Global Role, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each Asset is reached. Every member of the Group receives this access through it. A Group that holds a Global Role is marked as having instance-wide access.
+* **Members**: the Group's details, Configuration Permissions and members, as described below.
+* **Access**: the Group's Roles on Organizations and Assets, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
+
+
 Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
 
 ![image](images/group_view_pro_ui.png)
