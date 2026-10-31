@@ -16,7 +16,7 @@ A restore puts back the same four things a backup captures: the configuration an
 
 **There are two databases.** Alongside the main database (`dojodb` by default), the orchestrator keeps its state in a second one with `-ddorch` added to the name, for example `dojodb-ddorch`. Back up and restore both. If the second one is missing, the orchestrator creates an empty one at startup and the state of background work from before the backup is lost.
 
-**Restore the keys with the database.** Encrypted credentials only decrypt with the keys that encrypted them. Connector and integration credentials use `DD_SECRET_KEY`, and Tool Configuration credentials use `DD_CREDENTIAL_AES_256_KEY`. A mismatch fails quietly rather than with an error, which is why it gets its own entry under [Common problems](#common-problems).
+**Restore the keys with the database.** Encrypted credentials only decrypt with the keys that encrypted them. Connector and integration credentials, and the secrets in the SSO, OIDC, LDAP and email settings, use `DD_SECRET_KEY`. Tool Configuration credentials use `DD_CREDENTIAL_AES_256_KEY`. A mismatch fails quietly rather than with an error, which is why it gets its own entry under [Common problems](#common-problems).
 
 ## Docker Compose
 
@@ -228,7 +228,9 @@ Work through the [restore checklist](/get_started/pro/onprem/backing_up/#confirm
 
 ## Common problems
 
-**Connector or integration credentials are blank, with no error.** `DD_SECRET_KEY` is not the one they were encrypted with. They decrypt to nothing rather than failing, so the connector looks unconfigured. Tool Configuration credentials are unaffected. The stored values are intact: put the original key back and restart, and they read correctly again.
+**Connector or integration credentials are blank, or SSO, LDAP or email stops working, with no error.** `DD_SECRET_KEY` is not the one they were encrypted with. They decrypt to nothing rather than failing, so the connector looks unconfigured and the sign-in and email settings fall back to their defaults. DefectDojo logs a warning that it could not decrypt a stored value. Tool Configuration credentials are unaffected. The stored values are intact: put the original key back and restart, and they read correctly again.
+
+**Changing `DD_SECRET_KEY` on purpose.** Set the new key in `DD_SECRET_KEY`, and keep the old one in `DD_SECRET_KEY_FALLBACKS`. That variable takes a comma-separated list. Values encrypted under a key in that list still read correctly, and new values use the new key. Keep the old key in the list until nothing still depends on it.
 
 **Tool Configuration credentials do not work.** `DD_CREDENTIAL_AES_256_KEY` does not match. As above, the data is intact and the original key fixes it.
 

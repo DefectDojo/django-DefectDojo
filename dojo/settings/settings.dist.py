@@ -159,6 +159,8 @@ env = environ.FileAwareEnv(
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, "defectdojo"),
     DD_SECRET_KEY=(str, ""),
+    # Older secret keys, comma separated, kept readable while DD_SECRET_KEY changes
+    DD_SECRET_KEY_FALLBACKS=(list, []),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_DATA_UPLOAD_MAX_NUMBER_FIELDS=(int, 10240),  # Max number of GET/POST parameters in a request
@@ -382,6 +384,7 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
+SECRET_KEY_FALLBACKS = env("DD_SECRET_KEY_FALLBACKS")
 
 # Default cache backend (django.core.cache). Redis when DD_CACHE_URL is set,
 # else per-process LocMemCache. General framework caching only; the singleton
