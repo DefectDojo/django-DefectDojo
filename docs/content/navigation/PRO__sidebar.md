@@ -181,7 +181,8 @@ The last category, **Elsewhere in the app**, lists pages that configure DefectDo
 The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
 
 - **[Form Configuration](/navigation/pro__form_configuration/)**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
-- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
+- **[Sidebar Presets](/navigation/pro__sidebar_presets/)**: named presets that hide sidebar entries, shared with everyone or kept to one person, with one shared preset as the instance default. A preset hides, it never denies: direct links and the API keep working.
+- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), [sidebar presets](/navigation/pro__sidebar_presets/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, sidebar presets, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
 ## What moved
 
@@ -241,6 +242,8 @@ Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/
 
 The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
+Flags remove an entry for the whole instance. To take entries away for some people and not others, or for yourself, use a [sidebar preset](/navigation/pro__sidebar_presets/): a named list of hidden entries that leaves every page reachable by its link.
+
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 
 ## The classic sidebar
@@ -249,5 +252,6 @@ This layout is the only sidebar. The classic sidebar it replaced, and the **Menu
 
 ## Related
 
+* [Sidebar Presets](/navigation/pro__sidebar_presets/): hiding entries with named, sharable presets
 * [Menu Badges](/navigation/pro__menu_badges/): what the `NEW`, `BETA`, `SOON`, `LEGACY` and `DEPRECATED` tags mean
 * [Feature Flags](/admin/feature_flags/pro__feature_flags/): turning optional features on and off

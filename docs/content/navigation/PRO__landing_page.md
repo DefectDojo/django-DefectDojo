@@ -25,7 +25,7 @@ The landing page applies when signing in has nowhere else to go:
 
 When you were sent to the sign-in page from a specific page (a link to a finding, for example), signing in takes you back to that page instead.
 
-If your landing page later becomes unavailable to you (a role is removed, or the feature behind it is turned off), signing in opens Home instead, without an error.
+If your landing page later becomes unavailable to you (a role is removed, the feature behind it is turned off, or a [sidebar preset](/navigation/pro__sidebar_presets/) hides it), signing in opens Home instead, without an error. The profile page says so when the preset you picked hides it.
 
 ## Turning it off
 
