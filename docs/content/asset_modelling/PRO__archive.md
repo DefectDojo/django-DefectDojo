@@ -33,7 +33,7 @@ If a Finding you archive is the original of a duplicate cluster, DefectDojo prom
 
 ## The retention period
 
-Archived data is kept for 6 months by default. Self-hosted installs can change this with the `DD_ARCHIVE_RETENTION_MONTHS` environment variable (minimum 1). The period cannot be shortened for data that is already archived.
+Archived data is kept for 2 months by default. Self-hosted installs can change this with the `DD_ARCHIVE_RETENTION_MONTHS` environment variable (minimum 1). The period cannot be shortened for data that is already archived.
 
 Every archive has a purge date. A daily task permanently deletes archives whose purge date has passed. This removes the archived objects, everything under them, and their audit history. Nothing remains that refers to them, and they cannot be recovered.
 
