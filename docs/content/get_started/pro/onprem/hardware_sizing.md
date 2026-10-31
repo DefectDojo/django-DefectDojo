@@ -110,7 +110,7 @@ The limit is sent to PostgreSQL as a connection startup option. If DefectDojo re
 | --- | --- | --- | --- |
 | `DD_DATABASE_WEB_STATEMENT_TIMEOUT` | `dojo` (web) | 30 seconds under `DD_UWSGI_HARAKIRI`, or 1740 when that is unset or `0` | Seconds; `0` turns the limit off. |
 | `DD_DATABASE_IMPORT_STATEMENT_TIMEOUT` | `dojo-import-scan` (imports) | 30 seconds under `DD_UWSGI_IMPORT_HARAKIRI`, or 1740 when that is unset or `0` | Docker Compose only. Seconds; `0` turns the limit off. |
-| `DD_DATABASE_WEB_LONG_STATEMENT_TIMEOUT` | `dojo` (web) | 30 seconds under the service's harakiri | The limit for imports and exports. A value above the default is capped at it; `0` means the default. |
+| `DD_DATABASE_WEB_LONG_STATEMENT_TIMEOUT` | `dojo` (web) | 30 seconds under the service's harakiri, or 1740 when that is unset or `0` | The limit for imports and exports. A value above the default is capped at it; `0` means the default. |
 
 On Kubernetes, the limit follows each uWSGI pool's harakiri from the chart values: 870 seconds on the web pool and 1740 seconds on the import pool, or 1740 seconds on the web pool when `django.uwsgiImport.enabled` is `false`. To change it, set `DD_DATABASE_WEB_STATEMENT_TIMEOUT` in `config.extra` or `django.extraEnv`. The chart has no separate setting for the import pool, so a value set there applies to the web and import pools alike. If a request answers with this 503, the log names the request: send it to support, since a statement that runs this long is a performance problem to fix.
 
