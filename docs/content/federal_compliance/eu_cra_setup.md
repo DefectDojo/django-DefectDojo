@@ -74,7 +74,7 @@ No restart is needed. Leave every other flag as it is; this guide does not use t
 | Expected | Where |
 | --- | --- |
 | **CRA Article 14 Reports** under **Act** | The left menu |
-| A **Regulatory** card near the top of every Asset page | Any Asset |
+| A **Regulatory** card on every Asset page | Any Asset |
 | An **EU Evidence** tab | Asset > **Asset Overview** > **Compliance** tab > **Compliance Profile** |
 
 ### Step 2 — Enable per-release SBOMs
@@ -179,8 +179,9 @@ Repeat Steps 6 to 9 for each product. For many products, use the API (see the en
 ### Step 6 — Record the product's regulatory facts
 
 In the left menu, go to **Explore > Assets** and select the product's Asset. The **Regulatory**
-card is near the top of the Asset page, below the Engagements, Tests, Findings and Locations tiles.
-Fill it in and select **Submit**:
+card is on the Asset page below the Details row, after the Open Finding Severity meter, the Asset
+Overview tabs and the Organization Memberships and Asset Identity cards. Fill it in and select
+**Submit**:
 
 | Field | Example | What it records |
 | --- | --- | --- |
