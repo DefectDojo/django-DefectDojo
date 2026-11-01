@@ -6,7 +6,7 @@ from defusedxml.ElementTree import parse
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
-from dojo.tools.locations import LocationData
+from dojo.tools.locations import LocationAssociationData, LocationData
 
 
 class NmapParser:
@@ -53,6 +53,11 @@ class NmapParser:
                 host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
 
             host_info += "\n\n"
+            # Nmap lists OS matches by descending accuracy; the first one is the best guess
+            best_os_match = host.find("os/osmatch")
+            host_os = LocationAssociationData.host_os(
+                best_os_match.attrib.get("name") if best_os_match is not None else None,
+            )
             for os in host.iter("os"):
                 for os_match in os.iter("osmatch"):
                     if "name" in os_match.attrib:
@@ -74,7 +79,7 @@ class NmapParser:
                 ) else None
                 if locations_enabled():
                     location = LocationData.url(
-                        host=fqdn or ip, protocol=protocol, port=port,
+                        host=fqdn or ip, protocol=protocol, port=port, association=host_os,
                     )
                 else:
                     # TODO: Delete this after the move to Locations

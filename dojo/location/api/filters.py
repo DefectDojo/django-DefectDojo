@@ -84,6 +84,8 @@ class LocationFindingReferenceFilter(CommonFilters):
         "location_type", "Location Type", locals(), model_field_name="location__location_type")
     CommonFilters.create_char_filters(
         "location_value", "Location Value", locals(), model_field_name="location__location_value")
+    CommonFilters.create_char_filters(
+        "host_os", "Host OS reported by the scanner", locals(), model_field_name="relationship_data__os")
     CommonFilters.create_ordering_filters(
         locals(),
         (
