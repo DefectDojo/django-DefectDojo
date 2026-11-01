@@ -2,16 +2,21 @@ import logging
 import re
 import time
 from contextlib import contextmanager, suppress
+from http import HTTPStatus
 from threading import local
 from urllib.parse import quote
 
 import pghistory.middleware
 from django.conf import settings
+from django.contrib import messages
 from django.db import models
 from django.dispatch import receiver
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils import translation
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy
+from rest_framework.permissions import SAFE_METHODS
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -118,6 +123,42 @@ class LoginRequiredMiddleware:
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
         return response
+
+
+READ_ONLY_MODE_MESSAGE = gettext_lazy(
+    "Read-only mode is on. DefectDojo does not accept changes until a superuser turns it off in System Settings.",
+)
+
+
+class ReadOnlyModeMiddleware:
+
+    """Rejects every unsafe request while System_Settings.read_only_mode is on, except READ_ONLY_MODE_EXEMPT_URLS."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.exempt_urls = [re.compile(pattern) for pattern in settings.READ_ONLY_MODE_EXEMPT_URLS]
+
+    def __call__(self, request):
+        if request.method in SAFE_METHODS:
+            return self.get_response(request)
+        path = request.path_info.lstrip("/")
+        if any(pattern.match(path) for pattern in self.exempt_urls):
+            return self.get_response(request)
+        if not get_cached_system_settings().read_only_mode:
+            return self.get_response(request)
+
+        if (
+            path.startswith(f"{settings.URL_PREFIX}api/v")
+            or request.headers.get("HX-Request") == "true"
+            or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        ):
+            return JsonResponse({"detail": READ_ONLY_MODE_MESSAGE}, status=HTTPStatus.LOCKED)
+
+        messages.error(request, READ_ONLY_MODE_MESSAGE)
+        referer = request.headers.get("Referer", "")
+        if not url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+            referer = reverse("home")
+        return HttpResponseRedirect(referer)
 
 
 class DojoSettingsManagerMiddleware:
