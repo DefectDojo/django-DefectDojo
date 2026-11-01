@@ -116,6 +116,9 @@ attributed to the user who triggered it.
 | Organization Group Assignment |   ✅   |   ✅   |   ✅   |
 | Asset Member                |   ✅   |   ✅   |   ✅   |
 | Organization Member           |   ✅   |   ✅   |   ✅   |
+| View As Session               |   ✅   |   ✅   |   ✅   |
+
+A View As Session's create is the start of a [View As User](../pro__view_as_user/) session and its update is the end. The browser session it ran in is never stored, only a digest of it, and the digest is excluded from the audit log.
 
 ### Pro — relationship (add / remove) events
 
