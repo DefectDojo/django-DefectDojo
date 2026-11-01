@@ -9947,3 +9947,7 @@ msgstr "Đã cập nhật tệp thành công."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Vui lòng kiểm tra dữ liệu biểu mẫu và thử lại."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "Tích hợp GitHub"
