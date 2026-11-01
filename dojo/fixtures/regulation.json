@@ -1,7 +1,6 @@
 [
   {
     "model": "dojo.regulation",
-    "pk": 1,
     "fields": {
       "name": "Payment Card Industry Data Security Standard",
       "acronym": "PCI DSS",
@@ -13,7 +12,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 2,
     "fields": {
       "name": "Health Insurance Portability and Accountability Act",
       "acronym": "HIPAA",
@@ -25,7 +23,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 3,
     "fields": {
       "name": "Family Educational Rights and Privacy Act",
       "acronym": "FERPA",
@@ -37,7 +34,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 4,
     "fields": {
       "name": "Sarbanes–Oxley Act",
       "acronym": "SOX",
@@ -49,7 +45,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 5,
     "fields": {
       "name": "Gramm–Leach–Bliley Act",
       "acronym": "GLBA",
@@ -61,7 +56,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 6,
     "fields": {
       "name": "Personal Information Protection and Electronic Documents Act",
       "acronym": "PIPEDA",
@@ -73,7 +67,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 7,
     "fields": {
       "name": "Data Protection Act 1998",
       "acronym": "DPA",
@@ -85,7 +78,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 8,
     "fields": {
       "name": "Children's Online Privacy Protection Act",
       "acronym": "COPPA",
@@ -97,7 +89,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 9,
     "fields": {
       "name": "California Security Breach Information Act",
       "acronym": "CA SB-1386",
@@ -109,7 +100,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 10,
     "fields": {
       "name": "California Online Privacy Protection Act",
       "acronym": "OPPA",
@@ -121,7 +111,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 11,
     "fields": {
       "name": "Data Protection Directive",
       "acronym": "Directive 95/46/EC",
@@ -133,7 +122,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 12,
     "fields": {
       "name": "Directive on Privacy and Electronic Communications",
       "acronym": "Directive 2002/58/EC",
@@ -145,7 +133,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 13,
     "fields": {
       "name": "General Data Protection Regulation",
       "acronym": "GDPR",
@@ -157,7 +144,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 14,
     "fields": {
       "name": "System and Organization Controls",
       "acronym": "SOC2",
@@ -169,7 +155,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 15,
     "fields": {
       "name": "Information Security Standard 27001",
       "acronym": "ISO 27001",
@@ -181,7 +166,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 16,
     "fields": {
       "name": "CISA Secure Software Development Attestation",
       "acronym": "CISA-SSDA",
@@ -193,7 +177,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 17,
     "fields": {
       "name": "FEDRAMP",
       "acronym": "FEDRAMP",
@@ -205,7 +188,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 18,
     "fields": {
       "name": "Supply Chain Levels for Software Artifacts",
       "acronym": "SLSA",
@@ -217,7 +199,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 19,
     "fields": {
       "name": "NIST 800-218 Security Software Development Framework",
       "acronym": "SSDF",
@@ -229,7 +210,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 20,
     "fields": {
       "name": "CIS Controls & Benchmarks",
       "acronym": "CIS Benchmark",
@@ -241,7 +221,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 21,
     "fields": {
       "name": "NIST Cybersecurity Framework",
       "acronym": "CSF",
@@ -253,7 +232,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 22,
     "fields": {
       "name": "OWASP Application Security Verification Standard",
       "acronym": "ASVS",
@@ -265,7 +243,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 23,
     "fields": {
       "name": "OWASP Top 10",
       "acronym": "OWASP T10",
@@ -277,7 +254,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 24,
     "fields": {
       "name": "OWASP API Security Top 10",
       "acronym": "OWASP API T10",
@@ -289,7 +265,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 25,
     "fields": {
       "name": "California Consumer Privacy Act",
       "acronym": "CCPA",
@@ -301,7 +276,6 @@
   },
   {
     "model": "dojo.regulation",
-    "pk": 26,
     "fields": {
       "name": "California Privacy Rights Act",
       "acronym": "CPRA",
@@ -309,6 +283,61 @@
       "category": "privacy",
       "reference": "https://en.wikipedia.org/wiki/California_Privacy_Rights_Act",
       "description": "The California Privacy Rights Act of 2020 (CPRA), also known as Proposition 24, is a California ballot proposition that was approved by a majority of voters in California. This proposition expands California's consumer privacy law and builds upon the California Consumer Privacy Act (CCPA) of 2018, which established a foundation for consumer privacy regulations. The proposition enshrines more provisions in California state law, allowing consumers to prevent businesses from sharing their personal data, correct inaccurate personal data, and limit businesses' usage of \"sensitive personal information\", which includes precise geolocation, race, ethnicity, religion, genetic data, private communications, sexual orientation, and specified health information."
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "fields": {
+      "name": "ISO/IEC 42001:2023",
+      "acronym": "ISO 42001",
+      "category": "other",
+      "jurisdiction": "International",
+      "description": "ISO/IEC 42001:2023 specifies requirements for establishing, implementing, maintaining, and continually improving an Artificial Intelligence Management System (AIMS) within organizations.",
+      "reference": "https://www.iso.org/standard/81230.html"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "fields": {
+      "name": "EU Artificial Intelligence Act",
+      "acronym": "EU AI Act",
+      "category": "other",
+      "jurisdiction": "European Union",
+      "description": "Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence, establishing a risk-based framework classifying AI systems by risk level with corresponding compliance obligations.",
+      "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "fields": {
+      "name": "Network and Information Security Directive 2",
+      "acronym": "NIS2",
+      "category": "security",
+      "jurisdiction": "European Union",
+      "description": "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union, expanding scope and introducing stricter security requirements and incident reporting obligations.",
+      "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "fields": {
+      "name": "Digital Operational Resilience Act",
+      "acronym": "DORA",
+      "category": "finance",
+      "jurisdiction": "European Union",
+      "description": "Regulation (EU) 2022/2554 on digital operational resilience for the financial sector, covering ICT risk management, incident reporting, resilience testing, and third-party risk management.",
+      "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2554"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "fields": {
+      "name": "ISO/IEC 27701:2019",
+      "acronym": "ISO 27701",
+      "category": "privacy",
+      "jurisdiction": "International",
+      "description": "ISO/IEC 27701:2019 specifies requirements for a Privacy Information Management System (PIMS) as an extension to ISO/IEC 27001, addressing GDPR and other privacy regulation requirements.",
+      "reference": "https://www.iso.org/standard/71670.html"
     }
   }
 ]
