@@ -1,6 +1,6 @@
 ---
 title: "Customizing Tables"
-description: "Filter, sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables, switch between the table and the grid, and watch a findings view for new findings"
+description: "Filter, sort, choose, reorder, resize, and save the columns on DefectDojo Pro data tables, and switch between the table and the grid"
 weight: 8
 ---
 
@@ -109,30 +109,6 @@ The dot compares against the table as it was when the page loaded or a preferenc
 To switch between preferences, pick one from the list in the preferences menu. Selecting **Default** returns the table to its built-in columns and widths without deleting any of your saved preferences.
 
 Shared preferences created by other users appear under the **Shared Preferences** tab of the menu. You can load or set a shared preference as your default, but only its creator can change or delete it.
-
-## Watching a view
-
-On the Findings list pages, the eye button in the toolbar (beside the preferences menu) watches the list as it is filtered now: when a new finding matches those filters, however it was added (an import, the API or by hand), DefectDojo sends it to you. A saved preference is a good thing to watch, but any filter works, and a list with no filter watches every new finding you can see. Findings lists shown inside another page, such as a Finding's Similar Findings, have no eye.
-
-Clicking the eye opens **Watch This View**:
-
-- **Name**: what the watch is called on your User Profile page and in the Triage Engine. It starts as the preference's name.
-- **Channel**: **Email** sends to the address on your user profile, over the instance's Email connection (Connect, then Downstream). It is offered only when your user has an email address and an Email connection exists. **In-App Alert** puts an alert in your notification inbox.
-- **Cadence**: **Instant** sends as soon as new findings match. Findings added together, such as one import's, arrive as one message listing every match.
-- **Filters**: the filters the watch carries, named as the list's filter bar names them.
-
-Submitting creates a Triage Engine rule that you own. It runs with your access, so it never reports a finding you could not open yourself, and it sends only to you. Its sends are listed on the Triage Engine's Deliveries page like any rule's.
-
-The eye is filled when the selected preference already has a watch. A view set to match any filter (see [Matching all filters or any filter](#matching-all-filters-or-any-filter)) cannot be watched, and the dialog says so as it opens; switch the view to match all filters first. The same filters cannot be watched twice over the same channel.
-
-### Managing watches
-
-Every watch is listed in the **Watched Views** card on the User Profile page, with its preference, channel, cadence and status. The status reads **Paused** whenever the watch's rule is switched off, whether from this card or in the Triage Engine. Each row's menu offers:
-
-- **Pause** and **Resume**: turn the watch's rule off or back on.
-- **Remove**: delete the watch and its rule. A watch's rule runs only when a new finding matches it, so a watch that never sent anything goes together with its rule. A rule that has sent matches keeps that run history, as every Triage Engine rule with history does: it is switched off and stays in the Triage Engine list instead of being deleted.
-
-Deleting the saved preference a watch was made from does not stop the watch: it keeps the filters it was created with. Deleting a user removes their watches, and their watch rules the same way **Remove** does.
 
 ## Global defaults and restricted customization
 

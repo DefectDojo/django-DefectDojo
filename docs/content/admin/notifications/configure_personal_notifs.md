@@ -21,9 +21,9 @@ System notifications are set by a DefectDojo Superuser and cannot be opted out o
 
 Personal Notifications cannot be sent via Microsoft Teams, as Teams only allows for posting Global notifications in a single channel.
 
-### Receive new Findings that match a view (Pro)
+### Receive new Findings that match a set of filters (Pro)
 
-To be told about new Findings that match a filtered Findings list rather than every event of a kind, watch the list instead: the eye button in the list's toolbar sends matching new Findings by email or as an in-app alert, however they were added. See [Watching a view](/navigation/pro__table_customization/#watching-a-view).
+To be told about new Findings that match particular filters rather than every event of a kind, adopt one of the **Notifications** templates in the Triage Engine: it sends matching new Findings by email or as an in-app alert. See [Starting a rule](/automation/triage_engine/building_rules/#starting-a-rule).
 
 ### Receive Personal notifications for a specific Asset
 

@@ -33,6 +33,16 @@ Templates are starting points, not links. Editing an adopted rule does not affec
 adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
 gets pointed at two different sets of Assets. The second one is named with a suffix.
 
+The **Notifications** pack holds two templates for being told about new Findings: **Email new
+Findings that match a set of filters** and **Alert on new Findings that match a set of filters**.
+Each is an **On Finding Event** trigger on **Created** wired to one notify node. Pick the filters in
+the trigger's scope, the same ones the Findings list offers, and the rule sends one message for each
+batch of new Findings that match all of them, however the Findings were added. The email version
+needs an Email connection with the receiving addresses in its recipients; the alert version takes
+usernames, or alerts the administrators when left empty. The subject, body and alert text arrive
+pre-filled with the rule's name and the matching Findings, and are edited on the notify node like
+any other rule's.
+
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
 rule, because both create one.
 
@@ -122,8 +132,6 @@ Two things about scope are worth understanding, and both hold for either kind of
 * **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits everything in the instance is not.
 
 For an event trigger, scope acts as a second gate: the Findings or Assets named in the event are matched against it, and only those that pass enter the graph.
-
-A rule does not have to start in the editor. The eye button on a Findings list (**Watch This View**, see [Customizing Tables](/navigation/pro__table_customization/#watching-a-view)) creates an **On Finding Event** rule whose scope is the list's filters and whose only action sends new matches to the person who watched it. It is an ordinary rule owned by that person: it appears in the Triage Engine list and can be opened and edited there, and switching it off there pauses the watch. It runs only when a new Finding matches its scope. Pausing the watch from the User Profile page switches the same rule off, and removing it deletes the rule, or, once the rule has sent matches, switches it off and keeps it with its run history.
 
 ### Scheduling
 
