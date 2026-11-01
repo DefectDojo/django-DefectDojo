@@ -64,6 +64,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Datadog**
 * **Deepfence ThreatMapper**
 * **DeepSource**
+* **[DefectDojo Migration](/connectors/toolreference/defectdojo/)**
 * **Dependency-Track**
 * **Detectify**
 * **Docker Scout**
