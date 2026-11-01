@@ -12,7 +12,13 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
-from dojo.api_v2.views import DeprecationNoticeMixin, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import (
+    DeprecatedFieldsMixin,
+    DeprecationNoticeMixin,
+    PrefetchDojoModelViewSet,
+    report_generate,
+    schema_with_prefetch,
+)
 from dojo.asset.api import serializers
 from dojo.asset.api.filters import (
     ApiAssetFilter,
@@ -56,6 +62,7 @@ class AssetAPIScanConfigurationViewSet(
 
 @extend_schema_view(**schema_with_prefetch())
 class AssetViewSet(
+    DeprecatedFieldsMixin,
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     mixins.CreateModelMixin,
@@ -68,6 +75,7 @@ class AssetViewSet(
     queryset = Product.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiAssetFilter
+    deprecated_fields = {"asset_numeric_grade": "product_grade"}
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasAssetPermission,

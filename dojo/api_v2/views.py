@@ -35,6 +35,7 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.api_v2.deprecated_fields import active_fields, fields_used_by
 from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.deprecations import get_deprecation
@@ -174,6 +175,29 @@ class DeprecationNoticeMixin:
         if notice is not None and not notice.removed:
             response["X-Deprecated"] = True
             response["X-End-Of-Life-Date"] = datetime.combine(notice.removal_date, time.min).isoformat()
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
+class DeprecatedFieldsMixin:
+
+    """
+    Notice on a response whose request used a field that is going away.
+
+    ``deprecated_fields`` maps a field name, as it appears in a request body, a filter or the
+    ordering, to the key of its declaration in ``dojo.deprecations``. A request that writes, filters
+    by or orders by one of them gets ``X-Deprecated-Fields`` naming them and ``X-End-Of-Life-Date``
+    for the earliest removal. ``dojo.api_v2.deprecated_fields`` marks the same fields in the schema.
+    """
+
+    deprecated_fields: dict[str, str] = {}
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        active = active_fields(self.deprecated_fields)
+        used = fields_used_by(request, active) if active else set()
+        if used:
+            response["X-Deprecated-Fields"] = ", ".join(sorted(used))
+            removal = min(active[name].removal_date for name in used)
+            response["X-End-Of-Life-Date"] = datetime.combine(removal, time.min).isoformat()
         return super().finalize_response(request, response, *args, **kwargs)
 
 
