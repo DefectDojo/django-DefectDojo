@@ -37,6 +37,11 @@ siteUrl: "https://dojo.example.com"
 
 # Restart application pods when chart-managed configuration or secrets change.
 trackConfig: enabled
+
+# Existing releases only: retain the credentials created at first installation.
+createSecret: false
+createPostgresqlSecret: false
+createValkeySecret: false
 ```
 
 Replace the example host and credentials with those supplied by your SMTP provider.
@@ -77,8 +82,11 @@ The command assumes the DefectDojo chart repository is already configured. Repla
 `<CURRENT_CHART_VERSION>` with the installed chart version shown by `helm list`
 (without the `defectdojo-` prefix) to avoid upgrading the application as part of
 this configuration change. Use your maintained installation values, preserving
-other `extraSecrets` entries. Do not reuse first-install `createSecret=true`,
-`createPostgresqlSecret=true` or `createValkeySecret=true` flags on an upgrade.
+other `extraSecrets` entries. The three `create*Secret: false` values above override
+first-install settings that may still be present in your existing values file.
+Do not reuse first-install `createSecret=true`, `createPostgresqlSecret=true` or
+`createValkeySecret=true` flags on an upgrade. For a new installation, follow the
+chart's first-install instructions to create the required credentials instead.
 
 With `trackConfig: enabled`, the updated Secret changes the application Pod template
 checksums and triggers a rollout. Wait for Django and Celery to become ready:
