@@ -33,6 +33,21 @@ Templates are starting points, not links. Editing an adopted rule does not affec
 adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
 gets pointed at two different sets of Assets. The second one is named with a suffix.
 
+The **Notifications** pack holds two templates for being told about new Findings: **Email new
+findings that match a set of filters** and **Alert on new findings that match a set of filters**.
+Each is an **On Finding Event** trigger on **Created** wired to one notify node. Pick the filters in
+the trigger's scope, the same ones the Findings list offers, and the rule sends one message for each
+batch of new Findings that match all of them, however the Findings were added. An import usually
+sends one message; a very large one sends one per batch of 500 Findings by default. Every Finding an import
+creates counts as new, including one that duplicates a Finding already reported, so importing a
+report that was imported before sends its Findings again.
+
+The messages name the rule, so rename the adopted rule after what it watches. The email version
+needs an Email connection on its email node, with the receiving addresses in the **Recipients**
+field under the node's **Destination**; the alert version takes usernames, or alerts the
+administrators when left empty. The subject, body and alert text arrive pre-filled with the rule's
+name and the matching Findings, and are edited on the notify node like any other rule's.
+
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
 rule, because both create one.
 
