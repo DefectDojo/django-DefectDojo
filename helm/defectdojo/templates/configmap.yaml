@@ -56,9 +56,12 @@ data:
   DD_DJANGO_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   NGINX_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   METRICS_HTTP_AUTH_USER: {{ .Values.monitoring.user | default "monitoring" }}
+  PYTHONUTF8: {{ ternary (index .Values.extraConfigs "PYTHONUTF8") "1" (hasKey .Values.extraConfigs "PYTHONUTF8") | quote }}
+  LANG: {{ ternary (index .Values.extraConfigs "LANG") "C.UTF-8" (hasKey .Values.extraConfigs "LANG") | quote }}
+  LC_ALL: {{ ternary (index .Values.extraConfigs "LC_ALL") "C.UTF-8" (hasKey .Values.extraConfigs "LC_ALL") | quote }}
 {{- if  .Values.django.uwsgi.certificates.enabled }}
   REQUESTS_CA_BUNDLE: {{ .Values.django.uwsgi.certificates.certMountPath }}{{ .Values.django.uwsgi.certificates.certFileName }}
 {{- end }}
-{{- with .Values.extraConfigs }}
+{{- with omit .Values.extraConfigs "PYTHONUTF8" "LANG" "LC_ALL" }}
   {{- toYaml . | nindent 2 }}
 {{- end }}
