@@ -149,6 +149,8 @@ To take the username from an attribute instead, map that attribute to **Username
 
 Turning **Use Mapped Username** on changes which account an existing user signs in to. If your users' current usernames came from the `NameID` and the mapped attribute holds a different value, their next login lands on a different account, or creates a new one when **Create Unknown User** is on. Check the mapping with one test user first, using [SAML Login Attempts](#see-which-attributes-the-idp-sent) to confirm where the username came from.
 
+Map only an attribute that your IdP sets and that users cannot edit themselves. Whoever controls that value chooses the DefectDojo account the login lands on, including an administrator account: a user who can change their own mapped value to `admin` would sign in as the local `admin` user.
+
 With the option off:
 
 - Have your IdP send each person's DefectDojo username as the `NameID`. Many organizations use the email address as the DefectDojo username and send the email as the `NameID`.
@@ -185,15 +187,17 @@ If you're not sure what the IdP is actually sending, open the attempt in [SAML L
 
 ### Names or email stay empty after login
 
-Attribute Mapping rows match the attribute names in the assertion exactly, including case. If a row's **SAML Attribute** is spelled differently from what the IdP sends (`FirstName` against `firstName`, or a friendly name against a full claim URI), the field it fills stays empty and no error is shown. Open the attempt in [SAML Login Attempts](#see-which-attributes-the-idp-sent): a row marked **Not In Assertion** is one whose name the IdP did not send, and the list of received attribute names shows what to type instead.
+Attribute Mapping rows match the attribute names in the assertion exactly, including case. If a row's **SAML Attribute** is spelled differently from what the IdP sends (`FirstName` against `firstName`, or a friendly name against a full claim URI), the field it fills stays empty and no error is shown. Open the attempt in [SAML Login Attempts](#see-which-attributes-the-idp-sent): a row marked **Missing** is one whose attribute name was not among the accepted attributes, and the list of accepted names shows what to type instead.
 
 ### See which attributes the IdP sent
 
 The **SAML Login Attempts** panel at the bottom of the SAML settings page lists recent SAML logins. Expand an attempt to see, for every login that got as far as a decrypted assertion:
 
-- the names of all attributes the IdP sent,
-- each Attribute Mapping row, marked **Found** or **Not In Assertion**,
+- the names of the attributes DefectDojo accepted from the assertion,
+- each Attribute Mapping row, marked **Found** or **Missing**,
 - whether the username came from the `NameID` or from the attribute mapped to **Username**.
+
+With **Allow Unknown Attributes** off (the default), DefectDojo drops any attribute its attribute maps do not recognize before it reads the assertion, so those attributes are not in the list and rows that name them show as **Missing**. The attempt says so when this happened. Turn **Allow Unknown Attributes** on while troubleshooting to see every attribute the IdP sends.
 
 Attribute values (email addresses, names, group memberships) are recorded only while **Capture raw responses** is on. It turns itself off after 24 hours. A login that fails before the assertion is decrypted, such as a signature failure, has no attribute information.
 
