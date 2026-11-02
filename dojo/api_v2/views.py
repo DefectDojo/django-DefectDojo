@@ -149,6 +149,18 @@ class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
 class DojoSpectacularAPIView(SpectacularAPIView):
     renderer_classes = [DojoOpenApiJsonRenderer, *SpectacularAPIView.renderer_classes]
 
+    def _get_filename(self, request, version):
+        # The schema download filename is interpolated into the Content-Disposition response
+        # header, and `version` is attacker-controlled (the ?version= query parameter).
+        # drf-spectacular does not sanitize it, so a CR/LF in ?version= makes Django's
+        # HttpResponse raise BadHeaderError -- an unauthenticated 500 (and a diagnostics error
+        # report) on every probe. The header injection never actually succeeds because Django
+        # rejects header values containing CR/LF, but the crash and the error-report noise are
+        # avoidable. Strip CR, LF and the double quote that delimits the filename so the header
+        # is always well formed, whatever `version` (or a DRF versioning scheme) produced.
+        filename = super()._get_filename(request, version)
+        return filename.translate({0x0D: None, 0x0A: None, 0x22: None})
+
 
 class DojoModelViewSet(
     viewsets.ModelViewSet,
