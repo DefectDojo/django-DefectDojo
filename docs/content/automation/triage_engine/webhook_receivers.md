@@ -28,9 +28,9 @@ For a connector that supports it (Jira today), the fastest route is the connecti
 
 1. Open **Connect > Downstream**, then the Jira connection.
 2. Choose **Turn On Two-Way Sync**. This creates a Jira receiver already bound to this connection.
-3. Enter the webhook secret you will give Jira, review the behaviors, and save. The receiver and its rule start **disabled**.
+3. Enter the webhook secret you will give Jira, review the behaviors, and save. Keep a copy of the secret: once saved it is masked and never shown again. **Enabled** is checked by default, so the receiver and its rule are on as soon as you save; clear it to keep the receiver off until the Jira webhook exists.
 4. Follow the **Setup** tab: in Jira, open **System > WebHooks**, create a webhook with the receiver's URL and secret, and subscribe it to **Issue updated** and **Comment created**. Limit its JQL to the projects your connector pushes to. A Jira Data Center version that offers no webhook secret cannot sign, so switch the receiver to **URL Token Only** for it.
-5. Enable the receiver. From then on, the **Receipts** tab shows each delivery and the **Rules** tab links to the rule that acts on them.
+5. If you saved the receiver with **Enabled** cleared, check it on the **Settings** tab and choose **Submit**. From then on, the **Receipts** tab shows each delivery and the **Rules** tab links to the rule that acts on them.
 
 A connection has at most one two-way sync receiver. When someone else already turned it on, the connection's **Two-Way Sync** card says **Managed by another user** instead of offering to create a second one.
 
