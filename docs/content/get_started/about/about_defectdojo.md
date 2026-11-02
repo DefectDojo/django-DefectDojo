@@ -94,7 +94,7 @@ Our [Architecture](/get_started/open_source/architecture/) guide gives you an ov
 
 Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 
-If you run into trouble with an Open-Source install, we highly recommend asking questions on the [OWASP Slack](https://owasp.org/slack/invite). Our community members are active on the #defectdojo channel and can help you with issues you’re facing.
+If you run into trouble with an Open-Source install, we highly recommend asking questions in the [DefectDojo Community Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email). Our community members and maintainers are active in the #02-help channel and can help you with issues you’re facing.
 
 ## 🟧 DefectDojo Pro Edition
 
