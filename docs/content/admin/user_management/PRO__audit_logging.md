@@ -106,4 +106,8 @@ This API returns 31 days of audit logs.
 * Parameter `window_month` which will take a month and year in the format MM-YYYY and provide the audit logs for that month.
 * You can set the `window_start` parameter to limit these logs to a shorter window, rather than returning the entire month.
 
+### Paging Through Results
+
+Both endpoints return entries one page at a time, with `count`, `next`, `previous` and `results`. `count` is exact for up to 10,000 entries. When more entries match, `count` is a lower bound and the response also includes `"count_is_lower_bound": true`, and the Audit Log page in the UI shows the total with a plus sign (for example, "10,001+"). To read every entry, follow the `next` link until it is empty rather than computing the last page from `count`.
+
 For more information, see the API documentation, located in your instance: `your-instance.cloud.defectdojo.com/api/v2/oa3/swagger-ui/`
