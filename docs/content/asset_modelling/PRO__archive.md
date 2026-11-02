@@ -27,7 +27,7 @@ Archived data does not appear in:
 - deduplication and reimport: a new scan never matches an archived Finding, and you cannot import into an archived Engagement or Test
 - Triage Engine rules: archived Findings never enter a rule run
 
-The only place archived data appears is the **Archived** page.
+Archived data appears only on the **Archived** page, and on the pages you open from it (see [Viewing archived data](#viewing-archived-data)).
 
 If a Finding you archive is the original of a duplicate cluster, DefectDojo promotes one of the remaining duplicates to be the new original, the same way it does when you delete a Finding. Restoring the archived Finding does not relink the cluster.
 
@@ -60,11 +60,19 @@ To archive several Findings at once, select them in a Findings list and choose *
 
 The **Archived** page lists every archive you have permission to restore. For each one it shows what was archived, who archived it and why, when, how it was archived (user interface, API or Triage Engine rule) and its purge date.
 
-Expand an archive to browse the objects it holds. Choose **Unarchive** from its menu to restore it. Restoring brings back the whole tree that was archived together. It runs in the background: the archive shows **Restoring** until everything is back, then leaves the list. An archive that is still archiving or restoring cannot be restored until that finishes.
+Expand an archive to browse the objects it holds (see [Viewing archived data](#viewing-archived-data)). Choose **Unarchive** from its menu to restore it. Restoring brings back the whole tree that was archived together. It runs in the background: the archive shows **Restoring** until everything is back, then leaves the list. An archive that is still archiving or restoring cannot be restored until that finishes.
 
 An object archived on its own before its parent was archived keeps its own archive. Restoring the parent does not restore it, so restore it separately from the **Archived** page.
 
 The reverse is refused: an archive cannot be restored while something above it is still archived, because its objects would come back under a parent that stays hidden. Restore the parent's archive first. The API refuses it with `400` and `"code": "parent_archived"`.
+
+## Viewing archived data
+
+Expanding an archive on the **Archived** page lists what it holds in the same lists you use everywhere else: the Organizations, Assets, Engagements, Tests and Findings lists, with their columns, filters, search and export. Choose a type above the list to switch between them. Each list shows only the objects in that archive.
+
+Select an object in one of those lists to open its usual page, such as a Finding's or a Test's detail page. It loads as it did before it was archived, with a banner saying you are viewing archived data. Links from that page to other objects in the same archive, for example from a Test to one of its Findings, keep the archive open.
+
+Archived data is read-only. Changes to an archived object are refused until its archive is restored. Only people who can restore an archive can open it this way: anyone else gets the same "not found" response as before.
 
 ## Removing old Findings with Triage Engine rules
 
