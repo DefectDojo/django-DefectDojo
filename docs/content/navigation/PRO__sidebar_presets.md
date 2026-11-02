@@ -17,32 +17,39 @@ A preset only takes entries away from what a person can already see. It never ad
 
 Because a preset is a list of hidden entries rather than a list of shown ones, the sidebar keeps up with the product on its own:
 
-- An entry added in a later release appears for everyone, whatever preset they use, until someone hides it. The editor marks such entries **New Since Last Saved**, and the preset list shows how many a preset has not seen yet.
+- An entry added in a later release appears for everyone, whatever preset they use, until someone hides it. The editor marks such entries **New Since Last Saved**, and the preset picker shows how many a preset has not seen yet.
 - An entry removed from the product disappears on its own. The editor lists it under **No Longer in the Sidebar** so it can be dropped on the next save.
 - An entry a feature flag turns off is not in the sidebar, so a preset has nothing to say about it. Turning the flag on brings it back for everyone.
 
-Two entries are always shown, whatever a preset says: **Home**, so every section a person can see has somewhere to go, and **All Settings**, so everyone keeps the way to their User Profile and their own preset choice.
+Three entries are always shown, whatever a preset says: **Home**, so every section a person can see has somewhere to go, **All Settings**, so everyone keeps the way to their User Profile and their own preset choice, and **Sidebar Presets**, so a preset can never hide the page that would undo it. A group that holds one of them stays in the sidebar with only that entry.
+
+A preset also applies to **pinned pages**: a page the preset hides leaves the Pinned section of the sidebar until the preset shows it again. The pin itself is kept. This is deliberate, so a preset set for a team decides what that team's sidebar shows.
 
 ## Building a preset
 
-Open **Settings > UI Defaults > Sidebar Presets**. The page lists the presets you can see on the left (your own, the shared ones, and the instance default first) and opens the selected one in the editor on the right. **New Preset** starts an empty one; **Duplicate**, in a preset's menu, starts from a copy named `<name> (Copy)`.
+Open **Settings > UI Defaults > Sidebar Presets**. A toolbar across the top holds the preset picker and the actions on the open preset:
 
-The editor shows one card per sidebar section, with a row for each group and each entry and a switch on every row:
+- The **picker** lists the presets you can see (the instance default first, then the one you use, then the rest by name) and filters by name as you type. An icon marks the preset you use, the instance default and the shared presets, and each option says how many entries the preset hides.
+- **Use for Me** makes the open preset shape your own sidebar; it then reads **In Use**, and clicking it again stops using it.
+- **Instance Default** (shared presets, for people who hold the Share permission) makes the open preset the instance default, or clears it.
+- **Duplicate** starts a new preset from a copy named `<name> (Copy)`, and **Delete** removes the open preset after a confirmation.
+- **New Preset**, the plus button at the end, starts an empty one.
 
-- Switching an entry off hides it. Switching a **group** off hides the group and every entry under it; those entries read **Hidden with <group>** and their own switches are off until the group is shown again.
-- **Show All** on a section card shows or hides every row of that section at once. A section with nothing left to show leaves the sidebar.
+Under the toolbar, the editor has the preset's **Name**, an optional **Description** and, for people who hold the Share permission, a **Shared** checkbox. Below them, **Sidebar Entries** lists every sidebar section with its groups and entries, indented the way the sidebar nests them, each with a switch:
+
+- Switching an entry off hides it. Switching a **group** or a **section** off hides it and everything under it; those entries read **Hidden with <name>** and keep their own settings, so switching the group or section back on restores them exactly as they were.
+- The list is the preview. An entry that stays in the sidebar is tinted, a hidden one is struck through where it sits, and a group or section with nothing left to show reads as hidden too. Each section's tag counts how many of its entries are shown, and the header counts what the whole preset hides.
+- Sections and groups fold from the chevron at their left, as in the sidebar. A section you switch off folds on its own.
 - Entries you cannot open yourself are still listed, marked **Not visible to the current user**, so an administrator can build a preset for people with other roles.
-- The search box filters the rows by name.
+- The search box in the header filters the entries by name.
 
-The **preview** beside the cards is the sidebar as it will look under the current switches: hidden rows are gone, and so is a section with nothing left. Clicking a section heading in the preview scrolls to that section's card.
-
-A preset has a **Name**, an optional **Description**, and, for people who hold the Share permission, a **Shared** switch. **Submit** saves it. Saving also records which entries the sidebar had at that moment, which is what the **New Since Last Saved** marks are measured against.
+Changes are kept in the fields until you save them: a bar at the bottom of the page names what changed, with **Save Changes** and **Discard**, the same bar that saves edits made in place on a finding or an asset. Saving also records which entries the sidebar had at that moment, which is what the **New Since Last Saved** marks are measured against.
 
 ## Sharing and the instance default
 
-A **shared** preset appears in every user's list and in the **Sidebar Preset** field on every User Profile page. Sharing, unsharing, editing or deleting a shared preset, and choosing the instance default, all require the **Share Sidebar Preset** permission (under Additional Permissions in the role editor). A personal preset is edited and deleted by its owner with the Sidebar Preset Edit and Delete permissions, and anyone with Sidebar Preset Add can create one.
+A **shared** preset appears in every user's picker and in the **Sidebar Preset** field on every User Profile page. A preset is shared or unshared with the **Shared** checkbox in the editor, saved with the rest of the preset. Sharing, unsharing, editing or deleting a shared preset, and choosing the instance default, all require the **Share Sidebar Preset** permission (under Additional Permissions in the role editor). A personal preset is edited and deleted by its owner with the Sidebar Preset Edit and Delete permissions, and anyone with Sidebar Preset Add can create one.
 
-The **instance default** is the shared preset everyone gets who has not picked a preset of their own. Set it from a shared preset's menu (**Set as Instance Default**) or on **Settings > UI Defaults > Layout Defaults**, next to the dashboard, page layout and table defaults. Clearing it gives those users the full sidebar again. Deleting a preset that people had picked sends them back to the instance default.
+The **instance default** is the shared preset everyone gets who has not picked a preset of their own. Set it with the **Instance Default** button on the Sidebar Presets toolbar, or on **Settings > UI Defaults > Layout Defaults**, next to the dashboard, page layout and table defaults. Clearing it gives those users the full sidebar again. Deleting a preset that people had picked sends them back to the instance default.
 
 While **Restrict Layout Customization** is on (also on the Layout Defaults page), everyone but superusers is pinned to the instance default: the **Sidebar Preset** field on User Profile reads **Set by an administrator**, and personal presets are kept but not applied until the switch is turned back off.
 
@@ -50,7 +57,7 @@ While **Restrict Layout Customization** is on (also on the Layout Defaults page)
 
 Each person picks their own preset in one of two places:
 
-- **Use for Me** in a preset's menu on the Sidebar Presets page.
+- **Use for Me** on the Sidebar Presets toolbar, with the preset open.
 - The **Sidebar Preset** field on the **User Profile** page (select your username at the bottom of the sidebar, then **User Profile**, under **Navigation**). The first option is the instance default; the rest are your own presets and the shared ones. **Submit** saves it with the rest of the profile.
 
 The sidebar, the menu search and the landing page list change at once, without a reload. If the chosen preset hides the page set as your [Default Landing Page](/navigation/pro__landing_page/), the profile page says so and sign-in opens Home instead.
