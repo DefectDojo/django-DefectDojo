@@ -23,7 +23,7 @@ Personal Notifications cannot be sent via Microsoft Teams, as Teams only allows 
 
 ### Receive new Findings that match a set of filters (Pro)
 
-To be told about new Findings that match particular filters rather than every event of a kind, adopt one of the **Notifications** templates in the Triage Engine: it sends matching new Findings by email or as an in-app alert. See [Starting a rule](/automation/triage_engine/building_rules/#starting-a-rule).
+To be told about new Findings that match particular filters rather than every event of a kind, adopt the **Alert on new findings that match a set of filters** template in the Triage Engine: it sends an in-app alert about the matching new Findings. See [Starting a rule](/automation/triage_engine/building_rules/#starting-a-rule).
 
 ### Receive Personal notifications for a specific Asset
 
