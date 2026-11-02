@@ -11,7 +11,7 @@
 &lt;p&gt;要注册试用,您需要在我们的 &lt;a href="https://defectdojo.com/pricing"&gt;Cloud Portal&lt;/a&gt; 上创建一个账户,然后从侧边栏点击 New Subscription 菜单选项。&lt;/p&gt;</description></item><item><title>联系支持</title><link>https://docs.defectdojo.com/zh-hans/help/contact_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/help/contact_support/</guid><description>&lt;p&gt;需要 DefectDojo 方面的帮助吗?以下是几种获取帮助的方式。&lt;/p&gt;
 &lt;h2 id="开源版支持"&gt;开源版支持&lt;/h2&gt;
 &lt;p&gt;开源版用户可以通过我们的社区渠道获得帮助和建议。&lt;/p&gt;
-&lt;p&gt;对于开源版用户,获取帮助最快捷的方式是通过 &lt;a href="https://owasp.org/slack/invite"&gt;OWASP Slack Channel&lt;/a&gt;。我们的社区成员活跃在 &lt;strong&gt;# defectdojo channel&lt;/strong&gt; 频道中,可以帮助您解决遇到的问题。&lt;/p&gt;
+&lt;p&gt;对于开源版用户,获取帮助最快捷的方式是通过 &lt;a href="https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email"&gt;DefectDojo 社区 Slack&lt;/a&gt;。我们的社区成员和维护者活跃在 &lt;strong&gt;#02-help&lt;/strong&gt; 频道中,可以帮助您解决遇到的问题。&lt;/p&gt;
 &lt;p&gt;如需报告错误,可以在我们的 &lt;a href="https://github.com/DefectDojo/django-DefectDojo"&gt;GitHub&lt;/a&gt; 上提交 issue。&lt;/p&gt;
 &lt;p&gt;更多信息请参阅我们的 &lt;a href="https://defectdojo.com/open-source"&gt;Community Site&lt;/a&gt;。&lt;/p&gt;
 &lt;h2 id="defectdojo-pro-支持"&gt;DefectDojo Pro 支持&lt;/h2&gt;

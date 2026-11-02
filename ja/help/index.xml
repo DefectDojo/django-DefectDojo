@@ -87,7 +87,7 @@
 &lt;p&gt;プロセスを完了する前に、使用したいプランと請求頻度（月次または年次）を確認してください。&lt;/p&gt;</description></item><item><title>サポートに問い合わせる</title><link>https://docs.defectdojo.com/ja/help/contact_support/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/ja/help/contact_support/</guid><description>&lt;p&gt;DefectDojoについてお困りですか？サポートを受ける方法をいくつかご紹介します。&lt;/p&gt;
 &lt;h2 id="オープンソースサポート"&gt;オープンソースサポート&lt;/h2&gt;
 &lt;p&gt;オープンソースユーザーは、コミュニティチャンネルを通じてヘルプやアドバイスを受けることができます。&lt;/p&gt;
-&lt;p&gt;オープンソースユーザーにとって、最も早くヘルプを得る方法は&lt;a href="https://owasp.org/slack/invite"&gt;OWASP Slackチャンネル&lt;/a&gt;を利用することです。コミュニティメンバーは**# defectdojoチャンネル**で活発に活動しており、直面している問題の解決を手伝ってくれます。&lt;/p&gt;
+&lt;p&gt;オープンソースユーザーにとって、最も早くヘルプを得る方法は&lt;a href="https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email"&gt;DefectDojo Community Slack&lt;/a&gt;を利用することです。コミュニティメンバーとメンテナーは**#02-help**チャンネルで活発に活動しており、直面している問題の解決を手伝ってくれます。&lt;/p&gt;
 &lt;p&gt;バグを報告するには、&lt;a href="https://github.com/DefectDojo/django-DefectDojo"&gt;GitHub&lt;/a&gt;で課題を作成できます。&lt;/p&gt;
 &lt;p&gt;詳細については、&lt;a href="https://defectdojo.com/open-source"&gt;コミュニティサイト&lt;/a&gt;をご覧ください。&lt;/p&gt;
 &lt;h2 id="defectdojo-proサポート"&gt;DefectDojo Proサポート&lt;/h2&gt;
