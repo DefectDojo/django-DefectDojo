@@ -463,7 +463,7 @@ Key facts:
 - [Set System-Wide Notifications](https://docs.defectdojo.com/admin/notifications/configure_system_notifs/): How to configure Personal & System notifications
 - [Set up Email, Slack or Teams notifications](https://docs.defectdojo.com/admin/notifications/email_slack_teams/): Set up Microsoft Teams to receive notifications
 - [Authorization Connectors (Pro)](https://docs.defectdojo.com/admin/sso/pro__authorization_connectors/): See every identity provider on one page: which are configured, which are enabled, and what protocol each one speaks
-- [Login Settings (Pro)](https://docs.defectdojo.com/admin/sso/pro__login_settings/): Control the DefectDojo login page: disable password login, auto-redirect to SSO, session length, and JIT user creation
+- [Login Settings (Pro)](https://docs.defectdojo.com/admin/sso/pro__login_settings/): Control the DefectDojo login page: disable password login, auto-redirect to SSO, session length, idle timeout, and JIT user creation
 - [SAML Configuration (Pro)](https://docs.defectdojo.com/admin/sso/pro__saml/): Configure SAML in DefectDojo Pro
 - [OIDC (Pro)](https://docs.defectdojo.com/admin/sso/pro__oidc/): Configure OpenID Connect (OIDC) SSO in DefectDojo Pro
 - [Auth0 (Pro)](https://docs.defectdojo.com/admin/sso/pro__auth0/): Configure Auth0 SSO in DefectDojo Pro
