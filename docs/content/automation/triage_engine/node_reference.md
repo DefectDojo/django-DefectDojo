@@ -311,6 +311,8 @@ ctx.jira_instance_id            its classic Jira instance
 ctx.lookup_reason               on not found items: empty_value, no_match, engagement_epic, other_jira_site or limit_reached
 ```
 
+A message about the whole batch cannot name one item's value: there, `{{ctx.lookup_values}}` lists the values the batch's not found items carried.
+
 ## Findings
 
 These nodes change Findings. Every change is attributed back to the rule, run and node that made it, and shows up on the Finding's provenance timeline.
@@ -934,6 +936,8 @@ Creates an in-app alert about the batch.
 | **Recipients** | empty | Usernames, comma separated. Empty alerts the administrators. |
 
 Recipients still control this through their own **Rules Engine Match** notification setting, so an alert cannot bypass a user's notification preferences.
+
+A template rendered once for the whole batch (this node's **Title** and **Description**, and **Send an Email**'s **Subject** and **Body** with **One Message per Finding** off) has no single item to read from, so a Finding's or a webhook's own fields render empty there. It can use the run's facts (`{{ctx.rule_name}}`, `{{ctx.rule_id}}`, `{{ctx.run_id}}`, `{{ctx.count}}`), a scan group's `{{ctx.import_summary}}`, and `{{ctx.lookup_values}}`: the values a **Find Findings by a Value** lookup could not match, the first ten and then how many more.
 
 ### Generate a Report
 
