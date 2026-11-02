@@ -1,0 +1,57 @@
+{
+  "dectrax_version": "1.0",
+  "generated_at": "2026-10-27T12:00:00Z",
+  "incidents": [
+    {
+      "id": "DECTRAX-INC-2026-001",
+      "title": "Decoy SSH Credential Abuse & Reconnaissance",
+      "severity": "HIGH",
+      "description": "Adversary attempted interactive authentication against canary SSH daemon with decoy administrator credentials.",
+      "deception_type": "Decoy Service",
+      "protocol": "SSH",
+      "attacker_ip": "185.220.101.5",
+      "target_ip": "10.0.1.15",
+      "target_port": 22,
+      "cwe": 287,
+      "mitre_attack_id": "T1110.001",
+      "mitigation": "Automated firewall interdiction initiated. Revoke leaked credentials and isolate originating endpoint.",
+      "active_defense_status": "Contained",
+      "detected_at": "2026-10-27T11:45:00Z",
+      "tags": ["canary-token", "brute-force"]
+    },
+    {
+      "id": "DECTRAX-INC-2026-002",
+      "title": "Decoy Database SQL Injection Probe",
+      "severity": "CRITICAL",
+      "description": "SQL injection payloads detected hitting decoy PostgreSQL database canary table.",
+      "deception_type": "Database Trap",
+      "protocol": "PostgreSQL",
+      "attacker_ip": "194.26.29.112",
+      "target_ip": "10.0.2.20",
+      "target_port": 5432,
+      "cwe": 89,
+      "mitre_attack_id": "T1190",
+      "mitigation": "Attacker IP blocked at border gateway. Canary database connection terminated.",
+      "active_defense_status": "Contained",
+      "detected_at": "2026-10-27T12:10:00Z",
+      "tags": ["sqli", "canary-table"]
+    },
+    {
+      "id": "DECTRAX-INC-2026-003",
+      "title": "Canary AWS Access Key Token Trigger",
+      "severity": "MEDIUM",
+      "description": "Canary cloud token accessed outside approved IAM role from unknown external IP address.",
+      "deception_type": "Canary Token",
+      "protocol": "HTTPS",
+      "attacker_ip": "45.154.255.88",
+      "target_ip": "",
+      "target_port": 443,
+      "cwe": 522,
+      "mitre_attack_id": "T1078.004",
+      "mitigation": "Canary token disabled. Session invalidated in AWS CloudTrail integration.",
+      "active_defense_status": "Investigating",
+      "detected_at": "2026-10-27T12:30:00Z",
+      "tags": ["cloud-token", "aws-canary"]
+    }
+  ]
+}
