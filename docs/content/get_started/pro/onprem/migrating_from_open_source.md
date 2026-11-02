@@ -373,8 +373,8 @@ Each Sync locks the source with read-only mode while it reads, and unlocks it at
 On cutover day:
 
 1. Optional, for a fully quiet source: go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes.
-2. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync turns read-only mode off when it ends.
-3. Turn read-only mode on again in **System Settings** to keep the source frozen.
+2. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync leaves read-only mode as it found it, so a source you locked in step 1 stays locked.
+3. If you skipped step 1, turn read-only mode on now in **System Settings** to keep the source frozen.
 4. Point CI jobs, scripts, and integrations at your Pro deployment's `/api/v2/` API. Automate against `/api/v2/` only. Paths under `/api/vue/` belong to the Pro UI and reject API tokens.
 5. Retire the open source instance. If you keep it running, revoke the superuser API key first. Read-only mode blocks that change, so turn it off, revoke the key, and turn it on again.
 

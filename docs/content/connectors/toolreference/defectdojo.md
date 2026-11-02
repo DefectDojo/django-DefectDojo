@@ -57,7 +57,7 @@ If you delete the connection, or the Sync deletes it, and you add a new one for 
 
 DefectDojo 3.5.0 and later have a read-only mode. On such a source, the connector turns read-only mode on when a Sync starts, and turns it off when the Sync ends, also when the Sync fails. While it is on, nobody can change the source, so the Sync reads one consistent state. Discover does not change the mode.
 
-* If read-only mode was already on when the Sync started, the Sync still turns it off at the end. To keep the source frozen after the last Sync, turn read-only mode on again in **Configuration > System Settings**.
+* If read-only mode was already on when the Sync started, it stays on at the end. The Sync puts the mode back to what it was. To keep the source frozen after the last Sync, turn read-only mode on before that Sync.
 * If the connector stops in the middle of a Sync, for example on a restart, the source stays read-only until the next Sync ends, or until a superuser turns it off in **System Settings**.
 * A task that started on the source before the lock still writes until it ends.
 
@@ -106,7 +106,8 @@ Each Sync imports every mapped Record. For each Product the connector sends:
 * **The edit history of each note.** Each earlier text of a note crosses with its time and editor.
 * **Risk acceptances**, with their notes and their proof file, linked to the same findings.
 * **Finding groups**, with the same member findings.
-* **Users.** Every user of the source crosses, also the users of a Product you ignore. A finding field that names a user, for example the reporter, points at these accounts.
+* **Users.** Every user of the source crosses, also the users of a Product you ignore. A finding field that names a user, for example the reporter, points at these accounts. A user that was inactive on the source arrives inactive too, and **Activate and Invite** skips it. The preflight report counts these users. If you delete a migrated user in DefectDojo Pro, a later Sync does not create it again.
+* **Source staff users.** A user that was staff on the source had access to every Product there. It gets the Maintainer role on every Product this connection migrates. It also gets that role on every Product Type that the connection maps fully. The preflight report and the migration summary name these users.
 * **Reference data**: SLA configurations, development environments, regulations and note types. If DefectDojo Pro already has one with the same name, it keeps its own values. The preflight report warns when those values differ from the source.
 * **Finding templates**, with their tags and vulnerability ids. A template belongs to the instance, not to a Product. If DefectDojo Pro already has a template with the same title, it keeps its own. The connector adds no copy.
 * **Tool types and tool configurations, without passwords and keys.** A tool type brings its name and description. A tool configuration brings its name, description, URL, authentication type, username and **Title for SSH/API Key**. It never brings its password, SSH key, API key or extras. The connector creates it with those fields empty. Tool types match by name, and a tool configuration matches by name within its tool type. If DefectDojo Pro already has one with the same name, it keeps its own values, passwords and keys included. For a configuration that the connector created, enter the password, SSH key, API key or extras in DefectDojo Pro yourself.
@@ -144,6 +145,10 @@ Run Sync as often as you need until you cut over. Each run updates what an earli
 * A test that the source deleted stops syncing. Its findings in DefectDojo Pro stay as they are.
 
 If a Sync stops in the middle of a Product, the next Sync imports that Product again. The source ids and the hash keep it free of duplicates.
+
+A Sync overwrites changes made in DefectDojo Pro to migrated engagements, tests and findings. When a team starts to work on a Product in DefectDojo Pro, clear its **Include** box. Do this before the next Sync. A Product name or description that a person changed in DefectDojo Pro stays as changed.
+
+One connection serves one source. If a second connection points at the same source, its preflight report warns, and its Sync writes nothing. Delete the second connection. Or delete the first one before you set up the second. The second then takes over what the first migrated.
 
 #### Check the finding count after a Sync
 
