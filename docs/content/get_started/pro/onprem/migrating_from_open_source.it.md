@@ -9,6 +9,8 @@ audience: pro
 
 Questa pagina descrive come spostare i dati da un'istanza DefectDojo open source in un deployment self-hosted di DefectDojo Pro.
 
+Questa pagina descrive il percorso con il dump del database, e la [pagina in inglese](/get_started/pro/onprem/migrating_from_open_source/#path-2-the-defectdojo-connector) descrive un secondo percorso. Questo percorso, il connector DefectDojo Migration, migra tramite l'API dall'interfaccia Connectors. Lo esegui più volte fino al passaggio, anche verso un'istanza Pro che contiene già dati.
+
 Gli esempi utilizzano Amazon Web Services, con Docker Compose su EC2 oppure Kubernetes su EKS, e il database su Amazon RDS per PostgreSQL. Questa è la combinazione rispetto alla quale questa procedura è stata convalidata. La stessa sequenza si applica ad altri provider che offrono PostgreSQL gestito e risorse di calcolo equivalenti, nonché a hardware on-premise, adattando i comandi specifici del provider.
 
 Poiché sei tu a ospitare il deployment, i tuoi dati rimangono all'interno del tuo ambiente per l'intera durata della migrazione. Sei tu a eseguire l'esportazione e il ripristino, e il supporto DefectDojo può assisterti in qualsiasi fase. Se la tua istanza di DefectDojo Pro è ospitata nel cloud da DefectDojo anziché essere self-hosted, contatta invece [support@defectdojo.com](mailto:support@defectdojo.com), perché in quel caso è il team DefectDojo a eseguire il ripristino per te.

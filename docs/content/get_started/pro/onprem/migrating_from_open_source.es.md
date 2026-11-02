@@ -9,6 +9,8 @@ audience: pro
 
 Esta página describe cómo trasladar los datos de una instancia de DefectDojo de código abierto a una implementación autoalojada de DefectDojo Pro.
 
+Esta página describe la ruta del volcado de la base de datos, y la [página en inglés](/get_started/pro/onprem/migrating_from_open_source/#path-2-the-defectdojo-connector) describe una segunda ruta. Esa ruta, el conector DefectDojo Migration, migra por la API desde la interfaz de Conectores. Usted lo ejecuta varias veces hasta la migración final, incluso hacia una instancia Pro que ya contiene datos.
+
 Los ejemplos usan Amazon Web Services, ya sea con Docker Compose en EC2 o Kubernetes en EKS, y la base de datos en Amazon RDS para PostgreSQL. Esa es la combinación con la que se validó este procedimiento. La misma secuencia se aplica a otros proveedores que ofrecen PostgreSQL gestionado y cómputo equivalente, y a hardware on-premise, cambiando los comandos específicos del proveedor según corresponda.
 
 Como usted aloja la implementación, sus datos permanecen dentro de su propio entorno durante toda la migración. Usted ejecuta la exportación y la restauración, y el equipo de soporte de DefectDojo puede ayudarlo en cualquier paso. Si su instancia de DefectDojo Pro está alojada en la nube por DefectDojo en lugar de ser autoalojada, contacte en su lugar a [support@defectdojo.com](mailto:support@defectdojo.com), porque el equipo de DefectDojo realiza la restauración por usted.

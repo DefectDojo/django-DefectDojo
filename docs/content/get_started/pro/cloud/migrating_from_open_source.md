@@ -8,6 +8,8 @@ audience: pro
 
 This page explains how to move the data from an open source DefectDojo instance into a DefectDojo Cloud instance.
 
+If the open source instance is reachable from your cloud Pro instance, you can also use the [DefectDojo Migration connector](/get_started/pro/onprem/migrating_from_open_source/#path-2-the-defectdojo-connector). If it is not reachable, open a support ticket.
+
 On Cloud, you export your database and your uploaded files. The DefectDojo team restores them into your Cloud instance and upgrades the schema, so you never need access to the Cloud database. If you are moving to a self-hosted DefectDojo Pro deployment instead, follow [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/).
 
 The export is the same for both, so this page links to the self-hosted guide for the commands.
