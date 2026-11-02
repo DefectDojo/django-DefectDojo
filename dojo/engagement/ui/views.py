@@ -1352,7 +1352,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     extra_tags="alert-success")
 
         if "delete_note" in request.POST:
-            note = get_object_or_404(Notes, pk=request.POST["delete_note_id"])
+            note = get_object_or_404(risk_acceptance.notes, pk=request.POST["delete_note_id"])
             if note.author.username == request.user.username:
                 risk_acceptance.notes.remove(note)
                 note.delete()

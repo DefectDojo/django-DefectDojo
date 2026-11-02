@@ -121,11 +121,23 @@ It covers the three ways a Connector goes quiet:
 
 * **Its runs start failing.** A Discover or Sync ends in error or times out against your tool. The message names the Connector and carries the tool's own error, which is usually an expired or narrowed credential.
 * **Its tool stops returning data.** A run succeeds, but every record the Connector holds is now **Missing**. The run reports success, so this state raises no error anywhere. See [Managing Operations](/connectors/upstream/manage_operations/) for what that state means and how it clears.
-* **Its Syncs return zero results.** The records are still there and every Sync succeeds, but every actively mapped record has returned zero Findings for two Syncs in a row, after importing Findings in the previous 30 days. Records with nothing imported in that window are clean projects and do not count, and one record that still imports keeps the message from going out. See [Zero Results](/connectors/upstream/manage_operations/#zero-results).
+* **Its Syncs return zero results.** The records are still there and every Sync succeeds, but every actively mapped record has returned zero Findings for two Syncs in a row, after importing Findings in the previous 30 days. Records with nothing imported in that window are clean projects and do not count, and one record that still imports keeps the message from going out. See [Zero Results](/connectors/upstream/manage_operations/#zero-results). With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, the quiet period is also recorded on the Connector, where it can be acknowledged with a reason.
 
 None of these messages arrives once per run. A Connector with a dead credential on an hourly schedule sends one message when it starts failing, then stays quiet until its runs succeed again. A Connector that lost visibility, or keeps returning zero results, sends one message per day while the condition lasts, and re-arms once a Sync imports data again.
 
 The notification is on **🔔 Alerts** by default. Set it to Email, Slack or Teams on your notification settings page, under **Connections**. A Connector that is set up correctly but has never seen any data is a separate case, and it warns you when you save it rather than later.
+
+## Ingestion Health Notifications (Pro)
+
+With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, the **Ingestion Health Warning** notification covers the ways a source falls short that no other message reports:
+
+* **A Connector's or API import stream's volume drops.** A run succeeds and imports Findings, but far fewer than the source's 30-day baseline.
+* **An API import stream returns no Findings.** Its last import submitted none, against a baseline above zero.
+* **A source goes stale.** A Connector's or scheduled Triage Engine rule's schedule fired three times in a row without it running, or an API import stream has gone far longer than usual without a successful import (its imports stopped arriving, or keep failing).
+
+It is sent once per anomaly, never once per check, to superusers and to everyone who can see that source (the Connector View or Rule View permission, or for an API import stream, access to its Asset together with Connector View, which opens the page the message links to). A Connector's zero results and failed runs stay on the **Connector Health Warning** above, so no condition sends two messages.
+
+The notification is on **🔔 Alerts** by default. Set it to Email, Slack, Teams or a webhook on your notification settings page, under **Connections**; the setting is shown while Ingestion Health is on.
 
 ## Open-Source Considerations
 

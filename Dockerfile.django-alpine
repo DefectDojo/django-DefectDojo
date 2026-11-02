@@ -57,12 +57,13 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
-# Upgrade the system trust store in its own layer. Release builds reuse the layer
-# above from the build cache, so an OS security fix to ca-certificates (here the
-# eMudhra key compromise, 2026-10-20) would otherwise never reach the image.
-# Bump CA_REFRESH to force this layer to rebuild for the next trust-store fix.
-ARG CA_REFRESH=2026-10-20
-RUN echo "trust store refresh ${CA_REFRESH}" && apk upgrade --no-cache ca-certificates-bundle ca-certificates
+# Upgrade the system trust store and shared libraries in their own layer. Release
+# builds reuse the layer above from the build cache, so an OS update to these
+# packages (ca-certificates here after the eMudhra key compromise, 2026-10-20)
+# would otherwise never reach the image.
+# Bump OS_REFRESH to force this layer to rebuild for the next package update.
+ARG OS_REFRESH=2026-10-28
+RUN echo "OS package refresh ${OS_REFRESH}" && apk upgrade --no-cache ca-certificates-bundle ca-certificates brotli-libs brotli brotli-dev
 RUN \
   --mount=from=build,src=/tmp/wheels,target=/tmp/wheels \
   --mount=from=build,src=/app/requirements.txt,target=/app/requirements.txt \

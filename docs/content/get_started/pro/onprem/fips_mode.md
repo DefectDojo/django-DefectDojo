@@ -32,6 +32,7 @@ Because enforcement happens **inside the container**, FIPS mode does not require
 | Orchestration workers (`ddorch-workers`) | yes | OpenSSL FIPS Provider 3.1.2 |
 | nginx | yes | OpenSSL FIPS Provider 3.1.2 |
 | Connectors, Integrators, ddorch, MCP server | yes | Go Cryptographic Module v1.0.0 |
+| Webhook gateway (from 3.4.0) | yes | Go Cryptographic Module v1.0.0 |
 | **Sensei** | **partial** | service binaries: Go Cryptographic Module v1.0.0. Bundled scanner toolchain: **not covered** |
 | **PostgreSQL / Redis (embedded)** | **no** | use external FIPS-compliant services |
 | **OSCAL validator** | **no** | no FIPS variant; leave it disabled |
@@ -51,6 +52,7 @@ us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-connectors/connector
 us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-integrators/integrators:<version>-fips
 us-south1-docker.pkg.dev/defectdojo-container-registry/ddorch/ddorch:<version>-fips
 us-south1-docker.pkg.dev/defectdojo-container-registry/go-dd-pro-mcp/mcp-server:<version>-fips
+us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-pro/webhook-gateway:<version>-fips   # from 3.4.0
 ```
 
 The registry credentials that come with your license cover these repositories, the same as the standard images. Nothing needs to be requested or enabled on your account.
@@ -59,7 +61,9 @@ On Kubernetes and Docker Compose you do not write these tags yourself: `fips.ena
 
 **linux/amd64 only.** The OpenSSL FIPS Provider's certificate lists x86_64 operating environments, so the FIPS images are published for amd64 and not for arm64. A FIPS deployment needs amd64 nodes.
 
-**Signed.** Like the standard release images, each FIPS image is signed and carries SPDX and CycloneDX SBOM attestations.
+**Signed.** Like the standard release images, each FIPS image is signed and carries SPDX and CycloneDX SBOM attestations. [Verifying Images and SBOMs](/get_started/pro/onprem/image_provenance/) shows how to check them, including after mirroring.
+
+**Which version.** Deploy the most recent release in the [DefectDojo Pro Changelog](/releases/pro/changelog/) and append `-fips` to its version. Planning a FIPS deployment on a private network end to end is covered in [Planning a Private Deployment](/get_started/pro/onprem/private_deployment/).
 
 ## Enabling FIPS mode
 

@@ -1,24 +1,34 @@
 ---
 title: "Login Settings"
-description: "Control the DefectDojo login page: disable password login, auto-redirect to SSO, session length, and JIT user creation"
+description: "Control the DefectDojo login page: disable password login, auto-redirect to SSO, session length, idle timeout, and JIT user creation"
 weight: 20
 audience: pro
 ---
 
 Once you have an SSO provider working, **Login Settings** controls how the DefectDojo login page itself behaves — whether username/password login is still offered, whether visitors are sent straight to your identity provider, how long a session lasts, and whether SSO can create accounts on the fly. Open-source DefectDojo does not include these controls — see [Authorized Users](/admin/user_management/os__authorized_users/).
 
-Find it under **Connect > Authorization > Login Settings**. Only a **Superuser** can change it.
+Find it under **Connect > Authorization > Login Settings**. Changing it takes the **Tuner Edit** permission, which every Superuser has.
 
 ![Login Settings](images/pro_login_settings.png)
 
 ## Settings
 
-- **Session Age** — how long a session stays valid before the user must log in again. Choices range from 30 minutes to 30 days; the default is **12 hours**.
+- **Session Age**: the longest a login lasts, counted from the moment the user logged in. When it passes, the user is signed out and signs in again, however active they have been. Choices range from 30 minutes to 30 days; the default is **12 hours**.
+- **Idle Timeout**: signs a user out after this long without a request to DefectDojo. Choices are **Off** (the default), 15 minutes, 30 minutes, and 1, 2, 4 or 8 hours. With **Off**, only Session Age ends a session. When both are set, whichever comes first ends it. See [Session expiry](#session-expiry).
 - **Show Username and Password Fields** — when enabled, the username and password fields are shown on the login page.
 - **Allow Login via Username and Password** — when enabled, classic username/password authentication is allowed and its login button is shown. Turn this **off** once SSO is working to make the instance SSO-only. See [Making the instance SSO-only](#making-the-instance-sso-only) for the safe way to do this.
 - **Allow Password Reset** — when enabled, users can start the password-reset flow from the login page. This only applies to local passwords; SSO users reset credentials at their identity provider.
 - **Create User on Successful Login** — when enabled, a user authenticated by SSO who does not yet exist in DefectDojo is created automatically with minimal permissions (just-in-time provisioning). When disabled, only users who already exist in DefectDojo can sign in via SSO. Pair this with a **Default group** (below) so new users are not stranded with no access.
 - **Auto-Redirect to SSO Login Page** — when enabled, visiting DefectDojo redirects straight to the SSO login instead of showing the DefectDojo login form. **This only works when exactly one SSO connection is configured.** Always keep the [login fallback](#login-fallback) in mind before enabling it.
+
+## Session expiry
+
+Session Age and Idle Timeout apply to every login, whether by username and password or by SSO. A user whose session ends, for either reason, is taken to the login page on their next click, and lands back on the page they were on once they sign in again.
+
+- Only requests the user makes count as activity. A page left open in a browser tab still reaches the Idle Timeout, even though it keeps refreshing its notification count in the background.
+- Activity is recorded at most once a minute, so an idle session can end up to a minute before the Idle Timeout, never after it.
+- A change to either setting reaches every running server within a minute, and applies to sessions that are already signed in. Shortening Session Age signs out anyone whose login is older than the new value.
+- API tokens are not sessions: neither setting affects automation that calls the API with a token.
 
 ## Default access for new users
 

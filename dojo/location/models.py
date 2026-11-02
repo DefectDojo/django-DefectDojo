@@ -23,6 +23,7 @@ from django.db.models import (
     QuerySet,
     TextChoices,
     UniqueConstraint,
+    UUIDField,
 )
 from django.utils.translation import gettext_lazy as _
 from django_tagulous.models import TagField
@@ -30,6 +31,8 @@ from django_tagulous.models import TagField
 from dojo.base_models.base import BaseModel, BaseModelWithoutTimeMeta
 from dojo.base_models.validators import validate_not_empty
 from dojo.location.manager import (
+    HookedLocationFindingReferenceManager,
+    HookedLocationProductReferenceManager,
     LocationFindingReferenceManager,
     LocationFindingReferenceQueryset,
     LocationManager,
@@ -654,7 +657,13 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
         help_text=_("The status of the the given Location"),
     )
 
-    objects = LocationFindingReferenceManager().from_queryset(LocationFindingReferenceQueryset)()
+    # Read and written only by plugins; open source never sets them.
+    archived_at = DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedLocationFindingReferenceManager().from_queryset(LocationFindingReferenceQueryset)()
+    unfiltered = LocationFindingReferenceManager().from_queryset(LocationFindingReferenceQueryset)()
 
     class Meta:
         verbose_name = "Locations - FindingReference"
@@ -666,6 +675,7 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
             ),
         ]
         indexes = [
+            Index(fields=["archive_batch"], condition=Q(archive_batch__isnull=False), name="dojo_locfindref_archive_batch"),
             Index(fields=["location"]),
             Index(fields=["finding"]),
         ]
@@ -717,7 +727,13 @@ class LocationProductReference(BaseModel, ReferenceDataMixin):
         help_text=_("The status of the the given Location"),
     )
 
-    objects = LocationProductReferenceManager().from_queryset(LocationProductReferenceQueryset)()
+    # Read and written only by plugins; open source never sets them.
+    archived_at = DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedLocationProductReferenceManager().from_queryset(LocationProductReferenceQueryset)()
+    unfiltered = LocationProductReferenceManager().from_queryset(LocationProductReferenceQueryset)()
 
     class Meta:
         verbose_name = "Locations - ProductReference"

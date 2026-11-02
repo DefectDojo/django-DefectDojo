@@ -62,9 +62,9 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Asset even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Assets rather than moving its Findings.
 
-Steps 1 and 2 require the **Asset Identity** feature (see
-[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off));
-until it is on, Auto-Mapping resolves by name alone, which is the historical behaviour. The
+Steps 1 and 2 require the **Asset Identity** feature, which is off by default (see
+[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off)).
+While it is off, Auto-Mapping resolves by name alone, which is the historical behaviour. The
 tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
 changes nothing about existing Mappings: Records keep the Asset they are on, and later runs follow
 the identifier.
@@ -100,9 +100,9 @@ step 1 (and, for other tools, step 2) answers from then on. A Record already kno
 identifier stays on its Product even when its repository resolves elsewhere: DefectDojo shows
 that as a repository conflict on both Products rather than moving its Findings.
 
-Steps 1 and 2 require the **Asset Identity** feature (see
-[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off));
-until it is on, Auto-Mapping resolves by name alone, which is the historical behaviour. The
+Steps 1 and 2 require the **Asset Identity** feature, which is off by default (see
+[Turning Asset Identity on and off](/asset_modelling/engagements_tests/pro__assets/#turning-asset-identity-on-and-off)).
+While it is off, Auto-Mapping resolves by name alone, which is the historical behaviour. The
 tool's identifier is still recorded whenever a Mapping is created or changed, so enabling it
 changes nothing about existing Mappings: Records keep the Product they are on, and later runs follow
 the identifier.
@@ -131,11 +131,13 @@ Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans 
 
 * Record Mappings are designed to be non-invasive. If you map an Asset to a Record which contains existing Engagements or Findings, those existing Engagements and Findings will not be affected or overwritten by the data sync process.  
 ​
-* All data created via a connector will be stored under a single Engagement called **Global Connectors**. That Engagement will create a separate Test for each Connector mapped to the Asset.
+* Data created by a Connector is stored in an Engagement on the Asset named **Global Connectors - \<label\> - \<Vendor-Equivalent Product\>**. Connectors with different labels keep their data in separate Engagements, and a Connector whose Records bring several Vendor-Equivalent Products to the same Asset gets one Engagement for each. Mappings made before this naming was introduced may use an older Engagement named **Global Connectors - \<label\>**, and syncs keep using it.  
+​
+* The Record stays linked to its Engagement by ID, not by name. Renaming the Connector's label does not create a new Engagement: syncs keep landing in the existing one under its original name. A new Engagement, named with the current label, is created when the Record is mapped to a different Asset, when its Engagement was deleted, or when the **connectors** tag was removed from that Engagement.
 
 ![image](images/manage_records_2.jpg)
 
-This makes it possible to send scan data from multiple Connectors to the same Asset. All of the data will be stored in the same Engagement, but each Connector will store data in a separate Test.
+This makes it possible to send scan data from multiple Connectors to the same Asset, with each Connector's data kept in its own Engagement as long as the Connectors use different labels.
 
 To learn more about Assets, Engagements and Tests, see our [Asset Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/).
 

@@ -101,6 +101,27 @@ These four decide how many database connections the application holds open, so t
 | `DD_UWSGI_IMPORT_HARAKIRI` | `dojo-import-scan` (imports) | 1770 | Keep it below the 1800-second nginx timeout, so uWSGI logs the stuck import before nginx gives up on it. |
 
 Change either one with `dojo-compose-cli environment add` and restart, as above. A harakiri restart frees the process but does not remove the cause. If one shows up in the log, send the stack traces that come with it to support, since they show where the process was stuck.
+
+**Slow database statements.** A harakiri restart stops the web process, but not the database query it was running: PostgreSQL keeps working on that query until it finishes. From 3.5.0, PostgreSQL itself stops any single statement of a web request that runs past 30 seconds under that service's harakiri (870 seconds on `dojo`, 1740 seconds on `dojo-import-scan`), and the request answers with a 503 that says it took too long. Where harakiri is unset or `0`, the limit is 1740 seconds. Imports and exports may get a higher limit than other requests, but never more than 30 seconds under their own service's harakiri, because harakiri ends the request at that point anyway: with the defaults they get the same limit as everything else on that service. Background tasks, migrations and management commands are never limited.
+
+The limit is sent to PostgreSQL as a connection startup option. If DefectDojo reaches PostgreSQL through PgBouncer or another connection pooler, the pooler may refuse those connections or drop the option; set the limits below to `0` there.
+
+| Setting | Service | Default | Notes |
+| --- | --- | --- | --- |
+| `DD_DATABASE_WEB_STATEMENT_TIMEOUT` | `dojo` (web) | 30 seconds under `DD_UWSGI_HARAKIRI`, or 1740 when that is unset or `0` | Seconds; `0` turns the limit off. |
+| `DD_DATABASE_IMPORT_STATEMENT_TIMEOUT` | `dojo-import-scan` (imports) | 30 seconds under `DD_UWSGI_IMPORT_HARAKIRI`, or 1740 when that is unset or `0` | Docker Compose only. Seconds; `0` turns the limit off. |
+| `DD_DATABASE_WEB_LONG_STATEMENT_TIMEOUT` | `dojo` (web) | 30 seconds under the service's harakiri, or 1740 when that is unset or `0` | The limit for imports and exports. A value above the default is capped at it; `0` means the default. |
+
+On Kubernetes, the limit follows each uWSGI pool's harakiri from the chart values: 870 seconds on the web pool and 1740 seconds on the import pool, or 1740 seconds on the web pool when `django.uwsgiImport.enabled` is `false`. To change it, set `DD_DATABASE_WEB_STATEMENT_TIMEOUT` in `config.extra` or `django.extraEnv`. The chart has no separate setting for the import pool, so a value set there applies to the web and import pools alike. If a request answers with this 503, the log names the request: send it to support, since a statement that runs this long is a performance problem to fix.
+
+**Import memory and shutdown.** uWSGI also replaces a process whose memory grows too large. `DD_UWSGI_RELOAD_ON_RSS` (MB) replaces it after a request leaves it above the limit: it stops taking requests, and the ones still running on its other threads get `DD_UWSGI_WORKER_RELOAD_MERCY` seconds before uWSGI kills it, failing them with a 502 (the log says `NO MERCY`). `DD_UWSGI_EVIL_RELOAD_ON_RSS` (MB) is a safety limit: a process that passes it is killed within about a second, and every request it is serving fails with a 502. The log says `EVIL RELOAD`, and Docker shows no restart. Imports need far more memory than pages, so from 3.4.300 the import service can be set on its own:
+
+| Setting | Service | Default | Notes |
+| --- | --- | --- | --- |
+| `DD_UWSGI_IMPORT_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_RELOAD_ON_RSS`, else 800 | Replaces an import process after an import leaves it above this; its other running imports get the mercy below. |
+| `DD_UWSGI_IMPORT_EVIL_RELOAD_ON_RSS` | `dojo-import-scan` | `DD_UWSGI_EVIL_RELOAD_ON_RSS`, else 2560 | Raise it if large imports fail with a 502 and the log says `EVIL RELOAD`, keeping `DD_UWSGI_NUM_OF_PROCESSES` (the import service runs the same number of processes as the web service) x this value below the host's free memory. |
+| `DD_UWSGI_IMPORT_WORKER_RELOAD_MERCY` | `dojo-import-scan` | `DD_UWSGI_WORKER_RELOAD_MERCY`, else 120 | Seconds a process being replaced gets to finish its running imports before it is killed. If imports fail with a 502 and the log says `NO MERCY`, raise it toward 1770. It does not apply to the evil-reload limit. |
+| `DD_UWSGI_IMPORT_STOP_GRACE_PERIOD` | `dojo-import-scan` | 600s | When DefectDojo stops or upgrades, the import service finishes the imports it is running before it exits, for up to this long. An idle service stops at once. Imports can run for up to 30 minutes: if yours run longer than about 10, raise it toward `1800s`. |
 {{< /tab >}}
 {{< /tabs >}}
 

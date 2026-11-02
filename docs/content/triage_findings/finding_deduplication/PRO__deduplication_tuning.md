@@ -37,6 +37,24 @@ In a tool's row, select the algorithm shown under the matching kind you want to 
 
 Two rules are enforced when you save a field selection, for the reasons in [Set-based Hash Code Fields](#set-based-hash-code-fields-vulnerability-ids-and-cwes) below: a vulnerability IDs field may stand on its own, and CWE fields may not be the only criteria.
 
+### Resetting a tool to its default
+
+The editor shows the tool's **Default Configuration** for that matching kind: the algorithm and hash fields a new install starts with. Use it to check what a tool shipped with before you change it, or to see how far an edited tool has moved from it.
+
+To go back to the default, select **Reset to Default**. This fills in the default algorithm and hash fields (and, for Reimport, turns **Track Findings as Locations Change** back off), but saves nothing. Review the impact and confirm it like any other change. Resetting the hash fields re-hashes the tool's existing findings in the background, the same as any other field change. When the default algorithm is Unique ID From Tool, which hides the field picker, the reset still puts the stored hash fields back. The button is unavailable when the form already matches the default.
+
+Once a reset is saved, the tool no longer shows as **Changed** for that matching kind and drops out of the **Changed From Defaults** filter, provided its grouping is also at the default.
+
+Where the default comes from:
+
+- **A parser that ships with DefectDojo** uses the algorithm and hash fields it ships with, including any `DD_HASHCODE_FIELDS_PER_SCANNER` override your deployment sets.
+- **A dynamically named test type**, such as `My Scanner (SARIF)`, uses the default of the parser named in the parentheses.
+- **A Universal Parser** uses Hash Code on Title, Severity and Description, which is what it is given when it is created.
+- **Cross Tool** defaults to **Disabled** for every tool.
+- **A tool no parser defines** uses the legacy Hash Code fields: Title, CWE, Line, File Path and Description.
+
+A pool override has no default of its own, so its editor shows none.
+
 > **One configuration per tool.** Matching Configuration is instance-wide: every Asset uses the same algorithm and field list for a given tool, including Assets in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/). Per-pool algorithm overrides are not yet available. Hash fields will stay instance-wide even when they are, because a finding stores one hash and the classic UI, the v2 API and CSV exports all read that same value, so a pool-specific field list would change what every other view of that finding shows. [Grouping](#grouping-what-counts-as-one-finding) is the one exception: it can be set for a pool.
 
 ## Grouping: what counts as one finding
@@ -56,8 +74,15 @@ Both of the location-based groupings need the [Locations](/asset_modelling/locat
 It uses the tool's own matching configuration, so there is no second list of fields to maintain:
 
 - With **Unique ID From Tool**, or **Unique ID From Tool or Hash Code** for a report entry that has an ID, entries that share the tool's ID are one vulnerability. Many tools give one result an ID and report it at several places.
-- Otherwise the tool's hash fields are used, with everything that describes a location left out (file path, line, endpoints, component version and location types). Fields listed under **Fields Left Out of the Identity** are left out too, which helps when a tool writes the location into the description.
+- Otherwise the tool's Same Tool hash fields are used, with everything that describes a location left out (file path, line, endpoints, component version and location types). Fields listed under **Fields Left Out of the Identity** are left out too, which helps when a tool writes the location into the description.
 - **When Severities Differ** decides whether one vulnerability reported at two severities becomes one finding (at the highest severity) or stays two findings.
+
+DefectDojo refuses a setting that would change nothing, with a message saying what to set:
+
+- **One finding per vulnerability on a tool with no Same Tool hash fields.** Without them the hash falls back to one that includes the file and line, so nothing would fold. Many tools ship without hash fields, so set them first; Title, CWE, File Path and Line is a common choice.
+- **Keep Severities Apart when Severity is not part of the identity.** Severity has to be one of the hash fields and must not be listed under **Fields Left Out of the Identity**. It is also refused for tools matched on **Unique ID From Tool**, because the tool's ID ignores severity. With **Unique ID From Tool or Hash Code**, report entries without an ID fold on the hash, so the same rules apply to them as to hash code. Entries that carry an ID still fold on that ID whatever their severity, so Keep Severities Apart splits only the entries without one.
+
+A pool's grouping is checked against the instance's hash fields, because those are the ones its hash uses, and changing the instance's hash fields or algorithm checks again every pool that relies on them. A grouping change that is still Pending is checked the same way. Settings saved before these checks existed are left as they are. An edit to them is refused until they meet the checks, and so is a change to the instance's hash fields or algorithm while a pool still holds one. Other instance edits, such as a grouping or volatile-field change, are not blocked by an older pool setting.
 
 The same rules apply across tests: when a new test on the same Asset reports a vulnerability that already has a finding, its locations are added to that finding, attributed to the new test, instead of creating a duplicate. A reimport of that test then only changes the locations it reported. The finding closes once no test reports any of its locations.
 
@@ -68,7 +93,7 @@ On the folded finding:
 - the SLA starts from the earliest date any of its locations was found;
 - marking the finding False Positive or Risk Accepted applies that status to every location, and a single location can still be changed afterwards.
 
-Grouping is one setting for Same Tool and Reimport, because an import and a later reimport have to agree on what a finding is. With one finding per vulnerability, reimport also tracks locations as they change, so a line that moves updates its location instead of adding a new one.
+Grouping is one setting for Same Tool and Reimport, because an import and a later reimport have to agree on what a finding is. With one finding per vulnerability, reimport also tracks locations as they change, so the finding stays the same when a line moves: the old location is mitigated and marked with where it moved, and the new one is added.
 
 ### Changing a tool's grouping
 
@@ -84,6 +109,17 @@ python manage.py consolidate_folded_findings --product <asset id> --apply
 ```
 
 The newest finding of each group survives, and the others' locations move onto it, keeping the test that reported each one. The others become its duplicates.
+
+Consolidation records each finding it folds: the finding it went onto, the locations that moved, and what marking it a duplicate cleared. Moving the tool back to **As the parser groups them** after consolidating does not split anything when you save it, because what the parser makes of a report is only known at the next import. The split happens on the next reimport instead. When it reports a finding that consolidation folded away, that finding becomes active again, its locations (files, URLs or any other kind) move back from the surviving finding with their status history, it is verified again if it was before, and a note on it names the finding it had been folded into. Only findings with a consolidation record come back: a finding you marked as a duplicate yourself stays a duplicate. A folded-away finding is also left alone when the surviving finding is no longer active, for example because it was marked a false positive or risk accepted.
+
+Consolidations run on an earlier release have no record, so a reimport leaves their folded findings closed. To reopen them, run `unfold_consolidated_findings` for the Assets concerned. It lists each finding it would reopen with its reasons, counts the ones it leaves alone (`--verbose` lists those too), and changes nothing until you pass `--apply` (with `--user`, the account the notes are written as):
+
+```bash
+python manage.py unfold_consolidated_findings --product <asset id>
+python manage.py unfold_consolidated_findings --product <asset id> --apply --user <username>
+```
+
+It recognizes these findings by their file and line, so it only handles findings with a code location. A finding on the same line as the finding it duplicates is left alone, because a person marking one finding on that line a duplicate of another leaves the same traces. If a reimport on an earlier release already gave a folded-away finding a new location row of its own, that newer row is removed when the finding is reopened, so its original row, with its history, comes back to it from the surviving finding; the note on the finding names each row removed. Findings without a file are only counted, because nothing on them says which locations they held. Reopen any of these yourself if they should be open. Use `--pool <pool id>` instead of `--product` to cover every Asset in a dedupe pool.
 
 To use a grouping only for some Assets, put them in a [dedupe pool](/triage_findings/finding_deduplication/pro__dedupe_pools/) and pick that pool under **Applies To**. Assets outside the pool keep the instance default.
 

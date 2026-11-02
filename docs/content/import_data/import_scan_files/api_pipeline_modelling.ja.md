@@ -12,6 +12,8 @@ DefectDojo の API は、新しいスキャンをインスタンスに自動的�
 
 これらのパイプラインは、当社の **Import Scan Form** に近い方法で、スキャンファイルを添付して API の **/reimport** エンドポイントを直接呼び出すことによって作成できます。
 
+GitHub Actions のワークフローでは、公式の DefectDojo アクションがこのエンドポイントを代わりに呼び出します。[GitHub Actions からのインポート](/import_data/import_scan_files/github_actions/)を参照してください。
+
 ## DefectDojo の API
 
 DefectDojo の API は、OpenAPI フレームワークを使用してアプリ内でドキュメント化されています。このドキュメントには、画面右上のユーザーメニューの**「API v2 OpenAPI3」**からアクセスできます。

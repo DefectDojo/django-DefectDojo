@@ -12,6 +12,8 @@ DefectDojo 的 API 支持构建健壮的流水线解决方案，能够自动将�
 
 这些流水线可以通过直接调用我们的 API **/reimport** 端点并附加扫描文件来创建，其方式与我们的**导入扫描表单**非常相似。
 
+在 GitHub Actions 工作流中，官方 DefectDojo Action 会替您调用此端点。请参阅[从 GitHub Actions 导入](/import_data/import_scan_files/github_actions/)。
+
 ## DefectDojo 的 API
 
 DefectDojo 的 API 使用 OpenAPI 框架在应用内提供文档。您可以从右上角的用户菜单中的 **“API v2 OpenAPI3”** 选项访问此文档。

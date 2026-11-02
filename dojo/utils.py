@@ -55,6 +55,7 @@ from django.utils import timezone
 from django.utils.html import escape, format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from kombu import Connection
 
 from dojo.celery import app
@@ -229,6 +230,45 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             a_total,
         ))
         a_stuff.append(a_counts)
+
+
+def _restricted_kinds(restricted):
+    return ", ".join(sorted({str(obj._meta.verbose_name) for obj in restricted}))
+
+
+def restricted_delete_message(err):
+    """
+    A sentence saying why a delete was blocked by dependent rows, for a person to read.
+
+    str() of a RestrictedError is a tuple repr that names every referencing row, so this counts them and names
+    only their kinds (what to reassign).
+    """
+    restricted = list(err.restricted_objects or ())
+    if not restricted:
+        return _("It cannot be deleted while other records still refer to it.")
+    message = ngettext(
+        "It cannot be deleted while %(count)s other record still refers to it.",
+        "It cannot be deleted while %(count)s other records still refer to it.",
+        len(restricted),
+    ) % {"count": len(restricted)}
+    return message + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": _restricted_kinds(restricted)}
+
+
+def restricted_delete_reason(err):
+    """
+    The reason alone, for a warning that already says what cannot be deleted ("User cannot be deleted: ...").
+
+    Counts the referencing rows and names their kinds, as :func:`restricted_delete_message` does.
+    """
+    restricted = list(err.restricted_objects or ())
+    if not restricted:
+        return _("other records still refer to it.")
+    reason = ngettext(
+        "%(count)s other record still refers to it.",
+        "%(count)s other records still refer to it.",
+        len(restricted),
+    ) % {"count": len(restricted)}
+    return reason + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": _restricted_kinds(restricted)}
 
 
 def add_breadcrumb(parent=None,

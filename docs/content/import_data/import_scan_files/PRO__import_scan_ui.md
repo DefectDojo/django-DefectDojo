@@ -110,3 +110,5 @@ Here are the following use cases for using this field:
     - Finding date will be whatever the user set for `scan_date`
 
 In the Pro UI, the **Scan Date** field on both the Import and Reimport forms starts empty, so cases 1 and 2 apply unless you select a date. On Reimport, a Scan Date applies only to the Findings the Reimport creates: Findings that already exist in the Test keep their dates.
+
+A Scan Date is also the mitigated date of the Findings that **Close Old Findings** closes, on both forms. With the field empty, those Findings are marked mitigated at the time of the import.

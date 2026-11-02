@@ -82,15 +82,21 @@ By default, the first account created on a new DefectDojo instance will have Sup
 
 ## Configuration Permissions
 
-Configuration Permissions, although similar, are not related to Assets or Roles. They must be assigned separately from Roles. **Regular** **users do not have any Configuration Permissions by default, and assigning these configuration permissions should be done carefully.**
+Configuration Permissions open settings pages and instance-wide catalogs (Users, Groups, Finding Templates, Tool Types, SLA Configurations and so on). They are not related to Assets or Organizations: a user can hold them without any Asset or Organization membership, and holding them gives no access to Assets, Organizations or Findings. **Regular users do not have any Configuration Permissions by default, and assigning them should be done carefully.**
 
-Users can have Configuration Permissions assigned in different ways:
+Configuration Permissions are granted through Roles. A Role carries them in the **Configuration Permissions** table of the role editor, and they take effect when that Role is held as a **Global Role**:
 
-1. Users can be assigned Configuration Permissions directly. Specific permissions can be configured directly on a User page.  
+1. A user holds the Configuration Permissions of their own Global Role.
 
-2. User Groups can be assigned Configuration Permissions. As with Roles, specific Configuration Permissions can be added to Groups, which will give all Group members these permissions.
+2. A user also holds the Configuration Permissions of the Global Role of every Group they belong to, which is how a whole team is given access at once.
 
-Superusers have all Configuration Permissions, so they do not have a Configuration Permission section on their User page.
+Only a Superuser can add a Configuration Permission to a Role, clone a Role that carries one, or set such a Role as a Global Role. Superusers hold every Configuration Permission themselves.
+
+The **Configuration Permissions** card on a User page and on a Group page lists what the user or group holds and where it comes from; it is read-only. To change it, edit a custom Role (or clone one) on the **Settings > Users & Permissions > Roles** page and set it as the Global Role. See [Custom Roles](../pro__custom_rbac_roles/#configuration-permissions).
+
+The built-in Roles (Reader, Writer, Maintainer, Owner, API Importer) carry no Configuration Permissions. A Global Reader, for example, does not see the Users page until a Role that carries **Users: View** is their Global Role.
+
+A Global **Owner** keeps the built-in Owner Role, because the Owner-only abilities (managing Roles among them) belong to that one Role and a custom Role cannot stand in for it. To give an Owner a Configuration Permission, put the grant on a custom Role and set that Role as the Global Role of a Group the Owner belongs to: a user holds the Configuration Permissions of their own Global Role and of every Group's Global Role. When DefectDojo Pro upgrades an instance that still used the old per-user and per-group Configuration Permissions, every holder gets an equivalent custom Role as their Global Role, and an Owner gets a Group named **Configuration: ...** that carries their former set; a member added to an Owner Group later joins that Group too, or gets a Role of their own, and a member removed from the Owner Group keeps the set until they are removed from the **Configuration: ...** Group as well.
 
 ### Group Configuration Permissions
 

@@ -35,13 +35,16 @@ def visible_notes(notes, user):
     whatever DRF hands its ``ListSerializer``, and on a list endpoint that is a
     plain list: ``paginate_queryset`` returns ``list(queryset[offset:limit])``.
     So the same rule is applied in Python when there is no queryset left to
-    apply it to in SQL. Filtering a page after the fact does shorten it, which
+    apply it to in SQL, and also when the queryset is a prefetched relation
+    whose rows are already loaded. Filtering a page after the fact does shorten it, which
     is a consequence of choosing to enforce the rule at serialization time; the
     alternative -- leaking another user's private note -- is worse.
     """
     if user is not None and user.is_superuser:
         return notes
-    if not hasattr(notes, "filter"):
+    # A prefetched relation has its rows loaded already: filtering it in SQL would discard them,
+    # and the prefetch of their history with them, costing two queries per object on a list page.
+    if not hasattr(notes, "filter") or getattr(notes, "_result_cache", None) is not None:
         return [
             note
             for note in notes

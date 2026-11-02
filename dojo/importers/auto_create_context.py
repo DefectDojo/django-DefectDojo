@@ -27,7 +27,36 @@ class AutoCreateContextManager:
     - Products
     - Engagements
     - Tests
+
+    One request resolves the same target in the permission check, the view and the
+    serializer. ``for_request`` hands all three the same manager, which remembers the
+    rows it found so each lookup runs once per request. A miss is never remembered:
+    the creators look again before they create, as they always have.
     """
+
+    _REQUEST_ATTRIBUTE = "_dojo_auto_create_context_manager"
+
+    def __init__(self) -> None:
+        self._found: dict[tuple, Any] = {}
+
+    @classmethod
+    def for_request(cls, request) -> "AutoCreateContextManager":
+        """The manager shared by everything that handles ``request`` (a new one without a request)."""
+        if request is None:
+            return cls()
+        manager = getattr(request, cls._REQUEST_ATTRIBUTE, None)
+        if manager is None:
+            manager = cls()
+            setattr(request, cls._REQUEST_ATTRIBUTE, manager)
+        return manager
+
+    def _remembered(self, key: tuple, lookup):
+        """``lookup()``, run once per ``key`` while it finds something."""
+        if (found := self._found.get(key)) is not None:
+            return found
+        if (found := lookup()) is not None:
+            self._found[key] = found
+        return found
 
     """
     ===================================
@@ -119,7 +148,10 @@ class AutoCreateContextManager:
         """
         # Look for an existing object
         if product_type_name:
-            return get_object_or_none(Product_Type, name=product_type_name)
+            return self._remembered(
+                ("product_type", product_type_name),
+                lambda: get_object_or_none(Product_Type, name=product_type_name),
+            )
         return None
 
     def get_target_product_if_exists(
@@ -136,7 +168,10 @@ class AutoCreateContextManager:
         If a match is not found, return None
         """
         # Look for an existing object
-        if product_name and (product := get_object_or_none(Product, name=product_name)):
+        if product_name and (product := self._remembered(
+            ("product", product_name),
+            lambda: get_object_or_none(Product.objects.select_related("prod_type"), name=product_name),
+        )):
             # product type name must match if provided
             if product_type_name and product.prod_type.name != product_type_name:
                 msg = (
@@ -174,7 +209,10 @@ class AutoCreateContextManager:
 
         If a match is not found, and a product is not supplied, return None
         """
-        if engagement := get_object_or_none(Engagement, pk=engagement_id):
+        if engagement_id and (engagement := self._remembered(
+            ("engagement", engagement_id),
+            lambda: get_object_or_none(Engagement.objects.select_related("product__prod_type"), pk=engagement_id),
+        )):
             logger.debug("Using existing engagement by id: %s", engagement_id)
             if product is not None and engagement.product_id != product.id:
                 msg = "The provided identifiers are inconsistent — the engagement does not belong to the specified product."
@@ -184,7 +222,10 @@ class AutoCreateContextManager:
         if product is None:
             return None
         # engagement name is not unique unfortunately
-        return get_last_object_or_none(Engagement, product=product, name=engagement_name)
+        return self._remembered(
+            ("engagement", product.pk, engagement_name),
+            lambda: get_last_object_or_none(Engagement.objects.select_related("product__prod_type"), product=product, name=engagement_name),
+        )
 
     def get_target_test_if_exists(
         self,
@@ -199,7 +240,10 @@ class AutoCreateContextManager:
         If there is no `test_id` provided, we lookup the latest test inside the provided engagement that satisfies
         the provided scan_type and test_title.
         """
-        if test := get_object_or_none(Test, pk=test_id):
+        if test_id and (test := self._remembered(
+            ("test", test_id),
+            lambda: get_object_or_none(Test.objects.select_related("engagement__product__prod_type"), pk=test_id),
+        )):
             logger.debug("Using existing Test by id: %s", test_id)
             if engagement is not None and test.engagement_id != engagement.id:
                 msg = "The provided identifiers are inconsistent — the test does not belong to the specified engagement."
@@ -210,9 +254,15 @@ class AutoCreateContextManager:
             return None
         # Check for a custom test title
         if test_title:
-            return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
+            return self._remembered(
+                ("test", engagement.pk, scan_type, test_title),
+                lambda: get_last_object_or_none(Test.objects.select_related("engagement__product__prod_type"), engagement=engagement, title=test_title, scan_type=scan_type),
+            )
         # Otherwise use the last test by scan type
-        return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)
+        return self._remembered(
+            ("test", engagement.pk, scan_type),
+            lambda: get_last_object_or_none(Test.objects.select_related("engagement__product__prod_type"), engagement=engagement, scan_type=scan_type),
+        )
 
     """
     ===================================

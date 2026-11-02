@@ -853,6 +853,13 @@
                                         alt="{% trans 'Select to push to JIRA' %}"
                                         title="{% trans 'Push_To_Jira' %}"/>
                                     <br />
+                                    <b>{% trans "Unlink from JIRA" %}</b>
+                                    <input id="id_unlink_from_jira"
+                                        name="unlink_from_jira"
+                                        type="checkbox"
+                                        alt="{% trans 'Select to unlink JIRA issues from DefectDojo findings' %}"
+                                        title="{% trans 'Removes the link in DefectDojo only. The Jira issue is left as it is. Combine with Push to JIRA to create new issues in the current Jira project.' %}"/>
+                                    <br />
                                 {% endif %}
                                 <label style="display: block">
                                     {% trans "Notes" %}
@@ -1209,8 +1216,8 @@
                                             data-content="{{ visible_notes.0.author }} at {{ visible_notes.0.date }}: {{ visible_notes.0 }}"></i>
                                             <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                 class="dojo-sup"
-                                                alt="{{ visible_notes.count }} note{{ visible_notes.count|pluralize }}">
-                                                    ({{ visible_notes.count }})
+                                                alt="{{ visible_notes|length }} note{{ visible_notes|length|pluralize }}">
+                                                    ({{ visible_notes|length }})
                                             </a>
                                         {% endif %}
                                         {% endwith %}

@@ -15,6 +15,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_uid_or_hash,
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
+    locations_covered,
 )
 from dojo.importers.base_importer import BaseImporter, Parser, reports_a_deleted_target
 from dojo.importers.base_location_manager import LocationHandler
@@ -468,6 +469,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     candidates_by_uid=candidates_by_uid,
                     candidates_by_key=candidates_by_key,
                 )
+                matched_findings = self.order_reimport_candidates(unsaved_finding, matched_findings)
                 deduplicationLogger.debug(f"found {len(matched_findings)} findings matching with current new finding")
                 # Determine how to proceed based on whether matches were found or not
                 if matched_findings:
@@ -938,6 +940,58 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         """
         logger.debug("REIMPORT_SCAN parser v2: Create parse findings")
         return super().parse_findings_dynamic_test_type(scan, parser)
+
+    @staticmethod
+    def _carries_suppression_of(unsaved_finding: Finding, existing_finding: Finding) -> bool:
+        """Whether the incoming finding reports the same false-positive / out-of-scope / risk-accepted state."""
+        return (
+            (existing_finding.false_p and unsaved_finding.false_p)
+            or (existing_finding.out_of_scope and unsaved_finding.out_of_scope)
+            or (existing_finding.risk_accepted and unsaved_finding.risk_accepted)
+        )
+
+    def order_reimport_candidates(
+        self,
+        unsaved_finding: Finding,
+        matched_findings: list[Finding],
+    ) -> list[Finding]:
+        """
+        Filter and order the findings that share a matching key with an incoming finding, by where it was reported.
+
+        Matching keys often leave the location out (many network scanners hash only title,
+        severity and vulnerability ids), so the same issue reported on several hosts shares one key.
+        Taking the first candidate then folds every host into whichever finding has the lowest id:
+
+        * A false-positive, out-of-scope or risk-accepted candidate is skipped when it does not
+          already cover every location the incoming finding reports, unless the incoming finding
+          carries the same status. Matching into it would put a newly reported host under a
+          decision someone made about other hosts, and that host's issue would never be shown.
+          With no candidate left, the incoming finding is created as a new finding.
+        * Among the rest, a candidate that already covers the incoming locations comes first, so
+          each host's finding keeps matching itself. The order is otherwise unchanged.
+
+        Findings that report no location are returned as they are.
+        """
+        if not matched_findings:
+            return matched_findings
+        if not (getattr(unsaved_finding, "unsaved_locations", None) or getattr(unsaved_finding, "unsaved_endpoints", None)):
+            return matched_findings
+        covered = {id(candidate): locations_covered(unsaved_finding, candidate) for candidate in matched_findings}
+        kept = [
+            candidate
+            for candidate in matched_findings
+            if covered[id(candidate)]
+            or not (candidate.false_p or candidate.out_of_scope or candidate.risk_accepted)
+            or self._carries_suppression_of(unsaved_finding, candidate)
+        ]
+        if len(kept) < len(matched_findings):
+            deduplicationLogger.debug(
+                "reimport: skipped %d suppressed candidate(s) that do not cover the locations of incoming finding %s",
+                len(matched_findings) - len(kept),
+                unsaved_finding.title,
+            )
+        # Stable sort: covering candidates first, original order otherwise.
+        return sorted(kept, key=lambda candidate: not covered[id(candidate)])
 
     def match_finding_to_candidate_reimport(
         self,

@@ -27,7 +27,7 @@ For a configurable field you can set:
 
 - **Placement**, either **Main** or **Optional**. Main puts the field in the body of the form, where it is visible as soon as the form opens. Optional moves it into the collapsible Optional Fields section.
 - **Required**, which makes the field mandatory. Someone filling in the form cannot submit it until the field has a value.
-- **Disabled**, which takes the field off the form entirely.
+- **Disabled**, which takes the field off the form entirely. The form still sends the field's default value. **Close Old Findings** on the Reimport form is on by default, so with it disabled, every Reimport closes old Findings. **Async Import** on both forms follows the instance's async import setting, and a large scan file is always processed in the background, so disabling it does not make imports synchronous. The settings page notes both beside their **Disabled** checkbox.
 
 ## Custom fields
 
@@ -55,7 +55,7 @@ You can reorder a field that is otherwise not configurable, because its position
 
 ## Fields changed in place
 
-The Finding and Engagement pages let some fields be changed where they are shown, without opening the Edit Finding or Edit Engagement form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
+The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
 
 ## Saving
 

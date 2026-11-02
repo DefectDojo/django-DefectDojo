@@ -36,6 +36,22 @@ Notes on **Track Scanned Branches**:
 - Turning the toggle off later is safe: per-branch engagements simply stop receiving imports and the default engagement resumes on the next sync.
 - Connectors reconcile state on the sync schedule. Branch tracking makes each sync complete across branches; it does not make data real-time between syncs.
 
+#### **Selecting scans by Initiator**
+
+Some scans can only be told apart by who started them, for example scans run by a QA service account on branches your **Branch** filter does not select. The optional **Initiator** field selects those scans by the Checkmarx scan's Initiator (the user or service that started it).
+
+- **Initiator** is a regular expression, matched anywhere in the Initiator unless you anchor it with `^` and `$`. For example `^qa-scanner-\d{2}$` matches `qa-scanner-01`, and `Sécurité` matches any Initiator containing that word.
+- Matching **ignores case and accents** on both sides, so `Sécurité` also matches `SECURITE` and `securite`.
+- The pattern uses [RE2 syntax](https://github.com/google/re2/wiki/Syntax). An invalid pattern is rejected when you save the connector.
+
+How it combines with the branch fields:
+
+- A scan is selected when its branch matches **Branch** **or** its Initiator matches **Initiator**. For a branch the Branch field selects, the connector imports that branch's latest completed scan, as it does without an Initiator. For any other branch, it imports the latest completed scan whose Initiator matches. A wildcard Branch that matches nothing no longer skips the sync, because the Initiator-matched branches still import.
+- Setting **Initiator** always syncs per branch, as if **Track Scanned Branches** were on: each selected branch gets its own engagement, so Initiator-matched scans and Branch-matched scans never share an engagement or close each other's findings.
+- With **Branch** blank, only Initiator-matched scans are imported. You can use this for a separate connector that covers only those scans, alongside your existing connector.
+- Only the most recent 1,000 completed scans of each project are searched for a matching Initiator. A branch whose last matching scan is older than that stops receiving updates, the same way a branch that stops being scanned does.
+- Clearing **Initiator** later does not close anything: the engagements of branches it alone selected stop receiving imports and keep their last-known findings, which you can review and close in bulk. If **Track Scanned Branches** is off, the default engagement resumes on the next sync, as when that toggle is turned off.
+
 #### **Result States**
 
 By default, the connector imports findings in every Checkmarx result state except **Not Exploitable**. To import only findings in some states, fill in the optional **Result States** field.
@@ -47,6 +63,24 @@ By default, the connector imports findings in every Checkmarx result state excep
 - The filter applies to SAST, SCA, IaC and DAST results. If your DAST results cannot carry a custom state, a list of only custom states imports no DAST findings.
 - If a finding leaves a listed state, the next sync closes it in DefectDojo.
 - If no finding has a listed state, the sync imports nothing and closes the findings that the connector imported before. Check the spelling against your Checkmarx custom states before you save.
+
+#### **Triage state, Exploitable Path and comments**
+
+The connector carries three pieces of Checkmarx triage data onto each finding, so you can filter on them in the Findings list, in Custom Dashboards and in the Report Builder.
+
+- **State.** Every finding (SAST, SCA, IaC and DAST) that has a Checkmarx state is tagged `cx-state:<state>` with its Checkmarx result state in lowercase: `cx-state:to_verify`, `cx-state:confirmed`, `cx-state:urgent`, `cx-state:proposed_not_exploitable`. A custom state such as `DD Ready` becomes `cx-state:dd_ready`, and any space, comma or quote in a state name becomes `_`. A finding has at most one state tag. A result that Checkmarx returns with no state gets none.
+- **Exploitable Path.** When [Exploitable Path](https://docs.checkmarx.com/en/34965-19120-exploitable-path.html) is enabled on the Checkmarx project and a SAST scan has run, each SCA finding is tagged `exploitable-path:found` if Checkmarx found a call path from your code to the vulnerable method, or `exploitable-path:none` if it looked and found no path. A finding with neither tag was not analysed, which is different from being safe.
+- **Comments.** The comment a Checkmarx user wrote when triaging a result is stored in the finding's **Severity Justification**, prefixed with `Checkmarx comment:`. It is shown on the finding page and in Report Builder detail blocks. SCA and DAST results carry comments today. SAST results do not, because the Checkmarx SAST results API does not return them. IaC results do not either: the connector leaves the IaC comment field out until it is confirmed to hold the triage note.
+
+Unlike other tags, **the state and Exploitable Path tags follow the tool.** When a sync matches a finding that already exists, DefectDojo replaces that finding's `cx-state:` and `exploitable-path:` tags with the ones the sync reports, so a result moved from To Verify to Confirmed in Checkmarx shows as `cx-state:confirmed` here after the next sync. Tags outside those two families, including ones you added yourself, are never touched. The Severity Justification is refreshed the same way on active and reactivated findings, unless someone edited it in DefectDojo, in which case your edit is kept. A finding marked False Positive, Out of Scope or Risk Accepted still gets its tags updated, but keeps its Severity Justification.
+
+Notes:
+
+- The tags do not change deduplication and are never added to Unique ID From Tool or the description.
+- The connector owns the `cx-state:` and `exploitable-path:` tag families. A tag you add by hand in either family is replaced by what Checkmarx reports on the next sync, so use a different prefix for your own tags.
+- This applies to connector syncs only. Reimporting a Checkmarx One file through the regular import keeps the tags and Severity Justification a finding was first imported with.
+- Findings that already existed before this version gain the tags on their next sync. They gain the comment only if their Severity Justification is blank; a justification already on the finding is treated as yours and kept.
+- A finding whose state changes to Not Exploitable is still closed on the next sync, as before; it is not kept with a `cx-state:not_exploitable` tag.
 
 #### **Tagging findings with the Checkmarx scan ID**
 

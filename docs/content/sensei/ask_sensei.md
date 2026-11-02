@@ -19,9 +19,11 @@ change only on findings that user can edit.
 
 ## Asking a question
 
-Open the assistant in any of three ways:
+Open the assistant in any of these ways:
 
 - the **Ask Sensei** button in the sidebar footer;
+- **Ask Sensei** under **SENSEI + AI** in the sidebar, which opens the assistant as a page of its
+  own (see [The Ask Sensei page](#the-ask-sensei-page));
 - the command palette (**Cmd+K** or **Ctrl+K**): type a question and pick **Ask Sensei**, the
   first result;
 - from a record: **Explain With Sensei** on a finding's menu, or **Summarize With Sensei** on an
@@ -37,6 +39,28 @@ only the person who asked can open them, whatever the other person's role. Delet
 **Simple Answers**, at the top of the panel, asks for short, text-first answers with fewer
 charts.
 
+### The Ask Sensei page
+
+Two buttons in the panel's header give answers more room. **Expand to Full Width** widens the
+panel across the whole window, so a chart and a list sit side by side; the panel stays that
+width until you narrow it again. **Open as a Page** opens the same conversation at
+`/ui/sensei/ask`, with your conversations listed beside it. The panel and the page share one
+conversation: a question asked on the page is there when you open the panel on another page, and
+the other way round.
+
+A new conversation, on the page or in the panel, opens on a home view before you ask anything:
+
+- **What Changed** since your last visit, in whole days: new findings and how many are critical,
+  findings newly on the CISA known exploited vulnerabilities list, findings closed, and the pull
+  requests Sensei opened and merged. With no earlier visit, it covers the last seven days.
+- **Top Fixes**: the Root Causes that clear the most risk, exploited ones first, each with its own
+  **Fix With Sensei** button (see [Fixes, not findings](#fixes-not-findings)). This list needs
+  [Root Cause Correlation](/triage_findings/finding_correlation/pro__root_cause_correlation/)
+  switched on.
+
+The home view reads your data with your permissions, the same way an answer does, but asks the
+AI model nothing, so opening it does not use an answer from the license's allowance.
+
 ## Where the numbers come from
 
 Every number in an answer comes from your data, read with **your** permissions, at the moment
@@ -50,6 +74,37 @@ Answered** under an answer to see every query it ran.
 
 An answer is kept as it was shown. Reopening a conversation next month shows what you saw then,
 not what the data says now. Ask again for current numbers.
+
+## Fixes, not findings
+
+Ask "what should I fix first?" and Sensei answers with fixes rather than findings. A fix is a
+[Root Cause](/triage_findings/finding_correlation/pro__root_cause_correlation/): one change, such
+as one library upgrade, that clears every finding it explains, across every Asset. The answer
+lists the top fixes with what to change, how many findings and Assets each one clears, and how
+many of those findings are on the CISA known exploited vulnerabilities list. Fixes for exploited
+findings come first; the rest follow the Root Causes page's own ranking. The answer also says how
+many findings the listed fixes clear between them, counting a finding that two fixes share once.
+
+Each fix has a **Fix With Sensei** button. It shows the plan first, as the Root Causes page does:
+how many pull requests Sensei can open, in which repositories, why the rest of the findings are
+left out (an Asset not onboarded to Sensei, no file to patch, a fix already in progress, Writer
+access missing), and what is left of the fix quota. Nothing is spent until you confirm. Sensei
+then opens one pull request per finding it can fix, in the repository linked to the finding's
+Asset. A finding in an answer's list of findings has its own **Fix** button when you can edit
+it, and an answer can also offer to fix specific findings it found. Fixes are always started
+with a click, never by voice. Once a fix starts, the conversation says how many pull requests
+Sensei is preparing, with a link to follow them in Sensei.
+
+Root-cause fixes need [Root Cause Correlation](/triage_findings/finding_correlation/pro__root_cause_correlation/)
+switched on. See [Fixing Findings with Sensei](/sensei/fixing_findings/) for how Sensei fixes are
+onboarded, reviewed and merged.
+
+Ask "what changed since I last looked?" (or over any number of days) to see what moved since your
+last visit: findings that arrived (and how many are critical or high), findings newly on
+the known exploited vulnerabilities list, findings closed, and the pull requests Sensei opened and
+merged. Your last visit is the newest question you asked at least an hour earlier, so questions
+asked close together count as one visit. The numbers cover whole days from that visit, rounded up,
+and the answer says how many days that is.
 
 ## Changing findings from an answer
 

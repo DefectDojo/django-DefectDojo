@@ -549,7 +549,7 @@ class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(request)
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
@@ -750,7 +750,7 @@ class UserHasReimportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(request)
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:

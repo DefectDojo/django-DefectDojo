@@ -45,27 +45,42 @@ def _get_annotations_for_statistics():
 
 
 def _get_statistics_for_queryset(qs, annotation_factory):
+    return _get_statistics_by_group(qs, annotation_factory)[None]
+
+
+def _get_statistics_by_group(qs, annotation_factory, group_field=None, groups=(None,)):
+    """
+    Per-severity statistics of ``qs``, one query for all of ``groups``.
+
+    Without ``group_field`` the result is ``{None: stats}``. With it, the rows are also grouped by that
+    field and the result maps each value in ``groups`` to its own stats (the defaults when it has no rows).
+    """
+    annotations = annotation_factory()
+    group_by = ["sev"] if group_field is None else [group_field, "sev"]
     # order by to get rid of default ordering that would mess with group_by
     # group by severity (lowercase)
-    values = qs.annotate(sev=Lower("severity")).values("sev").order_by()
+    values = qs.annotate(sev=Lower("severity")).values(*group_by).order_by()
     # add annotation for each status field
-    values = values.annotate(**annotation_factory())
+    values = values.annotate(**annotations)
     # make sure sev and total are included
-    stat_fields = ["sev", "total", *STATS_FIELDS]
-    # go for it
-    values = values.values(*stat_fields)
+    values = values.values(*group_by, "total", *STATS_FIELDS)
 
-    # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
     # need to copy the DEFAULT_STATS otherwise it gets overwritten
-    stats = copy.copy(DEFAULT_STATS)
+    result = {group: copy.copy(DEFAULT_STATS) for group in groups}
+    totals = {group: dict.fromkeys(annotations, 0) for group in groups}
     for row in values:
+        group = row.pop(group_field) if group_field is not None else None
+        if group not in result:
+            continue
         sev = row.pop("sev")
-        stats[sev] = row
-
-    values_total = qs.values()
-    values_total = values_total.aggregate(**annotation_factory())
-    stats["total"] = values_total
-    return stats
+        result[group][sev] = row
+        # Every annotation is a count, so the per-severity rows add up to what aggregating
+        # the whole queryset returns, without a second query.
+        for key in annotations:
+            totals[group][key] += row[key]
+    for group, stats in result.items():
+        stats["total"] = totals[group]
+    return result
 
 
 def _sync_inherited_tags(obj, incoming_inherited_tags):
@@ -158,6 +173,7 @@ from dojo.product.models import (  # noqa: E402 -- re-export; class-body FKs bel
     Product_Line,  # noqa: F401 -- re-export
 )
 from dojo.product_type.models import Product_Type  # noqa: E402, F401 -- re-export
+from dojo.query_hooks import HookedManager, UnfilteredManager  # noqa: E402
 from dojo.reports.models import Report_Type  # noqa: E402, F401 -- re-export
 from dojo.test.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     IMPORT_ACTIONS,  # noqa: F401 -- re-export
@@ -202,6 +218,14 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name="location_meta_scope")
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         unique_together = (("product", "name"),
@@ -530,6 +554,14 @@ class Languages(models.Model):
     code = models.IntegerField(blank=True, null=True, verbose_name=_("Number of code lines"))
     created = models.DateTimeField(auto_now_add=True, null=False)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         unique_together = [("language", "product")]
 
@@ -549,6 +581,14 @@ class App_Analysis(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         indexes = [

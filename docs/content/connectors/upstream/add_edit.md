@@ -24,7 +24,7 @@ You can also edit an existing Connector under the **Configured Connectors** head
 
 4. You will need an accessible **Location URL** for the tool, along with an API **Secret** key. The location of the API key will depend on the tool you are trying to configure. See our [Tool\-Specific Reference](../../toolreference/upstream/) for more details.  
 ​
-5. Set a **Label** for this connection to help you identify it in DefectDojo.  
+5. Set a **Label** for this connection to help you identify it in DefectDojo. The label is cosmetic: you can rename it later from **Edit Configuration** without affecting the Records, Engagements or Tests the connector has already created. Each connector type can only use a given label once.  
 ​
 6. Schedule the Connector's automatic discovery and sync under the **Discovery Configuration** and **Synchronization Configuration** sections. For each, pick a **Frequency** (every 6, 12, or 24 hours) and a **Time**. At *Every 24 hours* the connector runs once a day at that time; at *Every 6 hours* or *Every 12 hours* the time sets when the first run of the day happens, and the connector repeats from there. Times are shown in your browser's local timezone. You can change any of this later.  
 ​

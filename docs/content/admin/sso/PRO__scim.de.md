@@ -131,7 +131,7 @@ Wenn Ihr Identity Provider auch Superuser verwalten soll, aktivieren Sie **Allow
 
 ## Fehlerbehebung
 
-**Der Verbindungstest meldet „not found".** SCIM ist deaktiviert, oder die Instanz ist nicht dafür lizenziert. Prüfen Sie, ob **Enable SCIM Provisioning** aktiviert ist und Ihr Abonnement SSO enthält. Solange nicht beides zutrifft, verhält sich die gesamte SCIM-Adresse so, als würde sie nicht existieren.
+**Der Verbindungstest meldet „not found".** SCIM ist deaktiviert. Prüfen Sie, ob **Enable SCIM Provisioning** aktiviert und gespeichert ist. Bis dahin verhält sich die gesamte SCIM-Adresse so, als würde sie nicht existieren.
 
 **Der Verbindungstest meldet einen Authentifizierungsfehler.** Das Token ist falsch oder wurde widerrufen. Generieren Sie ein neues und aktualisieren Sie Ihren Identity Provider. Prüfen Sie in Okta, dass der Wert mit `Bearer ` und einem Leerzeichen beginnt; prüfen Sie in Entra, dass dies nicht der Fall ist.
 

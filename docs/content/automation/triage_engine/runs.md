@@ -94,6 +94,10 @@ Two windows apply, both configurable:
 * A run that goes 30 minutes without a heartbeat is treated as abandoned, errored, and its lock released.
 * A run is killed outright after six hours, as a guard against one that will never finish.
 
+## When a scheduled rule stops running
+
+A rule on a schedule that stops firing raises no error: there is simply no run. With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, every enabled rule that runs on a cron schedule is listed on **Settings > Operations > Ingestion Health** with its last scheduled run and its next expected one. It is flagged **Stale** once its schedule has fired three times since its last scheduled run (the number is a per-rule threshold), and the **Ingestion Health Warning** notification goes out once. Runs started by hand do not count toward this.
+
 ## Retention
 
 Runs are kept for **180 days** by default, along with their per-node rows and their Finding provenance. Deliveries are kept for 180 days separately.

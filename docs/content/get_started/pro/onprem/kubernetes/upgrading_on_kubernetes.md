@@ -29,6 +29,7 @@ This guide covers:
 - [Upgrade via Extracted Zip](#upgrade-via-extracted-zip)
 - [Upgrade with ArgoCD](#upgrade-with-argocd)
 - [Verify the Upgrade](#verify-the-upgrade)
+- [Holding Pods Until Migrations Finish (optional)](#holding-pods-until-migrations-finish-optional)
 - [Rollback](#rollback)
 - [Troubleshooting](#troubleshooting)
 
@@ -470,6 +471,52 @@ login and returns 200 when the application is up:
 
 ```bash
 curl -fsS https://<your-fqdn>/api/v2/health_check/light/
+```
+
+---
+
+## Holding Pods Until Migrations Finish (optional)
+
+The initializer is a regular Job, so the new django, celery and
+ddorch-workers pods start alongside it, and while it migrates, new code runs
+against the old schema. On an upgrade that is usually a few minutes; a jump
+across many releases can take longer. The `dojo.migrationCheck` gate closes
+that window. It is **off by default**, because it changes what
+`helm upgrade --wait` waits for:
+
+```yaml
+dojo:
+  migrationCheck:
+    enabled: true
+    # intervalSeconds: 15      # between checks
+    # timeoutSeconds: 1800     # wall clock; then the pod starts anyway
+```
+
+With the gate on, the django, django-import, celery worker, celery imports
+worker, celery beat and ddorch-workers pods get a `wait-for-migrations` init
+container that lets the pod start once no migration is unapplied. After
+`timeoutSeconds` it logs the migrations still pending and starts the pod
+anyway, so it never keeps a pod down for good. Those Deployments also roll
+with `maxUnavailable: 0`, so the old pods keep serving until their
+replacements pass the gate.
+
+- **Pass a `--timeout` of at least `timeoutSeconds + 900` seconds**, which is
+  `--timeout 45m` for the defaults. The commands in this guide use 15m, so
+  raise it when you turn the gate on. A shorter
+  timeout fails the release, and with `--atomic` (Helm 3) or
+  `--rollback-on-failure` (Helm 4) the rollback deletes the initializer Job
+  while it is still migrating.
+- Do not turn it on when the initializer runs **after** the pods, such as a
+  Helm `post-upgrade` hook or an ArgoCD `PostSync` hook: the pods would wait
+  for a Job that waits for them.
+- A failed initializer leaves every new gated pod waiting the full
+  `timeoutSeconds` before it starts, so fix or roll back a failed upgrade
+  promptly.
+
+To see why a pod is waiting:
+
+```bash
+kubectl logs -n $NAMESPACE <pod> -c wait-for-migrations
 ```
 
 ---

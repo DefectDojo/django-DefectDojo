@@ -133,13 +133,13 @@ Changing the Asset field moves the Engagement, along with its Tests and Findings
 
 #### Change a Field in Place
 
-A few fields can also be changed on the Engagement page itself, without opening Edit Engagement: the **Name** and **Tags** in the page header, and **Status**, **Lead**, **Start Date**, **End Date** and **Description** wherever the page layout shows them. Hover over a value (or reach it with the keyboard) and click the pencil, or the value, to open its editor. **Enter** or **Save** saves the change and **Esc** or **Cancel** puts the value back; clicking elsewhere saves nothing (**Ctrl+Enter** or **Cmd+Enter** saves the Description, where Enter is a new line).
+A few fields can also be changed on the Engagement page itself, without opening Edit Engagement: the **Name** and **Tags** in the page header, and **Status**, **Lead**, **Start Date**, **End Date** and **Description** wherever the page layout shows them. Click a highlighted value to open a small editor under it. **Enter**, or clicking anywhere else, keeps the change (marked **Unsaved**) and **Esc** puts the value back; change as many fields as you like, then **Save Changes** in the card at the bottom of the page saves them all at once.
 
 * **Status** can be changed in place only on an Interactive Engagement, and offers the open statuses only. Completed and Cancelled stay with **Close Engagement** and **Reopen Engagement**, so a closed Engagement shows no status editor.
 * A date changed on its own still keeps the Start Date on or before the End Date.
 * If someone else changed the Engagement after you opened the page, nothing is overwritten: DefectDojo shows **Engagement Changed** and offers **Reload** or **Keep Editing**.
 
-The same rules as Findings apply: only users who can edit the Engagement see the pencil, Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
+The same rules as Findings apply: only users who can edit the Engagement can open a value, Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
 
 ### Copy Engagements 
 
