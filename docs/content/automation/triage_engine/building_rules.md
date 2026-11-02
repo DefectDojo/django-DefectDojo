@@ -33,6 +33,22 @@ Templates are starting points, not links. Editing an adopted rule does not affec
 adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
 gets pointed at two different sets of Assets. The second one is named with a suffix.
 
+The **Notifications** pack holds one template for being told about new Findings: **Alert on new
+findings that match a set of filters**. It is an **On Finding Event** trigger on **Created** wired to
+one in-app alert node. Pick the filters in the trigger's scope, the same ones the Findings list
+offers, and the rule sends one alert for each batch of new Findings that match all of them, however
+the Findings were added. An import usually sends one alert; a very large one sends one per batch of
+500 Findings by default, and the count in each alert is that batch's. Every Finding an import
+creates counts as new, including one that duplicates a Finding already reported. To leave those out,
+add the **Duplicate** filter to the scope, set to **No**.
+
+The alert names the rule, so rename the adopted rule after what it watches. The alert node takes
+usernames, or alerts the administrators when left empty. The title and description arrive
+pre-filled with the rule's name and the number of matching Findings, and are edited on the node like
+any other rule's. The alert goes only to DefectDojo users, and each recipient's own **Rules Engine
+Match** notification setting decides whether it reaches them: a recipient who has turned off alerts
+for it gets nothing, though the delivery still reads Sent.
+
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
 rule, because both create one.
 
