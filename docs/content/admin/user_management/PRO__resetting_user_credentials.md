@@ -7,7 +7,7 @@ weight: 2
 
 The **Users** list lets you rotate API tokens, force password resets, and activate and invite many users at once. Use it for periodic credential hygiene, after a suspected credential exposure, or to let migrated users sign in.
 
-These bulk actions are available only to **Superusers** and users with the **Global Owner** role. If you don't have one of those, the selection checkboxes and bulk buttons do not appear.
+These bulk actions are available only to **Superusers** and users with the **Global Owner** role. **Activate and Invite** also needs the permission to change users, the same right as the user edit form. If you don't have one of those, the selection checkboxes and bulk buttons do not appear.
 
 ## Selecting users
 
@@ -39,7 +39,7 @@ Keep in mind what this action does **not** do:
 
 * It activates the user, if the user is inactive. Each active user takes a license seat.
 * It emails the user a link to set a password, if the user has no password.
-* It skips service users, and it skips users that are active and have a password.
+* It skips service users, and it skips every account that is already active.
 * It skips a user that has no password and signed in before. That user signs in with SSO, so it gets no link.
 * A Global Owner cannot activate a superuser. The action skips the superuser.
 

@@ -333,7 +333,7 @@ The connector creates each new user inactive, with no password. No password cros
 
 To activate users and send them an invitation:
 
-1. Sign in as a superuser, or as a user with the Global Owner role.
+1. Sign in as a superuser, or as a user with the Global Owner role who can change users.
 2. Open **Settings > Users & Permissions > Users**. The page shows **Active Users** first, so it hides the migrated users. Choose **Inactive Users** in the view list above the table. Then select the users you need. Do not select your own account.
 3. Click **Activate and Invite**, and confirm. Each active user takes a license seat.
 
