@@ -892,15 +892,98 @@ html:not([data-dd-version='pro']) .version-pro {
   }
 }
 
-// Bare <pre> without a fence wrapper (rare) gets the same card look
+// Code without an expressive-code frame gets the same card look in both
+// modes: indented code blocks (bare <pre><code>) and the {{< highlight >}}
+// shortcode (.highlight > pre.chroma), which otherwise keeps the theme's
+// light gray background under our light ink.
 .docs-content > pre,
-.docs-content td > pre {
+.docs-content td > pre,
+.docs-content > .highlight > pre,
+.docs-content li > .highlight > pre,
+.docs-content td > .highlight > pre {
   background: var(--dd-code-bg);
   border: 1px solid var(--dd-code-border);
   border-radius: 0;
   color: var(--dd-code-ink);
   padding: 0.9375rem 1.125rem;
   font-size: 0.875rem;
+
+  // Drop the inline-code chip styling from the inner <code>
+  code {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+}
+
+// Copy button on those un-framed .highlight blocks. clipboard.js injects
+// .copy > .btn-copy > div into every .highlight, but the theme only styles
+// it inside .expressive-code, so here it rendered as a stray sliver above
+// the card. Mirror the framed button: teal square, copy icon, check on click.
+$dd-icon-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75'%3E%3Cpath d='M3 19a2 2 0 0 1-1-2V2a2 2 0 0 1 1-1h13a2 2 0 0 1 2 1'/%3E%3Crect x='6' y='5' width='16' height='18' rx='1.5' ry='1.5'/%3E%3C/svg%3E");
+$dd-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke-width='1.25' stroke='black' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E");
+
+.docs-content > .highlight,
+.docs-content li > .highlight,
+.docs-content td > .highlight {
+  position: relative;
+
+  // Start the text below the button (a header-height band, as on framed
+  // blocks) so long first lines that scroll horizontally never run under it
+  > pre {
+    padding-top: 2.75rem;
+  }
+
+  > .copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+  }
+
+  > .copy .btn-copy {
+    position: relative;
+    width: 1.875rem;
+    height: 1.875rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0.2rem;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.85;
+
+    > div {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background-color: #7fa9a0;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      margin: 0.4rem;
+      pointer-events: none;
+      background-color: #e8f2ee;
+      // Prefixed too: Sass only, no autoprefixer (older Safari/Chrome)
+      -webkit-mask: $dd-icon-copy no-repeat center / contain;
+      mask: $dd-icon-copy no-repeat center / contain;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus::after,
+    &:active::after {
+      -webkit-mask-image: $dd-icon-check;
+      mask-image: $dd-icon-check;
+    }
+  }
 }
 
 // --- Chroma syntax palette, tuned for the navy card ---
