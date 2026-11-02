@@ -44,7 +44,7 @@ Beide Badges sind Links, da sich ein Tooltip schließt, sobald der Mauszeiger ih
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-Beide werden in **3.5.0** entfernt, zusammen mit den API-basierten (Pull-)Parsern, die sie konfigurieren. Die [Upgrade-Hinweise zu 3.2](/releases/os_upgrading/3.2/) erläutern, worauf und bis wann migriert werden muss.
+Beide werden in **3.6.0** entfernt, zusammen mit den API-basierten (Pull-)Parsern, die sie konfigurieren. Die [Upgrade-Hinweise zu 3.2](/releases/os_upgrading/3.2/) erläutern, worauf und bis wann migriert werden muss.
 
 ![DEPRECATED-Badges unter Settings > Configuration](images/menu_badge_deprecated.png)
 

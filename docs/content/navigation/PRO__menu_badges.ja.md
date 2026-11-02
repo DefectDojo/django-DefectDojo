@@ -43,7 +43,7 @@ DefectDojo Proのサイドバーの項目には、小さな色付きタグが付
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-どちらも、それらが設定対象とするAPIベース（プル型）のパーサーとともに、**3.5.0**で削除されます。移行先と期限については、[3.2 upgrade notes](/releases/os_upgrading/3.2/)で説明されています。
+どちらも、それらが設定対象とするAPIベース（プル型）のパーサーとともに、**3.6.0**で削除されます。移行先と期限については、[3.2 upgrade notes](/releases/os_upgrading/3.2/)で説明されています。
 
 ![Settings > Configuration配下のDEPRECATEDバッジ](images/menu_badge_deprecated.png)
 

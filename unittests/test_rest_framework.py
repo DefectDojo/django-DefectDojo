@@ -2757,7 +2757,7 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-12-07"))
 
 
 @versioned_fixtures
@@ -2789,7 +2789,7 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-12-07"))
 
 
 @versioned_fixtures
@@ -2917,7 +2917,7 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-12-07"))
 
 
 @versioned_fixtures
@@ -2971,7 +2971,7 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         self.assertTrue(response.has_header("X-Deprecated"))
         self.assertEqual("True", str(response["X-Deprecated"]))
         self.assertTrue(response.has_header("X-End-Of-Life-Date"))
-        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-02"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-12-07"))
 
 
 @versioned_fixtures

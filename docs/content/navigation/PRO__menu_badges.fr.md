@@ -44,7 +44,7 @@ Les deux badges sont des liens, car une infobulle se ferme dès que le pointeur 
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-Les deux sont supprimées dans la version **3.5.0**, ainsi que les parseurs basés sur API (pull) qu'elles servent à configurer. Les [notes de mise à niveau 3.2](/releases/os_upgrading/3.2/) expliquent vers quoi migrer et pour quand.
+Les deux sont supprimées dans la version **3.6.0**, ainsi que les parseurs basés sur API (pull) qu'elles servent à configurer. Les [notes de mise à niveau 3.2](/releases/os_upgrading/3.2/) expliquent vers quoi migrer et pour quand.
 
 ![DEPRECATED badges under Settings > Configuration](images/menu_badge_deprecated.png)
 

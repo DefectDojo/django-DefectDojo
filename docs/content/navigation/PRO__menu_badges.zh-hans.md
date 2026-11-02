@@ -43,7 +43,7 @@ DefectDojo Pro 侧边栏中的条目可能带有一个彩色小标签。每种�
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-这两者将在 **3.5.0** 中一并移除,与之相关的、用于配置基于 API 的(拉取式)解析器也将一同移除。[3.2 升级说明](/releases/os_upgrading/3.2/)解释了应迁移到什么以及截止时间。
+这两者将在 **3.6.0** 中一并移除,与之相关的、用于配置基于 API 的(拉取式)解析器也将一同移除。[3.2 升级说明](/releases/os_upgrading/3.2/)解释了应迁移到什么以及截止时间。
 
 ![Settings > Configuration 下的 DEPRECATED 徽章](images/menu_badge_deprecated.png)
 
