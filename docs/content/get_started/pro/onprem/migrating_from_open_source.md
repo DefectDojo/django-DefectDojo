@@ -29,7 +29,7 @@ Because you host the deployment, your data stays inside your own environment for
 
 Take the dump path if you want an exact copy, and you can schedule a window. Users, groups, settings and history come across as they are. The target must be empty.
 
-Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets and history do not cross with the connector. Notification settings and most system settings cross once, on the first Sync. Tool configurations cross without their password, SSH key, API key and extras. You set up SSO, notification channels and tool credentials in DefectDojo Pro yourself.
+Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets and history do not cross with the connector. Notification settings and most system settings cross once, on the first Sync. Tool configurations cross without their password, SSH key, API key and extras. You set up notification channels and tool credentials in DefectDojo Pro yourself.
 
 ## Path 1: The database dump
 
@@ -282,7 +282,7 @@ Confirm the following before you add the connector.
 * **The open source version.** Upgrade the open source instance to 3.4.300 or later. That release added the export API. The connector refuses an older source.
 * **HTTPS.** Serve the open source instance over HTTPS, on a URL your Pro deployment can reach. The connector refuses a plain `http://` URL.
 * **A superuser API key.** Create a superuser on the source for the connector alone, and an API v2 key for it. The export API answers only a superuser. Revoke the key after the cutover.
-* **What does not cross.** Secrets stay on the source: SSO, JIRA, API tokens and passwords. The Slack, Microsoft Teams, email and webhook setup stays too. Notification settings and most system settings cross once, on the first Sync. A tool configuration arrives without its password, SSH key, API key and extras. History, JIRA issue links, groups and global roles stay on the source too. Files over the size limit stay. Duplicates stay, unless you ask for them. Plan to set up SSO, notification channels and tool credentials in DefectDojo Pro yourself.
+* **What does not cross.** Secrets stay on the source: JIRA, API tokens and passwords. The Slack, Microsoft Teams, email and webhook setup stays too. Notification settings and most system settings cross once, on the first Sync. A tool configuration arrives without its password, SSH key, API key and extras. History, JIRA issue links, groups and global roles stay on the source too. Files over the size limit stay. Duplicates stay, unless you ask for them. Plan to set up notification channels and tool credentials in DefectDojo Pro yourself.
 * **The owner fields.** The product manager, technical contact and team manager of a Product become members of the Product in DefectDojo Pro. The three fields stay empty.
 * **Access.** The users in the Authorized Users list of a Product become members of the Product. The users in the list of its Product Type become members of the Product Type. A user that was staff on the source gets the Maintainer role. Every other user gets the Writer role. A user that is already a member keeps the membership. An owner of the Product is the one exception: the owner gets the Maintainer role again on each Sync.
 
@@ -390,7 +390,7 @@ The open source instance keeps running until that day, so your team loses no wor
 - Discover run, with **Include** cleared on every Product to leave behind
 - Preflight report read: warnings, counts, what is created and what does not cross
 - First Sync run, finding counts checked, and validated
-- SSO, notification channels and tool credentials set up in DefectDojo Pro
+- Notification channels and tool credentials set up in DefectDojo Pro
 - Users activated with **Activate and Invite**, and given roles
 - Final Sync run, finding counts checked, and validated
 - Read-only mode turned on again in the source
