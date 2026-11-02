@@ -840,7 +840,7 @@ Posts to a Slack channel over a Messaging Connector. The connection carries the 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
@@ -855,7 +855,7 @@ Posts a card over a Messaging Connector. The connection carries the Power Automa
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
@@ -879,7 +879,7 @@ Emails a fixed list of addresses over a Messaging Connector. The recipients are 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 
 | **Subject** | `[DefectDojo] {{ctx.count}} finding(s) from rule {{ctx.rule_name}}` | Rendered once per message. |
@@ -915,7 +915,7 @@ Publishes one message about the batch, or one per item, to an Amazon SNS topic, 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) for Amazon SNS. Required. Unlike the chat channels, SNS has no instance-wide fallback: a connection is the only way to address a topic. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) for Amazon SNS. Required. Unlike the chat channels, SNS has no instance-wide fallback: a connection is the only way to address a topic. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The SNS topic to publish to, as its ARN. |
 | **One Message per Finding** | off | Off publishes one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
@@ -946,7 +946,7 @@ Generates a report from a template, scoped to the Findings that reached this nod
 | **Report Template** | none | Which template to generate from. Required. |
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
-| **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. |
+| **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. With a per-item scope, `{{ctx.finding_title}}` or `{{ctx.asset_name}}` names what the report is about. |
 

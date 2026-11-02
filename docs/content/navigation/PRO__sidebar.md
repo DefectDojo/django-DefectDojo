@@ -98,7 +98,7 @@ The AI capabilities sit together in their own section rather than being spread t
 
 **AI Proposals** lists the verdicts the Triage Engine's AI steps have left for a person to confirm. It appears only when your license includes Sensei.
 
-**MCP** is shown to superusers, and to everyone once the MCP server is enabled. **AI Model Settings** appears only on on-premise instances, because DefectDojo manages the model credentials on Cloud.
+**MCP** is shown to superusers, and to everyone once the MCP server is enabled. **AI Model Settings** appears on on-premise instances. On Cloud, DefectDojo manages the model credentials, so it appears only on an instance that [brings its own model](/sensei/ai_model_settings/#bring-your-own-model-on-defectdojo-cloud).
 
 ## Act
 

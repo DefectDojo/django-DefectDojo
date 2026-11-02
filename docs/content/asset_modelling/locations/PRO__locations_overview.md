@@ -91,7 +91,8 @@ Existing parsers have been updated to emit Location data when the feature flag i
 
 ## Where to Go Next
 
-- **Enable the feature** — turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
-- **Migrate from Endpoints** — see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
-- **Day-to-day URL workflows** — see [Working with URLs](../pro__working_with_urls).
-- **SBOMs and dependencies** — see [Working with SBOMs](../pro__working_with_sboms).
+- **Enable the feature**: turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
+- **Migrate from Endpoints**: see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
+- **Day-to-day URL workflows**: see [Working with URLs](../pro__working_with_urls).
+- **See an Asset's Locations on a map**: see [Location Map](../pro__location_map).
+- **SBOMs and dependencies**: see [Working with SBOMs](../pro__working_with_sboms).

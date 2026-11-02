@@ -45,8 +45,8 @@ The five roles below are DefectDojo Pro's **built-in roles**. They are locked pr
 |  | Edit Benchmarks |  | ☑️ | ☑️ | ☑️ |  |
 |  | Delete Benchmarks |  |  | ☑️ | ☑️ |  |
 |  | View Note History | ☑️ | ☑️ | ☑️ | ☑️ |  |
-|  | Add, Edit, Delete Own Notes | ☑️ | ☑️ | ☑️ | ☑️ | ☑️ |
-|  | Edit Other Notes |  | ☑️ | ☑️ | ☑️ | ☑️ |
+|  | Add, Edit, Delete Own Notes | ☑️ | ☑️ | ☑️ | ☑️ |  |
+|  | Edit Other Notes |  | ☑️ | ☑️ | ☑️ |  |
 |  | Delete Other Notes |  |  | ☑️ | ☑️ |  |
 
 1. A user who is assigned permissions at the Asset level only cannot view the Organization it is contained in.

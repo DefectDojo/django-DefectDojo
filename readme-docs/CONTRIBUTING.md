@@ -24,7 +24,7 @@ We don't want to waste your time, so if you're unsure whether your hypothetical 
 `enhancement-approved` label to your issue and you can begin building it out.
 
 Below are some representative examples of what we will and won't support going forward. If you have suggestions or other
-feedback, please let us know in the `#defectdojo` channel in [OWASP's Slack](https://owasp.org/slack/invite).
+feedback, please let us know in the `#02-help` channel in the [DefectDojo Community Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email).
 
 **Acceptable examples:**
 

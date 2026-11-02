@@ -4,7 +4,7 @@ description: "Import scan results from a GitHub Actions workflow with the offici
 weight: 3
 ---
 
-The official [DefectDojo action](https://github.com/DefectDojo/defectdojo-action) imports a scan report into DefectDojo from a GitHub Actions workflow. It works with DefectDojo Pro and the Open Source edition, and reads every report format DefectDojo supports, including SARIF.
+The official [DefectDojo action](https://github.com/marketplace/actions/defectdojo) imports a scan report into DefectDojo from a GitHub Actions workflow. It works with DefectDojo Pro and the Open Source edition, and reads every report format DefectDojo supports, including SARIF.
 
 Each run reimports into the same Test, so Findings the scanner no longer reports are closed and each Finding keeps its history. The action records the build, branch, commit and repository on the Test, and can fail the workflow step when Findings at a chosen severity remain active.
 

@@ -33,6 +33,22 @@ Templates are starting points, not links. Editing an adopted rule does not affec
 adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
 gets pointed at two different sets of Assets. The second one is named with a suffix.
 
+The **Notifications** pack holds one template for being told about new Findings: **Alert on new
+findings that match a set of filters**. It is an **On Finding Event** trigger on **Created** wired to
+one in-app alert node. Pick the filters in the trigger's scope, the same ones the Findings list
+offers, and the rule sends one alert for each batch of new Findings that match all of them, however
+the Findings were added. An import usually sends one alert; a very large one sends one per batch of
+500 Findings by default, and the count in each alert is that batch's. Every Finding an import
+creates counts as new, including one that duplicates a Finding already reported. To leave those out,
+add the **Duplicate** filter to the scope, set to **No**.
+
+The alert names the rule, so rename the adopted rule after what it watches. The alert node takes
+usernames, or alerts the administrators when left empty. The title and description arrive
+pre-filled with the rule's name and the number of matching Findings, and are edited on the node like
+any other rule's. The alert goes only to DefectDojo users, and each recipient's own **Rules Engine
+Match** notification setting decides whether it reaches them: a recipient who has turned off alerts
+for it gets nothing, though the delivery still reads Sent.
+
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
 rule, because both create one.
 
@@ -122,6 +138,19 @@ Two things about scope are worth understanding, and both hold for either kind of
 * **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits everything in the instance is not.
 
 For an event trigger, scope acts as a second gate: the Findings or Assets named in the event are matched against it, and only those that pass enter the graph.
+
+#### Scoping a rule to servers or subnets
+
+A Finding rule can be scoped to where a Finding was seen. On the Findings list, add the **Host** filter from **Add Filter** in the filter bar, or open the **Endpoints** column filter (the **Locations** column filter, when Locations are enabled), and enter one or more values in the **Host, IP address or CIDR network** field:
+
+* A hostname or a bare IP address (`web01.example.com`, `10.20.30.5`) matches Findings seen on exactly that host. Hostnames are not case-sensitive.
+* A CIDR network (`10.20.30.0/24`, `2001:db8::/32`) matches Findings seen on any IP address inside it. Hostnames are never matched against a network.
+
+Entries are combined with OR, up to 100 per filter, and the scope is stored as a single `location_host` filter.
+
+A Finding is "seen on" a host if it has any Endpoint or Location on that host, whatever that Endpoint's or Location's status: one marked Mitigated or False Positive still counts. The match is per Finding, not per host. A Finding seen on `10.20.30.5` and on `10.20.31.5` is in a `10.20.30.0/24` scope, and the rule acts on the whole Finding, including its host outside the network. A rule that reacts to **On Finding Event** with this scope and ends in an **Accept Risk** node is how to risk-accept, at import time, everything found on a set of servers that will not be fixed for now, without opening each Endpoint by hand. A malformed network (`10.20.30.0/99`) is rejected when the rule is saved rather than matching nothing at run time.
+
+An **Accept Risk** node in its simple mode only accepts Findings on Assets that have **Simple Risk Acceptance** enabled; on any other Asset the run reports the Finding as unchanged. Enable it in the Asset's settings, or use the node's acceptance mode to add the Findings to an existing Risk Acceptance instead.
 
 ### Scheduling
 

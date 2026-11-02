@@ -203,6 +203,8 @@ Ranked lists, feeds, and embedded tables.
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
 | **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
+An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the table's filter bar or column filters. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
+
 ### Static & Utility
 
 Notes, shortcuts, and structure.
