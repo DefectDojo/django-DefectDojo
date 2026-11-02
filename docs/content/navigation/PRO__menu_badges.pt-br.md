@@ -44,7 +44,7 @@ Ambos os selos são links, porque uma dica (tooltip) desaparece no momento em qu
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-Ambos serão removidos na versão **3.5.0**, junto com os parsers baseados em API (pull) que existem para configurá-los. As [notas de atualização da 3.2](/releases/os_upgrading/3.2/) explicam para o que migrar e até quando.
+Ambos serão removidos na versão **3.6.0**, junto com os parsers baseados em API (pull) que existem para configurá-los. As [notas de atualização da 3.2](/releases/os_upgrading/3.2/) explicam para o que migrar e até quando.
 
 ![Selos DEPRECATED em Settings > Configuration](images/menu_badge_deprecated.png)
 
