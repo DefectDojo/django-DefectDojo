@@ -2233,6 +2233,13 @@ def download_finding_pic(request, token):
     except Exception:
         raise PermissionDenied
 
+    file_upload = access_token.file
+    owners = [*file_upload.engagement_set.all(), *file_upload.test_set.all(), *file_upload.finding_set.all()]
+    if not owners:
+        raise PermissionDenied
+    for obj in owners:
+        user_has_permission_or_403(request.user, obj, "view")
+
     with Path(access_token.file.file.file.name).open("rb") as file:
         file_name = file.name
         image = size_map[size](source=file).generate()

@@ -1,8 +1,11 @@
 import datetime
+import io
 from unittest.mock import patch
 
 from django.core.exceptions import PermissionDenied
+from django.core.files.base import ContentFile
 from django.urls import reverse
+from PIL import Image
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -114,6 +117,31 @@ class FindingViewFollowupsTest(DojoTestCase):
         response = self.client.get(reverse("download_finding_pic", args=(token.token,)))
         self.assertTemplateUsed(response, "403.html")
         self.assertFalse(FileAccessToken.objects.filter(pk=token.pk).exists())
+
+    def _image_on(self, finding):
+        buffer = io.BytesIO()
+        Image.new("RGB", (4, 4), (0, 0, 255)).save(buffer, "PNG")
+        upload = FileUpload(title="picture")
+        upload.file.save("picture.png", ContentFile(buffer.getvalue()), save=True)
+        self.addCleanup(upload.delete)
+        finding.files.add(upload)
+        return FileAccessToken.objects.create(user=self.member, file=upload, size="original")
+
+    def test_image_token_needs_current_access_to_the_finding(self):
+        token = self._image_on(self.other_finding)
+
+        self.client.force_login(self.member)
+        response = self.client.get(reverse("download_finding_pic", args=(token.token,)))
+        self.assertTemplateUsed(response, "403.html")
+        self.assertFalse(FileAccessToken.objects.filter(pk=token.pk).exists())
+
+    def test_image_token_works_for_a_member_of_the_finding(self):
+        token = self._image_on(Finding.objects.get(id=2))
+
+        self.client.force_login(self.member)
+        response = self.client.get(reverse("download_finding_pic", args=(token.token,)))
+        self.assertEqual(200, response.status_code)
+        self.assertTrue(b"".join(response.streaming_content))
 
     # --- duplicate cluster --------------------------------------------------------------------
 
