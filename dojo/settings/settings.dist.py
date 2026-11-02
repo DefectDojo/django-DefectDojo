@@ -649,6 +649,14 @@ READ_ONLY_MODE_EXEMPT_URLS = (
     rf"^{URL_PREFIX}api/v2/system_settings/",
 )
 
+# Inbound webhooks blocked by read-only mode get a 503 with Retry-After instead of a redirect.
+# A sender reads a redirect as delivered and drops the event, but it retries a 503.
+READ_ONLY_MODE_RETRY_URLS = (
+    rf"^{URL_PREFIX}webhook/",
+    rf"^{URL_PREFIX}jira/webhook/",
+)
+READ_ONLY_MODE_RETRY_AFTER_SECONDS = 300
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "dojo.user.validators.DojoCommonPasswordValidator",

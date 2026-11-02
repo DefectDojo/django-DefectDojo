@@ -125,6 +125,41 @@ class TestReadOnlyModeMiddleware(DojoTestCase):
                 self.assertEqual(200, response.status_code)
                 self.assertEqual(b"OK", response.content)
 
+    def test_near_miss_paths_stay_blocked(self):
+        set_read_only_mode(enabled=True)
+        for path in ("/system_settings_x", "/loginx", "/xcomplete/github/", "/api/v2/system_settings_x/"):
+            with self.subTest(path=path):
+                # HX-Request takes the JSON branch, which RequestFactory can run without the messages middleware.
+                self.assertEqual(423, rf_middleware(path, HTTP_HX_REQUEST="true").status_code)
+
+    def test_webhooks_get_503_with_retry_after(self):
+        set_read_only_mode(enabled=True)
+        for path in ("/webhook/", "/webhook/secret", "/jira/webhook/", "/jira/webhook/secret"):
+            with self.subTest(path=path):
+                response = rf_middleware(path)
+                self.assertEqual(503, response.status_code)
+                self.assertEqual("300", response["Retry-After"])
+                self.assertEqual(str(READ_ONLY_MODE_MESSAGE), json.loads(response.content)["detail"])
+
+    def test_webhooks_pass_when_off(self):
+        set_read_only_mode(enabled=False)
+        self.assertEqual(200, rf_middleware("/jira/webhook/").status_code)
+
+    def test_unlock_through_settings_page(self):
+        set_read_only_mode(enabled=True)
+        form = SystemSettingsForm(instance=System_Settings.objects.get(no_cache=True))
+        data = {}
+        for field in form:
+            value = field.value()
+            if value is None or value is False:
+                continue
+            data[field.name] = value
+        data.pop("read_only_mode", None)
+        response = self.client.post(reverse("system_settings"), data)
+        self.assertEqual(200, response.status_code)
+        self.assertFalse(System_Settings.objects.get(no_cache=True).read_only_mode)
+        self.assertEqual(201, self.create_product_type("After page unlock").status_code)
+
     def test_lock_and_unlock_through_api(self):
         settings_url = f"/api/v2/system_settings/{System_Settings.objects.get(no_cache=True).id}/"
         self.assertEqual(200, self.api.patch(settings_url, {"read_only_mode": True}, format="json").status_code)

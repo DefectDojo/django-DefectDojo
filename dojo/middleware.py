@@ -137,6 +137,7 @@ class ReadOnlyModeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.exempt_urls = [re.compile(pattern) for pattern in settings.READ_ONLY_MODE_EXEMPT_URLS]
+        self.retry_urls = [re.compile(pattern) for pattern in settings.READ_ONLY_MODE_RETRY_URLS]
 
     def __call__(self, request):
         if request.method in SAFE_METHODS:
@@ -146,6 +147,11 @@ class ReadOnlyModeMiddleware:
             return self.get_response(request)
         if not get_cached_system_settings().read_only_mode:
             return self.get_response(request)
+
+        if any(pattern.match(path) for pattern in self.retry_urls):
+            response = JsonResponse({"detail": READ_ONLY_MODE_MESSAGE}, status=HTTPStatus.SERVICE_UNAVAILABLE)
+            response["Retry-After"] = str(settings.READ_ONLY_MODE_RETRY_AFTER_SECONDS)
+            return response
 
         if (
             path.startswith(f"{settings.URL_PREFIX}api/v")

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0303_system_settings_install_id'),
+        ('dojo', '0305_archive_batch_indexes'),
     ]
 
     operations = [
