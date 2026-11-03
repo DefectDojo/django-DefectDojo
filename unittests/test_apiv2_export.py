@@ -619,6 +619,60 @@ class TestExportManifest(DojoAPITestCase):
                     self.assertEqual(counts["files"] if params else 0, counts["files_over_cap"])
                     self.assertEqual(1 if product_id == 2 else 0, counts["finding_groups"])
 
+    def manifest_with_stat_calls(self, params):
+        storage = FileUpload._meta.get_field("file").storage
+        with (
+            mock.patch.object(storage, "size", wraps=storage.size) as size,
+            mock.patch.object(storage, "exists", wraps=storage.exists) as exists,
+        ):
+            manifest = self.client.get(self.url, params).json()
+        return manifest, size.call_count, exists.call_count
+
+    def test_file_counts_true_is_the_default_and_stats_each_file_once(self):
+        files = {
+            file_id
+            for through in (Engagement.files.through, Test.files.through, Finding.files.through)
+            for file_id in through.objects.values_list("fileupload_id", flat=True)
+        }
+        for params in ({}, {"file_counts": "true"}):
+            with self.subTest(params=params):
+                manifest, sizes, exists = self.manifest_with_stat_calls(params)
+                self.assertEqual(self.manifest["products"], manifest["products"])
+                self.assertEqual(self.manifest["totals"], manifest["totals"])
+                self.assertEqual((len(files), 0), (sizes, exists))
+        self.assertEqual(3, self.get_results_by_id(self.manifest["products"], 2)["counts"]["files"])
+
+    def test_file_counts_false_skips_the_file_stat(self):
+        manifest, sizes, exists = self.manifest_with_stat_calls({"file_counts": "false", "max_file_bytes": 4})
+        self.assertEqual((0, 0), (sizes, exists))
+        all_counts = [
+            *(entry["counts"] for entry in manifest["products"]),
+            *(entry["counts"] for entry in manifest["product_types"]),
+            manifest["totals"],
+        ]
+        for counts in all_counts:
+            self.assertIsNone(counts["files_over_cap"])
+        for key in ("files", "findings", "notes"):
+            self.assertEqual(self.manifest["totals"][key], manifest["totals"][key], key)
+        self.assertEqual(3, self.get_results_by_id(manifest["products"], 2)["counts"]["files"])
+        self.assertEqual(4, manifest["max_file_bytes"])
+
+    def test_file_counts_must_be_a_boolean(self):
+        response = self.client.get(self.url, {"file_counts": "maybe"})
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("file_counts", response.json())
+
+    def test_the_stream_ignores_file_counts(self):
+        response = self.client.get(reverse("export-product", args=[2]), {"file_counts": "false"})
+        self.assertEqual(3, ndjson_lines(response)[-1]["counts"]["files"])
+
+    def test_a_missing_file_is_counted_but_not_over_cap(self):
+        file_upload = make_file(self, "gone.txt")
+        self.finding.files.add(file_upload)
+        file_upload.file.storage.delete(file_upload.file.name)
+        counts = self.get_results_by_id(self.client.get(self.url, {"max_file_bytes": 4}).json()["products"], 2)["counts"]
+        self.assertEqual((4, 3), (counts["files"], counts["files_over_cap"]))
+
     def test_manifest_counts_a_risk_acceptance_linked_only_through_a_finding(self):
         # Regression: the manifest counted acceptances through their engagement link only.
         before = self.get_results_by_id(self.manifest["products"], 2)["counts"]

@@ -38,8 +38,23 @@ class ExportParamsSerializer(serializers.Serializer):
     )
 
 
+class ManifestParamsSerializer(ExportParamsSerializer):
+    file_counts = serializers.BooleanField(
+        default=True,
+        help_text=(
+            "Count files_over_cap by reading the size of every file in storage. With false the manifest skips "
+            "that read, and files_over_cap is null."
+        ),
+    )
+
+
 def file_size(storage, name: str) -> int | None:
-    return storage.size(name) if name and storage.exists(name) else None
+    if not name:
+        return None
+    try:
+        return storage.size(name)
+    except FileNotFoundError:
+        return None
 
 
 class InlineBudget:

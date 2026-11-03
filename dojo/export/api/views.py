@@ -31,6 +31,7 @@ from dojo.export.api.serializers import (
     ExportTestSerializer,
     ExportToolConfigurationSerializer,
     ExportUserSerializer,
+    ManifestParamsSerializer,
     file_size,
 )
 from dojo.finding.api.serializer import FindingTemplateSerializer
@@ -118,10 +119,10 @@ def source_block() -> dict:
     }
 
 
-def max_file_bytes_from(request) -> int:
-    params = ExportParamsSerializer(data=request.query_params)
+def export_params(request, serializer_class=ExportParamsSerializer) -> dict:
+    params = serializer_class(data=request.query_params)
     params.is_valid(raise_exception=True)
-    return params.validated_data["max_file_bytes"]
+    return params.validated_data
 
 
 def finding_queryset(product: Product) -> QuerySet:
@@ -220,8 +221,8 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
     yield render({"type": "end", "counts": counts})
 
 
-def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
-    counts = defaultdict(lambda: dict.fromkeys(COUNT_KEYS, 0))
+def product_counts(max_file_bytes: int, *, file_counts: bool) -> dict[int, dict[str, int | None]]:
+    counts = defaultdict(lambda: {**dict.fromkeys(COUNT_KEYS, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
         ("tests", Test, "engagement__product_id"),
@@ -257,21 +258,26 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
     )
     for through, product_path in file_sources:
         for product_id, file_id, name in through.objects.values_list(product_path, "fileupload_id", "fileupload__file"):
+            counts[product_id]["files"] += 1
+            if not file_counts:
+                continue
             if file_id not in over_cap:
                 size = file_size(storage, name)
                 over_cap[file_id] = size is not None and size > max_file_bytes
-            counts[product_id]["files"] += 1
             if over_cap[file_id]:
                 counts[product_id]["files_over_cap"] += 1
     return counts
 
 
-def _summed(products: list[dict]) -> dict[str, int]:
-    return {key: sum(product["counts"][key] for product in products) for key in COUNT_KEYS}
+def _summed(products: list[dict], *, file_counts: bool) -> dict[str, int | None]:
+    return {
+        key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
+        for key in COUNT_KEYS
+    }
 
 
-def build_manifest(request, max_file_bytes: int) -> dict:
-    counts = product_counts(max_file_bytes)
+def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
+    counts = product_counts(max_file_bytes, file_counts=file_counts)
     products = [
         {
             "id": product.id,
@@ -295,7 +301,7 @@ def build_manifest(request, max_file_bytes: int) -> dict:
     for product in products:
         members[product["prod_type"]].append(product)
     product_types = [
-        {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk])}}
+        {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk], file_counts=file_counts)}}
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
     ]
     users = Dojo_User.objects.select_related("usercontactinfo", "auth_token").order_by("id")
@@ -321,7 +327,9 @@ def build_manifest(request, max_file_bytes: int) -> dict:
         },
         "product_types": product_types,
         "products": products,
-        "totals": {"product_types": len(product_types), "products": len(products), **_summed(products)},
+        "totals": {
+            "product_types": len(product_types), "products": len(products), **_summed(products, file_counts=file_counts),
+        },
     }
 
 
@@ -340,7 +348,7 @@ class ProductExportView(APIView):
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         return StreamingHttpResponse(
-            product_lines(product, request, max_file_bytes_from(request)),
+            product_lines(product, request, export_params(request)["max_file_bytes"]),
             content_type="application/x-ndjson",
             headers={
                 "Content-Disposition": f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"',
@@ -354,7 +362,7 @@ class ExportManifestView(APIView):
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
     @extend_schema(
-        parameters=[ExportParamsSerializer],
+        parameters=[ManifestParamsSerializer],
         responses={200: OpenApiTypes.OBJECT},
         description=(
             "Superuser only. Lists the product types and products with their counts, the reference data "
@@ -362,4 +370,5 @@ class ExportManifestView(APIView):
         ),
     )
     def get(self, request):
-        return Response(build_manifest(request, max_file_bytes_from(request)))
+        params = export_params(request, ManifestParamsSerializer)
+        return Response(build_manifest(request, params["max_file_bytes"], file_counts=params["file_counts"]))
