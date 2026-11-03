@@ -140,9 +140,14 @@ class TestMigration0305Rerun(SimpleTestCase):
 
             release = threading.Timer(1, snapshot_holder.commit)
             release.start()
-            with patch.object(self.operation, "poll_seconds", 0.1):
+            with (
+                patch.object(self.operation, "poll_seconds", 0.1),
+                self.assertLogs(f"dojo.db_migrations.{NAME[1]}", "WARNING") as logs,
+            ):
                 self._run_operation()
             release.join()
+            # Once when the wait starts and once when it ends, however many polls it took.
+            self.assertEqual(2, len(logs.records))
 
         builder_thread.join(WAIT_TIMEOUT_SECONDS)
         self.assertEqual([], build_error)

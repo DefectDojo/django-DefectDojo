@@ -34,9 +34,11 @@ class AddIndexConcurrentlyIfMissing(AddIndexConcurrently):
             return
         quoted_name = schema_editor.quote_name(self.index.name)
         with schema_editor.connection.cursor() as cursor:
-            while self._build_in_progress(cursor, quoted_name):
+            if self._build_in_progress(cursor, quoted_name):
                 logger.warning("Waiting for an earlier build of index %s to finish", self.index.name)
-                time.sleep(self.poll_seconds)
+                while self._build_in_progress(cursor, quoted_name):
+                    time.sleep(self.poll_seconds)
+                logger.warning("Earlier build of index %s finished", self.index.name)
             cursor.execute(
                 "SELECT indisvalid FROM pg_index WHERE indexrelid = to_regclass(%s)",
                 [quoted_name],
