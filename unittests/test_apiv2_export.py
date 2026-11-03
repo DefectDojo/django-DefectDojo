@@ -3,6 +3,7 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 
 from django.core.files.base import ContentFile
 from django.test import RequestFactory
@@ -16,7 +17,9 @@ from dojo.endpoint.api.serializer import EndpointStatusSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
     MAX_FILE_BYTES_DEFAULT,
+    ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportRiskAcceptanceSerializer,
     export_endpoint_entries,
     export_file,
     export_proof,
@@ -55,8 +58,8 @@ def ndjson_lines(response):
     return [json.loads(line) for line in b"".join(response.streaming_content).splitlines()]
 
 
-def make_file(case, name):
-    file_upload = FileUpload.objects.create(title=name, file=ContentFile(b"hello", name=name))
+def make_file(case, name, content=b"hello"):
+    file_upload = FileUpload.objects.create(title=name, file=ContentFile(content, name=name))
     case.addClassCleanup(file_upload.file.storage.delete, file_upload.file.name)
     return file_upload
 
@@ -158,6 +161,57 @@ class TestExportSerializers(DojoAPITestCase):
         risk_acceptance = Risk_Acceptance.objects.create(name="ra without proof", owner=self.context["request"].user)
         self.assertIsNone(export_proof(risk_acceptance, MAX_FILE_BYTES_DEFAULT))
 
+    def line_files(self, *contents, max_file_bytes=MAX_FILE_BYTES_DEFAULT):
+        engagement = self.finding.test.engagement
+        for index, content in enumerate(contents):
+            engagement.files.add(make_file(self, f"line{index}.txt", content))
+        context = {**self.context, "max_file_bytes": max_file_bytes}
+        return ExportEngagementSerializer(context=context).get_files(engagement)
+
+    def test_a_line_under_the_inline_budget_is_unchanged(self):
+        entries = self.line_files(b"a", b"b", b"c")
+        self.assertEqual([b"a", b"b", b"c"], [base64.b64decode(entry["data_base64"]) for entry in entries])
+        self.assertFalse(any("error" in entry for entry in entries))
+
+    def test_a_line_past_the_inline_budget_marks_the_later_files(self):
+        # "hello" is 8 characters of base64 text.
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 16):
+            entries = self.line_files(b"hello", b"hello", b"hello")
+        self.assertEqual([False, False, True], ["error" in entry for entry in entries])
+        self.assertIsNotNone(entries[1]["data_base64"])
+        self.assertIsNone(entries[2]["data_base64"])
+        self.assertEqual("line_cap", entries[2]["error"])
+        self.assertEqual(5, entries[2]["size"])
+        self.assertEqual("text/plain", entries[2]["content_type"])
+
+    def test_a_small_file_still_fits_after_a_marked_one(self):
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 20):
+            entries = self.line_files(b"hello", b"x" * 30, b"hello")
+        self.assertEqual([None, "line_cap", None], [entry.get("error") for entry in entries])
+        self.assertIsNone(entries[1]["data_base64"])
+        self.assertEqual(30, entries[1]["size"])
+        self.assertIsNotNone(entries[2]["data_base64"])
+
+    def test_a_file_over_the_file_cap_does_not_use_the_inline_budget(self):
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 8):
+            entries = self.line_files(b"x" * 30, b"hello", max_file_bytes=10)
+        self.assertIsNone(entries[0]["data_base64"])
+        self.assertNotIn("error", entries[0])
+        self.assertIsNotNone(entries[1]["data_base64"])
+
+    def test_a_proof_past_the_inline_budget_is_marked(self):
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="ra with proof", owner=self.context["request"].user, path=ContentFile(b"proof", name="waiver.txt"),
+        )
+        self.addCleanup(risk_acceptance.path.storage.delete, risk_acceptance.path.name)
+        serializer = ExportRiskAcceptanceSerializer(context=self.context)
+        self.assertIsNotNone(serializer.get_proof(risk_acceptance)["data_base64"])
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 4):
+            proof = serializer.get_proof(risk_acceptance)
+        self.assertIsNone(proof["data_base64"])
+        self.assertEqual("line_cap", proof["error"])
+        self.assertEqual(5, proof["size"])
+
     def test_endpoint_entries_carry_uri_and_status(self):
         if locations_enabled():
             finding = Finding.objects.filter(locations__isnull=False).order_by("id").first()
@@ -240,6 +294,15 @@ class TestProductExportStream(DojoAPITestCase):
                 response = self.client.get(self.url, {"max_file_bytes": value})
                 self.assertEqual(400, response.status_code, response.content[:1000])
                 self.assertIn("max_file_bytes", response.json())
+
+    def test_max_file_bytes_has_a_ceiling_of_100_mib(self):
+        for url in (self.url, reverse("export-manifest")):
+            with self.subTest(url=url):
+                response = self.client.get(url, {"max_file_bytes": 104857601})
+                self.assertEqual(400, response.status_code, response.content[:1000])
+                self.assertIn("max_file_bytes", response.json())
+        response = self.client.get(self.url, {"max_file_bytes": 104857600})
+        self.assertEqual(104857600, ndjson_lines(response)[0]["max_file_bytes"])
 
     def test_empty_max_file_bytes_uses_the_default(self):
         response = self.client.get(self.url, {"max_file_bytes": ""})
@@ -397,6 +460,17 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual(0, lines[-1]["counts"]["files_over_cap"])
         proof = next(line["data"]["proof"] for line in lines if line["type"] == "risk_acceptance")
         self.assertEqual(b"proof", base64.b64decode(proof["data_base64"]))
+
+    def test_a_file_past_the_inline_budget_is_not_counted_over_cap(self):
+        self.finding.files.add(make_file(self, "second.txt"))
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 8):
+            lines = ndjson_lines(self.client.get(self.url))
+        first, second = self.line_data("finding", self.finding.id, lines)["files"]
+        self.assertIsNotNone(first["data_base64"])
+        self.assertIsNone(second["data_base64"])
+        self.assertEqual("line_cap", second["error"])
+        self.assertEqual(4, lines[-1]["counts"]["files"])
+        self.assertEqual(0, lines[-1]["counts"]["files_over_cap"])
 
     def test_risk_acceptance_linked_only_through_a_finding_crosses(self):
         # Regression: an acceptance with no engagement link got no line while the finding line named its id.
