@@ -161,6 +161,18 @@ Risk Acceptance visibility is **gated by a distinct minimum permission from Find
 
 For the complete role-permission chart that lists Risk Acceptance permissions alongside other Asset-level actions, see [Action permission charts](/admin/user_management/user_permission_chart/#role-permission-chart).
 
+### Read-only access to Risk Acceptances
+
+No built-in role can view Risk Acceptances without also being able to change them. To give a team read-only access, such as an audit or risk team, create a [custom role](/admin/user_management/pro__custom_rbac_roles/):
+
+1. Clone the **Reader** role.
+2. Edit the copy and tick **View** on the **Risk Acceptance** row. Leave **Add**, **Edit** and **Delete** unticked.
+3. Assign the role to the users or groups that need it:
+    * as a membership on an Organization or Asset, to show the Risk Acceptances that cover Findings in it;
+    * as a **Global Role**, to show every Risk Acceptance in the instance.
+
+A user with this role can open the Risk Acceptances list, a Risk Acceptance's details, its history, its notes and its proof file, in the UI and through `/api/v2/risk_acceptance/`. They cannot create, edit, expire, approve or delete a Risk Acceptance, or add notes to one.
+
 ## Expiring and Reinstating a Risk Acceptance
 
 A Risk Acceptance that has expired is labelled **Expired** next to its expiration date in the Risk Acceptances table, so you can tell at a glance which ones are no longer suppressing their Findings.
