@@ -875,9 +875,7 @@ Posts a card over a Messaging Connector. The connection carries the Power Automa
 
 `notify.email`
 
-Emails a fixed list of DefectDojo users over a Messaging Connector. The recipients are the connection's destination.
-
-Every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each email then goes only to the recipients who can see every Finding, Asset or alert it lists: a recipient who can see only some of them gets nothing from that send, and the delivery records who was left out and why. A rule that already names another address keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
+Emails a fixed list of addresses over a Messaging Connector. The recipients are the connection's destination.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -888,6 +886,10 @@ Every recipient must be the email address of an active DefectDojo user, so what 
 | **Body** | an HTML body containing `{{ctx.findings_html}}` | HTML. `{{ctx.findings_html}}` renders the Finding list. |
 | **One Message per Finding** | off | Off sends one email about the batch. |
 | **Findings Listed in the Body** | `25` | How many Findings `{{ctx.findings_html}}` lists before it says how many more there were. |
+
+#### Restricting recipients to DefectDojo users
+
+The **Restrict Outbound Emails to DefectDojo Users** feature flag, under **Settings > Feature Flags**, is off by default, and then a rule emails any address in its Recipients. Turn it on to keep rule emails inside DefectDojo's access control. While it is on, every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each email then goes only to the recipients who can see every Finding, Asset or alert it lists: a recipient who can see only some of them gets nothing from that send, and the delivery records who was left out and why. A rule that already names another address when the flag is turned on keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
 
 ### Call a Webhook
 
@@ -949,7 +951,7 @@ Generates a report from a template, scoped to the Findings that reached this nod
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
 | **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
-| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. Over an Email connection the addresses must be DefectDojo users, as for [Send an Email](#send-an-email), and a per-item report is announced only to the users who can see its Finding or Asset. |
+| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. With [Restrict Outbound Emails to DefectDojo Users](#restricting-recipients-to-defectdojo-users) on, the addresses of an Email connection must be DefectDojo users, and a per-item report is announced only to the users who can see its Finding or Asset. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. With a per-item scope, `{{ctx.finding_title}}` or `{{ctx.asset_name}}` names what the report is about. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.
