@@ -25,7 +25,7 @@ In every case:
 
 ## While viewing as a user
 
-1. Open the user's page and click **View As**. A group lead who cannot open users' pages starts it from the group instead: on the group's **Members** tab, choose the member under **View As a Member** and click **View As**.
+1. Open the user's page and click **View As**. A group lead who cannot open users' pages starts it from the group instead: on the group's **Members** tab, click **View As** on the member's row.
 2. The application reloads as that user. A bar across the top of the page reads "Viewing as <name>. Read-only." with an **Exit** button.
 
 While the bar is shown:

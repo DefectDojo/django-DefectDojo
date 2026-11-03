@@ -49,19 +49,17 @@ With Permission Audit on, **Export** offers the audit columns alongside the usua
 Open a user and select the **Access** tab. It shows:
 
 * An **Access Summary**: the user's flags, Global Roles and Configuration Permissions, each with where it comes from.
-* **Organizations**, **Assets** and **Groups** tables, each listing the Role and a **Via** column: **Direct**, **Group** with the Group's name, **Facet** with the Organization Type, or (for Assets) the **Organization** the Asset is reached through.
+* **Organizations**, **Assets** and **Groups** tables, each listing the Role and a **Via** column: **Direct**, **Group** with the Group's name, **Facet** with the Organization Type (only where Organization Type Roles are enabled), or (for Assets) the **Organization** the Asset is reached through.
 
-Each table can be searched by name and filtered by Via. An Asset can appear more than once when the user reaches it in more than one way, for example directly and through its Organization.
+Each table can be searched by name and filtered by Via. The Via filter offers only the sources that can apply, and is not shown when only one can. An Asset can appear more than once when the user reaches it in more than one way, for example directly and through its Organization.
 
 A Global Role reaches every Asset and Organization its permissions allow, so it is listed once in the summary rather than as one row per object.
 
-## A Group's Overview
+## The Access tab on a Group's page
 
-A Group's page opens on its **Overview** tab, which shows the Group's members count and what the Group reaches in its own right: its Global Role, its Configuration Permissions, and its Organizations and Assets, with the same Via column. Every member of the Group receives this access through it. When the Group holds a Global Role, the Overview says that the Group has instance-wide access.
+A Group's **Access** tab shows what the Group reaches in its own right: an **Access Summary** with its Global Roles and Configuration Permissions, and its **Organizations** and **Assets** with the same Via column. Every member of the Group receives this access through it. When the Group holds a Global Role, the tab says that the Group has instance-wide access.
 
-## Preview a Role
-
-When **View As User** is turned on, the Access tab also shows **Preview Role**. Choose a Role and an Organization or an Asset, and click **Preview** to see what that Role would reach there and the permissions the Role carries. Nothing is granted and no user is created.
+The Group's own Roles (the **Direct** rows) are changed in place, with **Add to Organization**, **Add to Asset**, and **Change Role** and **Remove** on each row's menu. A row the Group reaches another way, such as an Asset reached through its Organization, links to that Organization instead.
 
 ## API
 
