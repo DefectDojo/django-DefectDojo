@@ -32,6 +32,7 @@ from dojo.location.models import LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     BurpRawRequestResponse,
+    Check_List,
     Dojo_User,
     DojoMeta,
     Engagement,
@@ -58,6 +59,12 @@ from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 RAW_REQUEST = b"GET / HTTP/1.1\r\nX: \xff\xfe\r\n"
 RAW_RESPONSE = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nbody\r\n\r\n"
+CHECK_LIST_KEYS = {
+    "id", "session_management", "encryption_crypto", "configuration_management", "authentication",
+    "authorization_and_access_control", "data_input_sanitization_validation", "sensitive_data", "other",
+    "session_issues", "crypto_issues", "config_issues", "auth_issues", "author_issues", "data_issues",
+    "sensitive_issues", "other_issues",
+}
 
 
 def ndjson_lines(response):
@@ -97,6 +104,27 @@ def seed_product(case):
     case.risk_acceptance.accepted_findings.add(case.finding)
     test.engagement.risk_acceptance.add(case.risk_acceptance)
     case.risk_acceptance.notes.add(Notes.objects.create(entry="ra note", author=case.admin))
+
+
+def seed_check_lists(case):
+    case.checked_engagement = case.finding.test.engagement
+    case.checked_findings = Finding.objects.filter(test__engagement__product_id=2).order_by("id")[:2]
+    first, second = case.checked_findings
+    case.check_list = Check_List.objects.create(
+        engagement=case.checked_engagement,
+        session_management="Pass",
+        encryption_crypto="Fail",
+        configuration_management="N/A",
+        authentication="Pass",
+        authorization_and_access_control="Fail",
+        data_input_sanitization_validation="N/A",
+        sensitive_data="Pass",
+        other="Fail",
+    )
+    case.check_list.session_issues.add(first, second)
+    case.check_list.other_issues.add(second)
+    # A later check list of the same engagement must not win.
+    Check_List.objects.create(engagement=case.checked_engagement, session_management="Fail").session_issues.add(first)
 
 
 @versioned_fixtures
@@ -265,6 +293,7 @@ class TestProductExportStream(DojoAPITestCase):
         cls.preset.network_locations.add(Network_Locations.objects.create(location="VPN"))
         Engagement_Presets.objects.create(title="Other", scope="", product_id=1)
         Product_API_Scan_Configuration.objects.create(product_id=1, tool_configuration_id=3, service_key_1="other")
+        seed_check_lists(cls)
         cls.url = reverse("export-product", args=[2])
         client = APIClient()
         client.force_authenticate(cls.admin)
@@ -465,6 +494,38 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertIn(self.risk_acceptance.id, data["risk_acceptance"])
         self.assertEqual("engagement note", data["notes"][0]["entry"])
         self.assertEqual(Path(self.owner_files["engagement"].file.name).name, data["files"][0]["filename"])
+
+    def test_engagement_line_carries_the_lowest_check_list(self):
+        first, second = self.checked_findings
+        data = self.line_data("engagement", self.checked_engagement.id)
+        self.assertEqual(
+            {
+                "id": self.check_list.id,
+                "session_management": "Pass",
+                "encryption_crypto": "Fail",
+                "configuration_management": "N/A",
+                "authentication": "Pass",
+                "authorization_and_access_control": "Fail",
+                "data_input_sanitization_validation": "N/A",
+                "sensitive_data": "Pass",
+                "other": "Fail",
+                "session_issues": [first.id, second.id],
+                "crypto_issues": [],
+                "config_issues": [],
+                "auth_issues": [],
+                "author_issues": [],
+                "data_issues": [],
+                "sensitive_issues": [],
+                "other_issues": [second.id],
+            },
+            data["check_list"],
+        )
+        self.assertEqual(CHECK_LIST_KEYS, set(data["check_list"]))
+
+    def test_engagement_line_without_a_check_list_is_null(self):
+        other = Engagement.objects.filter(product_id=2).exclude(id=self.checked_engagement.id).order_by("id").first()
+        self.assertFalse(Check_List.objects.filter(engagement=other).exists())
+        self.assertIsNone(self.line_data("engagement", other.id)["check_list"])
 
     def test_risk_acceptance_line(self):
         (data,) = [line["data"] for line in self.lines if line["type"] == "risk_acceptance"]

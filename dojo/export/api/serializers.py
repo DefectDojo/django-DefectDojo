@@ -9,7 +9,7 @@ from dojo.engagement.api.serializer import EngagementSerializer
 from dojo.finding.api.serializer import BurpRawRequestResponseMultiSerializer, FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
-from dojo.models import Engagement_Presets, FileUpload, Finding, Product_API_Scan_Configuration, Risk_Acceptance
+from dojo.models import Check_List, Engagement_Presets, FileUpload, Finding, Product_API_Scan_Configuration, Risk_Acceptance
 from dojo.notes.api.serializer import NoteSerializer
 from dojo.product.api.serializer import ProductSerializer
 from dojo.product_type.api.serializer import ProductTypeSerializer
@@ -22,6 +22,10 @@ from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
 MAX_FILE_BYTES_DEFAULT = 10485760
 MAX_FILE_BYTES_LIMIT = 104857600
 MAX_INLINE_BYTES_PER_LINE = 50331648
+CHECK_LIST_ISSUE_FIELDS = (
+    "session_issues", "crypto_issues", "config_issues", "auth_issues", "author_issues", "data_issues",
+    "sensitive_issues", "other_issues",
+)
 
 
 class ExportParamsSerializer(serializers.Serializer):
@@ -129,8 +133,24 @@ class ExportProductSerializer(ProductSerializer):
     prod_type = ProductTypeSerializer(read_only=True)
 
 
+class ExportCheckListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Check_List
+        fields = (
+            "id", "session_management", "encryption_crypto", "configuration_management", "authentication",
+            "authorization_and_access_control", "data_input_sanitization_validation", "sensitive_data", "other",
+            *CHECK_LIST_ISSUE_FIELDS,
+        )
+        read_only_fields = fields
+
+
 class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
-    pass
+    # Replaces the Engagement.check_list flag with the check list itself.
+    check_list = serializers.SerializerMethodField()
+
+    def get_check_list(self, obj) -> dict | None:
+        check_list = next(iter(obj.eng_for_check.all()), None)
+        return ExportCheckListSerializer(check_list).data if check_list else None
 
 
 class ExportTestSerializer(ExportFilesMixin, TestSerializer):

@@ -13,6 +13,7 @@ from dojo.finding.helper import save_vulnerability_ids
 from dojo.location.feature import locations_enabled
 from dojo.models import (
     BurpRawRequestResponse,
+    Check_List,
     Dojo_User,
     DojoMeta,
     Engagement,
@@ -95,7 +96,9 @@ class TestProductExportQueryCount(DojoAPITestCase):
             engagement.risk_acceptance.add(risk_acceptance)
             for owner in (engagement, test, risk_acceptance):
                 owner.notes.add(Notes.objects.create(entry=f"{prefix}-{i}", author=self.admin))
-            risk_acceptance.accepted_findings.add(Finding.objects.create(title=f"{prefix}-{i}", test=test, reporter=self.admin, severity="Low"))
+            finding = Finding.objects.create(title=f"{prefix}-{i}", test=test, reporter=self.admin, severity="Low")
+            risk_acceptance.accepted_findings.add(finding)
+            Check_List.objects.create(engagement=engagement).session_issues.add(finding)
 
     def measure(self, url) -> int:
         with CaptureQueriesContext(connection) as ctx:

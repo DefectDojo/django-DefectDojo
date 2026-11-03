@@ -23,6 +23,7 @@ from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
     ExportAPIScanConfigurationSerializer,
     ExportEngagementPresetSerializer,
+    CHECK_LIST_ISSUE_FIELDS,
     ExportEngagementSerializer,
     ExportFindingSerializer,
     ExportParamsSerializer,
@@ -39,6 +40,7 @@ from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
     BurpRawRequestResponse,
+    Check_List,
     Dojo_User,
     Endpoint,
     Engagement,
@@ -154,6 +156,12 @@ def finding_queryset(product: Product) -> QuerySet:
     )
 
 
+def check_list_prefetch() -> Prefetch:
+    # Ordered by id: the engagement line carries the first check list.
+    issues = [Prefetch(field, queryset=Finding.objects.only("id").order_by("id")) for field in CHECK_LIST_ISSUE_FIELDS]
+    return Prefetch("eng_for_check", queryset=Check_List.objects.order_by("id").prefetch_related(*issues))
+
+
 def risk_acceptance_in(product: Product, prefix: str = "") -> Q:
     # An acceptance belongs to a product through an engagement link or through a finding it accepts.
     return Q(**{f"{prefix}engagement__product": product}) | Q(**{f"{prefix}accepted_findings__test__engagement__product": product})
@@ -183,7 +191,9 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
         (
             "engagement",
             ExportEngagementSerializer,
-            Engagement.objects.filter(product=product).prefetch_related(notes_prefetch(), "risk_acceptance", "files", "tags"),
+            Engagement.objects.filter(product=product).prefetch_related(
+                notes_prefetch(), "risk_acceptance", "files", "tags", check_list_prefetch(),
+            ),
         ),
         (
             "test",
