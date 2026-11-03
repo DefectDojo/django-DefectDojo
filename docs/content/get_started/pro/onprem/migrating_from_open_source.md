@@ -22,7 +22,7 @@ Because you host the deployment, your data stays inside your own environment for
 | Target | An empty Pro deployment. The restore replaces what is there. | A Pro instance, with or without data in it |
 | Who runs it | You, from a restore host with the PostgreSQL client tools | You, from the Connectors UI |
 | How often | Once per cutover, in a scheduled window | As often as you need, until you cut over |
-| Secrets, settings and history | Cross with the dump | Do not cross |
+| Secrets, settings and history | Cross with the dump | Secrets and history do not cross. Notification settings and most system settings cross once, on the first Sync |
 | Finding templates, engagement presets, API scan configurations and tool configurations | Cross with the dump | Cross, but tool configurations arrive without their password, SSH key, API key and extras |
 | Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords. The connector adds no group and sets no global role. The users in the Authorized Users list of a Product or Product Type become its members. They get the Writer role, or Maintainer for a staff user. The default group rule of DefectDojo Pro still applies to a new user. |
 | The source during the move | Frozen with read-only mode from the final dump | Read-only during each Sync, and open between Syncs |
@@ -293,20 +293,20 @@ Confirm the following before you add the connector.
 3. Enter the URL of the source in **Location URL** and the superuser API key in **API Token**.
 4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field. Auto-Mapping is always on for this connector: each source Product gets a Product of the same name, under a Product Type of the same name.
 5. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Migration**. Pick **Daily**, **Weekly** or **Monthly** if you want to sync on a schedule until you cut over.
-6. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. With **One-Time**, Discover then starts at once and the connection's migration page opens.
+6. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. Discover then starts at once, on every frequency, and the connection's migration page opens.
 
 The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page covers the shared parts of the form: the schedule and the label.
 
 ### Step 2: Discover and map
 
-With a recurring frequency, run [Discover](/connectors/upstream/manage_operations/#discover-operations) yourself. The connector creates one Record per Product on the source, and Auto-Mapping maps every Record at once.
+[Discover](/connectors/upstream/manage_operations/#discover-operations) runs once after you submit the form, and again whenever you choose **Discover** in the gear menu of the migration page. The connector creates one Record per Product on the source, and Auto-Mapping maps every Record at once.
 
 Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
 
 * **Warnings** lists the scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`.
 * **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync.
 * **To Be Created** lists the users and the reference data that the Sync creates.
-* **Not Migrated** lists the settings that you set up in DefectDojo Pro yourself.
+* **Not Migrated** lists what stays on the source: the secrets and the audit trail, and the settings and feature areas that you set up in DefectDojo Pro yourself.
 * **Estimated Duration** tells you how long the first Sync takes.
 
 ### Step 3: Sync
@@ -376,11 +376,20 @@ On cutover day:
 2. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync leaves read-only mode as it found it, so a source you locked in step 1 stays locked.
 3. If you skipped step 1, turn read-only mode on now in **System Settings** to keep the source frozen.
 4. Point CI jobs, scripts, and integrations at your Pro deployment's `/api/v2/` API. Automate against `/api/v2/` only. Paths under `/api/vue/` belong to the Pro UI and reject API tokens.
-5. Retire the open source instance. If you keep it running, revoke the superuser API key first. Read-only mode blocks that change, so turn it off, revoke the key, and turn it on again.
+5. Retire the open source instance. If you keep it running, revoke the connector's superuser API key. Read-only mode blocks that change, so revoke the key before step 3. If the source was locked since step 1, unlock it in a quiet moment with CI paused, revoke the key, and lock it again at once.
 
 While read-only mode is on, DefectDojo rejects every change from the UI and the API, and pauses scheduled background jobs. Superusers can still sign in and change System Settings. To turn it off, clear **Read-only mode** and click **Submit**.
 
 The open source instance keeps running until that day, so your team loses no working time.
+
+### If a migration went wrong
+
+A wrong mapping or a wrong Include choice shows in the first Sync. To start over:
+
+1. Delete the Products that the Sync created in DefectDojo Pro. **Target** on the migration page marks them as **New**. Deleting a Product deletes its engagements, tests and findings. A Product that existed before the migration also holds the engagements that the Sync added to it. Delete those engagements, not the Product.
+2. Run Discover again, fix the Include boxes, and run Sync again.
+
+The first Sync copies notification settings and system settings once. A second run does not copy them again, so correct them by hand under **System Settings** and in each user's notification settings. Migrated users stay too: deactivate or delete them under **Users**. Deleting the connection deletes its Records and nothing else.
 
 ### Connector checklist
 
