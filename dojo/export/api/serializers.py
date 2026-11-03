@@ -20,15 +20,20 @@ from dojo.tool_config.models import Tool_Configuration
 from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
 
 MAX_FILE_BYTES_DEFAULT = 10485760
+MAX_FILE_BYTES_LIMIT = 104857600
+MAX_INLINE_BYTES_PER_LINE = 50331648
 
 
 class ExportParamsSerializer(serializers.Serializer):
     max_file_bytes = serializers.IntegerField(
         min_value=0,
+        max_value=MAX_FILE_BYTES_LIMIT,
         default=MAX_FILE_BYTES_DEFAULT,
         help_text=(
-            "File size cap in bytes. The product export carries a file of this size or less inline as base64, "
-            "and a larger file keeps its size with no data. The manifest counts larger files in files_over_cap."
+            "File size cap in bytes, at most 104857600. The product export carries a file of this size or less "
+            "inline as base64, and a larger file keeps its size with no data. The manifest counts larger files "
+            "in files_over_cap. The files of one line carry at most 48 MiB of base64 text in all: a file past "
+            "that has no data and the error line_cap."
         ),
     )
 
@@ -37,30 +42,45 @@ def file_size(storage, name: str) -> int | None:
     return storage.size(name) if name and storage.exists(name) else None
 
 
-def _file_payload(field_file, max_file_bytes: int) -> dict:
+class InlineBudget:
+    def __init__(self):
+        self.left = MAX_INLINE_BYTES_PER_LINE
+
+    def take(self, size: int) -> bool:
+        cost = 4 * -(-size // 3)
+        if cost > self.left:
+            return False
+        self.left -= cost
+        return True
+
+
+def _file_payload(field_file, max_file_bytes: int, budget: InlineBudget) -> dict:
     size = file_size(field_file.storage, field_file.name)
     payload = {"size": size, "content_type": mimetypes.guess_type(field_file.name)[0], "data_base64": None}
     if size is None:
         payload["error"] = "missing"
     elif size <= max_file_bytes:
-        with field_file.open("rb") as handle:
-            payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
+        if budget.take(size):
+            with field_file.open("rb") as handle:
+                payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
+        else:
+            payload["error"] = "line_cap"
     return payload
 
 
-def export_file(file_upload: FileUpload, max_file_bytes: int) -> dict:
+def export_file(file_upload: FileUpload, max_file_bytes: int, budget: InlineBudget | None = None) -> dict:
     return {
         "id": file_upload.id,
         "title": file_upload.title,
         "filename": Path(file_upload.file.name).name,
-        **_file_payload(file_upload.file, max_file_bytes),
+        **_file_payload(file_upload.file, max_file_bytes, budget or InlineBudget()),
     }
 
 
 def export_proof(risk_acceptance: Risk_Acceptance, max_file_bytes: int) -> dict | None:
     if not risk_acceptance.path:
         return None
-    return {"filename": risk_acceptance.filename(), **_file_payload(risk_acceptance.path, max_file_bytes)}
+    return {"filename": risk_acceptance.filename(), **_file_payload(risk_acceptance.path, max_file_bytes, InlineBudget())}
 
 
 def export_endpoint_entries(finding: Finding, status: serializers.Serializer, *, locations: bool) -> list[dict]:
@@ -81,7 +101,12 @@ class ExportFilesMixin(serializers.Serializer):
     files = serializers.SerializerMethodField()
 
     def get_files(self, obj) -> list[dict]:
-        return [export_file(file_upload, self.context["max_file_bytes"]) for file_upload in obj.files.all()]
+        budget = InlineBudget()
+        # Id order keeps the files that a full line drops the same on every run.
+        return [
+            export_file(file_upload, self.context["max_file_bytes"], budget)
+            for file_upload in sorted(obj.files.all(), key=lambda file_upload: file_upload.id)
+        ]
 
 
 class ExportProductSerializer(ProductSerializer):
