@@ -159,6 +159,7 @@ class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
     check_list_detail = serializers.SerializerMethodField()
 
     def get_check_list_detail(self, obj) -> dict | None:
+        # check_list_prefetch() orders by id, so the first row is the lowest id.
         check_list = next(iter(obj.eng_for_check.all()), None)
         return ExportCheckListSerializer(check_list).data if check_list else None
 

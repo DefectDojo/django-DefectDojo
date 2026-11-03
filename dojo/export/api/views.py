@@ -168,7 +168,6 @@ def finding_queryset(product: Product) -> QuerySet:
 
 
 def check_list_prefetch() -> Prefetch:
-    # Ordered by id: the engagement line carries the first check list.
     issues = [Prefetch(field, queryset=Finding.objects.only("id").order_by("id")) for field in CHECK_LIST_ISSUE_FIELDS]
     return Prefetch("eng_for_check", queryset=Check_List.objects.order_by("id").prefetch_related(*issues))
 

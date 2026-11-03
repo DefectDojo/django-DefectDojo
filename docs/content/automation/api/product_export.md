@@ -9,7 +9,7 @@ weight: 5
 
 DefectDojo has two API endpoints that export data:
 
-- `GET /api/v2/export/manifest/` describes the instance: its product types and products with their counts, the reference data, the users, the announcement and the login banner.
+- `GET /api/v2/export/manifest/` describes the instance. It lists the product types and products with their counts, the reference data and the users. It also holds the announcement and the login banner.
 - `GET /api/v2/export/products/{id}/` streams one product with its engagements, tests, findings, notes, files and risk acceptances.
 
 Use them to back up a product, move it to another instance, or keep a mirror.
@@ -44,9 +44,9 @@ The response is one JSON object with these keys:
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
 | `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
-| `login_banner` | The login banner, as `{banner_enable, banner_message}`. It is `null` when the instance has no login banner row. |
+| `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
+| `reference` | The lookup tables that the product export refers to by id. They are `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. It holds `description`, `tags` (a list of names), `business_criticality`, `sla_configuration` (an SLA id) and three user ids: `product_manager`, `technical_contact`, `team_manager`. Each value is the one `/api/v2/products/` returns, and it is `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
@@ -193,7 +193,7 @@ An engagement line differs from `/api/v2/engagements/` in these fields:
 - `files` is a list of file entries, not ids.
 - `check_list_detail` is the check list of the engagement, or `null` when the engagement has none. It is not on `/api/v2/engagements/`.
 
-`check_list` stays as `/api/v2/engagements/` returns it: a true or false flag that says whether the engagement uses a check list. A `check_list` of `true` does not mean that a check list exists, and a `check_list_detail` can be set when the flag is `false`.
+`check_list` stays as `/api/v2/engagements/` returns it. It is a true or false flag that says whether the engagement uses a check list. A `check_list` of `true` does not mean that a check list exists. A `check_list_detail` can be set when the flag is `false`.
 
 An engagement that has more than one check list carries the one with the lowest id.
 A check list has these keys:

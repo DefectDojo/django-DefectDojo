@@ -63,12 +63,6 @@ from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 RAW_REQUEST = b"GET / HTTP/1.1\r\nX: \xff\xfe\r\n"
 RAW_RESPONSE = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nbody\r\n\r\n"
-CHECK_LIST_KEYS = {
-    "id", "session_management", "encryption_crypto", "configuration_management", "authentication",
-    "authorization_and_access_control", "data_input_sanitization_validation", "sensitive_data", "other",
-    "session_issues", "crypto_issues", "config_issues", "auth_issues", "author_issues", "data_issues",
-    "sensitive_issues", "other_issues",
-}
 
 
 def ndjson_lines(response):
@@ -112,8 +106,9 @@ def seed_product(case):
 
 def seed_check_lists(case):
     case.checked_engagement = case.finding.test.engagement
-    case.checked_findings = Finding.objects.filter(test__engagement__product_id=2).order_by("id")[:2]
+    case.checked_findings = list(Finding.objects.filter(test__engagement__product_id=2).order_by("id")[:2])
     first, second = case.checked_findings
+    case.foreign_finding = Finding.objects.exclude(test__engagement__product_id=2).order_by("id").first()
     case.check_list = Check_List.objects.create(
         engagement=case.checked_engagement,
         session_management="Pass",
@@ -127,7 +122,7 @@ def seed_check_lists(case):
     )
     case.check_list.session_issues.add(first, second)
     case.check_list.other_issues.add(second)
-    # A later check list of the same engagement must not win.
+    case.check_list.data_issues.add(case.foreign_finding)
     Check_List.objects.create(engagement=case.checked_engagement, session_management="Fail").session_issues.add(first)
 
 
@@ -518,13 +513,12 @@ class TestProductExportStream(DojoAPITestCase):
                 "config_issues": [],
                 "auth_issues": [],
                 "author_issues": [],
-                "data_issues": [],
+                "data_issues": [self.foreign_finding.id],
                 "sensitive_issues": [],
                 "other_issues": [second.id],
             },
             data["check_list_detail"],
         )
-        self.assertEqual(CHECK_LIST_KEYS, set(data["check_list_detail"]))
         self.assertNotIn("archived_at", data["check_list_detail"])
         self.assertNotIn("archive_batch", data["check_list_detail"])
         self.assertIsInstance(data["check_list"], bool)
@@ -539,9 +533,8 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual(other.check_list, data["check_list"])
 
     def test_engagement_check_list_flag_stays_a_boolean(self):
-        engagement = Engagement.objects.get(id=self.checked_engagement.id)
-        Engagement.objects.filter(id=engagement.id).update(check_list=False)
-        data = self.line_data("engagement", engagement.id, ndjson_lines(self.client.get(self.url)))
+        Engagement.objects.filter(id=self.checked_engagement.id).update(check_list=False)
+        data = self.line_data("engagement", self.checked_engagement.id, ndjson_lines(self.client.get(self.url)))
         self.assertIsInstance(data["check_list"], bool)
         self.assertFalse(data["check_list"])
         self.assertEqual(self.check_list.id, data["check_list_detail"]["id"])
@@ -857,8 +850,8 @@ class TestExportManifest(DojoAPITestCase):
         self.assertIsNone(self.client.get(self.url).json()["login_banner"])
 
     def test_contacts_list_every_row_by_id(self):
-        Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red", is_admin=True)
-        Contact.objects.create(name="Sam Roe", email="sam@example.com", team="Blue", is_globally_read_only=True)
+        pat = Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red", is_admin=True)
+        sam = Contact.objects.create(name="Sam Roe", email="sam@example.com", team="Blue", is_globally_read_only=True)
         contacts = self.client.get(self.url).json()["reference"]["contacts"]
         self.assertEqual(
             [
@@ -870,9 +863,9 @@ class TestExportManifest(DojoAPITestCase):
             ],
             contacts,
         )
-        self.assertEqual(2, len(contacts))
-        self.assertEqual([True, False], [contact["is_admin"] for contact in contacts])
-        self.assertEqual([False, True], [contact["is_globally_read_only"] for contact in contacts])
+        by_id = {contact["id"]: contact for contact in contacts}
+        self.assertEqual((True, False), (by_id[pat.id]["is_admin"], by_id[pat.id]["is_globally_read_only"]))
+        self.assertEqual((False, True), (by_id[sam.id]["is_admin"], by_id[sam.id]["is_globally_read_only"]))
 
     def test_report_types_list_every_row_by_id(self):
         report_types = self.manifest["reference"]["report_types"]
@@ -886,14 +879,13 @@ class TestExportManifest(DojoAPITestCase):
         BannerConf.objects.create(banner_enable=False, banner_message="x")
         Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red")
         manifest = self.client.get(self.url).json()
-        new_keys = [
+        rows = [
             manifest["announcement"], manifest["login_banner"],
-            manifest["reference"]["contacts"], manifest["reference"]["report_types"],
+            *manifest["reference"]["contacts"], *manifest["reference"]["report_types"],
         ]
-        self.assertNotIn(None, new_keys)
-        text = json.dumps(new_keys)
-        self.assertNotIn("archived_at", text)
-        self.assertNotIn("archive_batch", text)
+        self.assertNotIn(None, rows)
+        for row in rows:
+            self.assertEqual(set(), {"archived_at", "archive_batch"} & set(row))
 
     def test_scan_types_are_distinct_and_sorted(self):
         self.assertEqual(
