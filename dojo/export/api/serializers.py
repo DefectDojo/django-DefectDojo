@@ -145,13 +145,13 @@ class ExportEngagementPresetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement_Presets
-        exclude = ("product",)
+        exclude = ("product", "archived_at", "archive_batch")
 
 
 class ExportAPIScanConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_API_Scan_Configuration
-        exclude = ("product",)
+        exclude = ("product", "archived_at", "archive_batch")
 
 
 class ExportUserContactInfoSerializer(UserContactInfoSerializer):

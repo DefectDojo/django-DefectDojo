@@ -320,6 +320,7 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual(["BURP Scan", "ZAP Scan"], sorted(preset["test_type"]))
         self.assertEqual(["VPN"], preset["network_locations"])
         self.assertNotIn("product", preset)
+        self.assertFalse({"archived_at", "archive_batch"} & preset.keys())
         self.assertEqual(
             [{"id": 1, "tool_configuration": 3, "service_key_1": "dojo_sonar_key", "service_key_2": None, "service_key_3": None}],
             header["api_scan_configurations"],
