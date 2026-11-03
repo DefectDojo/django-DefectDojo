@@ -110,7 +110,9 @@ Email needs no credential. DefectDojo sends through the mail server this instanc
 
 Saving fails if this instance has no mail server or no sender address configured, because nothing sent over the connection would leave the building. Configure SMTP under **Settings > System > System Settings** first.
 
-Recipients are set on the alert, not on the connection, so one Email connection serves every alert. An email destination takes up to 50 addresses; past that, use a distribution address.
+Recipients are set on the alert, not on the connection, so one Email connection serves every alert. An email destination takes up to 50 addresses.
+
+A Triage Engine rule emails DefectDojo users only, and each one only what their access lets them see (see [Send an Email](/automation/triage_engine/node_reference/#send-an-email)). To reach a distribution list from a rule, give the list's address a DefectDojo user of its own, with the access the list should have.
 
 ## Set up an Amazon SNS connection
 
