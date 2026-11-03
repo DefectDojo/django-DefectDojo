@@ -633,6 +633,30 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}reset/",
 )
 
+# Unsafe requests that still pass while read-only mode is on: sign-in and System Settings,
+# so a superuser can always turn the mode off again.
+READ_ONLY_MODE_EXEMPT_URLS = (
+    rf"^{URL_PREFIX}login$",
+    rf"^{URL_PREFIX}logout$",
+    r"complete/",
+    r"oauth2/idpresponse",
+    rf"^{URL_PREFIX}password_reset/",
+    rf"^{URL_PREFIX}reset/",
+    rf"^{URL_PREFIX}forgot_username",
+    rf"^{URL_PREFIX}change_password$",
+    rf"^{URL_PREFIX}api/v2/api-token-auth/",
+    rf"^{URL_PREFIX}system_settings$",
+    rf"^{URL_PREFIX}api/v2/system_settings/",
+)
+
+# Inbound webhooks blocked by read-only mode get a 503 with Retry-After instead of a redirect.
+# A sender reads a redirect as delivered and drops the event, but it retries a 503.
+READ_ONLY_MODE_RETRY_URLS = (
+    rf"^{URL_PREFIX}webhook/",
+    rf"^{URL_PREFIX}jira/webhook/",
+)
+READ_ONLY_MODE_RETRY_AFTER_SECONDS = 300
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "dojo.user.validators.DojoCommonPasswordValidator",
@@ -954,6 +978,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
+    "dojo.middleware.ReadOnlyModeMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.authorization.middleware.AuthorizationMiddleware",
