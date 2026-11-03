@@ -9,7 +9,7 @@ Use of DefectDojo Pro is subject to DefectDojo Inc.'s [End User License Agreemen
 
 ## Accepting the agreement
 
-The first time a person signs in, DefectDojo Pro shows one card before anything else loads. It holds the full text of the agreement, its version and a link to the published copy at [defectdojo.com/eula](https://defectdojo.com/eula), and one **I agree** button. Nothing else in the application opens until they select it. Selecting **Logout** on the card leaves without accepting.
+The first time a person signs in, DefectDojo Pro shows one card before anything else loads. It holds the full text of the agreement, its version and a link to the published copy at [defectdojo.com/eula](https://defectdojo.com/eula), and one **I Agree** button. Nothing else in the application opens until they select it. Selecting **Logout** on the card leaves without accepting.
 
 The card appears after every way of signing in: a username and password, OIDC and the social login providers, SAML (including sign-ins your identity provider starts), and remote user authentication. When MFA is required, the person completes MFA first and then sees the card.
 
