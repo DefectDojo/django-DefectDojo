@@ -31,8 +31,11 @@ from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
+    Announcement,
+    BannerConf,
     BurpRawRequestResponse,
     Check_List,
+    Contact,
     Dojo_User,
     DojoMeta,
     Engagement,
@@ -46,6 +49,7 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
     Product_Platform,
+    Report_Type,
     Risk_Acceptance,
     System_Settings,
     Test,
@@ -521,6 +525,8 @@ class TestProductExportStream(DojoAPITestCase):
             data["check_list"],
         )
         self.assertEqual(CHECK_LIST_KEYS, set(data["check_list"]))
+        self.assertNotIn("archived_at", data["check_list"])
+        self.assertNotIn("archive_batch", data["check_list"])
 
     def test_engagement_line_without_a_check_list_is_null(self):
         other = Engagement.objects.filter(product_id=2).exclude(id=self.checked_engagement.id).order_by("id").first()
@@ -609,7 +615,7 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(
             {
                 "schema", "generated_at", "source", "max_file_bytes", "token", "scan_types", "reference",
-                "product_types", "products", "totals",
+                "product_types", "products", "totals", "announcement", "login_banner", "features",
             },
             set(self.manifest),
         )
@@ -756,7 +762,7 @@ class TestExportManifest(DojoAPITestCase):
             {
                 "sla_configurations", "development_environments", "regulations", "test_types", "note_types",
                 "product_platforms", "product_lifecycles", "product_origins", "finding_templates", "tool_types",
-                "tool_configurations", "users",
+                "tool_configurations", "users", "contacts", "report_types",
             },
             set(reference),
         )
@@ -810,6 +816,71 @@ class TestExportManifest(DojoAPITestCase):
         body = json.dumps(manifest)
         for value in secrets.values():
             self.assertNotIn(value, body)
+
+    def test_features_list_check_lists(self):
+        self.assertEqual(["check_lists"], self.manifest["features"])
+
+    def test_announcement_is_the_single_row(self):
+        row = Announcement.objects.get()
+        self.assertEqual(
+            {"message": row.message, "style": row.style, "dismissable": row.dismissable},
+            self.client.get(self.url).json()["announcement"],
+        )
+
+    def test_announcement_is_null_without_a_row(self):
+        Announcement.objects.all().delete()
+        self.assertIsNone(self.client.get(self.url).json()["announcement"])
+
+    def test_login_banner_is_the_banner_row(self):
+        BannerConf.objects.all().delete()
+        BannerConf.objects.create(banner_enable=True, banner_message="Welcome <b>back</b>")
+        self.assertEqual(
+            {"banner_enable": True, "banner_message": "Welcome <b>back</b>"},
+            self.client.get(self.url).json()["login_banner"],
+        )
+
+    def test_login_banner_is_null_without_a_row(self):
+        BannerConf.objects.all().delete()
+        self.assertIsNone(self.client.get(self.url).json()["login_banner"])
+
+    def test_contacts_list_every_row_by_id(self):
+        Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red", is_admin=True)
+        Contact.objects.create(name="Sam Roe", email="sam@example.com", team="Blue", is_globally_read_only=True)
+        contacts = self.client.get(self.url).json()["reference"]["contacts"]
+        self.assertEqual(
+            [
+                {
+                    "id": contact.id, "name": contact.name, "email": contact.email, "team": contact.team,
+                    "is_admin": contact.is_admin, "is_globally_read_only": contact.is_globally_read_only,
+                }
+                for contact in Contact.objects.order_by("id")
+            ],
+            contacts,
+        )
+        self.assertEqual(2, len(contacts))
+        self.assertEqual([True, False], [contact["is_admin"] for contact in contacts])
+        self.assertEqual([False, True], [contact["is_globally_read_only"] for contact in contacts])
+
+    def test_report_types_list_every_row_by_id(self):
+        report_types = self.manifest["reference"]["report_types"]
+        self.assertTrue(report_types)
+        self.assertEqual(
+            [{"id": row.id, "name": row.name} for row in Report_Type.objects.order_by("id")], report_types,
+        )
+
+    def test_new_keys_carry_no_archive_fields(self):
+        BannerConf.objects.all().delete()
+        BannerConf.objects.create(banner_enable=False, banner_message="x")
+        Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red")
+        manifest = self.client.get(self.url).json()
+        new_keys = [
+            manifest["announcement"], manifest["login_banner"],
+            manifest["reference"]["contacts"], manifest["reference"]["report_types"],
+        ]
+        self.assertNotIn(None, new_keys)
+        text = json.dumps(new_keys)
+        self.assertNotIn("archived_at", text)
+        self.assertNotIn("archive_batch", text)
 
     def test_scan_types_are_distinct_and_sorted(self):
         self.assertEqual(

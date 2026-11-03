@@ -9,7 +9,18 @@ from dojo.engagement.api.serializer import EngagementSerializer
 from dojo.finding.api.serializer import BurpRawRequestResponseMultiSerializer, FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
-from dojo.models import Check_List, Engagement_Presets, FileUpload, Finding, Product_API_Scan_Configuration, Risk_Acceptance
+from dojo.models import (
+    Announcement,
+    BannerConf,
+    Check_List,
+    Contact,
+    Engagement_Presets,
+    FileUpload,
+    Finding,
+    Product_API_Scan_Configuration,
+    Report_Type,
+    Risk_Acceptance,
+)
 from dojo.notes.api.serializer import NoteSerializer
 from dojo.product.api.serializer import ProductSerializer
 from dojo.product_type.api.serializer import ProductTypeSerializer
@@ -211,6 +222,34 @@ class ExportAPIScanConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_API_Scan_Configuration
         exclude = ("product", "archived_at", "archive_batch")
+
+
+class ExportContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ("id", "name", "email", "team", "is_admin", "is_globally_read_only")
+        read_only_fields = fields
+
+
+class ExportReportTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report_Type
+        fields = ("id", "name")
+        read_only_fields = fields
+
+
+class ExportAnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = ("message", "style", "dismissable")
+        read_only_fields = fields
+
+
+class ExportLoginBannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BannerConf
+        fields = ("banner_enable", "banner_message")
+        read_only_fields = fields
 
 
 class ExportUserContactInfoSerializer(UserContactInfoSerializer):

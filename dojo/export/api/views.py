@@ -21,13 +21,17 @@ from dojo.authorization.api_permissions import IsSuperUser
 from dojo.development_environment.api.serializer import DevelopmentEnvironmentSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
-    ExportAPIScanConfigurationSerializer,
-    ExportEngagementPresetSerializer,
     CHECK_LIST_ISSUE_FIELDS,
+    ExportAnnouncementSerializer,
+    ExportAPIScanConfigurationSerializer,
+    ExportContactSerializer,
+    ExportEngagementPresetSerializer,
     ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportLoginBannerSerializer,
     ExportParamsSerializer,
     ExportProductSerializer,
+    ExportReportTypeSerializer,
     ExportRiskAcceptanceSerializer,
     ExportTestSerializer,
     ExportToolConfigurationSerializer,
@@ -86,6 +90,8 @@ REFERENCE_SERIALIZERS = {
     "finding_templates": FindingTemplateSerializer,
     "tool_types": ToolTypeSerializer,
     "tool_configurations": ExportToolConfigurationSerializer,
+    "contacts": ExportContactSerializer,
+    "report_types": ExportReportTypeSerializer,
 }
 
 
@@ -119,6 +125,11 @@ def source_block() -> dict:
         "url": settings.SITE_URL,
         "locations_enabled": locations_enabled(),
     }
+
+
+def single_row(serializer) -> dict | None:
+    row = serializer.Meta.model.objects.order_by("id").first()
+    return serializer(row).data if row else None
 
 
 def export_params(request, serializer_class=ExportParamsSerializer) -> dict:
@@ -325,6 +336,9 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
+        "features": ["check_lists"],
+        "announcement": single_row(ExportAnnouncementSerializer),
+        "login_banner": single_row(ExportLoginBannerSerializer),
         "scan_types": sorted(
             Test.objects.exclude(scan_type=None).order_by().values_list("scan_type", flat=True).distinct(),
         ),
