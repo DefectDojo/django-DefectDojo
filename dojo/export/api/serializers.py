@@ -28,10 +28,10 @@ class ExportParamsSerializer(serializers.Serializer):
         max_value=MAX_FILE_BYTES_LIMIT,
         default=MAX_FILE_BYTES_DEFAULT,
         help_text=(
-            "File size cap in bytes, at most 104857600. The product export carries a file of this size or less "
-            "inline as base64, and a larger file keeps its size with no data. The manifest counts larger files "
-            "in files_over_cap. The files of one line carry at most 48 MiB of base64 text in all: a file past "
-            "that has no data and the error line_cap."
+            f"File size cap in bytes, at most {MAX_FILE_BYTES_LIMIT}. The product export carries a file of this "
+            "size or less inline as base64. A larger file keeps its size with no data. The manifest counts larger "
+            f"files in files_over_cap. The files of one line carry at most {MAX_INLINE_BYTES_PER_LINE // 2**20} MiB "
+            "of base64 text in all. A file past that has no data and the error line_cap."
         ),
     )
 
@@ -115,7 +115,6 @@ class ExportFilesMixin(serializers.Serializer):
 
     def get_files(self, obj) -> list[dict]:
         budget = InlineBudget()
-        # Id order keeps the files that a full line drops the same on every run.
         return [
             export_file(file_upload, self.context["max_file_bytes"], budget)
             for file_upload in sorted(obj.files.all(), key=lambda file_upload: file_upload.id)

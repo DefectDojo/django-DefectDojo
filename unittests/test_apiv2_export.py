@@ -633,6 +633,12 @@ class TestExportManifest(DojoAPITestCase):
         response = self.client.get(reverse("export-product", args=[2]), {"file_counts": "false"})
         self.assertEqual(3, ndjson_lines(response)[-1]["counts"]["files"])
 
+    def test_empty_file_counts_uses_the_default(self):
+        response = self.client.get(self.url, {"file_counts": "", "max_file_bytes": 4})
+        self.assertEqual(200, response.status_code)
+        counts = self.get_results_by_id(response.json()["products"], 2)["counts"]
+        self.assertEqual((3, 3), (counts["files"], counts["files_over_cap"]))
+
     def test_a_missing_file_is_counted_but_not_over_cap(self):
         file_upload = make_file(self, "gone.txt")
         self.finding.files.add(file_upload)

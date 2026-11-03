@@ -67,7 +67,8 @@ The manifest takes two parameters:
 | `file_counts` | boolean | `true` | With `false`, the server does not read the size of each file in storage, and `files_over_cap` is `null`. |
 
 An empty value, as in `?max_file_bytes=` or `?file_counts=`, uses the default.
-A `max_file_bytes` value that is not a whole number from 0 to 104857600, or a `file_counts` value that is not a boolean, gets a 400.
+A `max_file_bytes` value that is not a whole number from 0 to 104857600 gets a 400.
+A `file_counts` value that is not a boolean gets a 400.
 To count `files_over_cap`, the server reads the size of every file in storage, with one call for each file. On an instance with many files, or with files on remote storage, the manifest can take some time.
 Pass `file_counts=false` to skip these reads. The `files` count does not need them, so it stays. `files_over_cap` is `null` on every product, product type and in `totals`.
 
@@ -167,15 +168,17 @@ Engagement, test and finding lines carry their files in `files`. Each file entry
 | `size` | The size in bytes. |
 | `content_type` | The content type, from the file name. It is `null` when the file name has no known extension. |
 | `data_base64` | The file contents in base64. |
+| `error` | Present only when the entry has no contents for a reason on the server side: `missing` or `line_cap`. |
 
 Two caps decide which files carry their contents:
 
 - **The file cap, `max_file_bytes`.** A file of this size or less carries its contents. A larger file keeps its `size`, and `data_base64` is `null`. The entry has no `error`. The export has no download link for it. The default is 10 MiB. The highest value is 104857600 (100 MiB), and a larger value gets a 400.
-- **The line cap.** The files of one line carry at most 48 MiB (50331648 bytes) of base64 text in all. The server adds the files in id order. A file that would pass the cap keeps its `size` and `content_type`, `data_base64` is `null`, and the entry has `"error": "line_cap"`. A smaller file after it still carries its contents if it fits. A file over `max_file_bytes` has no contents, so it does not use the line cap.
+- **The line cap.** The files of one line carry at most 48 MiB (50331648 bytes) of base64 text in all. The server adds the files in id order. A file that passes the cap keeps its `size` and `content_type`. Its `data_base64` is `null`, and the entry has `"error": "line_cap"`. A smaller file after it still carries its contents if it fits. A file over `max_file_bytes` has no contents, so it does not use the line cap.
 
 Base64 text is a third larger than the file, so the line cap holds about 36 MiB of files. A larger file never carries its contents, whatever `max_file_bytes` is.
 To carry larger files, raise `max_file_bytes`. For example, `?max_file_bytes=33554432` carries files up to 32 MiB, as far as the line cap allows.
-A line needs about 170 MiB of server memory at most: while the server writes a line, its memory use peaks at about 4.7 times the size of the files on that line.
+A line needs about 170 MiB of server memory at most.
+While the server writes a line, its memory use peaks at about 4.7 times the size of its files.
 A file that is gone from storage has `size` and `data_base64` set to `null`, and `"error": "missing"`.
 
 ## Counts
