@@ -65,10 +65,11 @@ Each analysis can raise these alerts:
 | Environment variable access | Monitor | The code reads environment variables. |
 | High-entropy strings | Monitor | The code holds long random-looking strings, such as encoded payloads. |
 | Trivial package | Monitor | The package holds very little code. |
+| Partially analyzed | Monitor | Part of the package's code was not read, because it was past the analysis's size, file-count or time limits. |
 | Deprecated | Monitor | The publisher marked the version deprecated. |
 | Filesystem access | Ignore | The code reads or writes files. |
 
-A version the engine could not read (for example, a registry error) is marked failed and tried again after seven days. Ecosystems other than npm and PyPI are not analyzed.
+A version the engine could not read (for example, a registry error) is marked failed and tried again after seven days. Each version is read as npm or pip would install it: for PyPI, every wheel and the sdist, up to eight files per version. Ecosystems other than npm and PyPI are not analyzed.
 
 Analysis runs in the background: every ten minutes, a few jobs at a time and within a daily limit, so it never crowds out your other Sensei scans. A first pass over a large inventory spreads over several days. Versions you check through the evaluate API are also queued as they are met (see [Using the API](#using-the-api)).
 
