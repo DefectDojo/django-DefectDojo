@@ -6,7 +6,7 @@ from dojo.tools.earlylight.parser import EarlylightParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 # The sample reports in unittests/scans/earlylight are real `earlylight scan ... --format json`
-# output from Early Light v0.3.2 (main at 19c2e24), trimmed to a few findings each with every
+# output from Early Light main at 19c2e24 (after v0.3.1), trimmed to a few findings each with every
 # "skipped" list cut to two entries:
 #   no_findings.json   scan fs on a directory with one text file (path renamed to /srv/app)
 #   one_vuln.json      scan image php:8.3.0-cli, one finding kept
@@ -221,6 +221,23 @@ class TestEarlylightParser(DojoTestCase):
         self.assertTrue(findings[0].dynamic_finding)
         self.assertFalse(findings[0].static_finding)
         self.assertIsNone(findings[0].references)
+
+    def test_reported_kinds_win_over_the_table(self):
+        report = {
+            "detectors": [{"id": "brotli", "kinds": [
+                {"id": "go-port", "title": "t", "level": "warning", "severity": "7.1"},
+                {"id": "not-checked", "title": "t", "level": "note"},
+            ]}, {"id": "future", "kinds": [{"id": "thing", "title": "t", "level": "error", "severity": "3.0"}]}],
+            "targets": [{"target": "/srv", "type": "filesystem", "findings": [
+                {"detector": "brotli", "kind": "go-port", "path": "/a", "verdict": "vulnerable", "message": "m"},
+                {"detector": "brotli", "kind": "not-checked", "path": "/b", "verdict": "vulnerable", "message": "m"},
+                {"detector": "future", "kind": "thing", "path": "/c", "verdict": "vulnerable", "message": "m"},
+                {"detector": "future", "kind": "thing", "path": "/d", "verdict": "vulnerable", "message": "m", "severity": "critical"},
+            ]}],
+        }
+        findings = EarlylightParser().get_findings(io.StringIO(json.dumps(report)), Test())
+        self.assertEqual(["High", "Info", "Low", "Critical"], [f.severity for f in findings])
+        self.assertEqual(252, findings[0].cwe)
 
     def test_identical_findings_get_distinct_ids(self):
         item = {"detector": "brotli", "kind": "dependency", "path": "requirements.txt", "verdict": "vulnerable", "message": "m"}

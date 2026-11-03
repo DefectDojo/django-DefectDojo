@@ -38,10 +38,12 @@ FINDING_SEVERITIES = {
 }
 
 # Severity and CWE of each "<detector>/<kind>", taken from the detector manifests
-# (`earlylight detectors --format json`). The JSON scan report does not carry
-# them. The kind's CVSS-style "severity" score maps to >=9 Critical, >=7 High,
-# >=4 Medium, else Low. Kinds without a score use their SARIF level: error is
-# High, warning is Medium, note is Info. The CWE is the first one the kind lists.
+# (`earlylight detectors --format json`). Reports from Early Light releases after
+# v0.3.1 list each detector's kinds with their score and level, and those win;
+# this table covers older reports and supplies the CWE. The kind's CVSS-style
+# "severity" score maps to >=9 Critical, >=7 High, >=4 Medium, else Low. Kinds
+# without a score use their SARIF level: error is High, warning is Medium, note
+# is Info. The CWE is the first one the kind lists.
 KIND_SEVERITY = {
     # brotli: CVE-2026-111497
     "brotli/decoder-library": ("Critical", 252),  # 9.2
@@ -64,7 +66,9 @@ KIND_SEVERITY = {
     "php2shell/php-image": ("Critical", 416),  # 9.2
 }
 
-# Kinds this parser does not know yet (a detector released after it).
+LEVEL_SEVERITY = {"error": "High", "warning": "Medium", "note": "Info"}
+
+# Kinds neither the report nor this table describe.
 UNKNOWN_KIND_SEVERITY = {"vulnerable": "High", "unknown": "Medium"}
 
 # Facts that tell two findings of one kind at one path apart (two certificates
@@ -128,6 +132,7 @@ class EarlylightParser:
         path = item.get("path") or None
         message = item.get("message") or ""
         known_severity, cwe = KIND_SEVERITY.get(rule, (None, None))
+        known_severity = self._reported_kind_severity(detector, kind) or known_severity
 
         title = f"{rule}: {message}" if message else rule
         if len(title) > TITLE_MAX:
@@ -179,6 +184,23 @@ class EarlylightParser:
         if known_severity:
             return known_severity
         return UNKNOWN_KIND_SEVERITY[item["verdict"]]
+
+    def _reported_kind_severity(self, detector, kind):
+        for k in detector.get("kinds") or []:
+            if not isinstance(k, dict) or k.get("id") != kind:
+                continue
+            try:
+                score = float(k.get("severity") or "")
+            except ValueError:
+                return LEVEL_SEVERITY.get(k.get("level"))
+            if score >= 9:
+                return "Critical"
+            if score >= 7:
+                return "High"
+            if score >= 4:
+                return "Medium"
+            return "Low"
+        return None
 
     def _component(self, facts):
         if facts.get("product"):
