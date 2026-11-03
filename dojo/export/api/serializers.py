@@ -156,10 +156,9 @@ class ExportCheckListSerializer(serializers.ModelSerializer):
 
 
 class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
-    # Replaces the Engagement.check_list flag with the check list itself.
-    check_list = serializers.SerializerMethodField()
+    check_list_detail = serializers.SerializerMethodField()
 
-    def get_check_list(self, obj) -> dict | None:
+    def get_check_list_detail(self, obj) -> dict | None:
         check_list = next(iter(obj.eng_for_check.all()), None)
         return ExportCheckListSerializer(check_list).data if check_list else None
 

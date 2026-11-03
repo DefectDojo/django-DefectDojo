@@ -42,7 +42,7 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
-| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list`. An older instance has no `features` key. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
 | `login_banner` | The login banner, as `{banner_enable, banner_message}`. It is `null` when the instance has no login banner row. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
@@ -191,7 +191,9 @@ An example entry with Locations on:
 An engagement line differs from `/api/v2/engagements/` in these fields:
 
 - `files` is a list of file entries, not ids.
-- `check_list` is the check list of the engagement, or `null` when the engagement has none. On `/api/v2/engagements/` this key is a true or false flag. On the export it holds the check list itself.
+- `check_list_detail` is the check list of the engagement, or `null` when the engagement has none. It is not on `/api/v2/engagements/`.
+
+`check_list` stays as `/api/v2/engagements/` returns it: a true or false flag that says whether the engagement uses a check list. A `check_list` of `true` does not mean that a check list exists, and a `check_list_detail` can be set when the flag is `false`.
 
 An engagement that has more than one check list carries the one with the lowest id.
 A check list has these keys:
@@ -202,7 +204,7 @@ A check list has these keys:
 | `session_management`, `encryption_crypto`, `configuration_management`, `authentication`, `authorization_and_access_control`, `data_input_sanitization_validation`, `sensitive_data`, `other` | The text of each check, for example `Pass`, `Fail` or `N/A`. |
 | `session_issues`, `crypto_issues`, `config_issues`, `auth_issues`, `author_issues`, `data_issues`, `sensitive_issues`, `other_issues` | For each check, the ids of its findings, in id order. A finding id can name a finding in another product. |
 
-An example `check_list`:
+An example `check_list_detail`:
 
 ```json
 {"id": 1, "session_management": "Pass", "encryption_crypto": "Fail", "configuration_management": "N/A", "authentication": "Pass", "authorization_and_access_control": "Fail", "data_input_sanitization_validation": "N/A", "sensitive_data": "Pass", "other": "Fail", "session_issues": [2, 3], "crypto_issues": [], "config_issues": [], "auth_issues": [], "author_issues": [], "data_issues": [], "sensitive_issues": [], "other_issues": [3]}

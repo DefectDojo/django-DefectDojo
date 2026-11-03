@@ -522,16 +522,29 @@ class TestProductExportStream(DojoAPITestCase):
                 "sensitive_issues": [],
                 "other_issues": [second.id],
             },
-            data["check_list"],
+            data["check_list_detail"],
         )
-        self.assertEqual(CHECK_LIST_KEYS, set(data["check_list"]))
-        self.assertNotIn("archived_at", data["check_list"])
-        self.assertNotIn("archive_batch", data["check_list"])
+        self.assertEqual(CHECK_LIST_KEYS, set(data["check_list_detail"]))
+        self.assertNotIn("archived_at", data["check_list_detail"])
+        self.assertNotIn("archive_batch", data["check_list_detail"])
+        self.assertIsInstance(data["check_list"], bool)
+        self.assertTrue(data["check_list"])
 
     def test_engagement_line_without_a_check_list_is_null(self):
         other = Engagement.objects.filter(product_id=2).exclude(id=self.checked_engagement.id).order_by("id").first()
         self.assertFalse(Check_List.objects.filter(engagement=other).exists())
-        self.assertIsNone(self.line_data("engagement", other.id)["check_list"])
+        data = self.line_data("engagement", other.id)
+        self.assertIsNone(data["check_list_detail"])
+        self.assertIsInstance(data["check_list"], bool)
+        self.assertEqual(other.check_list, data["check_list"])
+
+    def test_engagement_check_list_flag_stays_a_boolean(self):
+        engagement = Engagement.objects.get(id=self.checked_engagement.id)
+        Engagement.objects.filter(id=engagement.id).update(check_list=False)
+        data = self.line_data("engagement", engagement.id, ndjson_lines(self.client.get(self.url)))
+        self.assertIsInstance(data["check_list"], bool)
+        self.assertFalse(data["check_list"])
+        self.assertEqual(self.check_list.id, data["check_list_detail"]["id"])
 
     def test_risk_acceptance_line(self):
         (data,) = [line["data"] for line in self.lines if line["type"] == "risk_acceptance"]
