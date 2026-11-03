@@ -9,7 +9,7 @@ weight: 5
 
 DefectDojo has two API endpoints that export data:
 
-- `GET /api/v2/export/manifest/` describes the instance: its product types and products with their counts, the reference data, and the users.
+- `GET /api/v2/export/manifest/` describes the instance: its product types and products with their counts, the reference data, the users, the announcement and the login banner.
 - `GET /api/v2/export/products/{id}/` streams one product with its engagements, tests, findings, notes, files and risk acceptances.
 
 Use them to back up a product, move it to another instance, or keep a mirror.
@@ -42,8 +42,11 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list`. An older instance has no `features` key. |
+| `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
+| `login_banner` | The login banner, as `{banner_enable, banner_message}`. It is `null` when the instance has no login banner row. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `tool_types`, `tool_configurations` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. |
+| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. It holds `description`, `tags` (a list of names), `business_criticality`, `sla_configuration` (an SLA id) and three user ids: `product_manager`, `technical_contact`, `team_manager`. Each value is the one `/api/v2/products/` returns, and it is `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
@@ -112,7 +115,7 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 | `type` | What the line holds |
 |--------|---------------------|
 | `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest), `product`, `engagement_presets` and `api_scan_configurations`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. See [Presets and API scan configurations](#presets-and-api-scan-configurations) for the other two. |
-| `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it. `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
+| `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it, with the changes in [Engagement lines](#engagement-lines). `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
 | `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. |
 | `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
@@ -183,6 +186,28 @@ An example entry with Locations on:
 {"id": 2, "uri": "ftp://localhost", "location_type": "url", "tags": [], "status": {"id": 1, "location_type": "url", "location_value": "ftp://localhost", "created": null, "updated": null, "relationship": "", "relationship_data": {}, "audit_time": null, "status": "Active", "location": 2, "finding": 2, "auditor": null}}
 ```
 
+### Engagement lines
+
+An engagement line differs from `/api/v2/engagements/` in these fields:
+
+- `files` is a list of file entries, not ids.
+- `check_list` is the check list of the engagement, or `null` when the engagement has none. On `/api/v2/engagements/` this key is a true or false flag. On the export it holds the check list itself.
+
+An engagement that has more than one check list carries the one with the lowest id.
+A check list has these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The check list id. |
+| `session_management`, `encryption_crypto`, `configuration_management`, `authentication`, `authorization_and_access_control`, `data_input_sanitization_validation`, `sensitive_data`, `other` | The text of each check, for example `Pass`, `Fail` or `N/A`. |
+| `session_issues`, `crypto_issues`, `config_issues`, `auth_issues`, `author_issues`, `data_issues`, `sensitive_issues`, `other_issues` | For each check, the ids of its findings, in id order. A finding id can name a finding in another product. |
+
+An example `check_list`:
+
+```json
+{"id": 1, "session_management": "Pass", "encryption_crypto": "Fail", "configuration_management": "N/A", "authentication": "Pass", "authorization_and_access_control": "Fail", "data_input_sanitization_validation": "N/A", "sensitive_data": "Pass", "other": "Fail", "session_issues": [2, 3], "crypto_issues": [], "config_issues": [], "auth_issues": [], "author_issues": [], "data_issues": [], "sensitive_issues": [], "other_issues": [3]}
+```
+
 ### Risk acceptance lines
 
 A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
@@ -248,12 +273,11 @@ An example `end` line:
 - Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
 - JIRA issue keys and JIRA project settings.
 - Product members and product groups.
-- Report types and CI/CD infrastructure. Their ids stay on the engagement line: `report_type`, `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
+- CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
 - The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
-- Contacts, for example an engagement's `requester`. The id stays on the engagement line.
-- Test import history, check lists, languages, technologies and benchmarks.
+- Test import history, languages, technologies and benchmarks.
 - User passwords and password hashes. A user entry has no `password` field.
-- Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys.
+- Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement and the login banner are in the manifest.
 
 A `duplicate_finding` id can point to a finding in another product. That id dangles in the export of this product.
 An `accepted_findings` id on a risk acceptance line can point to a finding in another product in the same way.
