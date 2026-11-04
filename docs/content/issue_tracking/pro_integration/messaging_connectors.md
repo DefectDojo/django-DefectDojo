@@ -112,7 +112,7 @@ Saving fails if this instance has no mail server or no sender address configured
 
 Recipients are set on the alert, not on the connection, so one Email connection serves every alert. An email destination takes up to 50 addresses; past that, use a distribution address.
 
-With the **Restrict Outbound Emails to DefectDojo Users** feature flag on, a Triage Engine rule emails DefectDojo users only, and each one only what their access lets them see (see [Restricting recipients to DefectDojo users](/automation/triage_engine/node_reference/#restricting-recipients-to-defectdojo-users)). To reach a distribution list from a rule then, give the list's address a DefectDojo user of its own, with the access the list should have.
+With the **Restrict Triage Engine Emails to DefectDojo Users** feature flag on (the default), a Triage Engine rule emails DefectDojo users only, and each email goes only to the recipients who can see everything it lists (see [Restricting recipients to DefectDojo users](/automation/triage_engine/node_reference/#restricting-recipients-to-defectdojo-users)). To reach a distribution list from a rule then, give the list's address a DefectDojo user of its own, with the access the list should have.
 
 ## Set up an Amazon SNS connection
 
