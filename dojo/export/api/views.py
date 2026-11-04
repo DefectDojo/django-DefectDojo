@@ -296,8 +296,16 @@ def _summed(products: list[dict], *, file_counts: bool) -> dict[str, int | None]
     }
 
 
+def _plain(value):
+    return list(value) if isinstance(value, tuple) else value
+
+
 def _set_by_customer(current: dict, shipped: dict) -> dict:
-    return {key: current[key] for key in sorted(current) if key not in shipped or shipped[key] != current[key]}
+    return {
+        key: _plain(current[key])
+        for key in sorted(current)
+        if key not in shipped or _plain(shipped[key]) != _plain(current[key])
+    }
 
 
 def deduplication_rules() -> dict:

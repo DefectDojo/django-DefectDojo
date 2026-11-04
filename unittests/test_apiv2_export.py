@@ -142,7 +142,7 @@ class TestShippedDeduplicationSettings(SimpleTestCase):
                 self.assertTrue(shipped)
                 self.assertIsNot(getattr(settings, name), shipped)
 
-    def test_overriding_a_map_leaves_the_shipped_copy_as_it_was(self):
+    def test_changing_a_map_leaves_the_shipped_copy_as_it_was(self):
         before = {name: json.dumps(getattr(settings, name), sort_keys=True) for name in SHIPPED_DEDUPLICATION_MAPS}
         with override_settings(
             HASHCODE_FIELDS_PER_SCANNER={"Only Scan": ["title"]},
@@ -151,14 +151,11 @@ class TestShippedDeduplicationSettings(SimpleTestCase):
         ):
             for name in SHIPPED_DEDUPLICATION_MAPS:
                 self.assertEqual(before[name], json.dumps(getattr(settings, name), sort_keys=True))
-
-    def test_changing_a_field_list_in_place_leaves_the_shipped_copy_as_it_was(self):
         scan_type = next(iter(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED))
-        shipped = list(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED[scan_type])
         live = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
         live.append("mitigation")
         try:
-            self.assertEqual(shipped, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED[scan_type])
+            self.assertEqual(before["HASHCODE_FIELDS_PER_SCANNER_SHIPPED"], json.dumps(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, sort_keys=True))
         finally:
             live.pop()
 
@@ -941,6 +938,18 @@ class TestExportManifest(DojoAPITestCase):
                 "hashcode_allows_null_cwe": {},
             },
             self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields),
+        )
+
+    def test_deduplication_treats_a_tuple_and_a_list_with_the_same_fields_as_equal(self):
+        shipped = settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED
+        fields = {**shipped, "Anchore Engine Scan": tuple(shipped["Anchore Engine Scan"])}
+        self.assertEqual({}, self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields)["hashcode_fields_per_scanner"])
+
+    def test_deduplication_sends_a_changed_tuple_as_a_list(self):
+        fields = {**settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, "Anchore Engine Scan": ("title", "cwe")}
+        self.assertEqual(
+            {"Anchore Engine Scan": ["title", "cwe"]},
+            self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields)["hashcode_fields_per_scanner"],
         )
 
     def test_deduplication_lists_a_changed_algorithm_only(self):
