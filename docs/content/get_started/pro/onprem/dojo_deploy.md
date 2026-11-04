@@ -172,13 +172,22 @@ Most changes are fixes. The ones you can notice after an update:
 
 `dojo-deploy support-bundle` writes one file for DefectDojo support, for a Docker Compose or a Kubernetes install. It is the recommended way to collect diagnostics. `dojo-compose-cli diagnostics collect` and `dojo-helm-cli diag` are unchanged and still work, under the old names and under `dojo-deploy compose` and `dojo-deploy kubernetes`.
 
+Run it with no options and it finds the install by itself:
+
 ```bash
-sudo -E dojo-deploy support-bundle --config install.json
+sudo -E dojo-deploy support-bundle
 ```
 
-It reads the install file named by `--config`. A Docker Compose install needs root and `DOJO_CLI_KEY` so it can read the CLI's configuration.
+- **Docker Compose:** when the host has `/etc/defectdojo/compose.config`, it collects from the install that configuration points to. A Docker Compose install needs root and `DOJO_CLI_KEY` so it can read the CLI's configuration.
+- **Kubernetes:** otherwise, or when you pass any of `--namespace`, `--release`, `--context` or `--kubeconfig`, it collects the Helm release `--release` in `--namespace`. Both default to `dojopro`, on the kubeconfig's current context. These are the same defaults as `dojo-helm-cli deploy status`. `--namespace` and `--release` must be Kubernetes names: lowercase letters, digits and `-`, at most 63 characters.
 
-An install made with `first-install` or `dojo-helm-cli deploy` has no install file. For those installs, use `diagnostics collect` or `diag`.
+```bash
+dojo-deploy support-bundle --namespace dojopro --release dojopro --context my-cluster
+```
+
+On a Docker Compose host that has lost `/etc/defectdojo/compose.config`, it falls back to Kubernetes. If no release answers, it tells you to pass `--config` or restore that file.
+
+If you installed with `dojo-deploy install`, pass the install file instead: `dojo-deploy support-bundle --config install.json`. Without an install file, the `check` collector has nothing to read, and on Kubernetes neither does the `config` collector.
 
 **What it collects.** On Docker Compose: instance details, install logs, the `check` results, the configuration, containers, container logs, certificates, an HTTPS probe and the systemd unit. On Kubernetes: instance details, install logs, the `check` results, the configuration, the Helm release, cluster resources, pod logs, certificates and an HTTPS probe. It keeps the last 2,000 lines of each log (`--tail` changes that). `--skip` leaves out named collectors. A collector that fails is recorded, and the others still run.
 
