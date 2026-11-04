@@ -988,9 +988,57 @@ class TestExportManifest(DojoAPITestCase):
             ),
         )
 
-    def test_deduplication_ignores_a_scan_type_the_customer_removed(self):
+    def test_deduplication_sends_a_removed_algorithm_as_legacy(self):
+        algorithms = {key: value for key, value in settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED.items() if key != "Anchore Engine Scan"}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {"Anchore Engine Scan": "legacy"},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(DEDUPLICATION_ALGORITHM_PER_PARSER=algorithms),
+        )
+
+    def test_deduplication_sends_a_removed_field_list_as_an_empty_list(self):
         fields = {key: value for key, value in settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED.items() if key != "Anchore Engine Scan"}
-        self.assertEqual({}, self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields)["hashcode_fields_per_scanner"])
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {"Anchore Engine Scan": []},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields),
+        )
+
+    def test_deduplication_sends_a_removed_null_cwe_value_as_true(self):
+        null_cwe = {key: value for key, value in settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED.items() if key != "Checkmarx Scan"}
+        self.assertFalse(settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED["Checkmarx Scan"])
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {"Checkmarx Scan": True},
+            },
+            self.deduplication(HASHCODE_ALLOWS_NULL_CWE=null_cwe),
+        )
+
+    def test_deduplication_skips_a_removed_scan_type_whose_fallback_is_its_shipped_value(self):
+        null_cwe = {key: value for key, value in settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED.items() if key != "Anchore Engine Scan"}
+        self.assertTrue(settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED["Anchore Engine Scan"])
+        self.assertEqual({}, self.deduplication(HASHCODE_ALLOWS_NULL_CWE=null_cwe)["hashcode_allows_null_cwe"])
+
+    def test_the_fallback_values_are_what_a_test_uses_without_the_scan_type(self):
+        test = Test(scan_type="Checkmarx Scan", test_type=Test_Type(name="Checkmarx Scan"))
+        with override_settings(
+            DEDUPLICATION_ALGORITHM_PER_PARSER={},
+            HASHCODE_FIELDS_PER_SCANNER={},
+            HASHCODE_ALLOWS_NULL_CWE={},
+        ):
+            rules = self.client.get(self.url).json()["deduplication"]
+            self.assertEqual(rules["algorithm_per_parser"]["Checkmarx Scan"], test.deduplication_algorithm)
+            self.assertFalse(test.hash_code_fields)
+            self.assertEqual([], rules["hashcode_fields_per_scanner"]["Checkmarx Scan"])
+            self.assertEqual(rules["hashcode_allows_null_cwe"]["Checkmarx Scan"], test.hash_code_allows_null_cwe)
 
     def test_scan_types_are_distinct_and_sorted(self):
         self.assertEqual(

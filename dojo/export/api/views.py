@@ -300,24 +300,27 @@ def _plain(value):
     return list(value) if isinstance(value, tuple) else value
 
 
-def _set_by_customer(current: dict, shipped: dict) -> dict:
+def _set_by_customer(current: dict, shipped: dict, *, fallback) -> dict:
+    effective = {key: _plain(current.get(key, fallback)) for key in current.keys() | shipped.keys()}
     return {
-        key: _plain(current[key])
-        for key in sorted(current)
-        if key not in shipped or _plain(shipped[key]) != _plain(current[key])
+        key: effective[key]
+        for key in sorted(effective)
+        if key not in shipped or _plain(shipped[key]) != effective[key]
     }
 
 
 def deduplication_rules() -> dict:
     return {
         "algorithm_per_parser": _set_by_customer(
-            settings.DEDUPLICATION_ALGORITHM_PER_PARSER, settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED,
+            settings.DEDUPLICATION_ALGORITHM_PER_PARSER,
+            settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED,
+            fallback=settings.DEDUPE_ALGO_LEGACY,
         ),
         "hashcode_fields_per_scanner": _set_by_customer(
-            settings.HASHCODE_FIELDS_PER_SCANNER, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED,
+            settings.HASHCODE_FIELDS_PER_SCANNER, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, fallback=[],
         ),
         "hashcode_allows_null_cwe": _set_by_customer(
-            settings.HASHCODE_ALLOWS_NULL_CWE, settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED,
+            settings.HASHCODE_ALLOWS_NULL_CWE, settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, fallback=True,
         ),
     }
 
