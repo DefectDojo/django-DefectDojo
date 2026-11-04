@@ -5,8 +5,9 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
+from django.conf import settings
 from django.core.files.base import ContentFile
-from django.test import RequestFactory
+from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.urls import reverse
 from drf_spectacular.generators import SchemaGenerator
 from rest_framework.authtoken.models import Token
@@ -124,6 +125,42 @@ def seed_check_lists(case):
     case.check_list.other_issues.add(second)
     case.check_list.data_issues.add(case.foreign_finding)
     Check_List.objects.create(engagement=case.checked_engagement, session_management="Fail").session_issues.add(first)
+
+
+SHIPPED_DEDUPLICATION_MAPS = {
+    "HASHCODE_FIELDS_PER_SCANNER_SHIPPED": "HASHCODE_FIELDS_PER_SCANNER",
+    "DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED": "DEDUPLICATION_ALGORITHM_PER_PARSER",
+    "HASHCODE_ALLOWS_NULL_CWE_SHIPPED": "HASHCODE_ALLOWS_NULL_CWE",
+}
+
+
+class TestShippedDeduplicationSettings(SimpleTestCase):
+    def test_each_shipped_map_is_a_separate_copy_of_its_map(self):
+        for shipped_name, name in SHIPPED_DEDUPLICATION_MAPS.items():
+            with self.subTest(shipped_name):
+                shipped = getattr(settings, shipped_name)
+                self.assertTrue(shipped)
+                self.assertIsNot(getattr(settings, name), shipped)
+
+    def test_overriding_a_map_leaves_the_shipped_copy_as_it_was(self):
+        before = {name: json.dumps(getattr(settings, name), sort_keys=True) for name in SHIPPED_DEDUPLICATION_MAPS}
+        with override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={"Only Scan": ["title"]},
+            DEDUPLICATION_ALGORITHM_PER_PARSER={"Only Scan": "legacy"},
+            HASHCODE_ALLOWS_NULL_CWE={"Only Scan": False},
+        ):
+            for name in SHIPPED_DEDUPLICATION_MAPS:
+                self.assertEqual(before[name], json.dumps(getattr(settings, name), sort_keys=True))
+
+    def test_changing_a_field_list_in_place_leaves_the_shipped_copy_as_it_was(self):
+        scan_type = next(iter(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED))
+        shipped = list(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED[scan_type])
+        live = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
+        live.append("mitigation")
+        try:
+            self.assertEqual(shipped, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED[scan_type])
+        finally:
+            live.pop()
 
 
 @versioned_fixtures
