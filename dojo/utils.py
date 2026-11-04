@@ -90,6 +90,7 @@ from dojo.models import (
     Test_Type,
     User,
 )
+from dojo.site_url import absolute_url, site_url
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1506,14 +1507,13 @@ def max_safe(full_list):
 
 
 def get_full_url(relative_url):
-    return f"{get_site_url()}{relative_url}"
+    # Kept for existing callers; dojo.site_url.absolute_url is the helper to use.
+    return absolute_url(relative_url)
 
 
 def get_site_url():
-    if settings.SITE_URL:
-        return settings.SITE_URL
-    logger.warning("SITE URL undefined in settings, full_url cannot be created")
-    return "settings.SITE_URL"
+    # Kept for existing callers; dojo.site_url.site_url is the helper to use.
+    return site_url()
 
 
 @receiver(post_save, sender=User)
