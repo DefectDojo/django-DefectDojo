@@ -25,7 +25,9 @@ one the resolver chose, so the error propagates to the caller instead.
 import logging
 from collections.abc import Callable
 
-logger = logging.getLogger(__name__)
+# The empty-setting warning keeps the logger it was always emitted under
+# (dojo.utils.get_site_url), so log filters and alerts on that name keep matching.
+logger = logging.getLogger("dojo.utils")
 
 # Single-slot registry, mutated in place so no `global` rebinding is needed. The stored
 # callable returns the base URL; None means "use default_site_url()".

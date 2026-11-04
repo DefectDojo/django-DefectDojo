@@ -28,7 +28,7 @@ class SiteUrlHelperTest(SimpleTestCase):
 
     @override_settings(SITE_URL="")
     def test_empty_setting_returns_placeholder_and_warns(self):
-        with self.assertLogs("dojo.site_url", level="WARNING") as logs:
+        with self.assertLogs("dojo.utils", level="WARNING") as logs:
             self.assertEqual("settings.SITE_URL", site_url())
         self.assertIn("SITE URL undefined in settings", logs.output[0])
 
