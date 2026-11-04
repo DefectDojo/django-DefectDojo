@@ -30,6 +30,13 @@ Beyond the card, the intelligence is a working surface across the app:
   Edit Finding forms — useful when no feed covers a finding (for example, one with no CVE).
   On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
   value; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
+* an **Exploit Evidence filter** on the findings list (**Add Filter > Exploit Evidence**). It
+  keeps the findings where any of their vulnerability IDs has a Metasploit module, a Nuclei
+  template or an Exploit-DB entry, and **Exclude** keeps every other finding. The filter reads
+  the current feed, while the Exploit Maturity badge holds a downgrade for the stability window
+  described under [Trust and score stability](#trust-and-score-stability) (14 days by default).
+  So for the length of that window after a source drops an exploit, the badge and the filter
+  can disagree.
 * an **"Urgent & Actively Exploited"** tile on the Priority Insights dashboard (**Overview > Insights > Priority**), counting
   active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
   exact filtered findings list
@@ -165,8 +172,11 @@ except intelligence freshness.
 
 ## Enabling it
 
-The feature ships off by default. Administrators can enable it directly, or first run it
-in **shadow mode** — which computes the would-be scores without changing anything live and
-produces a drift report showing exactly which findings would move — before turning it on.
-Contact support or see the operations runbook for the recommended rollout on large
-instances.
+From release 3.2.200, threat intelligence is on for every instance, with nothing to switch
+on. A self-hosted instance still needs one of the bundle options under
+[Self-hosted deployments](#self-hosted-deployments).
+
+Earlier releases shipped the feature off. On those, administrators can enable it directly, or
+first run it in **shadow mode**, which computes the would-be scores without changing anything
+live and produces a drift report showing exactly which findings would move. Contact support
+for the recommended rollout on large instances, or to switch the feature off.
