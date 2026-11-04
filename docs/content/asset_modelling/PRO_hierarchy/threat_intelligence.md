@@ -30,13 +30,19 @@ Beyond the card, the intelligence is a working surface across the app:
   Edit Finding forms — useful when no feed covers a finding (for example, one with no CVE).
   On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
   value; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
-* an **Exploit Evidence filter** on the findings list (**Add Filter > Exploit Evidence**). It
-  keeps the findings where any of their vulnerability IDs has a Metasploit module, a Nuclei
-  template or an Exploit-DB entry, and **Exclude** keeps every other finding. The filter reads
-  the current feed, while the Exploit Maturity badge holds a downgrade for the stability window
-  described under [Trust and score stability](#trust-and-score-stability) (14 days by default).
-  So for the length of that window after a source drops an exploit, the badge and the filter
-  can disagree.
+* an **Exploit Evidence filter** on the findings list (**Add Filter > Exploit Evidence**). Pick
+  one or more sources (a Metasploit module, a Nuclei template, an Exploit-DB entry), and it keeps
+  the findings where any of their vulnerability IDs has one of the sources you picked;
+  **Exclude** keeps every other finding. The filter and the Threat Intelligence card can show
+  different things in two cases:
+  * The card and the Exploit Maturity badge describe one vulnerability ID per finding, the one
+    with the strongest evidence, while the filter checks every ID. A finding with several IDs
+    can match "Metasploit Module" through an ID the card does not show, so the card has no
+    Metasploit chip.
+  * The filter reads the current feed, while the badge holds a downgrade for the stability
+    window described under [Trust and score stability](#trust-and-score-stability) (14 days by
+    default). So for the length of that window after a source drops an exploit, the badge and
+    the filter can disagree.
 * an **"Urgent & Actively Exploited"** tile on the Priority Insights dashboard (**Overview > Insights > Priority**), counting
   active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
   exact filtered findings list
