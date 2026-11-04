@@ -50,7 +50,7 @@ Four conventions run through the whole menu:
 
 ![The Pinned section at the top of the sidebar](images/sidebar_pinned_pages.png)
 
-Hover any page row in the sidebar or in a collapsed-rail flyout and a pin appears at its end; on touch screens the pin always shows. In Global Search, a page result's row actions menu (the **...** button, or **Option+Enter** / **Alt+Enter**) offers **Pin to Sidebar** and **Remove Sidebar Pin**. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
+Hover any page row in the sidebar or in a collapsed-rail flyout and a pin appears at its end; on touch screens the pin always shows. In Global Search, a page result's row actions menu (the **...** button, or **Option+Enter** / **Alt+Enter**) offers **Pin to Sidebar** and **Remove Sidebar Pin**. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to, or one your [sidebar preset](/navigation/pro__sidebar_presets/) hides, simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
 
 A page pinned from inside a group keeps the group's name and icon, since the entry's own name often leans on the group it came from: pinning **All** from **Findings** shows **Findings › All**, so it cannot be mistaken for the **All** under Assets. When the sidebar is too narrow, the group name shortens first and the page name stays whole; hover the row to see its full location. Pages that sit directly in a section, such as **My Work**, show just their name.
 
@@ -181,7 +181,8 @@ The last category, **Elsewhere in the app**, lists pages that configure DefectDo
 The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
 
 - **[Form Configuration](/navigation/pro__form_configuration/)**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
-- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
+- **[Sidebar Presets](/navigation/pro__sidebar_presets/)**: named presets that hide sidebar entries, shared with everyone or kept to one person, with one shared preset as the instance default. A preset hides, it never denies: direct links and the API keep working.
+- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), [sidebar presets](/navigation/pro__sidebar_presets/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, sidebar presets, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
 ## What moved
 
@@ -241,6 +242,8 @@ Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/
 
 The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
+Flags remove an entry for the whole instance. To take entries away for some people and not others, or for yourself, use a [sidebar preset](/navigation/pro__sidebar_presets/): a named list of hidden entries that leaves every page reachable by its link.
+
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 
 ## The classic sidebar
@@ -249,5 +252,6 @@ This layout is the only sidebar. The classic sidebar it replaced, and the **Menu
 
 ## Related
 
+* [Sidebar Presets](/navigation/pro__sidebar_presets/): hiding entries with named, sharable presets
 * [Menu Badges](/navigation/pro__menu_badges/): what the `NEW`, `BETA`, `SOON`, `LEGACY` and `DEPRECATED` tags mean
 * [Feature Flags](/admin/feature_flags/pro__feature_flags/): turning optional features on and off
