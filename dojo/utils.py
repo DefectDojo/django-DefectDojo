@@ -2350,26 +2350,37 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
 
     This function assumes all permissions have previously validated/verified
     by the caller of this function.
+
+    The file is read through the field's storage backend (``storage.exists``,
+    ``storage.size`` and ``storage.open``), never through a path built from
+    ``MEDIA_ROOT``, so it works with any configured Django storage backend.
     """
     # Quick check to ensure we have the right type of object
     if not isinstance(file_object, FileUpload):
         msg = f"FileUpload object expected but type <{type(file_object)}> received."
         raise TypeError(msg)
-    # Determine the path of the file on disk within the MEDIA_ROOT
-    file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
+    field_file = file_object.file
+    storage = field_file.storage
+    name = field_file.name
     # Clean the title by removing some problematic characters
     cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
-    # The database may reference a file that is no longer present on disk (e.g. media
-    # that was never persisted or was removed out of band). Reading file_object.file.size
-    # in that case raises a low-level FileNotFoundError that surfaces as an HTTP 500.
+    # The database may reference a file that is no longer present in storage (e.g. media
+    # that was never persisted or was removed out of band). Reading its size in that case
+    # raises a low-level FileNotFoundError that surfaces as an HTTP 500.
     # Treat a missing file as a 404 so the caller gets a clean "not found" response.
-    if not Path(file_path).is_file():
+    if not name or not storage.exists(name):
         msg = f"File {cleaned_file_name} could not be found on disk"
         raise Http404(msg)
-
-    return generate_file_response_from_file_path(
-        file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
+    full_file_name = f"{cleaned_file_name}{Path(name).suffix}"
+    response = FileResponse(
+        storage.open(name, "rb"),
+        filename=full_file_name,
+        content_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
     )
+    # Add some important headers
+    response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
+    response["Content-Length"] = storage.size(name)
+    return response
 
 
 def generate_file_response_from_file_path(
