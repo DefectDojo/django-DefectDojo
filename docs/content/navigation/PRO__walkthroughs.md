@@ -101,7 +101,9 @@ Beyond the App Tour, each area that people ask about most has its own tour. A to
 
 ## Task walkthroughs
 
-A task walkthrough goes one step further than a tour: you do the job for real while it guides you, and what you create or change stays. Each step outlines the control to use, the card says what it does, and the walkthrough moves on when the action has actually succeeded, such as when a form is saved or a record opens. If the action fails, the walkthrough waits on the same step until it works.
+A task walkthrough goes one step further than a tour: you can do the job for real while it guides you, and what you create or change stays. Each step outlines the control to use, the card says what it does, and the walkthrough moves on when the action has actually succeeded, such as when a form is saved or a record opens. If the action fails, the walkthrough waits on the same step until it works.
+
+Saving is optional outside the [sandbox](/admin/sandbox/pro__sandbox/). A step that saves a record (a user, a group, an Engagement, a connection, a rule) also offers **Next**, which closes the form without saving anything. The steps after it then show a record of that kind that already exists, or are skipped when there is none, and the last step says so. A step that changes data on the spot, such as marking a false positive, closing Findings in bulk, turning on Locations, pushing a Finding to Jira or running a rule, offers **Next** too, so you can read the rest without making the change. In the sandbox, where the data is sample data, a step that saves a record waits for the save. When the sandbox is turned on, those steps offer **Open the Sandbox** everywhere else, which starts the same task there.
 
 Because a task changes real data, it practices on the record you started it from when it can, and otherwise on the least important one it finds that you are allowed to change, such as the lowest-severity active Finding you can edit. A task that changes a Finding's status, such as marking a false positive or closing Findings in bulk, says how to undo it. What a task creates (an Asset, an Engagement, a Test, a user, a report) stays, and is deleted like any other record if you do not want to keep it. The [sandbox](/admin/sandbox/pro__sandbox/) is a good place to try one first.
 
@@ -112,7 +114,7 @@ A few things work differently from a tour:
 * A task does not pick up again on another page if one of its steps could not be found. Start it again from the lightbulb.
 * A task works on a record you are allowed to change: it picks one where you hold the permission the task needs, and steps that need a further permission you do not have there, such as importing, are skipped. A task with no record you can change is greyed out in the lightbulb, with the reason.
 
-Some tasks set up a connection to another system, such as a Jira site or a scanner. Those need that system's details to hand (a URL and credentials), and the walkthrough waits on the step that asks for them.
+Some tasks set up a connection to another system, such as a Jira site or a scanner. Saving the connection needs that system's details to hand (a URL and credentials); without them, **Next** moves past the form and the later steps use a connection that already exists. These tasks are greyed out in the sandbox, which does not connect to other systems.
 
 | Task | Start it from | What you do | Who sees it |
 |---|---|---|---|
