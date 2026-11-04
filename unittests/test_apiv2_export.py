@@ -658,7 +658,7 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(
             {
                 "schema", "generated_at", "source", "max_file_bytes", "token", "scan_types", "reference",
-                "product_types", "products", "totals", "announcement", "login_banner", "features",
+                "product_types", "products", "totals", "announcement", "login_banner", "features", "deduplication",
             },
             set(self.manifest),
         )
@@ -923,6 +923,65 @@ class TestExportManifest(DojoAPITestCase):
         self.assertNotIn(None, rows)
         for row in rows:
             self.assertEqual(set(), {"archived_at", "archive_batch"} & set(row))
+
+    def deduplication(self, **overrides):
+        with override_settings(**overrides):
+            return self.client.get(self.url).json()["deduplication"]
+
+    def test_deduplication_is_three_empty_maps_when_nothing_differs(self):
+        empty = {"algorithm_per_parser": {}, "hashcode_fields_per_scanner": {}, "hashcode_allows_null_cwe": {}}
+        self.assertEqual(empty, self.manifest["deduplication"])
+
+    def test_deduplication_lists_a_changed_field_list_only(self):
+        fields = {**settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, "Anchore Engine Scan": ["title", "cwe"]}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {"Anchore Engine Scan": ["title", "cwe"]},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields),
+        )
+
+    def test_deduplication_lists_a_changed_algorithm_only(self):
+        algorithms = {**settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED, "Anchore Engine Scan": "unique_id_from_tool"}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {"Anchore Engine Scan": "unique_id_from_tool"},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(DEDUPLICATION_ALGORITHM_PER_PARSER=algorithms),
+        )
+
+    def test_deduplication_lists_a_changed_null_cwe_value_only(self):
+        null_cwe = {**settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, "Anchore Engine Scan": False}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {"Anchore Engine Scan": False},
+            },
+            self.deduplication(HASHCODE_ALLOWS_NULL_CWE=null_cwe),
+        )
+
+    def test_deduplication_lists_a_scan_type_the_shipped_maps_lack(self):
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {"Acme Scan": "hash_code"},
+                "hashcode_fields_per_scanner": {"Acme Scan": ["title", "file_path"]},
+                "hashcode_allows_null_cwe": {"Acme Scan": True},
+            },
+            self.deduplication(
+                DEDUPLICATION_ALGORITHM_PER_PARSER={**settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED, "Acme Scan": "hash_code"},
+                HASHCODE_FIELDS_PER_SCANNER={**settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, "Acme Scan": ["title", "file_path"]},
+                HASHCODE_ALLOWS_NULL_CWE={**settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, "Acme Scan": True},
+            ),
+        )
+
+    def test_deduplication_ignores_a_scan_type_the_customer_removed(self):
+        fields = {key: value for key, value in settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED.items() if key != "Anchore Engine Scan"}
+        self.assertEqual({}, self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields)["hashcode_fields_per_scanner"])
 
     def test_scan_types_are_distinct_and_sorted(self):
         self.assertEqual(

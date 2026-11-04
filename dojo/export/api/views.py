@@ -296,6 +296,24 @@ def _summed(products: list[dict], *, file_counts: bool) -> dict[str, int | None]
     }
 
 
+def _set_by_customer(current: dict, shipped: dict) -> dict:
+    return {key: current[key] for key in sorted(current) if key not in shipped or shipped[key] != current[key]}
+
+
+def deduplication_rules() -> dict:
+    return {
+        "algorithm_per_parser": _set_by_customer(
+            settings.DEDUPLICATION_ALGORITHM_PER_PARSER, settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED,
+        ),
+        "hashcode_fields_per_scanner": _set_by_customer(
+            settings.HASHCODE_FIELDS_PER_SCANNER, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED,
+        ),
+        "hashcode_allows_null_cwe": _set_by_customer(
+            settings.HASHCODE_ALLOWS_NULL_CWE, settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED,
+        ),
+    }
+
+
 def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
     counts = product_counts(max_file_bytes, file_counts=file_counts)
     products = [
@@ -336,6 +354,7 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
         "features": ["check_lists"],
+        "deduplication": deduplication_rules(),
         "announcement": single_row(ExportAnnouncementSerializer),
         "login_banner": single_row(ExportLoginBannerSerializer),
         "scan_types": sorted(
