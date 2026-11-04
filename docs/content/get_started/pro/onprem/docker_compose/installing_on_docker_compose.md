@@ -14,6 +14,8 @@ The result is two hosts. One runs the application and its supporting services un
 
 Almost all of the work is done by `dojo-compose-cli`, which DefectDojo provides alongside your license. Its `first-install` command is an interactive wizard that configures the deployment, pulls the images, starts everything, and registers a systemd service.
 
+`dojo-compose-cli` is now part of `dojo-deploy`, which runs the same commands as `dojo-deploy compose`. Existing installs and the steps on this page keep working. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for the command mapping and what changes.
+
 ## Before you start
 
 Size the deployment first. The hardware sizing guidance in this section covers what to provision for both the application host and the database.

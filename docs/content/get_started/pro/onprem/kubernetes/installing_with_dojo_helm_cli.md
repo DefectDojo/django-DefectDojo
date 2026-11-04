@@ -10,6 +10,8 @@ audience: pro
 
 It does not replace the Helm chart or its installation guide. The CLI's `deploy` command hands off to a bootstrap script that makes sensible choices for each platform. If you need control over every value, or you deploy through GitOps, follow the full [DefectDojo Pro Installation Guide](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/) and use the CLI for the parts around it: registry access, pulling artifacts, preflight checks and diagnostics.
 
+`dojo-helm-cli` is now part of `dojo-deploy`, which runs the same commands as `dojo-deploy kubernetes`. Existing installs and the steps on this page keep working. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for the command mapping and what changes.
+
 ## Before you start
 
 You need a Kubernetes cluster and a workstation with access to it. Size the cluster first, using the [hardware sizing guidance](/get_started/pro/onprem/hardware_sizing/).
