@@ -9,7 +9,7 @@ weight: 5
 
 DefectDojo has two API endpoints that export data:
 
-- `GET /api/v2/export/manifest/` describes the instance. It lists the product types and products with their counts, the reference data and the users. It also holds the announcement and the login banner.
+- `GET /api/v2/export/manifest/` describes the instance. It lists the product types and products with their counts, the reference data and the users. It also holds the announcement, the login banner and the deduplication rules.
 - `GET /api/v2/export/products/{id}/` streams one product with its engagements, tests, findings, notes, files and risk acceptances.
 
 Use them to back up a product, move it to another instance, or keep a mirror.
@@ -45,6 +45,7 @@ The response is one JSON object with these keys:
 | `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
 | `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
+| `deduplication` | The deduplication rules that the customer set on the instance, as `{algorithm_per_parser, hashcode_fields_per_scanner, hashcode_allows_null_cwe}`. Each one is a map from a scan type to a value: the algorithm, the list of hash fields, or `true` or `false` for a missing CWE. A map holds only the scan types whose value differs from the settings that DefectDojo ships, and the scan types that DefectDojo does not ship. A map is empty when the customer changed nothing. An older instance has no `deduplication` key. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
 | `reference` | The lookup tables that the product export refers to by id. They are `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
@@ -279,7 +280,7 @@ An example `end` line:
 - The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
 - Test import history, languages, technologies and benchmarks.
 - User passwords and password hashes. A user entry has no `password` field.
-- Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement and the login banner are in the manifest.
+- Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement, the login banner and the deduplication rules are in the manifest.
 
 A `duplicate_finding` id can point to a finding in another product. That id dangles in the export of this product.
 An `accepted_findings` id on a risk acceptance line can point to a finding in another product in the same way.
