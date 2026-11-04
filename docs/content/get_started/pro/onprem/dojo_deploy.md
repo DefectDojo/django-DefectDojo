@@ -154,19 +154,32 @@ One compose command is new: `certs rotate-internal` gives an install its own int
 
 ## What changed since dojo-compose-cli 2.1.9 and dojo-helm-cli 4.0.1
 
-Most changes are fixes. The ones you can notice after an update:
+Most changes are fixes. The ones you are most likely to notice after an update are below. The release notes list every change.
+
+> **TODO (owner, remove before merge):** link the public release notes here (for example a GitHub release page or a docs page). The source file is `docs/RELEASE_NOTES.md` in the private dojo-deploy repository, so a link to it would not work for customers.
+
+**Both CLIs**
 
 - **The note** described above, in a terminal only.
-- **systemd (Docker Compose):** `app start`, `app restart`, `app upgrade` and `doctor --fix` add a drop-in, `/etc/systemd/system/defectdojo-compose.service.d/50-dojo-compose-cli-stop-timeout.conf`, which gives the service time to stop cleanly. `doctor` warns when it is missing.
-- **Upgrades:** the CLI refuses to install a DefectDojo release that has been withdrawn, and refuses upgrade paths that are not supported.
-- **Files (Docker Compose):** the CLI sets file modes and ownership in the install directory, and writes its configuration file in one step, so a crash cannot leave it half-written.
-- **SELinux hosts (Docker Compose):** when Docker has SELinux enabled, the CLI loads `docker-compose.selinux.yml` (shipped with DefectDojo Pro 3.4.202 and later) so Docker labels the bind mounts. `doctor` reports unlabelled ones.
-- **`dojo-helm-cli deploy status`:** if the release history cannot be read, the command warns and carries on. Warnings go to standard error, so JSON output on standard output stays clean.
-- **`dojo-helm-cli diag`:** redaction covers more secrets.
-- **macOS:** `dojo-compose-cli` is no longer built for macOS. Docker Compose installs run on Linux.
-- **Shogun secret (Docker Compose):** the CLI generates a `DD_SHOGUN_SHARED_SECRET` for each install, and replaces it when it holds a value DefectDojo ships. A value you set yourself is kept. With Shogun on, DefectDojo refuses to start on an unset, short or shipped value.
+- **Revoked releases:** the CLIs read a signed list of DefectDojo Pro releases that have been withdrawn, from `https://intel.defectdojo.com/releases/revocations.json`. They refuse to install a revoked release, and "latest" skips it. If the list cannot be fetched, the CLI warns and carries on. Air-gapped Docker Compose installs do not fetch it. If your hosts reach the internet through an allowlist, add `intel.defectdojo.com`.
 
-> **TODO (owner, remove before merge):** link the release notes once they are published, and check this list against them.
+**dojo-compose-cli**
+
+- **Shogun secret:** the CLI generates a `DD_SHOGUN_SHARED_SECRET` for each install, and replaces it when it holds a value DefectDojo ships. A value you set yourself is kept. With Shogun on, DefectDojo refuses to start on an unset, short or shipped value.
+- **Stopping and systemd:** stopping the stack waits out the import service's stop grace period on releases that have one. `app start`, `app restart`, `app upgrade` and `doctor --fix` add a drop-in, `/etc/systemd/system/defectdojo-compose.service.d/50-dojo-compose-cli-stop-timeout.conf`, which sets `TimeoutStopSec=4200`. The unit file itself is not changed.
+- **Upgrade refusals:** an install older than 2.58.0 must upgrade to 2.58.4 before 3.0.0 / 2.59.0 or later. `app upgrade` also refuses, before changing anything, when the installed or target version cannot be read (for example an install recorded as `latest`).
+- **`doctor`:** it checks more things (the systemd stop timeout, a revoked running release, an internal CA shared by every install, SELinux labels, Docker user namespace remapping). Each is a warning, so plain `doctor` still exits 0, but `doctor --strict` exits non-zero until it is fixed.
+- **TLS material:** a first install generates its own internal CA and service certificates. Existing installs keep theirs, and `doctor` warns about a shared CA. The new `certs rotate-internal` replaces it.
+- **Files:** `media/` belongs to the containers' user (uid 1001), `customizations/` is created with mode 0755 whatever the umask, and the configuration file is written in one step, so a crash cannot leave it half-written.
+- **SELinux hosts:** when Docker has SELinux enabled, the CLI loads `docker-compose.selinux.yml` from the deployment files so Docker labels the bind mounts. `doctor` reports unlabelled ones.
+- **Rootless Docker:** the systemd unit keeps `DOCKER_HOST` and no longer starts the rootful Docker daemon at boot.
+- **macOS:** the compose CLI is published for Linux only (amd64 and arm64). On macOS, `update-binary` fails, and once a newer release is published, `app upgrade`, image pulls, first install and deployment downloads refuse to run.
+
+**dojo-helm-cli**
+
+- **`deploy status`:** 4.0.1 printed `helm status -o json` as it came, including the release's values, which hold the license and passwords. It now prints a summary (name, namespace, status, revision, chart, app version, notes) with secrets removed. **Scripts that parsed the old JSON need `--output json`**, which prints those fields and never the values. Warnings go to standard error. If the release history cannot be read, the command warns and still exits 0. Each run also checks the revoked-release list and waits at most 2 seconds for it.
+- **`diag`:** release secrets are no longer bundled. `--no-redact` keeps values as they are, but Secret data is still dropped.
+- **New flags:** `deploy` takes `--kubeconfig` and `--context`. `deploy status` takes `--output` (`table` or `json`). `preflight` takes `--profile`. `download-artifacts` takes `--image-platform` and `--overwrite`. Without `--overwrite`, if a `dojopro/` chart directory in `--output-dir` differs from the pulled chart, the CLI asks on a terminal and stops when there is no terminal.
 
 ## Support bundle
 
