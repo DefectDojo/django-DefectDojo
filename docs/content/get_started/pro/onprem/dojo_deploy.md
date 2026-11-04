@@ -1,6 +1,6 @@
 ---
 title: "Moving to dojo-deploy"
-description: "dojo-deploy replaces dojo-compose-cli and dojo-helm-cli: what changes for an existing install, the command mapping, the support bundle, and how to roll back"
+description: "dojo-deploy replaces dojo-compose-cli and dojo-helm-cli: what changes for an existing install, the command mapping, the support bundle, and what to do if a release has a problem"
 draft: false
 weight: 7
 audience: pro
@@ -77,7 +77,9 @@ Automation that runs the CLI on a terminal (`expect`, `script`, a pseudo-termina
 
 ## Getting dojo-deploy
 
-> **TODO (owner, remove before merge):** say where customers download `dojo-deploy` (archive, registry image or bucket path) and which version is the first release. The `dojo-deploy/executables` registry repository does not exist yet. Until this is settled, keep using `dojo-compose-cli` and `dojo-helm-cli`.
+`dojo-deploy` is published to `us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-deploy/executables`, in the same DefectDojo Pro registry that `dojo-compose-cli` and `dojo-helm-cli` come from. You log in with your license as you do for those CLIs, and the host needs the same HTTPS access to `us-south1-docker.pkg.dev`. Nothing new needs to be allowlisted.
+
+> **TODO (owner, remove before merge):** add the exact download command and the first `dojo-deploy` version once the `dojo-deploy/executables` repository exists.
 
 Put the binary in a system directory on your `PATH`, such as `/usr/local/bin`, and check it:
 
@@ -162,12 +164,13 @@ Most changes are fixes. The ones you can notice after an update:
 - **`dojo-helm-cli deploy status`:** if the release history cannot be read, the command warns and carries on. Warnings go to standard error, so JSON output on standard output stays clean.
 - **`dojo-helm-cli diag`:** redaction covers more secrets.
 - **macOS:** `dojo-compose-cli` is no longer built for macOS. Docker Compose installs run on Linux.
+- **Shogun secret (Docker Compose):** the CLI generates a `DD_SHOGUN_SHARED_SECRET` for each install, and replaces it when it holds a value DefectDojo ships. A value you set yourself is kept. With Shogun on, DefectDojo refuses to start on an unset, short or shipped value.
 
-> **TODO (owner, remove before merge):** link the release notes (R8-3 writes the full list) and confirm this list against them.
+> **TODO (owner, remove before merge):** link the release notes once they are published, and check this list against them.
 
 ## Support bundle
 
-`dojo-deploy support-bundle` writes one file for DefectDojo support, for a Docker Compose or a Kubernetes install. It is the successor to `dojo-compose-cli diagnostics collect` and `dojo-helm-cli diag`. Both of those still work, under the old names and under `dojo-deploy compose` and `dojo-deploy kubernetes`.
+`dojo-deploy support-bundle` writes one file for DefectDojo support, for a Docker Compose or a Kubernetes install. It is the recommended way to collect diagnostics. `dojo-compose-cli diagnostics collect` and `dojo-helm-cli diag` are unchanged and still work, under the old names and under `dojo-deploy compose` and `dojo-deploy kubernetes`.
 
 ```bash
 sudo -E dojo-deploy support-bundle --config install.json
@@ -175,7 +178,7 @@ sudo -E dojo-deploy support-bundle --config install.json
 
 It reads the install file named by `--config`. A Docker Compose install needs root and `DOJO_CLI_KEY` so it can read the CLI's configuration.
 
-> **TODO (owner, remove before merge):** say what an install made with `first-install` or `dojo-helm-cli deploy`, which has no install file, passes to `--config`, or tell those users to keep using `diagnostics collect` and `diag`.
+An install made with `first-install` or `dojo-helm-cli deploy` has no install file. For those installs, use `diagnostics collect` or `diag`.
 
 **What it collects.** On Docker Compose: instance details, install logs, the `check` results, the configuration, containers, container logs, certificates, an HTTPS probe and the systemd unit. On Kubernetes: instance details, install logs, the `check` results, the configuration, the Helm release, cluster resources, pod logs, certificates and an HTTPS probe. It keeps the last 2,000 lines of each log (`--tail` changes that). `--skip` leaves out named collectors. A collector that fails is recorded, and the others still run.
 
@@ -183,9 +186,13 @@ It reads the install file named by `--config`. A Docker Compose install needs ro
 
 **Where it goes.** The bundle is a `.tar.gz` with mode `0600`, written to the current directory unless you pass `--output`. Nothing is uploaded. Look through it before you send it to support. `dojo-deploy support-bundle --validate <bundle.tar.gz>` checks that a bundle is valid.
 
-## Going back to the previous CLI
+## If a release has a problem
 
-`update-binary` does not keep the binary it replaces. To go back, install the earlier release by version.
+You don't need to pin a CLI version. If a `dojo-compose-cli`, `dojo-helm-cli` or `dojo-deploy` release turns out to be bad, DefectDojo withdraws it and publishes a fixed release. `update-binary`, or the automatic update `dojo-compose-cli` runs, then installs the fix.
+
+### Emergency only: installing an earlier release
+
+Use this only when support asks you to. `update-binary` does not keep the binary it replaces, so going back means installing an earlier release by version.
 
 **dojo-compose-cli.** Pin the version, and allow the downgrade:
 
@@ -193,7 +200,7 @@ It reads the install file named by `--config`. A Docker Compose install needs ro
 sudo -E dojo-compose-cli update-binary --version 2.1.9 --allow-downgrade
 ```
 
-The pin lasts until the next automatic update. `app upgrade`, `app pull-images`, `deploy download` and `first-install` update the CLI to the newest release first, as 2.1.9 already does.
+The pin lasts only until the next automatic update. `app upgrade`, `app pull-images`, `deploy download` and `first-install` update the CLI to the newest release first, and 2.1.9 does this too.
 
 **dojo-helm-cli.**
 
@@ -209,8 +216,6 @@ If `dojo-deploy compose` replaced `/usr/bin/dojo-compose-cli` with its wrapper, 
 sudo install -m 0755 /usr/bin/dojo-compose-cli.pre-dojo-deploy /usr/bin/dojo-compose-cli
 export DOJO_DEPLOY_SKIP_COMPOSE_LINK=true
 ```
-
-> **TODO (owner, remove before merge):** confirm that 2.1.9 and 4.0.1 stay published as version tags in the `executables` images after the first `dojo-deploy` release, and name the first `dojo-deploy`-built versions of each line.
 
 ## Questions or support
 
