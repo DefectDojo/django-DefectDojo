@@ -25,20 +25,29 @@ Both sets of commands now live in one binary. `dojo-deploy compose` runs the com
 When you run `dojo-compose-cli` or `dojo-helm-cli` by hand in a terminal, the CLI prints a two-line note before running your command:
 
 ```
-dojo-compose-cli is now part of dojo-deploy. Run "dojo-deploy compose <command>" instead.
-See https://docs.defectdojo.com/en/dojo-deploy/ (set DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 to hide this note).
+dojo-compose-cli is now part of dojo-deploy. Install dojo-deploy (see https://docs.defectdojo.com/get_started/pro/onprem/dojo_deploy/),
+then run "dojo-deploy compose <command>". Set DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 to hide this note.
 ```
 
-> **TODO (owner, remove before merge):** sync this text and URL with the merged notice in DefectDojo-Inc/dojo-deploy#197. Its review asks for a new first line (install dojo-deploy first) and for the URL to become this page's address.
-
 `dojo-helm-cli` prints the same note, naming `dojo-deploy kubernetes <command>` instead.
+
+If you have already installed `dojo-deploy` and run it under an old name (for example through the `/usr/bin/dojo-compose-cli` wrapper described [below](#getting-dojo-deploy)), the note reads:
+
+```
+dojo-compose-cli is now part of dojo-deploy. Run "dojo-deploy compose <command>" instead.
+See https://docs.defectdojo.com/get_started/pro/onprem/dojo_deploy/ (set DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 to hide this note).
+```
 
 The note goes to standard error. It never changes your command's output or its exit code, and it prints at most once per command, including when `app upgrade` restarts itself on an updated binary.
 
 It does not appear:
 
 - when standard error is not a terminal, so systemd units, cron jobs, CI and output piped or redirected to a file stay unchanged;
-- for `--version`, `--help`, `help`, or JSON output (`--output json`, `-o json`, `--json`);
+- for `--version`, or `-v` among the options before the command;
+- for help: `--help`, `-h`, `help` or `h`;
+- during shell completion;
+- for JSON output (`--output json`, `-o json`, `--json`);
+- with `--quiet` or `-q`, for example `app backup --quiet`;
 - when you run `dojo-deploy compose` or `dojo-deploy kubernetes`;
 - when `DOJO_DEPLOY_NO_MIGRATION_NOTICE` or `DOJO_CLI_UNATTENDED` is set to `1` or `true`.
 
