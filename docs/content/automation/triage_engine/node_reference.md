@@ -11,6 +11,10 @@ aliases:
 
 Triage Engine's nodes come in five categories, which this page follows. The AI, Alerts and DAST nodes appear in the palette only when the feature or licence they depend on is enabled, and are not covered on this page.
 
+Throughout this page, the **rule owner** is the identity the rule runs as: for a group's rule, the group's automation identity, and for an Instance rule, the person who owns it. See [Runs As](../sharing_and_versions/#runs-as).
+
+Some nodes also need a node family permission (Webhook, Messaging, Ticket, Report, Scan, Sensor or AI) before you can place them in a rule. The palette hides the ones you may not use. See [Node family permissions](../building_rules/#node-family-permissions).
+
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
 ## Triggers
@@ -317,6 +321,8 @@ A message about the whole batch cannot name one item's value: there, `{{ctx.look
 
 These nodes change Findings. Every change is attributed back to the rule, run and node that made it, and shows up on the Finding's provenance timeline.
 
+A Findings node changes only Findings the rule owner has permission to edit. A Finding the owner can see but not edit is passed on unchanged, and the node's entry in the run trace counts it, for example "12 findings not edited: no edit permission". If a rule reports skipped Findings you expected it to change, give the rule owner (for a group's rule, the group) an edit role on those Findings' Assets or Organizations.
+
 ### Set Severity
 
 `finding.set_severity`
@@ -445,6 +451,8 @@ Makes a group responsible for the Finding.
 |---------|-------|
 | **Group** | The group that owns these Findings. |
 
+In a group's rule, the group named must be one the group's automation identity can see. A run that meets a group it cannot see fails with an error naming it.
+
 ### Set Reviewers
 
 `finding.set_reviewers`
@@ -454,6 +462,8 @@ Puts the Finding under review by the selected users.
 | Setting | Notes |
 |---------|-------|
 | **Reviewers** | One or more users who should review these Findings. |
+
+In a group's rule, every reviewer must be a user the group's automation identity can see. A run that meets one it cannot see fails with an error naming the user.
 
 ### Accept Risk
 
@@ -792,6 +802,8 @@ When account names do not encode the OU, map account ids instead: read `AWS_ACCO
 
 Egress nodes are the nodes that leave DefectDojo. Every one of them records a [Delivery](../deliveries/) before anything is sent, and every one of them honours the rule's **Simulate** or **Live** mode.
 
+Most egress nodes belong to a node family with its own permission: **Call a Webhook** needs **Webhook Nodes**; Slack, Microsoft Teams, email and Amazon SNS need **Messaging Nodes**; the ticket nodes need **Ticket Nodes**; and **Generate a Report** needs **Report Nodes**. **Raise an In-App Alert** belongs to no family. See [Node family permissions](../building_rules/#node-family-permissions).
+
 The notification nodes (Slack, Teams, email, SNS, webhook, in-app alert) work in Finding and Asset rules alike: in an Asset rule the default message line becomes the Asset's name and organization, digests count by business criticality instead of severity, and a webhook body carries an `assets` list plus an `entity` key (its `findings` list stays present and empty, so existing receivers never meet a missing key). The ticket nodes and the report node stay Finding-only: tickets and reports track Findings.
 
 Several of them offer the same **One Message per Item** choice. Off, the node sends one message describing the whole batch, with a breakdown and a capped list of items. On, it sends one message per item.
@@ -943,6 +955,8 @@ Creates an in-app alert about the batch.
 
 Recipients still control this through their own **Rules Engine Match** notification setting, so an alert cannot bypass a user's notification preferences.
 
+In a group's rule, every recipient must be a user the group's automation identity can see. A run that meets one it cannot see fails with an error naming the user.
+
 A template rendered once for the whole batch (this node's **Title** and **Description**, and **Send an Email**'s **Subject** and **Body** with **One Message per Finding** off) has no single item to read from, so a Finding's or a webhook's own fields render empty there. It can use the run's facts (`{{ctx.rule_name}}`, `{{ctx.rule_id}}`, `{{ctx.run_id}}`, `{{ctx.count}}`), a scan group's `{{ctx.import_summary}}`, and `{{ctx.lookup_values}}`: the values a **Find Findings by a Value** lookup could not match, the first ten and then how many more.
 
 ### Generate a Report
@@ -953,7 +967,7 @@ Generates a report from a template, scoped to the Findings that reached this nod
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Report Template** | none | Which template to generate from. Required. |
+| **Report Template** | none | Which template to generate from. Required. Only templates the rule owner can see are offered: for a group's rule, the group's own templates, templates shared with the group or with everyone, and Instance templates it may read. |
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
 | **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |

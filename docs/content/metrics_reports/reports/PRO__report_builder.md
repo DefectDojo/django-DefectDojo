@@ -241,7 +241,9 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. Deleting a Generated Report needs a global role.
 
-**Templates**, **Blocks** and **Themes** are shared across every Organization, so their pages, and the matching entries under **Reporting** in the sidebar, need a global role. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
+**Templates**, **Blocks** and **Themes** are owned either by the instance or by a group (see [Group ownership](#group-ownership)). The Report Builder's **Templates**, **Blocks** and **Themes** pages, and the matching entries under **Reporting** in the sidebar, need a global role. A member of a group whose membership role carries **Report Template View** finds the group's templates, blocks and themes on the **Report Templates** tab of the group's page. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
+
+A group's report schedule runs as the group's automation identity, so the reports it generates are requested by that identity. Members of the group hold the same access the identity holds, so they can read those reports in **Generated Reports**.
 
 ### Report retention
 
@@ -275,6 +277,59 @@ A variable is filled in from wherever the report is generated:
 A report can only be about a finding or asset its requester is allowed to see. A generation that is missing a variable its Template uses is refused with a message naming it, rather than silently reporting on everything. A Template preview shows tokens as written and shows a placeholder in place of any Block that filters on a variable.
 
 The CSV, Excel and JSON formats read the same Blocks, so an export of a Template with variables is scoped exactly as its PDF. Widget Blocks are not part of those exports, but a Template's variables are one set whatever the format, so an export still asks for a variable that only a Widget Block uses.
+
+## Group ownership
+
+Templates, Blocks, Themes and report schedules can belong to a group instead of to the whole instance. A group's members then build and run their own reports without seeing, or being able to change, another group's.
+
+Group Ownership is a beta feature and is on by default. A superuser can turn it off under **Settings > Feature Flags**. While it is off, every template, block, theme and schedule behaves as an instance one.
+
+### Ownership tiers
+
+| Tier | Owner | Who can see it |
+|---|---|---|
+| **Group** | A group | Members of the group whose membership role carries **Report Template View**, and anyone holding **Report Template View** as a global role |
+| **Shared** | A group | Everyone above, plus members of the chosen groups whose membership role carries **Report Template View**. They can read and use it but not change it. |
+| **Everyone** | A group | Anyone who holds **Report Template View** through any role |
+| **Instance** | No group | The same people who could see it before Group Ownership existed |
+
+Every template, block, theme and schedule that existed before Group Ownership is an Instance one, and stays one until someone transfers it.
+
+The **Report Template** permissions sit in the **Group Content** table of a role. Held as a global role, they apply to every template, block, theme and schedule. Held as a group membership role, they apply to that group's. The built-in **Maintainer** role already carries **Report Template View**, **Add**, **Edit** and **Delete**, so a group member whose membership role is Maintainer can manage the group's templates without any further setup. See [Group Content permissions](/admin/user_management/pro__custom_rbac_roles/#group-content-permissions).
+
+### Creating, sharing and moving
+
+* **Owned By**, on the new Template, Block and Theme forms, chooses the owner: a group where your membership role carries **Report Template Add**, or **Instance** if you hold **Report Template Add** as a global role. With one choice it is already selected. **New** on a group's **Report Templates** tab selects that group.
+* The **Templates**, **Blocks** and **Themes** lists have an **Owner** column (the group, **Instance**, or **Unowned** for something whose group was deleted) and a **Scope** filter: **My Groups**, **Shared With Me**, **Everyone** and **Instance**.
+* **Share**, in a row's menu, sets **Visible To**: **Group** (the owning group only), **Specific Groups** (the owning group plus groups you choose, which can read but not change it), or **Everyone**. Sharing with everyone needs **Report Template Edit** as a global role.
+* **Transfer**, in the same menu, moves it to another group or to the instance. You need **Report Template Edit** on it and **Report Template Add** where it is going. Sharing starts over after a transfer.
+* **Duplicate** puts the copy with the original's owner when you can create there, and otherwise in the instance.
+
+A Template can only use Blocks and a Theme that whoever saves it can see: the group's own, those shared with one of their groups or with everyone, and Instance ones. Saving a Template that names a Block or Theme you cannot see is refused, and the message names it.
+
+### Report schedules
+
+A report schedule belongs to the owner of its Template. A schedule on a group's Template is the group's schedule, and it can only use that group's Templates. It runs as the group's automation identity, not as the person who created it, so:
+
+* its reports carry the group's data, the Organizations and Assets the group has been granted;
+* it keeps running when the person who created it leaves; and
+* the group's members can read the reports it generates.
+
+The group's page lists its schedules on its **Schedules** tab.
+
+Who can change a schedule depends on its owner:
+
+| Action | A group's schedule | An instance schedule |
+|---|---|---|
+| Create | **Report Template Edit** in the group (through the membership role or a global role) and membership of the group | Permission to run the Template |
+| Change (cadence, format, filters, pause or resume) | **Report Template Edit** in the group and membership of the group | Its creator only |
+| Delete | **Report Template Edit** in the group | Its creator, or someone holding the global permission to delete generated reports |
+
+Membership is required to create or change a group's schedule because the schedule acts with the group's access.
+
+### Unowned items
+
+Deleting a group does not delete what it owned. Its templates, blocks and themes are hidden from everyone except superusers and holders of **Report Template View** as a global role, and its schedules stop running. They wait under **Settings > Groups > Unowned Content**, which also lists report schedules whose creator was deleted or deactivated. Anyone holding **Report Template Edit** as a global role can open that page, select rows, and **Transfer** them to a group or to the instance in one step.
 
 ## Building a report in the UI
 

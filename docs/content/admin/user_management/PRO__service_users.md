@@ -9,6 +9,11 @@ A service user is a DefectDojo user meant for automation: a CI/CD pipeline, a sc
 
 Service users are kept apart from people. They are managed on their own pages, not on the Users pages or in the Members tabs of Assets, Organizations and groups. They are not offered when work is assigned or a reviewer is chosen, they are not managed by SCIM, SSO or LDAP, they are never added to the default group, they receive no email, and they do not count toward the licensed user total.
 
+There are two kinds of service user:
+
+* **Token** service users, which an administrator creates for a pipeline or scanner. Most of this page is about them.
+* **Group Automation** service users, which DefectDojo creates for a group. See [Group automation identities](#group-automation-identities).
+
 ## Turn on Service Users
 
 Service Users is an opt-in feature. A superuser turns it on under **Settings > Feature Flags > Service Users**.
@@ -81,6 +86,18 @@ The list shows each token's first characters, when it expires, when it was last 
 
 A service user authenticates only with its own token. It is never given a regular API token, so features that create one for the person asking, such as generating a token for a Sensei workflow, refuse a service user. The Users page's **Force Token Reset** and **Reset API Tokens** never rotate a service user's token: rotate it from the Service Users page or the API, where the new token is shown.
 
+## Group automation identities
+
+A group that owns Triage Engine rules or report schedules gets one service user of the **Group Automation** kind, named `svc-group-<group name>`, and every rule and report schedule the group owns runs as it. DefectDojo creates it the first time the group owns a rule or a schedule, and removes it when the group is deleted. See [the group's automation identity](../create_user_group/#the-groups-automation-identity).
+
+On the Service Users page it is marked with a **Group Automation** chip, and the **Group** column links to its group. It is read-only:
+
+* It has no password and no token, and none can be issued, so it can never authenticate to the API or the UI.
+* Its access is exactly its group's: the group's Organization and Asset Roles and its Global Roles. Its access cards say the access is set at the group level, and it cannot be given a Global Role, a membership or a group of its own.
+* Its menu offers only **View Service User**. It cannot be edited, disabled, given a new token or deleted here. Change its access by changing the group's, and remove it by deleting the group.
+
+Group Automation identities do not count toward the licensed user total, the same as any service user.
+
 ## Automate with the API
 
 The same operations are available at `/api/v2/service_users/` with an API token, for holders of the Service User permissions:
@@ -92,6 +109,8 @@ The same operations are available at `/api/v2/service_users/` with an API token,
 | Change | `PATCH /api/v2/service_users/<id>/` with any of `label`, `description`, `expires_in_days`, `is_active`, `global_role_id` |
 | Regenerate the token | `POST /api/v2/service_users/<id>/regenerate_token/`. The response includes the new `token`, once. |
 | Delete | `DELETE /api/v2/service_users/<id>/` |
+
+Each service user in a response carries `kind` (`token` or `group_automation`) and `group` (the `id` and `name` of the group a Group Automation identity belongs to, otherwise `null`). Changing, deleting or regenerating the token of a Group Automation identity answers `403`: its access is set on the group, and it is removed with the group.
 
 Give a service user access with the same endpoints used for any user, with its `user_id` from the service user's record: `POST /api/v2/product_members/`, `POST /api/v2/product_type_members/` and `POST /api/v2/dojo_group_members/`. Those endpoints list service users' memberships along with everyone else's.
 
