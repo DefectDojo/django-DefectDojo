@@ -55,7 +55,7 @@ If you delete the connection, or the Sync deletes it, and you add a new one for 
 
 #### Read-only mode during a Sync
 
-DefectDojo 3.5.0 and later have a read-only mode. On such a source, the connector turns read-only mode on when a Sync starts, and turns it off when the Sync ends, also when the Sync fails. While it is on, nobody can change the source, so the Sync reads one consistent state. Discover does not change the mode.
+DefectDojo 3.5.100 and later have a read-only mode. On such a source, the connector turns read-only mode on when a Sync starts, and turns it off when the Sync ends, also when the Sync fails. While it is on, nobody can change the source, so the Sync reads one consistent state. Discover does not change the mode.
 
 * If read-only mode was already on when the Sync started, it stays on at the end. The Sync puts the mode back to what it was. To keep the source frozen after the last Sync, turn read-only mode on before that Sync.
 * If the connector stops in the middle of a Sync, for example on a restart, the source stays read-only. The next Sync finds the mode on and keeps it on. The preflight report warns when the source is read-only. If you did not lock the source yourself, turn read-only mode off in **System Settings** before the next Sync.
