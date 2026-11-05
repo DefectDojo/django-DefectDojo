@@ -252,7 +252,7 @@ A shared layout can also be flagged `"is_collaborative": true` (same Maintainer 
 A collaborative layout can additionally be flagged `"is_read_only": true` (same Maintainer requirement; only a collaborative layout can carry the flag, and setting `is_collaborative` to `false` or unsharing the layout clears it). A read-only layout is still included in every user's `for_current_user/` results and any user may still make it their default or `clone` it, but only a Maintainer or the layout's owner may `PATCH` its `widgets`, `layout`, and `settings`; anyone else receives `403`. The owner keeps that right even without the Maintainer role, but renaming, unsharing, deleting it and changing its flags still require the Maintainer role. Each layout in a response carries `can_edit`, so a client can tell whether the caller may change it before trying.
 
 ```bash
-# Publish a collaborative layout that everyone uses but only Maintainers edit
+# Mark an existing collaborative layout read-only: everyone keeps using it, only Maintainers and its owner edit it
 curl -s -X PATCH \
   -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
   -H "Accept: application/json" \
