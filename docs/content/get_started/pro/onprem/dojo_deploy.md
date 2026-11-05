@@ -59,21 +59,33 @@ Set the variable in your shell profile or script:
 export DOJO_DEPLOY_NO_MIGRATION_NOTICE=1
 ```
 
-`sudo` drops most environment variables by default (its `env_reset` setting), so an exported variable does not reach `sudo dojo-compose-cli ...`. Pass it on the command line:
+`sudo` drops most environment variables by default (its `env_reset` setting), so a variable you export before running plain `sudo dojo-compose-cli ...` does not reach the CLI. Use one of these instead:
 
 ```bash
+# Keep your environment, as the install guides already do with sudo -E
+export DOJO_DEPLOY_NO_MIGRATION_NOTICE=1
+sudo -E dojo-compose-cli app start
+
+# Or put the variable on the sudo line
 sudo DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 dojo-compose-cli app start
 ```
 
-Or let `sudo` keep it, with a drop-in file edited through `sudo visudo -f /etc/sudoers.d/dojo-deploy`:
+`sudo -E` works only where the sudoers policy lets you keep your environment. To make `sudo` keep this one variable every time, add a drop-in with `sudo visudo -f /etc/sudoers.d/dojo-deploy`:
 
 ```
 Defaults env_keep += "DOJO_DEPLOY_NO_MIGRATION_NOTICE"
 ```
 
-`sudo -E` keeps your environment only if the sudoers policy allows it.
-
 Automation that runs the CLI on a terminal (`expect`, `script`, a pseudo-terminal in a test harness) sees the note in its captured output. Set `DOJO_DEPLOY_NO_MIGRATION_NOTICE=1` there. `DOJO_CLI_UNATTENDED=1`, which already tells the CLI never to prompt, hides it too.
+
+### New doctor warnings on Docker Compose
+
+After the update, `dojo-compose-cli doctor` can report two warnings it did not report before:
+
+- **The systemd stop timeout is too short.** The unit lets `app stop` run for less than 4200 seconds. The next `app start`, `app restart` or `app upgrade` fixes it by writing a drop-in for the unit, or run `sudo -E dojo-compose-cli doctor --fix` now.
+- **The internal CA is shared.** The install still uses the internal CA that the deployment files ship to every install. Run `sudo -E dojo-compose-cli certs rotate-internal` to give the install its own CA and internal certificates. It backs up the old ones under `certs/backup/`, and it refuses while DefectDojo is running unless you pass `--restart`.
+
+Both are warnings, so plain `doctor` still exits 0. `doctor --strict` exits non-zero until they are fixed.
 
 ## Getting dojo-deploy
 
