@@ -5,12 +5,10 @@ import re
 import time
 from datetime import datetime, timedelta
 from functools import partial, reduce
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 from time import strftime
 
 import pghistory
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import User
@@ -1352,7 +1350,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     extra_tags="alert-success")
 
         if "delete_note" in request.POST:
-            note = get_object_or_404(Notes, pk=request.POST["delete_note_id"])
+            note = get_object_or_404(risk_acceptance.notes, pk=request.POST["delete_note_id"])
             if note.author.username == request.user.username:
                 risk_acceptance.notes.remove(note)
                 note.delete()
@@ -1508,10 +1506,10 @@ def download_risk_acceptance(request, eid, raid):
     # ValueError/FileNotFoundError, which surfaces as a 500 rather than a missing file.
     if not risk_acceptance.path:
         raise Http404
-    proof_path = Path(settings.MEDIA_ROOT) / risk_acceptance.path.name
-    if not proof_path.is_file():
+    proof = risk_acceptance.path
+    if not proof.storage.exists(proof.name):
         raise Http404
-    file_handle = proof_path.open(mode="rb")
+    file_handle = proof.storage.open(proof.name, "rb")
     response = StreamingHttpResponse(FileIterWrapper(file_handle))
     if hasattr(response, "_resource_closers"):
         response._resource_closers.append(file_handle.close)

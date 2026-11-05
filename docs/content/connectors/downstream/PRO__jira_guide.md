@@ -492,6 +492,18 @@ If a Finding already has a linked Jira Issue, selecting **Push to Jira** again w
 
 To remove the association between a Finding and its Jira Issue, click the **☰ Finding Menu** and select **Unlink From Jira**. This removes the link in DefectDojo but does not delete the Jira Issue itself.
 
+To unlink many Findings at once, select them in a Findings list, open the **Bulk Update** form and check **Unlink from Jira** under **Jira Settings**. The Finding Groups the selected Findings belong to are unlinked as well, where you have permission to edit them. Finding Groups you cannot edit stay linked, and the result message counts them; Findings in those groups keep pushing to the group's existing issue.
+
+### Moving Findings to a new Jira project
+
+When a team moves to a new Jira project, the Findings already linked to issues in the old project keep updating those issues. To move them:
+
+1. Point the Asset's Jira configuration at the new project.
+2. Select the Findings in a Findings list and open the **Bulk Update** form.
+3. Under **Jira Settings**, check both **Unlink from Jira** and **Push to Jira**, then click **Submit**.
+
+The Findings are unlinked first and then pushed, so each one gets a new issue in the new project (a Finding in a Finding Group you cannot edit keeps its group's old issue, see above). The issues in the old project are not closed or changed; close them in Jira if they are no longer needed.
+
 ## Bulk Push Findings
 
 You can push multiple Findings to Jira at once using the Bulk Update form:

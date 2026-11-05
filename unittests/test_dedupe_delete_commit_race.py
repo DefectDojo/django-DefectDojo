@@ -1755,3 +1755,119 @@ class TestFindingCreateRacesDupeDelete(_DupeDeleteDuringWriteMixin, SimpleTestCa
             list(persisted.found_by.values_list("id", flat=True)), [self.test.test_type_id],
             msg="found_by was not persisted",
         )
+
+
+# Regression: the excess-duplicate delete (dojo.tasks.async_dupe_delete) aborted with
+# "deadlock detected ... while deleting tuple (...) in relation dojo_test_import_finding_action"
+# when a user deleted one of the duplicates it was removing (DELETE /api/v2/findings/{id}/).
+# The task locks the duplicate's dojo_finding row first and then deletes its import-history
+# rows; the single delete removed those rows first and only then reached the dojo_finding row.
+@override_settings(DUPE_DELETE_GRACE_MINUTES=1, DUPE_DELETE_MAX_PER_RUN=1_000_000)
+class TestDupeDeleteRacesSingleFindingDelete(_CommittedFindingsMixin, SimpleTestCase):
+
+    """A single-finding delete and the excess-duplicate delete take the same rows in the same order."""
+
+    DELETE_ALL_DUPLICATES = SimpleNamespace(delete_duplicates=True, max_dupes=0, enable_product_grade=False)
+
+    def _duplicate_with_import_history(self):
+        """An old original and duplicate, each with a Test_Import_Finding_Action row, all committed."""
+        original, duplicate, unrelated = self._create_findings(
+            "Single delete original", "Single delete duplicate", "Single delete unrelated",
+        )
+        past = timezone.now() - timedelta(minutes=120)
+        Finding.objects.filter(id=duplicate.id).update(duplicate=True, active=False, duplicate_finding=original)
+        Finding.objects.filter(id__in=[original.id, duplicate.id, unrelated.id]).update(created=past, updated=past)
+        test_import = Test_Import.objects.create(test=self.test, type=Test_Import.IMPORT_TYPE)
+        Test_Import_Finding_Action.objects.bulk_create([
+            Test_Import_Finding_Action(test_import=test_import, finding_id=finding_id, action="N")
+            for finding_id in (original.id, duplicate.id, unrelated.id)
+        ])
+        return duplicate, unrelated
+
+    def _single_delete_during_dupe_delete(self, finding_id, *, resume_after_the_deadlock_check=False):
+        """
+        Delete ``finding_id`` as the API does while the excess-duplicate delete is mid-chunk.
+
+        The chunk is paused after it locked its findings and before it touched any child row;
+        the single delete then runs on its own connection until it finishes or blocks on a row
+        lock, and only then does the chunk carry on. Conflict retries are switched off on both
+        sides, so a deadlock surfaces as an error instead of being absorbed by a retry.
+
+        When the two form a cycle, Postgres aborts whichever backend runs its deadlock check
+        once the cycle exists. The single delete starts waiting first, so it is usually the
+        victim. ``resume_after_the_deadlock_check`` holds the chunk back past the single
+        delete's one check (deadlock_timeout), which makes the chunk the victim instead: the
+        order seen in production, "while deleting tuple ... in relation
+        dojo_test_import_finding_action".
+
+        Returns ``(dupe_delete_error, single_delete_error)``.
+        """
+        finding = Finding.objects.get(id=finding_id)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT EXTRACT(EPOCH FROM current_setting('deadlock_timeout')::interval)")
+            deadlock_timeout = float(cursor.fetchone()[0])
+        deleter_pid = []
+
+        def delete_as_the_api_does():
+            deleter_pid.append(_backend_pid())
+            finding_helper.delete_finding_with_conflict_retry(finding)
+
+        deleter = _ConcurrentThread(delete_as_the_api_does)
+        real_clear = finding_helper.bulk_clear_finding_m2m
+
+        def let_the_single_delete_run_first(chunk_qs):
+            if not deleter.is_alive() and deleter.ident is None:
+                deleter.start()
+                _wait_for(
+                    lambda: deleter_pid and (not deleter.is_alive() or _is_waiting_on_a_lock(deleter_pid[0])),
+                    "the single delete to finish or block on the chunk",
+                )
+                if resume_after_the_deadlock_check:
+                    time.sleep(deadlock_timeout * 2)
+            return real_clear(chunk_qs)
+
+        dupe_delete_error = None
+        with (
+            patch.object(finding_helper, "BULK_DELETE_MAX_CONFLICT_RETRIES", 0),
+            patch.object(finding_helper, "SINGLE_DELETE_MAX_CONFLICT_RETRIES", 0),
+            patch.object(finding_helper, "bulk_clear_finding_m2m", let_the_single_delete_run_first),
+            patch("dojo.tasks.System_Settings.objects.get", return_value=self.DELETE_ALL_DUPLICATES),
+        ):
+            try:
+                _async_dupe_delete_impl()
+            except OperationalError as exc:
+                dupe_delete_error = exc
+            deleter.join(WAIT_TIMEOUT_SECONDS)
+        self.assertFalse(deleter.is_alive(), "the single delete did not finish")
+        return dupe_delete_error, deleter.error
+
+    def _assert_deleting_a_duplicate_the_dupe_delete_is_removing_does_not_deadlock(self, **kwargs):
+        duplicate, _unrelated = self._duplicate_with_import_history()
+
+        dupe_delete_error, single_delete_error = self._single_delete_during_dupe_delete(duplicate.id, **kwargs)
+
+        self.assertIsNone(dupe_delete_error, msg=f"the excess-duplicate delete failed: {dupe_delete_error!r}")
+        self.assertIsNone(single_delete_error, msg=f"the single-finding delete failed: {single_delete_error!r}")
+        self.assertFalse(Finding.objects.filter(id=duplicate.id).exists(), msg="the duplicate must be deleted")
+        self.assertFalse(
+            Test_Import_Finding_Action.objects.filter(finding_id=duplicate.id).exists(),
+            msg="no import-history row may survive for the deleted duplicate",
+        )
+
+    def test_deleting_a_duplicate_the_dupe_delete_is_removing_does_not_deadlock(self):
+        self._assert_deleting_a_duplicate_the_dupe_delete_is_removing_does_not_deadlock()
+
+    def test_dupe_delete_is_not_the_deadlock_victim_of_a_single_delete(self):
+        self._assert_deleting_a_duplicate_the_dupe_delete_is_removing_does_not_deadlock(
+            resume_after_the_deadlock_check=True,
+        )
+
+    def test_deleting_an_unrelated_finding_during_the_dupe_delete_succeeds(self):
+        duplicate, unrelated = self._duplicate_with_import_history()
+
+        dupe_delete_error, single_delete_error = self._single_delete_during_dupe_delete(unrelated.id)
+
+        self.assertIsNone(dupe_delete_error, msg=f"the excess-duplicate delete failed: {dupe_delete_error!r}")
+        self.assertIsNone(single_delete_error, msg=f"the single-finding delete failed: {single_delete_error!r}")
+        remaining = list(Finding.objects.filter(id__in=[duplicate.id, unrelated.id]).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"both findings must be deleted, still present: {remaining}")

@@ -593,7 +593,8 @@ class CommonImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
-            logger.debug(f"process_scan called with context: {context}")
+            # Lazy: rendering the context reads the test (and its type) even when debug is off
+            logger.debug("process_scan called with context: %s", context)
             start_time = time.perf_counter()
             importer = self.get_importer(**context)
             context["test"], _, _, _, _, _, _ = importer.process_scan(
@@ -772,7 +773,7 @@ class ImportScanSerializer(CommonImportScanSerializer):
         those inputs for any required info that is not present. In the event
         of an error, an exception will be raised and bubble up to the user
         """
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(self.context.get("request"))
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
@@ -796,7 +797,10 @@ class ImportScanSerializer(CommonImportScanSerializer):
 
 class ReImportScanSerializer(CommonImportScanSerializer):
 
-    help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
+    help_do_not_reactivate = _(
+        "Keep closed findings closed when they appear in the report again, instead of reactivating them. "
+        "New findings are still created, and open findings are processed as usual.",
+    )
     do_not_reactivate = serializers.BooleanField(
         default=False, required=False, help_text=help_do_not_reactivate,
     )
@@ -885,7 +889,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         """
         statistics_before, statistics_delta = None, None
         try:
-            logger.debug(f"process_scan called with context: {context}")
+            # Lazy: rendering the context reads the test (and its type) even when debug is off
+            logger.debug("process_scan called with context: %s", context)
             start_time = time.perf_counter()
             processor = None
             if test := context.get("test"):
@@ -945,7 +950,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         # set the jira option again as it was overridden
         context["push_to_jira"] = push_to_jira
         # Process the auto create context inputs
-        auto_create_manager = AutoCreateContextManager()
+        auto_create_manager = AutoCreateContextManager.for_request(self.context.get("request"))
         self.process_auto_create_create_context(auto_create_manager, context)
         # Import the scan with all of the supplied data
         self.process_scan(auto_create_manager, data, context)

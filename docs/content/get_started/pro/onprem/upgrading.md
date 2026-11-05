@@ -29,6 +29,30 @@ Put your own customizations in `local_settings.py`, never in `pro_settings.py`. 
 2. Back up your database, and the rest of what [Backing Up a Self-Hosted Deployment](/get_started/pro/onprem/backing_up/) lists. If an upgrade has to be undone, [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/) covers bringing that backup back.
 3. Follow the steps for your deployment method: [Kubernetes (Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) or [Docker Compose](/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose/). Do not change image tags independently of the release.
 
+## Upgrading across several releases
+
+You do not need to install the releases in between. Upgrade straight to the target: the initializer applies every database migration between your current version and the target in a single run. The release notes of the versions you skip still apply, which is why step 1 above asks you to read all of them.
+
+A jump across many releases runs many migrations, some of which rewrite data in large tables, so plan for it:
+
+- **Back up both databases**, the main one and its `-ddorch` companion, together with the configuration and keys. See [Backing Up a Self-Hosted Deployment](/get_started/pro/onprem/backing_up/).
+- **Rehearse on a copy.** Restore that backup into a separate environment on your current version, then run the upgrade there. The time the initializer takes on the copy is the best estimate of your maintenance window, and any problem it hits shows up before production does.
+- **Keep the restore and the upgrade apart.** A backup comes back on the version that wrote it; upgrading is a second step. See [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/#before-you-start).
+- **Migrations do not roll back.** Rolling the deployment back to the old version leaves the database on the new schema. To go back, restore the backup you took before the upgrade.
+- **On Kubernetes, consider holding the pods until the migrations finish.** By default the new pods start while the initializer is still migrating, so for a while new code runs against the old schema. Setting `dojo.migrationCheck.enabled: true` in your values makes each application pod wait for the migrations first, at the cost of a longer `helm upgrade --wait`. The [Kubernetes upgrade guide](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) covers the `--timeout` this needs.
+
+## Revoked releases
+
+Now and then a release ships with a problem serious enough that nobody should stay on it, and a later release fixes it. That release is then **revoked**. Its container images are never deleted or retagged, so a deployment already running it keeps working, can restart, and can roll back. What changes:
+
+- **In DefectDojo,** users who can see the Version Manager get a banner on every page naming the revoked release, the reason, and the release to upgrade to. The Version Manager never offers a revoked release as the latest version.
+- **The deployment CLIs** refuse to install or upgrade to a revoked release, and name the release to use instead. Choosing a revoked release on purpose, for example to roll back to it, needs `--allow-revoked`.
+- **The [DefectDojo Pro Changelog](/releases/pro/changelog/)** marks the release with a note giving the reason and the release to upgrade to.
+
+To leave a revoked release, follow the [supported upgrade procedure](#supported-upgrade-procedure) to the release the notice names.
+
+DefectDojo reads the list of revoked releases about once an hour from a signed public feed at `https://intel.defectdojo.com/releases/revocations.json`. An air-gapped instance does not read it, so check the changelog before choosing a target version. A forward proxy that blocks that address only hides the banner; nothing else depends on it.
+
 ## Reading the initializer's result
 
 Every upgrade runs the initializer once before the application starts: the `init` container on Docker Compose, the initializer Job on Kubernetes. It applies the database migrations and then runs DefectDojo's system checks. Its exit code says how far it got:

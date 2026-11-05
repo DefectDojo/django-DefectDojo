@@ -1,10 +1,13 @@
 import base64
+import logging
 import math
+import re
 from functools import cache
 
 import dateutil
 from django.core.files.base import ContentFile
 from django.db.models import CharField
+from packageurl import PackageURL
 
 from dojo.finding.cwe import cwe_number
 from dojo.location.feature import locations_enabled
@@ -12,6 +15,16 @@ from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
 from dojo.tools.utils import mark_unique_ids_ambiguous_when_repeated
+
+# Package coordinates a finding may carry for its dependency location. ``purl`` is a full
+# Package URL; ``purl_type`` and ``namespace`` complete ``component_name`` and
+# ``component_version`` when the tool reports the parts instead.
+PACKAGE_FIELDS = ("purl", "purl_type", "namespace")
+
+# A Package URL type: ASCII letters, digits, ".", "+" and "-", not starting with a digit.
+PURL_TYPE = re.compile(r"[a-z.+-][a-z0-9.+-]*")
+
+logger = logging.getLogger(__name__)
 
 # Accepted fields that map to a numeric column on Finding, and the type they hold.
 NUMERIC_FIELDS = {
@@ -39,6 +52,18 @@ def to_number(value, converter):
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
+
+
+def _stripped(value):
+    """Return a string value with surrounding whitespace removed, and any other value unchanged."""
+    return value.strip() if isinstance(value, str) else value
+
+
+def _purl_parts(purl):
+    """Every decoded string a Package URL carries: its components and its qualifier keys and values."""
+    qualifiers = purl.qualifiers if isinstance(purl.qualifiers, dict) else {}
+    parts = (purl.type, purl.namespace, purl.name, purl.version, purl.subpath, *qualifiers.keys(), *qualifiers.values())
+    return [part for part in parts if isinstance(part, str)]
 
 
 @cache
@@ -96,6 +121,9 @@ class GenericJSONParser:
             if "cwes" in item:
                 unsaved_cwes = item["cwes"]
                 del item["cwes"]
+            # remove the package coordinates from the dictionary: they are not Finding
+            # fields, they describe the dependency location built further down.
+            package = {key: item.pop(key) for key in PACKAGE_FIELDS if key in item}
             # check for required keys
             required = {"title", "severity", "description"}
 
@@ -170,6 +198,24 @@ class GenericJSONParser:
                 raise ValueError(msg)
 
             self._normalize_numeric_fields(item)
+            purl, purl_type, namespace = self._parse_package(package)
+            if purl:
+                # The purl names the component, so a report that sends only the purl still
+                # gets a component on the finding. Explicit component fields win, a blank one
+                # counts as unset, the version is only taken for the package the purl names
+                # (never next to a different component_name), and a value too wide for its
+                # column is left out rather than failing the import.
+                max_lengths = _finding_max_lengths()
+                name = _stripped(item.get("component_name"))
+                if not name and purl.name and len(purl.name) <= max_lengths["component_name"]:
+                    item["component_name"] = name = purl.name
+                if (
+                    name == purl.name
+                    and not _stripped(item.get("component_version"))
+                    and purl.version
+                    and len(purl.version) <= max_lengths["component_version"]
+                ):
+                    item["component_version"] = purl.version
             # A value wider than its column would only fail at INSERT time, deep in the
             # importer, as a DataError the API reports as a 500. Reject it here instead: the
             # importer turns the ValueError into a 400 naming the field and the limit.
@@ -213,9 +259,16 @@ class GenericJSONParser:
                 component_name = item.get("component_name")
                 component_version = item.get("component_version")
                 file_path = item.get("file_path")
-                if component_name or component_version or file_path:
+                if not (purl or component_name or component_version or file_path) and (purl_type or namespace):
+                    logger.warning(
+                        "Generic Findings Import: ignoring purl_type and namespace, the finding names no component",
+                    )
+                if purl or component_name or component_version or file_path:
                     finding.unsaved_locations.append(
                         LocationData.dependency(
+                            purl=purl.to_string() if purl else "",
+                            purl_type=purl_type,
+                            namespace=namespace,
                             name=component_name,
                             version=component_version,
                             file_path=file_path,
@@ -271,6 +324,55 @@ class GenericJSONParser:
         # report rather than storing it as if it named a single finding.
         mark_unique_ids_ambiguous_when_repeated(test_internal.findings)
         return test_internal
+
+    def _parse_package(self, package):
+        """
+        Read the package coordinates of a finding, returning ``(purl, purl_type, namespace)``.
+
+        Never raises. The package fields only refine the dependency location, so a value that
+        cannot be used is dropped with a warning and the finding imports as it would without
+        it: a null or blank value counts as absent, a purl that does not parse falls back to
+        ``purl_type`` and ``namespace``, and a ``purl_type`` outside the Package URL grammar
+        falls back to the generic type. A valid purl already names its type and namespace, so
+        it takes precedence over the two parts. A NUL character, which PostgreSQL cannot store
+        in a text column, makes a value unusable too, including one percent-encoded in a purl.
+        """
+        values = {}
+        for key, value in package.items():
+            if value is None:
+                continue
+            if not isinstance(value, str):
+                logger.warning("Generic Findings Import: ignoring %s, which is not a string: %.200r", key, value)
+                continue
+            if "\x00" in value:
+                logger.warning("Generic Findings Import: ignoring %s, which contains a NUL character", key)
+                continue
+            if value := value.strip():
+                values[key] = value
+
+        if package_url := values.get("purl"):
+            try:
+                purl = PackageURL.from_string(package_url)
+                # The location stores the normalized string and parses it again, so it has to
+                # survive that second parse too.
+                PackageURL.from_string(purl.to_string())
+                if any("\x00" in part for part in _purl_parts(purl)):
+                    msg = "a component decodes to a NUL character"
+                    raise ValueError(msg)
+            # Any failure, not only ValueError: an unusable purl must never fail the import.
+            except Exception as error:
+                logger.warning("Generic Findings Import: ignoring purl %.200r, not a valid Package URL: %s", package_url, error)
+            else:
+                ignored = sorted(key for key in ("purl_type", "namespace") if key in values)
+                if ignored:
+                    logger.warning("Generic Findings Import: ignoring %s, the purl already sets them", ignored)
+                return purl, "", ""
+
+        purl_type = values.get("purl_type", "").lower()
+        if purl_type and not PURL_TYPE.fullmatch(purl_type):
+            logger.warning("Generic Findings Import: ignoring purl_type %.200r, not a valid Package URL type", purl_type)
+            purl_type = ""
+        return None, purl_type, values.get("namespace", "")
 
     def _normalize_numeric_fields(self, item):
         """

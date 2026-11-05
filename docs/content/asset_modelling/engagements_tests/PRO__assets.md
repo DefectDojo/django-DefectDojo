@@ -80,8 +80,15 @@ For more information on user roles, see our [Introduction To Roles](/admin/user_
 
 Asset views contain a variety of tables and charts to interpret an Asset’s status at a glance. This includes: 
 
+- **Count cards**
+    - A row of cards at the top of the page for Engagements, Tests, Findings, and Endpoints (or Locations, when Locations are enabled). Each card shows its total, and its menu opens the matching list or import. Under each total, a footer shows what makes up that count, with one figure for what needs attention. Hover over or focus a figure to see what it counts. The figure that needs attention turns amber or red when it is above zero.
+    - **Engagements**: open, closed, and overdue (open with an end date that has passed).
+    - **Tests**: when the Asset was last scanned (the most recent update to any of its Tests), the imports and reimports in the last 30 days, and the Findings created in the last 30 days.
+    - **Findings**: direct and indirect Findings (see [Direct and indirect vulnerabilities](/asset_modelling/pro_hierarchy/asset_hierarchy/#direct-and-indirect-vulnerabilities)), and the active Findings past their SLA.
+    - **Endpoints**: vulnerable (an open Finding still affects it), not vulnerable (everything else, including Endpoints no Finding has touched), and those still affected by an active Critical Finding. With Locations enabled, the card counts active, mitigated, and critical Locations instead.
+    - Every figure counts only what you have permission to view.
 - **Open Finding Severity**
-    - A list of open Findings within the Asset, grouped by severity
+    - One bar of the Asset's open Findings split by severity, with each severity's count and share underneath. The panel header shows the total open count, and each severity links to the Asset's open Findings at that severity.
 - **Asset Overview**
     - A breakdown of various features of the Asset, including Description, Components, Contacts, [User Groups](/admin/user_management/create_user_group/
 ), Members, Technologies, and Regulations.
@@ -93,7 +100,8 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 - **Finding Severity Breakdown**
     - A graph of the Findings within the Asset, organized by severity. 
 - **Finding Distribution**
-    - A breakdown of the Findings within the Asset, organized by status (e.g., Active, Mitigated, Static, and Dynamic)
+    - A ring of the Asset's Findings by status: Active, Mitigated, and Other (Findings that are neither active nor mitigated, such as false positives and accepted risks). The three add up to the total, which the panel header shows, and each status in the legend links to the Asset's Findings with that status.
+    - Beside the ring, the share of Findings reported by static and by dynamic tools. Each is measured against the total on its own, because a Finding can be both static and dynamic, or neither.
 - **All Engagements**
     - A list of Engagements contained within the Asset. 
 
@@ -115,12 +123,12 @@ Changing the Organization field moves the Asset, along with its Engagements, Tes
 
 ### Change a Field in Place
 
-A few fields can also be changed on the Asset page itself, without opening Edit Asset: the **Name** and **Tags** in the page header, and **Business Criticality**, **Platform**, **Lifecycle** and **Description** wherever the page layout shows them. Hover over a value (or reach it with the keyboard) and click the pencil, or the value, to open its editor. **Enter** or **Save** saves the change and **Esc** or **Cancel** puts the value back; clicking elsewhere saves nothing (**Ctrl+Enter** or **Cmd+Enter** saves the Description, where Enter is a new line).
+A few fields can also be changed on the Asset page itself, without opening Edit Asset: the **Name** and **Tags** in the page header, and **Business Criticality**, **Platform**, **Lifecycle** and **Description** wherever the page layout shows them. Click a highlighted value to open a small editor under it. **Enter**, or clicking anywhere else, keeps the change (marked **Unsaved**) and **Esc** puts the value back; change as many fields as you like, then **Save Changes** in the card at the bottom of the page saves them all at once.
 
 * **Business Criticality**, **Platform** and **Lifecycle** can be cleared as well as changed. Platform and Lifecycle offer the options configured under [Editable Platform, Lifecycle and Origin Lists](/asset_modelling/pro__asset_attribute_options/).
 * If someone else changed the Asset after you opened the page, nothing is overwritten: DefectDojo shows **Asset Changed** and offers **Reload** or **Keep Editing**.
 
-Only users who can edit the Asset (a Maintainer or above on it, or its Organization) see the pencil. Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place) for the rules every page shares.
+Only users who can edit the Asset (a Maintainer or above on it, or its Organization) can open a value. Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place) for the rules every page shares.
 
 ### Bulk Edit Assets
 
@@ -275,7 +283,7 @@ recognise the Asset from whichever name a source happens to use.
 
 Each alias has three parts:
 
-- a **namespace**, naming the system that issued the identifier — `dns`, `oci`, `purl`, `git`,
+- a **namespace**, naming the system that issued the identifier: `dns`, `oci`, `purl`, `git`, `hw`, `cloud`,
 or a specific Connector configuration;
 - a **type**, saying what kind of identifier it is — `external_id`, `hostname`, `image_digest`,
 and so on;
@@ -314,10 +322,32 @@ again — to stop a Connector claiming an Asset, change its mapping rather than 
 
 Adding and withdrawing an alias requires edit permission on the Asset.
 
+### Device identifiers
+
+Two namespaces identify a machine rather than software:
+
+- **Hardware** (`hw`): a **MAC Address**, a **Hardware UUID** (the SMBIOS UUID) or a **Serial
+  Number**. These stay with one machine for its life.
+- **Cloud** (`cloud`): a **Cloud Instance ID**, written with its provider, for example
+  `aws:i-0abc1234def567890`, `azure:<VM id>` or `gcp:<instance id>`.
+
+DefectDojo stores each in one spelling, so `00-1B-A9-12-34-56` and `00:1b:a9:12:34:56` are the
+same address. It refuses values that cannot identify one machine: randomized and locally
+administered MAC addresses, the MAC addresses of virtual machines and of USB or dock network
+adapters, and the placeholder UUIDs and serial numbers firmware leaves when nobody set one.
+
+Connectors that report one machine per Record (for example CrowdStrike Falcon, Qualys, runZero,
+Wazuh and ServiceNow CMDB) also record the IP addresses and host names they see for each
+machine. These are kept as observations, with when each source first and last saw them, rather
+than as aliases: an IP address can move to another machine, so it is evidence for matching two
+Assets, never an identifier on its own.
+
 ### Turning Asset Identity on and off
 
 Aliases are controlled by the **Asset Identity** feature on the
-[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. While it is off, Connectors map
+[Feature Flags](/admin/feature_flags/pro__feature_flags/) page. It is off by default. A self-hosted
+install can turn it on by default by setting `DD_ASSET_IDENTITY_DEFAULT_ON=True`, and a choice made on
+the Feature Flags page still wins. While it is off, Connectors map
 Records by name alone, you cannot add or withdraw aliases, and the Asset Identity card and the
 **Type** field are hidden. Existing aliases stay readable through the API either way.
 

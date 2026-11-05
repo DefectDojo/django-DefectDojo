@@ -23,6 +23,7 @@ Locations fix all three by introducing a **base `Location` object** with a typed
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
 - **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
 - **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
+- **[Domain, IP Address and Certificate Locations](/asset_modelling/locations/pro__attack_surface_locations/)**: the DNS names, IP addresses and TLS certificates that make up an organization's internet-facing attack surface. Scan-managed, behind the **External Asset Discovery** flag.
 - **Host Locations**: a machine identified by its name (a system name, NetBIOS name or DNS name), stored exactly as the scanner reports it. Scan-managed. Qualys VMDR imports create one from each finding's Asset Name, and the Qualys connector creates one from each host's DNS or NetBIOS name when **Create Endpoints From Hosts** is on. The host's IP addresses stay URL Locations beside it.
 
 Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and from asset connectors when **Connector Location Inventory** is on. **Cloud Resources** under **Explore > Attack Surface** in the sidebar lists them. Container images arrive as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
@@ -90,7 +91,8 @@ Existing parsers have been updated to emit Location data when the feature flag i
 
 ## Where to Go Next
 
-- **Enable the feature** — turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
-- **Migrate from Endpoints** — see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
-- **Day-to-day URL workflows** — see [Working with URLs](../pro__working_with_urls).
-- **SBOMs and dependencies** — see [Working with SBOMs](../pro__working_with_sboms).
+- **Enable the feature**: turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/); no Support request is required.
+- **Migrate from Endpoints**: see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
+- **Day-to-day URL workflows**: see [Working with URLs](../pro__working_with_urls).
+- **See an Asset's Locations on a map**: see [Location Map](../pro__location_map).
+- **SBOMs and dependencies**: see [Working with SBOMs](../pro__working_with_sboms).

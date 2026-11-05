@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.functions import Upper
 from django.urls import reverse
 from django.utils import timezone
@@ -24,7 +24,7 @@ from django_extensions.db.models import TimeStampedModel
 from django_tagulous.models import TagField
 from titlecase import titlecase
 
-from dojo.base_models.base import BaseModel
+from dojo.base_models.base import BaseManager, BaseModel
 from dojo.finding.cwe import cwe_label, finding_cwe_labels
 from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
@@ -32,6 +32,7 @@ from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 # re-export that loads this module — so this resolves despite the partial circular load, and
 # keeps their dojo.models.* path for Django migration serialization (used as field defaults).
 from dojo.models import copy_model_util, get_current_date, tomorrow
+from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 from dojo.validators import cvss3_validator, cvss4_validator
 
 if TYPE_CHECKING:
@@ -454,9 +455,18 @@ class Finding(BaseModel):
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedBaseManager()
+    unfiltered = BaseManager()
+
     class Meta:
         ordering = ("numerical_severity", "-date", "title", "epss_score", "epss_percentile")
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_finding_archive_batch"),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("title", weight="A", config="english")
@@ -804,8 +814,18 @@ class Finding(BaseModel):
         # cannot form. It also clears the through rows, so the tagulous pre_delete handler
         # then finds nothing left to decrement (no double counting).
         from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
-        super().delete(*args, **kwargs)
+        with transaction.atomic():
+            # Lock this finding's row before the cascade touches any child row, the order the
+            # bulk delete uses (lock_findings_for_delete). The cascade otherwise deleted the
+            # child rows (Test_Import_Finding_Action, ...) first and reached the finding row
+            # last, so against a bulk delete holding the finding and waiting on those children
+            # the two deadlocked (Postgres 40P01, "while deleting tuple ... in relation
+            # dojo_test_import_finding_action"). Now this delete waits for the bulk delete to
+            # commit; if that removed the finding, there is nothing left to delete.
+            if not finding_helper.lock_findings_for_delete([self.pk]):
+                return
+            bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
+            super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
                 Engagement,
@@ -1061,7 +1081,10 @@ class Finding(BaseModel):
             if self.duplicate_finding is not None:
                 return Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by("title")
-            return []
+            # Orphaned duplicate (flagged duplicate with no duplicate_finding link):
+            # return an empty QuerySet rather than a list so callers can chain
+            # QuerySet methods such as .filter() without crashing.
+            return Finding.objects.none()
         return self.original_finding.all().order_by("title")
 
     def get_scanner_confidence_text(self):
@@ -1549,11 +1572,20 @@ class Vulnerability_Id(models.Model):
     # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
     vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
         ]
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_vulnid_archive_batch"),
             # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
             # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
             models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
@@ -1621,6 +1653,14 @@ class Finding_Group(TimeStampedModel):
     test = models.ForeignKey("dojo.Test", on_delete=models.CASCADE)
     findings = models.ManyToManyField("dojo.Finding")
     creator = models.ForeignKey("dojo.Dojo_User", on_delete=models.RESTRICT)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     def __str__(self):
         return self.name

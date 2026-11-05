@@ -9,11 +9,27 @@ audience: pro
 
 The create and edit forms in DefectDojo Pro ship with a sensible set of fields, but not every organization collects the same information. Form Configuration lets an administrator decide, per form, which fields appear, which are mandatory, where they sit, and what order they come in.
 
-**This is an instance-wide setting, not a personal preference.** Changes apply to everyone, and each person picks them up the next time they navigate to a new page.
+**This is an administrator setting, not a personal preference.** People cannot pick their own configuration, and a change reaches them the next time they navigate to a new page.
+
+## Configurations and the default
+
+An instance can hold several named Form Configurations. **Settings > UI Defaults > Form Configuration** lists them, and one of them can be marked **Default**: that is the configuration everyone's forms follow. The others reach no one's forms until they are made the default.
+
+From a configuration's menu you can:
+
+- **Edit Form Configuration**: open it to change its forms, as described below.
+- **Rename**: give it a new name. Names are unique, ignoring case.
+- **Duplicate**: make a copy with "(Copy)" after its name, which is not the default. Use it to prepare a change and switch over in one step.
+- **Make Default**: make it the configuration everyone's forms follow. The previous default stays in the list.
+- **Delete**: remove it. Deleting the default leaves the instance with no default, so every form returns to its stock layout until another configuration is made the default.
+
+**New Form Configuration** creates an empty configuration and opens it. The first configuration an instance creates becomes the default; later ones do not.
+
+An instance upgraded from a version with a single Form Configuration keeps its settings: they become the default configuration, named "Default".
 
 ## Choosing a form
 
-Pick the form you want to change from the selector at the top of the page. Each entity that has a create and edit form has an entry, for example the Finding form and the Asset form. The rest of the page then shows that form's fields.
+Open a configuration, then pick the form you want to change from the selector at the top of the page. Each entity that has a create and edit form has an entry, for example the Finding form and the Asset form. The rest of the page then shows that form's fields.
 
 ## The field list
 
@@ -27,7 +43,7 @@ For a configurable field you can set:
 
 - **Placement**, either **Main** or **Optional**. Main puts the field in the body of the form, where it is visible as soon as the form opens. Optional moves it into the collapsible Optional Fields section.
 - **Required**, which makes the field mandatory. Someone filling in the form cannot submit it until the field has a value.
-- **Disabled**, which takes the field off the form entirely.
+- **Disabled**, which takes the field off the form entirely. The form still sends the field's default value. **Close Old Findings** on the Reimport form is on by default, so with it disabled, every Reimport closes old Findings. **Async Import** on both forms follows the instance's async import setting, and a large scan file is always processed in the background, so disabling it does not make imports synchronous. The settings page notes both beside their **Disabled** checkbox.
 
 ## Custom fields
 
@@ -55,10 +71,10 @@ You can reorder a field that is otherwise not configurable, because its position
 
 ## Fields changed in place
 
-The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
+The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). The default Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
 
 ## Saving
 
-**Save** applies your changes for everyone. **Reset to Defaults** returns the selected form to the configuration DefectDojo ships with, which is a good way back if a form has been narrowed too far.
+**Save** stores your changes in the configuration you are editing; they apply to everyone when it is the default. **Reset to Defaults** returns the selected form to the configuration DefectDojo ships with, which is a good way back if a form has been narrowed too far.
 
 Each form is saved separately, so resetting one leaves your changes to the others alone.

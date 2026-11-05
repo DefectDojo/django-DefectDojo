@@ -55,6 +55,7 @@ from django.utils import timezone
 from django.utils.html import escape, format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from kombu import Connection
 
 from dojo.celery import app
@@ -89,6 +90,7 @@ from dojo.models import (
     Test_Type,
     User,
 )
+from dojo.site_url import absolute_url, site_url
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -229,6 +231,45 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             a_total,
         ))
         a_stuff.append(a_counts)
+
+
+def _restricted_kinds(restricted):
+    return ", ".join(sorted({str(obj._meta.verbose_name) for obj in restricted}))
+
+
+def restricted_delete_message(err):
+    """
+    A sentence saying why a delete was blocked by dependent rows, for a person to read.
+
+    str() of a RestrictedError is a tuple repr that names every referencing row, so this counts them and names
+    only their kinds (what to reassign).
+    """
+    restricted = list(err.restricted_objects or ())
+    if not restricted:
+        return _("It cannot be deleted while other records still refer to it.")
+    message = ngettext(
+        "It cannot be deleted while %(count)s other record still refers to it.",
+        "It cannot be deleted while %(count)s other records still refer to it.",
+        len(restricted),
+    ) % {"count": len(restricted)}
+    return message + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": _restricted_kinds(restricted)}
+
+
+def restricted_delete_reason(err):
+    """
+    The reason alone, for a warning that already says what cannot be deleted ("User cannot be deleted: ...").
+
+    Counts the referencing rows and names their kinds, as :func:`restricted_delete_message` does.
+    """
+    restricted = list(err.restricted_objects or ())
+    if not restricted:
+        return _("other records still refer to it.")
+    reason = ngettext(
+        "%(count)s other record still refers to it.",
+        "%(count)s other records still refer to it.",
+        len(restricted),
+    ) % {"count": len(restricted)}
+    return reason + " " + _("Records that refer to it: %(kinds)s.") % {"kinds": _restricted_kinds(restricted)}
 
 
 def add_breadcrumb(parent=None,
@@ -1466,14 +1507,13 @@ def max_safe(full_list):
 
 
 def get_full_url(relative_url):
-    return f"{get_site_url()}{relative_url}"
+    # Kept for existing callers; dojo.site_url.absolute_url is the helper to use.
+    return absolute_url(relative_url)
 
 
 def get_site_url():
-    if settings.SITE_URL:
-        return settings.SITE_URL
-    logger.warning("SITE URL undefined in settings, full_url cannot be created")
-    return "settings.SITE_URL"
+    # Kept for existing callers; dojo.site_url.site_url is the helper to use.
+    return site_url()
 
 
 @receiver(post_save, sender=User)
@@ -2310,26 +2350,37 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
 
     This function assumes all permissions have previously validated/verified
     by the caller of this function.
+
+    The file is read through the field's storage backend (``storage.exists``,
+    ``storage.size`` and ``storage.open``), never through a path built from
+    ``MEDIA_ROOT``, so it works with any configured Django storage backend.
     """
     # Quick check to ensure we have the right type of object
     if not isinstance(file_object, FileUpload):
         msg = f"FileUpload object expected but type <{type(file_object)}> received."
         raise TypeError(msg)
-    # Determine the path of the file on disk within the MEDIA_ROOT
-    file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
+    field_file = file_object.file
+    storage = field_file.storage
+    name = field_file.name
     # Clean the title by removing some problematic characters
     cleaned_file_name = re.sub(r'[<>:"/\\|?*`=\'&%#;]', "-", file_object.title)
-    # The database may reference a file that is no longer present on disk (e.g. media
-    # that was never persisted or was removed out of band). Reading file_object.file.size
-    # in that case raises a low-level FileNotFoundError that surfaces as an HTTP 500.
+    # The database may reference a file that is no longer present in storage (e.g. media
+    # that was never persisted or was removed out of band). Reading its size in that case
+    # raises a low-level FileNotFoundError that surfaces as an HTTP 500.
     # Treat a missing file as a 404 so the caller gets a clean "not found" response.
-    if not Path(file_path).is_file():
+    if not name or not storage.exists(name):
         msg = f"File {cleaned_file_name} could not be found on disk"
         raise Http404(msg)
-
-    return generate_file_response_from_file_path(
-        file_path, file_name=cleaned_file_name, file_size=file_object.file.size,
+    full_file_name = f"{cleaned_file_name}{Path(name).suffix}"
+    response = FileResponse(
+        storage.open(name, "rb"),
+        filename=full_file_name,
+        content_type=mimetypes.guess_type(name)[0] or "application/octet-stream",
     )
+    # Add some important headers
+    response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
+    response["Content-Length"] = storage.size(name)
+    return response
 
 
 def generate_file_response_from_file_path(

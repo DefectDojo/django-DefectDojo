@@ -13,7 +13,7 @@ Need help with DefectDojo? Here are some ways to get assistance.
 
 Open-Source users can receive help and advice through our community channels.
 
-For Open-Source users, the quickest way to get help is through the [OWASP Slack Channel](https://owasp.org/slack/invite).  Our community members are active on the **# defectdojo channel** and can help you with issues you're facing.
+For Open-Source users, the quickest way to get help is through the [DefectDojo Community Slack](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email).  Our community members and maintainers are active in the **#02-help** channel and can help you with issues you're facing.
 
 To report a bug, issues can be raised on our [GitHub](https://github.com/DefectDojo/django-DefectDojo).
 
@@ -26,6 +26,8 @@ DefectDojo Pro subscriptions come with full support from the DefectDojo, Inc. te
 ### Email
 
 Customers/Pro Users can always email our team directly at [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
+
+For self-hosted deployments, [Releases and Support Lifecycle](/get_started/pro/onprem/support_lifecycle/) explains which release is supported, where to send scan results for DefectDojo images, and how to report a vulnerability in DefectDojo itself.
 
 ### Within DefectDojo
 

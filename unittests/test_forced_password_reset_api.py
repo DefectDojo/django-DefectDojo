@@ -93,6 +93,20 @@ class ForcedPasswordResetApiTest(TestCase):
 
         self.assertEqual(client.get(reverse("user_profile")).status_code, 403)
 
+    def test_a_token_from_before_the_flag_is_refused_while_the_reset_is_pending(self):
+        key = Token.objects.create(user=self.user).key
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f"Token {key}")
+        self.assertEqual(client.get(reverse("user_profile")).status_code, 200)
+
+        self.set_forced_reset(value=True)
+
+        self.assertEqual(client.get(reverse("user_profile")).status_code, 403)
+
+        self.set_forced_reset(value=False)
+
+        self.assertEqual(client.get(reverse("user_profile")).status_code, 200)
+
     def test_disable_force_password_reset_is_a_no_op_when_the_flag_was_never_set(self):
         key = Token.objects.create(user=self.user).key
         self.set_forced_reset(value=False)

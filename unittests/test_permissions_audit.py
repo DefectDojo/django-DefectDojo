@@ -1013,6 +1013,28 @@ class TestRiskAcceptanceRemoveFindingGuard(LegacyAuthMirrorMixin, DojoTestCase):
         response = client.post(url, self._remove_finding_data(999999))
         self.assertEqual(response.status_code, 404)
 
+    def test_own_note_outside_risk_acceptance_is_not_deleted(self):
+        note = Notes.objects.create(entry="note on product B", author=self.owner_user_a)
+        self.finding_b.notes.add(note)
+        client = self._login("ra_remove_owner_a")
+        url = reverse("view_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(url, {"delete_note": "Delete", "delete_note_id": note.id})
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Notes.objects.filter(pk=note.pk).exists())
+
+    def test_own_note_on_risk_acceptance_is_deleted(self):
+        note = Notes.objects.create(entry="note on RA A", author=self.owner_user_a)
+        self.risk_acceptance_a.notes.add(note)
+        client = self._login("ra_remove_owner_a")
+        url = reverse("view_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(url, {"delete_note": "Delete", "delete_note_id": note.id})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Notes.objects.filter(pk=note.pk).exists())
+
 
 class TestEngagementPresetsCrossProductIDOR(LegacyAuthMirrorMixin, DojoTestCase):
 

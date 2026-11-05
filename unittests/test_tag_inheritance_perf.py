@@ -653,9 +653,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # the recipient count no longer moves the total: pinning user5 to non-superuser
     # (which took 12 import / 6 reimport-with-new queries off the per-recipient path)
     # measures the same with and without the pin on this path.
-    EXPECTED_ZAP_IMPORT_V2 = 289
-    EXPECTED_ZAP_IMPORT_V3 = 315
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 80
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 159
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 188
+    # -4 import, -16 on both reimport paths (measured, both modes): the permission
+    # check, the view and the serializer share one AutoCreateContextManager per
+    # request (AutoCreateContextManager.for_request), so the product type, product,
+    # engagement and test lookups run once per request with their parents
+    # select_related, and the statistics are read in one grouped query (per queryset,
+    # and across all import actions) instead of an extra aggregate per set.
+    EXPECTED_ZAP_IMPORT_V2 = 285
+    EXPECTED_ZAP_IMPORT_V3 = 311
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 64
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 75
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 143
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 172

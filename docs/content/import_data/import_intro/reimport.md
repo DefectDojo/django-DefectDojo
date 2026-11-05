@@ -81,7 +81,7 @@ If you want a Risk Accepted or Duplicate Finding to become Active again, you nee
 
 ### Scan Date
 
-The **Scan Date** field on the Reimport form starts empty. Left empty, each Finding that the Reimport creates keeps the date from the report (or today's date if the report has none). If you select a Scan Date, it is applied to every Finding the Reimport creates. Findings that already exist in the Test keep their dates either way.
+The **Scan Date** field on the Reimport form starts empty. Left empty, each Finding that the Reimport creates keeps the date from the report (or today's date if the report has none). If you select a Scan Date, it is applied to every Finding the Reimport creates. Findings that already exist in the Test keep their dates either way. A selected Scan Date is also the mitigated date of the Findings that **Close Old Findings** closes.
 
 ## Reimport Deduplication
 

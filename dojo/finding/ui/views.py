@@ -34,6 +34,7 @@ from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
     do_false_positive_history_batch,
+    manual_duplicate_hides_open_finding,
     match_finding_to_existing_findings,
 )
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
@@ -2232,6 +2233,13 @@ def download_finding_pic(request, token):
     except Exception:
         raise PermissionDenied
 
+    file_upload = access_token.file
+    owners = [*file_upload.engagement_set.all(), *file_upload.test_set.all(), *file_upload.finding_set.all()]
+    if not owners:
+        raise PermissionDenied
+    for obj in owners:
+        user_has_permission_or_403(request.user, obj, "view")
+
     with Path(access_token.file.file.file.name).open("rb") as file:
         file_name = file.name
         image = size_map[size](source=file).generate()
@@ -2773,6 +2781,40 @@ def _bulk_update_finding_groups(finds, form):
     return return_url, finds
 
 
+def _bulk_unlink_from_jira(request, finds):
+    """
+    Remove the DefectDojo link to the Jira issue of each finding, and of each finding group a selected finding belongs to.
+
+    The issues themselves are left untouched in Jira. Runs before _bulk_push_to_jira, so combining
+    unlink with push creates new issues in the Jira project currently configured for the product.
+    """
+    if not finds.exists():
+        # every selected finding was skipped for permission, which is already reported
+        return finds
+
+    finding_groups = {finding.finding_group for finding in finds if finding.has_jira_group_issue}
+    for group in finding_groups:
+        jira_services.unlink(request, group)
+
+    unlinked_count = 0
+    for finding in finds:
+        if finding.has_jira_issue:
+            jira_services.unlink_finding(request, finding)
+            unlinked_count += 1
+
+    if finding_groups:
+        noun = "finding group" if len(finding_groups) == 1 else "finding groups"
+        add_success_message_to_response(f"{len(finding_groups)} {noun} unlinked from JIRA successfully")
+    if unlinked_count > 0:
+        noun = "finding" if unlinked_count == 1 else "findings"
+        add_success_message_to_response(f"{unlinked_count} {noun} unlinked from JIRA successfully")
+    if not finding_groups and unlinked_count == 0:
+        add_error_message_to_response("None of the selected findings are linked to a JIRA issue")
+
+    # refresh from db so the push below does not see the deleted links
+    return finds.all()
+
+
 def _bulk_push_to_jira(finds, form, note):
     """Helper function to handle JIRA push operations."""
     error_counts = defaultdict(lambda: 0)
@@ -2822,11 +2864,6 @@ def _bulk_push_to_jira(finds, form, note):
     success_count = 0
     for finding in finds:
         tool_issue_updater.async_tool_issue_update(finding)
-
-        # not sure yet if we want to support bulk unlink, so leave as commented out for now
-        # if form.cleaned_data['unlink_from_jira']:
-        #     if finding.has_jira_issue:
-        #         jira_services.unlink_finding(request, finding)
 
         # Because we never call finding.save() in a bulk update, we need to actually
         # push the JIRA stuff here, rather than in finding.save()
@@ -2963,6 +3000,10 @@ def finding_bulk_update_all(request, pid=None):
                 # Delegate parsing and handling of strings/iterables to helper
                 bulk_add_tags_to_instances(tag_or_tags=tags, instances=finds, tag_field_name="tags")
 
+            # the checkbox is only shown when Jira is enabled; ignore a request that sends it anyway
+            if form.cleaned_data["unlink_from_jira"] and system_settings.enable_jira:
+                finds = _bulk_unlink_from_jira(request, finds)
+
             _bulk_push_to_jira(finds, form, note)
 
             # Show success message if status/severity updates were made (using actually_updated_count)
@@ -2980,7 +3021,8 @@ def finding_bulk_update_all(request, pid=None):
                 or form.cleaned_data["notes"] or form.cleaned_data["risk_acceptance"]
                 or form.cleaned_data["finding_group_create"] or form.cleaned_data["finding_group_add"]
                 or form.cleaned_data["finding_group_remove"] or form.cleaned_data["finding_group_by"]
-                or form.cleaned_data["push_to_jira"] or form.cleaned_data["push_to_github"]
+                or form.cleaned_data["push_to_jira"]
+                or form.cleaned_data["push_to_github"]
             ):
                 messages.add_message(
                     request,
@@ -3036,6 +3078,21 @@ def get_missing_mandatory_notetypes(finding):
     return Note_Type.objects.filter(id__in=notes_to_be_added)
 
 
+ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE = (
+    "Marking finding as duplicate/original failed as they are not in the same engagement "
+    "and deduplication_on_engagement is enabled for at least one of them"
+)
+
+
+def duplicate_onto_mitigated_message(duplicate, original):
+    """The refusal shown when a manual duplicate mark would hide an open finding under a mitigated one."""
+    return _(
+        "Finding %(original)s is mitigated, so marking finding %(duplicate)s as its duplicate would hide "
+        "a finding that is still open. Reopen finding %(original)s first, or mark it as a duplicate of "
+        "finding %(duplicate)s instead.",
+    ) % {"original": original.id, "duplicate": duplicate.id}
+
+
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
 
@@ -3051,13 +3108,24 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
             messages.add_message(
                 request,
                 messages.ERROR,
-                ("Marking finding as duplicate/original failed as they are not in the same engagement "
-                 "and deduplication_on_engagement is enabled for at least one of them"),
+                ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE,
                 extra_tags="alert-danger",
             )
             return redirect_to_return_url_or_else(
                 request, reverse("view_finding", args=(duplicate.id,)),
             )
+
+    if manual_duplicate_hides_open_finding(duplicate, original):
+        root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+        messages.add_message(
+            request,
+            messages.ERROR,
+            duplicate_onto_mitigated_message(duplicate, root),
+            extra_tags="alert-danger",
+        )
+        return redirect_to_return_url_or_else(
+            request, reverse("view_finding", args=(duplicate.id,)),
+        )
 
     duplicate.duplicate = True
     duplicate.active = False
@@ -3126,6 +3194,16 @@ def reset_finding_duplicate_status(request, duplicate_id):
 
 
 def set_finding_as_original_internal(user, finding_id, new_original_id):
+    """Make ``new_original`` the original of ``finding``'s cluster. True on success, False when refused."""
+    return set_finding_as_original_with_reason(user, finding_id, new_original_id) is None
+
+
+def set_finding_as_original_with_reason(user, finding_id, new_original_id):
+    """
+    Make ``new_original`` the original of ``finding``'s cluster.
+
+    Returns None on success, or the message explaining why it was refused.
+    """
     finding = get_object_or_404(Finding, id=finding_id)
     new_original = get_object_or_404(
         Finding.objects.filter(test__engagement__product=finding.test.engagement.product),
@@ -3135,7 +3213,12 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     if finding.test.engagement != new_original.test.engagement:
         if (finding.test.engagement.deduplication_on_engagement
                 or new_original.test.engagement.deduplication_on_engagement):
-            return False
+            return ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE
+
+    # The finding itself, and the cluster root it currently points at, both end up under new_original.
+    for moved in (finding, finding.duplicate_finding if finding.duplicate else None):
+        if moved is not None and moved != new_original and manual_duplicate_hides_open_finding(moved, new_original):
+            return duplicate_onto_mitigated_message(moved, new_original)
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
@@ -3182,20 +3265,19 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     new_original.duplicate_finding = None
     new_original.save(dedupe_option=False)
 
-    return True
+    return None
 
 
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
-    success = set_finding_as_original_internal(
+    refusal = set_finding_as_original_with_reason(
         request.user, finding_id, new_original_id,
     )
-    if not success:
+    if refusal:
         messages.add_message(
             request,
             messages.ERROR,
-            ("Marking finding as duplicate/original failed as they are not in the same engagement "
-             "and deduplication_on_engagement is enabled for at least one of them"),
+            refusal,
             extra_tags="alert-danger",
         )
 

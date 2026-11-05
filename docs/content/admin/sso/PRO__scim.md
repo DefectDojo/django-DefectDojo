@@ -11,6 +11,8 @@ SCIM is separate from single sign-on and complements it. SSO decides who may sig
 
 SCIM configuration can only be performed by a **Superuser**.
 
+SCIM and single sign-on come with every DefectDojo Pro license, cloud or self-hosted; neither depends on a license tier.
+
 ## What SCIM does in DefectDojo
 
 When you connect an identity provider over SCIM, it can:
@@ -35,6 +37,8 @@ The user record itself is kept. Findings, notes and history reference the people
    ```
    https://<your-instance>.cloud.defectdojo.com/scim/v2
    ```
+
+   On a self-hosted instance it is `https://<your-hostname>/scim/v2`.
 
 4. In the **SCIM Tokens** panel, give the token a name that says where it will be used, for example "Okta production", then select **Generate Token**.
 
@@ -77,6 +81,16 @@ To push groups as well, open the **Push Groups** tab and add the groups you want
 6. Assign users and groups under **Users and groups**, and start provisioning.
 
 Entra provisions on a cycle of roughly 40 minutes. While you are setting things up, **Provision on demand** applies a single user or group immediately, which makes it much faster to confirm the configuration works.
+
+## Other SCIM 2.0 providers
+
+DefectDojo implements the SCIM 2.0 protocol rather than any one provider's variant of it, so any identity governance or provisioning tool that speaks standard SCIM 2.0 (for example SailPoint) can provision DefectDojo. Okta and Entra ID are the two with step-by-step instructions above. For another provider, configure a generic SCIM 2.0 connection with:
+
+* **Base URL:** the Tenant URL from the setup steps above.
+* **Authentication:** an HTTP bearer token, the SCIM token you generated. The provider must send it as `Authorization: Bearer <token>`.
+* **Users and Groups** as the resource types, with `userName` as the attribute used to match accounts.
+
+Then check the provider against the [Limitations](#limitations) below. In particular, DefectDojo accepts only a single equality comparison in a filter, and does not implement bulk operations or sorting. A provider that needs one of those for its default configuration has to be set to do without it. The **Last Used** column in the SCIM Tokens panel and **Connect > Diagnostics** show whether its requests arrive and why any were refused.
 
 ## What DefectDojo stores
 

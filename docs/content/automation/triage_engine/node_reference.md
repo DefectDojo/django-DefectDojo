@@ -311,6 +311,8 @@ ctx.jira_instance_id            its classic Jira instance
 ctx.lookup_reason               on not found items: empty_value, no_match, engagement_epic, other_jira_site or limit_reached
 ```
 
+A message about the whole batch cannot name one item's value: there, `{{ctx.lookup_values}}` lists the values the batch's not found items carried.
+
 ## Findings
 
 These nodes change Findings. Every change is attributed back to the rule, run and node that made it, and shows up on the Finding's provenance timeline.
@@ -840,7 +842,7 @@ Posts to a Slack channel over a Messaging Connector. The connection carries the 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
@@ -855,7 +857,7 @@ Posts a card over a Messaging Connector. The connection carries the Power Automa
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
@@ -879,13 +881,19 @@ Emails a fixed list of addresses over a Messaging Connector. The recipients are 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 
 | **Subject** | `[DefectDojo] {{ctx.count}} finding(s) from rule {{ctx.rule_name}}` | Rendered once per message. |
 | **Body** | an HTML body containing `{{ctx.findings_html}}` | HTML. `{{ctx.findings_html}}` renders the Finding list. |
 | **One Message per Finding** | off | Off sends one email about the batch. |
 | **Findings Listed in the Body** | `25` | How many Findings `{{ctx.findings_html}}` lists before it says how many more there were. |
+
+#### Restricting recipients to DefectDojo users
+
+The **Restrict Triage Engine Emails to DefectDojo Users** feature flag, under **Settings > Feature Flags**, is on by default. It keeps rule emails inside DefectDojo's access control. While it is on, every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each email then goes only to the recipients who can see every Finding, Asset or alert it lists (an email about an import, an import group or a missed scan lists its Asset): a recipient who can see only some of them gets nothing from that send, and the delivery records who was left out and why. A rule that already names another address keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
+
+An instance whose rules need to email addresses outside DefectDojo can turn the flag off. The Feature Flags page asks for confirmation first, because while it is off a rule emails any address in its Recipients, including people outside the organization, and sends them what the rule lists whatever their access.
 
 ### Call a Webhook
 
@@ -915,7 +923,7 @@ Publishes one message about the batch, or one per item, to an Amazon SNS topic, 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) for Amazon SNS. Required. Unlike the chat channels, SNS has no instance-wide fallback: a connection is the only way to address a topic. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) for Amazon SNS. Required. Unlike the chat channels, SNS has no instance-wide fallback: a connection is the only way to address a topic. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
 | **Destination** | empty | Shown once a connection is chosen. The SNS topic to publish to, as its ARN. |
 | **One Message per Finding** | off | Off publishes one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
@@ -935,6 +943,8 @@ Creates an in-app alert about the batch.
 
 Recipients still control this through their own **Rules Engine Match** notification setting, so an alert cannot bypass a user's notification preferences.
 
+A template rendered once for the whole batch (this node's **Title** and **Description**, and **Send an Email**'s **Subject** and **Body** with **One Message per Finding** off) has no single item to read from, so a Finding's or a webhook's own fields render empty there. It can use the run's facts (`{{ctx.rule_name}}`, `{{ctx.rule_id}}`, `{{ctx.run_id}}`, `{{ctx.count}}`), a scan group's `{{ctx.import_summary}}`, and `{{ctx.lookup_values}}`: the values a **Find Findings by a Value** lookup could not match, the first ten and then how many more.
+
 ### Generate a Report
 
 `report.generate`
@@ -946,8 +956,8 @@ Generates a report from a template, scoped to the Findings that reached this nod
 | **Report Template** | none | Which template to generate from. Required. |
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
-| **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. |
-| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
+| **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
+| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. With [Restrict Triage Engine Emails to DefectDojo Users](#restricting-recipients-to-defectdojo-users) on, the addresses of an Email connection must be DefectDojo users, and a per-item report is announced only to the users who can see its Finding or Asset. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. With a per-item scope, `{{ctx.finding_title}}` or `{{ctx.asset_name}}` names what the report is about. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.

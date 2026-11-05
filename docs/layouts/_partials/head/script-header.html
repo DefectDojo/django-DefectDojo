@@ -46,23 +46,19 @@
     }
 
     // The defectdojo.com tag container (Google Ads, LinkedIn Insight, Reddit,
-    // Apollo and GA4 events), plus Reo and DefectDojo's own developer-activity
-    // tracker (t.defectdojo.com), which is replacing Reo. Both run for now so
-    // their numbers can be compared on the same visitors.
+    // Apollo and GA4 events) and DefectDojo's own developer-activity tracker
+    // (t.defectdojo.com).
     function loadMarketing() {
       if (loaded.marketing) return;
       loaded.marketing = true;
       window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
       addScript('https://www.googletagmanager.com/gtm.js?id=GTM-5GRLWWW7');
-      addScript('https://static.reo.dev/a92cfcfa51eca96/reo.js', function () {
-        window.Reo.init({ clientID: 'a92cfcfa51eca96' });
-      });
       addScript('https://t.defectdojo.com/t.js');
     }
 
     // First-party cookies the tags above set: Google (_ga, _gid, _gcl_),
-    // Reddit (_rdt_), Reo (__sec_), LinkedIn (li_, _li) and DefectDojo's
-    // tracker (_dds_vid, also kept in localStorage as dds_vid).
+    // Reddit (_rdt_), LinkedIn (li_, _li) and DefectDojo's tracker (_dds_vid,
+    // also kept in localStorage as dds_vid).
     function clearCookies(pattern) {
       var host = window.location.hostname;
       var root = host.split('.').slice(-2).join('.');
@@ -93,13 +89,13 @@
       // clears the tags' cookies and reloads the page, which then starts with
       // nothing loaded.
       if ((loaded.analytics && !analytics) || (loaded.marketing && !marketing)) {
-        clearCookies(/^(_ga|_gid|_gcl_|_rdt_|__sec_|li_|_li|_dds_)/);
+        clearCookies(/^(_ga|_gid|_gcl_|_rdt_|li_|_li|_dds_)/);
         try { window.localStorage.removeItem('dds_vid'); } catch (e) {}
         window.location.reload();
         return;
       }
-      // Reo loaded here without consent before this change; drop its cookies.
-      if (!marketing) clearCookies(/^__sec_/);
+      // Reo (__sec_ cookies) no longer loads here. Drop any cookies it left.
+      clearCookies(/^__sec_/);
       if (analytics) loadAnalytics();
       if (marketing) loadMarketing();
     }]);

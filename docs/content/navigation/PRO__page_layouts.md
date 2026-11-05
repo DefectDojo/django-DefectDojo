@@ -87,7 +87,7 @@ When you open one of the six pages, DefectDojo picks the first of these that app
 
 ## Fields you can change in place
 
-On the Finding, Engagement and Asset pages, a field tile or a row of the details table can be changed where it sits when the field supports it and you can edit the record: a pencil appears beside the value. On a Finding that is Severity, Assignees, Planned Remediation Date and Description; on an Engagement, Status, Lead, Start Date, End Date and Description; on an Asset, Business Criticality, Platform, Lifecycle and Description. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
+On the Finding, Engagement and Asset pages, a field tile or a row of the details table can be changed where it sits when the field supports it and you can edit the record: the value is highlighted on hover, and a click opens its editor. On a Finding that is Severity, Assignees, Planned Remediation Date and Description; on an Engagement, Status, Lead, Start Date, End Date and Description; on an Asset, Business Criticality, Platform, Lifecycle and Description. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
 
 ## Widgets with nothing to show
 
@@ -96,6 +96,23 @@ A widget is left out of the page when it has nothing to display, for example a t
 This affects only what is drawn. Your layout is unchanged, and the widget reappears when there is something in it.
 
 In edit mode those widgets are shown as labelled placeholders that say why they are not appearing, so you can still position them.
+
+### Hiding empty tabs
+
+Some tabs in a tab group always show, even when they are empty, such as a table with no rows or a Notes feed with no notes. You can choose to hide them on records where they have nothing to show, one tab at a time:
+
+1. In edit mode, open **Configure Widget** on the tab group.
+2. Each tab's row has an eye button beside its delete button. Click it to switch between the open eye (the tab always shows) and the crossed-out eye (the tab is hidden when it is empty). Hover over the button to see what a click will do.
+3. Click **Submit**.
+
+Leave the eye open on a tab whose own button adds its first item, such as Notes or Files: hiding an empty Notes tab also hides **Add Note**.
+
+The eye is locked in two cases, and hovering over it says why:
+
+- **Crossed out and locked**: the tab already hides itself when it has nothing to show.
+- **Open and locked**: the tab cannot tell when it is empty (some charts and composite panels), so it always shows.
+
+A hidden tab comes back as soon as the record has something for it, the next time the page loads. In edit mode every tab is shown, with a note on the ones that are hidden outside edit mode.
 
 ## When customization is restricted
 
@@ -120,4 +137,4 @@ Which widgets a page offers depends on the page, and **Add Widget** shows what i
 
 Some widgets appear only when the feature behind them is available to you. For example, the **Automation History** widget on the Asset and Finding pages shows what the rules engine did to that record and why, so it is offered only when Triage Engine is turned on and you hold Rule View.
 
-The record cards at the top of the Asset page (**Organization Memberships**, **Asset Identity**, **Exposure** and **Regulatory**) and the **Member Assets** table at the top of the Organization page are widgets as well. The shipped layouts place them first, and layouts saved before they were widgets have them added at the top, above their own widgets, so nothing that was on the page goes missing. Like any widget you can move, resize or remove them. Each one is shown only while the feature behind it is turned on.
+The record cards on the Asset page (**Organization Memberships**, **Asset Identity**, **Exposure** and **Regulatory**) and the **Member Assets** table at the top of the Organization page are widgets as well. The shipped Asset layout starts with the Open Finding Severity meter and places the cards after the Details row: Organization Memberships and Asset Identity side by side, then Exposure and Regulatory at full width. The shipped Organization layout places Member Assets first. A layout saved before the cards were widgets had them added above its own widgets, so nothing that was on the page went missing; one that was not rearranged since has them moved below its widgets, in the same arrangement as the shipped layout. Like any widget you can move, resize or remove them. Each one is shown only while the feature behind it is turned on.

@@ -375,7 +375,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(self.request)
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
@@ -500,7 +500,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return get_authorized_tests("import")
 
     def perform_create(self, serializer):
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(self.request)
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:

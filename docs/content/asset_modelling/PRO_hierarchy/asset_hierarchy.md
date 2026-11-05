@@ -160,7 +160,7 @@ the graph as it currently stands — nothing is stored, so re-parenting an Asset
 immediately, and no Finding is ever copied onto another Asset. Assets you do not have permission
 to view contribute nothing, and show no counts at all rather than a zero.
 
-The same split appears under the Findings count on the Asset page. There, **direct** matches the
+The same split appears in the footer of the Findings count card on the Asset page. There, **direct** matches the
 total in that page's Open Finding Severity breakdown: both exclude duplicates, false positives
 and out-of-scope Findings.
 

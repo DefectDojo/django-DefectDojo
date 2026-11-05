@@ -11,6 +11,7 @@ audience: pro
 - A refactor **renames or moves the file**.
 - A web application's **URL, port, or host** changes between DAST scans.
 - A dependency **version bump** changes the vulnerable package version an SCA tool reports.
+- A container image is scanned under a **new tag**, and the tool writes the tag into its findings.
 
 Each of these previously produced a closed finding plus a "new" finding, losing the status, notes, SLA clock, risk acceptance, and JIRA linkage on the original, and generating false "new critical finding" noise. With Location Drift Matching enabled, one finding is maintained in place: its location is updated from the latest scan and its history is preserved.
 
@@ -81,6 +82,14 @@ A finding with no image is not affected and deduplicates as before. Because tags
 
 This changes deduplication for every tool that attaches the scanned image to its findings, including Anchore Grype, Trivy, Trivy Operator, Snyk container projects and Anchore Enterprise. In an Engagement or Asset that holds scans of several images, each image's findings now stay separate instead of collapsing into the first image's findings.
 
+#### A new tag of the same image
+
+To follow one application from image tag to image tag (`app:v1`, then `app:v2`), reimport each new scan into the same test with **Track Findings as Locations Change** on for the tool. Some tools write the image tag into a finding's description (Trivy does, for operating system packages), so without tracking every new tag closes those findings and creates identical new ones, restarting their SLA. Tracking leaves the description out of the reimport hash, so the findings keep their ID, status, notes and SLA dates.
+
+Under Locations, the image a reimport no longer reports is mitigated on each matched finding and stamped with the image it moved to, and the new image is added as Active. With [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/) turned on, the finding's **Location History** shows that trail: earlier images struck through, the latest marked **Current**. A reimport that reports no image at all leaves the finding's images as they are.
+
+Importing each tag as a new test instead keeps every image's findings separate, as described above.
+
 ### Severity re-scores
 
 Security tools re-score severities as their rule engines evolve. With tracking enabled, a tool-reported severity change does **not** split a finding's identity: the finding matches, and its severity is updated from the scan, unless a person has re-triaged the severity by hand, in which case the human's value always wins (see below).
@@ -99,7 +108,7 @@ When a matched finding is refreshed, its stored identity hashes are **adopted fr
 
 ## Location History
 
-Under **Locations** (Beta), every drift match records where the finding used to live: the superseded source-code location, URL, or dependency version is kept as a reference on the finding, stamped with where it moved and why. The finding's location timeline ("this finding lived at `auth.py:42`, then `auth.py:57`, then `session.py:31`") is visible on the finding page. See [Source Code Locations](/asset_modelling/locations/pro__source_code_locations/).
+Under **Locations** (Beta), every drift match records where the finding used to live: the superseded source-code location, URL, dependency version, or container image is kept as a reference on the finding, stamped with where it moved and why. The finding's location timeline ("this finding lived at `auth.py:42`, then `auth.py:57`, then `session.py:31`") is visible on the finding page. See [Source Code Locations](/asset_modelling/locations/pro__source_code_locations/).
 
 Location Drift Matching itself works **with or without** the Locations feature: matching pairs on the finding's own fields and endpoints, so findings survive movement either way. Locations adds the recorded, visible history on top. History starts recording from the moment Locations is enabled: earlier moves were applied but not recorded.
 
