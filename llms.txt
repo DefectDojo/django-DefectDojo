@@ -454,10 +454,12 @@ Key facts:
 - [Service Users (Pro)](https://docs.defectdojo.com/admin/user_management/pro__service_users/): API-only users for pipelines, scanners and other automation
 - [Set a User's permissions (Pro)](https://docs.defectdojo.com/admin/user_management/set_user_permissions/): How to grant Roles & Permissions to a user, as well as superuser status
 - [Multi-Factor Authentication (MFA) (Pro)](https://docs.defectdojo.com/admin/user_management/pro__mfa/): Set up MFA on your own account, require it across your instance, and recover a user who has lost their device
+- [Permission Audit and Effective Access (Pro)](https://docs.defectdojo.com/admin/user_management/pro__permission_audit/): See what every user and group can reach, why, and export it for an access review
 - [Set Permissions in Pro](https://docs.defectdojo.com/admin/user_management/pro_permissions_overhaul/): Overhaul, pro feature
 - [Share permissions: User Groups (Pro)](https://docs.defectdojo.com/admin/user_management/create_user_group/): Share and maintain permissions for many users in DefectDojo Pro
 - [Action permission charts (Pro)](https://docs.defectdojo.com/admin/user_management/user_permission_chart/): All DefectDojo Pro user permissions in detail
 - [Audit Logging](https://docs.defectdojo.com/admin/user_management/pro__audit_log_index/): Every create, update, and delete action DefectDojo records in its audit log, plus what is captured and how to configure retention.
+- [View As User (Pro)](https://docs.defectdojo.com/admin/user_management/pro__view_as_user/): See DefectDojo the way another user sees it, read-only and audited
 - [Custom RBAC Roles (Pro)](https://docs.defectdojo.com/admin/user_management/pro__custom_rbac_roles/): Build your own roles by choosing individual permissions, using the five built-in roles as clonable starting points
 - [Diagnostics (Pro)](https://docs.defectdojo.com/admin/diagnostics/pro__diagnostics/): Read the cross-subsystem ledger of integration attempts: what is recorded, how to filter it, how credentials are kept out, and who can see the technical detail
 - [About Notifications & 🔔 Alerts](https://docs.defectdojo.com/admin/notifications/about_notifications/): Learn about notifications, in-app alerts
