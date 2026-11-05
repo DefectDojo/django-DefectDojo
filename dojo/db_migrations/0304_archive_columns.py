@@ -2853,11 +2853,13 @@ class ApplyStateUnrendered(migrations.operations.base.Operation):
     ``FindingReviewers``) are left out of that re-render, so they keep the previous copies of the
     models alive and ``gc`` cannot free them. Applied one by one, this migration's 102 state
     operations grew the ``migrate`` process by about 700 MB, enough to push an initializer with
-    a 1 GiB memory limit past it later in the same run. With ``apps`` dropped, the operations only edit the model states, and
-    Django renders the whole state once, the next time something reads ``state.apps``. The state
-    this produces is the same; only the work between operations changes.
+    a 1 GiB memory limit past it later in the same run. With ``apps`` dropped, the operations
+    only edit the model states, and Django renders the whole state once, the next time something
+    reads ``state.apps``. The state this produces is the same; only the work between operations
+    changes.
 
-    Defined here rather than imported, like everything else a migration runs.
+    Defined here rather than imported, like everything else a migration runs. A squashmigrations
+    run over 0304 has to inline this class into the squashed migration as well.
     """
 
     reduces_to_sql = False

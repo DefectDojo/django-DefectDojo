@@ -25,12 +25,12 @@ TARGET = ("dojo", "0304_archive_columns")
 
 
 def _shape(state):
-    """Each model's fields (name and class), triggers and indexes: everything 0304 changes."""
+    """Each model's full field definitions, triggers and indexes: everything 0304 changes."""
     return {
         key: (
-            {name: type(field).__name__ for name, field in model.fields.items()},
-            sorted(trigger.name for trigger in model.options.get("triggers", ())),
-            sorted(index.name for index in model.options.get("indexes", ())),
+            {name: field.deconstruct()[1:] for name, field in model.fields.items()},
+            {trigger.name: trigger.deconstruct() for trigger in model.options.get("triggers", ())},
+            {index.name: index.deconstruct() for index in model.options.get("indexes", ())},
         )
         for key, model in state.models.items()
     }
@@ -72,8 +72,8 @@ class TestMigration0304StateRendering(SimpleTestCase):
         for operation in batch.operations:
             operation.state_forwards("dojo", plain)
 
-        # ModelState equality compares field kwargs, some of which (encoders, callables) only
-        # compare by identity, so two plain runs already differ. Compare what 0304 changes.
+        # ModelState equality also compares options 0304 does not touch, some of which only
+        # compare by identity. Compare the full definitions of what 0304 changes.
         self.assertEqual(_shape(wrapped), _shape(plain))
         finding = wrapped.apps.get_model("dojo", "finding")
         self.assertEqual(finding._meta.get_field("archived_at").get_internal_type(), "DateTimeField")
