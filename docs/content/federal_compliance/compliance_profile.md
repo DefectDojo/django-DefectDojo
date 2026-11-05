@@ -7,7 +7,7 @@ audience: pro
 
 The Compliance Profile enrolls an Asset as a system and holds the facts that appear on every
 deliverable it produces. Open the Asset that represents your system boundary, go to the
-**Compliance** tab, then **Profile**.
+**Compliance** tab, then **Compliance Profile** under **All Pages**.
 
 ![The Compliance Profile form](images/01-compliance-profile.png)
 
