@@ -1652,6 +1652,127 @@ ALB).
 
 ---
 
+## Service Mesh (Istio)
+
+The chart runs under Istio sidecar injection, including with `STRICT` mutual
+TLS, with three changes to its defaults. Apply them on a non-production release
+first.
+
+**1. Move the components off group 1337.** The django, nginx, celery,
+integrators, ddorch, ddorch-workers and initializer containers run with group
+`1337` by default. Istio's sidecar does not capture traffic from that group
+(it is the proxy's own), so under `STRICT` their calls bypass the mesh and are
+refused. Give each a different primary group. `fsGroup` stays `1337`, so
+access to the shared media volume is unchanged:
+
+```yaml
+securityContext:
+  django:
+    runAsGroup: 1001
+  celery:
+    runAsGroup: 1001
+  integrators:
+    runAsGroup: 1001
+  ddorch:
+    runAsGroup: 1001
+  ddorchWorkers:
+    runAsGroup: 1001
+  initializer:
+    runAsGroup: 1001
+  nginx:
+    runAsGroup: 101
+```
+
+**2. Use native sidecars.** With a classic sidecar, a pod that runs to
+completion (the initializer Job, the `helm test` pods, the certificate
+generator) never finishes, because the proxy keeps running after the main
+container exits. Init containers are affected too: once their traffic is
+captured (step 1), they start before a classic proxy is up and cannot reach
+the database. Native sidecars (Kubernetes 1.29 or later) start before the init
+containers and stop with the pod. Turn them on mesh-wide in your Istio
+installation, or per pod with the chart's annotations:
+
+```yaml
+# Every Deployment, StatefulSet and the initializer Job.
+commonAnnotations:
+  sidecar.istio.io/nativeSidecar: "true"
+jobs:
+  # The helm test pods.
+  tests:
+    podAnnotations:
+      sidecar.istio.io/nativeSidecar: "true"
+  # The certificate generator, when certificates.generation.enabled is true.
+  certificateGeneration:
+    podAnnotations:
+      sidecar.istio.io/nativeSidecar: "true"
+```
+
+**3. Let the mesh through the NetworkPolicies.** Point
+`networkPolicy.ingressSource` at your Istio ingress gateway instead of an
+ingress controller (see
+[Ingress controller access](#ingress-controller-access-502-bad-gateway)). The
+`standard` profile allows all egress, so the sidecars reach istiod. With the
+`aggressive` profile, add an egress rule to istiod (port 15012 by default),
+for example through `extraManifests`.
+
+Changing the initializer's group or annotations changes its pod template,
+which Kubernetes does not allow while the Job exists. Apply these values with a
+chart version upgrade, which gives the Job a new name, or delete the completed
+initializer Job first.
+
+---
+
+## Read-Only Root Filesystem
+
+Every DefectDojo container can run with `readOnlyRootFilesystem: true`, for
+clusters that require it on all workloads. It is off by default. Turn it on per
+component, and give the containers a writable `/tmp`, where the application
+writes temp files such as scan uploads and connector exports:
+
+```yaml
+securityContext:
+  # An emptyDir at /tmp on every container that has none of its own.
+  tmpVolume:
+    enabled: true
+    # sizeLimit: "2Gi"   # optional; a pod that writes past it is evicted
+  django:
+    readOnlyRootFilesystem: true
+  nginx:
+    readOnlyRootFilesystem: true
+  celery:
+    readOnlyRootFilesystem: true
+  connectors:
+    readOnlyRootFilesystem: true
+  integrators:
+    readOnlyRootFilesystem: true
+  ddorch:
+    readOnlyRootFilesystem: true
+  ddorchWorkers:
+    readOnlyRootFilesystem: true
+  mcpServer:
+    readOnlyRootFilesystem: true
+  initializer:
+    readOnlyRootFilesystem: true
+  goDojoPro:
+    readOnlyRootFilesystem: true
+  sensei:
+    readOnlyRootFilesystem: true
+  oscal-validator:
+    readOnlyRootFilesystem: true
+```
+
+The `django` key also covers the django-import pods and the `helm test` pods.
+Init containers and the webhook gateway are read-only already. The bundled
+PostgreSQL and Redis (for evaluation installs) and the certificate generator
+Job (for test environments) are not covered.
+
+Turning these on restarts the pods. No volume claim or file ownership changes.
+The initializer Job has the same caveat as in
+[Service Mesh (Istio)](#service-mesh-istio): apply with a chart version
+upgrade, or delete the completed Job first.
+
+---
+
 ## Upgrading
 
 The recommended upgrade path pulls the chart directly from the DefectDojo
@@ -2323,6 +2444,7 @@ template includes commented examples for:
 
 | Date       | Version | Changes                                                              |
 |------------|---------|----------------------------------------------------------------------|
+| 2026-11-04 | after 3.5.0 | New [Service Mesh (Istio)](#service-mesh-istio) section (moving components off group 1337, native sidecars, NetworkPolicies) with the new `jobs.tests.podAnnotations` and `jobs.certificateGeneration.podAnnotations`; new [Read-Only Root Filesystem](#read-only-root-filesystem) section with the new `securityContext.tmpVolume` and `securityContext.nginx.readOnlyRootFilesystem`. All off by default; default renders are unchanged |
 | 2026-09-16 | 3.3.200+ | Remove the PSIRT Advisory Engine section. DefectDojo Pro 3.3.0 replaced the sidecar with PSIRT 2.0 inside the main application, and the chart no longer ships the component. Drop `psirt:` (and `vpa.components.psirt`, `egress.proxy.components.psirt`) from overrides; the chart rejects the nested keys as unknown components. Carry an existing sidecar database into PSIRT 2.0 with `manage.py psirt_import_legacy` |
 | 2026-07-09 | 3.1.0   | Add optional PSIRT Advisory Engine (`psirt.enabled`): served under `/psirt/` via the nginx sidecar, dedicated database via `psirt.databaseUrl`, secret pinning guidance, network policy rules, BYO hooks |
 | 2026-04-17 | 2.57.1  | Document `ddorch` + `ddorch-workers` (new orchestrator pair that replaces kairos/rulesengine/hatchet-integrators); add `ddorch.tls.rootCa/cert/key` `--set-file` flags to pre-flight and deploy commands; new ddorch mTLS certificates section with SAN requirements; mcp-server listed in expected pods; PDBs added for ddorch (singleton) and ddorch-workers; ArgoCD prerequisites note about ddorch cert delivery; update Hatchet warning to reflect worker consolidation |
