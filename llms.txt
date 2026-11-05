@@ -459,6 +459,7 @@ Key facts:
 - [Share permissions: User Groups (Pro)](https://docs.defectdojo.com/admin/user_management/create_user_group/): Share and maintain permissions for many users in DefectDojo Pro
 - [Action permission charts (Pro)](https://docs.defectdojo.com/admin/user_management/user_permission_chart/): All DefectDojo Pro user permissions in detail
 - [Audit Logging](https://docs.defectdojo.com/admin/user_management/pro__audit_log_index/): Every create, update, and delete action DefectDojo records in its audit log, plus what is captured and how to configure retention.
+- [End User License Agreement (Pro)](https://docs.defectdojo.com/admin/user_management/pro__eula_acceptance/): Each person accepts the DefectDojo Pro End User License Agreement once, after they first sign in
 - [View As User (Pro)](https://docs.defectdojo.com/admin/user_management/pro__view_as_user/): See DefectDojo the way another user sees it, read-only and audited
 - [Custom RBAC Roles (Pro)](https://docs.defectdojo.com/admin/user_management/pro__custom_rbac_roles/): Build your own roles by choosing individual permissions, using the five built-in roles as clonable starting points
 - [Diagnostics (Pro)](https://docs.defectdojo.com/admin/diagnostics/pro__diagnostics/): Read the cross-subsystem ledger of integration attempts: what is recorded, how to filter it, how credentials are kept out, and who can see the technical detail
