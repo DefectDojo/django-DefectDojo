@@ -242,7 +242,7 @@ Base64 text is a third larger than the file, so the line cap holds about 36 MiB 
 To carry larger files, raise `max_file_bytes`. For example, `?max_file_bytes=33554432` carries files up to 32 MiB, as far as the line cap allows.
 A line needs about 170 MiB of server memory at most.
 While the server writes a line, its memory use peaks at about 4.7 times the size of its files.
-A file that is gone from storage has `size` and `data_base64` set to `null`, and `"error": "missing"`.
+A file that is gone from storage, or whose name the server cannot read, has `size` and `data_base64` set to `null`, and `"error": "missing"`.
 
 ## Counts
 

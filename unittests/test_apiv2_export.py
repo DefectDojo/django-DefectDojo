@@ -219,6 +219,15 @@ class TestExportSerializers(DojoAPITestCase):
         self.assertIsNone(entry["size"])
         self.assertEqual("missing", entry["error"])
 
+    def test_export_file_marks_a_name_the_server_cannot_encode_missing(self):
+        file_upload = make_file(self, "poc.txt")
+        refused = UnicodeEncodeError("ascii", "\u00fc", 0, 1, "ordinal not in range(128)")
+        with mock.patch.object(file_upload.file.storage, "size", side_effect=refused):
+            entry = export_file(file_upload, MAX_FILE_BYTES_DEFAULT)
+        self.assertIsNone(entry["data_base64"])
+        self.assertIsNone(entry["size"])
+        self.assertEqual("missing", entry["error"])
+
     def test_export_file_marks_an_empty_name_missing(self):
         entry = export_file(FileUpload(title="empty", file=""), MAX_FILE_BYTES_DEFAULT)
         self.assertIsNone(entry["size"])
@@ -748,6 +757,14 @@ class TestExportManifest(DojoAPITestCase):
                 self.assertEqual(self.manifest["totals"], manifest["totals"])
                 self.assertEqual((len(files), 0), (sizes, exists))
         self.assertEqual(3, self.get_results_by_id(self.manifest["products"], 2)["counts"]["files"])
+
+    def test_a_file_name_the_server_cannot_encode_does_not_fail_the_manifest(self):
+        storage = FileUpload._meta.get_field("file").storage
+        refused = UnicodeEncodeError("ascii", "\u00fc", 0, 1, "ordinal not in range(128)")
+        with mock.patch.object(storage, "size", side_effect=refused):
+            response = self.client.get(self.url, {"max_file_bytes": 4})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.json()["totals"]["files_over_cap"])
 
     def test_file_counts_false_skips_the_file_stat(self):
         manifest, sizes, exists = self.manifest_with_stat_calls({"file_counts": "false", "max_file_bytes": 4})

@@ -68,7 +68,8 @@ def file_size(storage, name: str) -> int | None:
         return None
     try:
         return storage.size(name)
-    except FileNotFoundError:
+    # uwsgi under an ASCII locale cannot encode a non-ASCII file name.
+    except (FileNotFoundError, UnicodeError):
         return None
 
 
