@@ -1698,7 +1698,7 @@ containers and stop with the pod. Turn them on mesh-wide in your Istio
 installation, or per pod with the chart's annotations:
 
 ```yaml
-# Every Deployment, StatefulSet and the initializer Job.
+# Every Deployment and the initializer Job.
 commonAnnotations:
   sidecar.istio.io/nativeSidecar: "true"
 jobs:
