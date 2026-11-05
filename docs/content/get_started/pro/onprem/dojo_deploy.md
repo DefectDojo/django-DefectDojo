@@ -89,9 +89,27 @@ Both are warnings, so plain `doctor` still exits 0. `doctor --strict` exits non-
 
 ## Getting dojo-deploy
 
-`dojo-deploy` is published to `us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-deploy/executables`, in the same DefectDojo Pro registry that `dojo-compose-cli` and `dojo-helm-cli` come from. You log in with your license as you do for those CLIs, and the host needs the same HTTPS access to `us-south1-docker.pkg.dev`. Nothing new needs to be allowlisted.
+The first `dojo-deploy` release is **3.5.0**. A `dojo-deploy` release has the same version as the DefectDojo Pro release it ships with, so DefectDojo Pro 3.5.0 comes with `dojo-deploy` 3.5.0. A fix to `dojo-deploy` alone, between two DefectDojo Pro releases, adds a fourth number, such as 3.5.0.1.
 
-> **TODO (owner, remove before merge):** add the exact download command and the first `dojo-deploy` version once the `dojo-deploy/executables` repository exists.
+### If you already run dojo-compose-cli or dojo-helm-cli
+
+Update the CLI the way you always have:
+
+```bash
+# Docker Compose
+sudo -E dojo-compose-cli update-binary
+
+# Kubernetes
+dojo-helm-cli update-binary
+```
+
+This installs the new release of the CLI you already use, built from `dojo-deploy`: `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0. It keeps its old name, commands, options and version numbering, and prints the [note](#a-note-in-your-terminal) that links to this page. `dojo-compose-cli` also runs this update on its own before `app upgrade`, `app pull-images`, `deploy download` and `first-install`, as it did before.
+
+The update does not add a `dojo-deploy` command. To run `dojo-deploy` itself, download it as described next.
+
+### Downloading dojo-deploy
+
+`dojo-deploy` is listed with the other DefectDojo Pro tools at [cloud.defectdojo.com/tools](https://cloud.defectdojo.com/tools). It is published to `us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-deploy/executables`, in the same DefectDojo Pro registry that `dojo-compose-cli` and `dojo-helm-cli` come from. You log in with your license as you do for those CLIs, and the host needs the same HTTPS access to `us-south1-docker.pkg.dev`. Nothing new needs to be allowlisted.
 
 Put the binary in a system directory on your `PATH`, such as `/usr/local/bin`, and check it:
 
@@ -99,6 +117,10 @@ Put the binary in a system directory on your `PATH`, such as `/usr/local/bin`, a
 dojo-deploy --version
 dojo-deploy --help
 ```
+
+`dojo-deploy --version` also names the DefectDojo Pro release it was tested with, for example `dojo-deploy version 3.5.0 (tested with DefectDojo Pro 3.5.0)`.
+
+### Running dojo-deploy on a Docker Compose host
 
 On a Docker Compose host, the systemd unit and your scripts run `/usr/bin/dojo-compose-cli`. The first time you run `dojo-deploy compose ...` as root, `dojo-deploy` replaces that file with a small wrapper script that runs `dojo-deploy` under the old name, so the unit and your scripts keep working. It keeps the previous file at `/usr/bin/dojo-compose-cli.pre-dojo-deploy`. To keep your own file at `/usr/bin/dojo-compose-cli`, set `DOJO_DEPLOY_SKIP_COMPOSE_LINK=true`. `dojo-deploy` only writes the wrapper when its own binary sits in `/usr/local/bin`, `/usr/bin`, `/usr/local/sbin` or `/usr/sbin`.
 
@@ -166,9 +188,7 @@ One compose command is new: `certs rotate-internal` gives an install its own int
 
 ## What changed since dojo-compose-cli 2.1.9 and dojo-helm-cli 4.0.1
 
-Most changes are fixes. The ones you are most likely to notice after an update are below. The release notes list every change.
-
-> **TODO (owner, remove before merge):** link the public release notes here (for example a GitHub release page or a docs page). The source file is `docs/RELEASE_NOTES.md` in the private dojo-deploy repository, so a link to it would not work for customers.
+Most changes are fixes. The ones you are most likely to notice after an update are below. The [dojo-deploy 3.5.0 release notes](/releases/pro/changelog/#dojo-deploy-350) in the DefectDojo Pro changelog have the full list.
 
 **Both CLIs**
 
@@ -182,7 +202,10 @@ Most changes are fixes. The ones you are most likely to notice after an update a
 - **Upgrade refusals:** an install older than 2.58.0 must upgrade to 2.58.4 before 3.0.0 / 2.59.0 or later. `app upgrade` also refuses, before changing anything, when the installed or target version cannot be read (for example an install recorded as `latest`).
 - **`doctor`:** it checks more things (the systemd stop timeout, a revoked running release, an internal CA shared by every install, SELinux labels, Docker user namespace remapping). Each is a warning, so plain `doctor` still exits 0, but `doctor --strict` exits non-zero until it is fixed.
 - **TLS material:** a first install generates its own internal CA and service certificates. Existing installs keep theirs, and `doctor` warns about a shared CA. The new `certs rotate-internal` replaces it.
-- **Files:** `media/` belongs to the containers' user (uid 1001), `customizations/` is created with mode 0755 whatever the umask, and the configuration file is written in one step, so a crash cannot leave it half-written.
+- **Restart:** `app restart` no longer fails when nginx or the `dojo` container restarts during startup and then stays up. The check lasts 30 seconds. It still fails when a container exits or is killed for running out of memory, or when it is still restarting, or starts again, in the last 15 seconds.
+- **Configuration file:** on a new host, the first command run as root creates `/etc/defectdojo/compose.config` with mode 0660, owned by the service user and group. Before, every local user could read it until `first-install` ran. `doctor` now reports `/etc/defectdojo` as clean on a fresh host. The file is written in one step, so a crash cannot leave it half-written, and a symbolic link at that path is refused.
+- **License file:** a license that is a symbolic link is refused instead of copied. `app upgrade` now carries the license copy beside the compose file (`/opt/dojo/dojopro.lic`) into the new install, owned by the service user.
+- **Files:** `media/` belongs to the containers' user (uid 1001), and `customizations/` is created with mode 0755 whatever the umask.
 - **SELinux hosts:** when Docker has SELinux enabled, the CLI loads `docker-compose.selinux.yml` from the deployment files so Docker labels the bind mounts. `doctor` reports unlabelled ones.
 - **Rootless Docker:** the systemd unit keeps `DOCKER_HOST` and no longer starts the rootful Docker daemon at boot.
 - **macOS:** the compose CLI is published for Linux only (amd64 and arm64). On macOS, `update-binary` fails, and once a newer release is published, `app upgrade`, image pulls, first install and deployment downloads refuse to run.
