@@ -32,11 +32,12 @@ Users with the **View Group** configuration permission see every Group. A Member
 
 ## Viewing A Group
 
-With Access Administration on (Pro), a Group's page has three tabs:
+With Access Administration on (Pro), a Group's page has four tabs:
 
 * **Overview**: the Group's details, its description, and the read-only **Configuration Permissions** card.
 * **Members**: the Group's members and their Group Roles. When **View As User** is on, each member's row has a **View As** button.
 * **Access**: what the Group reaches in its own right: its Global Roles, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each one is reached. Every member of the Group receives this access through it, and a Group that holds a Global Role is marked as having instance-wide access. The Group's own Roles are changed here, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
+* **Defaults**: the landing page, dashboard, sidebar preset, Form Configuration, table views and layout restriction the Group sets for its Members. See [Set Group Defaults](#set-group-defaults).
 
 
 Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
@@ -165,3 +166,62 @@ If you want the Members in your Group to access Configuration functions, and con
 2. Open the Group, choose **Edit Group** from the ⚙️ menu, and add that Role under the Group's **Global Roles**. The Group's other Global Roles stay as they are.
 
 The Group page's **Configuration Permissions** card shows the result. Only a Superuser can grant Configuration Permissions this way.
+
+## Set Group Defaults
+
+With Access Administration on (Pro), the **Defaults** tab on a Group's page sets what the Group's Members start with: where they land after signing in, which dashboard, sidebar and forms they see, and which saved view each list opens with. A Member's own choices still come first; a Group default fills in only where the Member has not chosen.
+
+Anyone who can view the Group sees its Defaults tab, read-only, with **Not set** for each empty field. Saving needs permission to edit the Group.
+
+### The fields
+
+The tab is one form. Change any of its fields, then click **Submit** to save them together.
+
+* **Landing Page**: the page Members open after signing in (see [Default Landing Page](/navigation/pro__landing_page/)). A Member who cannot open that page lands on the next default instead.
+* **Default Dashboard**: the dashboard Members are shown on the Dashboards page. You can choose a dashboard you can see: one shared with everyone, or one of your own. Members who cannot open it fall through to the next default.
+* **Sidebar Preset**: the [sidebar preset](/navigation/pro__sidebar_presets/) that shapes Members' sidebars: a shared preset, or one of your own. This field needs the sidebar presets feature.
+* **Form Configuration**: the [Form Configuration](/navigation/pro__form_configuration/) that decides which fields Members' create and edit forms show. Choosing one needs the permission to edit Form Configurations.
+* **Table Views**: rows of a list, then the saved view that list opens with (see [Customizing Tables](/navigation/pro__table_customization/)). Only views shared with everyone can be chosen, and each list takes one row.
+* **Restrict Layout Customization**: **Inherit**, **Restrict** or **Allow**. See [Restrict Layout Customization per Group](#restrict-layout-customization-per-group).
+* **Priority**: an optional whole number that decides between a Member's Groups. See [Priority](#priority).
+
+Clearing a field means the Group sets nothing for it, and its Members fall to the next default.
+
+### Which default a Member gets
+
+Every default resolves the same way:
+
+1. The Member's own choice.
+2. Otherwise, the highest-priority Group of theirs that sets it, and that they can open.
+3. Otherwise, the instance default: the **Instance Landing Page** on **Settings > UI Defaults > Layout Defaults**, the instance sidebar preset and the default Form Configuration. The global default dashboard and table views on Layout Defaults apply while customization is restricted, as they always have.
+4. Otherwise, the built-in behavior (Home, the starter dashboard, the full sidebar, the stock forms).
+
+A Member whose own choice is empty can see where a value comes from on their **User Profile** page, for example "Using AppSec's default: Findings > All" or "Using the instance default:" followed by the value. On a list, the **Views** menu marks the view a Group set, and the dashboard picker marks the dashboard a Group set.
+
+### Priority
+
+When a Member belongs to several Groups that set the same default, **Priority** decides which one applies. The lowest number wins: a Group with priority 10 beats one with priority 20.
+
+Each number can be used by one Group only. Submitting a number another Group already holds is refused, and the message names that Group, for example "Priority 10 is used by Platform Security." Choose a free number, or change the other Group first.
+
+A Group with no priority applies only when it is the Member's only Group that sets that default. Give a Group a priority whenever its Members may also belong to other Groups that set defaults.
+
+### Restrict Layout Customization per Group
+
+The instance-wide **Restrict Layout Customization** switch lives on **Settings > UI Defaults > Layout Defaults**. A Group can override it for its Members, in either direction:
+
+* **Inherit** (the default): the Group follows the instance setting.
+* **Restrict**: locks the Group's Members to the defaults, even when the instance setting is off.
+* **Allow**: lets the Group's Members customize, even when the instance setting is on.
+
+The Member's highest-priority Group that sets **Restrict** or **Allow** decides; Groups set to **Inherit** are skipped. When none of a Member's Groups sets either, the instance setting applies. Superusers are never locked.
+
+A locked Member gets their Group's defaults enforced. The fields on their User Profile page are read-only and read "Set by" followed by the Group's name. Where the Group sets nothing, the instance defaults apply as before. For a locked Member, the landing page also follows the Group's, else the Instance Landing Page, else Home.
+
+### When a chosen item is deleted
+
+Deleting a dashboard, sidebar preset or Form Configuration that a Group points at clears that field for the Group, and its Members fall to the next default. Deleting a saved view removes the Group's row for that list. The delete dialogs for sidebar presets and Form Configurations name the Groups that point at them, so you can see who is affected before confirming.
+
+### Set Group Defaults through the API
+
+A Group's defaults are read and written at `/api/v2/dojo_groups/{id}/defaults/` with the usual API token. `GET` returns the current set, and `PUT` replaces the whole set, so send every field you want to keep. `restrict_layout_customization` takes `"inherit"`, `"restrict"` or `"allow"`. The same permissions apply as in the UI: reading needs permission to view the Group, and writing needs permission to edit it.

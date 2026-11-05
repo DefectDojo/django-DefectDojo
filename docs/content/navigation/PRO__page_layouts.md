@@ -124,6 +124,8 @@ An administrator can turn on **Restrict Layout Customization** in **Settings > U
 
 Layouts you saved before the switch was turned on are kept. If it is turned back off, they are available again exactly as they were.
 
+A Group can override the switch for its Members in either direction, with **Restrict** or **Allow** on the Group's **Defaults** tab (see [Set Group Defaults](/admin/user_management/create_user_group/#set-group-defaults)). Superusers are never restricted.
+
 For the administrator's side of this, see [The Sidebar Menu](/navigation/pro__sidebar/).
 
 ## The widget catalog

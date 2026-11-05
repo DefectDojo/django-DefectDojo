@@ -27,6 +27,10 @@ From a configuration's menu you can:
 
 An instance upgraded from a version with a single Form Configuration keeps its settings: they become the default configuration, named "Default".
 
+## Group and instance defaults
+
+A Group can point its Members at another configuration on the Group's **Defaults** tab, which needs the permission to edit Form Configurations (see [Set Group Defaults](/admin/user_management/create_user_group/#set-group-defaults)). A person's forms follow the configuration set by their highest-priority Group that sets one, else the **Default** configuration, else the stock forms. Deleting a configuration that a Group points at clears it for that Group, and the delete dialog names those Groups.
+
 ## Choosing a form
 
 Open a configuration, then pick the form you want to change from the selector at the top of the page. Each entity that has a create and edit form has an entry, for example the Finding form and the Asset form. The rest of the page then shows that form's fields.

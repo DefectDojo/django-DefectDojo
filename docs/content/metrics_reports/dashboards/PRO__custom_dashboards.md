@@ -72,6 +72,10 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 An administrator can enable **Restrict Layout Customization** (Settings, then UI Defaults, then Layout Defaults) to limit dashboard changes to superusers. Everyone else is shown the global default dashboard, or the built-in starter dashboard when none is designated, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
 
+### Group and instance defaults
+
+When you have not chosen a default dashboard, the Dashboards page opens the one set by your highest-priority Group that sets one and that you can open, else your own copy of the starter dashboard. While your customization is restricted, the Group's dashboard is enforced over the global default, which applies when no Group of yours sets one. A Group sets its dashboard on the Group's **Defaults** tab, and the dashboard picker marks it (see [Set Group Defaults](/admin/user_management/create_user_group/#set-group-defaults)). A Group can also restrict or allow customization for its Members, whatever the instance setting says.
+
 ## Building a dashboard in the UI
 
 ### The dashboard toolbar
