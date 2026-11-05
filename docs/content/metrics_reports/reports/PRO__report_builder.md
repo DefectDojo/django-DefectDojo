@@ -282,7 +282,9 @@ The CSV, Excel and JSON formats read the same Blocks, so an export of a Template
 
 Templates, Blocks, Themes and report schedules can belong to a group instead of to the whole instance. A group's members then build and run their own reports without seeing, or being able to change, another group's.
 
-Group Ownership is a beta feature and is on by default. A superuser can turn it off under **Settings > Feature Flags**. While it is off, every template, block, theme and schedule behaves as an instance one.
+Group Ownership is a beta feature and is off by default. A superuser turns it on under **Settings > Feature Flags**. While it is off, every template, block, theme and schedule behaves as an instance one.
+
+> **🔑 Important:** The built-in Writer, Maintainer and Owner roles carry Report Template Add, Edit and Delete. Once Group Ownership is on, every member who holds one of those roles in a Group can create and change templates, blocks, themes and report schedules for that Group, and share them. Before turning it on, review which Groups give their members those roles.
 
 ### Ownership tiers
 

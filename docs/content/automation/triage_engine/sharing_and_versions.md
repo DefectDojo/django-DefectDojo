@@ -14,7 +14,7 @@ Within one instance, a rule can also belong to a group instead of to one person,
 
 A rule is owned either by a group or by the instance. A group's rule belongs to the group rather than to whoever wrote it: its members manage it, it runs with the group's access, and it keeps running when the person who built it leaves.
 
-Group Ownership is a beta feature and is on by default. A superuser can turn it off under **Settings > Feature Flags**. While it is off, the controls on this page are hidden and every rule behaves as an Instance rule.
+Group Ownership is a beta feature and is off by default. A superuser turns it on under **Settings > Feature Flags**. While it is off, the controls on this page are hidden and every rule behaves as an Instance rule. Turning it on makes Group membership roles count for the content a Group owns: see [Group membership roles](/admin/user_management/pro__custom_rbac_roles/) for what that grants.
 
 ### Ownership tiers
 

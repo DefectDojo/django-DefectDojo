@@ -193,6 +193,8 @@ A group can own Triage Engine rules and Report Builder templates, blocks, themes
 * **As a Global Role**, they apply to every item of the type: every rule, or every template, block, theme and schedule, whoever owns it.
 * **As a group membership role** (the role a user holds in a group), they apply to that group's items only, the same way an Asset role applies to that Asset only.
 
+Group membership roles count only while the **Group Ownership** feature flag is on (it is off by default). The built-in Writer, Maintainer and Owner roles already carry Report Template Add, Edit and Delete, so turning the flag on lets every member who holds one of them in a Group author that Group's Report Builder content. The built-in roles carry no Rule permissions.
+
 | Permission | Allows |
 | --- | --- |
 | **Rule View** | Seeing rules, their runs and deliveries |
