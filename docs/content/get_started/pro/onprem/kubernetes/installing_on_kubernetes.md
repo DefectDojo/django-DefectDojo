@@ -1660,10 +1660,12 @@ first.
 
 **1. Move the components off group 1337.** The django, nginx, celery,
 integrators, ddorch, ddorch-workers and initializer containers run with group
-`1337` by default. Istio's sidecar does not capture traffic from that group
-(it is the proxy's own), so under `STRICT` their calls bypass the mesh and are
-refused. Give each a different primary group. `fsGroup` stays `1337`, so
-access to the shared media volume is unchanged:
+`1337` by default, and so do the init containers of the django and
+django-import pods, which take the image's default group. Istio's sidecar does
+not capture traffic from that group (it is the proxy's own), so under `STRICT`
+their calls bypass the mesh and are refused. Give each a different primary
+group. `fsGroup` stays `1337`, so access to the shared media volume is
+unchanged:
 
 ```yaml
 securityContext:
@@ -1681,6 +1683,9 @@ securityContext:
     runAsGroup: 1001
   nginx:
     runAsGroup: 101
+  # Init containers that run as the app user (wait-for-postgresql and others).
+  initContainers:
+    runAsGroup: 1001
 ```
 
 **2. Use native sidecars.** With a classic sidecar, a pod that runs to
@@ -2444,7 +2449,7 @@ template includes commented examples for:
 
 | Date       | Version | Changes                                                              |
 |------------|---------|----------------------------------------------------------------------|
-| 2026-11-04 | after 3.5.0 | New [Service Mesh (Istio)](#service-mesh-istio) section (moving components off group 1337, native sidecars, NetworkPolicies) with the new `jobs.tests.podAnnotations` and `jobs.certificateGeneration.podAnnotations`; new [Read-Only Root Filesystem](#read-only-root-filesystem) section with the new `securityContext.tmpVolume` and `securityContext.nginx.readOnlyRootFilesystem`. All off by default; default renders are unchanged |
+| 2026-11-04 | after 3.5.0 | New [Service Mesh (Istio)](#service-mesh-istio) section (moving components off group 1337, native sidecars, NetworkPolicies) with the new `jobs.tests.podAnnotations`, `jobs.certificateGeneration.podAnnotations` and `securityContext.initContainers.runAsGroup`; new [Read-Only Root Filesystem](#read-only-root-filesystem) section with the new `securityContext.tmpVolume` and `securityContext.nginx.readOnlyRootFilesystem`. All off by default; default renders are unchanged |
 | 2026-09-16 | 3.3.200+ | Remove the PSIRT Advisory Engine section. DefectDojo Pro 3.3.0 replaced the sidecar with PSIRT 2.0 inside the main application, and the chart no longer ships the component. Drop `psirt:` (and `vpa.components.psirt`, `egress.proxy.components.psirt`) from overrides; the chart rejects the nested keys as unknown components. Carry an existing sidecar database into PSIRT 2.0 with `manage.py psirt_import_legacy` |
 | 2026-07-09 | 3.1.0   | Add optional PSIRT Advisory Engine (`psirt.enabled`): served under `/psirt/` via the nginx sidecar, dedicated database via `psirt.databaseUrl`, secret pinning guidance, network policy rules, BYO hooks |
 | 2026-04-17 | 2.57.1  | Document `ddorch` + `ddorch-workers` (new orchestrator pair that replaces kairos/rulesengine/hatchet-integrators); add `ddorch.tls.rootCa/cert/key` `--set-file` flags to pre-flight and deploy commands; new ddorch mTLS certificates section with SAN requirements; mcp-server listed in expected pods; PDBs added for ddorch (singleton) and ddorch-workers; ArgoCD prerequisites note about ddorch cert delivery; update Hatchet warning to reflect worker consolidation |
