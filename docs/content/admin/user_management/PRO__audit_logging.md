@@ -36,6 +36,8 @@ Audit Logs track a variety of actions, including, but not limited to:
 - Creation and editing of User profiles.
 - EPSS percentile updates. 
 
+- Each [View As User](../pro__view_as_user/) session: an entry when it starts, naming the user who started it and the user viewed, and an entry when it ends, with how it ended.
+
 The full list of changes and actions that are captured in Audit Logs can be found [here](../pro__audit_log_index/).
 
 ## Audit Logs Table 
