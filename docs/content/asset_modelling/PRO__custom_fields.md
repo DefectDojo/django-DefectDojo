@@ -74,14 +74,18 @@ saved as the field's value:
 - On a **Multi Select** field, the typed text is saved alongside any options you picked. Each record
   holds at most one Other value.
 
-The typed value is shown, filtered and sorted like any other value of the field. When you open a
-record whose value is not one of the options, the editor shows **Other** chosen with the text filled
-in. Through the API, write the typed text as the value itself (`value` for a Single Select field, one
-entry of `value_options` for a Multi Select field).
+Options match exactly, letter case included: typing `major release` when the field has a `Major
+Release` option saves an Other value, not that option. The typed value is shown, filtered and sorted
+like any other value of the field. When you open a record whose value is not one of the options, the
+editor shows **Other** chosen with the text filled in. Through the API, write the typed text as the
+value itself (`value` for a Single Select field, one entry of `value_options` for a Multi Select
+field).
 
 **Allow Other** cannot be turned off while any record holds an Other value: the change is refused and
 says how many records hold one. Change those records to one of the defined options first, or add their
-typed text to the field's options, which makes it an ordinary option.
+typed text to the field's options, which makes it an ordinary option. It is also refused while an
+enabled rule sets the field to a value outside its options, and the message names those rules: update
+or disable them first.
 
 ## Filling in values
 
