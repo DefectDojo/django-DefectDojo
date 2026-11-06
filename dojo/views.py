@@ -1,8 +1,6 @@
 import logging
 from contextlib import suppress
-from pathlib import Path
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -73,8 +71,9 @@ def manage_files(request, oid, obj_type):
             for o in getattr(files_formset, "deleted_objects", []):
                 if has_file_edit_permission:
                     logger.debug("removing file: %s", o.file.name)
-                    with suppress(FileNotFoundError):
-                        (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
+                    if o.file.name:
+                        with suppress(FileNotFoundError):
+                            o.file.storage.delete(o.file.name)
 
             for o in files_formset.new_objects:
                 logger.debug("adding file: %s", o.file.name)
