@@ -149,6 +149,43 @@ The MCP Server answers the connection request with a plain-text error instead of
 
 If a toolset is switched off while a session is open, its tools stay listed but each call returns an error naming the toolset and its Feature Flag. Reconnect after the flag is enabled again.
 
+### Personal Data Filter
+
+A superuser can have the MCP Server remove personal data from every tool result before an AI assistant sees it. The filter is off by default.
+
+The setting lives on the **Personal Data Filter** card of the MCP page (**MCP** in the sidebar). Only superusers see the card, and only after the MCP disclaimer on that page has been accepted. There is no `/api/v2/` endpoint for this setting; change it on the MCP page. The MCP Server picks up a saved change within a minute.
+
+With the filter on, the MCP Server filters:
+
+- **User fields.** Any field that names a person, at any depth of the result: `reporter`, `lead`, `author`, `owner`, `assigned_to`, `reviewers`, `username`, `email`, `first_name`, `last_name`, fields ending in `_by` such as `created_by`, and similar. The records `get_users` and `get_user_by_id` return are filtered whole.
+- **Email addresses** anywhere in free text, such as descriptions and notes.
+- **Your patterns.** Text matching the regular expressions in **Patterns**.
+- **Audit trails.** Change histories such as `history` and `audit_log`.
+- **Charts grouped by a person.** Dashboard widget labels that are usernames, for example a chart grouped by reporter or lead.
+- **Names repeated in free text.** A name or email address that appears in one of the result's user fields is also removed wherever else it appears in that result.
+
+| Setting | Default | What it does |
+|---------|---------|--------------|
+| **Filter Personal Data** | Off | Turns the filter on. |
+| **Mode** | Remove Values | **Remove Values** replaces each filtered value with `[redacted]`. **Consistent Pseudonyms** replaces it with a pseudonym (`anon-` followed by 16 hex digits). The same person gets the same pseudonym in every result, so an assistant can still tell people apart, but the pseudonym cannot be turned back into the original value. |
+| **Audit Trails** | Remove | **Remove** drops audit trails from results entirely. **Filter** keeps them and filters the people in them like any other field. |
+| **Filter Email Addresses** | On | Removes email addresses from free text. |
+| **Scrub Known Names** | On | Removes a name taken out of a user field wherever it appears again in free text in the same result. |
+| **Patterns** | Empty | One regular expression per line, in RE2 syntax. At most 100 patterns, each at most 1024 bytes. RE2 has no lookarounds or backreferences. A pattern that does not compile, uses a construct RE2 lacks, or matches the empty string is refused when you save, and the message names its line. |
+| **Extra User Fields** | Empty | One field name per line. Values under these names are treated as people, in addition to the built-in list. At most 200 names. |
+| **Exempt Fields** | Empty | One field name per line. These fields are never filtered, even when the built-in list names them. At most 200 names. |
+
+**Regenerate Pseudonym Key** replaces the secret the pseudonyms are derived from. Every pseudonym changes, so an assistant can no longer match a person to its earlier answers. The page asks you to confirm first.
+
+If the MCP Server cannot read the policy, it refuses the tool call with the error code `pii_policy_unavailable` instead of answering unfiltered. The call stops before it reaches DefectDojo, so a write tool changes nothing. See [Troubleshooting MCP](#troubleshooting-mcp).
+
+Limits to know before relying on the filter:
+
+- A name typed into free text, such as a finding description, is caught only when one of your patterns matches it or the same result also carries that person in a user field.
+- Short names are matched as whole words, but a two-letter name can still remove the same word where it means something else in that result.
+- In **Remove Values** mode a filtered value becomes the text `[redacted]` whatever its original type, so a field that held a number comes back as text.
+- The reference resources and pre-configured prompts are fixed text that ships with the MCP Server and are not filtered.
+
 ## Quick Start Guides by AI Provider
 
 > **💡 Using Claude Code?** Do not configure it by hand. The
@@ -1459,6 +1496,18 @@ Verify these items when experiencing connection issues:
 1. Ask a superuser to open **Settings → Feature Flags**, confirm **MCP Server** is on, and enable the toolset's flag (for `hierarchy`, **MCP: Asset Hierarchy**, which also needs the **Asset Hierarchy** feature; for `reporting`, **MCP: Reporting**, which also needs the **Reporting** feature; for `dashboards`, **MCP: Dashboards 2.0**, which also needs the **Dashboards 2.0** feature; for `psirt`, **MCP: PSIRT**, which also needs the **PSIRT** feature)
 2. Or remove the toolset from the `toolsets` parameter and reconnect
 3. Ask your assistant to call `get_instance_info` to see which toolsets the instance has enabled
+
+---
+
+#### ❌ "the MCP PII filter policy could not be read from DefectDojo Pro"
+
+**Cause:** The MCP Server could not read the [Personal Data Filter](#personal-data-filter) policy, for example because DefectDojo did not answer in time or returned a server error. The error code is `pii_policy_unavailable`. The MCP Server refuses the call rather than answer without the filter, and the call never reaches DefectDojo.
+
+**Solutions:**
+
+1. Retry after a minute
+2. Check that the DefectDojo instance is reachable and healthy
+3. If every call keeps failing, contact your DefectDojo administrator. On a self-hosted install, the `mcp-server` container logs each refused call as `tool_refused_pii_policy_unavailable`
 
 ---
 
