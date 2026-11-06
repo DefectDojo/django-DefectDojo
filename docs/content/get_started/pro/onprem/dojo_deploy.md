@@ -103,13 +103,25 @@ sudo -E dojo-compose-cli update-binary
 dojo-helm-cli update-binary
 ```
 
-This installs the new release of the CLI you already use, built from `dojo-deploy`: `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0. It keeps its old name, commands, options and version numbering, and prints the [note](#a-note-in-your-terminal) that links to this page. `dojo-compose-cli` also runs this update on its own before `app upgrade`, `app pull-images`, `deploy download` and `first-install`, as it did before.
+One run does two things. It installs the new release of the CLI you already use, built from `dojo-deploy`: `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0. It also installs `dojo-deploy` next to it, in the same directory, with the same owner and mode. If `dojo-compose-cli` is in `/usr/local/bin`, `dojo-deploy` goes there too. Starting from the releases out today (`dojo-compose-cli` 2.1.x, `dojo-helm-cli` 4.0.x), you need only this one run.
 
-The update does not add a `dojo-deploy` command. To run `dojo-deploy` itself, download it as described next.
+The old-name CLI keeps its name, commands, options and version numbering, and prints the [note](#a-note-in-your-terminal) that links to this page. `dojo-compose-cli` also runs this update on its own before `app upgrade`, `app pull-images`, `deploy download` and `first-install`, as it did before.
+
+`update-binary` reports what it did with `dojo-deploy` in one line:
+
+```
+dojo-deploy 3.5.0 installed at /usr/local/bin/dojo-deploy
+dojo-deploy 3.5.0 -> 3.5.0.1 at /usr/local/bin/dojo-deploy
+dojo-deploy was not installed: <reason>. Download it from https://cloud.defectdojo.com/tools
+```
+
+The first line appears when `dojo-deploy` was not there before, and the second when an existing copy was updated. The third appears when `dojo-deploy` could not be installed, for example on a host that is offline or air-gapped, or when you lack permission to write to the directory. That does not fail the update: the CLI you already use is still updated and the command still exits successfully. Download `dojo-deploy` as described next.
 
 ### Downloading dojo-deploy
 
-`dojo-deploy` is listed with the other DefectDojo Pro tools at [cloud.defectdojo.com/tools](https://cloud.defectdojo.com/tools). It is published to `us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-deploy/executables`, in the same DefectDojo Pro registry that `dojo-compose-cli` and `dojo-helm-cli` come from. You log in with your license as you do for those CLIs, and the host needs the same HTTPS access to `us-south1-docker.pkg.dev`. Nothing new needs to be allowlisted.
+Most hosts don't need this, because `update-binary` installs `dojo-deploy` for you. Download it yourself on an air-gapped host, on a host that has neither old CLI, or when `update-binary` printed `dojo-deploy was not installed`.
+
+`dojo-deploy` is listed with the other DefectDojo Pro tools at [cloud.defectdojo.com/tools](https://cloud.defectdojo.com/tools). It is published to `us-south1-docker.pkg.dev/defectdojo-container-registry/dojo-deploy/executables`, in the same DefectDojo Pro registry that `dojo-compose-cli` and `dojo-helm-cli` come from. You log in with your license as you do for those CLIs, and the host needs the same HTTPS access to `us-south1-docker.pkg.dev`. Nothing new needs to be allowlisted. On an air-gapped host, download the binary from the tools page on a machine with internet access and copy it over.
 
 Put the binary in a system directory on your `PATH`, such as `/usr/local/bin`, and check it:
 
@@ -130,8 +142,8 @@ How you update depends on which name you run.
 
 | You run | Update with | What it installs |
 | --- | --- | --- |
-| `dojo-compose-cli` | `sudo -E dojo-compose-cli update-binary` | The newest `dojo-compose-cli` release |
-| `dojo-helm-cli` | `dojo-helm-cli update-binary` | The newest `dojo-helm-cli` release |
+| `dojo-compose-cli` | `sudo -E dojo-compose-cli update-binary` | The newest `dojo-compose-cli` release, and `dojo-deploy` beside it |
+| `dojo-helm-cli` | `dojo-helm-cli update-binary` | The newest `dojo-helm-cli` release, and `dojo-deploy` beside it |
 | `dojo-deploy` | `dojo-deploy update-binary` | The newest `dojo-deploy` release |
 
 `dojo-compose-cli` also updates itself before `app upgrade`, `app pull-images`, `deploy download` and `first-install`, then runs your command on the new binary. This is how it worked before. `dojo-helm-cli` only prints a one-line note when a newer release exists.
