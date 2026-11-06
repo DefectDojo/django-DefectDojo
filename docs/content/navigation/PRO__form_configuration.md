@@ -73,6 +73,26 @@ You can reorder a field that is otherwise not configurable, because its position
 
 The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). The default Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
 
+## Data sent through the API
+
+The default Form Configuration also governs records written through the REST API (`/api/v2/`), so a script or integration follows the same rules as someone filling in the form. This covers creating and updating Findings, Engagements, Tests, Assets (on both `/api/v2/products/` and `/api/v2/assets/`), Organizations (on both `/api/v2/product_types/` and `/api/v2/organizations/`), and Risk Acceptances.
+
+- A field set to **Disabled** cannot be written: a request that includes it is refused with a `400` naming the field.
+- A field set to **Required** must have a value. Creating a record without it, or replacing one with `PUT` without it, is refused with a `400` naming the field. A `PATCH` that leaves the field out keeps its current value; one that empties it is refused.
+- A field the form shows only for one Engagement type is required only for that type. The CI/CD fields (Build ID, Commit Hash, Branch/Tag and the server fields) are required only on a CI/CD Engagement, and Test Strategy only on an Interactive one. A `PATCH` that changes an Engagement to that type is refused when the field has no value.
+
+The same rules apply to the other API actions that write one of these fields:
+
+- Adding tags to a Finding (`/api/v2/findings/{id}/tags/`) is refused when Tags is disabled. Removing tags (`/api/v2/findings/{id}/remove_tags/`) is refused when Tags is disabled, and also when Tags is required and the request would remove every tag.
+- Merging Findings (`/api/v2/findings/merge/`) is refused when it would write a disabled field: setting tags on any Finding involved (the destination's or the merged Findings'), or turning on the option that copies the merged Findings' tags, references, vulnerability IDs or endpoints onto the destination.
+- Updating several Assets at once (`bulk_update` on `/api/v2/assets/` and `/api/v2/products/`) follows the Asset form's rules for the fields the request sets. Its tags are only ever added, so it is refused when Tags is disabled but never for leaving Tags empty. Removing an Asset's parent (`remove_parent`) is refused when Parent is disabled or required.
+- Uploading proof for a Risk Acceptance (`upload_proof`) is refused when Proof is disabled. Requesting a risk acceptance (`/api/v2/risk_acceptance/request/`) is refused when it sets a disabled field, such as the Expiration Date; the form's required fields do not apply to a request.
+- Accepting risks by vulnerability ID (`accept_risks` on `/api/v2/engagements/{id}/`, `/api/v2/tests/{id}/` and `/api/v2/findings/`) creates Risk Acceptances, so it follows the Risk Acceptance form's disabled fields: it is refused when Accepted By or Decision Details is disabled (every item sends both, the justification becoming the Decision Details), and when an item sends an Expiration Date while that field is disabled.
+
+The instance's API schema (`/api/v2/oa3/schema/`, shown in Swagger at `/api/v2/oa3/swagger-ui/`) follows the configuration too, for a signed-in user: disabled fields are left out of the request bodies and required fields are marked required. Anyone not signed in, and the schema published with each release, see the stock forms.
+
+Scan imports and reimports are not affected, since a scan file cannot supply a field an administrator chose to require. Neither is the JIRA Instance API.
+
 ## Saving
 
 **Save** stores your changes in the configuration you are editing; they apply to everyone when it is the default. **Reset to Defaults** returns the selected form to the configuration DefectDojo ships with, which is a good way back if a form has been narrowed too far.
