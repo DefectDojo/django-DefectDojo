@@ -35,6 +35,6 @@ Every Tenable scan reports, for each host, whether it ran with credentials (Ness
 
 A finding that spans several hosts carries both tags when those hosts disagree. Use the tag filter on the Findings list or in a report to split credentialed from uncredentialed results.
 
-The tags follow the scan: when a host that was scanned without credentials is scanned with them, the next sync replaces `uncredentialed-scan` with `credentialed-scan` on its findings. Tags you add yourself are left alone.
+The tags follow the scan: when a host that was scanned without credentials is scanned with them, the next sync replaces `uncredentialed-scan` with `credentialed-scan` on its findings. Other tags you add yourself are left alone, except a tag whose name starts with `credentialed-scan` or `uncredentialed-scan` (such as `credentialed-scan-exempt`): the connector treats those as its own and removes them on the next sync.
 
 Plugin 19506 is an Info severity plugin. With the **Scan** grouping, the connector asks for it even when the **Minimum Severity** is above Info, so the tags are applied either way (the plugin's own Info finding is still left out). With the **Tenable Asset** grouping, the tag is the host's most recent credential status across all of its scans, not the status of the scan that found the finding, and a Minimum Severity above Info drops the plugin from the export, so those findings get no credential tags.
