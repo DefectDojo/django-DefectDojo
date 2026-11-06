@@ -173,13 +173,20 @@ With Access Administration on (Pro), the **Defaults** tab on a Group's page sets
 
 Anyone who can view the Group sees its Defaults tab, read-only, with **Not set** for each empty field. Saving needs permission to edit the Group.
 
+Some fields reach past the Group, so permission to edit the Group is not enough to change them:
+
+* **Restrict Layout Customization** and **Priority** are instance policy: only a Superuser can change them.
+* **Sidebar Preset** needs the permission to view sidebar presets, and **Form Configuration** the permission to edit Form Configurations.
+
+For anyone else those fields are read-only, and the help next to each says why. Submitting the tab keeps their saved values, so the other fields still save.
+
 ### The fields
 
 The tab is one form. Change any of its fields, then click **Submit** to save them together.
 
 * **Landing Page**: the page Members open after signing in (see [Default Landing Page](/navigation/pro__landing_page/)). A Member who cannot open that page lands on the next default instead.
-* **Default Dashboard**: the dashboard Members are shown on the Dashboards page. You can choose a dashboard you can see: one shared with everyone, or one of your own. Members who cannot open it fall through to the next default.
-* **Sidebar Preset**: the [sidebar preset](/navigation/pro__sidebar_presets/) that shapes Members' sidebars: a shared preset, or one of your own. This field needs the sidebar presets feature.
+* **Default Dashboard**: the dashboard Members are shown on the Dashboards page. Only a dashboard shared with everyone can be chosen, so every Member can open it.
+* **Sidebar Preset**: the [sidebar preset](/navigation/pro__sidebar_presets/) that shapes Members' sidebars. Only a preset shared with everyone can be chosen. This field needs the sidebar presets feature.
 * **Form Configuration**: the [Form Configuration](/navigation/pro__form_configuration/) that decides which fields Members' create and edit forms show. Choosing one needs the permission to edit Form Configurations.
 * **Table Views**: rows of a list, then the saved view that list opens with (see [Customizing Tables](/navigation/pro__table_customization/)). Only views shared with everyone can be chosen, and each list takes one row.
 * **Restrict Layout Customization**: **Inherit**, **Restrict** or **Allow**. See [Restrict Layout Customization per Group](#restrict-layout-customization-per-group).
@@ -202,7 +209,7 @@ A Member whose own choice is empty can see where a value comes from on their **U
 
 When a Member belongs to several Groups that set the same default, **Priority** decides which one applies. The lowest number wins: a Group with priority 10 beats one with priority 20.
 
-Each number can be used by one Group only. Submitting a number another Group already holds is refused, and the message names that Group, for example "Priority 10 is used by Platform Security." Choose a free number, or change the other Group first.
+Each number can be used by one Group only. Submitting a number another Group already holds is refused, and the message names that Group when you can view it, for example "Priority 10 is used by Platform Security." (otherwise "Priority 10 is used by another group."). Choose a free number, or change the other Group first.
 
 A Group with no priority applies only when it is the Member's only Group that sets that default. Give a Group a priority whenever its Members may also belong to other Groups that set defaults.
 
@@ -224,4 +231,4 @@ Deleting a dashboard, sidebar preset or Form Configuration that a Group points a
 
 ### Set Group Defaults through the API
 
-A Group's defaults are read and written at `/api/v2/dojo_groups/{id}/defaults/` with the usual API token. `GET` returns the current set, and `PUT` replaces the whole set, so send every field you want to keep. `restrict_layout_customization` takes `"inherit"`, `"restrict"` or `"allow"`. The same permissions apply as in the UI: reading needs permission to view the Group, and writing needs permission to edit it.
+A Group's defaults are read and written at `/api/v2/dojo_groups/{id}/defaults/` with the usual API token. `GET` returns the current set, and `PUT` replaces the whole set, so send every field you want to keep. `restrict_layout_customization` takes `"inherit"`, `"restrict"` or `"allow"`; leaving it out, or sending `null`, means `"inherit"`. The same permissions apply as in the UI: reading needs permission to view the Group, and writing needs permission to edit it. The response's `editable` object says which of `restrict_layout_customization`, `priority`, `sidebar_preset` and `form_configuration` the caller may change; send the current value of the others, since a change to one of them is refused with a message under that field.
