@@ -171,7 +171,7 @@ With the filter on, the MCP Server filters:
 | **Audit Trails** | Remove | **Remove** drops audit trails from results entirely. **Filter** keeps them and filters the people in them like any other field. |
 | **Filter Email Addresses** | On | Removes email addresses from free text. |
 | **Scrub Known Names** | On | Removes a name taken out of a user field wherever it appears again in free text in the same result. |
-| **Patterns** | Empty | One regular expression per line, in RE2 syntax. At most 100 patterns, each at most 1024 bytes. RE2 has no lookarounds or backreferences. A pattern that does not compile, uses a construct RE2 lacks, or matches the empty string is refused when you save, and the message names its line. |
+| **Patterns** | Empty | One regular expression per line, in RE2 syntax. At most 100 patterns, each at most 1024 bytes. RE2 has no lookarounds or backreferences. Patterns are also checked with Python's `re` module, so RE2 syntax that Python lacks is refused too: `\p{L}`, `(?<name>x)`, `\x{41}` (write `\x41`), `\Qa.b\E`, and `(?U)`. A pattern that does not compile, uses a construct RE2 lacks, or matches the empty string is refused when you save, and the message names its line. |
 | **Extra User Fields** | Empty | One field name per line. Values under these names are treated as people, in addition to the built-in list. At most 200 names. |
 | **Exempt Fields** | Empty | One field name per line. These fields are never filtered, even when the built-in list names them. At most 200 names. |
 
@@ -1501,7 +1501,7 @@ Verify these items when experiencing connection issues:
 
 #### ❌ "the MCP PII filter policy could not be read from DefectDojo Pro"
 
-**Cause:** The MCP Server could not read the [Personal Data Filter](#personal-data-filter) policy, for example because DefectDojo did not answer in time or returned a server error. The error code is `pii_policy_unavailable`. The MCP Server refuses the call rather than answer without the filter, and the call never reaches DefectDojo.
+**Cause:** The MCP Server could not read or apply the [Personal Data Filter](#personal-data-filter) policy. The error code is `pii_policy_unavailable`, and the rest of the message says which case it is: DefectDojo did not answer in time or returned a server error; the saved policy contains a pattern the MCP Server cannot compile (the message names the pattern's line); or the policy route answered 404 after the MCP Server had already read it, for example after DefectDojo was downgraded or a proxy stopped forwarding the route (restart the MCP Server after a deliberate downgrade). The MCP Server refuses the call rather than answer without the filter, and the call never reaches DefectDojo.
 
 **Solutions:**
 
