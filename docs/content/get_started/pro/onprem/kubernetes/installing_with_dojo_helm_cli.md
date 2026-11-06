@@ -10,7 +10,7 @@ audience: pro
 
 It does not replace the Helm chart or its installation guide. The CLI's `deploy` command hands off to a bootstrap script that makes sensible choices for each platform. If you need control over every value, or you deploy through GitOps, follow the full [DefectDojo Pro Installation Guide](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/) and use the CLI for the parts around it: registry access, pulling artifacts, preflight checks and diagnostics.
 
-`dojo-helm-cli` is now part of `dojo-deploy`, which runs the same commands as `dojo-deploy kubernetes`. Existing installs and the steps on this page keep working. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for the command mapping and what changes.
+> **Legacy:** `dojo-helm-cli` is now a legacy command. It keeps working, and every step on this page still applies. Going forward, `dojo-deploy` replaces it and runs the same commands as `dojo-deploy kubernetes`. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for each legacy command's `dojo-deploy` equivalent.
 
 ## Before you start
 
@@ -230,7 +230,7 @@ Useful options:
 
 By default the bundle is redacted. Secret values, sensitive values and environment keys such as passwords and API tokens, and token-shaped strings in logs are masked. `--no-redact` turns that off, and the resulting bundle contains plaintext secrets. Even with redaction on, look through a bundle before you share it outside your organization.
 
-## Updating the CLI
+## Updating the CLI (legacy) {#updating-the-cli}
 
 ```bash
 dojo-helm-cli update-binary
@@ -244,7 +244,7 @@ When a newer release exists, the CLI prints a one-line notice before running you
 
 On an air-gapped machine, update the CLI on a connected host and copy the binary across.
 
-## Command reference
+## Command reference (legacy) {#command-reference}
 
 `dojo-helm-cli --help` lists everything, and every subcommand takes `--help` as well.
 

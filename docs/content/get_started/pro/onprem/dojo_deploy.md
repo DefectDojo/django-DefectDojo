@@ -1,6 +1,6 @@
 ---
 title: "Moving to dojo-deploy"
-description: "dojo-deploy replaces dojo-compose-cli and dojo-helm-cli: what changes for an existing install, the command mapping, the support bundle, and what to do if a release has a problem"
+description: "dojo-deploy replaces dojo-compose-cli and dojo-helm-cli: what changes for an existing install, the legacy commands and their dojo-deploy equivalents, the support bundle, and what to do if a release has a problem"
 draft: false
 weight: 7
 audience: pro
@@ -22,7 +22,7 @@ Both sets of commands now live in one binary. `dojo-deploy compose` runs the com
 
 ### A note in your terminal
 
-When you run `dojo-compose-cli` or `dojo-helm-cli` by hand in a terminal, the CLI prints a two-line note before running your command:
+When you run `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0 (or later) by hand in a terminal, the CLI prints a two-line note before running your command:
 
 ```
 dojo-compose-cli is now part of dojo-deploy. Install dojo-deploy (see https://docs.defectdojo.com/get_started/pro/onprem/dojo_deploy/),
@@ -30,6 +30,8 @@ then run "dojo-deploy compose <command>". Set DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 
 ```
 
 `dojo-helm-cli` prints the same note, naming `dojo-deploy kubernetes <command>` instead.
+
+The note always says "Install dojo-deploy", but you have probably installed it already: the `update-binary` run that brought you this release also installs `dojo-deploy` next to the old CLI (see [Getting dojo-deploy](#getting-dojo-deploy)). Run `dojo-deploy --version` to check. If it prints a version, there is nothing to install, and you can run `dojo-deploy compose <command>` or `dojo-deploy kubernetes <command>` right away. If it is not found, follow [Downloading dojo-deploy](#downloading-dojo-deploy).
 
 If you have already installed `dojo-deploy` and run it under an old name (for example through the `/usr/bin/dojo-compose-cli` wrapper described [below](#getting-dojo-deploy)), the note reads:
 
@@ -103,19 +105,28 @@ sudo -E dojo-compose-cli update-binary
 dojo-helm-cli update-binary
 ```
 
-One run does two things. It installs the new release of the CLI you already use, built from `dojo-deploy`: `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0. It also installs `dojo-deploy` next to it, in the same directory, with the same owner and mode. If `dojo-compose-cli` is in `/usr/local/bin`, `dojo-deploy` goes there too. Starting from the releases out today (`dojo-compose-cli` 2.1.x, `dojo-helm-cli` 4.0.x), you need only this one run.
+One run does two things. It installs the new release of the CLI you already use, built from `dojo-deploy`: `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0. It also installs `dojo-deploy` next to the old CLI, with the same owner, group and mode:
+
+- **Docker Compose:** next to `/usr/bin/dojo-compose-cli`, the copy on the `PATH` that the systemd unit runs, so `dojo-deploy` lands at `/usr/bin/dojo-deploy`, owned by root. It never goes into the install directory (`/opt/dojo`), even when the update runs from there.
+- **Kubernetes:** in the same directory as `dojo-helm-cli`.
+
+Starting from the releases out today (`dojo-compose-cli` 2.1.1 to 2.1.9, `dojo-helm-cli` 4.0.x), this one run is all you need. The old CLI exits as soon as its own update is done, and the new release then installs `dojo-deploy` in the background, giving up after 3 minutes. That first install prints nothing. If it fails, `dojo-compose-cli doctor` says so on its first line:
+
+```
+dojo-deploy is not installed; download it from https://cloud.defectdojo.com/tools (last install attempt <time>: <reason>)
+```
 
 The old-name CLI keeps its name, commands, options and version numbering, and prints the [note](#a-note-in-your-terminal) that links to this page. `dojo-compose-cli` also runs this update on its own before `app upgrade`, `app pull-images`, `deploy download` and `first-install`, as it did before.
 
-`update-binary` reports what it did with `dojo-deploy` in one line:
+From `dojo-compose-cli` 2.2.0 and `dojo-helm-cli` 4.1.0 on, `update-binary` installs or updates `dojo-deploy` itself and reports what it did in one line:
 
 ```
-dojo-deploy 3.5.0 installed at /usr/local/bin/dojo-deploy
-dojo-deploy 3.5.0 -> 3.5.0.1 at /usr/local/bin/dojo-deploy
+dojo-deploy 3.5.0 installed at /usr/bin/dojo-deploy
+dojo-deploy 3.5.0 -> 3.5.0.1 at /usr/bin/dojo-deploy
 dojo-deploy was not installed: <reason>. Download it from https://cloud.defectdojo.com/tools
 ```
 
-The first line appears when `dojo-deploy` was not there before, and the second when an existing copy was updated. The third appears when `dojo-deploy` could not be installed, for example on a host that is offline or air-gapped, or when you lack permission to write to the directory. That does not fail the update: the CLI you already use is still updated and the command still exits successfully. Download `dojo-deploy` as described next.
+The first line appears when `dojo-deploy` was not there before, and the second when an existing copy was updated. Nothing is printed when `dojo-deploy` is already current. The third line appears when `dojo-deploy` could not be installed, for example on a host that is offline or air-gapped, or when you lack permission to write to the directory. That does not fail the update: the CLI you already use is still updated and the command still exits successfully. Download `dojo-deploy` as described next.
 
 ### Downloading dojo-deploy
 
@@ -152,13 +163,15 @@ Under the `dojo-deploy` name, `dojo-deploy compose update-binary` and `dojo-depl
 
 `update-binary` checks the downloaded binary and runs it before it replaces the current one. If anything fails, the current binary stays in place.
 
-## Command mapping
+## Legacy commands
 
-Every command keeps its name, options and help text. Put `dojo-deploy compose` or `dojo-deploy kubernetes` where you used to type the old CLI's name.
+`dojo-compose-cli` and `dojo-helm-cli` are now legacy commands. They keep working, and every procedure on the [Docker Compose](/get_started/pro/onprem/docker_compose/installing_on_docker_compose/) and [dojo-helm-cli](/get_started/pro/onprem/kubernetes/installing_with_dojo_helm_cli/) pages still applies as written. For new scripts and runbooks, use `dojo-deploy`.
+
+Every command keeps its name and options under `dojo-deploy`. Put `dojo-deploy compose` or `dojo-deploy kubernetes` where you used to type the old CLI's name. The exceptions are `update-binary` and `--version`, which become `dojo-deploy update-binary` and `dojo-deploy --version`. The tables below list each legacy command and its `dojo-deploy` equivalent.
 
 ### dojo-compose-cli
 
-| dojo-compose-cli | dojo-deploy |
+| dojo-compose-cli (legacy) | dojo-deploy |
 | --- | --- |
 | `dojo-compose-cli app start`, `stop`, `restart`, `upgrade` | `dojo-deploy compose app start`, `stop`, `restart`, `upgrade` |
 | `dojo-compose-cli app pull-images`, `purge-images` | `dojo-deploy compose app pull-images`, `purge-images` |
@@ -182,7 +195,7 @@ One compose command is new: `certs rotate-internal` gives an install its own int
 
 ### dojo-helm-cli
 
-| dojo-helm-cli | dojo-deploy |
+| dojo-helm-cli (legacy) | dojo-deploy |
 | --- | --- |
 | `dojo-helm-cli register` | `dojo-deploy kubernetes register` |
 | `dojo-helm-cli license print` | `dojo-deploy kubernetes license print` |
