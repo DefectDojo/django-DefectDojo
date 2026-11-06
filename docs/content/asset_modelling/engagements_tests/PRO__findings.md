@@ -287,6 +287,8 @@ The CSV and Excel export dialog lets you choose which fields to include and whic
 
 Findings exports can also name the systems each Finding affects. With Locations enabled, select the **Locations** field: each row lists the values of the Finding's Locations, and you only see Locations you have permission to view. (On instances still using Endpoints, the equivalent field is **Endpoints**.) The Locations column of a report template's Findings table carries the same values, so a scheduled or templated report can pair each Finding with its affected hosts.
 
+Findings exports can carry the version and build metadata recorded on each Finding's Test and Engagement, so an export can be matched to the application version that was tested. Select **Test Version**, **Test Build ID**, **Test Commit Hash** or **Test Branch/Tag** for the values set on the Test (for example at import time), and the matching **Engagement Version**, **Engagement Build ID**, **Engagement Commit Hash** or **Engagement Branch/Tag** fields for the values set on the Engagement. A Test or Engagement without these values exports empty cells.
+
 Selecting Quick Export opens a dialog with three choices:
 
 - **Template**: the report template to apply. This defaults to the standard Findings table, so you can export without choosing one.
