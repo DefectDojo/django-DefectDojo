@@ -73,6 +73,18 @@ You can reorder a field that is otherwise not configurable, because its position
 
 The Finding, Engagement and Asset pages let some fields be changed where they are shown, without opening the Edit Finding, Edit Engagement or Edit Asset form (see [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place)). The default Form Configuration governs those fields the same way: a field set to **Disabled** has no editor on the page, and a field set to **Required** cannot be saved empty there either.
 
+## Data sent through the API
+
+The default Form Configuration also governs records written through the REST API (`/api/v2/`), so a script or integration follows the same rules as someone filling in the form. This covers creating and updating Findings, Engagements, Tests, Assets (on both `/api/v2/products/` and `/api/v2/assets/`), Organizations (on both `/api/v2/product_types/` and `/api/v2/organizations/`), and Risk Acceptances.
+
+- A field set to **Disabled** cannot be written: a request that includes it is refused with a `400` naming the field.
+- A field set to **Required** must have a value. Creating a record without it, or replacing one with `PUT` without it, is refused with a `400` naming the field. A `PATCH` that leaves the field out keeps its current value; one that empties it is refused.
+- A field the form shows only for one Engagement type is required only for that type. The CI/CD fields (Build ID, Commit Hash, Branch/Tag and the server fields) are required only on a CI/CD Engagement, and Test Strategy only on an Interactive one.
+
+The instance's API schema (`/api/v2/oa3/schema/`, shown in Swagger at `/api/v2/oa3/swagger-ui/`) follows the configuration too: disabled fields are left out of the request bodies and required fields are marked required. The schema published with each release describes the stock forms.
+
+Scan imports and reimports are not affected, since a scan file cannot supply a field an administrator chose to require. Neither is the JIRA Instance API.
+
 ## Saving
 
 **Save** stores your changes in the configuration you are editing; they apply to everyone when it is the default. **Reset to Defaults** returns the selected form to the configuration DefectDojo ships with, which is a good way back if a form has been narrowed too far.
