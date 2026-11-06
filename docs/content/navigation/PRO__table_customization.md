@@ -119,6 +119,6 @@ An administrator can pin everyone to a shared table view instead of letting each
 
 Personal preferences saved before the setting was enabled are not deleted. They are ignored while it is on, and they reappear if an administrator turns it back off.
 
-## Group and instance defaults
+## Default Profile and instance defaults
 
-When you have not set a default preference for a table, it opens with the view set by your highest-priority Group that sets one for that list, else the built-in columns. While your customization is restricted, the Group's view is enforced over the global default, which applies when no Group of yours sets one. A Group sets one shared view per list on the Group's **Defaults** tab, and the **Views** menu marks the view a Group set (see [Set Group Defaults](/admin/user_management/create_user_group/#set-group-defaults)). A Group can also restrict or allow customization for its Members, whatever the instance setting says. Deleting a view removes it from every Group that set it.
+When you have not set a default preference for a table, it opens with the view set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one for that list, else the built-in columns. While your customization is restricted, the profile's view is enforced over the global default, which applies when no profile of yours sets one. Under **Restrict to Selected Layouts**, the **Views** menu lists only the views your profile allows for that list, to switch between; nothing can be saved. Deleting a view removes it from every profile that lists it.

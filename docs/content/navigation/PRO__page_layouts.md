@@ -124,7 +124,7 @@ An administrator can turn on **Restrict Layout Customization** in **Settings > U
 
 Layouts you saved before the switch was turned on are kept. If it is turned back off, they are available again exactly as they were.
 
-A Group can override the switch for its Members in either direction, with **Restrict** or **Allow** on the Group's **Defaults** tab (see [Set Group Defaults](/admin/user_management/create_user_group/#set-group-defaults)). Superusers are never restricted.
+A [Default Profile](/admin/user_management/create_user_group/#default-profiles) can override the switch for the Members of its Groups in either direction, with **Allow** or **Restrict to Selected Layouts**. A profile can also set the layout each View page opens with, and under **Restrict to Selected Layouts** list the other layouts Members may switch to; the layout switcher then offers only those, with no edit menu. Superusers are never restricted.
 
 For the administrator's side of this, see [The Sidebar Menu](/navigation/pro__sidebar/).
 

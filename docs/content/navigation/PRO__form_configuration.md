@@ -27,9 +27,9 @@ From a configuration's menu you can:
 
 An instance upgraded from a version with a single Form Configuration keeps its settings: they become the default configuration, named "Default".
 
-## Group and instance defaults
+## Default Profile and instance defaults
 
-A Group can point its Members at another configuration on the Group's **Defaults** tab, which needs the permission to edit Form Configurations (see [Set Group Defaults](/admin/user_management/create_user_group/#set-group-defaults)). A person's forms follow the configuration set by their highest-priority Group that sets one, else the **Default** configuration, else the stock forms. Deleting a configuration that a Group points at clears it for that Group, and the delete dialog names those Groups.
+A [Default Profile](/admin/user_management/create_user_group/#default-profiles) can point the Members of its Groups at another configuration. A person's forms follow the configuration set by the highest-ranked profile among their Groups that sets one, else the **Default** configuration, else the stock forms. Deleting a configuration that a profile uses clears it from that profile, and the delete dialog names those profiles.
 
 ## Choosing a form
 
