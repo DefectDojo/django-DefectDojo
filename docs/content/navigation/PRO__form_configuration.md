@@ -79,9 +79,16 @@ The default Form Configuration also governs records written through the REST API
 
 - A field set to **Disabled** cannot be written: a request that includes it is refused with a `400` naming the field.
 - A field set to **Required** must have a value. Creating a record without it, or replacing one with `PUT` without it, is refused with a `400` naming the field. A `PATCH` that leaves the field out keeps its current value; one that empties it is refused.
-- A field the form shows only for one Engagement type is required only for that type. The CI/CD fields (Build ID, Commit Hash, Branch/Tag and the server fields) are required only on a CI/CD Engagement, and Test Strategy only on an Interactive one.
+- A field the form shows only for one Engagement type is required only for that type. The CI/CD fields (Build ID, Commit Hash, Branch/Tag and the server fields) are required only on a CI/CD Engagement, and Test Strategy only on an Interactive one. A `PATCH` that changes an Engagement to that type is refused when the field has no value.
 
-The instance's API schema (`/api/v2/oa3/schema/`, shown in Swagger at `/api/v2/oa3/swagger-ui/`) follows the configuration too: disabled fields are left out of the request bodies and required fields are marked required. The schema published with each release describes the stock forms.
+The same rules apply to the other API actions that write one of these fields:
+
+- Adding tags to a Finding (`/api/v2/findings/{id}/tags/`) is refused when Tags is disabled. Removing tags (`/api/v2/findings/{id}/remove_tags/`) is refused when Tags is disabled, and also when Tags is required and the request would remove every tag.
+- Merging Findings (`/api/v2/findings/merge/`) is refused when it would write a disabled field onto the destination Finding: setting its tags, or turning on the option that copies the other Findings' tags, references, vulnerability IDs or endpoints.
+- Updating several Assets at once (`bulk_update` on `/api/v2/assets/` and `/api/v2/products/`) follows the Asset form's rules for the fields the request sets, and removing an Asset's parent (`remove_parent`) is refused when Parent is disabled or required.
+- Uploading proof for a Risk Acceptance (`upload_proof`) is refused when Proof is disabled. Requesting a risk acceptance (`/api/v2/risk_acceptance/request/`) is refused when it sets a disabled field, such as the Expiration Date; the form's required fields do not apply to a request.
+
+The instance's API schema (`/api/v2/oa3/schema/`, shown in Swagger at `/api/v2/oa3/swagger-ui/`) follows the configuration too, for a signed-in user: disabled fields are left out of the request bodies and required fields are marked required. Anyone not signed in, and the schema published with each release, see the stock forms.
 
 Scan imports and reimports are not affected, since a scan file cannot supply a field an administrator chose to require. Neither is the JIRA Instance API.
 
