@@ -137,7 +137,9 @@ USER root
 RUN \
     # The app runs as a non-root user and never needs setuid/setgid binaries
     # (su, passwd, mount, ...); clear the bits so they can't be used to escalate.
-    find / -xdev -perm /6000 -type f -exec chmod a-s {} + && \
+    # Directories too (e.g. /var/mail): image scanners flag setgid directories,
+    # and the app never writes to them.
+    find / -xdev -perm /6000 -exec chmod a-s {} + && \
     addgroup --gid ${gid} ${appuser} && \
     adduser --system --no-create-home --disabled-password --gecos '' \
         --uid ${uid} --gid ${gid} ${appuser} && \
