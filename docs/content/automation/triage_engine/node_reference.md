@@ -350,6 +350,8 @@ Moves the Finding to a status.
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
 
+`false_positive` and `mitigated` take a risk-accepted Finding out of its risk acceptance first, as closing it by hand does: it leaves the acceptance, and a note on the Finding says so.
+
 ### Copy Status from Matched Finding
 
 `finding.copy_matched_status`
