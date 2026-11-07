@@ -10,13 +10,14 @@ Early Light runs on Linux, macOS and Windows as a single static binary. It runs 
 
 ## Detectors
 
-Run `earlylight detectors` to list the detectors in the release you have. Release v0.4.0 has three:
+Run `earlylight detectors` to list the detectors in the release you have. Release v0.5.0 has four:
 
 | Detector | Finds | Scan modes |
 | --- | --- | --- |
 | `brotli` | Brotli decoders vulnerable to CVE-2026-111497 ("Node2Shell"): the system `libbrotlidec` and the copies bundled into Node.js, .NET, Bun, Electron, Envoy, Python wheels and other software, plus the Node.js, .NET and Bun versions a source tree pins | `fs`, `image`, `repo`, `fix` |
 | `emudhra` | Trust in the eMudhra intermediate CA keys compromised in October 2026: trust stores, bundles, keystores and binaries that still trust them, Go binaries built without Go's blocklist (CVE-2026-111943), and servers presenting certificates those keys signed | `fs`, `image`, `host` |
 | `php2shell` | PHP runtimes vulnerable to CVE-2026-109618 and CVE-2026-109619 ("PHP2Shell"). A PHP installed by a package manager is judged by its vendor's backport data, not by the version it reports | `fs`, `image`, `repo`, `fix` |
+| `sshole` | The OpenSSH password authentication bypass on musl libc ("\*sshole"), fixed in OpenSSH 10.6p2 and in Alpine's openssh packages of November 5, 2026. It checks each sshd's C library, release and package database, then whether its `sshd_config` and account files make the bypass reachable, and reports the accounts. It has no CVE yet | `fs`, `image`, `host`, `repo`, `fix` |
 
 Each release also publishes `detectors.json` (the output of `earlylight detectors --format json`), which lists every detector's CVEs, advisories, scan modes and finding kinds.
 
@@ -79,7 +80,7 @@ earlylight scan image docker-archive:app.tar
 
 ### Fixing a source tree
 
-For `brotli` and `php2shell`, `earlylight fix` moves the pins and image references a `repo` scan finds to their fixed releases. Preview the changes with `--dry-run`:
+For detectors that support it (`brotli`, `php2shell` and `sshole` in v0.5.0), `earlylight fix` moves the pins and image references a `repo` scan finds to their fixed releases. Preview the changes with `--dry-run`:
 
 ```bash
 earlylight fix --dry-run .
