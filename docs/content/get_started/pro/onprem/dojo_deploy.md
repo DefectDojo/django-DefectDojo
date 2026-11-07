@@ -22,16 +22,23 @@ Both sets of commands now live in one binary. `dojo-deploy compose` runs the com
 
 ### A note in your terminal
 
-When you run `dojo-compose-cli` 2.2.0 or `dojo-helm-cli` 4.1.0 (or later) by hand in a terminal, the CLI prints a two-line note before running your command:
+When you run `dojo-compose-cli` 2.2.0 or later, or `dojo-helm-cli` 4.1.0 or later, by hand in a terminal, the CLI prints a two-line note before running your command. The note has two forms.
+
+When dojo-deploy is not installed:
 
 ```
 dojo-compose-cli is now part of dojo-deploy. Install dojo-deploy (see https://docs.defectdojo.com/get_started/pro/onprem/dojo_deploy/),
 then run "dojo-deploy compose <command>". Set DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 to hide this note.
 ```
 
-`dojo-helm-cli` prints the same note, naming `dojo-deploy kubernetes <command>` instead.
+When dojo-deploy is already installed:
 
-The note always says "Install dojo-deploy", but you have probably installed it already: the `update-binary` run that brought you this release also installs `dojo-deploy` next to the old CLI (see [Getting dojo-deploy](#getting-dojo-deploy)). Run `dojo-deploy --version` to check. If it prints a version, there is nothing to install, and you can run `dojo-deploy compose <command>` or `dojo-deploy kubernetes <command>` right away. If it is not found, follow [Downloading dojo-deploy](#downloading-dojo-deploy).
+```
+dojo-compose-cli is now part of dojo-deploy. Use dojo-deploy (see https://docs.defectdojo.com/get_started/pro/onprem/dojo_deploy/):
+run "dojo-deploy compose <command>". Set DOJO_DEPLOY_NO_MIGRATION_NOTICE=1 to hide this note.
+```
+
+`dojo-helm-cli` prints the same notes, naming `dojo-helm-cli` and `dojo-deploy kubernetes <command>` instead. The `update-binary` run that brought you the release also installs `dojo-deploy` next to the old CLI (see [Getting dojo-deploy](#getting-dojo-deploy)), so you will usually see the second form. If you see the first, follow [Downloading dojo-deploy](#downloading-dojo-deploy).
 
 If you have already installed `dojo-deploy` and run it under an old name (for example through the `/usr/bin/dojo-compose-cli` wrapper described [below](#getting-dojo-deploy)), the note reads:
 
