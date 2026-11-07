@@ -200,7 +200,7 @@ Runs when deduplication matches a newly imported Finding to an existing one. Use
 | **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
 | **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
 
-With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted or someone removes the link. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
 
 Each item carries the match on `ctx`:
 
@@ -210,6 +210,14 @@ ctx.kept_active          true when deduplication kept this Finding active
 ```
 
 **Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+#### Linked Findings
+
+A Finding's links show on its page, in the **Linked Findings** tab beside **Duplicate Findings** (the tab is hidden while a Finding has none). Each row names the linked Finding, its Asset, severity and status, which of the two was kept active, the rule that linked them and when. Only links to Findings you can see are listed.
+
+To break a wrong link, open the row's menu and choose **Remove Link**; it takes permission to edit the Finding whose page you are on. Statuses are then no longer carried between the two Findings in either direction. The Finding that was kept active stays active, and deduplication neither links the two again nor marks it a duplicate of the other when it next runs on it. A removed link stays in the tab, marked **Removed** with who removed it and when, and **Restore Link** in its menu puts it back.
+
+Automation reads a Finding's links, removed ones included, with `GET /api/v2/finding_links/?finding=<id>`, removes one with `DELETE /api/v2/finding_links/<link id>/?finding=<id>` and restores one with `POST /api/v2/finding_links/<link id>/restore/?finding=<id>`, with the same permissions.
 
 #### Example: keep staging and production in step
 
