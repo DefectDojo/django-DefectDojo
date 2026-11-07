@@ -9807,3 +9807,7 @@ msgstr "تم تحديث الملفات بنجاح."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "يرجى التحقق من بيانات النموذج والمحاولة مرة أخرى."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "تكاملات GitHub"

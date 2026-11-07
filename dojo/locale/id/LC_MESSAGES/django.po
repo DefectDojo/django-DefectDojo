@@ -9964,3 +9964,7 @@ msgstr "Berkas berhasil diperbarui."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Silakan periksa data formulir dan coba lagi."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "Integrasi GitHub"

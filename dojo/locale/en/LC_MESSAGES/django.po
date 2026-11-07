@@ -9367,3 +9367,7 @@ msgstr ""
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr ""
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr ""

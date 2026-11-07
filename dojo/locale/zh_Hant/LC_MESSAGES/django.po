@@ -9451,3 +9451,7 @@ msgstr "檔案已成功更新。"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "請檢查表單資料並再試一次。"
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub 整合"

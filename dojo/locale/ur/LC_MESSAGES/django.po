@@ -9883,3 +9883,7 @@ msgstr "فائلیں کامیابی سے اپ ڈیٹ ہو گئیں۔"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "براہ کرم فارم ڈیٹا چیک کریں اور دوبارہ کوشش کریں۔"
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub انٹیگریشنز"
