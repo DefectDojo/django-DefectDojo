@@ -245,26 +245,64 @@ The Early Light action runs on Linux and macOS runners.
 An AI coding agent that can run shell commands, such as Claude Code, can run Early Light and explain the results. Paste this prompt into the agent and replace the text in angle brackets with what to scan:
 
 ```text
-Use Early Light (https://github.com/DefectDojo/earlylight) to check <this repository | the image myorg/app:prod | this machine> for emerging vulnerabilities.
+Use Early Light (https://github.com/DefectDojo/earlylight) to check
+<this repository | the image myorg/app:prod | this machine> for emerging
+vulnerabilities.
 
-1. Run `earlylight version`. If it isn't installed, ask me before installing it. On Linux or macOS, install it with:
-   curl -fsSL https://raw.githubusercontent.com/DefectDojo/earlylight/main/install.sh | sh
-   Otherwise, point me to https://github.com/DefectDojo/earlylight/releases and stop.
-2. Run `earlylight detectors` to see which vulnerabilities this release covers. Not every detector runs in every scan mode; the report's `detectors` list shows which ones ran.
+1. Run `earlylight version`. If it isn't installed, ask me before
+   installing it. On Linux or macOS, install it with:
+   curl -fsSL \
+     https://raw.githubusercontent.com/DefectDojo/earlylight/main/install.sh | sh
+   Otherwise, point me to
+   https://github.com/DefectDojo/earlylight/releases and stop.
+2. Run `earlylight detectors` to see which vulnerabilities this release
+   covers. Not every detector runs in every scan mode; the report's
+   `detectors` list shows which ones ran.
 3. Choose the scan mode:
-   - `repo` for a source tree or checked-out repository. It checks the images its Dockerfiles, Compose files, Kubernetes manifests, Helm values and CI files use, and runtime pins such as `.nvmrc`. Don't use `fs` on a source tree: it doesn't check image references or pins, so it can report a vulnerable repository as clean.
-   - `image` for container images. Images are scanned as linux/amd64; add `--platform all` if I deploy other platforms.
-   - `fs` for an installed system or a directory of installed software. Ask me before using sudo.
+   - `repo` for a source tree or checked-out repository. It checks the
+     images its Dockerfiles, Compose files, Kubernetes manifests, Helm
+     values and CI files use, and runtime pins such as `.nvmrc`. Don't
+     use `fs` on a source tree: it doesn't check image references or
+     pins, so it can report a vulnerable repository as clean.
+   - `image` for container images. Images are scanned as linux/amd64;
+     add `--platform all` if I deploy other platforms.
+   - `fs` for an installed system or a directory of installed software.
+     Ask me before using sudo.
    - `host` for a live server. Scan only hosts I have named.
-4. Scan with a JSON report, written outside the directory you scan. Put every flag before the targets, because anything after the first target is read as another target:
+4. Scan with a JSON report, written outside the directory you scan. Put
+   every flag before the targets, because anything after the first
+   target is read as another target:
    earlylight scan <mode> --format json --output <report path> <target>
-   Exit status 1 means something is vulnerable (unknown findings may also be present), 3 that nothing is vulnerable but something is unknown, and 2 an error. Exit 1 and 3 are results, not a failed command.
-5. Read the report. For each entry in `targets`, check for an `error` field first: a target with one was not scanned, so report it as not scanned, never as clean. Also report the count of its `skipped` files, and whether they look like files that matter. If an image fails with TOOMANYREQUESTS or an authentication error, ask me to run `docker login`.
-6. Report every finding whose `verdict` is `vulnerable` or `unknown`, with its `detector`, `kind`, `path` (and `line` when present), `reason` and `fix`. When a finding has no `reason`, use its `message`. When it has no `fix`, say the report gives none rather than inventing one. For `unknown`, the reason says what evidence is missing: check it if you can, and tell me what you found. The same issue can appear at several paths, such as a certificate in a bundle and in its source file, so group related findings.
-7. For a source tree, run `earlylight fix --dry-run <dir>` and show me the proposed changes. It exits 1 when there is something to fix. A finding it can't change automatically has to be fixed by hand, so list those separately. Don't run `earlylight fix` without `--dry-run` until I agree.
-8. Finish with a summary: what was scanned, what is vulnerable, what is unknown and what to check next, and what could not be scanned.
+   Exit status 1 means something is vulnerable (unknown findings may
+   also be present), 3 that nothing is vulnerable but something is
+   unknown, and 2 an error. Exit 1 and 3 are results, not a failed
+   command.
+5. Read the report. For each entry in `targets`, check for an `error`
+   field first: a target with one was not scanned, so report it as not
+   scanned, never as clean. Also report the count of its `skipped`
+   files, and whether they look like files that matter. If an image
+   fails with TOOMANYREQUESTS or an authentication error, ask me to run
+   `docker login`.
+6. Report every finding whose `verdict` is `vulnerable` or `unknown`,
+   with its `detector`, `kind`, `path` (and `line` when present),
+   `reason` and `fix`. When a finding has no `reason`, use its
+   `message`. When it has no `fix`, say the report gives none rather
+   than inventing one. For `unknown`, the reason says what evidence is
+   missing: check it if you can, and tell me what you found. The same
+   issue can appear at several paths, such as a certificate in a bundle
+   and in its source file, so group related findings.
+7. For a source tree, run `earlylight fix --dry-run <dir>` and show me
+   the proposed changes. It exits 1 when there is something to fix. A
+   finding it can't change automatically has to be fixed by hand, so
+   list those separately. Don't run `earlylight fix` without `--dry-run`
+   until I agree.
+8. Finish with a summary: what was scanned, what is vulnerable, what is
+   unknown and what to check next, and what could not be scanned.
 
-Don't upload the report anywhere unless I ask. If I ask you to import it into DefectDojo, use the /api/v2/reimport-scan/ endpoint with scan_type "Early Light Scan", read the API token from the DEFECTDOJO_API_TOKEN environment variable, and never print the token.
+Don't upload the report anywhere unless I ask. If I ask you to import it
+into DefectDojo, use the /api/v2/reimport-scan/ endpoint with scan_type
+"Early Light Scan", read the API token from the DEFECTDOJO_API_TOKEN
+environment variable, and never print the token.
 ```
 
 The prompt keeps the agent to the commands on this page: it asks before installing software, using `sudo`, changing files or uploading the report, and scans only the hosts you name, because a `host` scan connects to them.
