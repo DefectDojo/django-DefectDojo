@@ -32,11 +32,19 @@ Users with the **View Group** configuration permission see every Group. A Member
 
 ## Viewing A Group
 
-With Access Administration on (Pro), a Group's page has three tabs:
+With Access Administration on (Pro), a Group's page has these tabs:
 
-* **Overview**: the Group's details, its description, and the read-only **Configuration Permissions** card.
+* **Overview**: the Group's details, its description, the read-only **Configuration Permissions** card and, with Group Ownership on, the **Automation Identity** card (see [The group's automation identity](#the-groups-automation-identity)).
 * **Members**: the Group's members and their Group Roles. When **View As User** is on, each member's row has a **View As** button.
 * **Access**: what the Group reaches in its own right: its Global Roles, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each one is reached. Every member of the Group receives this access through it, and a Group that holds a Global Role is marked as having instance-wide access. The Group's own Roles are changed here, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
+
+With Group Ownership on, the page also has a tab for each kind of content the Group can own:
+
+* **Rules**: the Triage Engine rules the Group owns. **New Rule** here creates a rule owned by the Group. See [Group ownership](/automation/triage_engine/sharing_and_versions/#group-ownership).
+* **Report Templates**: the Report Builder templates, blocks and themes the Group owns, with **New** creating each into the Group. See [the Report Builder](/metrics_reports/reports/report-builder/#group-ownership).
+* **Schedules**: the report schedules the Group owns.
+
+Each of these tabs is the normal list for that kind of content, limited to this Group, so it has the same columns, filters and row menus. **Rules** and **Report Templates** are shown when the Group owns something of that kind that you can see, or when you can create it here (your Role in the Group, or a Global Role, carries **Rule Add** or **Report Template Add**), and only while Triage Engine or Reporting is turned on. **Schedules** is shown when the Group owns a report schedule you can see.
 
 
 Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
@@ -45,6 +53,25 @@ Viewing a group displays all Group information, such as ID, name, description, g
 
 * The **Configuration Permissions** card lists the Configuration Permissions the Group's Global Roles carry, grouped by area. It is read-only: to change them, a Superuser edits the Role on the **Roles** page or changes the Group's Global Roles.
 * A Group's history, opened from the ⚙️ menu, is shown only to Users with the **View Group** configuration permission, because it also lists the Group's past Asset and Organization Roles.
+
+## The group's automation identity
+
+Rules and report schedules a Group owns do not run as the person who created them. They run as the Group's **automation identity**: a [service user](../pro__service_users/) of the **Group Automation** kind, named `svc-group-<group name>`. Each Group has at most one, shared by everything it owns. It is created the first time the Group owns a rule or a report schedule, and the **Automation Identity** card on the Group's **Overview** tab shows its username, or says the Group has none yet.
+
+The identity has exactly the Group's access, and nothing of its own:
+
+* It sees and edits what the Group's Organization and Asset Roles allow, and what the Group's Global Roles allow. When the Group gains or loses access, so does the identity, immediately.
+* It has no password and no API token, and it cannot sign in.
+* It cannot be given a Global Role, a membership or any access of its own. Its access is set on the Group.
+* It is removed when the Group is deleted.
+
+Because the identity carries the Group's access, a Group that holds a Global Role has an identity that reaches the whole instance, and its rules can act on every Finding. The rule editor's **Runs As** panel warns about this.
+
+Changing what a Group's rule or report schedule does needs membership of the Group as well as the permission to edit it, because the change acts with the Group's access. See [Group Content permissions](../pro__custom_rbac_roles/#group-content-permissions).
+
+### Deleting a Group that owns content
+
+Deleting a Group does not delete its rules, templates, blocks, themes or schedules. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. All of them appear under **Settings > Groups > Unowned Content**, where an administrator holding **Rule Edit** or **Report Template Edit** as a Global Role transfers them to another Group or to the instance. The Group's automation identity is removed with the Group.
 
 ## Create a User Group
 
