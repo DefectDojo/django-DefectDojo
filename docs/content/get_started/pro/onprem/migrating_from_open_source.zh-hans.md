@@ -8,6 +8,8 @@ audience: pro
 
 本页介绍如何将开源 DefectDojo 实例中的数据迁移到自托管的 DefectDojo Pro 部署中。
 
+本页介绍数据库转储这条路径,[英文页面](/get_started/pro/onprem/migrating_from_open_source/#path-2-the-defectdojo-connector)介绍第二条路径。这条路径使用 DefectDojo Migration 连接器,通过 API 从 Connectors 界面迁移。您可以多次运行它直到切换,也可以迁移到已有数据的 Pro 实例。
+
 示例使用 Amazon Web Services,采用 EC2 上的 Docker Compose 或 EKS 上的 Kubernetes,数据库使用 Amazon RDS for PostgreSQL。此流程正是针对这一组合验证过的。对于提供托管 PostgreSQL 和同等计算资源的其他云服务商,以及本地硬件环境,同样适用这一流程,只需将特定于服务商的命令替换为相应的命令即可。
 
 由于部署由您自行托管,整个迁移过程中您的数据始终留在您自己的环境内。导出和恢复操作均由您执行,DefectDojo 支持团队可以在任何步骤提供协助。如果您的 DefectDojo Pro 实例是由 DefectDojo 云托管而非自托管,请改为联系 [support@defectdojo.com](mailto:support@defectdojo.com),因为恢复工作将由 DefectDojo 团队为您完成。

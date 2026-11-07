@@ -1,17 +1,17 @@
 ---
 title: "Resetting User Credentials in Bulk"
-description: "Rotate API tokens and force password resets for many users at once from the Users list"
+description: "Rotate API tokens, force password resets, and activate and invite many users at once from the Users list"
 audience: pro
 weight: 2
 ---
 
-The DefectDojo Pro **Users** list lets you rotate API tokens and force password resets for many users at once — useful for periodic credential hygiene or responding to a suspected credential exposure.
+The **Users** list lets you rotate API tokens, force password resets, and activate and invite many users at once. Use it for periodic credential hygiene, after a suspected credential exposure, or to let migrated users sign in.
 
-These bulk actions are available only to **Superusers** and users with the **Global Owner** role. If you don't have one of those, the selection checkboxes and bulk buttons do not appear.
+These bulk actions are available only to **Superusers** and users with the **Global Owner** role. **Activate and Invite** also needs the permission to change users, the same right as the user edit form. If you don't have one of those, the selection checkboxes and bulk buttons do not appear.
 
 ## Selecting users
 
-On the **Users** list, use the checkboxes to select one or more users. A bulk-action bar appears with the reset buttons. Each action asks you to confirm in a dialog before it runs.
+On the **Users** list, use the checkboxes to select one or more users. A bulk-action bar appears with **Reset API Tokens**, **Force Password Reset**, **Activate and Invite** and **Deactivate Users**. Each action asks you to confirm in a dialog before it runs.
 
 The action applies to the users you have explicitly checked. You **cannot include your own account** in a bulk reset: if your account is among the selected rows, the bulk buttons are disabled and a warning is shown.
 
@@ -32,4 +32,16 @@ Keep in mind what this action does **not** do:
 * It does **not** set or randomize a temporary password, and it does **not** return any credentials to you.
 * It does **not** send the affected users an email or notification. Because there's no automatic notice, tell the affected users out-of-band that they'll be prompted to change their password on next login.
 
-> **SSO users:** Unlike the single-user edit form (which disables the force-reset flag for SSO-authorized accounts), the bulk action applies the flag to **every** selected user regardless of how they authenticate. Since SSO users sign in through your Identity Provider rather than a DefectDojo password, forcing a password reset on them is generally not meaningful — avoid including SSO-only users in the selection.
+> **SSO users:** The single-user edit form disables the force-reset flag for SSO-authorized accounts. **Force Password Reset** in bulk sets the flag on **every** selected user, however that user signs in. SSO users sign in through your Identity Provider, so a forced password reset does nothing for them. Do not include SSO-only users in the selection. **Activate and Invite** skips SSO users on its own. The next section explains how.
+
+## Activate and Invite
+
+**Activate and Invite** gives a user with no password a way to sign in. A migration creates such users. For each selected user, DefectDojo Pro does the following:
+
+* It activates the user, if the user is inactive. Each active user takes a license seat.
+* It emails the user a link to set a password, if the user has no password.
+* It skips service users, and it skips every account that is already active.
+* It skips a user that has no password and signed in before. That user signs in with SSO, so it gets no link.
+* A Global Owner cannot activate a superuser. The action skips the superuser.
+
+If an email cannot go out, the **Pass On These Links** window lists the user. It shows the link and a copy button. Send each link only to its user, because a link works like a password. [How Migrated Users Sign In](/get_started/pro/onprem/migrating_from_open_source/#how-migrated-users-sign-in) gives the full steps.
