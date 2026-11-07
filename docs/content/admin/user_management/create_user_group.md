@@ -32,11 +32,12 @@ Users with the **View Group** configuration permission see every Group. A Member
 
 ## Viewing A Group
 
-With Access Administration on (Pro), a Group's page has three tabs:
+With Access Administration on (Pro), a Group's page has four tabs:
 
 * **Overview**: the Group's details, its description, and the read-only **Configuration Permissions** card.
 * **Members**: the Group's members and their Group Roles. When **View As User** is on, each member's row has a **View As** button.
 * **Access**: what the Group reaches in its own right: its Global Roles, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each one is reached. Every member of the Group receives this access through it, and a Group that holds a Global Role is marked as having instance-wide access. The Group's own Roles are changed here, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
+* **Defaults**: the [Default Profile](#default-profiles) the Group's Members start from, and what that profile sets. See [Set Group Defaults](#set-group-defaults).
 
 
 Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
@@ -165,3 +166,70 @@ If you want the Members in your Group to access Configuration functions, and con
 2. Open the Group, choose **Edit Group** from the ⚙️ menu, and add that Role under the Group's **Global Roles**. The Group's other Global Roles stay as they are.
 
 The Group page's **Configuration Permissions** card shows the result. Only a Superuser can grant Configuration Permissions this way.
+
+## Default Profiles
+
+With Access Administration on (Pro), a Superuser defines what Members start with as **Default Profiles** on **Settings > UI Defaults > Default Profiles**, and each Group picks one. Many Groups can share one profile, so a large instance needs only a handful of profiles rather than settings on every Group.
+
+### The ranked list
+
+The Default Profiles page lists every profile in rank order, with how many Groups use it and its layout setting. Drag a row by its handle to change its rank. The order saves at once.
+
+The rank settles conflicts. When a Member belongs to several Groups with different profiles, each default comes from the highest-ranked of those profiles that sets it. There are no numbers to pick, so two profiles can never claim the same rank.
+
+Click **New Default Profile** to create one, or a profile's name to edit it. Deleting a profile clears it from every Group that uses it, and their Members fall to their next profile. The delete dialog says how many Groups are affected.
+
+### What a profile sets
+
+A profile's page has one card per area. The link at the top right of each card opens the page where those items are built.
+
+* **Profile**: its **Name** (unique) and **Description**.
+* **Layout Customization**: **Inherit**, **Allow** or **Restrict to Selected Layouts**. See [Restrict to Selected Layouts](#restrict-to-selected-layouts).
+* **Navigation**: the **Landing Page** Members open after signing in (see [Default Landing Page](/navigation/pro__landing_page/)) and the **Default Sidebar Preset** (see [Sidebar Presets](/navigation/pro__sidebar_presets/)).
+* **Forms**: the [Form Configuration](/navigation/pro__form_configuration/) Members' create and edit forms follow.
+* **Dashboards**: the **Default Dashboard** Members open the Dashboards page with.
+* **Page Layouts**: for each View page, the [page layout](/navigation/pro__page_layouts/) it opens with.
+* **Table Views**: for each list, the saved view it opens with (see [Customizing Tables](/navigation/pro__table_customization/)).
+
+Only dashboards, sidebar presets, page layouts and saved views shared with everyone can be chosen, so every Member of every Group using the profile can open them. Leave a field empty to set nothing for it; Members then fall to their next profile, or to the instance default.
+
+Click **Submit** to save the profile. Members pick up the change on their next page navigation.
+
+### Restrict to Selected Layouts
+
+The instance-wide **Restrict Layout Customization** switch lives on **Settings > UI Defaults > Layout Defaults**. A profile can override it for its Members, in either direction:
+
+* **Inherit** (the default): the profile follows the instance setting.
+* **Allow**: Members create, edit and choose their own dashboards, page layouts, table views and sidebar presets, even when the instance setting is on.
+* **Restrict to Selected Layouts**: Members cannot create, edit, duplicate or delete any of those layouts. They can switch among the layouts the profile lists.
+
+Under **Restrict to Selected Layouts**, the Navigation, Dashboards, Page Layouts and Table Views cards show an **Also Allowed** field next to each default. Members may switch between the default and the layouts listed there: the dashboard picker, the page layout switcher, the table **Views** menu and the sidebar preset on the User Profile page offer only those. An area with nothing listed pins Members to its default, as the instance switch does.
+
+The highest-ranked profile among a Member's Groups that sets **Allow** or **Restrict to Selected Layouts** decides, and the layouts Members may switch among come from that same profile. Profiles set to **Inherit** are skipped. When none of a Member's profiles sets either, the instance setting applies. Superusers are never restricted.
+
+## Set Group Defaults
+
+The **Defaults** tab on a Group's page shows the Group's Default Profile. A Superuser picks the profile from the **Default Profile** list and clicks **Submit**; clearing it means the Group sets nothing. Below the picker, one card per area shows what the profile sets, each with an **Edit Profile** link for a Superuser.
+
+Anyone else who can view the Group sees the tab read-only.
+
+### Which default a Member gets
+
+Every default resolves the same way:
+
+1. The Member's own choice. A restricted Member's own dashboard, page layouts, table views and sidebar preset are set aside; their landing page is not, since it is not a layout.
+2. Otherwise, the highest-ranked Default Profile among their Groups that sets it, and that they can open.
+3. Otherwise, the instance default: the **Instance Landing Page** on **Settings > UI Defaults > Layout Defaults**, the instance sidebar preset and the default Form Configuration. The global default dashboard, page layouts and table views on Layout Defaults apply while customization is restricted, as they always have.
+4. Otherwise, the built-in behavior (Home, the starter dashboard, the full sidebar, the stock forms).
+
+A Member whose own choice is empty can see where a value comes from on their **User Profile** page, for example "Using Security Leads's default: Findings > All". A restricted Member reads "Set by" followed by the profile's name.
+
+### When a chosen item is deleted
+
+Deleting a dashboard, sidebar preset, page layout, saved view or Form Configuration that a profile lists removes it from the profile, and Members fall to the next default. The delete dialogs for sidebar presets and Form Configurations name the profiles that use them.
+
+### Default Profiles through the API
+
+Profiles are read and written at `/api/v2/default_profiles/` with a Superuser's API token, and ranked with `POST /api/v2/default_profiles/reorder/` and `{"ids": [...]}` listing every profile once, highest first. `layout_customization` takes `"inherit"`, `"allow"` or `"restrict"`. Each area is a `default_*` id plus an `allowed_*` list (`table_views` and `page_layouts` hold one entry per list or page, each with `default` and `allowed`); the default is always allowed and is not repeated in the list.
+
+A Group's profile is read at `/api/v2/dojo_groups/{id}/defaults/` (permission to view the Group) and set with `PUT` and `{"profile": <id>}` or `{"profile": null}` (Superusers only).

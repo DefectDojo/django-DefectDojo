@@ -53,6 +53,10 @@ The **instance default** is the shared preset everyone gets who has not picked a
 
 While **Restrict Layout Customization** is on (also on the Layout Defaults page), everyone but superusers is pinned to the instance default: the **Sidebar Preset** field on User Profile reads **Set by an administrator**, and personal presets are kept but not applied until the switch is turned back off.
 
+## Default Profile and instance defaults
+
+When you have not picked a preset, your sidebar follows the preset set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one, else the instance default, else the full sidebar. Under **Restrict to Selected Layouts**, your User Profile offers only the presets your profile allows. Deleting a preset that a profile uses removes it from that profile, and the delete dialog names those profiles.
+
 ## Picking a preset
 
 Each person picks their own preset in one of two places:
