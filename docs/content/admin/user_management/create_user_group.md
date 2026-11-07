@@ -217,7 +217,7 @@ Anyone else who can view the Group sees the tab read-only.
 
 Every default resolves the same way:
 
-1. The Member's own choice, unless their layouts are restricted.
+1. The Member's own choice. A restricted Member's own dashboard, page layouts, table views and sidebar preset are set aside; their landing page is not, since it is not a layout.
 2. Otherwise, the highest-ranked Default Profile among their Groups that sets it, and that they can open.
 3. Otherwise, the instance default: the **Instance Landing Page** on **Settings > UI Defaults > Layout Defaults**, the instance sidebar preset and the default Form Configuration. The global default dashboard, page layouts and table views on Layout Defaults apply while customization is restricted, as they always have.
 4. Otherwise, the built-in behavior (Home, the starter dashboard, the full sidebar, the stock forms).
