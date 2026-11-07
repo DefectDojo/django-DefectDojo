@@ -14,8 +14,8 @@ class FileSerializer(serializers.ModelSerializer):
         if file := data.get("file"):
             # the clean will validate the file extensions and raise a Validation error if the extensions are not accepted
             FileUpload(title=file.name, file=file).clean()
-            return data
-        return None
+        # A partial update may change only the title
+        return data
 
 
 class RawFileSerializer(serializers.ModelSerializer):
