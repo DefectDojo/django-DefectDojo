@@ -1,0 +1,55 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "brotli",
+      "title": "Brotli decoder vulnerable to CVE-2026-111497",
+      "cves": [
+        "CVE-2026-111497"
+      ],
+      "advisories": [
+        "https://github.com/advisories/GHSA-9v8h-qqgm-4m35",
+        "https://github.com/google/brotli/releases/tag/v1.2.1",
+        "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+        "https://github.com/dotnet/announcements/issues/494"
+      ],
+      "data": "Brotli decoder error-code tables (google/brotli 1.0.0 to 1.2.1) and the fixed Node.js, .NET and Bun releases"
+    },
+    {
+      "id": "emudhra",
+      "title": "Trust in the compromised eMudhra intermediate CA keys",
+      "cves": [
+        "CVE-2026-111943"
+      ],
+      "advisories": [
+        "https://bugzilla.mozilla.org/show_bug.cgi?id=2083449"
+      ],
+      "data": "eight compromised intermediates and four path roots (Mozilla bug 2083449)"
+    },
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    }
+  ],
+  "targets": [
+    {
+      "target": "/srv/app",
+      "type": "filesystem",
+      "root": "/srv/app",
+      "files_scanned": 1,
+      "files_read": 1,
+      "findings": [],
+      "skipped": []
+    }
+  ]
+}

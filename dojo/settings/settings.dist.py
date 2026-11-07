@@ -2002,6 +2002,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
     "OPF Scan": DEDUPE_ALGO_HASH_CODE,
+    # The parser builds a stable unique_id_from_tool for every finding (detector, kind, target, path and the
+    # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
+    "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var

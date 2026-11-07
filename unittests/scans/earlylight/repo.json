@@ -1,0 +1,112 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "brotli",
+      "title": "Brotli decoder vulnerable to CVE-2026-111497",
+      "cves": [
+        "CVE-2026-111497"
+      ],
+      "advisories": [
+        "https://github.com/advisories/GHSA-9v8h-qqgm-4m35",
+        "https://github.com/google/brotli/releases/tag/v1.2.1",
+        "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+        "https://github.com/dotnet/announcements/issues/494"
+      ],
+      "data": "Brotli decoder error-code tables (google/brotli 1.0.0 to 1.2.1) and the fixed Node.js, .NET and Bun releases"
+    },
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    }
+  ],
+  "targets": [
+    {
+      "target": "repo",
+      "type": "repository",
+      "files_scanned": 6,
+      "files_read": 0,
+      "findings": [
+        {
+          "detector": "brotli",
+          "kind": "node-pin",
+          "path": "app/Dockerfile",
+          "line": 1,
+          "verdict": "vulnerable",
+          "message": "Dockerfile FROM image node:20.0.0-slim pins Node.js 20.0.0, whose bundled Brotli decoder lacks the CVE-2026-111497 fix, on a release line with no fixed release (fixed in 22.23.4, 24.22.1 or 26.12.1).",
+          "method": "source",
+          "facts": {
+            "column": "11",
+            "current": "20.0.0",
+            "fixed": "22.23.4, 24.22.1 or 26.12.1",
+            "image": "node:20.0.0-slim",
+            "source": "node-image",
+            "upgrade": "major",
+            "upgrade_to": "22.23.4"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-111497",
+              "verdict": "vulnerable"
+            }
+          ],
+          "fix": "Moves Node.js 20.0.0 to 22.23.4, the nearest release line with the fix. This is a major upgrade, which can change behaviour: review it and run your tests before you merge, then rebuild and redeploy. The new image is used only once it is pulled and scanned clean on every platform the current one has."
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-image",
+          "path": "web/Dockerfile",
+          "line": 1,
+          "verdict": "vulnerable",
+          "reason": "php:8.3.0-fpm carries a PHP release without the fix: linux/amd64 (PHP 8.3.0), linux/arm/v5 (PHP 8.3.0), linux/arm/v7 (PHP 8.3.0), linux/arm64/v8 (PHP 8.3.0), linux/386 (PHP 8.3.0), linux/mips64le (PHP 8.3.0), linux/ppc64le (PHP 8.3.0), linux/s390x (PHP 8.3.0)",
+          "message": "image php:8.3.0-fpm",
+          "method": "registry",
+          "facts": {
+            "image": "php:8.3.0-fpm",
+            "platforms": "linux/amd64 (PHP 8.3.0),linux/arm/v5 (PHP 8.3.0),linux/arm/v7 (PHP 8.3.0),linux/arm64/v8 (PHP 8.3.0),linux/386 (PHP 8.3.0),linux/mips64le (PHP 8.3.0),linux/ppc64le (PHP 8.3.0),linux/s390x (PHP 8.3.0)",
+            "reference": "dockerfile"
+          },
+          "fix": "No automatic change: cannot tell which OS release docker.io/library/php:8.3.36-fpm or the original is built on for linux/amd64, linux/arm/v5, linux/arm/v7, linux/arm64/v8, linux/386, linux/ppc64le, linux/s390x (no org.opencontainers.image.base.name annotation or recognisable base layer), and the tag does not name one; pin a tag that names the OS release (for the php image: -bookworm, -trixie, -alpine3.21 ...)",
+          "severity": "critical",
+          "details": {
+            "file": "web/Dockerfile",
+            "line": 1,
+            "kind": "dockerfile",
+            "image": "php:8.3.0-fpm",
+            "status": "vulnerable",
+            "severity": "critical",
+            "reason": "php:8.3.0-fpm carries a PHP release without the fix: linux/amd64 (PHP 8.3.0), linux/arm/v5 (PHP 8.3.0), linux/arm/v7 (PHP 8.3.0), linux/arm64/v8 (PHP 8.3.0), linux/386 (PHP 8.3.0), linux/mips64le (PHP 8.3.0), linux/ppc64le (PHP 8.3.0), linux/s390x (PHP 8.3.0)",
+            "platforms": [
+              "linux/amd64 (PHP 8.3.0)",
+              "linux/arm/v5 (PHP 8.3.0)",
+              "linux/arm/v7 (PHP 8.3.0)",
+              "linux/arm64/v8 (PHP 8.3.0)",
+              "linux/386 (PHP 8.3.0)",
+              "linux/mips64le (PHP 8.3.0)",
+              "linux/ppc64le (PHP 8.3.0)",
+              "linux/s390x (PHP 8.3.0)"
+            ],
+            "fix": "No automatic change: cannot tell which OS release docker.io/library/php:8.3.36-fpm or the original is built on for linux/amd64, linux/arm/v5, linux/arm/v7, linux/arm64/v8, linux/386, linux/ppc64le, linux/s390x (no org.opencontainers.image.base.name annotation or recognisable base layer), and the tag does not name one; pin a tag that names the OS release (for the php image: -bookworm, -trixie, -alpine3.21 ...)"
+          }
+        }
+      ],
+      "skipped": [
+        {
+          "path": "compose.yaml:3 registry.example.internal/team/php-api:8.3",
+          "reason": "image not checked: registry.example.internal/team/php-api:8.3: network: Get \"https://registry.example.internal/v2/\": dial tcp: lookup registry.example.internal: no such host"
+        }
+      ],
+      "incomplete": "1 image reference(s) could not be checked because a registry failed: compose.yaml:3 registry.example.internal/team/php-api:8.3 (network)"
+    }
+  ]
+}
