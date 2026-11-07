@@ -1,0 +1,69 @@
+{
+    "meta": {
+        "application": "Dependency-Track",
+        "version": "5.2.0",
+        "timestamp": "2026-10-22T00:00:00Z"
+    },
+    "findings": [
+        {
+            "component": {
+                "name": "log4j-core",
+                "project": "7d0f7e5e-1c9b-4a5e-9d2b-3a1c6e8f0b11",
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1",
+                "uuid": "a3c1f5d2-6b4e-4f7a-8c9d-0e1f2a3b4c5d",
+                "version": "2.14.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-10-22 00:00:00.000"
+            },
+            "vulnerability": {
+                "uuid": "b4d2e6f3-7c5f-4a8b-9dae-1f2a3b4c5d6e",
+                "source": "NVD",
+                "vulnId": "CVE-2021-44228",
+                "severity": "CRITICAL",
+                "description": "Apache Log4j2 JNDI features do not protect against attacker-controlled LDAP.",
+                "aliases": [],
+                "cwes": [
+                    {
+                        "cweId": 917,
+                        "name": "Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')"
+                    },
+                    {
+                        "cweId": 502,
+                        "name": "Deserialization of Untrusted Data"
+                    }
+                ]
+            },
+            "matrix": "7d0f7e5e-1c9b-4a5e-9d2b-3a1c6e8f0b11:a3c1f5d2-6b4e-4f7a-8c9d-0e1f2a3b4c5d:b4d2e6f3-7c5f-4a8b-9dae-1f2a3b4c5d6e"
+        },
+        {
+            "component": {
+                "name": "log4j-api",
+                "project": "7d0f7e5e-1c9b-4a5e-9d2b-3a1c6e8f0b11",
+                "purl": "pkg:maven/org.apache.logging.log4j/log4j-api@2.14.1",
+                "uuid": "c5e3f7a4-8d6a-4b9c-aebf-2a3b4c5d6e7f",
+                "version": "2.14.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-10-22 00:00:00.000"
+            },
+            "vulnerability": {
+                "uuid": "d6f4a8b5-9e7b-4cad-bfc0-3b4c5d6e7f80",
+                "source": "NVD",
+                "vulnId": "CVE-2021-45046",
+                "severity": "CRITICAL",
+                "description": "The fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations.",
+                "aliases": []
+            },
+            "matrix": "7d0f7e5e-1c9b-4a5e-9d2b-3a1c6e8f0b11:c5e3f7a4-8d6a-4b9c-aebf-2a3b4c5d6e7f:d6f4a8b5-9e7b-4cad-bfc0-3b4c5d6e7f80"
+        }
+    ],
+    "project": {
+        "name": "test-app",
+        "uuid": "7d0f7e5e-1c9b-4a5e-9d2b-3a1c6e8f0b11",
+        "version": "1.0.0"
+    },
+    "version": "1.5"
+}
