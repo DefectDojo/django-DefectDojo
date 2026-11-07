@@ -215,9 +215,9 @@ ctx.kept_active          true when deduplication kept this Finding active
 
 A Finding's links show on its page, in the **Linked Findings** tab beside **Duplicate Findings** (the tab is hidden while a Finding has none). Each row names the linked Finding, its Asset, severity and status, which of the two was kept active, the rule that linked them and when. Only links to Findings you can see are listed.
 
-To break a wrong link, open the row's menu and choose **Remove Link**; it takes permission to edit the Finding whose page you are on. Statuses are then no longer carried between the two Findings in either direction. The Finding that was kept active stays active, and deduplication neither links the two again nor marks it a duplicate of the other when it next runs on it.
+To break a wrong link, open the row's menu and choose **Remove Link**; it takes permission to edit the Finding whose page you are on. Statuses are then no longer carried between the two Findings in either direction. The Finding that was kept active stays active, and deduplication neither links the two again nor marks it a duplicate of the other when it next runs on it. A removed link stays in the tab, marked **Removed** with who removed it and when, and **Restore Link** in its menu puts it back.
 
-Automation reads a Finding's links with `GET /api/v2/finding_links/?finding=<id>` and removes one with `DELETE /api/v2/finding_links/<link id>/?finding=<id>`, with the same permissions.
+Automation reads a Finding's links, removed ones included, with `GET /api/v2/finding_links/?finding=<id>`, removes one with `DELETE /api/v2/finding_links/<link id>/?finding=<id>` and restores one with `POST /api/v2/finding_links/<link id>/restore/?finding=<id>`, with the same permissions.
 
 #### Example: keep staging and production in step
 
