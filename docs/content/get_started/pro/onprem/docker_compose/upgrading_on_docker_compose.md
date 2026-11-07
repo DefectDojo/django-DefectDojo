@@ -10,6 +10,8 @@ aliases:
 
 This guide covers upgrading a self-hosted DefectDojo Pro deployment that runs on Docker Compose, managed with `dojo-compose-cli`. If you run on Kubernetes, see the [DefectDojo Pro Upgrade Guide](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) for the Helm chart instead.
 
+> **Legacy:** `dojo-compose-cli` is now a legacy command. It keeps working, and every step on this page still applies. Going forward, `dojo-deploy` replaces it and runs the same commands as `dojo-deploy compose`. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for each legacy command's `dojo-deploy` equivalent.
+
 Each DefectDojo Pro release is a set of container images, deployment files, and settings that are built and tested together. Upgrade them together, and do not change image tags on their own.
 
 ## Before you upgrade
