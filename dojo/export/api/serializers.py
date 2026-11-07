@@ -9,56 +9,109 @@ from dojo.engagement.api.serializer import EngagementSerializer
 from dojo.finding.api.serializer import BurpRawRequestResponseMultiSerializer, FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
-from dojo.models import FileUpload, Finding, Risk_Acceptance
+from dojo.models import (
+    Announcement,
+    BannerConf,
+    Check_List,
+    Contact,
+    Engagement_Presets,
+    FileUpload,
+    Finding,
+    Product_API_Scan_Configuration,
+    Report_Type,
+    Risk_Acceptance,
+)
 from dojo.notes.api.serializer import NoteSerializer
 from dojo.product.api.serializer import ProductSerializer
 from dojo.product_type.api.serializer import ProductTypeSerializer
 from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
 from dojo.test.api.serializer import TestSerializer
+from dojo.tool_config.api.serializer import ToolConfigurationSerializer
+from dojo.tool_config.models import Tool_Configuration
 from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
 
 MAX_FILE_BYTES_DEFAULT = 10485760
+MAX_FILE_BYTES_LIMIT = 104857600
+MAX_INLINE_BYTES_PER_LINE = 50331648
+CHECK_LIST_ISSUE_FIELDS = (
+    "session_issues", "crypto_issues", "config_issues", "auth_issues", "author_issues", "data_issues",
+    "sensitive_issues", "other_issues",
+)
 
 
 class ExportParamsSerializer(serializers.Serializer):
     max_file_bytes = serializers.IntegerField(
         min_value=0,
+        max_value=MAX_FILE_BYTES_LIMIT,
         default=MAX_FILE_BYTES_DEFAULT,
         help_text=(
-            "File size cap in bytes. The product export carries a file of this size or less inline as base64, "
-            "and a larger file keeps its size with no data. The manifest counts larger files in files_over_cap."
+            f"File size cap in bytes, at most {MAX_FILE_BYTES_LIMIT}. The product export carries a file of this "
+            "size or less inline as base64. A larger file keeps its size with no data. The manifest counts larger "
+            f"files in files_over_cap. The files of one line carry at most {MAX_INLINE_BYTES_PER_LINE // 2**20} MiB "
+            "of base64 text in all. A file past that has no data and the error line_cap."
+        ),
+    )
+
+
+class ManifestParamsSerializer(ExportParamsSerializer):
+    file_counts = serializers.BooleanField(
+        default=True,
+        help_text=(
+            "Count files_over_cap by reading the size of every file in storage. With false the manifest skips "
+            "that read, and files_over_cap is null."
         ),
     )
 
 
 def file_size(storage, name: str) -> int | None:
-    return storage.size(name) if name and storage.exists(name) else None
+    if not name:
+        return None
+    try:
+        return storage.size(name)
+    # uwsgi under an ASCII locale cannot encode a non-ASCII file name.
+    except (FileNotFoundError, UnicodeError):
+        return None
 
 
-def _file_payload(field_file, max_file_bytes: int) -> dict:
+class InlineBudget:
+    def __init__(self):
+        self.left = MAX_INLINE_BYTES_PER_LINE
+
+    def take(self, size: int) -> bool:
+        cost = 4 * -(-size // 3)
+        if cost > self.left:
+            return False
+        self.left -= cost
+        return True
+
+
+def _file_payload(field_file, max_file_bytes: int, budget: InlineBudget) -> dict:
     size = file_size(field_file.storage, field_file.name)
     payload = {"size": size, "content_type": mimetypes.guess_type(field_file.name)[0], "data_base64": None}
     if size is None:
         payload["error"] = "missing"
     elif size <= max_file_bytes:
-        with field_file.open("rb") as handle:
-            payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
+        if budget.take(size):
+            with field_file.open("rb") as handle:
+                payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
+        else:
+            payload["error"] = "line_cap"
     return payload
 
 
-def export_file(file_upload: FileUpload, max_file_bytes: int) -> dict:
+def export_file(file_upload: FileUpload, max_file_bytes: int, budget: InlineBudget | None = None) -> dict:
     return {
         "id": file_upload.id,
         "title": file_upload.title,
         "filename": Path(file_upload.file.name).name,
-        **_file_payload(file_upload.file, max_file_bytes),
+        **_file_payload(file_upload.file, max_file_bytes, budget or InlineBudget()),
     }
 
 
 def export_proof(risk_acceptance: Risk_Acceptance, max_file_bytes: int) -> dict | None:
     if not risk_acceptance.path:
         return None
-    return {"filename": risk_acceptance.filename(), **_file_payload(risk_acceptance.path, max_file_bytes)}
+    return {"filename": risk_acceptance.filename(), **_file_payload(risk_acceptance.path, max_file_bytes, InlineBudget())}
 
 
 def export_endpoint_entries(finding: Finding, status: serializers.Serializer, *, locations: bool) -> list[dict]:
@@ -79,7 +132,11 @@ class ExportFilesMixin(serializers.Serializer):
     files = serializers.SerializerMethodField()
 
     def get_files(self, obj) -> list[dict]:
-        return [export_file(file_upload, self.context["max_file_bytes"]) for file_upload in obj.files.all()]
+        budget = InlineBudget()
+        return [
+            export_file(file_upload, self.context["max_file_bytes"], budget)
+            for file_upload in sorted(obj.files.all(), key=lambda file_upload: file_upload.id)
+        ]
 
 
 class ExportProductSerializer(ProductSerializer):
@@ -88,8 +145,24 @@ class ExportProductSerializer(ProductSerializer):
     prod_type = ProductTypeSerializer(read_only=True)
 
 
+class ExportCheckListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Check_List
+        fields = (
+            "id", "session_management", "encryption_crypto", "configuration_management", "authentication",
+            "authorization_and_access_control", "data_input_sanitization_validation", "sensitive_data", "other",
+            *CHECK_LIST_ISSUE_FIELDS,
+        )
+        read_only_fields = fields
+
+
 class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
-    pass
+    check_list_detail = serializers.SerializerMethodField()
+
+    def get_check_list_detail(self, obj) -> dict | None:
+        # check_list_prefetch() orders by id, so the first row is the lowest id.
+        check_list = next(iter(obj.eng_for_check.all()), None)
+        return ExportCheckListSerializer(check_list).data if check_list else None
 
 
 class ExportTestSerializer(ExportFilesMixin, TestSerializer):
@@ -128,6 +201,56 @@ class ExportRiskAcceptanceSerializer(RiskAcceptanceSerializer):
 
     def get_proof(self, obj) -> dict | None:
         return export_proof(obj, self.context["max_file_bytes"])
+
+
+class ExportToolConfigurationSerializer(ToolConfigurationSerializer):
+    class Meta:
+        model = Tool_Configuration
+        exclude = ("extras",)
+        extra_kwargs = ToolConfigurationSerializer.Meta.extra_kwargs
+
+
+class ExportEngagementPresetSerializer(serializers.ModelSerializer):
+    test_type = serializers.SlugRelatedField(slug_field="name", many=True, read_only=True)
+    network_locations = serializers.SlugRelatedField(slug_field="location", many=True, read_only=True)
+
+    class Meta:
+        model = Engagement_Presets
+        exclude = ("product", "archived_at", "archive_batch")
+
+
+class ExportAPIScanConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_API_Scan_Configuration
+        exclude = ("product", "archived_at", "archive_batch")
+
+
+class ExportContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ("id", "name", "email", "team", "is_admin", "is_globally_read_only")
+        read_only_fields = fields
+
+
+class ExportReportTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report_Type
+        fields = ("id", "name")
+        read_only_fields = fields
+
+
+class ExportAnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = ("message", "style", "dismissable")
+        read_only_fields = fields
+
+
+class ExportLoginBannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BannerConf
+        fields = ("banner_enable", "banner_message")
+        read_only_fields = fields
 
 
 class ExportUserContactInfoSerializer(UserContactInfoSerializer):

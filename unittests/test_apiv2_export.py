@@ -3,9 +3,11 @@ import json
 import uuid
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 
+from django.conf import settings
 from django.core.files.base import ContentFile
-from django.test import RequestFactory
+from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.urls import reverse
 from drf_spectacular.generators import SchemaGenerator
 from rest_framework.authtoken.models import Token
@@ -16,7 +18,9 @@ from dojo.endpoint.api.serializer import EndpointStatusSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
     MAX_FILE_BYTES_DEFAULT,
+    ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportRiskAcceptanceSerializer,
     export_endpoint_entries,
     export_file,
     export_proof,
@@ -28,16 +32,25 @@ from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
+    Announcement,
+    BannerConf,
     BurpRawRequestResponse,
+    Check_List,
+    Contact,
     Dojo_User,
     DojoMeta,
     Engagement,
+    Engagement_Presets,
     FileUpload,
     Finding,
     Finding_Group,
+    Finding_Template,
+    Network_Locations,
     Notes,
     Product,
+    Product_API_Scan_Configuration,
     Product_Platform,
+    Report_Type,
     Risk_Acceptance,
     System_Settings,
     Test,
@@ -45,6 +58,8 @@ from dojo.models import (
     UserContactInfo,
 )
 from dojo.system_settings.ui.forms import SystemSettingsForm
+from dojo.tool_config.models import Tool_Configuration
+from dojo.tool_type.models import Tool_Type
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
 RAW_REQUEST = b"GET / HTTP/1.1\r\nX: \xff\xfe\r\n"
@@ -55,8 +70,8 @@ def ndjson_lines(response):
     return [json.loads(line) for line in b"".join(response.streaming_content).splitlines()]
 
 
-def make_file(case, name):
-    file_upload = FileUpload.objects.create(title=name, file=ContentFile(b"hello", name=name))
+def make_file(case, name, content=b"hello"):
+    file_upload = FileUpload.objects.create(title=name, file=ContentFile(content, name=name))
     case.addClassCleanup(file_upload.file.storage.delete, file_upload.file.name)
     return file_upload
 
@@ -88,6 +103,61 @@ def seed_product(case):
     case.risk_acceptance.accepted_findings.add(case.finding)
     test.engagement.risk_acceptance.add(case.risk_acceptance)
     case.risk_acceptance.notes.add(Notes.objects.create(entry="ra note", author=case.admin))
+
+
+def seed_check_lists(case):
+    case.checked_engagement = case.finding.test.engagement
+    case.checked_findings = list(Finding.objects.filter(test__engagement__product_id=2).order_by("id")[:2])
+    first, second = case.checked_findings
+    case.foreign_finding = Finding.objects.exclude(test__engagement__product_id=2).order_by("id").first()
+    case.check_list = Check_List.objects.create(
+        engagement=case.checked_engagement,
+        session_management="Pass",
+        encryption_crypto="Fail",
+        configuration_management="N/A",
+        authentication="Pass",
+        authorization_and_access_control="Fail",
+        data_input_sanitization_validation="N/A",
+        sensitive_data="Pass",
+        other="Fail",
+    )
+    case.check_list.session_issues.add(first, second)
+    case.check_list.other_issues.add(second)
+    case.check_list.data_issues.add(case.foreign_finding)
+    Check_List.objects.create(engagement=case.checked_engagement, session_management="Fail").session_issues.add(first)
+
+
+SHIPPED_DEDUPLICATION_MAPS = {
+    "HASHCODE_FIELDS_PER_SCANNER_SHIPPED": "HASHCODE_FIELDS_PER_SCANNER",
+    "DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED": "DEDUPLICATION_ALGORITHM_PER_PARSER",
+    "HASHCODE_ALLOWS_NULL_CWE_SHIPPED": "HASHCODE_ALLOWS_NULL_CWE",
+}
+
+
+class TestShippedDeduplicationSettings(SimpleTestCase):
+    def test_each_shipped_map_is_a_separate_copy_of_its_map(self):
+        for shipped_name, name in SHIPPED_DEDUPLICATION_MAPS.items():
+            with self.subTest(shipped_name):
+                shipped = getattr(settings, shipped_name)
+                self.assertTrue(shipped)
+                self.assertIsNot(getattr(settings, name), shipped)
+
+    def test_changing_a_map_leaves_the_shipped_copy_as_it_was(self):
+        before = {name: json.dumps(getattr(settings, name), sort_keys=True) for name in SHIPPED_DEDUPLICATION_MAPS}
+        with override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={"Only Scan": ["title"]},
+            DEDUPLICATION_ALGORITHM_PER_PARSER={"Only Scan": "legacy"},
+            HASHCODE_ALLOWS_NULL_CWE={"Only Scan": False},
+        ):
+            for name in SHIPPED_DEDUPLICATION_MAPS:
+                self.assertEqual(before[name], json.dumps(getattr(settings, name), sort_keys=True))
+        scan_type = next(iter(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED))
+        live = settings.HASHCODE_FIELDS_PER_SCANNER[scan_type]
+        live.append("mitigation")
+        try:
+            self.assertEqual(before["HASHCODE_FIELDS_PER_SCANNER_SHIPPED"], json.dumps(settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, sort_keys=True))
+        finally:
+            live.pop()
 
 
 @versioned_fixtures
@@ -149,6 +219,15 @@ class TestExportSerializers(DojoAPITestCase):
         self.assertIsNone(entry["size"])
         self.assertEqual("missing", entry["error"])
 
+    def test_export_file_marks_a_name_the_server_cannot_encode_missing(self):
+        file_upload = make_file(self, "poc.txt")
+        refused = UnicodeEncodeError("ascii", "\u00fc", 0, 1, "ordinal not in range(128)")
+        with mock.patch.object(file_upload.file.storage, "size", side_effect=refused):
+            entry = export_file(file_upload, MAX_FILE_BYTES_DEFAULT)
+        self.assertIsNone(entry["data_base64"])
+        self.assertIsNone(entry["size"])
+        self.assertEqual("missing", entry["error"])
+
     def test_export_file_marks_an_empty_name_missing(self):
         entry = export_file(FileUpload(title="empty", file=""), MAX_FILE_BYTES_DEFAULT)
         self.assertIsNone(entry["size"])
@@ -157,6 +236,57 @@ class TestExportSerializers(DojoAPITestCase):
     def test_export_proof_is_none_without_a_proof(self):
         risk_acceptance = Risk_Acceptance.objects.create(name="ra without proof", owner=self.context["request"].user)
         self.assertIsNone(export_proof(risk_acceptance, MAX_FILE_BYTES_DEFAULT))
+
+    def line_files(self, *contents, max_file_bytes=MAX_FILE_BYTES_DEFAULT):
+        engagement = self.finding.test.engagement
+        for index, content in enumerate(contents):
+            engagement.files.add(make_file(self, f"line{index}.txt", content))
+        context = {**self.context, "max_file_bytes": max_file_bytes}
+        return ExportEngagementSerializer(context=context).get_files(engagement)
+
+    def test_a_line_under_the_inline_budget_is_unchanged(self):
+        entries = self.line_files(b"a", b"b", b"c")
+        self.assertEqual([b"a", b"b", b"c"], [base64.b64decode(entry["data_base64"]) for entry in entries])
+        self.assertFalse(any("error" in entry for entry in entries))
+
+    def test_a_line_past_the_inline_budget_marks_the_later_files(self):
+        # "hello" is 8 characters of base64 text.
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 16):
+            entries = self.line_files(b"hello", b"hello", b"hello")
+        self.assertEqual([False, False, True], ["error" in entry for entry in entries])
+        self.assertIsNotNone(entries[1]["data_base64"])
+        self.assertIsNone(entries[2]["data_base64"])
+        self.assertEqual("line_cap", entries[2]["error"])
+        self.assertEqual(5, entries[2]["size"])
+        self.assertEqual("text/plain", entries[2]["content_type"])
+
+    def test_a_small_file_still_fits_after_a_marked_one(self):
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 20):
+            entries = self.line_files(b"hello", b"x" * 30, b"hello")
+        self.assertEqual([None, "line_cap", None], [entry.get("error") for entry in entries])
+        self.assertIsNone(entries[1]["data_base64"])
+        self.assertEqual(30, entries[1]["size"])
+        self.assertIsNotNone(entries[2]["data_base64"])
+
+    def test_a_file_over_the_file_cap_does_not_use_the_inline_budget(self):
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 8):
+            entries = self.line_files(b"x" * 30, b"hello", max_file_bytes=10)
+        self.assertIsNone(entries[0]["data_base64"])
+        self.assertNotIn("error", entries[0])
+        self.assertIsNotNone(entries[1]["data_base64"])
+
+    def test_a_proof_past_the_inline_budget_is_marked(self):
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="ra with proof", owner=self.context["request"].user, path=ContentFile(b"proof", name="waiver.txt"),
+        )
+        self.addCleanup(risk_acceptance.path.storage.delete, risk_acceptance.path.name)
+        serializer = ExportRiskAcceptanceSerializer(context=self.context)
+        self.assertIsNotNone(serializer.get_proof(risk_acceptance)["data_base64"])
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 4):
+            proof = serializer.get_proof(risk_acceptance)
+        self.assertIsNone(proof["data_base64"])
+        self.assertEqual("line_cap", proof["error"])
+        self.assertEqual(5, proof["size"])
 
     def test_endpoint_entries_carry_uri_and_status(self):
         if locations_enabled():
@@ -200,6 +330,12 @@ class TestProductExportStream(DojoAPITestCase):
     @classmethod
     def setUpTestData(cls):
         seed_product(cls)
+        cls.preset = Engagement_Presets.objects.create(title="Quarterly", notes="n", scope="s", product_id=2)
+        cls.preset.test_type.add(*Test_Type.objects.filter(name__in=["ZAP Scan", "BURP Scan"]))
+        cls.preset.network_locations.add(Network_Locations.objects.create(location="VPN"))
+        Engagement_Presets.objects.create(title="Other", scope="", product_id=1)
+        Product_API_Scan_Configuration.objects.create(product_id=1, tool_configuration_id=3, service_key_1="other")
+        seed_check_lists(cls)
         cls.url = reverse("export-product", args=[2])
         client = APIClient()
         client.force_authenticate(cls.admin)
@@ -240,6 +376,15 @@ class TestProductExportStream(DojoAPITestCase):
                 response = self.client.get(self.url, {"max_file_bytes": value})
                 self.assertEqual(400, response.status_code, response.content[:1000])
                 self.assertIn("max_file_bytes", response.json())
+
+    def test_max_file_bytes_has_a_ceiling_of_100_mib(self):
+        for url in (self.url, reverse("export-manifest")):
+            with self.subTest(url=url):
+                response = self.client.get(url, {"max_file_bytes": 104857601})
+                self.assertEqual(400, response.status_code, response.content[:1000])
+                self.assertIn("max_file_bytes", response.json())
+        response = self.client.get(self.url, {"max_file_bytes": 104857600})
+        self.assertEqual(104857600, ndjson_lines(response)[0]["max_file_bytes"])
 
     def test_empty_max_file_bytes_uses_the_default(self):
         response = self.client.get(self.url, {"max_file_bytes": ""})
@@ -300,6 +445,28 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertNotIn("findings_list", header["product"])
         self.assertNotIn("findings_count", header["product"])
         datetime.fromisoformat(header["generated_at"])
+
+    def test_header_carries_engagement_presets_and_api_scan_configurations(self):
+        header = self.lines[0]
+        (preset,) = header["engagement_presets"]
+        self.assertEqual(self.preset.id, preset["id"])
+        self.assertEqual(("Quarterly", "n", "s"), (preset["title"], preset["notes"], preset["scope"]))
+        self.assertEqual(["BURP Scan", "ZAP Scan"], sorted(preset["test_type"]))
+        self.assertEqual(["VPN"], preset["network_locations"])
+        self.assertNotIn("product", preset)
+        self.assertFalse({"archived_at", "archive_batch"} & preset.keys())
+        self.assertEqual(
+            [{"id": 1, "tool_configuration": 3, "service_key_1": "dojo_sonar_key", "service_key_2": None, "service_key_3": None}],
+            header["api_scan_configurations"],
+        )
+        empty = ndjson_lines(self.client.get(reverse("export-product", args=[3])))[0]
+        self.assertEqual(([], []), (empty["engagement_presets"], empty["api_scan_configurations"]))
+
+    def test_the_stream_adds_no_new_line_type(self):
+        self.assertEqual(
+            {"header", "engagement", "test", "finding", "risk_acceptance", "end"},
+            {line["type"] for line in self.lines},
+        )
 
     def test_line_order_is_flat_by_type_then_id(self):
         rank = {"engagement": 0, "test": 1, "finding": 2, "risk_acceptance": 3}
@@ -370,6 +537,51 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual("engagement note", data["notes"][0]["entry"])
         self.assertEqual(Path(self.owner_files["engagement"].file.name).name, data["files"][0]["filename"])
 
+    def test_engagement_line_carries_the_lowest_check_list(self):
+        first, second = self.checked_findings
+        data = self.line_data("engagement", self.checked_engagement.id)
+        self.assertEqual(
+            {
+                "id": self.check_list.id,
+                "session_management": "Pass",
+                "encryption_crypto": "Fail",
+                "configuration_management": "N/A",
+                "authentication": "Pass",
+                "authorization_and_access_control": "Fail",
+                "data_input_sanitization_validation": "N/A",
+                "sensitive_data": "Pass",
+                "other": "Fail",
+                "session_issues": [first.id, second.id],
+                "crypto_issues": [],
+                "config_issues": [],
+                "auth_issues": [],
+                "author_issues": [],
+                "data_issues": [self.foreign_finding.id],
+                "sensitive_issues": [],
+                "other_issues": [second.id],
+            },
+            data["check_list_detail"],
+        )
+        self.assertNotIn("archived_at", data["check_list_detail"])
+        self.assertNotIn("archive_batch", data["check_list_detail"])
+        self.assertIsInstance(data["check_list"], bool)
+        self.assertTrue(data["check_list"])
+
+    def test_engagement_line_without_a_check_list_is_null(self):
+        other = Engagement.objects.filter(product_id=2).exclude(id=self.checked_engagement.id).order_by("id").first()
+        self.assertFalse(Check_List.objects.filter(engagement=other).exists())
+        data = self.line_data("engagement", other.id)
+        self.assertIsNone(data["check_list_detail"])
+        self.assertIsInstance(data["check_list"], bool)
+        self.assertEqual(other.check_list, data["check_list"])
+
+    def test_engagement_check_list_flag_stays_a_boolean(self):
+        Engagement.objects.filter(id=self.checked_engagement.id).update(check_list=False)
+        data = self.line_data("engagement", self.checked_engagement.id, ndjson_lines(self.client.get(self.url)))
+        self.assertIsInstance(data["check_list"], bool)
+        self.assertFalse(data["check_list"])
+        self.assertEqual(self.check_list.id, data["check_list_detail"]["id"])
+
     def test_risk_acceptance_line(self):
         (data,) = [line["data"] for line in self.lines if line["type"] == "risk_acceptance"]
         self.assertEqual(Path(self.risk_acceptance.path.name).name, data["proof"]["filename"])
@@ -397,6 +609,17 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual(0, lines[-1]["counts"]["files_over_cap"])
         proof = next(line["data"]["proof"] for line in lines if line["type"] == "risk_acceptance")
         self.assertEqual(b"proof", base64.b64decode(proof["data_base64"]))
+
+    def test_a_file_past_the_inline_budget_is_not_counted_over_cap(self):
+        self.finding.files.add(make_file(self, "second.txt"))
+        with mock.patch("dojo.export.api.serializers.MAX_INLINE_BYTES_PER_LINE", 8):
+            lines = ndjson_lines(self.client.get(self.url))
+        first, second = self.line_data("finding", self.finding.id, lines)["files"]
+        self.assertIsNotNone(first["data_base64"])
+        self.assertIsNone(second["data_base64"])
+        self.assertEqual("line_cap", second["error"])
+        self.assertEqual(4, lines[-1]["counts"]["files"])
+        self.assertEqual(0, lines[-1]["counts"]["files_over_cap"])
 
     def test_risk_acceptance_linked_only_through_a_finding_crosses(self):
         # Regression: an acceptance with no engagement link got no line while the finding line named its id.
@@ -441,7 +664,7 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(
             {
                 "schema", "generated_at", "source", "max_file_bytes", "token", "scan_types", "reference",
-                "product_types", "products", "totals",
+                "product_types", "products", "totals", "announcement", "login_banner", "features", "deduplication",
             },
             set(self.manifest),
         )
@@ -512,6 +735,74 @@ class TestExportManifest(DojoAPITestCase):
                     self.assertEqual(counts["files"] if params else 0, counts["files_over_cap"])
                     self.assertEqual(1 if product_id == 2 else 0, counts["finding_groups"])
 
+    def manifest_with_stat_calls(self, params):
+        storage = FileUpload._meta.get_field("file").storage
+        with (
+            mock.patch.object(storage, "size", wraps=storage.size) as size,
+            mock.patch.object(storage, "exists", wraps=storage.exists) as exists,
+        ):
+            manifest = self.client.get(self.url, params).json()
+        return manifest, size.call_count, exists.call_count
+
+    def test_file_counts_true_is_the_default_and_stats_each_file_once(self):
+        files = {
+            file_id
+            for through in (Engagement.files.through, Test.files.through, Finding.files.through)
+            for file_id in through.objects.values_list("fileupload_id", flat=True)
+        }
+        for params in ({}, {"file_counts": "true"}):
+            with self.subTest(params=params):
+                manifest, sizes, exists = self.manifest_with_stat_calls(params)
+                self.assertEqual(self.manifest["products"], manifest["products"])
+                self.assertEqual(self.manifest["totals"], manifest["totals"])
+                self.assertEqual((len(files), 0), (sizes, exists))
+        self.assertEqual(3, self.get_results_by_id(self.manifest["products"], 2)["counts"]["files"])
+
+    def test_a_file_name_the_server_cannot_encode_does_not_fail_the_manifest(self):
+        storage = FileUpload._meta.get_field("file").storage
+        refused = UnicodeEncodeError("ascii", "\u00fc", 0, 1, "ordinal not in range(128)")
+        with mock.patch.object(storage, "size", side_effect=refused):
+            response = self.client.get(self.url, {"max_file_bytes": 4})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.json()["totals"]["files_over_cap"])
+
+    def test_file_counts_false_skips_the_file_stat(self):
+        manifest, sizes, exists = self.manifest_with_stat_calls({"file_counts": "false", "max_file_bytes": 4})
+        self.assertEqual((0, 0), (sizes, exists))
+        all_counts = [
+            *(entry["counts"] for entry in manifest["products"]),
+            *(entry["counts"] for entry in manifest["product_types"]),
+            manifest["totals"],
+        ]
+        for counts in all_counts:
+            self.assertIsNone(counts["files_over_cap"])
+        for key in ("files", "findings", "notes"):
+            self.assertEqual(self.manifest["totals"][key], manifest["totals"][key], key)
+        self.assertEqual(3, self.get_results_by_id(manifest["products"], 2)["counts"]["files"])
+        self.assertEqual(4, manifest["max_file_bytes"])
+
+    def test_file_counts_must_be_a_boolean(self):
+        response = self.client.get(self.url, {"file_counts": "maybe"})
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("file_counts", response.json())
+
+    def test_the_stream_ignores_file_counts(self):
+        response = self.client.get(reverse("export-product", args=[2]), {"file_counts": "false"})
+        self.assertEqual(3, ndjson_lines(response)[-1]["counts"]["files"])
+
+    def test_empty_file_counts_uses_the_default(self):
+        response = self.client.get(self.url, {"file_counts": "", "max_file_bytes": 4})
+        self.assertEqual(200, response.status_code)
+        counts = self.get_results_by_id(response.json()["products"], 2)["counts"]
+        self.assertEqual((3, 3), (counts["files"], counts["files_over_cap"]))
+
+    def test_a_missing_file_is_counted_but_not_over_cap(self):
+        file_upload = make_file(self, "gone.txt")
+        self.finding.files.add(file_upload)
+        file_upload.file.storage.delete(file_upload.file.name)
+        counts = self.get_results_by_id(self.client.get(self.url, {"max_file_bytes": 4}).json()["products"], 2)["counts"]
+        self.assertEqual((4, 3), (counts["files"], counts["files_over_cap"]))
+
     def test_manifest_counts_a_risk_acceptance_linked_only_through_a_finding(self):
         # Regression: the manifest counted acceptances through their engagement link only.
         before = self.get_results_by_id(self.manifest["products"], 2)["counts"]
@@ -527,7 +818,8 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(
             {
                 "sla_configurations", "development_environments", "regulations", "test_types", "note_types",
-                "product_platforms", "product_lifecycles", "product_origins", "users",
+                "product_platforms", "product_lifecycles", "product_origins", "finding_templates", "tool_types",
+                "tool_configurations", "users", "contacts", "report_types",
             },
             set(reference),
         )
@@ -543,6 +835,227 @@ class TestExportManifest(DojoAPITestCase):
         self.assertIn("email", user1)
         self.assertFalse(user1["is_superuser"])
         self.assertEqual(Test_Type.objects.count(), len(reference["test_types"]))
+
+    def test_reference_carries_finding_templates_tool_types_and_tool_configurations(self):
+        reference = self.manifest["reference"]
+        for key, model in (
+            ("finding_templates", Finding_Template),
+            ("tool_types", Tool_Type),
+            ("tool_configurations", Tool_Configuration),
+        ):
+            ids = [entry["id"] for entry in reference[key]]
+            self.assertTrue(ids, key)
+            self.assertEqual(list(model.objects.order_by("id").values_list("id", flat=True)), ids, key)
+        template = self.get_results_by_id(reference["finding_templates"], 1)
+        self.assertEqual(Finding_Template.objects.get(id=1).title, template["title"])
+        self.assertEqual(Finding_Template.objects.get(id=1).severity, template["severity"])
+        tool_type = self.get_results_by_id(reference["tool_types"], 1)
+        self.assertEqual("Tool Type 1", tool_type["name"])
+        configuration = self.get_results_by_id(reference["tool_configurations"], 1)
+        self.assertEqual(
+            (1, "Tool Configuration 1", "http://www.example.com", "Password", "user1"),
+            (
+                configuration["tool_type"], configuration["name"], configuration["url"],
+                configuration["authentication_type"], configuration["username"],
+            ),
+        )
+
+    def test_tool_configurations_carry_no_secret(self):
+        secrets = {
+            "password": "hunter2", "ssh": "PRIVATE-KEY-MATERIAL", "api_key": "TOKEN-VALUE", "extras": "ORG-TOKEN",
+        }
+        Tool_Configuration.objects.filter(id=1).update(**secrets)
+        manifest = self.client.get(self.url).json()
+        self.assertTrue(manifest["reference"]["tool_configurations"])
+        for entry in manifest["reference"]["tool_configurations"]:
+            for field in secrets:
+                self.assertNotIn(field, entry)
+        body = json.dumps(manifest)
+        for value in secrets.values():
+            self.assertNotIn(value, body)
+
+    def test_features_list_check_lists(self):
+        self.assertEqual(["check_lists"], self.manifest["features"])
+
+    def test_announcement_is_the_single_row(self):
+        row = Announcement.objects.get()
+        self.assertEqual(
+            {"message": row.message, "style": row.style, "dismissable": row.dismissable},
+            self.client.get(self.url).json()["announcement"],
+        )
+
+    def test_announcement_is_null_without_a_row(self):
+        Announcement.objects.all().delete()
+        self.assertIsNone(self.client.get(self.url).json()["announcement"])
+
+    def test_login_banner_is_the_banner_row(self):
+        BannerConf.objects.all().delete()
+        BannerConf.objects.create(banner_enable=True, banner_message="Welcome <b>back</b>")
+        self.assertEqual(
+            {"banner_enable": True, "banner_message": "Welcome <b>back</b>"},
+            self.client.get(self.url).json()["login_banner"],
+        )
+
+    def test_login_banner_is_null_without_a_row(self):
+        BannerConf.objects.all().delete()
+        self.assertIsNone(self.client.get(self.url).json()["login_banner"])
+
+    def test_contacts_list_every_row_by_id(self):
+        pat = Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red", is_admin=True)
+        sam = Contact.objects.create(name="Sam Roe", email="sam@example.com", team="Blue", is_globally_read_only=True)
+        contacts = self.client.get(self.url).json()["reference"]["contacts"]
+        self.assertEqual(
+            [
+                {
+                    "id": contact.id, "name": contact.name, "email": contact.email, "team": contact.team,
+                    "is_admin": contact.is_admin, "is_globally_read_only": contact.is_globally_read_only,
+                }
+                for contact in Contact.objects.order_by("id")
+            ],
+            contacts,
+        )
+        by_id = {contact["id"]: contact for contact in contacts}
+        self.assertEqual((True, False), (by_id[pat.id]["is_admin"], by_id[pat.id]["is_globally_read_only"]))
+        self.assertEqual((False, True), (by_id[sam.id]["is_admin"], by_id[sam.id]["is_globally_read_only"]))
+
+    def test_report_types_list_every_row_by_id(self):
+        report_types = self.manifest["reference"]["report_types"]
+        self.assertTrue(report_types)
+        self.assertEqual(
+            [{"id": row.id, "name": row.name} for row in Report_Type.objects.order_by("id")], report_types,
+        )
+
+    def test_new_keys_carry_no_archive_fields(self):
+        BannerConf.objects.all().delete()
+        BannerConf.objects.create(banner_enable=False, banner_message="x")
+        Contact.objects.create(name="Pat Doe", email="pat@example.com", team="Red")
+        manifest = self.client.get(self.url).json()
+        rows = [
+            manifest["announcement"], manifest["login_banner"],
+            *manifest["reference"]["contacts"], *manifest["reference"]["report_types"],
+        ]
+        self.assertNotIn(None, rows)
+        for row in rows:
+            self.assertEqual(set(), {"archived_at", "archive_batch"} & set(row))
+
+    def deduplication(self, **overrides):
+        with override_settings(**overrides):
+            return self.client.get(self.url).json()["deduplication"]
+
+    def test_deduplication_is_three_empty_maps_when_nothing_differs(self):
+        empty = {"algorithm_per_parser": {}, "hashcode_fields_per_scanner": {}, "hashcode_allows_null_cwe": {}}
+        self.assertEqual(empty, self.manifest["deduplication"])
+
+    def test_deduplication_lists_a_changed_field_list_only(self):
+        fields = {**settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, "Anchore Engine Scan": ["title", "cwe"]}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {"Anchore Engine Scan": ["title", "cwe"]},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields),
+        )
+
+    def test_deduplication_treats_a_tuple_and_a_list_with_the_same_fields_as_equal(self):
+        shipped = settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED
+        fields = {**shipped, "Anchore Engine Scan": tuple(shipped["Anchore Engine Scan"])}
+        self.assertEqual({}, self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields)["hashcode_fields_per_scanner"])
+
+    def test_deduplication_sends_a_changed_tuple_as_a_list(self):
+        fields = {**settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, "Anchore Engine Scan": ("title", "cwe")}
+        self.assertEqual(
+            {"Anchore Engine Scan": ["title", "cwe"]},
+            self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields)["hashcode_fields_per_scanner"],
+        )
+
+    def test_deduplication_lists_a_changed_algorithm_only(self):
+        algorithms = {**settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED, "Anchore Engine Scan": "unique_id_from_tool"}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {"Anchore Engine Scan": "unique_id_from_tool"},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(DEDUPLICATION_ALGORITHM_PER_PARSER=algorithms),
+        )
+
+    def test_deduplication_lists_a_changed_null_cwe_value_only(self):
+        null_cwe = {**settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, "Anchore Engine Scan": False}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {"Anchore Engine Scan": False},
+            },
+            self.deduplication(HASHCODE_ALLOWS_NULL_CWE=null_cwe),
+        )
+
+    def test_deduplication_lists_a_scan_type_the_shipped_maps_lack(self):
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {"Acme Scan": "hash_code"},
+                "hashcode_fields_per_scanner": {"Acme Scan": ["title", "file_path"]},
+                "hashcode_allows_null_cwe": {"Acme Scan": True},
+            },
+            self.deduplication(
+                DEDUPLICATION_ALGORITHM_PER_PARSER={**settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED, "Acme Scan": "hash_code"},
+                HASHCODE_FIELDS_PER_SCANNER={**settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, "Acme Scan": ["title", "file_path"]},
+                HASHCODE_ALLOWS_NULL_CWE={**settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, "Acme Scan": True},
+            ),
+        )
+
+    def test_deduplication_sends_a_removed_algorithm_as_legacy(self):
+        algorithms = {key: value for key, value in settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED.items() if key != "Anchore Engine Scan"}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {"Anchore Engine Scan": "legacy"},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(DEDUPLICATION_ALGORITHM_PER_PARSER=algorithms),
+        )
+
+    def test_deduplication_sends_a_removed_field_list_as_an_empty_list(self):
+        fields = {key: value for key, value in settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED.items() if key != "Anchore Engine Scan"}
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {"Anchore Engine Scan": []},
+                "hashcode_allows_null_cwe": {},
+            },
+            self.deduplication(HASHCODE_FIELDS_PER_SCANNER=fields),
+        )
+
+    def test_deduplication_sends_a_removed_null_cwe_value_as_true(self):
+        null_cwe = {key: value for key, value in settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED.items() if key != "Checkmarx Scan"}
+        self.assertFalse(settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED["Checkmarx Scan"])
+        self.assertEqual(
+            {
+                "algorithm_per_parser": {},
+                "hashcode_fields_per_scanner": {},
+                "hashcode_allows_null_cwe": {"Checkmarx Scan": True},
+            },
+            self.deduplication(HASHCODE_ALLOWS_NULL_CWE=null_cwe),
+        )
+
+    def test_deduplication_skips_a_removed_scan_type_whose_fallback_is_its_shipped_value(self):
+        null_cwe = {key: value for key, value in settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED.items() if key != "Anchore Engine Scan"}
+        self.assertTrue(settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED["Anchore Engine Scan"])
+        self.assertEqual({}, self.deduplication(HASHCODE_ALLOWS_NULL_CWE=null_cwe)["hashcode_allows_null_cwe"])
+
+    def test_the_fallback_values_are_what_a_test_uses_without_the_scan_type(self):
+        test = Test(scan_type="Checkmarx Scan", test_type=Test_Type(name="Checkmarx Scan"))
+        with override_settings(
+            DEDUPLICATION_ALGORITHM_PER_PARSER={},
+            HASHCODE_FIELDS_PER_SCANNER={},
+            HASHCODE_ALLOWS_NULL_CWE={},
+        ):
+            rules = self.client.get(self.url).json()["deduplication"]
+            self.assertEqual(rules["algorithm_per_parser"]["Checkmarx Scan"], test.deduplication_algorithm)
+            self.assertFalse(test.hash_code_fields)
+            self.assertEqual([], rules["hashcode_fields_per_scanner"]["Checkmarx Scan"])
+            self.assertEqual(rules["hashcode_allows_null_cwe"]["Checkmarx Scan"], test.hash_code_allows_null_cwe)
 
     def test_scan_types_are_distinct_and_sorted(self):
         self.assertEqual(

@@ -21,26 +21,39 @@ from dojo.authorization.api_permissions import IsSuperUser
 from dojo.development_environment.api.serializer import DevelopmentEnvironmentSerializer
 from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
+    CHECK_LIST_ISSUE_FIELDS,
+    ExportAnnouncementSerializer,
+    ExportAPIScanConfigurationSerializer,
+    ExportContactSerializer,
+    ExportEngagementPresetSerializer,
     ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportLoginBannerSerializer,
     ExportParamsSerializer,
     ExportProductSerializer,
+    ExportReportTypeSerializer,
     ExportRiskAcceptanceSerializer,
     ExportTestSerializer,
+    ExportToolConfigurationSerializer,
     ExportUserSerializer,
+    ManifestParamsSerializer,
     file_size,
 )
+from dojo.finding.api.serializer import FindingTemplateSerializer
 from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
     BurpRawRequestResponse,
+    Check_List,
     Dojo_User,
     Endpoint,
     Engagement,
+    Engagement_Presets,
     FileUpload,
     Finding,
     Finding_Group,
     Product,
+    Product_API_Scan_Configuration,
     Product_Type,
     Risk_Acceptance,
     Test,
@@ -54,6 +67,7 @@ from dojo.product_attributes.api.serializer import (
 )
 from dojo.regulations.api.serializer import RegulationSerializer
 from dojo.test.api.serializer import TestTypeSerializer
+from dojo.tool_type.api.serializer import ToolTypeSerializer
 from dojo.user.authentication import token_expires_at
 from dojo.utils import get_system_setting
 from dojo.vulnerability.queries import vulnerability_id_prefetch
@@ -73,6 +87,11 @@ REFERENCE_SERIALIZERS = {
     "product_platforms": ProductPlatformSerializer,
     "product_lifecycles": ProductLifecycleSerializer,
     "product_origins": ProductOriginSerializer,
+    "finding_templates": FindingTemplateSerializer,
+    "tool_types": ToolTypeSerializer,
+    "tool_configurations": ExportToolConfigurationSerializer,
+    "contacts": ExportContactSerializer,
+    "report_types": ExportReportTypeSerializer,
 }
 
 
@@ -108,10 +127,15 @@ def source_block() -> dict:
     }
 
 
-def max_file_bytes_from(request) -> int:
-    params = ExportParamsSerializer(data=request.query_params)
+def single_row(serializer) -> dict | None:
+    row = serializer.Meta.model.objects.order_by("id").first()
+    return serializer(row).data if row else None
+
+
+def export_params(request, serializer_class=ExportParamsSerializer) -> dict:
+    params = serializer_class(data=request.query_params)
     params.is_valid(raise_exception=True)
-    return params.validated_data["max_file_bytes"]
+    return params.validated_data
 
 
 def finding_queryset(product: Product) -> QuerySet:
@@ -143,6 +167,11 @@ def finding_queryset(product: Product) -> QuerySet:
     )
 
 
+def check_list_prefetch() -> Prefetch:
+    issues = [Prefetch(field, queryset=Finding.objects.only("id").order_by("id")) for field in CHECK_LIST_ISSUE_FIELDS]
+    return Prefetch("eng_for_check", queryset=Check_List.objects.order_by("id").prefetch_related(*issues))
+
+
 def risk_acceptance_in(product: Product, prefix: str = "") -> Q:
     # An acceptance belongs to a product through an engagement link or through a finding it accepts.
     return Q(**{f"{prefix}engagement__product": product}) | Q(**{f"{prefix}accepted_findings__test__engagement__product": product})
@@ -158,6 +187,13 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
         "max_file_bytes": max_file_bytes,
         "source": source_block(),
         "product": ExportProductSerializer(product, context=context).data,
+        "engagement_presets": ExportEngagementPresetSerializer(
+            Engagement_Presets.objects.filter(product=product).order_by("id").prefetch_related("test_type", "network_locations"),
+            many=True,
+        ).data,
+        "api_scan_configurations": ExportAPIScanConfigurationSerializer(
+            Product_API_Scan_Configuration.objects.filter(product=product).order_by("id"), many=True,
+        ).data,
     })
     counts = dict.fromkeys(COUNT_KEYS, 0)
     finding_groups = set()
@@ -165,7 +201,9 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
         (
             "engagement",
             ExportEngagementSerializer,
-            Engagement.objects.filter(product=product).prefetch_related(notes_prefetch(), "risk_acceptance", "files", "tags"),
+            Engagement.objects.filter(product=product).prefetch_related(
+                notes_prefetch(), "risk_acceptance", "files", "tags", check_list_prefetch(),
+            ),
         ),
         (
             "test",
@@ -203,8 +241,8 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
     yield render({"type": "end", "counts": counts})
 
 
-def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
-    counts = defaultdict(lambda: dict.fromkeys(COUNT_KEYS, 0))
+def product_counts(max_file_bytes: int, *, file_counts: bool) -> dict[int, dict[str, int | None]]:
+    counts = defaultdict(lambda: {**dict.fromkeys(COUNT_KEYS, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
         ("tests", Test, "engagement__product_id"),
@@ -240,21 +278,55 @@ def product_counts(max_file_bytes: int) -> dict[int, dict[str, int]]:
     )
     for through, product_path in file_sources:
         for product_id, file_id, name in through.objects.values_list(product_path, "fileupload_id", "fileupload__file"):
+            counts[product_id]["files"] += 1
+            if not file_counts:
+                continue
             if file_id not in over_cap:
                 size = file_size(storage, name)
                 over_cap[file_id] = size is not None and size > max_file_bytes
-            counts[product_id]["files"] += 1
             if over_cap[file_id]:
                 counts[product_id]["files_over_cap"] += 1
     return counts
 
 
-def _summed(products: list[dict]) -> dict[str, int]:
-    return {key: sum(product["counts"][key] for product in products) for key in COUNT_KEYS}
+def _summed(products: list[dict], *, file_counts: bool) -> dict[str, int | None]:
+    return {
+        key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
+        for key in COUNT_KEYS
+    }
 
 
-def build_manifest(request, max_file_bytes: int) -> dict:
-    counts = product_counts(max_file_bytes)
+def _plain(value):
+    return list(value) if isinstance(value, tuple) else value
+
+
+def _set_by_customer(current: dict, shipped: dict, *, fallback) -> dict:
+    effective = {key: _plain(current.get(key, fallback)) for key in current.keys() | shipped.keys()}
+    return {
+        key: effective[key]
+        for key in sorted(effective)
+        if key not in shipped or _plain(shipped[key]) != effective[key]
+    }
+
+
+def deduplication_rules() -> dict:
+    return {
+        "algorithm_per_parser": _set_by_customer(
+            settings.DEDUPLICATION_ALGORITHM_PER_PARSER,
+            settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED,
+            fallback=settings.DEDUPE_ALGO_LEGACY,
+        ),
+        "hashcode_fields_per_scanner": _set_by_customer(
+            settings.HASHCODE_FIELDS_PER_SCANNER, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, fallback=[],
+        ),
+        "hashcode_allows_null_cwe": _set_by_customer(
+            settings.HASHCODE_ALLOWS_NULL_CWE, settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, fallback=True,
+        ),
+    }
+
+
+def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
+    counts = product_counts(max_file_bytes, file_counts=file_counts)
     products = [
         {
             "id": product.id,
@@ -278,7 +350,7 @@ def build_manifest(request, max_file_bytes: int) -> dict:
     for product in products:
         members[product["prod_type"]].append(product)
     product_types = [
-        {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk])}}
+        {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk], file_counts=file_counts)}}
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
     ]
     users = Dojo_User.objects.select_related("usercontactinfo", "auth_token").order_by("id")
@@ -292,6 +364,10 @@ def build_manifest(request, max_file_bytes: int) -> dict:
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
+        "features": ["check_lists"],
+        "deduplication": deduplication_rules(),
+        "announcement": single_row(ExportAnnouncementSerializer),
+        "login_banner": single_row(ExportLoginBannerSerializer),
         "scan_types": sorted(
             Test.objects.exclude(scan_type=None).order_by().values_list("scan_type", flat=True).distinct(),
         ),
@@ -304,7 +380,9 @@ def build_manifest(request, max_file_bytes: int) -> dict:
         },
         "product_types": product_types,
         "products": products,
-        "totals": {"product_types": len(product_types), "products": len(products), **_summed(products)},
+        "totals": {
+            "product_types": len(product_types), "products": len(products), **_summed(products, file_counts=file_counts),
+        },
     }
 
 
@@ -323,7 +401,7 @@ class ProductExportView(APIView):
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         return StreamingHttpResponse(
-            product_lines(product, request, max_file_bytes_from(request)),
+            product_lines(product, request, export_params(request)["max_file_bytes"]),
             content_type="application/x-ndjson",
             headers={
                 "Content-Disposition": f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"',
@@ -337,7 +415,7 @@ class ExportManifestView(APIView):
     renderer_classes = (JSONRenderer, NDJSONRenderer)
 
     @extend_schema(
-        parameters=[ExportParamsSerializer],
+        parameters=[ManifestParamsSerializer],
         responses={200: OpenApiTypes.OBJECT},
         description=(
             "Superuser only. Lists the product types and products with their counts, the reference data "
@@ -345,4 +423,5 @@ class ExportManifestView(APIView):
         ),
     )
     def get(self, request):
-        return Response(build_manifest(request, max_file_bytes_from(request)))
+        params = export_params(request, ManifestParamsSerializer)
+        return Response(build_manifest(request, params["max_file_bytes"], file_counts=params["file_counts"]))
