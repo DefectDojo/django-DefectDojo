@@ -31,12 +31,16 @@ The permissions involved (**Rule View**, **Rule Add**, **Rule Edit**, **Rule Del
 
 ### Who can change a group's rule
 
-Changing what a group's rule does (editing it, enabling or disabling it, running it, setting its schedule, restoring a version, sharing, transferring or deleting it) needs both of these:
+Changing what a group's rule does (editing it, enabling or disabling it, running it, setting its schedule, restoring a version, sharing or transferring it) needs both of these:
 
-* **Rule Edit** (or **Rule Delete**, to delete it) through your membership role in the owning group, or through a global role.
+* **Rule Edit** through your membership role in the owning group, or through a global role.
 * Membership of the owning group.
 
 Membership is required because the rule acts with the group's access. Someone outside the group cannot change what a group's rule does, even with **Rule Edit** as a global role, because that would let them act with access they do not have. A superuser can always change it.
+
+Deleting a group's rule needs only **Rule Delete**, through your membership role in the owning group or through a global role. Deleting stops the rule rather than acting with the group's access, so it does not need membership.
+
+**Preview** in the rule editor runs with your own access, not the group's, so for a group's rule it can show items the group itself cannot see. The rule's runs use the group's access, as its **Runs As** panel says.
 
 ### Creating a rule in a group
 
@@ -45,7 +49,7 @@ Membership is required because the rule acts with the group's access. Someone ou
 * The groups where your membership role carries **Rule Add** (every group, if you hold **Rule Add** as a global role, though you must still be a member of the group you choose).
 * **Instance**, if you hold **Rule Add** as a global role.
 
-When there is only one choice it is already selected. Starting a rule from the **Rules** tab of a group's page selects that group. The owner is fixed when the rule is created: to move it later, use **Transfer**.
+When there is only one choice it is already selected. With more than one, pick one before saving, adopting a template or importing: nothing is created until you do. Starting a rule from the **Rules** tab of a group's page selects that group. The owner is fixed when the rule is created: to move it later, use **Transfer**.
 
 The rule lists on **Act > Triage Engine > Rules** have an **Owner** column (the group, or **Instance**) and a **Scope** filter:
 

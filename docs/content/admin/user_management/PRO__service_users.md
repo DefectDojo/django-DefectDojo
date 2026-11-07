@@ -90,11 +90,12 @@ A service user authenticates only with its own token. It is never given a regula
 
 A group that owns Triage Engine rules or report schedules gets one service user of the **Group Automation** kind, named `svc-group-<group name>`, and every rule and report schedule the group owns runs as it. DefectDojo creates it the first time the group owns a rule or a schedule, and removes it when the group is deleted. See [the group's automation identity](../create_user_group/#the-groups-automation-identity).
 
-On the Service Users page it is marked with a **Group Automation** chip, and the **Group** column links to its group. It is read-only:
+On the Service Users page it is marked with a **Group Automation** chip, and the **Group** column (shown while Group Ownership is on) links to its group. It is read-only:
 
 * It has no password and no token, and none can be issued, so it can never authenticate to the API or the UI.
 * Its access is exactly its group's: the group's Organization and Asset Roles and its Global Roles. Its access cards say the access is set at the group level, and it cannot be given a Global Role, a membership or a group of its own.
-* Its menu offers only **View Service User**. It cannot be edited, disabled, given a new token or deleted here. Change its access by changing the group's, and remove it by deleting the group.
+* Its menu offers only **View Service User**. It cannot be edited, disabled, given a new token or deleted here, and the Users API refuses to deactivate it. Change its access by changing the group's, and remove it by deleting the group.
+* Its name and description follow the group's current name.
 
 Group Automation identities do not count toward the licensed user total, the same as any service user.
 

@@ -107,6 +107,8 @@ Permissions are grouped into five tables plus a checklist.
 | Webhook Nodes, Messaging Nodes, Ticket Nodes, Report Nodes, Scan Nodes, Sensor Nodes, AI Nodes (nested under Rule) | Granted or not |
 | Report Template | View, Add, Edit, Delete |
 
+While the **Group Ownership** feature flag is off, there is no Group Content table: **Rule** and **Report Template** (with the node family rows) sit under **Global Feature Permissions**, because a group membership role grants nothing on them then.
+
 See [Group Content permissions](#group-content-permissions) for what each one allows and how to give a group its own rules.
 
 **Global Feature Permissions** gate instance-wide Pro features rather than individual Organizations or Assets, so **they only take effect when the role is held as a Global Role**. Granting them on a role that is only used as an Asset membership has no effect.
@@ -210,7 +212,7 @@ Group membership roles count only while the **Group Ownership** feature flag is 
 | **AI Nodes** | Placing AI nodes and **Request Triage** in a rule |
 | **Report Template View, Add, Edit, Delete** | The same, for templates, blocks, themes and report schedules |
 
-Changing what a group's rule or report schedule does also needs membership of the owning group, because it runs with the group's access. A global **Rule Edit** does not let someone outside the group change the group's rules. Rules owned by the instance stay owner-only: only the person a rule runs as (or a superuser) can change it.
+Changing what a group's rule or report schedule does also needs membership of the owning group, because it runs with the group's access. A global **Rule Edit** does not let someone outside the group change the group's rules. Deleting one does not need membership. Rules owned by the instance stay owner-only: only the person a rule runs as (or a superuser) can change it.
 
 The node family permissions decide which nodes an author may place in a rule: the palette hides the others, and saving or enabling a rule that contains one is refused. Upgrading gave all seven to every role that already held **Rule Edit**, so existing rules keep working until you remove a family from a role. See [Node family permissions](/automation/triage_engine/building_rules/#node-family-permissions).
 

@@ -305,9 +305,10 @@ The **Report Template** permissions sit in the **Group Content** table of a role
 * The **Templates**, **Blocks** and **Themes** lists have an **Owner** column (the group, **Instance**, or **Unowned** for something whose group was deleted) and a **Scope** filter: **My Groups**, **Shared With Me**, **Everyone** and **Instance**.
 * **Share**, in a row's menu, sets **Visible To**: **Group** (the owning group only), **Specific Groups** (the owning group plus groups you choose, which can read but not change it), or **Everyone**. Sharing with everyone needs **Report Template Edit** as a global role.
 * **Transfer**, in the same menu, moves it to another group or to the instance. You need **Report Template Edit** on it and **Report Template Add** where it is going. Sharing starts over after a transfer.
-* **Duplicate** puts the copy with the original's owner when you can create there, and otherwise in the instance.
+* **Duplicate** asks where the copy goes (**Owned By**), starting on the original's owner when you can create there. For an item another group shared with you, pick one of your own groups.
+* An **Unowned** item cannot be shared. Transfer it to a group or the instance first.
 
-A Template can only use Blocks and a Theme that whoever saves it can see: the group's own, those shared with one of their groups or with everyone, and Instance ones. Saving a Template that names a Block or Theme you cannot see is refused, and the message names it.
+A Template can only use Blocks and a Theme that whoever saves it can see: the group's own, those shared with one of their groups or with everyone, and Instance ones. Adding a Block or Theme you cannot see is refused, and the message names it. Blocks and a Theme already on the Template stay when their owner stops sharing them or when the Template is transferred, so the Template can still be saved.
 
 ### Report schedules
 
@@ -325,13 +326,13 @@ Who can change a schedule depends on its owner:
 |---|---|---|
 | Create | **Report Template Edit** in the group (through the membership role or a global role) and membership of the group | Permission to run the Template |
 | Change (cadence, format, filters, pause or resume) | **Report Template Edit** in the group and membership of the group | Its creator only |
-| Delete | **Report Template Edit** in the group | Its creator, or someone holding the global permission to delete generated reports |
+| Delete | **Report Template Edit** in the group, or the global permission to delete generated reports | Its creator, or someone holding the global permission to delete generated reports |
 
 Membership is required to create or change a group's schedule because the schedule acts with the group's access.
 
 ### Unowned items
 
-Deleting a group does not delete what it owned. Its templates, blocks and themes are hidden from everyone except superusers and holders of **Report Template View** as a global role, and its schedules stop running. They wait under **Settings > Groups > Unowned Content**, which also lists report schedules whose creator was deleted or deactivated. Anyone holding **Report Template Edit** as a global role can open that page, select rows, and **Transfer** them to a group or to the instance in one step.
+Deleting a group does not delete what it owned. Its templates, blocks and themes are hidden from everyone except superusers and holders of **Report Template View** as a global role, and its schedules stop running. They wait under **Settings > Groups > Unowned Content**, which also lists report schedules whose creator was deleted or deactivated. Anyone holding **Report Template Edit** as a global role can open that page, select rows, and **Transfer** them to a group or to the instance in one step. A schedule moves into a group only once its Template is that group's, so transfer the Template first.
 
 ## Building a report in the UI
 
