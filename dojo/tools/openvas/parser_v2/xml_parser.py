@@ -122,14 +122,18 @@ class XMLParserV2:
 
     def _handle_host(self, field):
         if field.text:
+            ip = field.text.strip()
+            self.aux_info.ip_address = ip
             hostname_field = field.find("hostname")
             # default to hostname else ip
             if hostname_field is not None and hostname_field.text:
                 # strip due to https://github.com/greenbone/gvmd/issues/2378
-                get_location(self.finding).host = hostname_field.text.strip()
+                hostname = hostname_field.text.strip()
+                self.aux_info.hostname = hostname
+                get_location(self.finding).host = hostname
             else:
                 # strip due to https://github.com/greenbone/gvmd/issues/2378
-                get_location(self.finding).host = field.text.strip()
+                get_location(self.finding).host = ip
 
     def _handle_port(self, field):
         if field.text:

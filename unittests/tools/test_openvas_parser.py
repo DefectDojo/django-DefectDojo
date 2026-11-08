@@ -58,6 +58,7 @@ class TestOpenVASParserV2(DojoTestCase):
         # location tests
         self.assertEqual(1, len(self.get_unsaved_locations(finding)))
         self.assertEqual("server99", self.get_unsaved_locations(finding)[0].host)
+        self.assertIn("**IP Address**: 10.99.99.99", finding.description)
         # this is example data normaly tested finding does not include this
         self.assertEqual(42, self.get_unsaved_locations(finding)[0].port)
         self.assertEqual("tcp", self.get_unsaved_locations(finding)[0].protocol)
@@ -71,6 +72,8 @@ class TestOpenVASParserV2(DojoTestCase):
         self.assertEqual(len(findings), 1)
         finding = findings[0]
         self.assertEqual(9.8, finding.cvssv3_score)
+        self.assertEqual("server99", self.get_unsaved_locations(finding)[0].host)
+        self.assertIn("**IP Address**: 10.99.99.99", finding.description)
 
     def test_openvas_parser_csv_xml_parity(self):
         """Ensure xml and csv parser parse data that is the same between report in the same way"""
@@ -232,3 +235,4 @@ class TestOpenVASParser(DojoTestCase):
             self.assertEqual(44, len([location for finding in findings for location in self.get_unsaved_locations(finding)]))
             self.validate_locations(findings)
             self.assertEqual("tcp://192.168.1.1001:512", str(self.get_unsaved_locations(findings[0])[0]))
+            self.assertIn("**Hostname**: b6b9f466d63", findings[0].description)
