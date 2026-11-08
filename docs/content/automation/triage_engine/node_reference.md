@@ -211,6 +211,8 @@ ctx.kept_active          true when deduplication kept this Finding active
 
 **Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
 
+**Run Now** of a **Keep Both Active** rule also brings in the matches deduplication made before the rule existed, for example when both Assets were in a Dedupe Pool before the rule was added. A Finding in the rule's scope that is a duplicate of a Finding in another Asset becomes active again (unless it is closed for a reason of its own, such as mitigated or a false positive), is linked to that Finding, and then goes through the rest of the rule like a Finding kept at import, so **Copy Status from Matched Finding** gives it the matched Finding's status. A match inside one Asset still wins: of several duplicates of the same Finding in one Asset, only one becomes active, and the others stay duplicates of it. The rule owner must be able to edit the Finding; a Finding they cannot edit is left as it is. A run brings back every such Finding in scope. Preview the rule first: the preview lists the Findings a run would bring back, up to the preview's item limit, and changes nothing. Two copies that are both still active are linked by **Apply Now** on the Dedupe Pool instead.
+
 #### Linked Findings
 
 A Finding's links show on its page, in the **Linked Findings** tab beside **Duplicate Findings** (the tab is hidden while a Finding has none). Each row names the linked Finding, its Asset, severity and status, which of the two was kept active, the rule that linked them and when. Only links to Findings you can see are listed.
@@ -385,6 +387,8 @@ Gives every Finding linked to this one by **On Dedupe Match** the same status, a
 | **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
 
 The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
+
+A Finding the rule runs on is never also a target. So **Run Now** of a rule ending in this node over a scope that covers both Assets carries nothing between two linked Findings that are both in the run. Scope such a run to the Asset whose statuses should be carried, so the Findings in the other Asset are only targets.
 
 ### Add Tags
 
