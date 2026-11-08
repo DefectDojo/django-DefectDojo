@@ -203,7 +203,7 @@ The instance-wide **Restrict Layout Customization** switch lives on **Settings >
 * **Allow**: Members create, edit and choose their own dashboards, page layouts, table views and sidebar presets, even when the instance setting is on.
 * **Restrict to Selected Layouts**: Members cannot create, edit, duplicate or delete any of those layouts. They can switch among the layouts the profile lists.
 
-Under **Restrict to Selected Layouts**, the Navigation, Dashboards, Page Layouts and Table Views cards show an **Also Allowed** field next to each default. Members may switch between the default and the layouts listed there: the dashboard picker, the page layout switcher, the table **Views** menu and the sidebar preset on the User Profile page offer only those. An area with nothing listed pins Members to its default, as the instance switch does.
+Under **Restrict to Selected Layouts**, the Navigation, Dashboards, Page Layouts and Table Views cards show an **Also Allowed** field next to each default. Members may switch between the default and the layouts listed there: the dashboard picker, the page layout switcher, the table **Views** menu and the sidebar preset on the User Profile page offer only those (picking a preset there also needs the **Sidebar Preset View** permission). An area with nothing listed pins Members to its default, as the instance switch does.
 
 The highest-ranked profile among a Member's Groups that sets **Allow** or **Restrict to Selected Layouts** decides, and the layouts Members may switch among come from that same profile. Profiles set to **Inherit** are skipped. When none of a Member's profiles sets either, the instance setting applies. Superusers are never restricted.
 

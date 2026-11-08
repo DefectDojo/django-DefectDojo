@@ -55,7 +55,7 @@ While **Restrict Layout Customization** is on (also on the Layout Defaults page)
 
 ## Default Profile and instance defaults
 
-When you have not picked a preset, your sidebar follows the preset set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one, else the instance default, else the full sidebar. Under **Restrict to Selected Layouts**, your User Profile offers only the presets your profile allows. Deleting a preset that a profile uses removes it from that profile, and the delete dialog names those profiles.
+When you have not picked a preset, your sidebar follows the preset set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one, else the instance default, else the full sidebar. Under **Restrict to Selected Layouts**, your User Profile offers only the presets your profile allows. Picking one still needs the **Sidebar Preset View** permission: without it, the field is hidden and your profile's default preset applies. Deleting a preset that a profile uses removes it from that profile, and the delete dialog names those profiles.
 
 ## Picking a preset
 
