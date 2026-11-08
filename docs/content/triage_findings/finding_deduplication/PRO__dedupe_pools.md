@@ -67,13 +67,15 @@ Under **Add Assets**, choose the Assets and click **Preview Impact** before **Ad
 
 The preview reports how many of the Findings **you can see** would become comparable with the rest of the pool, split by hash and by vendor ID. It is an **upper bound**, not a prediction. It answers an exact question (which Findings share an identity with the rest of the pool) rather than re-running the deduplication engine, because a preview that re-simulated every algorithm, set-matching rule and location predicate would produce confident numbers that were quietly wrong. The real run can only mark fewer.
 
+When a Triage Engine rule with **On Dedupe Match** set to **Keep Both Active** covers some of those Findings, the preview also says how many: deduplication keeps them active and links them to their match instead of marking them duplicates. Findings such a rule has already linked are left out of the counts, because deduplication never makes them duplicates or links them again.
+
 Adding members applies to **future imports**. Findings already in DefectDojo are untouched until you ask for them to be reprocessed.
 
 ## Applying a pool to Findings that already exist
 
 **Apply to Existing Findings** re-runs deduplication over the Findings already in the pool's Assets. This can mark a large number of Findings as duplicates at once, so it is gated:
 
-1. Click **Preview Re-run**. This reports how many Findings you can see share an identity with a Finding in another Asset in the pool.
+1. Click **Preview Re-run**. This reports how many Findings you can see share an identity with a Finding in another Asset in the pool, and how many of those a **Keep Both Active** rule would keep active and link instead, as the Add Assets preview does.
 2. **Apply Now** stays disabled until that preview has run, and uses the acknowledgement the preview returned.
 
 Apply Now is scoped to one pool and one matching kind: it re-runs deduplication over the pool's members for the kind selected on the page, over the Findings that are not already duplicates. Existing duplicate links are left as they are, so it is not a general re-run of deduplication.

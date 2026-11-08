@@ -159,10 +159,26 @@ A probe that gets no answer records nothing. A refused or timed-out connection i
 consistent with a firewall, a stopped service or a blocked address, so silence is never
 treated as evidence that an asset is isolated.
 
+## The Exposure panel
+
+The asset page's **Exposure** panel shows the verdict in its header (marked **Set Manually**
+beside it when somebody has overridden it) and explains it in one sentence from the source
+whose verdict decides, for example "Wiz sees devportal-lb on 198.51.100.24 port 443/tcp",
+with that source's confidence and when it last saw the asset. Every other source follows on
+a line of its own with its verdict, where it saw the asset and its confidence. A tall panel
+also shows where each source lands, from Externally Exposed down to Isolated, so a source
+that disagrees stands out.
+
+Beside or under that, the panel shows the two exposure settings: the override and the
+production branch. An asset with no production branch is flagged, and when the asset's
+findings suggest a branch, the flag offers it. Both settings are changed in one **Edit
+Exposure** form, opened from the panel by anyone with edit permission on the asset. Nothing
+is saved until the form is submitted, and a save re-scores the asset's findings.
+
 ## Overriding exposure
 
-Each asset has an **exposure override**, set on the asset's Exposure panel by anyone with
-edit permission on that asset. When set it outranks every automated verdict, everywhere:
+Each asset has an **exposure override**, set in the Exposure panel's **Edit Exposure** form
+by anyone with edit permission on that asset. When set it outranks every automated verdict, everywhere:
 the badge, priority, filtering, and SLA tiers.
 
 The override is the single manual control for exposure in DefectDojo Pro. If you
@@ -181,8 +197,8 @@ deployed onto. A service nobody has scanned, running on a cluster that answers f
 internet, is reachable.
 
 To record that, link the two assets with a **deploys to** relationship, pointing from the
-deployed asset to the thing it runs on. The Exposure panel then shows a second badge, the
-**effective exposure**, naming the asset the exposure came from. The strongest verdict
+deployed asset to the thing it runs on. The Exposure panel then shows a **Runs on** line
+naming the asset the exposure came from, with its verdict: the **effective exposure**. The strongest verdict
 anywhere along the deployment chain wins, so a service deployed onto a cluster in an exposed
 account inherits from the account too.
 
@@ -214,8 +230,8 @@ This is resolved from two settings, in order:
 1. **The environment of the Finding's test.** Environments are mapped to production or
    non-production under **Settings**. Production maps to production; Staging, Test,
    Pre-prod and Lab map to non-production.
-2. **The asset's production branch.** Set a production branch on the asset's Exposure
-   panel and Findings from that branch count as running in production, while Findings from
+2. **The asset's production branch.** Set a production branch in the Exposure panel's
+   **Edit Exposure** form and Findings from that branch count as running in production, while Findings from
    other branches do not.
 
 An environment always wins over a branch, because an environment is stated explicitly per

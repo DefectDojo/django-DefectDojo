@@ -200,7 +200,7 @@ Runs when deduplication matches a newly imported Finding to an existing one. Use
 | **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
 | **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
 
-With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted or someone removes the link. Deduplication for every other Finding works as before. The import and reimport previews (`/api/v2/import-scan/preview/` and `/api/v2/reimport-scan/preview/`) match across a Dedupe Pool the way the import does, and count a Finding such a rule would keep active as created, and again under `created_linked`, rather than as a duplicate. The parsed Findings are not saved, so a rule scope that filters on tags, endpoints, locations or other related records matches none of them in the preview, and under the unique-id and legacy algorithms `created_linked` is an upper bound. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
 
 Each item carries the match on `ctx`:
 
@@ -210,6 +210,16 @@ ctx.kept_active          true when deduplication kept this Finding active
 ```
 
 **Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+**Run Now** of a **Keep Both Active** rule also brings in the matches deduplication made before the rule existed, for example when both Assets were in a Dedupe Pool before the rule was added. A Finding in the rule's scope that is a duplicate of a Finding in another Asset becomes active again (unless it is closed for a reason of its own, such as mitigated or a false positive), is linked to that Finding, and then goes through the rest of the rule like a Finding kept at import, so **Copy Status from Matched Finding** gives it the matched Finding's status. A match inside one Asset still wins: of several duplicates of the same Finding in one Asset, only one becomes active, and the others stay duplicates of it. The rule owner must be able to edit the Finding; a Finding they cannot edit is left as it is. A run brings back every such Finding in scope. Preview the rule first: the preview lists the Findings a run would bring back, up to the preview's item limit, and changes nothing. Two copies that are both still active are linked by **Apply Now** on the Dedupe Pool instead.
+
+#### Linked Findings
+
+A Finding's links show on its page, in the **Linked Findings** tab beside **Duplicate Findings** (the tab is hidden while a Finding has none). Each row names the linked Finding, its Asset, severity and status, which of the two was kept active, the rule that linked them and when. Only links to Findings you can see are listed.
+
+To break a wrong link, open the row's menu and choose **Remove Link**; it takes permission to edit the Finding whose page you are on. Statuses are then no longer carried between the two Findings in either direction. The Finding that was kept active stays active, and deduplication neither links the two again nor marks it a duplicate of the other when it next runs on it. A removed link stays in the tab, marked **Removed** with who removed it and when, and **Restore Link** in its menu puts it back.
+
+Automation reads a Finding's links, removed ones included, with `GET /api/v2/finding_links/?finding=<id>`, removes one with `DELETE /api/v2/finding_links/<link id>/?finding=<id>` and restores one with `POST /api/v2/finding_links/<link id>/restore/?finding=<id>`, with the same permissions.
 
 #### Example: keep staging and production in step
 
@@ -350,6 +360,8 @@ Moves the Finding to a status.
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
 
+`false_positive` and `mitigated` take a risk-accepted Finding out of its risk acceptance first, as closing it by hand does: it leaves the acceptance, and a note on the Finding says so.
+
 ### Copy Status from Matched Finding
 
 `finding.copy_matched_status`
@@ -375,6 +387,8 @@ Gives every Finding linked to this one by **On Dedupe Match** the same status, a
 | **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
 
 The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
+
+A Finding the rule runs on is never also a target. So **Run Now** of a rule ending in this node over a scope that covers both Assets carries nothing between two linked Findings that are both in the run. Scope such a run to the Asset whose statuses should be carried, so the Findings in the other Asset are only targets.
 
 ### Add Tags
 
