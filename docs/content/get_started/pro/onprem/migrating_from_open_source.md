@@ -135,6 +135,13 @@ gunzip -c defectdojo-v<VERSION>-backup.sql.gz | \
   psql -h <db-endpoint> -U <master_user> -d defectdojo
 ```
 
+3. Turn off read-only mode in the restored database. If you turned on read-only mode before the dump (see [Planning the cutover](#planning-the-cutover)), the restored copy is locked too. Clear the setting before you start DefectDojo Pro:
+
+```bash
+psql -h <db-endpoint> -U <master_user> -d defectdojo \
+  -c "UPDATE dojo_system_settings SET read_only_mode = false;"
+```
+
 If the restore reports errors, capture the output and contact support before you strip anything further out of the dump. Removing too much can leave the database in an inconsistent state that is harder to diagnose than the original error.
 
 ## Step 5: Restore your media files
@@ -209,7 +216,13 @@ Once the application is running against the restored database:
 
 ## Planning the cutover
 
-The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, freeze the open source instance for the final dump and cutover, or run the migration during a quiet period.
+The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, turn on read-only mode in the open source instance before the final dump or the final sync. Read-only mode is available in DefectDojo 3.5.100 and later.
+
+1. Go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**.
+2. Wait until **Configuration > Celery Status** shows no queued tasks. Then run `celery --app=dojo inspect active` in the Celery worker container, and wait until it reports `empty` for every worker. Tasks that started before the lock still write until they finish, and so do requests that were already running, such as a large scan import. Wait for any running import to finish too.
+3. Take the final dump, or run the final sync. The dump keeps read-only mode turned on, so turn it off in the restored database (Step 4).
+
+While read-only mode is on, DefectDojo rejects changes to your data from the UI and the API, and pauses scheduled background jobs. Inbound Jira and generic webhooks get a `503` response with `Retry-After`, so a sender that retries does not count them as delivered. Everyone can still sign in, sign out and change their password, which records the sign-in on the user. Superusers can still change System Settings. To turn it off, clear **Read-only mode** and click **Submit**.
 
 A dry run is worth the time. Migrate a recent copy first, validate it, and then repeat the process for the real cutover. The second run is faster, and it tells you how long the schema migration in Step 6 is going to take.
 

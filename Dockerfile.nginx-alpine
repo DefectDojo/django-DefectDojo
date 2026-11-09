@@ -72,14 +72,18 @@ RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=True python3 manage.py
     --ignore yarn.lock --ignore package-lock.json --ignore npm-shrinkwrap.json --ignore pnpm-lock.yaml \
     --ignore '*.map' --ignore '*.ts' --ignore '*.mts' --ignore '*.cts' && true
 
-FROM nginx:1.29.3-alpine3.22@sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14 AS release
+FROM nginx:1.31.8-alpine@sha256:713fc2ebfd92e8217db451477182ee91944b123d2b1ee9fd5a8c6e91ca6c3a11 AS release
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
 COPY docker/entrypoint-nginx.sh /
+# the nginx base image ships curl, but nothing in this container uses it (the Helm chart probes
+# nginx with httpGet, and busybox wget is still available), so remove it and its libraries
+# (libcurl, nghttp2, c-ares, ...) to keep their CVEs out of container scans
 RUN \
   apk upgrade --no-cache && \
+  apk del --no-cache curl && \
   apk add --no-cache openssl && \
   chmod -R g=u /var/cache/nginx && \
   mkdir /var/run/defectdojo && \

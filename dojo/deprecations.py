@@ -85,13 +85,13 @@ def overdue_deprecations(version: str) -> list[Deprecation]:
 _UPGRADING_3_2 = "https://docs.defectdojo.com/releases/os_upgrading/3.2/"
 
 register_deprecation(
-    Deprecation(key="tool_type", title=_("Tool Types"), removal_version="3.5.0", notice_url=_UPGRADING_3_2),
+    Deprecation(key="tool_type", title=_("Tool Types"), removal_version="3.6.0", notice_url=_UPGRADING_3_2),
 )
 register_deprecation(
     Deprecation(
         key="tool_configuration",
         title=_("Tool Configurations"),
-        removal_version="3.5.0",
+        removal_version="3.6.0",
         notice_url=_UPGRADING_3_2,
     ),
 )
@@ -99,7 +99,7 @@ register_deprecation(
     Deprecation(
         key="api_scan_configuration",
         title=_("API Scan Configurations"),
-        removal_version="3.5.0",
+        removal_version="3.6.0",
         notice_url=_UPGRADING_3_2,
     ),
 )

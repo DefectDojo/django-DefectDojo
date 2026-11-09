@@ -55,9 +55,9 @@ Five resources make up the Report Builder API. Each supports the standard list (
 
 | Resource | Path | What it is | Custom actions |
 |----------|------|------------|----------------|
-| Themes | `/report_themes/` | Colors, fonts, header/footer images, page numbers | — |
-| Blocks | `/report_blocks/` | A single piece of content: a cover page, a table, or a detail section | `field_options/`, `preview/`, `{id}/preview/`, `{id}/duplicate/` |
-| Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/` |
+| Themes | `/report_themes/` | Colors, fonts, header/footer images, page numbers | `{id}/share/`, `{id}/transfer/` |
+| Blocks | `/report_blocks/` | A single piece of content: a cover page, a table, or a detail section | `field_options/`, `preview/`, `{id}/preview/`, `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/` |
+| Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/` |
 | Generated reports | `/generated_reports/` | A run of a template that produces a downloadable file | `{id}/download/`, `{id}/content/` |
 | Report schedules | `/report_schedules/` | A standing request that runs a template on a cron cadence | — |
 
@@ -67,6 +67,17 @@ Two more endpoints help you discover the vocabulary you need:
 |----------|---------|
 | `GET /report_blocks/field_options/` | Valid column field paths and ordering options for each model |
 | `GET /oa3/schema/?format=json` | The full OpenAPI schema — used to discover valid filter names |
+
+### Group ownership
+
+Themes, blocks and templates can be owned by a group instead of by the instance (see [Group ownership](../report-builder/#group-ownership)). Every row in their responses carries `owner_group` (the group's id, or `null` for the instance), `owner_group_name`, `visibility` (`group`, `shared`, `everyone`, or `orphaned` once the owning group has been deleted) and, for a shared row, `shared_groups` (each with `id` and `name`).
+
+- **Create into a group** by sending `owner_group` with the create request. Leaving it out creates an instance row, which needs **Report Template Add** as a global role. `owner_group` can only be set on create: a different value on an update answers `400`. Use `transfer/` instead.
+- **List by owner** with `scope` (`mine`: owned by a group you belong to; `shared`: shared with one of your groups; `everyone`; `instance`) or `owner_group=<id>` (`owner_group=instance` for rows with no group). Both narrow what you can already see.
+- **Share** with `POST {id}/share/` and a body of `visibility` (`group`, `shared` or `everyone`) plus `shared_groups` (a list of group ids) for `shared`. Sharing with `everyone` needs **Report Template Edit** as a global role.
+- **Transfer** with `POST {id}/transfer/` and a body of `owner_group` (a group id, or `null` for the instance). You need **Report Template Edit** on the row and **Report Template Add** in the destination.
+
+`share/` and `transfer/` answer `403` with a `detail` sentence when you may not make the change, and `400` for invalid input. A template can only reference blocks and a theme the caller can see; naming one you cannot see answers `400`.
 
 ## Step 1: Discover the vocabulary
 
@@ -490,12 +501,12 @@ The response is the schedule with the scheduling service's view of it nested as 
 
 A few things to know about how schedules behave:
 
-- **Every run is generated as the schedule's creator.** `created_by` is the user whose token created the schedule, each run is requested by that user with that user's visibility, and `created_by` never changes — a PATCH by someone else does not move the schedule to them.
+- **A schedule belongs to its template's owner.** A schedule on a group's template has that group as its `owner_group` (set from the template, never sent), can only use that group's templates, and every run is generated as the group's automation identity, with the group's visibility. A schedule on an instance template has no `owner_group`, and every run is generated as the schedule's creator: `created_by` is the user whose token created it, each run is requested by that user with that user's visibility, and `created_by` never changes (a PATCH by someone else does not move the schedule to them).
 - **A new schedule is always enabled.** To create one without running it yet, create it and then pause it (below).
 - **Registering a new cadence resumes the schedule**, even if the same PATCH also sends `"enabled": false`. To move a paused schedule and keep it paused, PATCH the cadence first and pause it in a second call. The `schedule.enabled` value in every response is the schedule's real state.
 - **Creating and registering are one transaction.** If the scheduling service cannot register the cadence, the request answers `503` and no schedule row is kept.
 
-**List, filter and read back.** `GET /report_schedules/` lists the schedules the caller may see, newest first; filter with `template`, `created_by`, `file_format` or `id`, and retrieve one with `GET /report_schedules/{id}/`. To see the reports a schedule has produced, list `/generated_reports/` with the same `template` and the creator as `requested_by`.
+**List, filter and read back.** `GET /report_schedules/` lists the schedules the caller may see, newest first; filter with `template`, `created_by`, `file_format`, `owner_group` or `id`, and retrieve one with `GET /report_schedules/{id}/`. To see the reports a schedule has produced, list `/generated_reports/` with the same `template` and the creator (for a group's schedule, the group's automation identity) as `requested_by`.
 
 **Pause, resume or change a schedule.** PATCH the report-side fields (`name`, `file_format`, `runtime_filters`) or a `schedule` object. `schedule` may carry only `enabled` to pause or resume without touching the cadence:
 
@@ -510,7 +521,7 @@ curl -s -X PATCH \
 
 **Delete a schedule.** `DELETE /report_schedules/{id}/` answers `204` and stops future runs; the reports it already generated stay in `/generated_reports/`.
 
-Any organization member who may run a template may schedule it. Updating or deleting a schedule is limited to its creator and to users with the global permission to delete generated reports; anyone else receives `403`. As with every other Report Builder endpoint, the routes require the **Reporting** feature and answer `403` with `"code": "feature_disabled"` when it is off.
+Any organization member who may run an instance template may schedule it. Updating an instance schedule is limited to its creator, and deleting one to its creator and to users with the global permission to delete generated reports. A group's schedule is created and updated by members of the group holding **Report Template Edit** in it (through their membership role or a global role), and deleted by anyone holding **Report Template Edit** in the group. Anyone else receives `403`. As with every other Report Builder endpoint, the routes require the **Reporting** feature and answer `403` with `"code": "feature_disabled"` when it is off.
 
 ## Putting it together: a full lifecycle script
 

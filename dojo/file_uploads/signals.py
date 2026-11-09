@@ -7,15 +7,15 @@ from dojo.models import FileUpload
 @receiver(post_delete, sender=FileUpload)
 def delete_file_on_object_delete(sender, instance, **kwargs):
     """
-    Deletes file from filesystem when corresponding `FileUpload` is deleted.
+    Deletes file from storage when corresponding `FileUpload` is deleted.
     Mostly used as a backup in case the FileUpload.delete() function fails
     for whatever reason
     """
     if instance.file:
         storage = instance.file.storage
-        path = instance.file.path
-        if path and storage.exists(path):
-            storage.delete(path)
+        name = instance.file.name
+        if name and storage.exists(name):
+            storage.delete(name)
 
 
 @receiver(pre_save, sender=FileUpload)
@@ -30,6 +30,6 @@ def delete_old_file_on_change(sender, instance, **kwargs):
     new_file = instance.file
     if old_file and old_file != new_file:
         storage = old_file.storage
-        path = old_file.path
-        if path and storage.exists(path):
-            storage.delete(path)
+        name = old_file.name
+        if name and storage.exists(name):
+            storage.delete(name)

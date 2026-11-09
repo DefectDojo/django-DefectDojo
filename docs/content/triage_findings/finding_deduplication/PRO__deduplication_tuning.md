@@ -216,7 +216,7 @@ Reimport can completely discard Findings before they are recorded, so Reimport D
 
 ### Track Findings as Locations Change
 
-A tool whose Reimport algorithm is **Hash Code** can also track findings as their locations change. With that enabled, a finding whose location moved between reimports (a line shift or file rename, a URL move, or a dependency version bump) is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
+A tool whose Reimport algorithm is **Hash Code** can also track findings as their locations change. With that enabled, a finding whose location moved between reimports (a line shift or file rename, a URL move, a dependency version bump, or a scan of a newer [container image tag](/triage_findings/finding_deduplication/pro__location_drift_matching/#a-new-tag-of-the-same-image)) is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
 
 It is off by default and applies only to the Hash Code reimport algorithm (tools with a reliable Unique ID From Tool already track movement through their stable IDs). Tick it in the tool's **Reimport** column on **Settings > Finding Workflow > Matching Configuration**. Because it changes which fields the reimport hash is built from, applying it re-hashes the tool's existing findings in the background; the impact review tells you how many before you commit.
 

@@ -11,6 +11,10 @@ aliases:
 
 Triage Engine's nodes come in five categories, which this page follows. The AI, Alerts and DAST nodes appear in the palette only when the feature or licence they depend on is enabled, and are not covered on this page.
 
+Throughout this page, the **rule owner** is the identity the rule runs as: for a group's rule, the group's automation identity, and for an Instance rule, the person who owns it. See [Runs As](../sharing_and_versions/#runs-as).
+
+Some nodes also need a node family permission (Webhook, Messaging, Ticket, Report, Scan, Sensor or AI) before you can place them in a rule. The palette hides the ones you may not use. See [Node family permissions](../building_rules/#node-family-permissions).
+
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
 ## Triggers
@@ -200,7 +204,7 @@ Runs when deduplication matches a newly imported Finding to an existing one. Use
 | **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
 | **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
 
-With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted or someone removes the link. Deduplication for every other Finding works as before. The import and reimport previews (`/api/v2/import-scan/preview/` and `/api/v2/reimport-scan/preview/`) match across a Dedupe Pool the way the import does, and count a Finding such a rule would keep active as created, and again under `created_linked`, rather than as a duplicate. The parsed Findings are not saved, so a rule scope that filters on tags, endpoints, locations or other related records matches none of them in the preview, and under the unique-id and legacy algorithms `created_linked` is an upper bound. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
 
 Each item carries the match on `ctx`:
 
@@ -210,6 +214,16 @@ ctx.kept_active          true when deduplication kept this Finding active
 ```
 
 **Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+**Run Now** of a **Keep Both Active** rule also brings in the matches deduplication made before the rule existed, for example when both Assets were in a Dedupe Pool before the rule was added. A Finding in the rule's scope that is a duplicate of a Finding in another Asset becomes active again (unless it is closed for a reason of its own, such as mitigated or a false positive), is linked to that Finding, and then goes through the rest of the rule like a Finding kept at import, so **Copy Status from Matched Finding** gives it the matched Finding's status. A match inside one Asset still wins: of several duplicates of the same Finding in one Asset, only one becomes active, and the others stay duplicates of it. The rule owner must be able to edit the Finding; a Finding they cannot edit is left as it is. A run brings back every such Finding in scope. Preview the rule first: the preview lists the Findings a run would bring back, up to the preview's item limit, and changes nothing. Two copies that are both still active are linked by **Apply Now** on the Dedupe Pool instead.
+
+#### Linked Findings
+
+A Finding's links show on its page, in the **Linked Findings** tab beside **Duplicate Findings** (the tab is hidden while a Finding has none). Each row names the linked Finding, its Asset, severity and status, which of the two was kept active, the rule that linked them and when. Only links to Findings you can see are listed.
+
+To break a wrong link, open the row's menu and choose **Remove Link**; it takes permission to edit the Finding whose page you are on. Statuses are then no longer carried between the two Findings in either direction. The Finding that was kept active stays active, and deduplication neither links the two again nor marks it a duplicate of the other when it next runs on it. A removed link stays in the tab, marked **Removed** with who removed it and when, and **Restore Link** in its menu puts it back.
+
+Automation reads a Finding's links, removed ones included, with `GET /api/v2/finding_links/?finding=<id>`, removes one with `DELETE /api/v2/finding_links/<link id>/?finding=<id>` and restores one with `POST /api/v2/finding_links/<link id>/restore/?finding=<id>`, with the same permissions.
 
 #### Example: keep staging and production in step
 
@@ -311,9 +325,13 @@ ctx.jira_instance_id            its classic Jira instance
 ctx.lookup_reason               on not found items: empty_value, no_match, engagement_epic, other_jira_site or limit_reached
 ```
 
+A message about the whole batch cannot name one item's value: there, `{{ctx.lookup_values}}` lists the values the batch's not found items carried.
+
 ## Findings
 
 These nodes change Findings. Every change is attributed back to the rule, run and node that made it, and shows up on the Finding's provenance timeline.
+
+A Findings node changes only Findings the rule owner has permission to edit. A Finding the owner can see but not edit is passed on unchanged, and the node's entry in the run trace counts it, for example "12 findings not edited: no edit permission". If a rule reports skipped Findings you expected it to change, give the rule owner (for a group's rule, the group) an edit role on those Findings' Assets or Organizations.
 
 ### Set Severity
 
@@ -348,6 +366,8 @@ Moves the Finding to a status.
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
 
+`false_positive` and `mitigated` take a risk-accepted Finding out of its risk acceptance first, as closing it by hand does: it leaves the acceptance, and a note on the Finding says so.
+
 ### Copy Status from Matched Finding
 
 `finding.copy_matched_status`
@@ -373,6 +393,8 @@ Gives every Finding linked to this one by **On Dedupe Match** the same status, a
 | **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
 
 The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
+
+A Finding the rule runs on is never also a target. So **Run Now** of a rule ending in this node over a scope that covers both Assets carries nothing between two linked Findings that are both in the run. Scope such a run to the Asset whose statuses should be carried, so the Findings in the other Asset are only targets.
 
 ### Add Tags
 
@@ -443,6 +465,8 @@ Makes a group responsible for the Finding.
 |---------|-------|
 | **Group** | The group that owns these Findings. |
 
+In a group's rule, the group named must be one the group's automation identity can see. A run that meets a group it cannot see fails with an error naming it.
+
 ### Set Reviewers
 
 `finding.set_reviewers`
@@ -452,6 +476,8 @@ Puts the Finding under review by the selected users.
 | Setting | Notes |
 |---------|-------|
 | **Reviewers** | One or more users who should review these Findings. |
+
+In a group's rule, every reviewer must be a user the group's automation identity can see. A run that meets one it cannot see fails with an error naming the user.
 
 ### Accept Risk
 
@@ -790,6 +816,8 @@ When account names do not encode the OU, map account ids instead: read `AWS_ACCO
 
 Egress nodes are the nodes that leave DefectDojo. Every one of them records a [Delivery](../deliveries/) before anything is sent, and every one of them honours the rule's **Simulate** or **Live** mode.
 
+Most egress nodes belong to a node family with its own permission: **Call a Webhook** needs **Webhook Nodes**; Slack, Microsoft Teams, email and Amazon SNS need **Messaging Nodes**; the ticket nodes need **Ticket Nodes**; and **Generate a Report** needs **Report Nodes**. **Raise an In-App Alert** belongs to no family. See [Node family permissions](../building_rules/#node-family-permissions).
+
 The notification nodes (Slack, Teams, email, SNS, webhook, in-app alert) work in Finding and Asset rules alike: in an Asset rule the default message line becomes the Asset's name and organization, digests count by business criticality instead of severity, and a webhook body carries an `assets` list plus an `entity` key (its `findings` list stays present and empty, so existing receivers never meet a missing key). The ticket nodes and the report node stay Finding-only: tickets and reports track Findings.
 
 Several of them offer the same **One Message per Item** choice. Off, the node sends one message describing the whole batch, with a breakdown and a capped list of items. On, it sends one message per item.
@@ -887,6 +915,12 @@ Emails a fixed list of addresses over a Messaging Connector. The recipients are 
 | **One Message per Finding** | off | Off sends one email about the batch. |
 | **Findings Listed in the Body** | `25` | How many Findings `{{ctx.findings_html}}` lists before it says how many more there were. |
 
+#### Restricting recipients to DefectDojo users
+
+The **Restrict Triage Engine Emails to DefectDojo Users** feature flag, under **Settings > Feature Flags**, is on by default. It keeps rule emails inside DefectDojo's access control. While it is on, every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each email then goes only to the recipients who can see every Finding, Asset or alert it lists (an email about an import, an import group or a missed scan lists its Asset): a recipient who can see only some of them gets nothing from that send, and the delivery records who was left out and why. A rule that already names another address keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
+
+An instance whose rules need to email addresses outside DefectDojo can turn the flag off. The Feature Flags page asks for confirmation first, because while it is off a rule emails any address in its Recipients, including people outside the organization, and sends them what the rule lists whatever their access.
+
 ### Call a Webhook
 
 `notify.webhook`
@@ -935,6 +969,10 @@ Creates an in-app alert about the batch.
 
 Recipients still control this through their own **Rules Engine Match** notification setting, so an alert cannot bypass a user's notification preferences.
 
+In a group's rule, every recipient must be a user the group's automation identity can see. A run that meets one it cannot see fails with an error naming the user.
+
+A template rendered once for the whole batch (this node's **Title** and **Description**, and **Send an Email**'s **Subject** and **Body** with **One Message per Finding** off) has no single item to read from, so a Finding's or a webhook's own fields render empty there. It can use the run's facts (`{{ctx.rule_name}}`, `{{ctx.rule_id}}`, `{{ctx.run_id}}`, `{{ctx.count}}`), a scan group's `{{ctx.import_summary}}`, and `{{ctx.lookup_values}}`: the values a **Find Findings by a Value** lookup could not match, the first ten and then how many more.
+
 ### Generate a Report
 
 `report.generate`
@@ -943,11 +981,11 @@ Generates a report from a template, scoped to the Findings that reached this nod
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Report Template** | none | Which template to generate from. Required. |
+| **Report Template** | none | Which template to generate from. Required. Only templates the rule owner can see are offered: for a group's rule, the group's own templates, templates shared with the group or with everyone, and Instance templates it may read. |
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
 | **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
-| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
+| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. With [Restrict Triage Engine Emails to DefectDojo Users](#restricting-recipients-to-defectdojo-users) on, the addresses of an Email connection must be DefectDojo users, and a per-item report is announced only to the users who can see its Finding or Asset. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. With a per-item scope, `{{ctx.finding_title}}` or `{{ctx.asset_name}}` names what the report is about. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.

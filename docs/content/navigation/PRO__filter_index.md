@@ -136,6 +136,7 @@ These fields are set when an issue is created, but can be modified as an issue p
 * [Status](/triage_findings/findings_workflows/finding_status_definitions/)
 * Last Status Update (Timestamp)
 * Mitigated (True or False)
+* Mitigated By (the user who closed the Finding; empty while it is open. The column is hidden by default, turn it on from the column picker)
 
 ##### Additional Model Functions
 These DefectDojo functions can be used to further organize your Findings or track remediation.
