@@ -31,13 +31,13 @@ Beyond the card, the intelligence is a working surface across the app:
   On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
   value; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 * an **Exploit Evidence filter** on the findings list (**Add Filter > Exploit Evidence**). Pick
-  one or more sources (a Metasploit module, a Nuclei template, an Exploit-DB entry), and it keeps
+  one or more sources (**Metasploit Module**, **Nuclei Template**, **Exploit-DB Entry**), and it keeps
   the findings where any of their vulnerability IDs has one of the sources you picked;
   **Exclude** keeps every other finding. The filter and the Threat Intelligence card can show
   different things in two cases:
   * The card and the Exploit Maturity badge describe one vulnerability ID per finding, the one
     with the strongest evidence, while the filter checks every ID. A finding with several IDs
-    can match "Metasploit Module" through an ID the card does not show, so the card has no
+    can match **Metasploit Module** through an ID the card does not show, so the card has no
     Metasploit chip.
   * The filter reads the current feed, while the badge holds a downgrade for the stability
     window described under [Trust and score stability](#trust-and-score-stability) (14 days by
