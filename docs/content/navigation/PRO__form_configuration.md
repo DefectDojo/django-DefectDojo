@@ -27,6 +27,10 @@ From a configuration's menu you can:
 
 An instance upgraded from a version with a single Form Configuration keeps its settings: they become the default configuration, named "Default".
 
+## Default Profile and instance defaults
+
+A [Default Profile](/admin/user_management/create_user_group/#default-profiles) can point the Members of its Groups at another configuration. A person's forms follow the configuration set by the highest-ranked profile among their Groups that sets one, else the **Default** configuration, else the stock forms. Deleting a configuration that a profile uses clears it from that profile, and the delete dialog names those profiles.
+
 ## Choosing a form
 
 Open a configuration, then pick the form you want to change from the selector at the top of the page. Each entity that has a create and edit form has an entry, for example the Finding form and the Asset form. The rest of the page then shows that form's fields.
