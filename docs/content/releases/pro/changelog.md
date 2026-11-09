@@ -68,6 +68,38 @@ Upgrade notes:
 * **(Deployment)** SSO, LDAP and SMTP secrets saved in Settings are encrypted with `DD_SECRET_KEY`. To change the key, set the new one in `DD_SECRET_KEY` and keep the old one in `DD_SECRET_KEY_FALLBACKS`, a comma-separated list. See [Restoring a Self-Hosted Deployment](/get_started/pro/onprem/restoring/#common-problems).
 * **(Helm)** The Sensei engine finishes running scans before it shuts down, for up to `sensei.shutdownGraceSeconds` (300 by default), and keeps a job journal (`sensei.jobJournal.enabled`, on by default) so jobs interrupted by a restart are run again at once. A rollout can take up to about 5 minutes per Sensei engine pod while scans run. See [DefectDojo Pro Upgrade Guide (Kubernetes / Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/).
 
+#### dojo-deploy 3.5.0
+
+`dojo-deploy` is the new command line tool for self-hosted DefectDojo Pro. It replaces `dojo-compose-cli` and `dojo-helm-cli`: it runs their commands as `dojo-deploy compose` and `dojo-deploy kubernetes`, and adds `install`, `upgrade`, `check`, `prereqs`, `verify` and `support-bundle`. 3.5.0 is its first release. Download it from [cloud.defectdojo.com/tools](https://cloud.defectdojo.com/tools).
+
+Existing installs get these changes through the update they already run (`sudo -E dojo-compose-cli update-binary` or `dojo-helm-cli update-binary`), as `dojo-compose-cli` 2.2.0 and `dojo-helm-cli` 4.1.0. Both are now legacy commands. They keep their names, commands and options, keep working, and print a short note in the terminal that links to [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/). The same run also installs `dojo-deploy` next to the old CLI, with the same owner, group and mode (on Docker Compose, at `/usr/bin/dojo-deploy`, owned by root), so moving from `dojo-compose-cli` 2.1.1 to 2.1.9 or `dojo-helm-cli` 4.0.x takes one `update-binary` run. If `dojo-deploy` cannot be installed (offline, air-gapped, or no permission), the update still succeeds, and `dojo-compose-cli doctor` or the next `update-binary` points to [cloud.defectdojo.com/tools](https://cloud.defectdojo.com/tools). The changes below are measured against `dojo-compose-cli` 2.1.9 and `dojo-helm-cli` 4.0.1.
+
+Docker Compose:
+* **(Compose)** `app restart` no longer fails when nginx or the `dojo` container restarts during startup and then stays up. The check lasts 30 seconds. It still fails when a container exits or is killed for running out of memory, or when it is still restarting, or starts again, in the last 15 seconds.
+* **(Compose)** A license file that is a symbolic link is refused instead of copied. The copy beside the compose file (`/opt/dojo/dojopro.lic`) is written to a new file and renamed into place, so a failed copy leaves nothing half-written. `app upgrade` now carries that copy into the new install directory with mode 0640, owned by the service user and group.
+* **(Compose)** On a new host, the first command run as root creates `/etc/defectdojo/compose.config` with mode 0660, owned by the service user and group. Before, it was readable by every local user until `first-install` ran. `doctor` now reports `/etc/defectdojo` as clean on a fresh host. The file is written in one step, so a crash or full disk cannot leave it half-written, and a symbolic link, FIFO or hard link at that path is refused.
+* **(Compose)** Each install gets its own `DD_SHOGUN_SHARED_SECRET`, stored encrypted like the other service secrets. An install that uses a value DefectDojo ships gets a new one on its next start or upgrade, with a warning. A value you set yourself is kept.
+* **(Compose)** Stopping DefectDojo waits for the import service's stop grace period on releases that have one. `app start`, `app restart`, `app upgrade` and `doctor --fix` add a systemd drop-in, `/etc/systemd/system/defectdojo-compose.service.d/50-dojo-compose-cli-stop-timeout.conf`, that sets `TimeoutStopSec=4200`. A value you set with `systemctl edit` still wins.
+* **(Compose)** `doctor` warns about more problems: a systemd stop timeout under 4200 seconds, a revoked running release, an internal CA that every install shares, unlabelled bind mounts on an SELinux host, and Docker user namespace remapping it could not check. Plain `doctor` still exits 0 for these. `doctor --strict` exits non-zero until they are fixed.
+* **(Compose)** `app upgrade`, `first-install` and `bundle create` refuse a DefectDojo Pro release that has been revoked, and "latest" skips it. The CLI reads the signed list from `intel.defectdojo.com`. If the list cannot be read, it warns and carries on. Air-gapped installs do not fetch it.
+* **(Compose)** An install older than 2.58.0 can no longer jump straight to 3.0.0 / 2.59.0 or later, which failed halfway through the database migration. Upgrade to 2.58.4 first. `app upgrade` also stops before changing anything when the installed or target version cannot be read, for example an install recorded as `latest`.
+* **(Compose)** A first install generates its own internal CA and service certificates. Existing installs keep theirs. The new `certs rotate-internal` command replaces a shared internal CA, after backing up the old files under `certs/backup/`.
+* **(Compose)** `media/` belongs to the containers' user (uid 1001), which fixes an HTTP 500 on the first scan import after an install. `customizations/` is created with mode 0755 whatever the umask, so DefectDojo Pro loads its settings under a strict umask.
+* **(Compose)** On a host where Docker runs with SELinux enabled, the CLI loads `docker-compose.selinux.yml` from the deployment files, so the bind mounts are labelled and stop failing with AVC denials.
+* **(Compose)** With rootless Docker, the systemd unit keeps `DOCKER_HOST` and no longer starts the rootful Docker daemon at boot.
+* **(Compose)** `environment print` no longer crashes when the license is not at `/etc/defectdojo/dojopro.lic`. As root, `environment print` and `environment remove` work on an incomplete install.
+* **(Compose)** `dojo-deploy install`, `dojo-deploy upgrade` and `dojo-deploy compose app upgrade` lock the install for the whole run. A second run on the same install exits before changing anything and names the run that holds the lock.
+
+Kubernetes:
+* **(Helm)** `deploy status` no longer prints the release's values, which hold the license and passwords. It prints a summary like `helm status` does, with secrets removed. Scripts that parsed the old JSON need `--output json`.
+* **(Helm)** `diag` redacts Helm values, ConfigMaps and logs by default. `--no-redact` keeps them, but Secret data is still left out.
+* **(Helm)** `deploy` and `download-artifacts` refuse a revoked release, "latest" skips it, and `download-artifacts --list-versions` marks revoked versions. `deploy status` warns when the running release is revoked.
+* **(Helm)** New options: `deploy --kubeconfig` and `--context`, `preflight --profile`, and `download-artifacts --image-platform` and `--overwrite`.
+* **(Helm)** `update-binary` checks the download's digest and size before it installs it.
+
+New in dojo-deploy:
+* **(dojo-deploy)** `dojo-deploy support-bundle` writes one redacted support bundle for a Docker Compose or Kubernetes install. It finds the install by itself, uploads nothing, and `--validate` checks a bundle. See [Support bundle](/get_started/pro/onprem/dojo_deploy/#support-bundle).
+
 ## October 2026: v3.4
 
 ### October 30, 2026: v3.4.304
