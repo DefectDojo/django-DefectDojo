@@ -9449,3 +9449,7 @@ msgstr "文件更新成功。"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "请检查表单数据后重试。"
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub 集成"

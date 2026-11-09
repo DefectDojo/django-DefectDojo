@@ -10098,3 +10098,7 @@ msgstr "Dateien erfolgreich aktualisiert."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Bitte überprüfen Sie die Formulardaten und versuchen Sie es erneut."
+
+#: dojo/deprecations.py
+msgid "GitHub Integrations"
+msgstr "GitHub-Integrationen"
