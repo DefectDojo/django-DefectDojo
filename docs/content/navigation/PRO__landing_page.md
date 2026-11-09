@@ -11,9 +11,15 @@ The landing page is saved to your account, not to the browser, so it follows you
 
 ## Choosing a page
 
-When no page is chosen, signing in opens **Home**, as it always has.
+When no page is chosen, signing in opens your Default Profile's or the instance's landing page if one is set (see [Default Profile and instance defaults](#default-profile-and-instance-defaults)), and **Home** otherwise. Your profile names where that page comes from.
 
 The list holds every page in the sidebar that your account can open, named by where it sits in the menu (for example **Explore > Findings > All**). Type in the list to filter it. Clear the field to go back to Home. Select **Submit** to save it with the rest of your profile. A change takes effect the next time you sign in, in any browser.
+
+## Default Profile and instance defaults
+
+When you have not chosen a landing page, signing in opens the landing page set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one and that you can open, else the **Instance Landing Page**, else Home. An administrator sets the Instance Landing Page on **Settings > UI Defaults > Layout Defaults** (empty means Home). When a profile's landing page is not available to you, the next default applies. The landing page is not a layout, so restricting layout customization never replaces a landing page you chose.
+
+A Default Profile can also lock its landing page (**Lock Landing Page** on the profile). While the highest-ranked profile whose landing page you can open has it locked, signing in always opens that page, your own choice is set aside, and the **Default Landing Page** field on your profile is read-only and names the profile that set it. If you cannot open the locked page, the next default applies and you can choose your own again. Superusers are never locked.
 
 ## When it applies
 

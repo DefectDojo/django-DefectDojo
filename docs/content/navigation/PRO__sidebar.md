@@ -184,6 +184,10 @@ The **UI Defaults** group collects the settings that control how much of the int
 - **[Sidebar Presets](/navigation/pro__sidebar_presets/)**: named presets that hide sidebar entries, shared with everyone or kept to one person, with one shared preset as the instance default. A preset hides, it never denies: direct links and the API keep working.
 - **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), [sidebar presets](/navigation/pro__sidebar_presets/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, sidebar presets, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
 
+  Layout Defaults also holds the **Instance Landing Page**: the [landing page](/navigation/pro__landing_page/) for users who have not chosen one and whose Default Profiles set none. Pick a page and click **Submit**; empty means Home.
+
+  **Default Profile and instance defaults**: a [Default Profile](/admin/user_management/create_user_group/#default-profiles) sets a landing page, dashboard, page layouts, sidebar preset, Form Configuration and table views for the Members of its Groups, and can allow or restrict customization whatever this switch says. Each default resolves to the user's own choice, else their highest-ranked profile's, else the instance default here, else the built-in behavior.
+
 ## What moved
 
 If you are used to the classic sidebar:

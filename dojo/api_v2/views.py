@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime, time
 
 import pghistory
@@ -99,6 +100,9 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
+# anything a version string does not need, see DojoSpectacularAPIView._get_filename
+SCHEMA_FILENAME_VERSION_UNSAFE_CHARS = re.compile(r"[^A-Za-z0-9._+-]")
+
 
 labels = get_labels()
 
@@ -148,6 +152,21 @@ class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
 
 class DojoSpectacularAPIView(SpectacularAPIView):
     renderer_classes = [DojoOpenApiJsonRenderer, *SpectacularAPIView.renderer_classes]
+
+    def _get_filename(self, request, version):
+        # The schema download filename is interpolated into the Content-Disposition response
+        # header, and `version` is attacker-controlled (the ?version= query parameter).
+        # drf-spectacular does not sanitize it, so a CR/LF in ?version= makes Django's
+        # HttpResponse raise BadHeaderError: an unauthenticated 500 (and an error report) on
+        # every probe. The header injection never actually succeeds because Django rejects
+        # header values containing CR/LF, but other characters still break the header: a NUL,
+        # or a U+2028/U+0085 that Django MIME-folds onto a new line, makes nginx reject the
+        # response with a 502, and a quote or backslash breaks the quoted filename. Keep only
+        # the characters a real version string uses, so the header is always plain ASCII and
+        # well formed, whatever `version` (or a DRF versioning scheme) produced.
+        if version:
+            version = SCHEMA_FILENAME_VERSION_UNSAFE_CHARS.sub("", str(version))
+        return super()._get_filename(request, version)
 
 
 class DojoModelViewSet(
