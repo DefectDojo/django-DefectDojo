@@ -162,7 +162,7 @@ If you have stored your images in a private registry, you can install defectdojo
 - Then install the chart with the same commands as before but adding:
 
 ```zsh
-  --set repositoryPrefix=<myregistry.com/path> \
+  --set global.imageRegistry=<myregistry.com/path> \
   --set imagePullSecrets=defectdojoregistrykey
 ```
 
