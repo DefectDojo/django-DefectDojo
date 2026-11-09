@@ -41,7 +41,7 @@ Once the flag is on, a **Triage Engine** group appears under **Act** in the side
 
 ### Permissions
 
-Access is governed by four global role permissions, shared with the original Rules Engine:
+Access is governed by four permissions, shared with the original Rules Engine:
 
 * **Rule View** is required to see the Triage Engine group and everything under it.
 * **Rule Add** is required to create a rule, including converting one from the original Rules Engine or importing one from a file.
@@ -52,7 +52,7 @@ Validating and previewing a rule are accepted with either authoring permission, 
 
 Rule Add and Rule Edit are close to administrative permissions. A rule author can reach any Finding their rule's owner can see, and can direct output at external systems, so grant them deliberately.
 
-All four are strict global permissions: a grant counts only when the role is held as a global role, never when it is held as an Organization or Asset membership role. Superusers keep access regardless.
+Held as a global role, they apply to every rule. Held as a group membership role, they apply to the rules that group owns (see [Group ownership](../sharing_and_versions/#group-ownership)). A grant on an Organization or Asset membership role never counts. Superusers keep access regardless. Seven node family permissions sit beside them and decide which nodes that send something out, or spend something, an author may use: see [Node family permissions](../building_rules/#node-family-permissions).
 
 If you are upgrading, a role that already held Rule Edit keeps the ability to create and delete rules, so nobody loses access. No built-in role gains rule access on upgrade.
 
@@ -60,7 +60,7 @@ If you are upgrading, a role that already held Rule Edit keeps the ability to cr
 
 ### Rules and graphs
 
-A rule is a name, a description, an owner, a mode, an enabled switch, and a graph. The graph is a set of **nodes** and the **edges** between them. It must contain exactly one trigger node and must not contain a cycle. Everything else is up to you, including leaving a node unconnected, which simply means it runs with nothing to work on.
+A rule is a name, a description, an owner, a mode, an enabled switch, and a graph. Rule names do not have to be unique. The graph is a set of **nodes** and the **edges** between them. It must contain exactly one trigger node and must not contain a cycle. Everything else is up to you, including leaving a node unconnected, which simply means it runs with nothing to work on.
 
 New rules are always created **disabled**, so enabling one is a deliberate act.
 
@@ -83,10 +83,10 @@ Conditions and message templates are written against the paths in that structure
 
 ### Owner
 
-Every rule runs **as its owner**. It sees exactly the Findings that user can see, through the same authorization used everywhere else in the Asset. Two consequences are worth knowing:
+Every rule runs **as its owner**. For a rule owned by a group, that is the group's automation identity, which has exactly the group's access. For an Instance rule, it is the person who owns it. The rule sees exactly the Findings its owner can see, and changes only the Findings its owner may edit, through the same authorization used everywhere else. Two consequences are worth knowing:
 
-* Narrowing a rule owner's access narrows the rule.
-* A rule whose owner's account is deleted has no owner, so it matches nothing at all and does nothing. Assign a new owner, or use **Take Ownership** from the rule list, to bring it back.
+* Narrowing a rule owner's access (or a group's) narrows the rule.
+* A rule whose owner's account is deleted or deactivated, or whose group is deleted, has no one to run as, so it does nothing. It appears under **Settings > Groups > Unowned Content**, where it can be transferred to a group or to the instance. For an Instance rule, **Take Ownership** from the rule list also brings it back. See [Group ownership](../sharing_and_versions/#group-ownership).
 
 ### Mode: Simulate or Live
 
