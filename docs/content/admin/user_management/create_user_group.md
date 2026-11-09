@@ -185,7 +185,7 @@ A profile's page has one card per area. The link at the top right of each card o
 
 * **Profile**: its **Name** (unique) and **Description**.
 * **Layout Customization**: **Inherit**, **Allow** or **Restrict to Selected Layouts**. See [Restrict to Selected Layouts](#restrict-to-selected-layouts).
-* **Navigation**: the **Landing Page** Members open after signing in (see [Default Landing Page](/navigation/pro__landing_page/)) and the **Default Sidebar Preset** (see [Sidebar Presets](/navigation/pro__sidebar_presets/)).
+* **Navigation**: the **Landing Page** Members open after signing in (see [Default Landing Page](/navigation/pro__landing_page/)), with **Lock Landing Page** to make it binding so Members cannot choose their own, and the **Default Sidebar Preset** (see [Sidebar Presets](/navigation/pro__sidebar_presets/)).
 * **Forms**: the [Form Configuration](/navigation/pro__form_configuration/) Members' create and edit forms follow.
 * **Dashboards**: the **Default Dashboard** Members open the Dashboards page with.
 * **Page Layouts**: for each View page, the [page layout](/navigation/pro__page_layouts/) it opens with.
@@ -209,7 +209,7 @@ The highest-ranked profile among a Member's Groups that sets **Allow** or **Rest
 
 ## Set Group Defaults
 
-The **Defaults** tab on a Group's page shows the Group's Default Profile. A Superuser picks the profile from the **Default Profile** list and clicks **Submit**; clearing it means the Group sets nothing. Below the picker, one card per area shows what the profile sets, each with an **Edit Profile** link for a Superuser.
+The **Defaults** tab on a Group's page shows the Group's Default Profile. A Superuser picks the profile from the **Default Profile** list and clicks **Submit**; clearing it means the Group sets nothing. Below the picker, a card named for the profile lists what it sets, area by area, with **Locked** beside a locked landing page and an **Edit Profile** link for a Superuser.
 
 Anyone else who can view the Group sees the tab read-only.
 
@@ -217,7 +217,7 @@ Anyone else who can view the Group sees the tab read-only.
 
 Every default resolves the same way:
 
-1. The Member's own choice. A restricted Member's own dashboard, page layouts, table views and sidebar preset are set aside; their landing page is not, since it is not a layout.
+1. The Member's own choice. A restricted Member's own dashboard, page layouts, table views and sidebar preset are set aside; their landing page is not, since it is not a layout, unless the profile that sets it has **Lock Landing Page** on.
 2. Otherwise, the highest-ranked Default Profile among their Groups that sets it, and that they can open.
 3. Otherwise, the instance default: the **Instance Landing Page** on **Settings > UI Defaults > Layout Defaults**, the instance sidebar preset and the default Form Configuration. The global default dashboard, page layouts and table views on Layout Defaults apply while customization is restricted, as they always have.
 4. Otherwise, the built-in behavior (Home, the starter dashboard, the full sidebar, the stock forms).
