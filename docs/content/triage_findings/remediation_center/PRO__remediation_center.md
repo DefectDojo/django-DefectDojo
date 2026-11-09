@@ -58,7 +58,15 @@ Each action records:
   KEV entries, and the highest severity and risk among the open Findings.
 
 The **target version** is the highest fixed version the Findings name, so one upgrade covers
-every lower fix. Each action also carries a **Grouping Rationale** that shows why its Findings
+every lower fix.
+
+Findings on one host whose remediation text names the same vendor patch, such as an Oracle Patch
+Set Update or a Microsoft KB update, are one **Patch** action named for that patch ("Apply Patch
+Set Update 40069954"), even when the scanner titles each Finding by its own CVE. Remediation text
+that names two different patches does not say which one applies, so those Findings are not grouped
+by patch.
+
+Each action also carries a **Grouping Rationale** that shows why its Findings
 were grouped together, marked as an **Exact Match**, a **Heuristic Match**, or **Grouped by
 Hand**.
 

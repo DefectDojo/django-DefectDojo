@@ -118,3 +118,7 @@ An administrator can pin everyone to a shared table view instead of letting each
 - **Restrict Layout Customization**: a system setting (Settings, then UI Defaults, then Layout Defaults) that, when enabled, limits table customization to superusers. Everyone else is shown the designated global default for each table, or the table's built-in columns when none is designated, and the **Views** and **Columns** buttons are hidden. Sorting, filtering, and searching still work.
 
 Personal preferences saved before the setting was enabled are not deleted. They are ignored while it is on, and they reappear if an administrator turns it back off.
+
+## Default Profile and instance defaults
+
+When you have not set a default preference for a table, it opens with the view set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one for that list, else the built-in columns. While your customization is restricted, the profile's view is enforced over the global default, which applies when no profile of yours sets one. Under **Restrict to Selected Layouts**, the **Views** menu lists only the views your profile allows for that list, to switch between; nothing can be saved. On a list the profile names no views for, the **Views** button is hidden, as under the instance switch. On a list it does name, a default view that is not allowed gives way to the profile's default for that list, else its first allowed view. Deleting a view removes it from every profile that lists it.
