@@ -43,7 +43,7 @@
                 $('#caltype').val('{{ caltype }}');
                 $('#caltype').trigger('change');
             }
-            $('#lead').val([{% for lead in leads %} '{{ lead }}', {% endfor %}]);
+            $('#lead').val([{% for lead in leads %} '{{ lead|escapejs }}', {% endfor %}]);
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
