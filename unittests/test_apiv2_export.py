@@ -836,6 +836,18 @@ class TestExportManifest(DojoAPITestCase):
         self.assertFalse(user1["is_superuser"])
         self.assertEqual(Test_Type.objects.count(), len(reference["test_types"]))
 
+    def test_reference_test_types_carry_dynamically_generated(self):
+        created = Test_Type.objects.create(name="Acme Scan (SARIF)", dynamically_generated=True, static_tool=True)
+        rows = self.client.get(self.url).json()["reference"]["test_types"]
+        row = next(row for row in rows if row["name"] == "Acme Scan (SARIF)")
+        self.assertEqual(
+            {
+                "id": created.id, "name": "Acme Scan (SARIF)", "static_tool": True, "dynamic_tool": False,
+                "active": True, "dynamically_generated": True,
+            },
+            row,
+        )
+
     def test_reference_carries_finding_templates_tool_types_and_tool_configurations(self):
         reference = self.manifest["reference"]
         for key, model in (

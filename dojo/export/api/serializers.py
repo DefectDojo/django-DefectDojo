@@ -20,6 +20,7 @@ from dojo.models import (
     Product_API_Scan_Configuration,
     Report_Type,
     Risk_Acceptance,
+    Test_Type,
 )
 from dojo.notes.api.serializer import NoteSerializer
 from dojo.product.api.serializer import ProductSerializer
@@ -236,6 +237,13 @@ class ExportReportTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report_Type
         fields = ("id", "name")
+        read_only_fields = fields
+
+
+class ExportTestTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test_Type
+        fields = ("id", "name", "static_tool", "dynamic_tool", "active", "dynamically_generated")
         read_only_fields = fields
 
 
