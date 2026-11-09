@@ -337,16 +337,17 @@ To activate users and send them an invitation:
 2. Open **Settings > Users & Permissions > Users**. The page shows **Active Users** first, so it hides the migrated users. Choose **Inactive Users** in the view list above the table. Then select the users you need. Do not select your own account.
 3. Click **Activate and Invite**, and confirm. Each active user takes a license seat.
 
-Do not use the **Active** box on **Edit User** for this. The box activates a user, but it sends no link. To send the link to such a user, choose **All Users**, select the user, and click **Activate and Invite**.
+Do not use the **Active** box on **Edit User** for this. The box activates a user, but it sends no link, and **Activate and Invite** skips a user that is already active. To send the link to such a user, deactivate it with **Deactivate Users**. Then choose **Inactive Users**, select the user, and click **Activate and Invite**.
 
 For each selected user, DefectDojo Pro does the following:
 
 * It activates the user, if the user is inactive.
-* It emails the user a link to set a password, if the user has no password.
-* It skips service users, and it skips users that are active and have a password.
-* It skips a user that has no password and signed in before. That user signs in with SSO.
+* It emails a migrated user a link to set a password, if the user has no password. A user that no migration created gets no link.
+* If SSO or LDAP sign-in is on, it sends no link. The users sign in with SSO or LDAP.
+* It sends no link to a user that has no password and signed in before. That user signs in with SSO.
+* It skips service users, and it skips every account that is already active.
 
-The user opens the link and chooses a password. The link stops working when the user sets a password or signs in. It also stops after 3 days, or after the number of seconds you set in `DD_PASSWORD_RESET_TIMEOUT`. To make a new link, choose **All Users**, select the user, and click **Activate and Invite** again.
+The user opens the link and chooses a password. The link stops working when the user sets a password or signs in. It also stops after 3 days, or after the number of seconds you set in `DD_PASSWORD_RESET_TIMEOUT`. To make a new link, deactivate the user with **Deactivate Users**. Then choose **Inactive Users**, select the user, and click **Activate and Invite** again.
 
 If an email cannot go out, DefectDojo Pro still activates the user. The **Pass On These Links** window then lists each such user with the link and a copy button. An email cannot go out in these cases:
 
@@ -354,7 +355,7 @@ If an email cannot go out, DefectDojo Pro still activates the user. The **Pass O
 * The deployment has no working email server, or the send fails.
 * The address reached its mail limit.
 
-Copy each link and send it to its user yourself. A link works like a password, so send it only to that user. The window shows the links once. If you close it before you copy them, make new links. Choose **All Users**, select the same users, and click **Activate and Invite** again.
+Copy each link and send it to its user yourself. A link works like a password, so send it only to that user. The window shows the links once. If you close it before you copy them, make new links: deactivate the same users with **Deactivate Users**, then select them under **Inactive Users** and click **Activate and Invite** again.
 
 How each sign-in method treats a migrated user:
 

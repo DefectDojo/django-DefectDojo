@@ -36,12 +36,13 @@ Keep in mind what this action does **not** do:
 
 ## Activate and Invite
 
-**Activate and Invite** gives a user with no password a way to sign in. A migration creates such users. For each selected user, DefectDojo Pro does the following:
+**Activate and Invite** gives a migrated user a way to sign in. A migration creates its users inactive, with no password. For each selected user, DefectDojo Pro does the following:
 
 * It activates the user, if the user is inactive. Each active user takes a license seat.
-* It emails the user a link to set a password, if the user has no password.
+* It emails a migrated user a link to set a password, if the user has no password. A user that no migration created gets no link.
+* If SSO or LDAP sign-in is on, it sends no link. The users sign in with SSO or LDAP.
+* It sends no link to a user that has no password and signed in before. That user signs in with SSO.
 * It skips service users, and it skips every account that is already active.
-* It skips a user that has no password and signed in before. That user signs in with SSO, so it gets no link.
 * A Global Owner cannot activate a superuser. The action skips the superuser.
 
 If an email cannot go out, the **Pass On These Links** window lists the user. It shows the link and a copy button. Send each link only to its user, because a link works like a password. [How Migrated Users Sign In](/get_started/pro/onprem/migrating_from_open_source/#how-migrated-users-sign-in) gives the full steps.
