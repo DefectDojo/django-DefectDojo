@@ -6,6 +6,8 @@ audience: pro
 ---
 The DefectDojo Migration connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. The source can also be a DefectDojo Pro instance on a release that serves the export API. The connector reads the source over its [export API](/automation/api/product_export/). It changes nothing on the source.
 
+> The DefectDojo Migration is a **beta** feature and is **off by default**. A superuser turns on **DefectDojo Migration** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/). While it is off, the connector's tile, its connections, the migration page and **Activate and Invite** do not show.
+
 Use it to move an open source estate into DefectDojo Pro, or to consolidate two instances. You set it up in the Connectors UI, like every other Upstream Connector. On **Connect > Upstream**, its tile is **DefectDojo Migration**. You can run it again and again until you cut over. For the full migration procedure, and for the database dump path, see [Migrating from Open Source to Self-Hosted DefectDojo Pro](/get_started/pro/onprem/migrating_from_open_source/).
 
 This page uses the open source names Product Type and Product. In DefectDojo Pro, they can show as Organization and Asset.

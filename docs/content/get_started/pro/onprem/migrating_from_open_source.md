@@ -277,6 +277,7 @@ The connector ships in a coming DefectDojo Pro release.
 
 Confirm the following before you add the connector.
 
+* **The feature flag.** The DefectDojo Migration is a beta feature and is off by default. A superuser turns on **DefectDojo Migration** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/). Until then, the connector's tile and **Activate and Invite** do not show.
 * **The open source version.** Upgrade the open source instance to 3.4.300 or later. That release added the export API. The connector refuses an older source.
 * **HTTPS.** Serve the open source instance over HTTPS, on a URL your Pro deployment can reach. The connector refuses a plain `http://` URL.
 * **A superuser API key.** Create a superuser on the source for the connector alone, and an API v2 key for it. The export API answers only a superuser. Revoke the key after the cutover.
