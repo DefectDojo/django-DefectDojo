@@ -44,6 +44,8 @@ The one exception is **Engagement epics**. The Downstream Connector has no conce
 * Each **Jira Project** configuration becomes an issue tracker mapping, keeping its project key and issue type, and stays assigned to the same Asset or Engagement.
 * **Push All Issues** is preserved: projects that had it enabled keep pushing automatically.
 * **Push Notes** becomes **Push Notes as Comments** on the mapping. Private notes are still never posted.
+* **Send SLA Notifications As Comments** becomes **Post SLA Notifications as Comments** on the mapping. It is turned on when the Jira instance's global SLA notification setting or the project's own setting is on, as classic Jira decided it.
+* **Send Risk Acceptance Expiration Notifications As Comment** becomes **Post Risk Acceptance Changes as Comments** on the mapping. Like the classic setting, it covers every risk acceptance comment: accepted, removed, reinstated, about to expire and expired. See [Post SLA notifications and risk acceptance changes as comments](/connectors/toolreference/jira/#post-sla-notifications-and-risk-acceptance-changes-as-comments-optional).
 * **Custom fields**, **close/reopen transition fields**, **component**, **default assignee**, and **labels** are converted to field mappings. Where you used *Add Vulnerability Id as a Jira label*, that becomes a label mapping too.
 * A **custom issue template** directory becomes a ticket template. The stock templates are not copied, because the connector already ships equivalents.
 
@@ -53,7 +55,6 @@ These are reported as warnings on the migration run — they do not stop it. Loo
 
 * **Jira → DefectDojo reverse sync is not switched on for you.** The connector syncs back from Jira through [two-way sync](/connectors/toolreference/jira/#two-way-sync), which needs a new webhook in Jira pointing at a Triage Engine receiver, so the migration cannot turn it on. Each migrated connection carries a warning saying so. Your classic resolution mappings are carried over to the connector's status mapping, under **Coming Back From Jira**, so two-way sync treats a resolution the way classic Jira did. **Until you turn two-way sync on, leave the classic Jira webhook in place** if you rely on it: the migration does not remove it.
 * **Engagement Epic Mapping** — the connector has no epic concept.
-* **SLA notification comments** and **risk acceptance expiration comments**: the connector does not post these to Jira.
 * Custom fields named `summary`, `description`, `project`, `issuetype` or `status` — these are reserved by the connector, and a field mapping using one is skipped.
 * Custom field values longer than 512 characters — skipped rather than truncated.
 * A Jira Project attached to neither an Asset nor an Engagement produces no assignment.
@@ -66,7 +67,7 @@ Your classic configuration is **kept, not deleted** — the instance, project an
 
 **To roll back**, re-enable the classic Jira project settings and remove the connector configuration the migration created. There is no one-click undo.
 
-**Re-running is safe.** The migration records what it has already converted and skips it on a second run, so nothing is duplicated. If a project or instance fails, the rest still migrates — a failed project is left running on the classic integration rather than being switched off, so it keeps working while you investigate.
+**Re-running is safe.** The migration records what it has already converted and skips it on a second run, so nothing is duplicated. A re-run does not change a mapping an earlier run created, so a project migrated before the comment settings carried over keeps its comment toggles off: turn **Post SLA Notifications as Comments** and **Post Risk Acceptance Changes as Comments** on yourself on those mappings. If a project or instance fails, the rest still migrates — a failed project is left running on the classic integration rather than being switched off, so it keeps working while you investigate.
 
 ### While it runs
 
