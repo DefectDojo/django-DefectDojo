@@ -22,11 +22,8 @@ These features still work. Plan to move off them before the release named in **R
 | Tool Types: the Tool Type pages, `/api/v2/tool_types/`, and **Settings > Configuration > Tool Types** in Pro | Open Source | 3.2.0 | 3.6.0 (December 7, 2026) | Pro [Connectors](/connectors/upstream/about/) | [3.2 upgrade notes](/releases/os_upgrading/3.2/#deprecation-tool-type-and-tool-configuration) |
 | Tool Configurations: the Tool Configuration pages, `/api/v2/tool_configurations/`, and **Settings > Configuration > Tool Configurations** in Pro | Open Source | 3.2.0 | 3.6.0 (December 7, 2026) | Pro [Connectors](/connectors/upstream/about/) | [3.2 upgrade notes](/releases/os_upgrading/3.2/#deprecation-tool-type-and-tool-configuration) |
 | API Scan Configurations: the per-Asset pages, `/api/v2/product_api_scan_configurations/`, `/api/v2/asset_api_scan_configurations/`, and the `api_scan_configuration` parameter on `import-scan` and `reimport-scan` | Open Source | 3.2.0 | 3.6.0 (December 7, 2026) | Pro [Connectors](/connectors/upstream/about/) | [3.2 upgrade notes](/releases/os_upgrading/3.2/#deprecation-tool-type-and-tool-configuration), [3.4.100 upgrade notes](/releases/os_upgrading/3.4.100/) |
-| Endpoints: the Endpoints menu, the Endpoint and Host list pages, and a Finding's endpoint tables | Pro | 3.2.201 | 3.6.0 (December 7, 2026) | Locations. Turn on Locations on the Feature Flags page and run the migration. | [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/) |
 | Configuration Permissions API: the `configuration_permissions` endpoint, and the field of that name on users and groups, which is now read-only | Pro | 3.5.0 | 3.6.0 (December 7, 2026) | Grant Configuration Permissions on a role and assign the role as a Global Role. Read the effective set from the user or group. | [Custom RBAC Roles](/admin/user_management/pro__custom_rbac_roles/#configuration-permissions), [v3.5.0 changelog](/releases/pro/changelog/#november-2-2026-v350) |
-| Shogun HS256 job tokens (compat mode): `shogun.jobTokens: compat`, `shogun.jobTokenKey`, `DD_SHOGUN_JOB_TOKENS=compat`, `DD_SHOGUN_JOB_TOKEN_KEY`, and `docker-compose.shogun-compat.yml` | Pro (self-hosted) | 3.5.100 | 3.6.0 (December 7, 2026) | Ed25519 job tokens (strict mode, the default) | The notes `helm upgrade` prints |
-| Shogun runtime credentials compat mode, which sends the Vertex AI service-account key to the runtime | Pro (self-hosted) | 3.5.100 | 3.6.0 (December 7, 2026) | A short-lived Vertex AI access token, sent over TLS (strict mode, the default) | The notes `helm upgrade` prints |
-| Shogun ingest direct mTLS listener on port 4443 (`shogun.ingest.directListener`) | Pro (self-hosted) | Not recorded | 3.6.0 (December 7, 2026) | The sensor channel through DefectDojo. Turn the listener off once every sensor runs 3.4.300 or later. | The notes `helm upgrade` prints |
+| Endpoints: the Endpoints menu, the Endpoint and Host list pages, and a Finding's endpoint tables | Pro | 3.2.201 | 3.7.0 (January 4, 2027) | Locations. Turn on Locations on the Feature Flags page and run the migration. | [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/) |
 | `manage.py dbbackup` and `dbrestore` (django-dbbackup) | Open Source | 3.2.0 | To be confirmed | Your database's own tooling, such as `pg_dump` and `pg_restore` matched to your PostgreSQL server version, or your provider's managed backups | [3.2 upgrade notes](/releases/os_upgrading/3.2/#deprecation-managepy-dbbackup) |
 
 ## Planned, no timeline yet
@@ -79,7 +76,7 @@ These features are on the way out, but no removal release has been chosen. Where
 | Single sign-on in open source: SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise and remote-user headers | Open Source | Not recorded | 3.0.0 | DefectDojo Pro, which keeps single sign-on. Open source keeps local login. | [3.0 upgrade notes](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only) |
 | Members and Groups (role-based access) in open source | Open Source | Not recorded | 3.0.0 | The **Authorized Users** panel on Assets and Organizations. Pro keeps role-based access. | [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) |
 
-The 2.56 and 2.57 notices named 2.59.0 as the removal release. That release shipped as 3.0.0.
+The 2.56 and 2.57 notices named 2.59.0 as the removal release. The removals shipped in 3.0.0.
 
 ### Removal release not recorded
 
@@ -87,7 +84,7 @@ The 2.56 and 2.57 notices named 2.59.0 as the removal release. That release ship
 |---|---|---|---|---|---|
 | SSE (Server-Sent Events) transport for the MCP Server | Pro | Not recorded | Not recorded | Streamable HTTP | [MCP Server](/metrics_reports/ai/mcp_server_pro/) |
 | DefectDojo Burp plugin | Open Source | Not recorded | Not recorded | Import Burp XML reports | [Burp plugin](/archived_docs/burp-plugin/) |
-| Open source Helm values `tag` and `repositoryPrefix` | Open Source | 2.52 | Not recorded | `images.django.tag`, `images.nginx.tag`, and the per-container `image` values | [2.52 upgrade notes](/releases/os_upgrading/2.52/) |
+| Open source Helm values `tag` and `repositoryPrefix` | Open Source | 2.52 | Not recorded | `images.django.image.tag` and `images.nginx.image.tag` for the tag, `global.imageRegistry` for a private registry, and the per-container `image` values | [2.52 upgrade notes](/releases/os_upgrading/2.52/) |
 
 ### 2.x and earlier
 
