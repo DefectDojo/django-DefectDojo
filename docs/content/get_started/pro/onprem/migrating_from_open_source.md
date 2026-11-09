@@ -303,7 +303,7 @@ The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page cover
 
 Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
 
-* **Warnings** lists the scan types that DefectDojo Pro has no parser for. Their findings go to a test of type `DefectDojo - Connectors Import`.
+* **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it.
 * **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync.
 * **To Be Created** lists the users and the reference data that the Sync creates.
 * **Not Migrated** lists what stays on the source: the secrets and the audit trail, and the settings and feature areas that you set up in DefectDojo Pro yourself.
@@ -321,7 +321,7 @@ Compare the two instances once the first Sync ends:
 
 1. Check that every Product Type and every Product you mapped is present, with its description and tags. The owners of each source Product are members of it, with the Maintainer role. So are the users in its Authorized Users list, with the Writer role, or Maintainer for a staff user.
 2. Open a Product and check its engagements and tests, with their names and dates.
-3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. A scan type that the preflight report listed as unknown is in a test of type `DefectDojo - Connectors Import`.
+3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. Its test has the test type and the scan type of the source test. Only a test with no test type on the source is in a test of type `DefectDojo - Connectors Import`.
 4. Check the risk acceptances and the finding groups of a Product that has them.
 5. Check the finding templates, and the engagement presets and API scan configurations of a Product that has them. Enter the password, SSH key, API key or extras of each tool configuration that the connector created. They do not cross.
 6. Check that the users are present. New users arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
