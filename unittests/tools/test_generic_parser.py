@@ -1102,3 +1102,29 @@ class TestGenericJSONParserPackage(DojoTestCase):
             finding = self._parse_one(purl_type="npm", namespace="@x")
         self.assertEqual([], self._dependency_locations(finding))
         self.assertIn("the finding names no component", "\n".join(logs.output))
+
+    # Regression: a finding carrying only file_path (a SAST finding) built a dependency
+    # location with no package data, which Pro stored as pkg:generic/unknown-package.
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_file_path_alone_builds_no_dependency_location(self):
+        finding = self._parse_one(file_path="src/app/routes.ts", line=42, static_finding=True)
+        dependencies = self._dependency_locations(finding)
+        self.assertEqual(
+            [], dependencies,
+            msg=f"expected no dependency location for a file_path-only finding, got {[d.data for d in dependencies]}",
+        )
+        (code,) = [location for location in finding.unsaved_locations if location.type == "code"]
+        self.assertEqual("src/app/routes.ts", code.data["file_path"])
+        self.assertEqual(42, code.data["line"])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_parse_json_file_path_beside_a_component_still_rides_the_dependency_location(self):
+        for fields in [
+            {"component_name": "lodash"},
+            {"component_version": "4.17.20"},
+            {"purl": "pkg:npm/lodash@4.17.20"},
+        ]:
+            with self.subTest(fields=fields):
+                finding = self._parse_one(file_path="package.json", **fields)
+                (dependency,) = self._dependency_locations(finding)
+                self.assertEqual("package.json", dependency.data["file_path"])
