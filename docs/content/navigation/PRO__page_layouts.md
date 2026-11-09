@@ -99,6 +99,8 @@ In edit mode those widgets are shown as labelled placeholders that say why they 
 
 ### Hiding empty tabs
 
+A tab that holds a list, such as a table, Notes or Files, shows how many items it has beside its label, and a tab with none is dimmed, so an empty tab reads as empty before you open it.
+
 Some tabs in a tab group always show, even when they are empty, such as a table with no rows or a Notes feed with no notes. You can choose to hide them on records where they have nothing to show, one tab at a time:
 
 1. In edit mode, open **Configure Widget** on the tab group.
