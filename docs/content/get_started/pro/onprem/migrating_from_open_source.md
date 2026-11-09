@@ -321,7 +321,7 @@ Compare the two instances once the first Sync ends:
 
 1. Check that every Product Type and every Product you mapped is present, with its description and tags. The owners of each source Product are members of it, with the Maintainer role. So are the users in its Authorized Users list, with the Writer role, or Maintainer for a staff user.
 2. Open a Product and check its engagements and tests, with their names and dates.
-3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. Its test has the test type and the scan type of the source test. Only a test with no test type on the source is in a test of type `DefectDojo - Connectors Import`.
+3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. Its test has the test type and the scan type of the source test. Only a test with no test type on the source gets the test type `DefectDojo - Connectors Import`.
 4. Check the risk acceptances and the finding groups of a Product that has them.
 5. Check the finding templates, and the engagement presets and API scan configurations of a Product that has them. Enter the password, SSH key, API key or extras of each tool configuration that the connector created. They do not cross.
 6. Check that the users are present. New users arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
