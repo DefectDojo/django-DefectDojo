@@ -91,14 +91,19 @@
   weight = 1
 
 [[sidebar_releases]]
+  name = "Descontinuações"
+  pageRef = "/releases/deprecations"
+  weight = 2
+
+[[sidebar_releases]]
   name = "Atualização no Kubernetes (Helm)"
   pageRef = "/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes"
-  weight = 2
+  weight = 3
 
 [[sidebar_releases]]
   name = "Atualização no Docker Compose"
   pageRef = "/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose"
-  weight = 3
+  weight = 4
 
 [[social]]
   name = "YouTube"

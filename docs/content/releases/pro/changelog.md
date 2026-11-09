@@ -18,6 +18,8 @@ You can subscribe to these release notes with the [RSS feed](/releases/pro/chang
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-Defe ctDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+For features that are deprecated, scheduled for removal or already removed, see [Deprecations](/releases/deprecations/).
+
 ## November 2026: v3.5
 
 ### November 2, 2026: v3.5.0
