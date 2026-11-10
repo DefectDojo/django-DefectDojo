@@ -192,10 +192,31 @@ Single-glance metrics — counts, KPIs, and gauges.
 | Widget | What it shows |
 |--------|---------------|
 | **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. For findings, the **Measure** option can count unique CWEs or unique vulnerability IDs instead of rows. |
-| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. |
+| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. With the **Snapshot** source it can instead show a chart of open findings at the end of each month or week (see [Open findings at each month end](#open-findings-at-each-month-end)). |
 | **Gauge** | A ratio drawn as an arc gauge — a "universe" filter as the denominator and a "pass" filter as the numerator. Use for SLA compliance, mitigation rate, or scan coverage, with configurable warning/OK thresholds. |
 | **License Usage** | Your account's license-usage status with a per-signal breakdown (database size, weekly finding volume, and so on). *Requires the Maintainer role.* |
 | **Scan Coverage** | What fraction of assets were scanned within 30 / 90 / 180 / 365 days, as a multi-window rollup. |
+
+### Open findings at each month end
+
+A management pack usually reports how many findings were open at the end of each month, split by severity. A **Graph** widget cannot show that: it counts the findings as they are now. The **KPI / Trend** widget can, because its **Snapshot** source reads the nightly metrics snapshots, which record the open findings of every severity each night.
+
+To chart the last six months with Critical and High as one line and Medium and Low as another:
+
+1. Enter edit mode, choose **Add Widget**, and pick **KPI / Trend**.
+2. Set **Source** to **Snapshot** and **Show As** to **Chart**.
+3. In **Severities**, keep Critical, High, Medium and Low (remove Info if you do not want it).
+4. Leave **Series** on **Critical and High, Medium and Low, Info**. Choose **One Series per Severity** instead to draw a line for each severity.
+5. Leave **Period** on **Month** and **Periods Shown** at 6. **Week** charts the end of each week instead.
+6. Pick **Line** or **Bar** in **Chart Type**, keep **Show Values** to print each count on its point, and change a series color if you need to (by default Critical and High is red, Medium and Low is green, and Info uses the Info severity color).
+7. Submit. The widget is saved as soon as you submit; click **Done** to leave edit mode.
+
+How to read the chart:
+
+* Each point is the number of findings open on the last night of that month: the month end for a closed month, and the latest night for the current one. Hover a point to see which night it was read from.
+* A month with no snapshot is left as a gap rather than drawn as zero. If the snapshots stopped partway through a month, the point shows the last night that was recorded, and the tooltip names that night.
+* The numbers count the findings of the Assets you can view, so two people with different access can see different numbers on the same dashboard.
+* History starts with the first nightly snapshot. Until then the widget says that history arrives after it.
 
 ### Charts
 
