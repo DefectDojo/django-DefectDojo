@@ -161,7 +161,7 @@ The `kind` matters: a `time` dimension (like `date`) requires you to also send a
 
 ### Filters
 
-A widget's `config.filters` use the **same filter shape as the object's list view** — the values the list page emits to its URL, not the raw REST query parameters. For example, on findings: `{"status_any": "Active"}`, `{"severity": "Critical"}`, `{"duplicate": "false"}`, `{"date_past_days": 7}`, `{"sla_days_remaining_less_than_equal_to": 7}`; on assets: `{"grade": "A,B,C"}`, `{"last_scanned_past_days": 90}`. The quickest way to learn the right filter for a need is to apply it on the relevant list page in the UI and read it back from the widget config dialog, or to copy the filters from the seeded shared templates.
+A widget's `config.filters` use the **same filter shape as the object's list view**: the values the list page emits to its URL, not the raw REST query parameters. For example, on findings: `{"status_any": "Active"}`, `{"severity": "Critical"}`, `{"duplicate": "false"}`, `{"date_past_days": 7}`, `{"date_past_full_months": 6}` (the last six complete calendar months, not counting the current one), `{"sla_days_remaining_less_than_equal_to": 7}`; on assets: `{"grade": "A,B,C"}`, `{"last_scanned_past_days": 90}`. The quickest way to learn the right filter for a need is to apply it on the relevant list page in the UI and read it back from the widget config dialog, or to copy the filters from the seeded shared templates.
 
 > **🔑 Important:** Unknown filter **keys are silently ignored** — a misspelled or non-existent filter does not raise an error, it simply does not apply, leaving the widget showing a wider population than you intended. Invalid *values* for a real filter return `400`. Always [verify what you built](#verify-what-you-built) by reading the layout back. (Filters are validated through the same FilterSet the list view uses, so list values may be passed as arrays for "any-of" matching: `{"severity": ["Critical", "High"]}`.)
 
@@ -304,7 +304,9 @@ The full set of `widget_data` actions:
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
 | `count` | POST | `model`, `filters`, `aggregation?` | `{count}` |
-| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?` | `{labels, series, ...}` |
+| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `series_by?` | `{labels, series, ...}` |
+
+`series_by` splits every group by a second dimension from the same `dimensions/` list (not a `time` one, and not the `group_by`). The response then carries one entry per value in `series`, each `{"key", "name", "data"}` with a number for every label (0 where the group has none of that value), plus `series_by` and `series_by_label`. At most 10 series are returned: for `count` the rest are combined into one series with the key `__other__`, and for a distinct `aggregation` more than 10 values is a `400`. A `time` `group_by` returns every bucket from the first to the last (or across the request's own date filter on the same field), with 0 for an empty one, and leaves out records with no date.
 
 `aggregation` is `count` (rows, the default) for every model. For `finding` it can also be `distinct_cwe`, the number of unique CWEs (a CWE of 0 or none is not counted), or `distinct_vulnerability_id`, the number of unique vulnerability IDs. A finding with both a CWE and a CVE counts in both. With a `group_by`, a CWE that appears at two severities counts under each, so the per-group numbers can add up to more than the total.
 | `dimensions` | GET | `?model=` | valid group-by dimensions |

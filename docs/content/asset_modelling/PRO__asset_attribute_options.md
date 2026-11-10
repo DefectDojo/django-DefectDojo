@@ -34,6 +34,17 @@ New and renamed options show up immediately in the **Platform / Lifecycle / Orig
 asset add and edit forms, and their labels are what appears on the asset detail page, in the asset
 list, in reports and on dashboard tiles.
 
+## Filtering findings by Platform
+
+The Findings table can be filtered by the Platform of each finding's asset, so there is no need to tag
+assets by platform to report on them. Open **Add Filter**, pick **Asset Platform** (listed with the other
+asset filters) and check one or more platforms. Choosing **Exclude** keeps every finding except those on
+the chosen platforms, including findings on assets with no platform set.
+
+The filter is saved with the table's other filters, so it stays in place when the page is reloaded or
+shared as a link. Dashboard widgets that count or chart findings use the same filters in their
+**Filters** step, so a Count or Graph widget can be limited to one platform the same way.
+
 ## What the API sees
 
 Nothing about the API contract changes. These fields are still sent and returned as the option's

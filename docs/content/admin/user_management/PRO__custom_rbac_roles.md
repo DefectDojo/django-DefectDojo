@@ -188,6 +188,26 @@ Two constraints are worth knowing:
 * **Owner-tier is reserved.** A custom role can never be an owner-tier role. Only the built-in Owner is, so only it carries the implicit power to manage other Owners.
 * **Granting the Owner role to someone else still requires the matching Add Owner permission**, whether you do it on an Organization, an Asset, or a Group.
 
+### Choosing which roles non-superusers may assign
+
+Anyone who can manage the members of an Organization, an Asset or a Group can normally give out any role short of Owner, including a custom role that grants more than they hold themselves. To stop that, turn off **Assignable by Non-superusers** on the role's **Edit Role** form. The setting is on for every new role, so nothing changes until you turn it off.
+
+While it is off:
+
+* **Only a superuser or a Global Owner can give the role** to a user or a group, as a member of an Organization, an Asset or a Group. These are the same people who can edit roles, so the setting binds everyone who cannot change it back.
+* **Adding someone to a Group that holds the role** (on an Organization or an Asset, as a Global Role, or across an Organization type) **counts as giving it**. Only a superuser, or a Global Owner who can manage that Group's members, can add people to it.
+* **Everyone else no longer sees the role** in the role dropdowns of the Permissions dialogs. A member who already holds it keeps it, and member tables still show it.
+* **Someone who manages members can still take the role away**: remove the member, or move them to a role they are allowed to give. They cannot move a membership that holds the role to another user or group. In a Group that holds the role, removing a member and changing an existing member's Group role are always allowed, because neither adds anyone to the Group.
+* **The other rules still apply on top.** Granting an Owner-tier role still needs the matching Add Owner permission, and a role that can reveal recovery keys or wipe devices is still reserved for superusers and Global Owners.
+* **The same rule covers every way in**: the Permissions dialogs, `/api/v2/`, `/api/v3/`, the **Owner Group Role** of a connector that assigns asset ownership, and carrying access over when assets are merged. A refused grant answers `403` with the message "Only a superuser or a global Owner can grant this role." Saving a connector answers `400` with the same message on the **Owner Group Role** field, and a merge plan reports it as an error on the merge. The message does not name the role.
+* **A clone keeps the setting** of the role it was cloned from. A clone of a built-in role starts with the setting on.
+
+Built-in roles cannot be edited, so they are always assignable. To keep a built-in role's permissions away from delegated managers, clone it, turn the setting off on the clone, and assign the clone instead.
+
+Grants the system makes on its own are not affected: single sign-on, SCIM and LDAP group membership, the default group role, and the owner of something a user creates.
+
+The connector ownership sync hands out the **Owner Group Role** chosen when the connector was saved. If that role is kept from non-superusers and no superuser or Global Owner chose it (for example, it was turned off after someone else chose it), the sync skips the ownership grant and logs why. A superuser or a Global Owner can save the connector to confirm the role, or choose another one.
+
 ## Group Content permissions
 
 A group can own Triage Engine rules and Report Builder templates, blocks, themes and report schedules (see [Group ownership for rules](/automation/triage_engine/sharing_and_versions/#group-ownership) and [for reports](/metrics_reports/reports/report-builder/#group-ownership)). The **Group Content** table holds the permissions for that content, and where they apply depends on how the role is held:
@@ -290,7 +310,8 @@ Roles are available at `/api/v2/roles/`. Reads are open to any authenticated use
 | List roles | `GET /api/v2/roles/` |
 | Retrieve one role | `GET /api/v2/roles/{id}/` |
 | List every grantable permission | `GET /api/v2/roles/permissions_catalog/` |
-| Create a role | `POST /api/v2/roles/` with `name`, optional `description`, and a `permissions` list |
+| Create a role | `POST /api/v2/roles/` with `name`, optional `description`, optional `assignable_by_non_superusers` (default `true`), and a `permissions` list |
+| Keep a role from non-superusers | `PATCH /api/v2/roles/{id}/` with `assignable_by_non_superusers: false` |
 | Replace a role's permissions | `PATCH /api/v2/roles/{id}/` with a `permissions` list |
 | Clone a role | `POST /api/v2/roles/{id}/clone/` with an optional `name` and `description` |
 | Delete a role | `DELETE /api/v2/roles/{id}/` |
@@ -303,6 +324,7 @@ Notes:
 * `?reassign_to=` moves every assignment of the deleted role to the role you name, in one transaction. This is the only way to reassign in bulk: the UI does not offer it.
 * Attempting to edit or delete a built-in role returns `403`. Editing an unknown permission value, reusing an existing role name, or deleting an in-use role without `reassign_to` returns `400` with an explanation.
 * `is_owner` cannot be set through the API. Posting it is accepted and ignored.
+* Every role in the list carries `assignable_by_me`: whether the caller may give that role to a member or a group. The list itself is not filtered, so a caller can still read the name of a role someone already holds.
 
 ## Things to know
 

@@ -7,9 +7,9 @@ audience: pro
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sidebar Presets are a DefectDojo Pro feature.</span>
 
-A **sidebar preset** is a named list of sidebar entries to hide. A team that only triages findings can have a sidebar with the Connect section, the Sensei pages and most of Settings gone; a team that runs integrations can keep those and lose the rest. Presets are built on **Settings > UI Defaults > Sidebar Presets**, shared with everyone or kept to one person, duplicated like a dashboard or a page layout, and one shared preset can be the instance default. Each person picks the preset that shapes their own sidebar on their User Profile page.
+A **sidebar preset** is a named list of sidebar entries to hide. A team that only triages findings can have a sidebar with the Connect section, the Sensei pages and most of Settings gone; a team that runs integrations can keep those and lose the rest. Presets are built on **Settings > UI Defaults > Sidebar Presets**, shared with everyone or kept to one person, duplicated like a dashboard or a page layout, and one shared preset can be the Instance Default. Each person picks the preset that shapes their own sidebar on their User Profile page.
 
-A preset follows the user, not the browser: the pick is saved to the account, and the sidebar, the **Cmd+K** / **Ctrl+K** menu search, the [Default Landing Page](/navigation/pro__landing_page/) list, the All Settings directory and the walkthrough lightbulb all read the same preset, so they never disagree about what is there.
+A preset follows the user, not the browser: the pick is saved to the account, and the sidebar, the **Cmd+K** / **Ctrl+K** menu search, the [Landing Page](/navigation/pro__landing_page/) list, the All Settings directory and the walkthrough lightbulb all read the same preset, so they never disagree about what is there.
 
 ## Hidden, never denied
 
@@ -49,22 +49,22 @@ Changes are kept in the fields until you save them: a bar at the bottom of the p
 
 A **shared** preset appears in every user's picker and in the **Sidebar Preset** field on every User Profile page. A preset is shared or unshared with the **Shared** checkbox in the editor, saved with the rest of the preset. Sharing, unsharing, editing or deleting a shared preset, and choosing the instance default, all require the **Share Sidebar Preset** permission (under Additional Permissions in the role editor). A personal preset is edited and deleted by its owner with the Sidebar Preset Edit and Delete permissions, and anyone with Sidebar Preset Add can create one.
 
-The **instance default** is the shared preset everyone gets who has not picked a preset of their own. Set it with the **Instance Default** button on the Sidebar Presets toolbar, or on **Settings > UI Defaults > Layout Defaults**, next to the dashboard, page layout and table defaults. Clearing it gives those users the full sidebar again. Deleting a preset that people had picked sends them back to the instance default.
+The **Instance Default** is the shared preset everyone gets who has not picked a preset of their own. Set it with the **Instance Default** button on the Sidebar Presets toolbar, or on **Settings > Defaults > Instance Defaults** (the **Sidebar Presets** card), next to the dashboard, page layout and table defaults. Clearing it gives those users the full sidebar again. Deleting a preset that people had picked sends them back to the Instance Default.
 
-While **Restrict Layout Customization** is on (also on the Layout Defaults page), everyone but superusers is pinned to the instance default: the **Sidebar Preset** field on User Profile reads **Set by an administrator**, and personal presets are kept but not applied until the switch is turned back off.
+While **Restrict Layout Customization** is on (also on **Settings > Defaults > Instance Defaults**), everyone but superusers is pinned to the Instance Default: the **Sidebar Preset** field on User Profile reads **Set by an administrator**, and personal presets are kept but not applied until the switch is turned back off.
 
 ## Default Profile and instance defaults
 
-When you have not picked a preset, your sidebar follows the preset set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one, else the instance default, else the full sidebar. Under **Restrict to Selected Layouts**, your User Profile offers only the presets your profile allows. Picking one still needs the **Sidebar Preset View** permission: without it, the field is hidden and your profile's default preset applies. Deleting a preset that a profile uses removes it from that profile, and the delete dialog names those profiles.
+When you have not picked a preset, your sidebar follows the preset from the first [Default Profile](/admin/user_management/create_user_group/#defaults) that sets one (the profile assigned to you directly, then your Groups' profiles in rank order), else the Instance Default, else the full sidebar. The **Sidebar Preset** field on your User Profile reads **From <profile>**, or **Set by <profile>** when it is locked. Under **Restrict to Selected Layouts**, your User Profile offers only the presets your profile allows. Picking one still needs the **Sidebar Preset View** permission: without it, the field is hidden and your profile's default preset applies. Deleting a preset that a profile uses removes it from that profile, and the delete dialog names those profiles.
 
 ## Picking a preset
 
 Each person picks their own preset in one of two places:
 
 - **Use for Me** on the Sidebar Presets toolbar, with the preset open.
-- The **Sidebar Preset** field on the **User Profile** page (select your username at the bottom of the sidebar, then **User Profile**, under **Navigation**). The first option is the instance default; the rest are your own presets and the shared ones. **Submit** saves it with the rest of the profile.
+- The **Sidebar Preset** field on the **User Profile** page (select your username at the bottom of the sidebar, then **User Profile**, under **Navigation**). The first option is the Instance Default; the rest are your own presets and the shared ones. **Submit** saves it with the rest of the profile.
 
-The sidebar, the menu search and the landing page list change at once, without a reload. If the chosen preset hides the page set as your [Default Landing Page](/navigation/pro__landing_page/), the profile page says so and sign-in opens Home instead.
+The sidebar, the menu search and the landing page list change at once, without a reload. If the chosen preset hides the page set as your [Landing Page](/navigation/pro__landing_page/), the profile page says so and sign-in opens Home instead.
 
 ## The permissions
 
@@ -85,5 +85,5 @@ Presets are managed at `/api/v2/sidebar_presets/` with the usual API token: list
 ## Related
 
 * [The Sidebar](/navigation/pro__sidebar/): the sections, pinned pages and the menu search
-* [Default Landing Page](/navigation/pro__landing_page/): the page sign-in opens
+* [Landing Page](/navigation/pro__landing_page/): the page sign-in opens
 * [Customizing Page Layouts](/navigation/pro__page_layouts/): the same sharing and default model for view pages

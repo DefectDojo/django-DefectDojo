@@ -452,20 +452,27 @@ Versions require `DD_V3_ASSET_VERSIONS` to be enabled: set it on a self-hosted d
 contact support on Cloud. While it is off, none of the surfaces below are offered. An Asset with
 no versions behaves exactly as it does today.
 
-### The Versions table
+### The Versions widget
 
-Versions appear as an optional table on the Asset page. Add it from **Page Layout → Edit Layout
-→ Add Widget → Data Table**, then choose `Versions` as the record set. Each row shows the
-version, its optional release date, how many BOM snapshots it has, and how many Findings are
-recorded as found in or fixed as of it.
+Versions appear as an optional widget on the Asset page. Add it from **Page Layout → Edit Layout
+→ Add Widget → Data Table**, then choose `Versions` as the record set. The widget's header counts
+the versions declared on the Asset.
+
+The newest version leads: its name, its optional release date, and three counts: how many BOM
+snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
+Earlier versions list below it, or beside it on a wide widget, one line each with their release
+date and their Found In and Fixed In counts. A long list scrolls inside the widget. Versions are
+ordered by release date, newest first, and a version without a release date sorts ahead of the
+dated ones. On a small widget only the newest version shows, with the number of earlier ones.
 
 **Add Version** declares one by hand, which is useful for a release you want to record claims
-against before any SBOM has been uploaded for it. Name it the way its producer does — `5.2.0`,
-`2026.08`, a build tag — because that is the string imports match against. The release date is
+against before any SBOM has been uploaded for it. Name it the way its producer does (`5.2.0`,
+`2026.08`, a build tag), because that is the string imports match against. The release date is
 optional and is a display hint: DefectDojo does not parse or order version names.
 
-Removing a version removes the snapshots and claims bound to it. The Findings themselves are
-untouched; only the per-version claims about them go.
+Each version, the newest included, has a menu at the start of its line with **Remove**. Removing
+a version removes the snapshots and claims bound to it. The Findings themselves are untouched;
+only the per-version claims about them go.
 
 ### Uploading an SBOM for a version
 
