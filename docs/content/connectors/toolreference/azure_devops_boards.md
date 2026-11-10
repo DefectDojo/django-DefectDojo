@@ -21,6 +21,14 @@ These details dictate how DefectDojo will map Finding or Finding Group attribute
 
 The `Project ID` field corresponds to the name or the ID of the Project in Azure.
 
+The `Work Item Type` field sets the type DefectDojo creates each work item as, by name: `Issue`
+(the default), `Bug`, `Task`, or a custom type your process defines, such as `Vulnerability`.
+Azure DevOps fixes a work item's type when it is created, so this is the only place to set it:
+a Custom Field Mapping cannot change it. The type must exist in the
+project. If it does not, every push to this mapping fails with an error naming the type and the
+project. Changing the type only affects work items created afterwards: existing ones keep the
+type they were created with.
+
 #### Severity Mapping Details
 
 The attributes in the form are supplied as defaults, and are as follows:
@@ -52,6 +60,7 @@ Custom field mappings set additional Azure DevOps fields on the work items Defec
 creates or updates. The **Vendor Field** must be the Azure DevOps field's *reference name*
 (for example `System.AreaPath`, `System.Tags`, or `Custom.MyField` - not its display name),
 and the field must exist on the work item type in your project's process.
+The work item type itself is set by the mapping's **Work Item Type**, not by a custom field mapping.
 
 Two mappings are especially useful for routing work items to a team:
 
@@ -65,6 +74,7 @@ Two mappings are especially useful for routing work items to a team:
   error saying so.
 
 Note that Azure DevOps boards and backlogs only display work item types that belong to a
-backlog level. DefectDojo creates work items of type **Issue**; if that type is not part of
+backlog level. DefectDojo creates work items of the mapping's **Work Item Type** (**Issue** by
+default); if that type is not part of
 a backlog level in your project's process, the pushed items are only visible in the
 **Boards → Work items** view regardless of their area or iteration.
