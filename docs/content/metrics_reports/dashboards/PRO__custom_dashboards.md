@@ -113,6 +113,27 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 ![Configuring a Graph widget](images/pro_dashboard_v2_widget_config.png)
 
+#### Graph options
+
+A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**):
+
+- **Split By** draws one line, or one run of bars, per value of a second dimension. Grouping by **Created Date** by month and splitting by **Severity Group** gives new findings per month as two lines, one for Critical and High findings and one for Medium and Low findings. Split By takes any dimension that is not a date and not the Group By, and is available on bar, line and area charts (a pie or doughnut shows one dimension). A chart draws up to 10 series: past that, the smallest values are combined into one **Other** series. A chart that counts unique CWEs or vulnerability IDs cannot combine values that way, so it asks for a filter or a dimension with fewer values instead.
+- **Severity Group** is a finding dimension with three values: **Critical and High**, **Medium and Low**, and **Info**. It works as a Group By (a two or three slice doughnut) or as a Split By. Its lines and slices are red for Critical and High and green for Medium and Low unless you pick other colors. Clicking one opens the Findings list filtered to that group's severities.
+- **Created Date** is when a finding was created in DefectDojo (when it was imported or added), as opposed to **Discovered Date**, the date the scanner reported. Charting new findings per month by Created Date counts each finding in the month it arrived.
+- **Show Values** prints the number on each bar, point or slice. A pie or doughnut also shows each slice's share of the total.
+- **Stacked** stacks the series of a split chart on top of each other instead of drawing them side by side. It appears once Split By is set.
+- **Colors** sets the color of each series (with Split By) or of each slice or bar (without). **Default** keeps the color the chart would pick, such as the severity colors.
+
+A chart over a date (**Created Date**, **Discovered Date**, **Mitigated Date** and the others) shows every period between its first and last, with 0 for a month in which nothing happened, so a line never skips a gap. When the widget filters on the same date (for example Created Date in the past 180 days), the chart spans that whole window. Records with no value for the date, such as open findings on a Mitigated Date chart, are not counted, so a fixed-findings-per-month chart needs no extra Mitigated filter.
+
+A management pack of three monthly charts, for example, is three Graph widgets over findings:
+
+| Chart | Chart Type | Group By | Split By | Filters |
+|-------|------------|----------|----------|---------|
+| Open findings by severity | Doughnut, with Show Values | Severity | | Active findings |
+| New findings per month | Line, with Show Values | Created Date, by Month | Severity Group | Created Date in the past 180 days |
+| Fixed findings per month | Line, with Show Values | Mitigated Date, by Month | Severity Group | Mitigated Date in the past 180 days |
+
 > **💡 Tip:** A widget's data always respects your permissions. If a shared layout includes a "My Work" widget, every viewer sees *their own* assignments and mentions — not the layout author's.
 
 ### Step 4: Arrange, then save
@@ -182,7 +203,7 @@ Time-series and distribution visualizations.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Graph** | A general-purpose chart over any model and group-by dimension: bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. For a chart by month, filter its date with **Full Months** (for example Last 6 Full Months) so that every month on the chart is complete; see [date filters](/navigation/pro__filter_index/#how-date-filters-are-evaluated). |
+| **Graph** | A general-purpose chart over any model and group-by dimension: bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. **Split By** draws one series per value of a second dimension, such as new findings per month by Severity Group (see [Graph options](#graph-options)). For a chart by month, filter its date with **Full Months** (for example Last 6 Full Months) so that every month on the chart is complete; see [date filters](/navigation/pro__filter_index/#how-date-filters-are-evaluated). |
 | **Sankey** | A flow diagram from a source dimension to a target dimension — e.g. Severity → Status. |
 | **Sunburst** | A one- or two-level radial breakdown — e.g. Severity, then Test Type within each severity. |
 | **Risk Matrix** | An EPSS-probability × risk heatmap of findings — bottom-left safe, top-right dangerous. |
