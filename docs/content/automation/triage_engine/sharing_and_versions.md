@@ -49,16 +49,17 @@ Deleting a group's rule needs only **Rule Delete**, through your membership role
 * The groups where your membership role carries **Rule Add** (every group, if you hold **Rule Add** as a global role, though you must still be a member of the group you choose).
 * **Instance**, if you hold **Rule Add** as a global role.
 
-When there is only one choice it is already selected. With more than one, pick one before saving, adopting a template or importing: nothing is created until you do. Starting a rule from the **Rules** tab of a group's page selects that group. The owner is fixed when the rule is created: to move it later, use **Transfer**.
+When there is only one choice it is already selected. With more than one, pick one before saving, adopting a template or importing: nothing is created until you do. Starting a rule from **New Rule** in the **Rules** row of a group's **Owned Content** tab selects that group. The owner is fixed when the rule is created: to move it later, use **Transfer**.
 
-The rule lists on **Act > Triage Engine > Rules** have an **Owner** column (the group, or **Instance**) and a **Scope** filter:
+The rule lists on **Act > Triage Engine > Rules** have an **Owner** column (the group, or **Instance**) and an **Owner** filter:
 
-| Scope | Shows |
+| Owner filter | Shows |
 |---|---|
 | **My Groups** | Rules owned by a group you are a member of |
 | **Shared With Me** | Rules another group has shared with one of your groups |
 | **Everyone** | Rules shared with everyone |
 | **Instance** | Rules with no owning group |
+| A group, by name | Rules that group owns. The **Rules** row of the group's **Owned Content** tab opens the list this way. |
 
 The filter only narrows the list. It never shows a rule you could not otherwise see.
 

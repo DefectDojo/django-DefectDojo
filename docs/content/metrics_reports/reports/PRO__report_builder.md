@@ -301,8 +301,8 @@ The **Report Template** permissions sit in the **Group Content** table of a role
 
 ### Creating, sharing and moving
 
-* **Owned By**, on the new Template, Block and Theme forms, chooses the owner: a group where your membership role carries **Report Template Add**, or **Instance** if you hold **Report Template Add** as a global role. With one choice it is already selected. **New** on a group's **Report Templates** tab selects that group.
-* The **Templates**, **Blocks** and **Themes** lists have an **Owner** column (the group, **Instance**, or **Unowned** for something whose group was deleted) and a **Scope** filter: **My Groups**, **Shared With Me**, **Everyone** and **Instance**.
+* **Owned By**, on the new Template, Block and Theme forms, chooses the owner: a group where your membership role carries **Report Template Add**, or **Instance** if you hold **Report Template Add** as a global role. With one choice it is already selected. **New** on a group's **Owned Content** tab selects that group.
+* The **Templates**, **Blocks** and **Themes** lists have an **Owner** column (the group, **Instance**, or **Unowned** for something whose group was deleted) and an **Owner** filter: **My Groups**, **Shared With Me**, **Everyone**, **Instance**, or one group by name. A group's **Owned Content** tab opens these lists with the filter set to that group.
 * **Share**, in a row's menu, sets **Visible To**: **Group** (the owning group only), **Specific Groups** (the owning group plus groups you choose, which can read but not change it), or **Everyone**. Sharing with everyone needs **Report Template Edit** as a global role.
 * **Transfer**, in the same menu, moves it to another group or to the instance. You need **Report Template Edit** on it and **Report Template Add** where it is going. Sharing starts over after a transfer.
 * **Duplicate** asks where the copy goes (**Owned By**), starting on the original's owner when you can create there. For an item another group shared with you, pick one of your own groups.
@@ -318,7 +318,7 @@ A report schedule belongs to the owner of its Template. A schedule on a group's 
 * it keeps running when the person who created it leaves; and
 * the group's members can read the reports it generates.
 
-The group's page lists its schedules on its **Schedules** tab.
+**Reporting > Schedules** lists the schedules you can see, with each one's Template, format, cadence, next run and creator, and an **Owner** column (the group, or **Instance**). Its **Owner** filter offers **My Groups**, **Instance** and each group by name; a group's **Owned Content** tab opens it filtered to that group. **Delete** in a row's menu stops a schedule; the reports it already generated are kept. Schedules are created through the API (see [Report Builder API](../report-builder-api/)).
 
 Who can change a schedule depends on its owner:
 
