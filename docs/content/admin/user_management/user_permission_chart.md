@@ -76,7 +76,7 @@ The majority of Configuration Permissions give users access to certain pages in 
 | Questionnaires | Access the **Act > Explore > Surveys > Surveys** page | Add a new Questionnaire | Edit an existing Questionnaire | Delete a Questionnaire |
 | Questions | Access the **Act > Explore > Surveys > Questions** page | Add a new Question | Edit an existing Question | n/a |
 | Regulations | n/a | Add a Regulation to the **Settings > Configuration > Regulations** page | Edit an existing Regulation | Delete a Regulation |
-| Rules Engine | Access **Act > Triage Engine** and everything under it (Rules, Runs, and Deliveries) | Create a rule, including converting one from Classic Rules | Change, enable, schedule, run, replay, or take ownership of an existing rule | Delete a rule |
+| Rules Engine | Access **Act > Triage Engine** and everything under it (Rules, Runs, and Deliveries) | Create a rule, including converting one from Classic Rules | Change, enable, schedule, run, or replay an existing rule; take ownership of one (with Rule Add) | Delete a rule |
 | Scheduling Service Schedule | Access the **Settings > Operations > Schedules** page | Superuser only | Edit an existing Schedule (change trigger, enable/disable) | Delete a Schedule |
 | SLA Configuration | Access the **Settings > Finding Workflow > Service Level Agreements** page | Add a new SLA Configuration | Edit an existing SLA Configuration | Delete an SLA Configuration |
 | Test Types | n/a | Add a new Test Type (under **Settings > Configuration > Test Types**) | Edit an existing Test Type | n/a |

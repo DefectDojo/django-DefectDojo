@@ -97,7 +97,7 @@ Review the rule, fill in what was cleared, and enable it again. A rule moved to 
 
 A rule managed by a webhook receiver cannot be transferred until it is detached from the receiver.
 
-**Take Ownership** still works for Instance rules: it makes you the owner of someone else's Instance rule, with the same effect of turning it off and clearing its credentials. A group's rule cannot be taken over this way: move it with **Transfer**.
+**Take Ownership** still works for Instance rules, whether or not group ownership is turned on. It is a transfer of someone else's Instance rule to **Instance**, with you as its owner, so it needs what that transfer needs (**Rule Edit**, **Rule Add** as a global role, and every node family the rule contains) and has the same effect: the rule is turned off, its credentials are cleared, and sharing starts over. A group's rule cannot be taken over this way: move it with **Transfer**.
 
 ### Unowned rules
 
