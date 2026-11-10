@@ -22,14 +22,14 @@ Because you host the deployment, your data stays inside your own environment for
 | Target | An empty Pro deployment. The restore replaces what is there. | A Pro instance, with or without data in it |
 | Who runs it | You, from a restore host with the PostgreSQL client tools | You, from the Connectors UI |
 | How often | Once per cutover, in a scheduled window | As often as you need, until you cut over |
-| Secrets, settings and history | Cross with the dump | Secrets and history do not cross. Notification settings and most system settings cross once, on the first Sync |
+| Secrets, settings and history | Cross with the dump | Secrets do not cross. The import and audit history of the migrated objects crosses. Notification settings and most system settings cross once, on the first Sync |
 | Finding templates, engagement presets, API scan configurations and tool configurations | Cross with the dump | Cross, but tool configurations arrive without their password, SSH key, API key and extras |
 | Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords. The connector adds no group and sets no global role. The users in the Authorized Users list of a Product or Product Type become its members. They get the Writer role, or Maintainer for a staff user. The default group rule of DefectDojo Pro still applies to a new user. |
 | The source during the move | Frozen with read-only mode from the final dump | Read-only during each Sync, and open between Syncs |
 
 Take the dump path if you want an exact copy, and you can schedule a window. Users, groups, settings and history come across as they are. The target must be empty.
 
-Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets and history do not cross with the connector. Notification settings and most system settings cross once, on the first Sync. Tool configurations cross without their password, SSH key, API key and extras. You set up notification channels and tool credentials in DefectDojo Pro yourself.
+Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets do not cross with the connector. The import and audit history of the migrated objects crosses. Notification settings and most system settings cross once, on the first Sync. Tool configurations cross without their password, SSH key, API key and extras. You set up notification channels and tool credentials in DefectDojo Pro yourself.
 
 ## Path 1: The database dump
 
@@ -282,7 +282,8 @@ Confirm the following before you add the connector.
 * **HTTPS.** Serve the open source instance over HTTPS, on a URL your Pro deployment can reach. The connector refuses a plain `http://` URL.
 * **A superuser API key.** Create a superuser on the source for the connector alone, and an API v2 key for it. The export API answers only a superuser. Revoke the key after the cutover.
 * **Email.** Set up a mail server under **Settings > System > Email** in DefectDojo Pro. Migrated users get their set-password link by email. While users would migrate and DefectDojo Pro cannot send email, **Begin Migration** stays off. SSO or LDAP sign-in and DefectDojo Pro cloud need no mail server here.
-* **What does not cross.** Secrets stay on the source: JIRA, API tokens and passwords. The Slack, Microsoft Teams, email and webhook setup stays too. Notification settings and most system settings cross once, on the first Sync. A tool configuration arrives without its password, SSH key, API key and extras. History, JIRA issue links, groups and global roles stay on the source too. Files over the size limit stay. Duplicates stay, unless you ask for them. Plan to set up notification channels and tool credentials in DefectDojo Pro yourself.
+* **What does not cross.** Secrets stay on the source: JIRA, API tokens and passwords. The Slack, Microsoft Teams, email and webhook setup stays too. Notification settings and most system settings cross once, on the first Sync. A tool configuration arrives without its password, SSH key, API key and extras. JIRA issue links, groups and global roles stay on the source too. So does the history of users, finding templates, Product Types and other reference data. Files over the size limit stay. Duplicates stay, unless you ask for them. Plan to set up notification channels and tool credentials in DefectDojo Pro yourself.
+* **History.** The connector copies the import history and the audit history of the objects it migrates. The fields **Migrate Import History** and **Migrate Audit History** are on by default. The source needs an export version that offers history. If audit retention is on in DefectDojo Pro, the next flush deletes migrated audit events older than the retention period. The [connector reference](/connectors/toolreference/defectdojo/#what-crosses) explains which history crosses.
 * **The owner fields.** The product manager, technical contact and team manager of a Product become members of the Product in DefectDojo Pro. The three fields stay empty.
 * **Access.** The users in the Authorized Users list of a Product become members of the Product. The users in the list of its Product Type become members of the Product Type. A user that was staff on the source gets the Maintainer role. Every other user gets the Writer role. A user that is already a member keeps the membership. An owner of the Product is the one exception: the owner gets the Maintainer role again on each Sync.
 
@@ -303,15 +304,15 @@ The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page cover
 
 Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
 
-* **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it.
-* **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync.
+* **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it. It also warns when audit retention is on and audit events cross.
+* **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync. The totals include the imports, import actions, audit events and legacy audit entries that the Sync copies.
 * **To Be Created** lists the users and the reference data that the Sync creates.
-* **Not Migrated** lists what stays on the source: the secrets and the audit trail, and the settings and feature areas that you set up in DefectDojo Pro yourself.
+* **Not Migrated** lists what stays on the source: the secrets, and the settings and feature areas that you set up in DefectDojo Pro yourself. It names Audit History and Import History only when the source sends no such history, or when you turned the field off.
 * **Estimated Duration** tells you how long the first Sync takes.
 
 ### Step 3: Sync
 
-Click **Begin Migration** on the migration page and confirm. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.100 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run also creates the users and the reference data they refer to. It also brings the finding templates and the tool configurations without their password, SSH key, API key and extras. It brings the engagement presets and API scan configurations of each Product too. A large estate takes a while. **History** on the migration page shows each run.
+Click **Begin Migration** on the migration page and confirm. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.100 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run copies the import history and the audit history of these objects, unless you turned those fields off. The run also creates the users and the reference data they refer to. It also brings the finding templates and the tool configurations without their password, SSH key, API key and extras. It brings the engagement presets and API scan configurations of each Product too. A large estate takes a while. **History** on the migration page shows each run.
 
 The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. The migration page shows a progress bar during that time, and **Migration Complete** when it ends. If it shows **Migration Stalled**, click **Begin Migration** again to finish the import. A notification then sums up the migration. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
 
@@ -323,9 +324,10 @@ Compare the two instances once the first Sync ends:
 2. Open a Product and check its engagements and tests, with their names and dates.
 3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. Its test has the test type and the scan type of the source test. Only a test with no test type on the source gets the test type `DefectDojo - Connectors Import`.
 4. Check the risk acceptances and the finding groups of a Product that has them.
-5. Check the finding templates, and the engagement presets and API scan configurations of a Product that has them. Enter the password, SSH key, API key or extras of each tool configuration that the connector created. They do not cross.
-6. Check that the users are present. New users arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
-7. Report any discrepancies to your DefectDojo contact.
+5. Open a test and a finding that had imports and edits on the source. Check their import history and their audit history. **All Audit Logs** shows the last 31 days by default. For older events, open the history of the object or change the date filter.
+6. Check the finding templates, and the engagement presets and API scan configurations of a Product that has them. Enter the password, SSH key, API key or extras of each tool configuration that the connector created. They do not cross.
+7. Check that the users are present. New users arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
+8. Report any discrepancies to your DefectDojo contact.
 
 ### How Migrated Users Sign In
 
@@ -367,7 +369,7 @@ A user that signs in only with [SSO](/admin/sso/) does not need a password. Afte
 
 ### Step 5: Repeat until you cut over
 
-Run Sync again by hand, or on the recurring frequency you set. If the connection deleted itself after the first Sync, add it again: the new connection continues where the old one stopped. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro.
+Run Sync again by hand, or on the recurring frequency you set. If the connection deleted itself after the first Sync, add it again: the new connection continues where the old one stopped. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro. A run adds only the imports and audit events made since the last run.
 
 Each Sync locks the source with read-only mode while it reads, and unlocks it at the end. On 3.4.300 the source has no read-only mode, so stop all writes by hand before the final Sync: pause CI pipelines, scheduled imports, and anything else that pushes findings.
 
@@ -399,6 +401,7 @@ The first Sync copies notification settings and system settings once. A second r
 - Connector added in **Connect > Upstream**
 - Discover run, with **Include** cleared on every Product to leave behind
 - Preflight report read: warnings, counts, what is created and what does not cross
+- Audit retention in DefectDojo Pro checked, when the report shows audit events
 - First Sync run, finding counts checked, and validated
 - Notification channels and tool credentials set up in DefectDojo Pro
 - Users activated with **Activate and Invite**, and given roles
