@@ -1,9 +1,48 @@
 import hashlib
+import hmac
 import json
+
+from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
+
+# The key under which a v3 detection's unique_id_from_tool is digested. It is a fixed domain
+# separator, not a per-instance secret: the DefectDojo Pro TruffleHog connector computes the same
+# ID with no shared state, and the ID has to stay the same across every reimport for as long as
+# the instance exists, so nothing about it may rotate. Changing this value (bump the suffix)
+# changes every Trufflehog Scan finding's identity under the "Unique ID from tool" algorithm.
+UNIQUE_ID_KEY = b"defectdojo:trufflehog:unique_id_from_tool:v1"
+
+
+def normalize_repository(repository):
+    """
+    The repository as it enters the unique id.
+
+    TruffleHog names the same repository differently per source: the git source reports
+    ``https://host/org/repo``, the GitHub source ``https://host/org/repo.git``. The ID treats
+    them as one repository.
+    """
+    repository = str(repository).strip().rstrip("/")
+    return repository.removesuffix(".git")
+
+
+def unique_id_from_tool(detector_name, repository, file, secret):
+    """
+    A stable identity for one secret at one path, independent of the commit it was found in.
+
+    An HMAC-SHA256 over the detector, the repository, the file path and the raw secret. The
+    secret itself is never stored: the digest is one-way, so it cannot be read back from the
+    ID, and the same secret in another repository or another file is another ID. A rotated
+    secret at the same path is a new finding. ``None`` when the detection carries no secret
+    material, because every such detection of one detector in one file would otherwise share
+    an ID.
+    """
+    if not secret:
+        return None
+    material = "\x00".join([str(detector_name), normalize_repository(repository), str(file), secret])
+    return hmac.new(UNIQUE_ID_KEY, material.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
 class TruffleHogParser:
@@ -174,9 +213,20 @@ class TruffleHogParser:
                 elif detector_name == "Generic Secret":
                     severity = "Medium"
 
-            dupe_key = hashlib.md5(
-                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"), usedforsecurity=False,
-            ).hexdigest()
+            secret = raw + rawV2
+            unique_id = unique_id_from_tool(detector_name, repository, file, secret)
+
+            # One finding per commit, as the parser has always reported, unless the instance asked
+            # for one finding per secret per file: then the fold key is the unique id itself, which
+            # leaves out the commit and the line, so the id is unique within the report by
+            # construction. A detection with no secret material has no unique id and keeps the
+            # per-commit key either way.
+            if settings.TRUFFLEHOG_FOLD_COMMITS and unique_id:
+                dupe_key = unique_id
+            else:
+                dupe_key = hashlib.md5(
+                    (file + detector_name + str(line_number) + commit + secret).encode("utf-8"), usedforsecurity=False,
+                ).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -202,6 +252,7 @@ class TruffleHogParser:
                     static_finding=True,
                     verified=verified,
                     nb_occurences=1,
+                    unique_id_from_tool=unique_id,
                 )
                 if locations_enabled() and file:
                     finding.unsaved_locations.append(
