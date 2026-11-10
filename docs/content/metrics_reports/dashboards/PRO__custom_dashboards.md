@@ -263,6 +263,30 @@ Notes, shortcuts, and structure.
 | **Markdown / Notes** | An inline rich-text panel for headers, context notes, or reference links. |
 | **Quick Actions** | One-click action buttons that navigate to a chosen page. |
 
+## Charting scans by category
+
+Every Test Type belongs to a **category** that says what kind of scan it is: **SAST**, **DAST**, **SCA**, **API**, **Container**, **IaC**, **Secrets**, **Cloud**, **Infrastructure**, **Mobile** or **Penetration Test**. Charts and lists can group and filter by it, so a report of scans per category does not need a list of tools kept by hand.
+
+- On a **Graph** widget with the **Test** model, choose **Category** as the group-by dimension to count tests (scans) in each category. To count scans per month in each category, group by **Created** with a **Month** time bucket and set **Split By** to **Category** (see [Graph options](#graph-options)); to chart one category on its own, filter the widget on **Category** instead.
+- On the **Finding** model, the same breakdown is the **Test Category** dimension: findings grouped by the category of the test that reported them.
+- The **Tests** list has a **Category** column (hidden by default; add it from the column picker) and a **Category** filter. The **Findings** list has a **Test Category** filter. Clicking a bar or slice of a chart grouped by category opens the matching list filtered to that category.
+
+### Where a category comes from
+
+Built-in scanners have a default category, chosen from the Test Type's name (for example, **ZAP Scan** is DAST, **Semgrep JSON Report** is SAST, **Trivy Scan** is Container, **Checkov Scan** is IaC). A Test Type whose name no default covers, such as a custom tool, takes **SAST** when it is marked **Static**, **DAST** when it is marked **Dynamic**, and otherwise **Uncategorized**.
+
+**Uncategorized** is a category of its own: its tests show as their own bar or slice and can be selected in a filter, so no test is left out of a chart because its tool is unknown.
+
+### Setting a Test Type's category
+
+1. Go to **Settings > Test Types**. The **Category** column shows each Test Type's category, marked **(default)** when it comes from the default rather than from a choice someone made.
+2. Open a Test Type's menu and choose **Edit Test Type**.
+3. Pick a **Category** and click **Submit**.
+
+The change applies to every test of that type, including tests imported before it, and charts show it the next time they load. To go back to the default, clear the **Category** field and submit. The placeholder names the default the Test Type returns to.
+
+Changing a category needs permission to edit Test Types.
+
 ## Next steps
 
 - **[Automating Dashboards with the API](../custom-dashboards-api/)** — discover the widget catalog, create and update layouts, and render widget data over the REST API, with a complete script.
