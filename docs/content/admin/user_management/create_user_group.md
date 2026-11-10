@@ -39,14 +39,14 @@ With Access Administration on (Pro), a Group's page has these tabs:
 * **Access**: what the Group reaches in its own right: its Global Roles, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each one is reached. Every member of the Group receives this access through it, and a Group that holds a Global Role is marked as having instance-wide access. The Group's own Roles are changed here, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
 * **Default Profile**: the [Default Profile](#default-profiles) the Group's Members start from, and what that profile sets. See [Set Group Defaults](#set-group-defaults).
 
-With Group Ownership on, the page also has a tab for each kind of content the Group can own:
+With Group Ownership on, the page also has an **Owned Content** tab: one row for each kind of content a Group can own (**Rules**, **Report Templates**, **Report Blocks**, **Report Themes** and **Generated Reports**), with how many of the Group's you can see. A report schedule belongs to its Template, as a rule's schedule belongs to the rule, so it has no row of its own. A kind's name opens its list filtered to the Group, and that page's title and breadcrumb name the Group (for example **Report Templates Owned By AppSec**, under a link back to the Group).
 
-* **Rules**: the Triage Engine rules the Group owns. **New Rule** here creates a rule owned by the Group. See [Group ownership](/automation/triage_engine/sharing_and_versions/#group-ownership).
-* **Report Templates**: the Report Builder templates, blocks and themes the Group owns, with **New** creating each into the Group. See [the Report Builder](/metrics_reports/reports/report-builder/#group-ownership).
-* **Schedules**: the report schedules the Group owns.
+* The kind's name opens its usual list filtered to the Group: the **Owner** filter is set to the Group, and clearing it shows the whole list again.
+* The row menu has **View** (the same filtered list) and, where you can create that kind for the Group, **New**, which opens the create page with **Owned By** already set to the Group. See [Group ownership of rules](/automation/triage_engine/sharing_and_versions/#group-ownership) and [of Report Builder content](/metrics_reports/reports/report-builder/#group-ownership).
 
-Each of these tabs is the normal list for that kind of content, limited to this Group, so it has the same columns, filters and row menus. **Rules** and **Report Templates** are shown when the Group owns something of that kind that you can see, or when you can create it here (your Role in the Group, or a Global Role, carries **Rule Add** or **Report Template Add**), and only while Triage Engine or Reporting is turned on. **Schedules** is shown when the Group owns a report schedule you can see.
+A kind is listed when the Group owns something of that kind that you can see, or when you can create it there (your Role in the Group, or a Global Role, carries its **Add** permission; for a rule you must also be a member of the Group), and only while Triage Engine or Reporting is turned on.
 
+The Group's page shows what it owns. Who owns something is chosen where it is created (**Owned By**) and changed with **Transfer** in its row menu.
 
 Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
 
@@ -72,7 +72,7 @@ Changing what a Group's rule or report schedule does needs membership of the Gro
 
 ### Deleting a Group that owns content
 
-Deleting a Group does not delete its rules, templates, blocks, themes or schedules. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. All of them appear under **Settings > Groups > Unowned Content**, where an administrator holding **Rule Edit** or **Report Template Edit** as a Global Role transfers them to another Group or to the instance. The Group's automation identity is removed with the Group.
+Deleting a Group does not delete its rules, templates, blocks, themes or schedules. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. The rules, templates, blocks and themes appear under **Settings > Groups > Unowned Content** (a schedule waits with its Template and comes back when the Template is transferred), where an administrator holding **Rule Edit** or **Report Template Edit** as a Global Role transfers them to another Group or to the instance. The Group's automation identity is removed with the Group.
 
 ## Create a User Group
 
