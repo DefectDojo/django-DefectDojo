@@ -46,10 +46,40 @@ Permissions:
 The objects refer to each other by id, so create them in this order:
 
 1. **Find the connector id.** `GET /api/v2/downstream/connectors/` and note the `id` of your connector.
-2. **Create the severity and status mappings.** These tell DefectDojo which vendor values to use for each severity and status. Create any custom field mappings at this point too.
-3. **Create a Ticket Template** if you want your own title and description layout. A mapping works without one.
-4. **Create the Issue Tracker Mapping.** Send the connector id as `integration`, the ids from steps 2 and 3, and the vendor's own target keys in `identifiers` (for Jira, the project key).
-5. **Create one Issue Tracker Assignment for each Asset or Engagement.** Each assignment names the mapping and exactly one of `product` (the Asset id) or `engagement` (the Engagement id).
+2. **Create a Ticket Template** if you want your own summary and description layout. A mapping works without one.
+3. **Create the Issue Tracker Mapping.** Send the connector id as `integration`, the vendor's own target keys in `identifiers` (for Jira, the project key), and the status and severity values as nested objects in the same request. Add `ticket_template` with the id from step 2, and `custom_field_mappings` as a list of objects, if you use them.
+4. **Create one Issue Tracker Assignment for each Asset or Engagement.** Each assignment names the mapping and exactly one of `product` (the Asset id) or `engagement` (the Engagement id).
+
+This request creates a Jira mapping:
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Token ${DD_API_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "label": "Security tickets",
+        "integration": 3,
+        "identifiers": {"project_key": "SEC"},
+        "status_mapping": {
+          "field_name": "status",
+          "active": "To Do",
+          "closed": "Done",
+          "false_positive": "Rejected",
+          "risk_accepted": "Risk Accepted"
+        },
+        "severity_mapping": {
+          "field_name": "priority",
+          "info": "Lowest",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "critical": "Highest"
+        }
+      }' \
+  "${DD_URL}/api/v2/downstream/issue_tracker_mappings/"
+```
+
+DefectDojo reuses an existing status or severity row when its values are the same. So a `PATCH` on `/api/v2/downstream/status_mappings/{id}/` changes every mapping that uses that row. To change the values of one mapping only, send new nested values on that mapping instead.
 
 ## Assign a mapping to an Asset
 
@@ -65,7 +95,7 @@ curl -s -X POST \
 
 ## Assign one mapping to many Assets
 
-This loop assigns mapping `12` to every Asset id in `asset_ids.txt`, one id per line. Run it again with new ids as your Assets change. To see which Assets already have an assignment, `GET /api/v2/downstream/issue_tracker_assignments/` first, and skip those ids.
+This loop assigns mapping `12` to every Asset id in `asset_ids.txt`, one id per line. Run it again with new ids as your Assets change. To see which Assets already have an assignment, `GET /api/v2/downstream/issue_tracker_assignments/?issue_tracker_mapping_equals=12` first, and skip the `product` ids it returns. DefectDojo does not stop a second assignment of the same mapping to the same Asset.
 
 ```bash
 while read -r asset_id; do
