@@ -14,6 +14,14 @@ DefectDojo Pro includes a dedicated table view for Components, which can be foun
 
 An individual Asset's Components can be seen on the Asset view.
 
+### Components on the Asset View
+
+On the Asset view, Components is a tab of the Overview tabs (or a widget of its own on a customized layout). It lists the same Component, Version, Active, Duplicate and Total values, but counts only the Findings of this Asset. A search field filters the list by Component name or version, and each column heading sorts by that column.
+
+Every count is a link to this Asset's Findings, never to the whole instance: the Component name and the Total open all of this Asset's Findings for that Component, Active opens its Active Findings, and Duplicate opens its Duplicate Findings. Each list holds the same Findings as the number that links to it.
+
+Findings that name no Component are counted in a **No component** row at the end of the list. When a Component has more than one version on the Asset, the first version is shown with a count of the others, and every version appears when the pointer rests on that count.
+
 ## The Component Table
 
 The Component Table displays the following columns:
