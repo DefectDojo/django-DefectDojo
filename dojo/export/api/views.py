@@ -4,9 +4,11 @@ from collections.abc import Iterator
 from itertools import batched, groupby
 from operator import itemgetter
 
+from auditlog.models import LogEntry
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Count, Prefetch, Q, QuerySet
+from django.db.models import Count, OuterRef, Prefetch, Q, QuerySet, Subquery
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -26,10 +28,12 @@ from dojo.export.api.serializers import (
     CHECK_LIST_ISSUE_FIELDS,
     ExportAnnouncementSerializer,
     ExportAPIScanConfigurationSerializer,
+    ExportAuditEventSerializer,
     ExportContactSerializer,
     ExportEngagementPresetSerializer,
     ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportLegacyAuditEntrySerializer,
     ExportLoginBannerSerializer,
     ExportParamsSerializer,
     ExportProductSerializer,
@@ -41,6 +45,7 @@ from dojo.export.api.serializers import (
     ExportToolConfigurationSerializer,
     ExportUserSerializer,
     ManifestParamsSerializer,
+    audit_event_model,
     file_size,
     render_datetime,
 )
@@ -86,7 +91,17 @@ COUNT_KEYS = (
     "engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances", "finding_groups",
 )
 IMPORT_HISTORY_COUNT_KEYS = ("test_imports", "test_import_actions")
+AUDIT_HISTORY_COUNT_KEYS = ("audit_events", "legacy_audit_entries")
 HISTORY_FEATURES = ("import_history", "audit_history")
+AUDIT_MODELS = (Product, Engagement, Test, Finding, Finding_Group, Risk_Acceptance)
+# From an audited object to its product id. A risk acceptance has two paths: see risk_acceptance_in.
+AUDIT_PRODUCT_PATHS = {
+    Product: "id",
+    Engagement: "product_id",
+    Test: "engagement__product_id",
+    Finding: "test__engagement__product_id",
+    Finding_Group: "test__engagement__product_id",
+}
 REFERENCE_SERIALIZERS = {
     "sla_configurations": SLAConfigurationSerializer,
     "development_environments": DevelopmentEnvironmentSerializer,
@@ -214,7 +229,37 @@ def import_history_lines(product: Product, counts: dict, render) -> Iterator[byt
         pending = next(by_import, None)
 
 
-def product_lines(product: Product, request, max_file_bytes: int, *, import_history: bool = False) -> Iterator[bytes]:
+def audit_scope(model, product: Product) -> QuerySet:
+    if model is Risk_Acceptance:
+        return Risk_Acceptance.objects.filter(risk_acceptance_in(product))
+    return model.objects.filter(**{AUDIT_PRODUCT_PATHS[model]: product.id})
+
+
+def audit_history_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
+    for model in AUDIT_MODELS:
+        events = (
+            audit_event_model(model).objects.filter(pgh_obj_id__in=audit_scope(model, product).values("id"))
+            .select_related("pgh_context")
+            .order_by("pgh_id")
+        )
+        serializer = ExportAuditEventSerializer(model)
+        for event in events.iterator(chunk_size=EXPORT_CHUNK_SIZE):
+            counts["audit_events"] += 1
+            yield render({"type": "audit_event", "data": serializer.to_representation(event)})
+    content_types = ContentType.objects.get_for_models(*AUDIT_MODELS)
+    in_product = Q()
+    for model in AUDIT_MODELS:
+        in_product |= Q(content_type=content_types[model], object_id__in=audit_scope(model, product).values("id"))
+    entries = LogEntry.objects.filter(in_product).select_related("content_type").order_by("id")
+    serializer = ExportLegacyAuditEntrySerializer()
+    for entry in entries.iterator(chunk_size=EXPORT_CHUNK_SIZE):
+        counts["legacy_audit_entries"] += 1
+        yield render({"type": "legacy_audit_entry", "data": serializer.to_representation(entry)})
+
+
+def product_lines(
+    product: Product, request, max_file_bytes: int, *, import_history: bool = False, audit_history: bool = False,
+) -> Iterator[bytes]:
     context = {"request": request, "max_file_bytes": max_file_bytes}
     render = NDJSONRenderer().render
     yield render({
@@ -278,15 +323,57 @@ def product_lines(product: Product, request, max_file_bytes: int, *, import_hist
     if import_history:
         counts.update(dict.fromkeys(IMPORT_HISTORY_COUNT_KEYS, 0))
         yield from import_history_lines(product, counts, render)
+    if audit_history:
+        counts.update(dict.fromkeys(AUDIT_HISTORY_COUNT_KEYS, 0))
+        yield from audit_history_lines(product, counts, render)
     yield render({"type": "end", "counts": counts})
 
 
-def count_keys(*, import_history: bool) -> tuple[str, ...]:
-    return (*COUNT_KEYS, *IMPORT_HISTORY_COUNT_KEYS) if import_history else COUNT_KEYS
+def count_keys(*, import_history: bool, audit_history: bool) -> tuple[str, ...]:
+    return (
+        *COUNT_KEYS,
+        *(IMPORT_HISTORY_COUNT_KEYS if import_history else ()),
+        *(AUDIT_HISTORY_COUNT_KEYS if audit_history else ()),
+    )
 
 
-def product_counts(max_file_bytes: int, *, file_counts: bool, import_history: bool) -> dict[int, dict[str, int | None]]:
-    keys = count_keys(import_history=import_history)
+def ids_by_product(model, prefix: str = "") -> dict[int, set[int]]:
+    ids = defaultdict(set)
+    for path in (f"{prefix}engagement__product_id", f"{prefix}accepted_findings__test__engagement__product_id"):
+        for product_id, found in model.objects.order_by().values_list(path).annotate(ids=ArrayAgg("id", distinct=True)):
+            if product_id is not None:
+                ids[product_id].update(found)
+    return ids
+
+
+def add_audit_history_counts(counts: dict) -> None:
+    content_types = ContentType.objects.get_for_models(*AUDIT_MODELS)
+    for model in AUDIT_MODELS:
+        events = audit_event_model(model).objects.order_by()
+        entries = LogEntry.objects.filter(content_type=content_types[model]).order_by()
+        if model is Risk_Acceptance:
+            per_event = dict(events.values_list("pgh_obj_id").annotate(n=Count("pgh_id")))
+            per_entry = dict(entries.values_list("object_id").annotate(n=Count("id")))
+            for product_id, found in ids_by_product(Risk_Acceptance).items():
+                counts[product_id]["audit_events"] += sum(per_event.get(pk, 0) for pk in found)
+                counts[product_id]["legacy_audit_entries"] += sum(per_entry.get(pk, 0) for pk in found)
+            continue
+        path = AUDIT_PRODUCT_PATHS[model]
+        object_product = Subquery(model.objects.filter(pk=OuterRef("object_id")).values(path)[:1])
+        # An object that is gone has no product, so its events and entries add to no product of the manifest.
+        for key, rows in (
+            ("audit_events", events.values_list(f"pgh_obj__{path}").annotate(n=Count("pgh_id"))),
+            ("legacy_audit_entries", entries.annotate(object_product=object_product).values_list("object_product").annotate(n=Count("id"))),
+        ):
+            for product_id, n in rows:
+                if product_id is not None:
+                    counts[product_id][key] += n
+
+
+def product_counts(
+    max_file_bytes: int, *, file_counts: bool, import_history: bool, audit_history: bool,
+) -> dict[int, dict[str, int | None]]:
+    keys = count_keys(import_history=import_history, audit_history=audit_history)
     counts = defaultdict(lambda: {**dict.fromkeys(keys, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
@@ -312,13 +399,10 @@ def product_counts(max_file_bytes: int, *, file_counts: bool, import_history: bo
                 counts[product_id][key] += n
     # A risk acceptance reaches a product through two paths, so collect ids per product and count the union.
     for key, model, prefix in (("risk_acceptances", Risk_Acceptance, ""), ("notes", Risk_Acceptance.notes.through, "risk_acceptance__")):
-        ids = defaultdict(set)
-        for path in (f"{prefix}engagement__product_id", f"{prefix}accepted_findings__test__engagement__product_id"):
-            for product_id, found in model.objects.order_by().values_list(path).annotate(ids=ArrayAgg("id", distinct=True)):
-                if product_id is not None:
-                    ids[product_id].update(found)
-        for product_id, found in ids.items():
+        for product_id, found in ids_by_product(model, prefix).items():
             counts[product_id][key] += len(found)
+    if audit_history:
+        add_audit_history_counts(counts)
     storage = FileUpload._meta.get_field("file").storage
     over_cap = {}
     file_sources = (
@@ -339,10 +423,10 @@ def product_counts(max_file_bytes: int, *, file_counts: bool, import_history: bo
     return counts
 
 
-def _summed(products: list[dict], *, file_counts: bool, import_history: bool) -> dict[str, int | None]:
+def _summed(products: list[dict], *, file_counts: bool, import_history: bool, audit_history: bool) -> dict[str, int | None]:
     return {
         key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
-        for key in count_keys(import_history=import_history)
+        for key in count_keys(import_history=import_history, audit_history=audit_history)
     }
 
 
@@ -375,8 +459,10 @@ def deduplication_rules() -> dict:
     }
 
 
-def build_manifest(request, max_file_bytes: int, *, file_counts: bool, import_history: bool = False) -> dict:
-    counts = product_counts(max_file_bytes, file_counts=file_counts, import_history=import_history)
+def build_manifest(
+    request, max_file_bytes: int, *, file_counts: bool, import_history: bool = False, audit_history: bool = False,
+) -> dict:
+    counts = product_counts(max_file_bytes, file_counts=file_counts, import_history=import_history, audit_history=audit_history)
     products = [
         {
             "id": product.id,
@@ -405,7 +491,7 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool, import_hi
             "name": name,
             "counts": {
                 "products": len(members[pk]),
-                **_summed(members[pk], file_counts=file_counts, import_history=import_history),
+                **_summed(members[pk], file_counts=file_counts, import_history=import_history, audit_history=audit_history),
             },
         }
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
@@ -440,7 +526,7 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool, import_hi
         "totals": {
             "product_types": len(product_types),
             "products": len(products),
-            **_summed(products, file_counts=file_counts, import_history=import_history),
+            **_summed(products, file_counts=file_counts, import_history=import_history, audit_history=audit_history),
         },
     }
 
@@ -461,7 +547,13 @@ class ProductExportView(APIView):
         product = get_object_or_404(Product, pk=pk)
         params = export_params(request)
         return StreamingHttpResponse(
-            product_lines(product, request, params["max_file_bytes"], import_history=params["import_history"]),
+            product_lines(
+                product,
+                request,
+                params["max_file_bytes"],
+                import_history=params["import_history"],
+                audit_history=params["audit_history"],
+            ),
             content_type="application/x-ndjson",
             headers={
                 "Content-Disposition": f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"',
@@ -486,6 +578,10 @@ class ExportManifestView(APIView):
         params = export_params(request, ManifestParamsSerializer)
         return Response(
             build_manifest(
-                request, params["max_file_bytes"], file_counts=params["file_counts"], import_history=params["import_history"],
+                request,
+                params["max_file_bytes"],
+                file_counts=params["file_counts"],
+                import_history=params["import_history"],
+                audit_history=params["audit_history"],
             ),
         )

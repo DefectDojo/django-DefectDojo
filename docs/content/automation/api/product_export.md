@@ -42,7 +42,7 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
-| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history` and `audit_history` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines). An older instance has no `features` key. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history` and `audit_history` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines) and [Audit history lines](#audit-history-lines). An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
 | `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
 | `deduplication` | The deduplication rules that the customer set on the instance, as `{algorithm_per_parser, hashcode_fields_per_scanner, hashcode_allows_null_cwe}`. Each one is a map from a scan type to a value. The value is an algorithm or a list of hash fields. In `hashcode_allows_null_cwe` it is `true` or `false`, and says whether the hash accepts a missing CWE. A map holds the scan types whose value differs from the shipped settings. It also holds the scan types that DefectDojo does not ship. A scan type that the customer removed is listed with the value that DefectDojo then uses. That value is the `legacy` algorithm, an empty list of hash fields, or `true`. A removed scan type is not listed when that value is the shipped one. A map is empty when the customer changed nothing. An older instance has no `deduplication` key. |
@@ -70,7 +70,7 @@ The manifest takes these parameters:
 | `max_file_bytes` | integer, 0 to 104857600 (100 MiB) | `10485760` (10 MiB) | The file cap. A file larger than this counts in `files_over_cap`. See [Files](#files). |
 | `file_counts` | boolean | `true` | With `false`, the server does not read the size of each file in storage, and `files_over_cap` is `null`. |
 | `import_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `test_imports` and `test_import_actions`. See [Counts](#counts). |
-| `audit_history` | boolean | `false` | Reserved for the audit history. It has no effect yet. |
+| `audit_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `audit_events` and `legacy_audit_entries`. See [Counts](#counts). |
 
 An empty value, as in `?max_file_bytes=` or `?file_counts=`, uses the default.
 A `max_file_bytes` value that is not a whole number from 0 to 104857600 gets a 400.
@@ -96,7 +96,7 @@ curl -H "Authorization: Token <your API key>" \
 The response has the content type `application/x-ndjson`: one JSON object on each line.
 The `Content-Disposition` header names the file `defectdojo-product-2-export.ndjson`.
 The endpoint takes the same `max_file_bytes`, `import_history` and `audit_history` parameters as the manifest. It ignores `file_counts`.
-Without `import_history=true` the stream is the same as it was before the parameter existed.
+Without `import_history=true` and `audit_history=true` the stream is the same as it was before these parameters existed.
 
 The lines come in this order:
 
@@ -106,7 +106,9 @@ The lines come in this order:
 4. Every `finding`, by test and then by id within the test. You can group a test's findings as they arrive.
 5. Every `risk_acceptance`, by id.
 6. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
-7. One `end` line.
+7. With `audit_history=true`, every `audit_event`, by model and then by event id. See [Audit history lines](#audit-history-lines).
+8. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
+9. One `end` line.
 
 Each object has its own line and names its parent by id.
 Notes, files, endpoint entries and finding groups nest in their line.
@@ -126,6 +128,8 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
 | `test_import` | `data`: one import or reimport of a test. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
 | `test_import_actions` | `data`: some of the actions of one import. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
+| `audit_event` | `data`: one change of the product or of one of its objects, with the values after the change. Only with `audit_history=true`. See [Audit history lines](#audit-history-lines). |
+| `legacy_audit_entry` | `data`: one entry of the older audit log, for the product or for one of its objects. Only with `audit_history=true`. See [Audit history lines](#audit-history-lines). |
 | `end` | `counts`: what the stream wrote. See [Counts](#counts). |
 
 An example `header` line, shortened:
@@ -257,6 +261,56 @@ An example import, with its actions on one line:
 {"type": "test_import_actions", "data": {"test_import": 6829, "actions": [[232, "N", "2025-03-04T05:06:07.130000Z", "2025-03-04T05:06:07.130000Z"], [233, "C", "2025-03-04T05:06:07.140000Z", "2025-03-04T05:06:07.140000Z"]]}}
 ```
 
+### Audit history lines
+
+With `audit_history=true`, the stream sends the audit history of the product after the import history.
+DefectDojo keeps this history in two places. The `audit_event` lines hold the history that DefectDojo records today.
+The `legacy_audit_entry` lines hold the entries of the older audit log. DefectDojo no longer writes to that log, but the old entries stay.
+
+The history covers the product, its engagements, tests, findings, finding groups and risk acceptances.
+A risk acceptance is in the product when an engagement of the product holds it, or when it accepts a finding of the product.
+The stream does not send the history of an object that was deleted, because the object is not in the product any more.
+It does not send the history of any other model, for example users, endpoints and tags.
+
+An `audit_event` line has `data` with these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `model` | The model of the object: `dojo.product`, `dojo.engagement`, `dojo.test`, `dojo.finding`, `dojo.finding_group` or `dojo.risk_acceptance`. |
+| `pgh_id` | The id of the event. |
+| `pgh_created_at` | The time of the event, in ISO 8601. |
+| `pgh_label` | What happened: `insert`, `update`, `delete` or `initial_backfill`. |
+| `pgh_obj_id` | The id of the object. |
+| `data` | The object as it was after the event. It has every column of the object, by column name. A column that points to another object holds its id, and its name ends in `_id`, for example `test_id`. A date column is in ISO 8601, and a file column holds the file name. It never has a `pgh_` key. |
+| `context` | What DefectDojo recorded about the request or task that made the change: `id`, `created_at`, `updated_at` and `metadata`. `metadata` is an object, for example with `user`, `url` and `remote_addr`. It is `null` when the change has no context. |
+
+The events come by model, in the order of the `model` list above. Inside a model they come in the order of `pgh_id`.
+
+A `legacy_audit_entry` line has `data` with every field of the entry, by field name. These are the fields:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The id of the entry. |
+| `content_type` | The model of the object, as `app_label.model`, for example `dojo.finding`. It has the same values as `model` in an `audit_event` line. |
+| `object_pk`, `object_id` | The id of the object. `object_pk` is text and `object_id` is a number. |
+| `object_repr` | The text that named the object when the entry was written. |
+| `action` | `0` for a create, `1` for an update, `2` for a delete and `3` for an access. |
+| `changes`, `changes_text` | The changes, as the older log stored them. |
+| `serialized_data` | A copy of the object. It can be `null`. |
+| `actor_id`, `actor_email` | The user who made the change. They can be `null`. |
+| `cid`, `remote_addr`, `remote_port` | The correlation id and the address of the request. They can be `null`. |
+| `timestamp` | The time of the entry, in ISO 8601. |
+| `additional_data` | Extra data of the entry. It can be `null`. |
+
+The stream sends the entries of the six models above whose `object_id` is the id of an object of the product, by entry id.
+The ids inside `changes` stay as the older log wrote them.
+
+An example `audit_event` line, with the `data` of the finding shortened:
+
+```text
+{"type": "audit_event", "data": {"model": "dojo.finding", "pgh_id": 4120, "pgh_created_at": "2025-03-04T05:06:07.123456Z", "pgh_label": "update", "pgh_obj_id": 232, "data": {"id": 232, "title": "Edited", "test_id": 90, ...}, "context": {"id": "5f0d8d6e-8f0e-4a6f-8a53-0c1b6a5b7d11", "created_at": "2025-03-04T05:06:07.100000Z", "updated_at": "2025-03-04T05:06:07.100000Z", "metadata": {"user": 1, "url": "/finding/232/edit", "remote_addr": "192.0.2.10"}}}}
+```
+
 ### Files
 
 Engagement, test and finding lines carry their files in `files`. Each file entry has these keys:
@@ -299,6 +353,8 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
 | `test_imports` | Imports and reimports of the tests in the product. Only with `import_history=true`. | `test_import` lines. Only with `import_history=true`. |
 | `test_import_actions` | Actions of those imports. Only with `import_history=true`. | The actions on `test_import_actions` lines. Only with `import_history=true`. |
+| `audit_events` | Events of the objects that the audit history covers. Only with `audit_history=true`. | `audit_event` lines. Only with `audit_history=true`. |
+| `legacy_audit_entries` | Entries of the older audit log for those objects. Only with `audit_history=true`. | `legacy_audit_entry` lines. Only with `audit_history=true`. |
 
 The two sides agree on every key except `endpoints` and `finding_groups`.
 
@@ -319,6 +375,7 @@ An example `end` line:
 - CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
 - The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
 - Languages, technologies and benchmarks.
+- The audit history of every model that the [audit history lines](#audit-history-lines) do not name, and of any object that is no longer in the product.
 - User passwords and password hashes. A user entry has no `password` field.
 - Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement, the login banner and the deduplication rules are in the manifest.
 

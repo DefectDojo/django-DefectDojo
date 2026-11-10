@@ -1,7 +1,11 @@
 import base64
 import mimetypes
+from datetime import datetime
 from pathlib import Path
 
+from auditlog.models import LogEntry
+from django.apps import apps
+from django.db.models.fields.files import FieldFile
 from rest_framework import serializers
 
 from dojo.endpoint.api.serializer import EndpointStatusSerializer
@@ -65,7 +69,10 @@ class ExportParamsSerializer(serializers.Serializer):
     )
     audit_history = serializers.BooleanField(
         default=False,
-        help_text="Reserved for the audit history of the product. It has no effect yet.",
+        help_text=(
+            "Add the audit history of the product to the stream, and its counts to the manifest. The stream "
+            "sends audit_event lines, then legacy_audit_entry lines, after the import history."
+        ),
     )
 
 
@@ -226,6 +233,57 @@ class ExportTestImportSerializer(serializers.ModelSerializer):
             "id", "test", "type", "version", "build_id", "commit_hash", "branch_tag", "import_settings", "created", "modified",
         )
         read_only_fields = fields
+
+
+def audit_event_model(model):
+    return apps.get_model("dojo", f"{model.__name__}Event")
+
+
+def export_value(value):
+    if isinstance(value, datetime):
+        return render_datetime(value)
+    if isinstance(value, FieldFile):
+        return value.name
+    return value
+
+
+# One django-pghistory event row. Query it with select_related("pgh_context").
+class ExportAuditEventSerializer(serializers.BaseSerializer):
+    def __init__(self, model, **kwargs):
+        super().__init__(**kwargs)
+        self.label = model._meta.label_lower
+        self.columns = [
+            field.attname for field in audit_event_model(model)._meta.concrete_fields if not field.name.startswith("pgh_")
+        ]
+
+    def to_representation(self, event):
+        context = event.pgh_context
+        return {
+            "model": self.label,
+            "pgh_id": event.pgh_id,
+            "pgh_created_at": render_datetime(event.pgh_created_at),
+            "pgh_label": event.pgh_label,
+            "pgh_obj_id": event.pgh_obj_id,
+            "data": {column: export_value(getattr(event, column)) for column in self.columns},
+            "context": None if context is None else {
+                "id": context.id,
+                "created_at": render_datetime(context.created_at),
+                "updated_at": render_datetime(context.updated_at),
+                "metadata": context.metadata,
+            },
+        }
+
+
+# One django-auditlog entry. Query it with select_related("content_type").
+class ExportLegacyAuditEntrySerializer(serializers.BaseSerializer):
+    def to_representation(self, entry):
+        data = {
+            field.attname: export_value(getattr(entry, field.attname))
+            for field in LogEntry._meta.concrete_fields
+            if field.name != "content_type"
+        }
+        data["content_type"] = f"{entry.content_type.app_label}.{entry.content_type.model}"
+        return data
 
 
 class ExportToolConfigurationSerializer(ToolConfigurationSerializer):

@@ -5,8 +5,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from unittest import mock
 
+import pghistory
+from auditlog.models import LogEntry
+from django.apps import apps
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.urls import reverse
 from drf_spectacular.generators import SchemaGenerator
@@ -65,6 +70,7 @@ from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_type.models import Tool_Type
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
+FindingEvent = apps.get_model("dojo", "FindingEvent")
 RAW_REQUEST = b"GET / HTTP/1.1\r\nX: \xff\xfe\r\n"
 RAW_RESPONSE = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nbody\r\n\r\n"
 
@@ -790,6 +796,264 @@ class TestExportImportHistory(DojoAPITestCase):
             for name in ("import_history", "audit_history"):
                 with self.subTest(url=url, name=name):
                     self.assertEqual(400, self.client.get(url, {name: "maybe"}).status_code)
+
+
+@versioned_fixtures
+class TestExportAuditHistory(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+    AUDIT_LABELS = ["dojo.product", "dojo.engagement", "dojo.test", "dojo.finding", "dojo.finding_group", "dojo.risk_acceptance"]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = Dojo_User.objects.get(username="admin")
+        cls.finding = Finding.objects.filter(test__engagement__product_id=2).order_by("id").first()
+        cls.other_product_finding = Finding.objects.filter(test__engagement__product_id=1).order_by("id").first()
+        cls.group = Finding_Group.objects.create(name="grp", test=cls.finding.test, creator=cls.admin)
+        # One acceptance held by an engagement, one that only accepts a finding, one of another product, one of both.
+        cls.held = Risk_Acceptance.objects.create(name="held", owner=cls.admin)
+        cls.finding.test.engagement.risk_acceptance.add(cls.held)
+        cls.accepting = Risk_Acceptance.objects.create(name="accepting", owner=cls.admin)
+        cls.accepting.accepted_findings.add(cls.finding)
+        cls.foreign = Risk_Acceptance.objects.create(name="foreign", owner=cls.admin)
+        cls.foreign.accepted_findings.add(cls.other_product_finding)
+        cls.shared = Risk_Acceptance.objects.create(name="shared", owner=cls.admin)
+        cls.shared.accepted_findings.add(cls.finding, cls.other_product_finding)
+        cls.finding_type = ContentType.objects.get_for_model(Finding)
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+
+    def export(self, product_id=2, **params):
+        return ndjson_lines(self.client.get(reverse("export-product", args=[product_id]), params))
+
+    def sent(self, lines, line_type):
+        return [line["data"] for line in lines if line["type"] == line_type]
+
+    def legacy_entry(self, obj, **fields):
+        return LogEntry.objects.create(
+            content_type=ContentType.objects.get_for_model(type(obj)),
+            object_pk=str(obj.pk),
+            object_id=obj.pk,
+            object_repr="obj",
+            action=1,
+            changes={"title": ["A", "B"]},
+            **fields,
+        )
+
+    def legacy_entry_for_every_model(self):
+        test = self.finding.test
+        for obj in (test.engagement.product, test.engagement, test, self.finding, self.group, self.shared, self.foreign):
+            self.legacy_entry(obj)
+
+    def objects_of(self, product_id):
+        acceptances = Q(engagement__product_id=product_id) | Q(accepted_findings__test__engagement__product_id=product_id)
+        return {
+            Product: {product_id},
+            Engagement: set(Engagement.objects.filter(product_id=product_id).values_list("id", flat=True)),
+            Test: set(Test.objects.filter(engagement__product_id=product_id).values_list("id", flat=True)),
+            Finding: set(Finding.objects.filter(test__engagement__product_id=product_id).values_list("id", flat=True)),
+            Finding_Group: set(Finding_Group.objects.filter(test__engagement__product_id=product_id).values_list("id", flat=True)),
+            Risk_Acceptance: set(Risk_Acceptance.objects.filter(acceptances).values_list("id", flat=True)),
+        }
+
+    def expected_counts(self, product_id):
+        events = entries = 0
+        for model, ids in self.objects_of(product_id).items():
+            events += apps.get_model("dojo", f"{model.__name__}Event").objects.filter(pgh_obj_id__in=ids).count()
+            entries += LogEntry.objects.filter(content_type=ContentType.objects.get_for_model(model), object_id__in=ids).count()
+        return {"audit_events": events, "legacy_audit_entries": entries}
+
+    def test_the_stream_has_no_audit_lines_by_default(self):
+        self.legacy_entry(self.finding)
+        for params in ({}, {"audit_history": "false"}):
+            lines = self.export(**params)
+            self.assertEqual({"header", "engagement", "test", "finding", "risk_acceptance", "end"}, {line["type"] for line in lines})
+            self.assertEqual(set(COUNT_KEYS), set(lines[-1]["counts"]))
+
+    def test_audit_history_alone_adds_the_audit_lines_and_their_counts(self):
+        self.legacy_entry(self.finding)
+        lines = self.export(audit_history="true")
+        self.assertEqual({"audit_event", "legacy_audit_entry"}, {line["type"] for line in lines} - {"header", "engagement", "test", "finding", "risk_acceptance", "end"})
+        self.assertEqual(set(COUNT_KEYS) | {"audit_events", "legacy_audit_entries"}, set(lines[-1]["counts"]))
+
+    def test_the_audit_lines_come_after_the_import_history_and_before_the_end_line(self):
+        self.legacy_entry(self.finding)
+        rank = {"risk_acceptance": 0, "test_import": 1, "test_import_actions": 1, "audit_event": 2, "legacy_audit_entry": 3, "end": 4}
+        kinds = [line["type"] for line in self.export(import_history="true", audit_history="true") if line["type"] in rank]
+        self.assertEqual(sorted(kinds, key=rank.__getitem__), kinds)
+        self.assertEqual({0, 1, 2, 3, 4}, {rank[kind] for kind in kinds})
+
+    def test_audit_events_are_the_product_s_objects_events_with_their_context(self):
+        with pghistory.context(user=self.admin.id, url="/finding/1", remote_addr="192.0.2.10"):
+            self.finding.title = "Edited"
+            self.finding.save()
+        events = self.sent(self.export(audit_history="true"), "audit_event")
+        edit = next(e for e in events if e["model"] == "dojo.finding" and e["pgh_label"] == "update")
+        self.assertEqual("Edited", edit["data"]["title"])
+        self.assertEqual("/finding/1", edit["context"]["metadata"]["url"])
+        self.assertNotIn(self.other_product_finding.id, {e["pgh_obj_id"] for e in events if e["model"] == "dojo.finding"})
+
+    def test_an_event_carries_the_source_values_and_dates(self):
+        with pghistory.context(user=self.admin.id):
+            self.finding.title = "Edited"
+            self.finding.save()
+        events = self.sent(self.export(audit_history="true"), "audit_event")
+        edit = next(e for e in events if e["model"] == "dojo.finding" and e["pgh_label"] == "update" and e["pgh_obj_id"] == self.finding.id)
+        row = FindingEvent.objects.select_related("pgh_context").get(pgh_id=edit["pgh_id"])
+        self.assertEqual({"model", "pgh_id", "pgh_created_at", "pgh_label", "pgh_obj_id", "data", "context"}, set(edit))
+        self.assertEqual(render_datetime(row.pgh_created_at), edit["pgh_created_at"])
+        self.assertEqual(row.pgh_created_at, datetime.fromisoformat(edit["pgh_created_at"]))
+        self.assertEqual(
+            {field.attname for field in FindingEvent._meta.concrete_fields if not field.name.startswith("pgh_")}, set(edit["data"]),
+        )
+        self.assertEqual((self.finding.id, self.finding.test_id), (edit["data"]["id"], edit["data"]["test_id"]))
+        for field in FindingEvent._meta.concrete_fields:
+            value = getattr(row, field.attname)
+            if isinstance(value, datetime) and not field.name.startswith("pgh_"):
+                self.assertEqual(render_datetime(value), edit["data"][field.attname], field.attname)
+        self.assertEqual(
+            {"id": str(row.pgh_context_id), "created_at": render_datetime(row.pgh_context.created_at),
+             "updated_at": render_datetime(row.pgh_context.updated_at), "metadata": row.pgh_context.metadata},
+            edit["context"],
+        )
+        self.assertEqual(self.admin.id, edit["context"]["metadata"]["user"])
+
+    def test_an_event_with_no_context_has_a_null_context(self):
+        events = self.sent(self.export(audit_history="true"), "audit_event")
+        row = FindingEvent.objects.filter(pgh_context__isnull=True, pgh_obj_id=self.finding.id).order_by("pgh_id").first()
+        self.assertIsNotNone(row)
+        sent = next(e for e in events if e["model"] == "dojo.finding" and e["pgh_id"] == row.pgh_id)
+        self.assertIsNone(sent["context"])
+
+    def test_a_risk_acceptance_event_sends_the_file_name(self):
+        proof = Risk_Acceptance.objects.create(name="proof", owner=self.admin, path=ContentFile(b"proof", name="waiver.txt"))
+        self.addCleanup(proof.path.storage.delete, proof.path.name)
+        proof.accepted_findings.add(self.finding)
+        events = self.sent(self.export(audit_history="true"), "audit_event")
+        sent = [e for e in events if e["model"] == "dojo.risk_acceptance" and e["pgh_obj_id"] == proof.id]
+        self.assertTrue(sent)
+        self.assertEqual({proof.path.name}, {e["data"]["path"] for e in sent})
+
+    def test_events_come_in_model_order_then_pgh_id_and_cover_the_six_models(self):
+        events = self.sent(self.export(audit_history="true"), "audit_event")
+        labels = [e["model"] for e in events]
+        self.assertEqual(sorted(labels, key=self.AUDIT_LABELS.index), labels)
+        for model, ids in self.objects_of(2).items():
+            label = model._meta.label_lower
+            mine = [e for e in events if e["model"] == label]
+            self.assertEqual(sorted(e["pgh_id"] for e in mine), [e["pgh_id"] for e in mine], label)
+            self.assertEqual(ids, {e["pgh_obj_id"] for e in mine}, label)
+        self.assertEqual(set(self.AUDIT_LABELS), set(labels))
+
+    def test_risk_acceptance_events_follow_either_link_and_skip_other_products(self):
+        ids = {
+            product_id: {
+                e["pgh_obj_id"]
+                for e in self.sent(self.export(product_id, audit_history="true"), "audit_event")
+                if e["model"] == "dojo.risk_acceptance"
+            }
+            for product_id in (1, 2)
+        }
+        self.assertLessEqual({self.held.id, self.accepting.id, self.shared.id}, ids[2])
+        self.assertNotIn(self.foreign.id, ids[2])
+        self.assertLessEqual({self.foreign.id, self.shared.id}, ids[1])
+        self.assertFalse({self.held.id, self.accepting.id} & ids[1])
+
+    def test_a_deleted_object_s_events_are_not_sent(self):
+        doomed = Finding.objects.create(title="doomed", test=self.finding.test, reporter=self.admin, severity="Low")
+        self.legacy_entry(doomed)
+        doomed_id = doomed.id
+        doomed.delete()
+        self.assertTrue(FindingEvent.objects.filter(pgh_obj_id=doomed_id, pgh_label="delete").exists())
+        lines = self.export(audit_history="true")
+        sent = {e["pgh_obj_id"] for e in self.sent(lines, "audit_event") if e["model"] == "dojo.finding"}
+        self.assertIn(self.finding.id, sent)
+        self.assertNotIn(doomed_id, sent)
+        self.assertNotIn(doomed_id, {e["object_id"] for e in self.sent(lines, "legacy_audit_entry")})
+
+    def test_legacy_entries_of_the_product_s_objects_are_sent(self):
+        LogEntry.objects.create(
+            content_type=self.finding_type, object_pk=str(self.finding.id), object_id=self.finding.id, object_repr="F", action=1,
+            changes={"title": ["A", "B"]},
+        )
+        entries = self.sent(self.export(audit_history="true"), "legacy_audit_entry")
+        sent = next(e for e in entries if e["content_type"] == "dojo.finding" and e["object_id"] == self.finding.id)
+        self.assertEqual({"title": ["A", "B"]}, sent["changes"])
+
+    def test_a_legacy_entry_carries_every_field_by_attname(self):
+        stamp = datetime(2020, 1, 2, 3, 4, 5, 678901, tzinfo=UTC)
+        entry = self.legacy_entry(
+            self.finding, actor=self.admin, remote_addr="192.0.2.10", remote_port=443, cid="c1", actor_email="a@example.com",
+            additional_data={"k": "v"}, serialized_data={"s": 1},
+        )
+        LogEntry.objects.filter(id=entry.id).update(timestamp=stamp)
+        entry.refresh_from_db()
+        sent = next(e for e in self.sent(self.export(audit_history="true"), "legacy_audit_entry") if e["id"] == entry.id)
+        concrete = {field.attname for field in LogEntry._meta.concrete_fields}
+        self.assertEqual((concrete - {"content_type_id"}) | {"content_type"}, set(sent))
+        self.assertEqual("2020-01-02T03:04:05.678901Z", sent["timestamp"])
+        self.assertEqual(
+            (self.admin.id, "192.0.2.10", 443, "c1", "a@example.com", {"k": "v"}, {"s": 1}, 1, str(self.finding.id), "obj"),
+            (sent["actor_id"], sent["remote_addr"], sent["remote_port"], sent["cid"], sent["actor_email"], sent["additional_data"],
+             sent["serialized_data"], sent["action"], sent["object_pk"], sent["object_repr"]),
+        )
+
+    def test_legacy_entries_are_limited_to_the_product_s_audited_models_and_objects(self):
+        mine = [self.legacy_entry(self.finding), self.legacy_entry(self.finding.test), self.legacy_entry(self.held)]
+        foreign = [self.legacy_entry(self.other_product_finding), self.legacy_entry(self.foreign)]
+        not_audited = [self.legacy_entry(Notes.objects.create(entry="n", author=self.admin))]
+        mine.append(self.legacy_entry(self.finding))
+        ids = [e["id"] for e in self.sent(self.export(audit_history="true"), "legacy_audit_entry")]
+        self.assertEqual(sorted(ids), ids)
+        self.assertLessEqual({e.id for e in mine}, set(ids))
+        self.assertFalse({e.id for e in foreign + not_audited} & set(ids))
+
+    def test_the_end_counts_match_the_lines_and_the_database(self):
+        self.legacy_entry_for_every_model()
+        for product_id in (1, 2, 3):
+            lines = self.export(product_id, audit_history="true")
+            counts = lines[-1]["counts"]
+            self.assertEqual(len(self.sent(lines, "audit_event")), counts["audit_events"])
+            self.assertEqual(len(self.sent(lines, "legacy_audit_entry")), counts["legacy_audit_entries"])
+            expected = self.expected_counts(product_id)
+            self.assertEqual(expected, {key: counts[key] for key in expected}, product_id)
+
+    def test_the_manifest_counts_appear_only_when_asked_and_match_the_end_line(self):
+        self.legacy_entry_for_every_model()
+        url = reverse("export-manifest")
+        plain = self.client.get(url).json()
+        self.assertNotIn("audit_events", plain["totals"])
+        self.assertNotIn("legacy_audit_entries", plain["totals"])
+        manifest = self.client.get(url, {"audit_history": "true"}).json()
+        keys = ("audit_events", "legacy_audit_entries")
+        for entry in manifest["products"]:
+            self.assertEqual(set(COUNT_KEYS) | set(keys), set(entry["counts"]))
+            end = self.export(entry["id"], audit_history="true")[-1]["counts"]
+            for key in keys:
+                self.assertEqual(end[key], entry["counts"][key], (entry["id"], key))
+        self.assertNotIn("test_imports", manifest["totals"])
+        for key in keys:
+            self.assertGreater(manifest["totals"][key], 0, key)
+            self.assertEqual(sum(entry["counts"][key] for entry in manifest["products"]), manifest["totals"][key], key)
+            for product_type in manifest["product_types"]:
+                members = [entry for entry in manifest["products"] if entry["prod_type"] == product_type["id"]]
+                self.assertEqual(sum(entry["counts"][key] for entry in members), product_type["counts"][key], key)
+        self.assertNotIn("audit_events", self.get_results_by_id(plain["products"], 2)["counts"])
+
+    def test_the_manifest_counts_ignore_the_history_of_deleted_objects(self):
+        def counts():
+            manifest = self.client.get(reverse("export-manifest"), {"audit_history": "true"}).json()
+            return {key: self.get_results_by_id(manifest["products"], 2)["counts"][key] for key in ("audit_events", "legacy_audit_entries")}
+
+        baseline = counts()
+        doomed = Finding.objects.create(title="doomed", test=self.finding.test, reporter=self.admin, severity="Low")
+        self.legacy_entry(doomed)
+        grown = counts()
+        self.assertGreater(grown["audit_events"], baseline["audit_events"])
+        self.assertGreater(grown["legacy_audit_entries"], baseline["legacy_audit_entries"])
+        doomed.delete()
+        self.assertEqual(baseline, counts())
 
 
 @versioned_fixtures

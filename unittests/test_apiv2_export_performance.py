@@ -1,6 +1,9 @@
 import base64
 from unittest.mock import patch
 
+import pghistory
+from auditlog.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -110,6 +113,20 @@ class TestProductExportQueryCount(DojoAPITestCase):
                 finding = Finding.objects.create(title=f"{prefix}-{i}-{n}", test=test, reporter=self.admin, severity="Low")
                 Test_Import_Finding_Action.objects.create(test_import=test_import, finding=finding, action="N")
 
+    def add_audit_history(self, product: Product, count: int, prefix: str) -> None:
+        test = Test.objects.filter(engagement__product=product).order_by("id").first()
+        content_type = ContentType.objects.get_for_model(Finding)
+        for i in range(count):
+            finding = Finding.objects.create(title=f"{prefix}-{i}", test=test, reporter=self.admin, severity="Low")
+            with pghistory.context(user=self.admin.id):
+                finding.title = f"{prefix}-{i} edited"
+                finding.save()
+            LogEntry.objects.create(
+                content_type=content_type, object_pk=str(finding.id), object_id=finding.id, object_repr="F", action=1, changes={},
+            )
+            risk_acceptance = Risk_Acceptance.objects.create(name=f"{prefix}-{i}", owner=self.admin)
+            risk_acceptance.accepted_findings.add(finding)
+
     def measure(self, url) -> int:
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(url)
@@ -162,3 +179,20 @@ class TestProductExportQueryCount(DojoAPITestCase):
         self.add_imports(self.product, 4, "j")
         q_b = self.measure(url)
         self.assertEqual(q_a, q_b, f"The export stream issues {q_a} queries with 4 added imports and {q_b} with 8.")
+
+    def test_manifest_query_count_is_constant_with_audit_history(self):
+        url = reverse("export-manifest") + "?audit_history=true"
+        self.measure(url)
+        before = self.measure(url)
+        self.add_audit_history(self.product, 4, "k")
+        after = self.measure(url)
+        self.assertEqual(before, after, f"The manifest issues {before} queries before the added history and {after} after.")
+
+    def test_stream_query_count_is_constant_across_audit_history(self):
+        url = self.url + "?audit_history=true"
+        self.measure(url)
+        self.add_audit_history(self.product, 4, "l")
+        q_a = self.measure(url)
+        self.add_audit_history(self.product, 4, "m")
+        q_b = self.measure(url)
+        self.assertEqual(q_a, q_b, f"The export stream issues {q_a} queries with 4 added findings of history and {q_b} with 8.")
