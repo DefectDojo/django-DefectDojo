@@ -1,9 +1,15 @@
+from unittest.mock import patch
+
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import Permission
+from django.db import DEFAULT_DB_ALIAS, connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from dojo.models import Finding, Notes, Regulation, User
+from dojo.api_v2.mixins import DELETE_PREVIEW_MAX_PAGE_SIZE
+from dojo.models import Endpoint, Finding, Notes, Product, Regulation, Test, User
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
@@ -45,6 +51,112 @@ class DeletePreviewPermissionTest(DojoTestCase):
         response = self._client(admin).get(reverse("user-delete-preview", args=(self.author.id,)))
         self.assertEqual(200, response.status_code, response.content[:500])
         self.assertIn("Notes", [row["model"] for row in response.json()["results"]])
+
+
+@versioned_fixtures
+class DeletePreviewBoundTest(DojoTestCase):
+
+    """
+    delete_preview pages through the cascade in SQL and renders only the page asked for.
+
+    It used to load and render every object a delete would remove before paginating, which on a
+    product with millions of findings ran for many minutes and held gigabytes of memory.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.admin = User.objects.get(username="admin")
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.get_or_create(user=self.admin)[0].key)
+        self.test = Test.objects.get(id=3)
+        Finding.objects.bulk_create(
+            Finding(
+                test=self.test,
+                title=f"Bounded preview finding {i}",
+                severity="Low",
+                numerical_severity="S3",
+                reporter=self.admin,
+                date=self.test.target_start.date(),
+            )
+            for i in range(DELETE_PREVIEW_MAX_PAGE_SIZE + 10)
+        )
+
+    def _preview(self, basename, pk, **params):
+        response = self.client.get(reverse(f"{basename}-delete-preview", args=(pk,)), params)
+        self.assertEqual(200, response.status_code, response.content[:500])
+        return response.json()
+
+    def _collector_rows(self, obj):
+        """What Django's deletion Collector would remove, as (model, id) pairs."""
+        with Endpoint.allow_endpoint_init():
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([obj])
+
+            def flatten(elem):
+                if isinstance(elem, list):
+                    for child in elem:
+                        yield from flatten(child)
+                else:
+                    yield elem
+
+            return sorted((type(x).__name__, getattr(x, "id", None)) for x in flatten(collector.nested()))
+
+    def _all_pages(self, basename, pk):
+        rows, offset = [], 0
+        while True:
+            page = self._preview(basename, pk, limit=100, offset=offset)
+            rows.extend((row["model"], row["id"]) for row in page["results"])
+            offset += 100
+            if offset >= page["count"]:
+                return sorted(rows), page["count"]
+
+    def test_renders_only_the_requested_page(self):
+        with patch.object(Finding, "__str__", autospec=True, side_effect=lambda finding: finding.title) as rendered:
+            body = self._preview("test", self.test.id, limit=5)
+        self.assertLessEqual(rendered.call_count, 5)
+        self.assertEqual(5, len(body["results"]))
+        self.assertEqual(len(self._collector_rows(self.test)), body["count"])
+
+    def test_page_size_is_capped(self):
+        body = self._preview("test", self.test.id, limit=100000)
+        self.assertGreater(body["count"], DELETE_PREVIEW_MAX_PAGE_SIZE)
+        self.assertEqual(DELETE_PREVIEW_MAX_PAGE_SIZE, len(body["results"]))
+        self.assertIsNotNone(body["next"])
+
+    def test_pages_list_what_the_collector_would_delete(self):
+        for basename, obj in (
+            ("product", Product.objects.get(id=2)),
+            ("test", self.test),
+            ("user", User.objects.create(username="delete-preview-bound-user")),
+        ):
+            with self.subTest(basename=basename):
+                Notes.objects.create(entry="preview note", author=self.admin)
+                rows, count = self._all_pages(basename, obj.id)
+                expected = self._collector_rows(obj)
+                self.assertEqual(expected, rows)
+                self.assertEqual(len(expected), count)
+
+    def test_cascade_subqueries_are_not_sorted(self):
+        # A model's Meta.ordering inside an IN (SELECT ...) makes Postgres sort every parent row on each
+        # walk step: on a product with millions of findings each one took seconds.
+        with CaptureQueriesContext(connection) as captured:
+            self._preview("product", 2)
+        walk_queries = [query["sql"] for query in captured.captured_queries if "IN (SELECT" in query["sql"]]
+        self.assertTrue(walk_queries)
+        for sql in walk_queries:
+            self.assertLessEqual(sql.count("ORDER BY"), 1, sql)
+
+    def test_cascade_deeper_than_the_guard_stops_walking(self):
+        with patch("dojo.api_v2.mixins.DELETE_PREVIEW_MAX_DEPTH", 0), self.assertLogs("dojo.api_v2.mixins", "WARNING"):
+            rows, _ = self._all_pages("product", 2)
+        models = {model for model, _ in rows}
+        self.assertIn("Engagement", models)
+        self.assertNotIn("Test", models)
+
+    def test_root_object_comes_first(self):
+        body = self._preview("product", 2, limit=1)
+        self.assertEqual([{"model": "Product", "id": 2, "name": str(Product.objects.get(id=2))}], body["results"])
 
 
 @versioned_fixtures
