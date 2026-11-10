@@ -446,6 +446,29 @@ A few rules keep this endpoint cheap to call, whatever the size of the underlyin
 - Like `download/`, the endpoint responds `404` until the run is `completed`.
 - `csv`, `xlsx` and `json` runs have no text rendition — their rows are already machine-readable through `download/` — so `content/` answers `200` with `"content": null` for them.
 
+**Delete a run.** `DELETE /generated_reports/{id}/` answers `204` and removes the file and its text rendition. The user who requested the report can delete it while they can still view generated reports; so can anyone holding **Generated Report Delete** as a global role, and, for a report generated for a group, a member whose membership role in that group carries **Generated Report Delete**. Anyone else who can see the report gets `403`. Each report in a response carries `can_delete`, which is `true` exactly when this call would succeed for you.
+
+### Generated reports and groups
+
+With [Group ownership](../report-builder/#generated-reports-and-groups) on, every report in a `/generated_reports/` response also carries `owner_group` (the group it was generated for, or `null`), `owner_group_name`, `visibility` (`group`, `shared`, or `orphaned` once its group has been deleted), `shared_groups` (each with `id` and `name`, for a shared report) and `can_share`.
+
+- **Generate for a group** by adding `owner_group` (a group id) to the `POST /generated_reports/` or `POST /generated_reports/quick_report/` body. The report is built with that group's access rather than yours, and its graphs are drawn on the server with that access: any `chart_snapshots` in the body are ignored. You must be a member of the group with a membership role that carries **Generated Report Add**. A group you cannot see, or one that does not exist, answers `400` with `"That group does not exist."` under `owner_group`. `GET /generated_reports/owner_choices/` lists the groups you can generate for under `groups`.
+- **Share** a report generated as yourself with `POST /generated_reports/{id}/share/` and a body of `visibility` (`group` to stop sharing, or `shared`) plus `shared_groups` (a list of group ids) for `shared`. There is no `everyone`. Each group must be able to see all of the data in the report for its Template, or the call answers `400` and names the group; that check runs again on every read. Only the requester, or someone holding **Generated Report Delete** as a global role, can share (`403` otherwise).
+- **List by owner** with `scope` (`mine`: generated for a group you belong to; `shared`: shared with one of your groups; `instance`: generated for no group) or `owner_group=<id>`. Both narrow what you can already see.
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/generated_reports/" \
+  -d '{
+    "template_id": 5,
+    "file_format": "pdf",
+    "owner_group": 3
+  }'
+```
+
 ## Step 4: Run a report on a schedule
 
 A report schedule is a standing version of the request in Step 3: the template, format and runtime filters to run, plus a cron cadence. DefectDojo's scheduling service generates a new report on every tick, and each one appears in `/generated_reports/` as an ordinary run, so the polling, download and `content/` calls above work unchanged. Report schedules are available from DefectDojo Pro 3.3.300.

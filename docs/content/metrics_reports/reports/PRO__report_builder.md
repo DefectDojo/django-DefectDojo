@@ -239,11 +239,13 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Who can see Generated Reports
 
-The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. Deleting a Generated Report needs a global role.
+The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. With [Group ownership](#generated-reports-and-groups) on, a group's members also see the reports generated for their group and the reports shared with it.
+
+Whoever requested a Generated Report can delete it, as long as they can still open **Generated Reports**. Anyone holding **Generated Report Delete** as a global role can delete any report they can see, and a member of a group whose membership role carries **Generated Report Delete** can delete the reports generated for that group. **Delete Report** appears in a report's menu only when you can delete it.
 
 **Templates**, **Blocks** and **Themes** are owned either by the instance or by a group (see [Group ownership](#group-ownership)). The Report Builder's **Templates**, **Blocks** and **Themes** pages, and the matching entries under **Reporting** in the sidebar, need a global role. A member of a group whose membership role carries **Report Template View** finds the group's templates, blocks and themes on the **Report Templates** tab of the group's page. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
 
-A group's report schedule runs as the group's automation identity, so the reports it generates are requested by that identity. Members of the group hold the same access the identity holds, so they can read those reports in **Generated Reports**.
+A group's report schedule runs as the group's automation identity, so the reports it generates are requested by that identity and belong to the group. Members of the group hold the same access the identity holds, so they can read those reports in **Generated Reports**.
 
 ### Report retention
 
@@ -330,9 +332,27 @@ Who can change a schedule depends on its owner:
 
 Membership is required to create or change a group's schedule because the schedule acts with the group's access.
 
+### Generated reports and groups
+
+A Generated Report holds the data of whoever it was generated as. Group Ownership gives a group's members two ways to read a report, and both keep that data within what the group can see.
+
+**Generate for a group.** The **Generate Report** and **Quick Export** dialogs have a **Generate For** field. It offers **Myself** and each group where your membership role carries **Generated Report Add**, and it appears only when there is such a group. A report generated for a group is built as the group's automation identity, so it holds only the Organizations and Assets the group has been granted, even when you can see more. Its graphs are drawn on the server with the group's access rather than captured in your browser, so they can look a little different from the graphs in a report you generate for yourself. You stay its requester.
+
+* Members of the group whose membership role carries **Generated Report View** can read and download it.
+* Its requester, a member whose membership role in the group carries **Generated Report Delete**, or anyone holding **Generated Report Delete** as a global role can delete it.
+* Reports from a group's [report schedule](#report-schedules), or from a Triage Engine rule the group owns, belong to the group in the same way.
+
+**Share a report you generated.** **Share**, in a report's menu, sets **Visible To**: **Not Shared**, or **Specific Groups** with the groups you choose. Only the person who requested the report, or someone holding **Generated Report Delete** as a global role, can share it. A report can only be shared with a group that can see all of the data in it: for every Organization and Asset the requester could see, the group must hold the same access for what the report's Template reads. If a group cannot, sharing is refused and the message suggests generating the report for that group instead. DefectDojo checks this again every time the report is read, so if the requester later gains access the group does not have, the report stops showing for the group's members. A report generated for a group is not shared further.
+
+The **Generated Reports** list has an **Owner** column (the group a report was generated for, and **Shared** when it is shared with groups) and a filter on it: **My Groups**, **Shared With Me** and **No Group**.
+
+Reports generated before Group Ownership was turned on, and reports generated as yourself, belong to no group. While Group Ownership is off, every report is read under the requester rule in [Who can see Generated Reports](#who-can-see-generated-reports) alone.
+
 ### Unowned items
 
 Deleting a group does not delete what it owned. Its templates, blocks and themes are hidden from everyone except superusers and holders of **Report Template View** as a global role, and its schedules stop running. They wait under **Settings > Groups > Unowned Content**, which also lists report schedules whose creator was deleted or deactivated. Anyone holding **Report Template Edit** as a global role can open that page, select rows, and **Transfer** them to a group or to the instance in one step. A schedule moves into a group only once its Template is that group's, so transfer the Template first.
+
+A deleted group's Generated Reports are not transferred. Each is shown as **Unowned** and only the person who requested it (and superusers) can still read it. A report for the group that had not finished generating fails rather than running with its requester's access.
 
 ## Building a report in the UI
 
@@ -380,13 +400,13 @@ The trash icon on a Block's row takes it out of this Template only; the Block it
 
 ### Step 4: Generate and download
 
-When the Template is ready, generate the report. If the Template uses [template variables](#template-variables), the dialog first asks what the report is about: a finding, an asset or a vulnerability ID, only the ones the Template uses. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
+When the Template is ready, generate the report. If the Template uses [template variables](#template-variables), the dialog first asks what the report is about: a finding, an asset or a vulnerability ID, only the ones the Template uses. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. With Group Ownership on, **Generate For** lets you generate the report for one of your groups instead of yourself (see [Generated reports and groups](#generated-reports-and-groups)). Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 
 When the report finishes, a notice says it is ready and links to its row in the Generated Reports list. A large report can take longer than the dialog waits for (about a minute). It then keeps generating in the background, the dialog closes, and the notice links to its row in the Generated Reports list.
 
-Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser or download it.
+Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser, download it, share it with groups or delete it.
 
 ![Generated reports list](images/pro_generated_reports_list.png)
 
