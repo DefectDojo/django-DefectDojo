@@ -94,8 +94,10 @@ or disable them first.
 Any Integer or Decimal custom field can be **computed**: DefectDojo fills its value in with a
 formula, and nobody types it. A typical use is a health score for each Asset, or a weighted risk on
 each Finding. Give the field a formula when you add it, or type one into the **Options or Formula**
-column of its row; clearing the formula makes the field an ordinary one again. **Insert Number**
-beside the formula lists every number it can read.
+column of its row; clearing the formula makes the field an ordinary one again. Because a formula
+replaces every value already entered in the field, DefectDojo asks before an existing field becomes
+computed, and again before a computed field goes back to being entered by hand (its values stay as
+last computed). **Insert Number** beside the formula lists every number it can read.
 
 A formula reads the record's own numbers:
 
@@ -139,15 +141,16 @@ stop reading it; the message names them.
 ### When values are recomputed
 
 - **After Findings change.** Saving or deleting a Finding (including an import) recomputes, shortly
-  afterwards, every computed field on its Asset, Organization, Engagements, Tests, the Risk
-  Acceptances on its Engagements, and the Asset's Findings.
+  afterwards, the Finding's own computed fields and every computed field on its Asset, Organization,
+  Engagements, Tests and the Risk Acceptances on its Engagements.
 - **After an input changes.** Changing a custom field value that a computed formula reads (by hand,
   through the API or from a rule) recomputes that record, and a Finding's value recomputes its Asset.
   Saving an Asset or a Test recomputes it when a formula reads its built-in numbers.
 - **When the formula changes**, the field and every computed field that reads it are recomputed for
   every record at once.
 - **Every hour**, every computed field is recomputed in full. That catches changes made without saving
-  each record, such as bulk updates, priority recalculations and records moving between Assets.
+  each record, such as bulk updates, priority recalculations and records moving between Assets. A
+  sweep still running when the next hour comes is never overlapped; the next one is skipped.
 
 When a computed field gets a new value, the Triage Engine hears it the same way as a rule writing that
 field. On an Asset, a rule triggered [On Asset Event](/automation/triage_engine/node_reference/#on-asset-event)
