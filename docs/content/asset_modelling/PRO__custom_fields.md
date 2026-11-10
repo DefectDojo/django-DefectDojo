@@ -46,6 +46,8 @@ add the fields that apply to it. Each definition has:
   required field always appears on those forms and cannot be hidden from them.
 - **Allow Other** (Single Select and Multi Select only): whether the field also offers an **Other**
   choice that takes a typed value. See [The Other choice](#the-other-choice).
+- **Formula** (Integer and Decimal fields): fills the value in from the record's numbers instead of
+  by hand. See [Computed fields](#computed-fields).
 
 ### Data types
 
@@ -86,6 +88,83 @@ says how many records hold one. Change those records to one of the defined optio
 typed text to the field's options, which makes it an ordinary option. It is also refused while an
 enabled rule sets the field to a value outside its options, and the message names those rules: update
 or disable them first.
+
+## Computed fields
+
+Any Integer or Decimal custom field can be **computed**: DefectDojo fills its value in with a
+formula, and nobody types it. A typical use is a health score for each Asset, or a weighted risk on
+each Finding. Give the field a formula when you add it, or type one into the **Options or Formula**
+column of its row; clearing the formula makes the field an ordinary one again. **Insert Number**
+beside the formula lists every number it can read.
+
+A formula reads the record's own numbers:
+
+- **Built-in numbers**: `fields.<name>`. On a Finding: `cwe`, `cvssv3_score`, `cvssv4_score`,
+  `epss_score`, `epss_percentile`, `line`, `occurrences`, `scanner_confidence`, `priority`,
+  `risk_score`, `threat_score`, `threat_ladder_rung`, `pain_rating` and `reachability_confidence`. On
+  an Asset: `grade`, `user_records`, `revenue`, `exposure_confidence` and `patch_cycle_days`. On a
+  Test: `percent_complete`.
+- **Number custom fields**: `custom_fields.<name>` for the record's Integer and Decimal fields,
+  computed ones included.
+- **Finding counts** (on an Organization, Asset, Engagement, Test or Risk Acceptance):
+  `findings.active.total`, `findings.active.risk.urgent` (and `needs_action`, `medium`, `low`,
+  `unscored`), `findings.active.severity.critical` (and `high`, `medium`, `low`, `info`), and the
+  same under `findings.open` for open Findings (active, and not a duplicate, false positive, out of
+  scope, risk accepted or mitigated).
+- **Finding aggregates** (on the same records): `findings.<active|open>.<sum|avg|min|max>.` followed
+  by any Finding number, built-in or custom. For example `findings.open.max.fields.epss_score` is the
+  highest EPSS score among the record's open Findings, and `findings.active.sum.custom_fields.cost`
+  adds up a Finding custom field. A sum over no Findings is 0; an average, lowest or highest over none
+  is missing.
+
+It combines them with `+ - * /`, parentheses, comparisons, `and`, `or`, `not`, and the functions
+`min`, `max`, `abs`, `round`, `div(a, b, if_zero)`, `coalesce` and `if(test, a, b)`. For example, a
+score from 100 down that weighs each active Finding by its priority band:
+
+```
+100 * (1 - div(10 * findings.active.risk.urgent + 5 * findings.active.risk.needs_action
+  + 2 * findings.active.risk.medium + findings.active.risk.low, 10 * findings.active.total, 0))
+```
+
+### Computed fields that read each other
+
+A computed field can read another computed field, on the same record or, through an aggregate, on its
+Findings: a computed `weighted_risk` on each Finding can feed an Asset's
+`findings.active.sum.custom_fields.weighted_risk`. DefectDojo recomputes them in order, so a field is
+always written before anything that reads it. A formula that would make fields read each other in a
+loop is refused when it is saved, and the message names the loop. A field that a computed formula
+reads cannot be deleted, or changed to a type other than Integer or Decimal, until those formulas
+stop reading it; the message names them.
+
+### When values are recomputed
+
+- **After Findings change.** Saving or deleting a Finding (including an import) recomputes, shortly
+  afterwards, every computed field on its Asset, Organization, Engagements, Tests, the Risk
+  Acceptances on its Engagements, and the Asset's Findings.
+- **After an input changes.** Changing a custom field value that a computed formula reads (by hand,
+  through the API or from a rule) recomputes that record, and a Finding's value recomputes its Asset.
+  Saving an Asset or a Test recomputes it when a formula reads its built-in numbers.
+- **When the formula changes**, the field and every computed field that reads it are recomputed for
+  every record at once.
+- **Every hour**, every computed field is recomputed in full. That catches changes made without saving
+  each record, such as bulk updates, priority recalculations and records moving between Assets.
+
+When a computed field gets a new value, the Triage Engine hears it the same way as a rule writing that
+field. On an Asset, a rule triggered [On Asset Event](/automation/triage_engine/node_reference/#on-asset-event)
+for updates sees `custom_fields.<name>` in `ctx.changed_fields`, so an If / Filter node with
+`ctx.changed_fields` `contains` `custom_fields.<name>` runs only when that value moves. On a Finding,
+it is a Finding update. A recompute that leaves the value unchanged raises no event.
+
+Counts and aggregates include every Finding of the record, whoever is looking, so everyone sees the
+same value, as with the Asset grade. An Integer field rounds half away from zero; a Decimal field keeps
+up to four decimal places. A record whose formula reads a number it does not have, or divides by zero
+with `/`, keeps its previous value: use `div` or `coalesce` to give such a record a value of its own.
+
+A computed value cannot be typed on the record, set through the API, or written by a rule; on the
+record and its forms it shows read-only, with its formula. A field cannot be made computed while an
+enabled rule writes it (the message names the rules). To compute a value only on some records, or on a
+schedule of your own, use a [rule with a formula](/automation/triage_engine/node_reference/#formulas)
+instead.
 
 ## Filling in values
 

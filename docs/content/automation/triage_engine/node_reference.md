@@ -42,8 +42,10 @@ Runs when Assets (Products) are created or updated. Tag changes count as updates
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Event** | `created` | Which Asset change wakes this rule: `created`, `updated`, or `any` for both. |
+| **Event** | `created` | Which Asset change wakes this rule: `created`, `updated`, `any` for both, or `findings_changed`. |
 | **Scope** | empty | Which Assets this rule considers, in the Assets list's own filters. Empty means every Asset the rule owner can see. |
+
+**Findings Changed** (`findings_changed`) wakes the rule when a Finding of the Asset is created, closed, reopened or updated, including a change another rule made. It is not part of `any`, so a rule written for any change to the Asset itself does not start waking on every Finding save. It is what keeps a score computed from the Asset's Findings current (see [Formulas](#formulas)). Changes written in bulk without saving each Finding, and a Finding moving to another priority band, do not wake it, so pair such a rule with a scheduled copy, or use a [computed custom field](/asset_modelling/pro__custom_fields/#computed-fields), which also recomputes hourly.
 
 Assets named by the event are matched against scope before they enter the graph. For an update, the names of the changed fields travel with the items as `ctx.changed_fields`, so an If / Filter node can say "only when the organization changed" (`ctx.changed_fields` `contains` `organization`) or "only when tagged" (`contains` `tags`).
 
@@ -571,8 +573,9 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 
 | Setting | Notes |
 |---------|-------|
-| **Field** | Which custom field to write. |
-| **Value** | Typed to the field: text takes a template with `{{finding.title}}` style placeholders, numbers take a number, dates take a `YYYY-MM-DD` date, booleans take true or false, and the select types offer the field's own options. |
+| **Write To** | `This Finding` by default, or a record the Finding belongs to: its Test, Engagement, Asset or Organization. |
+| **Field** | Which custom field to write, from the fields defined for the record chosen in **Write To**. |
+| **Value** | Typed to the field: text takes a template with `{{finding.title}}` style placeholders, Integer and Decimal fields take a number or a [formula](#formulas), dates take a `YYYY-MM-DD` date, booleans take true or false, and the select types offer the field's own options. |
 
 The value is checked against the field's current definition when the rule is saved and again on every run, so a rule can never write a value the field's data type refuses. A text template that renders empty for a Finding leaves that Finding untouched (removal is the Clear node's job), setting a multi-select replaces the whole stored list, and Findings already holding the value are left alone.
 
@@ -581,6 +584,7 @@ Three behaviors worth knowing:
 * **Scope is the boundary.** Like every Findings node, the write applies to every Finding the trigger produced under the rule owner's visibility.
 * **A custom field write is not a Finding save.** Nothing that follows a Finding save runs: no SLA recomputation, no deduplication, no re-prioritization. A custom field edited by hand on a Finding's page does not wake **On Finding Event** rules either. A write made by a rule does cascade: other rules see it as an `updated` event, and later nodes in the same run read the new value.
 * **The field must still exist.** If the field is deleted after the rule was saved, the run errors naming it. If Custom Fields is switched off entirely, the node skips with the reason on its trace instead, so a saved rule never starts erroring over a feature flag.
+* **Writing to a record the Finding belongs to.** Many Findings share one Test, Engagement, Asset or Organization, so that record is written once, from the first of its Findings in the run, and its change appears once on that Finding's provenance timeline. The rule owner needs edit on the record itself; records they cannot edit are counted as `skipped_unauthorized`. A [computed](/asset_modelling/pro__custom_fields/#computed-fields) field is never offered: the instance fills it in.
 
 ### Clear a Custom Field
 
@@ -590,7 +594,38 @@ Removes one custom field's value from the Finding. The value it held is recorded
 
 | Setting | Notes |
 |---------|-------|
+| **Write To** | `This Finding`, or its Test, Engagement, Asset or Organization, as on **Set a Custom Field**. |
 | **Field** | Which custom field to clear. |
+
+### Formulas
+
+An Integer or Decimal custom field's value can be a formula over the numbers the item carries, evaluated per item when the rule runs. A plain number is a formula too, so a rule saved with a fixed number reads the same. For example, a health score that weighs each active Finding by its priority band:
+
+```
+100 * (1 - div(10 * product.findings.active.risk.urgent + 5 * product.findings.active.risk.needs_action
+  + 2 * product.findings.active.risk.medium + product.findings.active.risk.low,
+  10 * product.findings.active.total, 0))
+```
+
+* **Numbers.** A formula reads a path, written bare or in `{{ }}`: the item's number fields, its number custom fields, and the Finding counts below. **Insert Field** beside the formula lists exactly the paths a formula can read.
+* **Operators.** `+ - * /` and parentheses; the comparisons `< <= > >= == !=`, `and`, `or` and `not`, which give 1 or 0.
+* **Functions.** `min`, `max`, `abs`, `round(x)` or `round(x, places)`, `div(a, b, if_zero)` (`a / b`, or `if_zero` when `b` is 0), `coalesce(a, b, ...)` (the first that has a value) and `if(test, a, b)`.
+* **Results.** An Integer field rounds half away from zero; a Decimal field keeps up to four decimal places.
+* **Skipped items.** An item whose formula reads a number the item does not have, divides by zero with `/`, or overflows is skipped: nothing is written, the field keeps its previous value, and the node trace counts it as `skipped_missing_input`, `skipped_division_by_zero` or `skipped_not_finite`.
+* **Writing to a parent record.** A formula writing a Test's, Engagement's, Asset's or Organization's field may read only that record and the records above it, so every Finding of the record computes the same value. The save refuses a formula that reads anything else.
+
+#### Finding counts
+
+The Test, Engagement, Asset and Organization of an item each carry `findings`, the counts of the Findings beneath them that the rule owner can see. An Asset graph's items carry the Asset's and the Organization's. Each count is a number in conditions and templates too.
+
+| Path | Counts |
+|------|--------|
+| `<record>.findings.active.total` | Active Findings (the number the lists' Active Findings column shows). |
+| `<record>.findings.active.risk.<band>` | Active Findings in a priority band: `urgent`, `needs_action`, `medium`, `low`, or `unscored` for Findings not yet prioritized. |
+| `<record>.findings.active.severity.<severity>` | Active Findings of a severity: `critical`, `high`, `medium`, `low`, `info`. |
+| `<record>.findings.open.*` | The same counts over open Findings: active, and not a duplicate, false positive, out of scope, risk accepted or mitigated. |
+
+`<record>` is `test`, `engagement`, `product` (or `asset`) or `product_type` (or `organization`).
 
 ## Assets
 
@@ -689,8 +724,9 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 
 | Setting | Notes |
 |---------|-------|
-| **Field** | Which custom field to write. One entry per Asset custom field defined on the instance. |
-| **Value** | Typed to the field. |
+| **Write To** | `This Asset` by default, or its Organization. |
+| **Field** | Which custom field to write. One entry per custom field defined for the record chosen in **Write To**. |
+| **Value** | Typed to the field. Integer and Decimal fields take a number or a [formula](#formulas) over the Asset's numbers and Finding counts. |
 
 Two behaviors of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
 
@@ -698,10 +734,11 @@ Two behaviors of its own: Assets the rule owner may not edit are counted on the 
 
 `asset.clear_custom_field`
 
-Removes one custom field's value from the Asset, recording what it held on the Asset's provenance.
+Removes one custom field's value from the Asset, or from its Organization, recording what it held on the Asset's provenance.
 
 | Setting | Notes |
 |---------|-------|
+| **Write To** | `This Asset`, or its Organization. |
 | **Field** | Which custom field to clear. |
 
 ### Naming a configuration or engine the rule owner cannot see
