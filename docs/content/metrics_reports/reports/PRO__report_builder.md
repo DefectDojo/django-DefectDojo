@@ -392,6 +392,45 @@ Generated reports are collected in the Generated Reports list, which shows each 
 
 You can generate a Template again at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time: it reflects your data as of when it was generated and will not change as DefectDojo data changes, so generate the Template again whenever you need an up-to-date snapshot.
 
+## Move templates between instances
+
+Build and check a Template on a test instance, then carry it to production as a file. The same file is a good thing to keep in version control.
+
+### Export a Template
+
+Open a Template's menu on *All Report Templates* and choose **Export Template**. The browser saves a JSON file that holds everything the Template needs:
+
+- its Theme, with the header and footer images,
+- its Blocks in order, each with its configuration, its filters and, for an image Block, the image itself.
+
+A filter that names an object (an Asset, an Organization, an Engagement, a user) is written with that object's name beside its id, so the other instance can find its own copy of it. Ids are never trusted on import.
+
+Exporting needs only permission to see the Template. A filter that names an object you cannot see is exported empty, and the export says so.
+
+### Import Templates
+
+On *All Report Templates*, choose **Import** and pick an export file. Nothing is created yet: DefectDojo checks the file first and shows one row per Template with what would happen to it. Choose **Import** in the dialog to create the Templates once the report has no problems.
+
+- **Blocks are created new.** Each imported Template gets its own copy of its Blocks, so importing never changes a Block another Template uses.
+- **A Theme is reused only when it is identical.** A Theme here with the same name, colors, footer and images is reused; anything else creates a new Theme.
+- **Every named object must exist here.** A filter whose Asset, Organization or user cannot be found on this instance (or that you cannot see) stops the import, because the Template would otherwise report on more than it did before. Create or share that object, then import the file again.
+- **Filters on records of the source instance only** (a particular Test or Finding) cannot travel. Remove them on the source instance and export again.
+- **Columns this version does not have** are left out, and the report lists them.
+
+When a Template with the same name and owner already exists, choose what happens:
+
+| Choice | Result |
+|--------|--------|
+| **Create** | The file's Template is added beside the existing one. |
+| **Skip** | The existing Template is left alone. |
+| **Overwrite** | The existing Template's description, Theme and Blocks are replaced. Only a Template you can edit can be overwritten. Its old Blocks stay in the Block library. |
+
+With group ownership on, the dialog also asks which group the imported Templates, Blocks and Themes belong to.
+
+### Versions
+
+The file records the DefectDojo version that exported it. A file from an earlier version imports, and is brought up to date on the way in. A file from a later version is refused: upgrade this instance, or export from a matching version.
+
 ## Moving off the classic report engine
 
 The classic report engine — the **Report Builder**, **Report Templates** and **Generated

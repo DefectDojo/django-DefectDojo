@@ -57,7 +57,7 @@ Five resources make up the Report Builder API. Each supports the standard list (
 |----------|------|------------|----------------|
 | Themes | `/report_themes/` | Colors, fonts, header/footer images, page numbers | `{id}/share/`, `{id}/transfer/` |
 | Blocks | `/report_blocks/` | A single piece of content: a cover page, a table, or a detail section | `field_options/`, `preview/`, `{id}/preview/`, `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/` |
-| Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/` |
+| Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/`, `{id}/export/`, `export/`, `import/` |
 | Generated reports | `/generated_reports/` | A run of a template that produces a downloadable file | `{id}/download/`, `{id}/content/` |
 | Report schedules | `/report_schedules/` | A standing request that runs a template on a cron cadence | — |
 
@@ -78,6 +78,26 @@ Themes, blocks and templates can be owned by a group instead of by the instance 
 - **Transfer** with `POST {id}/transfer/` and a body of `owner_group` (a group id, or `null` for the instance). You need **Report Template Edit** on the row and **Report Template Add** in the destination.
 
 `share/` and `transfer/` answer `403` with a `detail` sentence when you may not make the change, and `400` for invalid input. A template can only reference blocks and a theme the caller can see; naming one you cannot see answers `400`.
+
+### Export and import templates
+
+`GET /report_templates/{id}/export/` returns one template as an export file, and `GET /report_templates/export/?id=4,7` several (at most 25). The file is JSON with `format` set to `defectdojo.report_template`, `format_version`, the `source_version` of DefectDojo that wrote it, and a `templates` list. Each template carries its theme, its blocks in order and the images they show. Every filter value that names an object also carries the object's name, under `refs`.
+
+`POST /report_templates/import/` takes the file as `bundle`:
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Token [YOUR-API-TOKEN]" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/report_templates/import/" \
+  -d '{"bundle": '"$(cat report-template-4.json)"', "dry_run": true, "conflict": "create"}'
+```
+
+- `dry_run` defaults to `true`: the answer is the report and nothing is written. Send `false` to import.
+- `conflict` is `create` (the default), `skip` or `overwrite`, for a template with the same name and owner.
+- `owner_group` is the group the new templates, blocks and themes belong to; leave it out for the instance.
+
+The answer has one row per template (`action`, `template_id`, `warnings`, `problems`, `written`). If any row has a problem, nothing is written and the status is `400`. A file that is not a report template export, or that a newer version of DefectDojo wrote, answers `400` with a `detail` sentence. Importing needs **Report Template Add**.
 
 ## Step 1: Discover the vocabulary
 
