@@ -318,7 +318,7 @@ A report schedule belongs to the owner of its Template. A schedule on a group's 
 * it keeps running when the person who created it leaves; and
 * the group's members can read the reports it generates.
 
-A schedule moves with its Template. **Transfer** on a Template takes its schedules along: into a group they run as that group's automation identity, and to the instance they run as the person who moved them. Because its schedules would then run as the group, a Template that has schedules can be moved into a group only by a member of that group.
+A schedule moves with its Template. **Transfer** on a Template takes its schedules along: into a group they run as that group's automation identity, and to the instance they run as the person who moved them. Because its schedules would then run as the group, a Template that has schedules can be moved into a group only by a member of that group. A move is also refused when a schedule's variables name something its new identity cannot see (a Finding outside the group's access, for example), since every run of that schedule would fail; the refusal names the schedule.
 
 **Reporting > Schedules** lists the schedules you can see, with each one's Template, format, cadence, next run and creator, and an **Owner** column (the group, or **Instance**). Its **Owner** filter offers **My Groups**, **Instance** and each group by name; a group's **Owned Content** tab opens it filtered to that group. **Delete** in a row's menu stops a schedule; the reports it already generated are kept. Schedules are created through the API (see [Report Builder API](../report-builder-api/)).
 
