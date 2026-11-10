@@ -71,7 +71,10 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  # pycryptodome (via stream-unzip) and pycryptodomex ship their own test suites, whose sample
+  # private keys container secret scanners report as leaked secrets. Nothing imports them.
+  rm -rf /usr/local/lib/python3*/site-packages/Crypto/SelfTest /usr/local/lib/python3*/site-packages/Cryptodome/SelfTest
 # Fail the build if either trust store still carries the root distrusted after the
 # eMudhra key compromise (2026-10-20), so a cached or stale layer can't ship it.
 RUN python3 -c "import ssl, sys, certifi; bad = [f for f in ('/etc/ssl/certs/ca-certificates.crt', certifi.where()) if (lambda ctx: ctx.load_verify_locations(cafile=f) or any(dict(x[0] for x in c['subject']).get('commonName') == 'emSign ECC Root CA - G3' for c in ctx.get_ca_certs()))(ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT))]; sys.exit('distrusted root emSign ECC Root CA - G3 still in: ' + ', '.join(bad) if bad else 0)"
