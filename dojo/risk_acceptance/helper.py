@@ -11,6 +11,7 @@ from django.utils import timezone
 from dojo.celery import app
 from dojo.jira import services as jira_services
 from dojo.models import Dojo_User, Engagement, Finding, Notes, Risk_Acceptance, System_Settings
+from dojo.notifications import ticket_comments
 from dojo.notifications.helper import create_notification
 from dojo.utils import get_full_url, get_system_setting
 
@@ -423,8 +424,42 @@ def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     return "Finding is no longer risk accepted"
 
 
+def _ticket_comment_event(message_factory):
+    """The ticket comment event a message creator's comment is about, or None for an unknown creator."""
+    return {
+        accepted_message_creator: ticket_comments.RISK_ACCEPTANCE_ACCEPTED,
+        unaccepted_message_creator: ticket_comments.RISK_ACCEPTANCE_UNACCEPTED,
+        reinstation_message_creator: ticket_comments.RISK_ACCEPTANCE_REINSTATED,
+        expiration_warning_message_creator: ticket_comments.RISK_ACCEPTANCE_EXPIRATION_WARNING,
+        expiration_message_creator: ticket_comments.RISK_ACCEPTANCE_EXPIRED,
+    }.get(message_factory)
+
+
+def post_ticket_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
+    """
+    Hand the comment to the registered ticket comment handlers (see dojo.notifications.ticket_comments).
+
+    Runs before, and apart from, the JIRA project's own setting: each handler decides for its tickets.
+    Never raises, so the JIRA comment and the change that caused it go ahead whatever happens here.
+    """
+    if not ticket_comments.has_ticket_comment_handlers():
+        return
+    event = _ticket_comment_event(message_factory)
+    if event is None:
+        return
+    try:
+        text = message_factory(risk_acceptance, heads_up_days)
+    except Exception:
+        logger.exception("Could not build the %s ticket comment", event)
+        return
+    ticket_comments.dispatch_ticket_comments(event, findings, text, risk_acceptance=risk_acceptance)
+
+
 def post_jira_comment(finding, message_factory, heads_up_days=0):
-    if not finding or (not finding.has_jira_issue and not finding.has_jira_group_issue):
+    if not finding:
+        return
+    post_ticket_comments(None, [finding], message_factory, heads_up_days)
+    if not finding.has_jira_issue and not finding.has_jira_group_issue:
         return
     jira_project = jira_services.get_project(finding)
 
@@ -445,6 +480,11 @@ def post_jira_comment(finding, message_factory, heads_up_days=0):
 def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
     if not risk_acceptance:
         return
+
+    if ticket_comments.has_ticket_comment_handlers():
+        # read once, for the handlers and the JIRA comments alike
+        findings = list(findings)
+        post_ticket_comments(risk_acceptance, findings, message_factory, heads_up_days)
 
     jira_project = jira_services.get_project(risk_acceptance.engagement)
 
