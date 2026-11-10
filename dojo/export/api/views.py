@@ -1,6 +1,8 @@
 import math
 from collections import defaultdict
 from collections.abc import Iterator
+from itertools import batched, groupby
+from operator import itemgetter
 
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -33,12 +35,14 @@ from dojo.export.api.serializers import (
     ExportProductSerializer,
     ExportReportTypeSerializer,
     ExportRiskAcceptanceSerializer,
+    ExportTestImportSerializer,
     ExportTestSerializer,
     ExportTestTypeSerializer,
     ExportToolConfigurationSerializer,
     ExportUserSerializer,
     ManifestParamsSerializer,
     file_size,
+    render_datetime,
 )
 from dojo.finding.api.serializer import FindingTemplateSerializer
 from dojo.location.feature import locations_enabled
@@ -58,6 +62,8 @@ from dojo.models import (
     Product_Type,
     Risk_Acceptance,
     Test,
+    Test_Import,
+    Test_Import_Finding_Action,
 )
 from dojo.note_type.api.serializer import NoteTypeSerializer
 from dojo.notes.helper import notes_prefetch
@@ -73,11 +79,14 @@ from dojo.utils import get_system_setting
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 EXPORT_CHUNK_SIZE = 500
+ACTIONS_PER_LINE = 10000
 DOCS_URL = "https://docs.defectdojo.com/automation/api/product_export/"
 SCHEMA_VERSION = 1
 COUNT_KEYS = (
     "engagements", "tests", "findings", "endpoints", "notes", "files", "files_over_cap", "risk_acceptances", "finding_groups",
 )
+IMPORT_HISTORY_COUNT_KEYS = ("test_imports", "test_import_actions")
+HISTORY_FEATURES = ("import_history", "audit_history")
 REFERENCE_SERIALIZERS = {
     "sla_configurations": SLAConfigurationSerializer,
     "development_environments": DevelopmentEnvironmentSerializer,
@@ -177,7 +186,35 @@ def risk_acceptance_in(product: Product, prefix: str = "") -> Q:
     return Q(**{f"{prefix}engagement__product": product}) | Q(**{f"{prefix}accepted_findings__test__engagement__product": product})
 
 
-def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[bytes]:
+def import_history_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
+    imports = Test_Import.objects.filter(test__engagement__product=product).order_by("test_id", "id")
+    # The same order as the imports, so one pass pairs each import with its group of actions.
+    actions = (
+        Test_Import_Finding_Action.objects.filter(test_import__test__engagement__product=product)
+        .order_by("test_import__test_id", "test_import_id", "id")
+        .values_list("test_import_id", "finding_id", "action", "created", "modified")
+    )
+    # Start the actions query before the imports query. An import made in between then has no group of actions,
+    # instead of a group of actions with no import.
+    by_import = groupby(actions.iterator(chunk_size=EXPORT_CHUNK_SIZE), key=itemgetter(0))
+    pending = next(by_import, None)
+    serializer = ExportTestImportSerializer()
+    for test_import in imports.iterator(chunk_size=EXPORT_CHUNK_SIZE):
+        counts["test_imports"] += 1
+        yield render({"type": "test_import", "data": serializer.to_representation(test_import)})
+        if pending is None or pending[0] != test_import.id:
+            continue
+        for batch in batched(pending[1], ACTIONS_PER_LINE, strict=False):
+            counts["test_import_actions"] += len(batch)
+            rows = [
+                [finding_id, action, render_datetime(created), render_datetime(modified)]
+                for _, finding_id, action, created, modified in batch
+            ]
+            yield render({"type": "test_import_actions", "data": {"test_import": test_import.id, "actions": rows}})
+        pending = next(by_import, None)
+
+
+def product_lines(product: Product, request, max_file_bytes: int, *, import_history: bool = False) -> Iterator[bytes]:
     context = {"request": request, "max_file_bytes": max_file_bytes}
     render = NDJSONRenderer().render
     yield render({
@@ -238,11 +275,19 @@ def product_lines(product: Product, request, max_file_bytes: int) -> Iterator[by
                 finding_groups.update(group["id"] for group in data["finding_groups"])
             yield render({"type": line_type, "data": data})
     counts["finding_groups"] = len(finding_groups)
+    if import_history:
+        counts.update(dict.fromkeys(IMPORT_HISTORY_COUNT_KEYS, 0))
+        yield from import_history_lines(product, counts, render)
     yield render({"type": "end", "counts": counts})
 
 
-def product_counts(max_file_bytes: int, *, file_counts: bool) -> dict[int, dict[str, int | None]]:
-    counts = defaultdict(lambda: {**dict.fromkeys(COUNT_KEYS, 0), "files_over_cap": 0 if file_counts else None})
+def count_keys(*, import_history: bool) -> tuple[str, ...]:
+    return (*COUNT_KEYS, *IMPORT_HISTORY_COUNT_KEYS) if import_history else COUNT_KEYS
+
+
+def product_counts(max_file_bytes: int, *, file_counts: bool, import_history: bool) -> dict[int, dict[str, int | None]]:
+    keys = count_keys(import_history=import_history)
+    counts = defaultdict(lambda: {**dict.fromkeys(keys, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
         ("tests", Test, "engagement__product_id"),
@@ -254,6 +299,11 @@ def product_counts(max_file_bytes: int, *, file_counts: bool) -> dict[int, dict[
         ("notes", Finding.notes.through, "finding__test__engagement__product_id"),
         ("finding_groups", Finding_Group, "test__engagement__product_id"),
     )
+    if import_history:
+        sources += (
+            ("test_imports", Test_Import, "test__engagement__product_id"),
+            ("test_import_actions", Test_Import_Finding_Action, "test_import__test__engagement__product_id"),
+        )
     for key, model, product_path in sources:
         # order_by() drops default orderings, which would otherwise split the GROUP BY per row.
         rows = model.objects.order_by().values_list(product_path).annotate(n=Count("id", distinct=True))
@@ -289,10 +339,10 @@ def product_counts(max_file_bytes: int, *, file_counts: bool) -> dict[int, dict[
     return counts
 
 
-def _summed(products: list[dict], *, file_counts: bool) -> dict[str, int | None]:
+def _summed(products: list[dict], *, file_counts: bool, import_history: bool) -> dict[str, int | None]:
     return {
         key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
-        for key in COUNT_KEYS
+        for key in count_keys(import_history=import_history)
     }
 
 
@@ -325,8 +375,8 @@ def deduplication_rules() -> dict:
     }
 
 
-def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
-    counts = product_counts(max_file_bytes, file_counts=file_counts)
+def build_manifest(request, max_file_bytes: int, *, file_counts: bool, import_history: bool = False) -> dict:
+    counts = product_counts(max_file_bytes, file_counts=file_counts, import_history=import_history)
     products = [
         {
             "id": product.id,
@@ -350,7 +400,14 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
     for product in products:
         members[product["prod_type"]].append(product)
     product_types = [
-        {"id": pk, "name": name, "counts": {"products": len(members[pk]), **_summed(members[pk], file_counts=file_counts)}}
+        {
+            "id": pk,
+            "name": name,
+            "counts": {
+                "products": len(members[pk]),
+                **_summed(members[pk], file_counts=file_counts, import_history=import_history),
+            },
+        }
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
     ]
     users = Dojo_User.objects.select_related("usercontactinfo", "auth_token").order_by("id")
@@ -364,7 +421,7 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
-        "features": ["check_lists"],
+        "features": ["check_lists", *HISTORY_FEATURES],
         "deduplication": deduplication_rules(),
         "announcement": single_row(ExportAnnouncementSerializer),
         "login_banner": single_row(ExportLoginBannerSerializer),
@@ -381,7 +438,9 @@ def build_manifest(request, max_file_bytes: int, *, file_counts: bool) -> dict:
         "product_types": product_types,
         "products": products,
         "totals": {
-            "product_types": len(product_types), "products": len(products), **_summed(products, file_counts=file_counts),
+            "product_types": len(product_types),
+            "products": len(products),
+            **_summed(products, file_counts=file_counts, import_history=import_history),
         },
     }
 
@@ -400,8 +459,9 @@ class ProductExportView(APIView):
     )
     def get(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
+        params = export_params(request)
         return StreamingHttpResponse(
-            product_lines(product, request, export_params(request)["max_file_bytes"]),
+            product_lines(product, request, params["max_file_bytes"], import_history=params["import_history"]),
             content_type="application/x-ndjson",
             headers={
                 "Content-Disposition": f'attachment; filename="defectdojo-product-{product.pk}-export.ndjson"',
@@ -424,4 +484,8 @@ class ExportManifestView(APIView):
     )
     def get(self, request):
         params = export_params(request, ManifestParamsSerializer)
-        return Response(build_manifest(request, params["max_file_bytes"], file_counts=params["file_counts"]))
+        return Response(
+            build_manifest(
+                request, params["max_file_bytes"], file_counts=params["file_counts"], import_history=params["import_history"],
+            ),
+        )

@@ -20,6 +20,7 @@ from dojo.models import (
     Product_API_Scan_Configuration,
     Report_Type,
     Risk_Acceptance,
+    Test_Import,
     Test_Type,
 )
 from dojo.notes.api.serializer import NoteSerializer
@@ -40,6 +41,9 @@ CHECK_LIST_ISSUE_FIELDS = (
 )
 
 
+render_datetime = serializers.DateTimeField().to_representation
+
+
 class ExportParamsSerializer(serializers.Serializer):
     max_file_bytes = serializers.IntegerField(
         min_value=0,
@@ -51,6 +55,17 @@ class ExportParamsSerializer(serializers.Serializer):
             f"files in files_over_cap. The files of one line carry at most {MAX_INLINE_BYTES_PER_LINE // 2**20} MiB "
             "of base64 text in all. A file past that has no data and the error line_cap."
         ),
+    )
+    import_history = serializers.BooleanField(
+        default=False,
+        help_text=(
+            "Add the import history of the product to the stream, and its counts to the manifest. The stream "
+            "sends test_import lines, each followed by test_import_actions lines, after the risk acceptances."
+        ),
+    )
+    audit_history = serializers.BooleanField(
+        default=False,
+        help_text="Reserved for the audit history of the product. It has no effect yet.",
     )
 
 
@@ -202,6 +217,15 @@ class ExportRiskAcceptanceSerializer(RiskAcceptanceSerializer):
 
     def get_proof(self, obj) -> dict | None:
         return export_proof(obj, self.context["max_file_bytes"])
+
+
+class ExportTestImportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test_Import
+        fields = (
+            "id", "test", "type", "version", "build_id", "commit_hash", "branch_tag", "import_settings", "created", "modified",
+        )
+        read_only_fields = fields
 
 
 class ExportToolConfigurationSerializer(ToolConfigurationSerializer):

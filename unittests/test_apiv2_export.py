@@ -1,7 +1,7 @@
 import base64
 import json
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest import mock
 
@@ -24,8 +24,9 @@ from dojo.export.api.serializers import (
     export_endpoint_entries,
     export_file,
     export_proof,
+    render_datetime,
 )
-from dojo.export.api.views import COUNT_KEYS
+from dojo.export.api.views import ACTIONS_PER_LINE, COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
@@ -54,6 +55,8 @@ from dojo.models import (
     Risk_Acceptance,
     System_Settings,
     Test,
+    Test_Import,
+    Test_Import_Finding_Action,
     Test_Type,
     UserContactInfo,
 )
@@ -643,6 +646,153 @@ class TestProductExportStream(DojoAPITestCase):
 
 
 @versioned_fixtures
+class TestExportImportHistory(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = Dojo_User.objects.get(username="admin")
+        test = Test_Import.objects.get(id=6829).test
+        findings = [Finding.objects.create(title=f"h{i}", test=test, reporter=cls.admin, severity="Low") for i in range(4)]
+        cls.reimport = Test_Import.objects.create(
+            test=test,
+            type="reimport",
+            version="1.2",
+            build_id="b7",
+            commit_hash="abc123",
+            branch_tag="main",
+            import_settings={"close_old_findings": True, "tags": ["a"]},
+        )
+        cls.empty_import = Test_Import.objects.create(test=test, type="import")
+        # The reimport's actions are created out of finding order, so action id order differs from finding id order.
+        for finding, action in zip((findings[2], findings[0], findings[3], findings[1]), "CRUN", strict=True):
+            Test_Import_Finding_Action.objects.create(test_import=cls.reimport, finding=finding, action=action)
+        Test_Import.objects.filter(id=cls.reimport.id).update(
+            created=datetime(2025, 3, 4, 5, 6, 7, 123456, tzinfo=UTC), modified=datetime(2025, 3, 5, 6, 7, 8, 654321, tzinfo=UTC),
+        )
+        for number, action in enumerate(Test_Import_Finding_Action.objects.filter(test_import=cls.reimport).order_by("id"), start=1):
+            Test_Import_Finding_Action.objects.filter(id=action.id).update(
+                created=datetime(2025, 3, 4, 5, 6, number, 1000 * number, tzinfo=UTC),
+                modified=datetime(2025, 3, 5, 6, 7, number, 1000 * number, tzinfo=UTC),
+            )
+        cls.reimport.refresh_from_db()
+        accepted = Risk_Acceptance.objects.create(name="ra", owner=cls.admin)
+        accepted.accepted_findings.add(findings[0])
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+
+    def export(self, product_id=2, **params):
+        return ndjson_lines(self.client.get(reverse("export-product", args=[product_id]), params))
+
+    def end_line(self, product_id=2, **params):
+        return self.export(product_id, **params)[-1]
+
+    def import_line(self, import_id, lines):
+        return next(line["data"] for line in lines if line["type"] == "test_import" and line["data"]["id"] == import_id)
+
+    def expected_actions(self, import_id):
+        rows = Test_Import_Finding_Action.objects.filter(test_import_id=import_id).order_by("id")
+        return [[row.finding_id, row.action, render_datetime(row.created), render_datetime(row.modified)] for row in rows]
+
+    def test_the_stream_has_no_history_lines_by_default(self):
+        lines = self.export()
+        self.assertEqual({"header", "engagement", "test", "finding", "risk_acceptance", "end"}, {line["type"] for line in lines})
+        self.assertEqual(set(COUNT_KEYS), set(lines[-1]["counts"]))
+
+    def test_import_history_follows_the_risk_acceptances(self):
+        kinds = [line["type"] for line in self.export(import_history="true")]
+        first = kinds.index("test_import")
+        self.assertLess(max(i for i, kind in enumerate(kinds) if kind == "risk_acceptance"), first)
+        self.assertEqual("end", kinds[-1])
+        self.assertEqual({"test_import", "test_import_actions"}, set(kinds[first:-1]))
+
+    def test_an_import_line_carries_the_source_values_and_dates(self):
+        data = self.import_line(self.reimport.id, self.export(import_history="true"))
+        self.assertEqual(
+            {"id", "test", "type", "version", "build_id", "commit_hash", "branch_tag", "import_settings", "created", "modified"},
+            set(data),
+        )
+        self.assertEqual(
+            ("reimport", "1.2", "b7", "abc123", "main", self.reimport.test_id),
+            (data["type"], data["version"], data["build_id"], data["commit_hash"], data["branch_tag"], data["test"]),
+        )
+        self.assertEqual(self.reimport.import_settings, data["import_settings"])
+        for key in ("created", "modified"):
+            self.assertEqual(render_datetime(getattr(self.reimport, key)), data[key])
+            self.assertEqual(getattr(self.reimport, key), datetime.fromisoformat(data[key]))
+        self.assertNotEqual(data["created"], data["modified"])
+
+    def test_each_import_is_followed_by_its_actions_in_test_then_id_order(self):
+        lines = self.export(import_history="true")
+        body = [line for line in lines if line["type"] in {"test_import", "test_import_actions"}]
+        imports = [line["data"]["id"] for line in body if line["type"] == "test_import"]
+        self.assertEqual([6829, self.reimport.id, self.empty_import.id, 6830], imports)
+        owner, actions = None, {}
+        for line in body:
+            if line["type"] == "test_import":
+                owner = line["data"]["id"]
+            else:
+                self.assertEqual(owner, line["data"]["test_import"])
+                actions.setdefault(owner, []).extend(line["data"]["actions"])
+        with_actions = [import_id for import_id in imports if import_id != self.empty_import.id]
+        self.assertEqual({import_id: self.expected_actions(import_id) for import_id in with_actions}, actions)
+        self.assertEqual(4, len(actions[self.reimport.id]))
+
+    def test_an_import_with_more_actions_than_one_line_spans_lines(self):
+        self.assertEqual(10000, ACTIONS_PER_LINE)
+        with mock.patch("dojo.export.api.views.ACTIONS_PER_LINE", 3):
+            lines = self.export(import_history="true")
+        reimport_lines = [
+            line["data"]["actions"]
+            for line in lines
+            if line["type"] == "test_import_actions" and line["data"]["test_import"] == self.reimport.id
+        ]
+        self.assertEqual([3, 1], [len(actions) for actions in reimport_lines])
+        self.assertEqual(self.expected_actions(self.reimport.id), [action for actions in reimport_lines for action in actions])
+
+    def test_end_counts_include_the_history_counts_when_asked(self):
+        lines = self.export(import_history="true")
+        counts = lines[-1]["counts"]
+        self.assertEqual(set(COUNT_KEYS) | {"test_imports", "test_import_actions"}, set(counts))
+        self.assertEqual(Test_Import.objects.filter(test__engagement__product_id=2).count(), counts["test_imports"])
+        self.assertEqual(sum(line["type"] == "test_import" for line in lines), counts["test_imports"])
+        self.assertEqual(
+            Test_Import_Finding_Action.objects.filter(test_import__test__engagement__product_id=2).count(), counts["test_import_actions"],
+        )
+        action_lines = [line["data"]["actions"] for line in lines if line["type"] == "test_import_actions"]
+        self.assertEqual(sum(len(actions) for actions in action_lines), counts["test_import_actions"])
+
+    def test_a_product_with_no_imports_has_no_history_lines(self):
+        lines = self.export(3, import_history="true")
+        self.assertEqual(["header", "end"], [line["type"] for line in lines])
+        self.assertEqual({0}, set(lines[-1]["counts"].values()))
+        self.assertEqual({"test_imports", "test_import_actions"}, set(lines[-1]["counts"]) - set(COUNT_KEYS))
+
+    def test_the_manifest_counts_match_the_end_line(self):
+        url = reverse("export-manifest")
+        manifest = self.client.get(url, {"import_history": "true"}).json()
+        end = self.end_line(import_history="true")["counts"]
+        entry = self.get_results_by_id(manifest["products"], 2)["counts"]
+        for key in ("test_imports", "test_import_actions"):
+            self.assertEqual(end[key], entry[key], key)
+            self.assertEqual(sum(product["counts"][key] for product in manifest["products"]), manifest["totals"][key], key)
+            for product_type in manifest["product_types"]:
+                members = [product for product in manifest["products"] if product["prod_type"] == product_type["id"]]
+                self.assertEqual(sum(product["counts"][key] for product in members), product_type["counts"][key], key)
+        plain = self.client.get(url).json()
+        self.assertNotIn("test_imports", self.get_results_by_id(plain["products"], 2)["counts"])
+        self.assertNotIn("test_imports", plain["totals"])
+
+    def test_a_value_that_is_not_a_boolean_gets_a_400(self):
+        for url in (reverse("export-product", args=[2]), reverse("export-manifest")):
+            for name in ("import_history", "audit_history"):
+                with self.subTest(url=url, name=name):
+                    self.assertEqual(400, self.client.get(url, {name: "maybe"}).status_code)
+
+
+@versioned_fixtures
 class TestExportManifest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -886,8 +1036,15 @@ class TestExportManifest(DojoAPITestCase):
         for value in secrets.values():
             self.assertNotIn(value, body)
 
-    def test_features_list_check_lists(self):
-        self.assertEqual(["check_lists"], self.manifest["features"])
+    def test_features_list_check_lists_and_the_history_parts(self):
+        self.assertEqual(["check_lists", "import_history", "audit_history"], self.manifest["features"])
+
+    def test_the_manifest_counts_import_history_only_when_asked(self):
+        self.assertNotIn("test_imports", self.manifest["totals"])
+        self.assertNotIn("test_import_actions", self.manifest["totals"])
+        totals = self.client.get(self.url, {"import_history": "true"}).json()["totals"]
+        self.assertEqual(2, totals["test_imports"])
+        self.assertEqual(Test_Import_Finding_Action.objects.count(), totals["test_import_actions"])
 
     def test_announcement_is_the_single_row(self):
         row = Announcement.objects.get()

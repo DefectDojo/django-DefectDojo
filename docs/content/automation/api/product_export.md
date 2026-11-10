@@ -42,7 +42,7 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
-| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. An older instance has no `features` key. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history` and `audit_history` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines). An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
 | `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
 | `deduplication` | The deduplication rules that the customer set on the instance, as `{algorithm_per_parser, hashcode_fields_per_scanner, hashcode_allows_null_cwe}`. Each one is a map from a scan type to a value. The value is an algorithm or a list of hash fields. In `hashcode_allows_null_cwe` it is `true` or `false`, and says whether the hash accepts a missing CWE. A map holds the scan types whose value differs from the shipped settings. It also holds the scan types that DefectDojo does not ship. A scan type that the customer removed is listed with the value that DefectDojo then uses. That value is the `legacy` algorithm, an empty list of hash fields, or `true`. A removed scan type is not listed when that value is the shipped one. A map is empty when the customer changed nothing. An older instance has no `deduplication` key. |
@@ -63,16 +63,18 @@ The keys of `counts` are in [Counts](#counts). An example product entry, with Lo
 {"id": 1, "name": "Security How-to", "prod_type": 2, "counts": {"engagements": 1, "tests": 1, "findings": 4, "endpoints": 2, "notes": 2, "files": 2, "files_over_cap": 0, "risk_acceptances": 1, "finding_groups": 0}, "description": "Security How-to", "tags": [], "business_criticality": null, "sla_configuration": 1, "product_manager": null, "technical_contact": null, "team_manager": null}
 ```
 
-The manifest takes two parameters:
+The manifest takes these parameters:
 
 | Parameter | Type | Default | What it does |
 |-----------|------|---------|--------------|
 | `max_file_bytes` | integer, 0 to 104857600 (100 MiB) | `10485760` (10 MiB) | The file cap. A file larger than this counts in `files_over_cap`. See [Files](#files). |
 | `file_counts` | boolean | `true` | With `false`, the server does not read the size of each file in storage, and `files_over_cap` is `null`. |
+| `import_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `test_imports` and `test_import_actions`. See [Counts](#counts). |
+| `audit_history` | boolean | `false` | Reserved for the audit history. It has no effect yet. |
 
 An empty value, as in `?max_file_bytes=` or `?file_counts=`, uses the default.
 A `max_file_bytes` value that is not a whole number from 0 to 104857600 gets a 400.
-A `file_counts` value that is not a boolean gets a 400.
+A `file_counts`, `import_history` or `audit_history` value that is not a boolean gets a 400.
 To count `files_over_cap`, the server reads the size of every file in storage, with one call for each file. On an instance with many files, or with files on remote storage, the manifest can take some time.
 Pass `file_counts=false` to skip these reads. The `files` count does not need them, so it stays. `files_over_cap` is `null` on every product, product type and in `totals`.
 
@@ -93,7 +95,8 @@ curl -H "Authorization: Token <your API key>" \
 
 The response has the content type `application/x-ndjson`: one JSON object on each line.
 The `Content-Disposition` header names the file `defectdojo-product-2-export.ndjson`.
-The endpoint takes the same `max_file_bytes` parameter as the manifest. It ignores `file_counts`.
+The endpoint takes the same `max_file_bytes`, `import_history` and `audit_history` parameters as the manifest. It ignores `file_counts`.
+Without `import_history=true` the stream is the same as it was before the parameter existed.
 
 The lines come in this order:
 
@@ -102,7 +105,8 @@ The lines come in this order:
 3. Every `test`, by id.
 4. Every `finding`, by test and then by id within the test. You can group a test's findings as they arrive.
 5. Every `risk_acceptance`, by id.
-6. One `end` line.
+6. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
+7. One `end` line.
 
 Each object has its own line and names its parent by id.
 Notes, files, endpoint entries and finding groups nest in their line.
@@ -120,6 +124,8 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 | `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. |
 | `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
+| `test_import` | `data`: one import or reimport of a test. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
+| `test_import_actions` | `data`: some of the actions of one import. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
 | `end` | `counts`: what the stream wrote. See [Counts](#counts). |
 
 An example `header` line, shortened:
@@ -219,6 +225,38 @@ A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
 - `notes` are nested, not ids.
 - `proof` replaces `path`. It holds `filename`, `size`, `content_type` and `data_base64`, or it is `null` when there is no proof. The proof follows the same caps and the same missing-file rule as a file entry. It is the only file on its line.
 
+### Import history lines
+
+With `import_history=true`, the stream sends the import history of the product after the risk acceptances.
+An import is one run of an import or a reimport on a test.
+Each import has a `test_import` line. Its `test_import_actions` lines follow it, and the next import comes after them.
+An import with no actions has no `test_import_actions` line.
+
+A `test_import` line has `data` with these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The import id. |
+| `test` | The id of the test. |
+| `type` | `import` or `reimport`. |
+| `version`, `build_id`, `commit_hash`, `branch_tag` | The values that the import set. Each one can be `null` or empty. |
+| `import_settings` | The settings of the import, as the instance stored them. It can be `null`. |
+| `created`, `modified` | The times of the import, in ISO 8601. |
+
+A `test_import_actions` line has `data` with the keys `test_import` (the import id) and `actions`.
+`actions` is a list of `[finding, action, created, modified]`, in the order of the action id.
+`finding` is a finding id.
+`action` is one letter: `N` for a finding the import created, `C` for a finding it closed, `R` for a finding it reactivated, and `U` for a finding it left as it was.
+It can be `null`. `created` and `modified` are the times of the action.
+A line holds at most 10000 actions. An import with more actions has more than one line.
+
+An example import, with its actions on one line:
+
+```text
+{"type": "test_import", "data": {"id": 6829, "test": 90, "type": "reimport", "version": "1.2", "build_id": "b7", "commit_hash": "abc123", "branch_tag": "main", "import_settings": {"close_old_findings": true}, "created": "2025-03-04T05:06:07.123456Z", "modified": "2025-03-05T06:07:08.654321Z"}}
+{"type": "test_import_actions", "data": {"test_import": 6829, "actions": [[232, "N", "2025-03-04T05:06:07.130000Z", "2025-03-04T05:06:07.130000Z"], [233, "C", "2025-03-04T05:06:07.140000Z", "2025-03-04T05:06:07.140000Z"]]}}
+```
+
 ### Files
 
 Engagement, test and finding lines carry their files in `files`. Each file entry has these keys:
@@ -259,6 +297,8 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `files_over_cap` | File entries over `max_file_bytes`. A missing file and a file with `"error": "line_cap"` are not counted. It is `null` with `file_counts=false`. | The same, on the lines. |
 | `risk_acceptances` | Risk acceptances that an engagement of the product holds, or that accept a finding of the product. | Risk acceptance lines. |
 | `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
+| `test_imports` | Imports and reimports of the tests in the product. Only with `import_history=true`. | `test_import` lines. Only with `import_history=true`. |
+| `test_import_actions` | Actions of those imports. Only with `import_history=true`. | The actions on `test_import_actions` lines. Only with `import_history=true`. |
 
 The two sides agree on every key except `endpoints` and `finding_groups`.
 
@@ -278,7 +318,7 @@ An example `end` line:
 - Product members and product groups.
 - CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
 - The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
-- Test import history, languages, technologies and benchmarks.
+- Languages, technologies and benchmarks.
 - User passwords and password hashes. A user entry has no `password` field.
 - Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement, the login banner and the deduplication rules are in the manifest.
 

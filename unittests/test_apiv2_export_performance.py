@@ -24,6 +24,8 @@ from dojo.models import (
     Product,
     Risk_Acceptance,
     Test,
+    Test_Import,
+    Test_Import_Finding_Action,
     Test_Type,
 )
 from dojo.url.models import URL
@@ -100,6 +102,14 @@ class TestProductExportQueryCount(DojoAPITestCase):
             risk_acceptance.accepted_findings.add(finding)
             Check_List.objects.create(engagement=engagement).session_issues.add(finding)
 
+    def add_imports(self, product: Product, count: int, prefix: str) -> None:
+        test = Test.objects.filter(engagement__product=product).order_by("id").first()
+        for i in range(count):
+            test_import = Test_Import.objects.create(test=test, type="reimport", import_settings={"n": i})
+            for n in range(2):
+                finding = Finding.objects.create(title=f"{prefix}-{i}-{n}", test=test, reporter=self.admin, severity="Low")
+                Test_Import_Finding_Action.objects.create(test_import=test_import, finding=finding, action="N")
+
     def measure(self, url) -> int:
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(url)
@@ -137,3 +147,18 @@ class TestProductExportQueryCount(DojoAPITestCase):
         self.create_product("perf", prod_type=self.product.prod_type)
         after = self.measure(url)
         self.assertEqual(before, after, f"The manifest issues {before} queries before the added data and {after} after.")
+
+    def test_manifest_query_count_is_constant_with_import_history(self):
+        url = reverse("export-manifest") + "?import_history=true"
+        before = self.measure(url)
+        self.add_imports(self.product, 4, "h")
+        after = self.measure(url)
+        self.assertEqual(before, after, f"The manifest issues {before} queries before the added imports and {after} after.")
+
+    def test_stream_query_count_is_constant_across_imports_with_import_history(self):
+        url = self.url + "?import_history=true"
+        self.add_imports(self.product, 4, "i")
+        q_a = self.measure(url)
+        self.add_imports(self.product, 4, "j")
+        q_b = self.measure(url)
+        self.assertEqual(q_a, q_b, f"The export stream issues {q_a} queries with 4 added imports and {q_b} with 8.")
