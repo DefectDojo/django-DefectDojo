@@ -409,7 +409,7 @@ Exporting needs only permission to see the Template. A filter that names an obje
 
 ### Import Templates
 
-On *All Report Templates*, choose **Import** and pick an export file. Nothing is created yet: DefectDojo checks the file first and shows one row per Template with what would happen to it. Choose **Import** in the dialog to create the Templates once the report has no problems.
+On *All Report Templates*, choose **Import** and pick an export file. Nothing is created yet: DefectDojo checks the file first and shows one row per Template with what would happen to it. Choose **Import** in the dialog to create the Templates once the report has no problems. A file holds at most 25 Templates and 250 Blocks. Once it has run, the report marks each Template **Imported** or **Not Imported**.
 
 - **Blocks are created new.** Each imported Template gets its own copy of its Blocks, so importing never changes a Block another Template uses.
 - **A Theme is reused only when it is identical.** A Theme here with the same name, colors, footer and images is reused; anything else creates a new Theme.

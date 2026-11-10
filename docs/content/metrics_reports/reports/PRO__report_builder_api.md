@@ -81,7 +81,7 @@ Themes, blocks and templates can be owned by a group instead of by the instance 
 
 ### Export and import templates
 
-`GET /report_templates/{id}/export/` returns one template as an export file, and `GET /report_templates/export/?id=4,7` several (at most 25). The file is JSON with `format` set to `defectdojo.report_template`, `format_version`, the `source_version` of DefectDojo that wrote it, and a `templates` list. Each template carries its theme, its blocks in order and the images they show. Every filter value that names an object also carries the object's name, under `refs`.
+`GET /report_templates/{id}/export/` returns one template as an export file, and `GET /report_templates/export/?id=4,7` several (at most 25 templates and 250 blocks). The file is JSON with `format` set to `defectdojo.report_template`, `format_version`, the `source_version` of DefectDojo that wrote it, and a `templates` list. Each template carries its theme, its blocks in order and the images they show. Every filter value that names an object also carries the object's name, under `refs`.
 
 `POST /report_templates/import/` takes the file as `bundle`:
 
@@ -97,7 +97,7 @@ curl -s -X POST \
 - `conflict` is `create` (the default), `skip` or `overwrite`, for a template with the same name and owner.
 - `owner_group` is the group the new templates, blocks and themes belong to; leave it out for the instance.
 
-The answer has one row per template (`action`, `template_id`, `warnings`, `problems`, `written`). If any row has a problem, nothing is written and the status is `400`. A file that is not a report template export, or that a newer version of DefectDojo wrote, answers `400` with a `detail` sentence. Importing needs **Report Template Add**.
+The answer has one row per template (`action`, `template_id`, `warnings`, `problems`, `written`). If any row has a problem, nothing is written and the status is `400`. A file that is not a report template export, that a newer version of DefectDojo wrote, or that holds more than 250 blocks answers `400` with a `detail` sentence. Importing needs **Report Template Add**.
 
 ## Step 1: Discover the vocabulary
 
