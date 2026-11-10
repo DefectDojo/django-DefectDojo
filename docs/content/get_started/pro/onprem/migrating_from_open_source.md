@@ -283,7 +283,7 @@ Confirm the following before you add the connector.
 * **A superuser API key.** Create a superuser on the source for the connector alone, and an API v2 key for it. The export API answers only a superuser. Revoke the key after the cutover.
 * **Email.** Set up a mail server under **Settings > System > Email** in DefectDojo Pro. Migrated users get their set-password link by email. While users would migrate and DefectDojo Pro cannot send email, **Begin Migration** stays off. SSO or LDAP sign-in and DefectDojo Pro cloud need no mail server here.
 * **What does not cross.** Secrets stay on the source: JIRA, API tokens and passwords. The Slack, Microsoft Teams, email and webhook setup stays too. Notification settings and most system settings cross once, on the first Sync. A tool configuration arrives without its password, SSH key, API key and extras. JIRA issue links, groups and global roles stay on the source too. So does the history of users, finding templates, Product Types and other reference data. Files over the size limit stay. Duplicates stay, unless you ask for them. Plan to set up notification channels and tool credentials in DefectDojo Pro yourself.
-* **History.** The connector copies the import history and the audit history of the objects it migrates. The fields **Migrate Import History** and **Migrate Audit History** are on by default. The source needs an export version that offers history. If audit retention is on in DefectDojo Pro, the next flush deletes migrated audit events older than the retention period. To keep them, raise the retention period or set `DD_AUDITLOG_FLUSH_RETENTION_PERIOD` to `-1` before the Sync. The [connector reference](/connectors/toolreference/defectdojo/#what-crosses) explains which history crosses.
+* **History.** The connector copies the import history and the audit history of the objects it migrates. The fields **Migrate Import History** and **Migrate Audit History** are on by default. The source needs an export version that offers history. Audit retention is on when `DD_AUDITLOG_FLUSH_RETENTION_PERIOD` is 0 or above. The next flush then deletes migrated audit events older than that many months. It keeps legacy audit entries. To keep the events, raise the period before the Sync, or set it to `-1` to turn the flush off. The [connector reference](/connectors/toolreference/defectdojo/#what-crosses) explains which history crosses.
 * **The owner fields.** The product manager, technical contact and team manager of a Product become members of the Product in DefectDojo Pro. The three fields stay empty.
 * **Access.** The users in the Authorized Users list of a Product become members of the Product. The users in the list of its Product Type become members of the Product Type. A user that was staff on the source gets the Maintainer role. Every other user gets the Writer role. A user that is already a member keeps the membership. An owner of the Product is the one exception: the owner gets the Maintainer role again on each Sync.
 
@@ -304,7 +304,7 @@ The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page cover
 
 Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
 
-* **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it. It also warns when audit retention is on and audit events or legacy audit entries cross.
+* **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it. It also warns when audit retention is on and audit events cross.
 * **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync. The totals include the imports, import actions, audit events and legacy audit entries that the Sync copies.
 * **To Be Created** lists the users and the reference data that the Sync creates.
 * **Not Migrated** lists what stays on the source. It names the secrets, and the settings and feature areas that you set up in DefectDojo Pro yourself. It names Audit History and Import History when the source sends no such history. It also names them when you turned the field off.
@@ -401,7 +401,7 @@ The first Sync copies notification settings and system settings once. A second r
 - Connector added in **Connect > Upstream**
 - Discover run, with **Include** cleared on every Product to leave behind
 - Preflight report read: warnings, counts, what is created and what does not cross
-- Audit retention in DefectDojo Pro checked, when the report shows audit events or legacy audit entries
+- Audit retention in DefectDojo Pro checked, when the report shows audit events
 - First Sync run, finding counts checked, and validated
 - Notification channels and tool credentials set up in DefectDojo Pro
 - Users activated with **Activate and Invite**, and given roles
