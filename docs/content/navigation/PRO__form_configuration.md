@@ -29,7 +29,7 @@ An instance upgraded from a version with a single Form Configuration keeps its s
 
 ## Default Profile and instance defaults
 
-A [Default Profile](/admin/user_management/create_user_group/#default-profiles) can point the Members of its Groups at another configuration. A person's forms follow the configuration set by the highest-ranked profile among their Groups that sets one, else the **Default** configuration, else the stock forms. Deleting a configuration that a profile uses clears it from that profile, and the delete dialog names those profiles.
+A [Default Profile](/admin/user_management/create_user_group/#defaults) can point its Members (the users it is assigned to directly and the Members of its Groups) at another configuration. A person's forms follow the configuration set by the first profile that sets one, in this order: the profile assigned to them directly, then their Groups' profiles in rank order. Profiles do not combine. Otherwise the **Default** configuration applies, else the stock forms. Deleting a configuration that a profile uses clears it from that profile, and the delete dialog names those profiles.
 
 ## Choosing a form
 

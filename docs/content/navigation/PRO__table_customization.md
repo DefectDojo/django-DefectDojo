@@ -94,7 +94,7 @@ Column visibility, column order, column widths, page size, filters, sort order, 
 - **Save as New Preference**: capture the current table setup under a new name. You can optionally set it as your default and, if you have permission, share it with other users.
 - **Save Column Layout**: update the active preference's columns only (visibility, order, widths, page size, and the view), leaving its saved filters and sort untouched.
 - **Save Filters and Sort**: update the active preference's filters, sort, and match mode only, leaving its column layout untouched.
-- **Set Preference as Default**: load this preference automatically whenever you open the table.
+- **Set as My Default**: load this preference automatically whenever you open the table.
 - **Duplicate Preference**: copy the active preference (including its column widths) to a new name so you can adjust it without changing the original.
 - **Update Preference Label**: rename the active preference.
 - **Delete Preference**: remove the active preference.
@@ -108,17 +108,17 @@ The dot compares against the table as it was when the page loaded or a preferenc
 
 To switch between preferences, pick one from the list in the preferences menu. Selecting **Default** returns the table to its built-in columns and widths without deleting any of your saved preferences.
 
-Shared preferences created by other users appear under the **Shared Preferences** tab of the menu. You can load or set a shared preference as your default, but only its creator can change or delete it.
+Shared preferences created by other users appear under the **Shared Preferences** tab of the menu. You can load or set a shared preference as your **My Default**, but only its creator can change or delete it.
 
-## Global defaults and restricted customization
+## Instance defaults and restricted customization
 
 An administrator can pin everyone to a shared table view instead of letting each person keep their own.
 
-- **Set as Global Default**: on a shared preference, the preferences menu offers **Set as Global Default** to users who can share preferences. The designated preference becomes the one every user is shown for that table while customization is restricted. You can also choose it on the Layout Defaults settings page (Settings, then UI Defaults, then Layout Defaults), which offers a dropdown of the shared preferences for each table.
-- **Restrict Layout Customization**: a system setting (Settings, then UI Defaults, then Layout Defaults) that, when enabled, limits table customization to superusers. Everyone else is shown the designated global default for each table, or the table's built-in columns when none is designated, and the **Views** and **Columns** buttons are hidden. Sorting, filtering, and searching still work.
+- **Set as Instance Default**: on a shared preference, the preferences menu offers **Set as Instance Default** (and **Clear Instance Default**) to users who can share preferences. The designated preference becomes the one every user is shown for that table while customization is restricted. You can also choose it on **Settings > Defaults > Instance Defaults** (the **Table Views** card), which offers a dropdown of the shared preferences for each table.
+- **Restrict Layout Customization**: a system setting (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) that, when enabled, limits table customization to superusers. Everyone else is shown the Instance Default for each table, or the table's built-in columns when none is designated, and the **Views** and **Columns** buttons are hidden. Sorting, filtering, and searching still work.
 
 Personal preferences saved before the setting was enabled are not deleted. They are ignored while it is on, and they reappear if an administrator turns it back off.
 
 ## Default Profile and instance defaults
 
-When you have not set a default preference for a table, it opens with the view set by the highest-ranked [Default Profile](/admin/user_management/create_user_group/#default-profiles) among your Groups that sets one for that list, else the built-in columns. While your customization is restricted, the profile's view is enforced over the global default, which applies when no profile of yours sets one. Under **Restrict to Selected Layouts**, the **Views** menu lists only the views your profile allows for that list, to switch between; nothing can be saved. On a list the profile names no views for, the **Views** button is hidden, as under the instance switch. On a list it does name, a default view that is not allowed gives way to the profile's default for that list, else its first allowed view. Deleting a view removes it from every profile that lists it.
+When you have not set a preference as **My Default** for a table, it opens with the view from the first [Default Profile](/admin/user_management/create_user_group/#defaults) that sets one for that list (the profile assigned to you directly, then your Groups' profiles in rank order), else the **Instance Default**, else the built-in columns. A view that comes from a profile reads **From <profile>**, or **Set by <profile>** when it is locked. While your customization is restricted, the profile's view is enforced over the Instance Default, which applies when no profile of yours sets one. Under **Restrict to Selected Layouts**, the **Views** menu lists only the views your profile allows for that list, to switch between; nothing can be saved. On a list the profile names no views for, the **Views** button is hidden, as under the instance switch. On a list it does name, a default view that is not allowed gives way to the profile's default for that list, else its first allowed view. Deleting a view removes it from every profile that lists it.

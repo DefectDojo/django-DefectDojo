@@ -38,7 +38,7 @@ Every one of the six pages has a **Page Layout** button in its toolbar. Opening 
 - **New Layout**: create a layout from scratch or from an existing one.
 - **Manage Layouts**: open the full management dialog.
 
-Layouts in the list carry a marker showing where they came from: shipped with DefectDojo, a shared template, or your default.
+Layouts in the list carry a marker showing where they came from: shipped with DefectDojo, a shared template, or your **My Default**.
 
 ## Making your first change
 
@@ -70,20 +70,21 @@ In edit mode:
 | **Rename** | Change a layout's name. |
 | **Clone** | Copy a layout, including a shared or shipped one, into Saved Layouts. |
 | **Delete** | Remove one of your layouts. |
-| **Set Default** / **Clear Default** | Choose which layout you personally land on for this page. |
+| **Set as My Default** / **Clear My Default** | Choose which layout you personally land on for this page. The layout carries a **My Default** tag. |
 | **Share** / **Unshare** | Publish one of your layouts as a shared template, or withdraw it. |
-| **Set Shared Default** / **Clear Shared Default** | Choose which layout everyone on the instance lands on for this page. |
+| **Set as Instance Default** / **Clear Instance Default** | Choose which layout everyone on the instance lands on for this page. A layout from a Default Profile reads **From <profile>**, or **Set by <profile>** when it is locked. |
 
-Sharing a layout and setting the instance-wide default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
+Sharing a layout and setting the Instance Default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
 
 ## Which layout you see
 
 When you open one of the six pages, DefectDojo picks the first of these that applies:
 
 1. The layout you last chose for that page.
-2. Your personal default, if you have set one.
-3. The instance-wide shared default, if an administrator has set one.
-4. The layout shipped with DefectDojo.
+2. Your own default (**My Default**), if you have set one.
+3. The layout from a [Default Profile](/admin/user_management/create_user_group/#defaults): the one assigned to you directly, else your Groups' profiles in rank order (the first that sets one wins).
+4. The **Instance Default**, if an administrator has set one.
+5. The layout shipped with DefectDojo.
 
 ## Fields you can change in place
 
@@ -118,15 +119,15 @@ A hidden tab comes back as soon as the record has something for it, the next tim
 
 ## When customization is restricted
 
-An administrator can turn on **Restrict Layout Customization** in **Settings > UI Defaults > Layout Defaults**. With it on:
+An administrator can turn on **Restrict Layout Customization** in **Settings > Defaults > Instance Defaults** (the **Layout Customization** card). With it on:
 
 - Only superusers can create or change layouts.
-- Everyone else sees the layout designated as the default, or the shipped layout when none has been designated.
+- Everyone else sees the Instance Default layout, or the shipped layout when none has been set.
 - The Page Layout menu no longer offers the editing and management actions.
 
 Layouts you saved before the switch was turned on are kept. If it is turned back off, they are available again exactly as they were.
 
-A [Default Profile](/admin/user_management/create_user_group/#default-profiles) can override the switch for the Members of its Groups in either direction, with **Allow** or **Restrict to Selected Layouts**. A profile can also set the layout each View page opens with, and under **Restrict to Selected Layouts** list the other layouts Members may switch to; the layout switcher then offers only those, with no edit menu. Superusers are never restricted.
+A [Default Profile](/admin/user_management/create_user_group/#defaults) can override the switch for its Members (its Groups' Members and users it is assigned to directly) in either direction, with **Allow** or **Restrict to Selected Layouts**. The first profile in the resolution order that sets it decides. A profile can also set the layout each View page opens with, and under **Restrict to Selected Layouts** list the other layouts Members may switch to; the layout switcher then offers only those, with no edit menu. Superusers are never restricted.
 
 For the administrator's side of this, see [The Sidebar Menu](/navigation/pro__sidebar/).
 
