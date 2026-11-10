@@ -8,7 +8,7 @@ slug: downstream-connector-api
 ---
 You can build and maintain your Downstream Connector setup from code instead of the UI. This is useful when you have many Assets: a script can assign one Issue Tracker Mapping to hundreds of Assets, and run again when your Assets change.
 
-This page covers the objects you work with after a connector exists: Issue Tracker Mappings, Issue Tracker Assignments, Ticket Templates, and the custom field, severity and status mappings that a mapping uses. Create the connector itself, with its credentials, in the UI. See [Downstream Connectors](../about/) for what each object does.
+This page covers the objects you work with after a connector exists: Issue Tracker Mappings, Issue Tracker Assignments, Ticket Templates, and the custom field, severity and status mappings that a mapping uses. Create the connector itself, with its credentials, in the UI. See [Downstream Connectors](/connectors/downstream/about/) for what each object does.
 
 ## Authentication
 
@@ -23,7 +23,7 @@ All paths on this page start with `/api/v2/downstream/`. The full request and re
 
 Permissions:
 
-- To read these objects, your user needs the **Integration View** permission. To create, change or delete them, your user needs **Integration Edit**.
+- To read these objects, your user needs the global **Integration View** permission. To create, change or delete them, your user needs the global **Integration Edit** permission.
 - To assign a mapping to an Asset or an Engagement, you also need edit rights on that Asset or Engagement.
 
 > **⚠️ Security Notice:** Your API token grants access to your DefectDojo data. Never paste it into a chat, screenshot, ticket, or committed file. Read it from an environment variable, and rotate it if it is ever exposed.
@@ -35,7 +35,7 @@ Permissions:
 | Connectors | `/api/v2/downstream/connectors/` | `GET` only. Use it to find the id of a connector you created in the UI. |
 | Issue Tracker Mappings | `/api/v2/downstream/issue_tracker_mappings/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/` |
 | Issue Tracker Assignments | `/api/v2/downstream/issue_tracker_assignments/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/` |
-| Ticket Templates | `/api/v2/downstream/ticket_templates/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/`, plus `POST validate/` |
+| Ticket Templates | `/api/v2/downstream/ticket_templates/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/`, plus `POST validate/`, which renders a template against sample data and answers `503` when the rendering service is not available |
 | Custom Field Mappings | `/api/v2/downstream/custom_field_mappings/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/` |
 | Severity Mappings | `/api/v2/downstream/severity_mappings/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/` |
 | Status Mappings | `/api/v2/downstream/status_mappings/` | `GET`, `POST`, `GET {id}/`, `PUT`/`PATCH {id}/`, `DELETE {id}/` |
@@ -83,7 +83,7 @@ DefectDojo reuses an existing status or severity row when its values are the sam
 
 ## Assign a mapping to an Asset
 
-The `config` field sets how Findings are pushed. It takes one of `NO_AUTO_FEATURE`, `AUTO_ADD_LINK`, `AUTO_EDIT_LINK` or `AUTO_ADD_AND_EDIT_LINK`, which match the four options described in [Downstream Connectors](../about/).
+The `config` field sets how Findings are pushed. It takes one of `NO_AUTO_FEATURE`, `AUTO_ADD_LINK`, `AUTO_EDIT_LINK` or `AUTO_ADD_AND_EDIT_LINK`, which match the four options described in [Downstream Connectors](/connectors/downstream/about/).
 
 ```bash
 curl -s -X POST \
@@ -107,7 +107,7 @@ while read -r asset_id; do
 done < asset_ids.txt
 ```
 
-A `201` means the assignment was created. A `403` means your user can see that Asset but cannot edit it. A `400` that names `product` means the id is wrong or your user cannot see that Asset.
+A `201` means the assignment was created. A `403` means your user has no global Integration Edit permission, or can see that Asset but cannot edit it. A `400` that names `product` means the id is wrong or your user cannot see that Asset.
 
 ## Other paths to the same objects
 
