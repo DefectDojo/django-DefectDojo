@@ -307,20 +307,26 @@ writes to a `connector:` namespace. Everything else is yours to declare, through
 ### Managing aliases from the Asset page
 
 The **Asset Identity** card on the Asset page lists every identifier that resolves to that
-Asset, with its type, its namespace, and where it came from — a Connector's name for the ones
-its sync asserted, or *User* for the ones you added.
+Asset, with its type, its namespace, and where it came from: a Connector's name for the ones
+its sync asserted, or *User* for the ones you added. The namespace appears once the card is wide
+enough for it. Above the list, the card counts the identifiers and how many of them people
+added, and the card's title shows the same count (or the number of repository conflicts, when
+there are any). A long identifier is cut to fit the card: hover over it, or move keyboard focus
+to it, to read it in full.
 
 Use **Add Identity** to declare one. You pick the namespace first, then the type, because only
 some pairings mean anything: a hostname belongs in `dns`, an image digest in `oci`. The
 namespaces offered are the shared, semantic ones; a Connector's own namespace is not offered,
 because those belong to its sync.
 
-Removing an alias **withdraws** it rather than editing it. Withdrawing one you added means
-sources that knew the Asset by that identifier fall back to matching it by name. Withdrawing
-one a Connector asserted only lasts until that Connector's next sync, which will assert it
-again — to stop a Connector claiming an Asset, change its mapping rather than its aliases.
+Removing an alias **withdraws** it rather than editing it: choose **Withdraw** from the menu at
+the start of its row. Withdrawing one you added means sources that knew the Asset by that
+identifier fall back to matching it by name. Withdrawing one a Connector asserted only lasts
+until that Connector's next sync, which will assert it again. To stop a Connector claiming an
+Asset, change its mapping rather than its aliases.
 
-Adding and withdrawing an alias requires edit permission on the Asset.
+Adding and withdrawing an alias requires edit permission on the Asset. Without it, the card
+lists the identifiers with no **Add Identity** button and no row menus.
 
 ### Device identifiers
 
@@ -403,9 +409,11 @@ reporting a repository whose alias names a different Asset, or if you map a Reco
 different Asset than its repository's alias names, DefectDojo does not move the Record or its
 Findings, and does not re-point the alias. It records a **repository conflict** instead.
 
-Conflicts appear at the top of the Asset Identity card, on both Assets involved, naming the
-repository, the Record and its Connector, and the two Assets. (If you cannot view the other
-Asset, the card says so without naming it.) To settle one, either:
+When there are conflicts, a strip at the top of the Asset Identity card says how many, on both
+Assets involved, and the identifier a conflict names is marked at the start of its row. Select
+**Review** on the strip to list them: each names the repository, the Record and its Connector,
+and the two Assets. (If you cannot view the other Asset, the list says so without naming it.)
+To settle one, either:
 
 - remap the Record onto the Asset the repository resolves to, choosing **Move** so its Findings
 travel with it (see [Managing Records](/connectors/upstream/manage_records/)); or
