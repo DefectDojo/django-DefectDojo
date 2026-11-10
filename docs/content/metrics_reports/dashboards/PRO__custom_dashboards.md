@@ -188,7 +188,7 @@ To chart the last six months with Critical and High as one line and Medium and L
 4. Leave **Series** on **Critical and High, Medium and Low, Info**. Choose **One Series per Severity** instead to draw a line for each severity.
 5. Leave **Period** on **Month** and **Periods Shown** at 6. **Week** charts the end of each week instead.
 6. Pick **Line** or **Bar** in **Chart Type**, keep **Show Values** to print each count on its point, and change a series color if you need to (by default Critical and High is red, Medium and Low is green, and Info uses the Info severity color).
-7. Submit, then save the layout.
+7. Submit. The widget is saved as soon as you submit; click **Done** to leave edit mode.
 
 How to read the chart:
 
