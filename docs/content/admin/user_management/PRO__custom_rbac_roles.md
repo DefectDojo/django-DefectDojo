@@ -197,14 +197,16 @@ While it is off:
 * **Only a superuser or a Global Owner can give the role** to a user or a group, as a member of an Organization, an Asset or a Group. These are the same people who can edit roles, so the setting binds everyone who cannot change it back.
 * **Adding someone to a Group that holds the role** (on an Organization or an Asset, as a Global Role, or across an Organization type) **counts as giving it**. Only a superuser, or a Global Owner who can manage that Group's members, can add people to it.
 * **Everyone else no longer sees the role** in the role dropdowns of the Permissions dialogs. A member who already holds it keeps it, and member tables still show it.
-* **Someone who manages members can still take the role away**: remove the member, or move them to a role they are allowed to give. They cannot move a membership that holds the role to another user or group. Removing a member from a Group that holds the role is always allowed.
+* **Someone who manages members can still take the role away**: remove the member, or move them to a role they are allowed to give. They cannot move a membership that holds the role to another user or group. In a Group that holds the role, removing a member and changing an existing member's Group role are always allowed, because neither adds anyone to the Group.
 * **The other rules still apply on top.** Granting an Owner-tier role still needs the matching Add Owner permission, and a role that can reveal recovery keys or wipe devices is still reserved for superusers and Global Owners.
-* **The same rule covers every way in**: the Permissions dialogs, `/api/v2/`, `/api/v3/`, the **Owner Group Role** of a connector that assigns asset ownership, and carrying access over when assets are merged. A refused grant answers `403` with the message "Only a superuser or a global Owner can grant this role." The message does not name the role.
+* **The same rule covers every way in**: the Permissions dialogs, `/api/v2/`, `/api/v3/`, the **Owner Group Role** of a connector that assigns asset ownership, and carrying access over when assets are merged. A refused grant answers `403` with the message "Only a superuser or a global Owner can grant this role." Saving a connector answers `400` with the same message on the **Owner Group Role** field, and a merge plan reports it as an error on the merge. The message does not name the role.
 * **A clone keeps the setting** of the role it was cloned from. A clone of a built-in role starts with the setting on.
 
 Built-in roles cannot be edited, so they are always assignable. To keep a built-in role's permissions away from delegated managers, clone it, turn the setting off on the clone, and assign the clone instead.
 
-Grants the system makes on its own are not affected: single sign-on, SCIM and LDAP group membership, the default group role, the owner of something a user creates, and the connector ownership sync, which uses the role chosen when the connector was saved.
+Grants the system makes on its own are not affected: single sign-on, SCIM and LDAP group membership, the default group role, and the owner of something a user creates.
+
+The connector ownership sync hands out the **Owner Group Role** chosen when the connector was saved. If that role is kept from non-superusers and no superuser or Global Owner chose it (for example, it was turned off after someone else chose it), the sync skips the ownership grant and logs why. A superuser or a Global Owner can save the connector to confirm the role, or choose another one.
 
 ## Group Content permissions
 
