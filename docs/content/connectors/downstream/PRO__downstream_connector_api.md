@@ -95,7 +95,7 @@ curl -s -X POST \
 
 ## Assign one mapping to many Assets
 
-This loop assigns mapping `12` to every Asset id in `asset_ids.txt`, one id per line. Run it again with new ids as your Assets change. To see which Assets already have an assignment, `GET /api/v2/downstream/issue_tracker_assignments/?issue_tracker_mapping_equals=12` first, and skip the `product` ids it returns. DefectDojo does not stop a second assignment of the same mapping to the same Asset.
+This loop assigns mapping `12` to every Asset id in `asset_ids.txt`, one id per line. Run it again with new ids as your Assets change. To see which Assets already have an assignment, `GET /api/v2/downstream/issue_tracker_assignments/?issue_tracker_mapping_equals=12` first, and skip the `product` ids it returns. The list comes in pages of 25 rows by default: send a larger `limit` if you need one, and follow the `next` URL of each page until it is `null`. DefectDojo does not stop a second assignment of the same mapping to the same Asset.
 
 ```bash
 while read -r asset_id; do
@@ -111,4 +111,4 @@ A `201` means the assignment was created. A `403` means your user has no global 
 
 ## Other paths to the same objects
 
-The same objects are also served under `/api/connectors/v1/downstream/` and the older `/api/integrators/v1/`. Scripts that use those paths keep working, but automate against the `/api/v2/downstream/` paths on this page. The DefectDojo UI calls an internal mirror under `/api/vue/downstream/`, which does not accept API tokens.
+The same objects are also served under `/api/connectors/v1/downstream/` and the older `/api/integrators/v1/`. Scripts that use those paths keep working, but automate against the `/api/v2/downstream/` paths on this page. From release 3.5.200, assignments on all three paths use the Asset id in `product` and the Engagement id in `engagement`. The `product_*` and `engagement_*` filters and the `product` and `engagement` ordering use the same ids. Earlier releases used an internal id there, so update any script that stored those values. The DefectDojo UI calls an internal mirror under `/api/vue/downstream/`, which does not accept API tokens.
