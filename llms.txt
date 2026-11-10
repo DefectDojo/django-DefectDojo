@@ -883,6 +883,7 @@ Key facts:
 ## Optional
 
 - [Open Source Upgrading](https://docs.defectdojo.com/releases/os_upgrading/upgrading_guide/): Release specific upgrading instructions
+- [Upgrading to DefectDojo Version 3.5.200](https://docs.defectdojo.com/releases/os_upgrading/3.5.200/): Trufflehog Scan findings gain a stable unique_id_from_tool; switching the scan type to Unique ID from tool recreates each existing finding once. A new optional DD_TRUFFLEHOG_FOLD_COMMITS setting folds a secret's commits into one finding.
 - [Upgrading to DefectDojo Version 3.5.100](https://docs.defectdojo.com/releases/os_upgrading/3.5.100/): The nginx image moves to nginx 1.31.8 and no longer includes curl.
 - [Upgrading to DefectDojo Version 3.6.x](https://docs.defectdojo.com/releases/os_upgrading/3.6/): No special instructions.
 - [Upgrading to DefectDojo Version 3.4.300](https://docs.defectdojo.com/releases/os_upgrading/3.4.300/): The endpoint field of /api/v2/endpoint_status/ carries the ID /api/v2/endpoints/ lists; a new optional DD_GITHUB_STAR_PROMPT_ENABLED setting controls the GitHub star prompt.
