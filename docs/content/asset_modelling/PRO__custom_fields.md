@@ -97,7 +97,12 @@ each Finding. Give the field a formula when you add it, or type one into the **O
 column of its row; clearing the formula makes the field an ordinary one again. Because a formula
 replaces every value already entered in the field, DefectDojo asks before an existing field becomes
 computed, and again before a computed field goes back to being entered by hand (its values stay as
-last computed). **Insert Number** beside the formula lists every number it can read.
+last computed). **Insert Number** under the formula, in the field's row and when you add a field,
+lists every number it can read and adds the one you pick to the end of the formula.
+
+A computed field holds what its formula gives and nothing else. Where the formula has no result for a
+record (an input it reads is missing, it divides by zero, or it averages no Findings), the record's
+value is empty, including a value typed in before the field became computed.
 
 A formula reads the record's own numbers:
 
@@ -146,8 +151,9 @@ stop reading it; the message names them.
 - **After an input changes.** Changing a custom field value that a computed formula reads (by hand,
   through the API or from a rule) recomputes that record, and a Finding's value recomputes its Asset.
   Saving an Asset or a Test recomputes it when a formula reads its built-in numbers.
-- **When the formula changes**, the field and every computed field that reads it are recomputed for
-  every record at once.
+- **When the formula changes** (or the field's type, or whether it is computed), the field and every
+  computed field that reads it are recomputed for every record at once. Changing only its label
+  recomputes nothing.
 - **Every hour**, every computed field is recomputed in full. That catches changes made without saving
   each record, such as bulk updates, priority recalculations and records moving between Assets. A
   sweep still running when the next hour comes is never overlapped; the next one is skipped.
@@ -157,6 +163,12 @@ field. On an Asset, a rule triggered [On Asset Event](/automation/triage_engine/
 for updates sees `custom_fields.<name>` in `ctx.changed_fields`, so an If / Filter node with
 `ctx.changed_fields` `contains` `custom_fields.<name>` runs only when that value moves. On a Finding,
 it is a Finding update. A recompute that leaves the value unchanged raises no event.
+
+When a rule's write is what moved the computed value (the rule set a field the formula reads), the
+event belongs to that rule's run, as a change the rule made itself would: it does not start the same
+rule again, and it counts toward the limit on how many rules one change can set off in a chain. A rule
+that writes a field from a computed field reading that same field therefore runs once per change,
+rather than feeding itself forever.
 
 Counts and aggregates include every Finding of the record, whoever is looking, so everyone sees the
 same value, as with the Asset grade. An Integer field rounds half away from zero; a Decimal field keeps
