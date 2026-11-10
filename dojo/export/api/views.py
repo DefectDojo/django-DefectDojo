@@ -1,8 +1,9 @@
+import heapq
 import math
 from collections import defaultdict
 from collections.abc import Iterator
 from itertools import batched, groupby
-from operator import itemgetter
+from operator import attrgetter, itemgetter
 
 from auditlog.models import LogEntry
 from django.conf import settings
@@ -247,12 +248,16 @@ def audit_history_lines(product: Product, counts: dict, render) -> Iterator[byte
             counts["audit_events"] += 1
             yield render({"type": "audit_event", "data": serializer.to_representation(event)})
     content_types = ContentType.objects.get_for_models(*AUDIT_MODELS)
-    in_product = Q()
-    for model in AUDIT_MODELS:
-        in_product |= Q(content_type=content_types[model], object_id__in=audit_scope(model, product).values("id"))
-    entries = LogEntry.objects.filter(in_product).select_related("content_type").order_by("id")
+    # One query per model. In one query, an OR over the models stops Postgres from using the object_id index.
+    per_model = [
+        LogEntry.objects.filter(content_type=content_types[model], object_id__in=audit_scope(model, product).values("id"))
+        .select_related("content_type")
+        .order_by("id")
+        .iterator(chunk_size=EXPORT_CHUNK_SIZE)
+        for model in AUDIT_MODELS
+    ]
     serializer = ExportLegacyAuditEntrySerializer()
-    for entry in entries.iterator(chunk_size=EXPORT_CHUNK_SIZE):
+    for entry in heapq.merge(*per_model, key=attrgetter("id")):
         counts["legacy_audit_entries"] += 1
         yield render({"type": "legacy_audit_entry", "data": serializer.to_representation(entry)})
 

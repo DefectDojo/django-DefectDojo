@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,8 +12,10 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
+from django.db import connection
 from django.db.models import Q
 from django.test import RequestFactory, SimpleTestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from drf_spectacular.generators import SchemaGenerator
 from rest_framework.authtoken.models import Token
@@ -31,7 +34,7 @@ from dojo.export.api.serializers import (
     export_proof,
     render_datetime,
 )
-from dojo.export.api.views import ACTIONS_PER_LINE, COUNT_KEYS
+from dojo.export.api.views import ACTIONS_PER_LINE, AUDIT_MODELS, COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
@@ -1008,6 +1011,14 @@ class TestExportAuditHistory(DojoAPITestCase):
         self.assertEqual(sorted(ids), ids)
         self.assertLessEqual({e.id for e in mine}, set(ids))
         self.assertFalse({e.id for e in foreign + not_audited} & set(ids))
+
+    def test_each_model_reads_its_legacy_entries_in_its_own_query(self):
+        with CaptureQueriesContext(connection) as queries:
+            self.export(audit_history="true")
+        legacy = [query["sql"] for query in queries if 'FROM "auditlog_logentry"' in query["sql"]]
+        self.assertEqual(len(AUDIT_MODELS), len(legacy), legacy)
+        for sql in legacy:
+            self.assertEqual(1, len(re.findall(r'"auditlog_logentry"\."content_type_id" = (?!"django_content_type")', sql)), sql)
 
     def test_the_end_counts_match_the_lines_and_the_database(self):
         self.legacy_entry_for_every_model()
