@@ -26,6 +26,19 @@ sudo -E dojo-compose-cli app restart
 
 Run `dojo-compose-cli environment add --help` for the exact syntax your CLI version expects.
 
+## The connector chunk limit
+
+Connectors send findings to DefectDojo in chunks of about 5,000 findings, and each chunk has its own size limit, separate from the scan file limit. A chunk over it fails the sync with `Chunk is too large. Maximum supported size is N MB`, or `decompressed chunk exceeds N MB` for a compressed chunk.
+
+The limit defaults to the larger of `DD_SCAN_FILE_MAX_SIZE` and 100 MB, so lowering the scan file limit never shrinks it below 100 MB. Change it only if a connector sync fails with one of those messages: set `DD_CONNECTORS_CHUNK_MAX_MB`, in megabytes, then restart:
+
+```bash
+sudo -E dojo-compose-cli environment add --key DD_CONNECTORS_CHUNK_MAX_MB --value 200
+sudo -E dojo-compose-cli app restart
+```
+
+DefectDojo holds each chunk in memory while it checks it, so raise the limit in steps rather than removing it. The nginx ceiling below still applies.
+
 ## The nginx ceiling
 
 Compose deployments have no ingress controller, so the ingress limit that Kubernetes deployments raise does not apply. Instead, the nginx that ships in the deployment caps request bodies at 800 MB, which is the practical ceiling, and the application limit above applies on top of that.
