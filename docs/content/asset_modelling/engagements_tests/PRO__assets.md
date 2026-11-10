@@ -98,7 +98,7 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 - **Service Level Agreement by Severity**
     - Applies the Asset’s SLA configuration from settings to the Findings within the Asset. 
 - **Finding Severity Breakdown**
-    - A graph of the Findings within the Asset, organized by severity. 
+    - A ring of the Asset's open Findings (active, and not duplicates, false positives or out of scope) by severity, with the open total in the middle. Beside it, each severity's count and share, each linking to the Asset's open Findings at that severity. The panel header shows the total open count.
 - **Finding Distribution**
     - A ring of the Asset's Findings by status: Active, Mitigated, and Other (Findings that are neither active nor mitigated, such as false positives and accepted risks). The three add up to the total, which the panel header shows, and each status in the legend links to the Asset's Findings with that status.
     - Beside the ring, the share of Findings reported by static and by dynamic tools. Each is measured against the total on its own, because a Finding can be both static and dynamic, or neither.
