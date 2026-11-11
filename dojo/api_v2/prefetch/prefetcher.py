@@ -18,6 +18,38 @@ from dojo.location.api.serializers import (
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, FileUpload, Finding, Notes, Test
+from dojo.notes.helper import notes_prefetch
+from dojo.vulnerability.queries import vulnerability_id_prefetch
+
+
+def _finding_prefetch_related():
+    """
+    The relations FindingSerializer reads, so the findings a page prefetches (``?prefetch=duplicate_finding``)
+    load each one once for the page rather than once per finding. Built per call: under V3 ``endpoints`` reads
+    the finding's ``locations``, and the notes and vulnerability id lookups are ``Prefetch`` objects.
+    """
+    return (
+        "locations" if locations_enabled() else "endpoints",
+        "tags",
+        "reviewers",
+        "found_by",
+        "files",
+        "finding_meta",
+        "burprawrequestresponse_set",
+        "finding_cwe_set",
+        notes_prefetch(),
+        vulnerability_id_prefetch(),
+        "jira_issue__jira_project__jira_instance",
+        "finding_group_set__jira_issue__jira_project__jira_instance",
+        # accepted_risks: each acceptance's notes, accepted findings and the engagement its path names
+        "risk_acceptance_set__notes",
+        "risk_acceptance_set__accepted_findings",
+        "risk_acceptance_set__engagement_set",
+        # test_type_name, and the product the accepted_risks permission check walks to
+        "test__test_type",
+        "test__engagement__product__prod_type",
+    )
+
 
 # Related objects that a prefetched model's serializer reads, so they are fetched in the same query
 _PREFETCH_SELECT_RELATED = {
@@ -25,9 +57,11 @@ _PREFETCH_SELECT_RELATED = {
     LocationProductReference: ("location",),
     Notes: ("author", "editor", "note_type"),
 }
-# Relations a prefetched model's serializer reads, batched over every object the page prefetches
+# Relations a prefetched model's serializer reads, batched over every object the page prefetches. A callable is
+# called each time, for lookups that depend on runtime state.
 _PREFETCH_PREFETCH_RELATED = {
     Endpoint: ("endpoint_params", "findings", "tags"),
+    Finding: _finding_prefetch_related,
     Notes: ("history__current_editor", "history__note_type"),
     # TestSerializer nests every finding group in the test with its JIRA issue and that issue's url, and every note
     Test: (
@@ -39,6 +73,13 @@ _PREFETCH_PREFETCH_RELATED = {
         "notes__history__note_type",
     ),
 }
+
+
+def _prefetch_related_for(model):
+    """The ``prefetch_related`` lookups for a prefetched ``model``'s serializer, empty when it needs none."""
+    lookups = _PREFETCH_PREFETCH_RELATED.get(model, ())
+    return lookups() if callable(lookups) else lookups
+
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
@@ -262,7 +303,7 @@ class _Prefetcher:
             # Serializers that read through a FK (``location.location_value``) would otherwise query once per row
             if select_related := _PREFETCH_SELECT_RELATED.get(model_type):
                 authorized_qs = authorized_qs.select_related(*select_related)
-            if prefetch_related := _PREFETCH_PREFETCH_RELATED.get(model_type):
+            if prefetch_related := _prefetch_related_for(model_type):
                 authorized_qs = authorized_qs.prefetch_related(*prefetch_related)
 
             serializer_kwargs = {"many": many}
@@ -306,15 +347,18 @@ class _Prefetcher:
         authorized_ids = set(authorized_qs.filter(pk__in={value.pk for value in field_values}).values_list("pk", flat=True))
         # The entries' own instances are serialized, not authorized_qs rows, so its prefetch_related never reaches
         # them: load the relations the serializer reads onto the instances, once for all of them
-        if prefetch_related := _PREFETCH_PREFETCH_RELATED.get(type(field_values[0])):
+        if prefetch_related := _prefetch_related_for(type(field_values[0])):
             prefetch_related_objects([value for value in field_values if value.pk in authorized_ids], *prefetch_related)
+        # One serializer for all of them, as a list serializer reuses its child: building a serializer's fields is
+        # most of the cost of serializing a finding, and it does not depend on the object
+        serializer = extra_serializer(**serializer_kwargs)
         serialized = set()
         for field_value in field_values:
             if field_value.pk not in authorized_ids or field_value.pk in serialized:
                 continue
             serialized.add(field_value.pk)
             # Serialize the entry's own instance, which carries whatever the queryset prefetched on it
-            data = extra_serializer(**serializer_kwargs).to_representation(field_value)
+            data = serializer.to_representation(field_value)
             self._prefetch_data[field_to_fetch][data["id"]] = data
 
     @property
