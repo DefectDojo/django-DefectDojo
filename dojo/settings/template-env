@@ -47,7 +47,7 @@ DD_WHITENOISE=True
 # If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
 # DD_SECURE_CONTENT_TYPE_NOSNIFF=True
 
-# Show the open-source promo ("Upgrade to Pro") banner and the Pro links in the
+# Show the open-source promo ("Upgrade to Pro") banner and the Pro link in the
 # user menu. Set to False to disable both.
 # DD_OS_MESSAGE_ENABLED=True
 

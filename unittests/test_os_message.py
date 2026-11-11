@@ -419,14 +419,14 @@ class TestProDemoLinks(DojoTestCase):
     def test_user_menu_links_to_demo_form(self):
         html = self._support_page()
         self.assertEqual(html.count(self.MENU_DEMO_URL), 1)
-        # The pay-as-you-go link stays: once in the menu, twice on the Support page.
-        self.assertEqual(html.count(self.PAYG_URL), 3)
+        # The demo link is the menu's only Pro item. Pay-as-you-go stays on the Support page.
+        self.assertEqual(html.count(self.PAYG_URL), 2)
 
     def test_pro_links_open_new_tab_without_referrer(self):
         html = self._support_page()
         anchors = re.findall(r"<a\b[^>]*>", html)
         pro_links = [a for a in anchors if "book-a-demo" in a or self.PAYG_URL in a]
-        self.assertEqual(len(pro_links), 6)
+        self.assertEqual(len(pro_links), 5)
         for anchor in pro_links:
             with self.subTest(anchor=anchor):
                 self.assertIn('target="_blank"', anchor)
@@ -439,7 +439,7 @@ class TestProDemoLinks(DojoTestCase):
                 self.assertIn(url, {self.SUPPORT_DEMO_URL, self.MENU_DEMO_URL})
 
     @override_settings(OS_MESSAGE_ENABLED=False)
-    def test_user_menu_pro_links_hidden_when_os_message_disabled(self):
+    def test_user_menu_pro_link_hidden_when_os_message_disabled(self):
         html = self._support_page()
         self.assertNotIn(self.MENU_DEMO_URL, html)
         # Only the Support page's own links are left.
