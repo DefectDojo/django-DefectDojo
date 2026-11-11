@@ -10,8 +10,10 @@ from dojo.caching import (
     invalidate_dojo_settings_cache,
     model_to_cache_dict,
 )
+from dojo.celery import DojoAsyncTask, app
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.models import Dojo_User, System_Settings
-from dojo.request_cache import begin_task_cache, cache_for_request_or_task, end_task_cache
+from dojo.request_cache import begin_task_cache, cache_for_request_or_task, end_task_cache, get_task_cache
 
 from .dojo_test_case import DojoTestCase
 
@@ -179,3 +181,48 @@ class CacheForRequestOrTaskTest(DojoTestCase):
         with impersonate(self.user_a):
             self.getter()  # no task cache and no request -> recomputed
         self.assertEqual(self.calls["n"], 2)
+
+
+class NestedTaskCacheTest(DojoTestCase):
+
+    """
+    A task run in the foreground inside another task (``dojo_dispatch_task(..., force_sync=True)``)
+    gets a task cache of its own and gives the outer task's cache back when it ends.
+    """
+
+    # Regression: the nested task's end set the thread's task cache to None, so every memoized read
+    # for the rest of the outer task (a chunked connector reimport, after its first batch's
+    # synchronous prioritization) went back to the database or the shared cache.
+    def test_nested_foreground_task_keeps_the_outer_task_cache(self):
+        seen = {}
+        calls = {"n": 0}
+
+        @cache_for_request_or_task
+        def getter():
+            calls["n"] += 1
+            return calls["n"]
+
+        @app.task(base=DojoAsyncTask, name="unittests.test_caching.nested_inner")
+        def inner(*_args, **_kwargs):  # absorbs the dispatch kwargs (force_sync, async_user_id)
+            seen["inner"] = get_task_cache()
+
+        @app.task(base=DojoAsyncTask, name="unittests.test_caching.nested_outer")
+        def outer(*_args, **_kwargs):
+            seen["outer_before"] = get_task_cache()
+            getter()
+            dojo_dispatch_task(inner, force_sync=True)
+            seen["outer_after"] = get_task_cache()
+            getter()
+
+        outer()
+
+        self.assertIsNotNone(seen["outer_before"])
+        self.assertIsNotNone(seen["inner"])
+        self.assertIsNot(seen["inner"], seen["outer_before"], msg="the nested task must not share the outer cache")
+        self.assertIs(
+            seen["outer_after"],
+            seen["outer_before"],
+            msg=f"outer task cache after the nested task: {seen['outer_after']!r}, before: {seen['outer_before']!r}",
+        )
+        self.assertEqual(calls["n"], 1, msg=f"memoized read computed {calls['n']} times in one task")
+        self.assertIsNone(get_task_cache(), msg="no task cache may outlive the outer task")

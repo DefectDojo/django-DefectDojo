@@ -41,16 +41,23 @@ def begin_task_cache():  # noqa: RUF067
     """
     Install a fresh task cache. Called at the START of every task so a task never
     inherits a cache populated by a prior task on the same (reused) worker thread.
+
+    Returns the cache it replaced (``None`` at a top-level task boundary). A task run
+    in the foreground inside another one (``dojo_dispatch_task(..., force_sync=True)``)
+    passes it back to ``end_task_cache``, so the outer task keeps its cache.
     """
+    previous = get_task_cache()
     _task_cache_local.cache = _TaskCache()
+    return previous
 
 
-def end_task_cache():  # noqa: RUF067
+def end_task_cache(previous=None):  # noqa: RUF067
     """
     Drop the task cache. Called at the END of every task so nothing lingers on the
-    thread after the task completes.
+    thread after the task completes. ``previous`` is what ``begin_task_cache``
+    returned: the enclosing task's cache when this task ran nested in it, else ``None``.
     """
-    _task_cache_local.cache = None
+    _task_cache_local.cache = previous
 
 
 cache_args_kwargs_marker = object()  # noqa: RUF067 marker for separating args from kwargs (needs to be global)
