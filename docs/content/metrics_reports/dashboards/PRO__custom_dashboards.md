@@ -126,6 +126,8 @@ A Graph widget groups its records by one dimension (**Group By**) and can split 
 
 A chart over a date (**Created Date**, **Discovered Date**, **Mitigated Date** and the others) shows every period between its first and last, with 0 for a month in which nothing happened, so a line never skips a gap. When the widget filters on the same date (for example Created Date in the past 180 days), the chart spans that whole window. Records with no value for the date, such as open findings on a Mitigated Date chart, are not counted, so a fixed-findings-per-month chart needs no extra Mitigated filter.
 
+Each period is labeled by its size, in your language: a day or a week by the date it starts (May 4, 2026), a month by its month and year (May 2026), a quarter as Q2 2026 and a year as 2026. Clicking a period opens the list filtered to that period.
+
 A management pack of three monthly charts, for example, is three Graph widgets over findings:
 
 | Chart | Chart Type | Group By | Split By | Filters |
