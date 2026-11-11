@@ -72,15 +72,15 @@ Changing what a Group's rule or report schedule does needs membership of the Gro
 
 ### The group's API token
 
-With the **Group API Tokens** feature flag on, a Group's automation identity can hold one API token, so the Group's own automation (a pipeline, a script) calls the API as the Group. The token sees exactly what the Group has been granted, nothing more.
+With the **Group API Tokens** feature flag on, a Group's automation identity can hold one API token, so the Group's own automation (a pipeline, a script) calls the API as the Group. The token sees exactly what the Group owns and has been granted, nothing more. It acts as the Group, not as whoever issued it, so it can read Group content (connectors and ticket templates, for example, with their secrets masked) that the issuer's own Role in the Group does not show them.
 
 The **Automation Identity** card on the Group's **Overview** tab shows the token's first characters, who issued it and when, and when it expires. A superuser, or a member whose Role in the Group carries **Service User Edit**, manages it there:
 
 * **Issue Token** creates the token, with an expiry of 30, 60, 90 or 180 days or none. The token is shown once; DefectDojo keeps only a hash of it. Issuing creates the automation identity if the Group has none yet.
-* **Replace Token** issues a new token; the old one stops working at once.
-* **Revoke Token** ends the token at once. Revoking works even while the feature flag is off.
+* **Replace Token** issues a new token; the old one stops working at once. OAuth access tokens already exchanged from it keep working until they expire, within the hour.
+* **Revoke Token** ends the token at once (OAuth access tokens already exchanged from it expire within the hour). Revoking works even while the feature flag is off.
 
-When the Group holds a Global Role, its token reaches every Organization, so only a superuser may issue it. The token is used like any [service user](../pro__service_users/#use-the-token) token, in the `Authorization` header with the `Token` keyword. Turning the **Group API Tokens** flag off refuses every group token until it is turned on again.
+When the Group holds a Global Role, its token reaches every Organization, so only a superuser may issue it. The token is used like any [service user](../pro__service_users/#use-the-token) token, in the `Authorization` header with the `Token` keyword. Turning the **Group API Tokens** flag off refuses every group token, and every OAuth access token exchanged from one, until it is turned on again.
 
 ### Deleting a Group that owns content
 
