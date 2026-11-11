@@ -235,3 +235,29 @@ class TestFindingGroupJiraQueryCountTest(DojoTestCase):
         self.assertEqual(body["count"], 1)
         self._assert_groups(body["results"][0])
         self.assertEqual(body["results"][0], self._unprefetched_body())
+
+    def test_jira_disabled_loads_no_jira_project_or_instance(self):
+        """With JIRA off an issue's url is null without its project or instance being read, so neither is loaded."""
+        self.system_settings(enable_jira=False)
+        for index in range(6):
+            self._add_group(index)
+        for url, params in (
+            (reverse("test-detail", args=[self.test.pk]), None),
+            (reverse("test-list"), {"id": self.test.pk}),
+        ):
+            self.client.get(url, params, format="json")  # warm the content type and permission caches
+            with CaptureQueriesContext(connection) as queries:
+                response = self.client.get(url, params, format="json")
+            self.assertEqual(response.status_code, 200, response.content[:1000])
+            jira_reads = [
+                query["sql"] for query in queries.captured_queries
+                if '"dojo_jira_project"' in query["sql"] or '"dojo_jira_instance"' in query["sql"]
+            ]
+            self.assertEqual(jira_reads, [], f"GET {url} read a JIRA project or instance with JIRA disabled")
+            body = response.json()
+            test_body = body["results"][0] if "results" in body else body
+            test_body.pop("prefetch", None)
+            self.assertEqual(
+                {group["jira_issue"]["url"] for group in test_body["finding_groups"] if group["jira_issue"]}, {None},
+            )
+            self.assertEqual(test_body, self._unprefetched_body())
