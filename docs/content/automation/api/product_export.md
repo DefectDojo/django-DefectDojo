@@ -106,7 +106,7 @@ The lines come in this order:
 4. Every `finding`, by test and then by id within the test. You can group a test's findings as they arrive.
 5. Every `risk_acceptance`, by id.
 6. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
-7. With `audit_history=true`, every `audit_event`, by model and then by event id. See [Audit history lines](#audit-history-lines).
+7. With `audit_history=true`, every `audit_event`, by model, then by object id, and then by event id. See [Audit history lines](#audit-history-lines).
 8. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
 9. One `end` line.
 
@@ -284,7 +284,8 @@ An `audit_event` line has `data` with these keys:
 | `data` | The object as it was after the event. It has every column of the object, by column name. A column that points to another object holds its id, and its name ends in `_id`, for example `test_id`. A date column is in ISO 8601, and a file column holds the file name. It never has a `pgh_` key. |
 | `context` | What DefectDojo recorded about the request or task that made the change: `id`, `created_at`, `updated_at` and `metadata`. `metadata` is an object, for example with `user`, `url` and `remote_addr`. It is `null` when the change has no context. |
 
-The events come by model, in the order of the `model` list above. Inside a model they come in the order of `pgh_id`.
+The events come by model, in the order of the `model` list above. Inside a model they come by object, in the order of `pgh_obj_id`.
+The events of one object come in the order of `pgh_id`.
 
 A `legacy_audit_entry` line has `data` with every field of the entry, by field name. These are the fields:
 

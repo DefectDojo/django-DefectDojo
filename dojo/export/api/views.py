@@ -236,24 +236,44 @@ def audit_scope(model, product: Product) -> QuerySet:
     return model.objects.filter(**{AUDIT_PRODUCT_PATHS[model]: product.id})
 
 
+def pages(queryset: QuerySet, ordering: tuple[str, ...], after) -> Iterator:
+    """
+    The rows in ``ordering``, one query per page of EXPORT_CHUNK_SIZE rows. ``after(row)`` selects the rows past it.
+
+    A page holds no cursor open, so the database never keeps a copy of the whole result.
+    """
+    page = list(queryset.order_by(*ordering)[:EXPORT_CHUNK_SIZE])
+    while page:
+        yield from page
+        if len(page) < EXPORT_CHUNK_SIZE:
+            return
+        page = list(queryset.filter(after(page[-1])).order_by(*ordering)[:EXPORT_CHUNK_SIZE])
+
+
 def audit_history_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
     for model in AUDIT_MODELS:
-        events = (
-            audit_event_model(model).objects.filter(pgh_obj_id__in=audit_scope(model, product).values("id"))
-            .select_related("pgh_context")
-            .order_by("pgh_id")
-        )
+        events = audit_event_model(model).objects.filter(
+            pgh_obj_id__in=audit_scope(model, product).values("id"),
+        ).select_related("pgh_context")
         serializer = ExportAuditEventSerializer(model)
-        for event in events.iterator(chunk_size=EXPORT_CHUNK_SIZE):
+        rows = pages(
+            events,
+            ("pgh_obj_id", "pgh_id"),
+            lambda event: Q(pgh_obj_id__gt=event.pgh_obj_id) | Q(pgh_obj_id=event.pgh_obj_id, pgh_id__gt=event.pgh_id),
+        )
+        for event in rows:
             counts["audit_events"] += 1
             yield render({"type": "audit_event", "data": serializer.to_representation(event)})
     content_types = ContentType.objects.get_for_models(*AUDIT_MODELS)
     # One query per model. In one query, an OR over the models stops Postgres from using the object_id index.
     per_model = [
-        LogEntry.objects.filter(content_type=content_types[model], object_id__in=audit_scope(model, product).values("id"))
-        .select_related("content_type")
-        .order_by("id")
-        .iterator(chunk_size=EXPORT_CHUNK_SIZE)
+        pages(
+            LogEntry.objects.filter(
+                content_type=content_types[model], object_id__in=audit_scope(model, product).values("id"),
+            ).select_related("content_type"),
+            ("id",),
+            lambda entry: Q(id__gt=entry.id),
+        )
         for model in AUDIT_MODELS
     ]
     serializer = ExportLegacyAuditEntrySerializer()

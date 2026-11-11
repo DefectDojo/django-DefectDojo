@@ -938,16 +938,40 @@ class TestExportAuditHistory(DojoAPITestCase):
         self.assertTrue(sent)
         self.assertEqual({proof.path.name}, {e["data"]["path"] for e in sent})
 
-    def test_events_come_in_model_order_then_pgh_id_and_cover_the_six_models(self):
+    def test_events_come_by_model_then_object_then_pgh_id_and_cover_the_six_models(self):
+        lower, higher = Finding.objects.filter(test__engagement__product_id=2).order_by("id")[:2]
+        for finding in (higher, lower, higher):
+            finding.title = f"Edited {uuid.uuid4()}"
+            finding.save()
         events = self.sent(self.export(audit_history="true"), "audit_event")
         labels = [e["model"] for e in events]
         self.assertEqual(sorted(labels, key=self.AUDIT_LABELS.index), labels)
         for model, ids in self.objects_of(2).items():
             label = model._meta.label_lower
-            mine = [e for e in events if e["model"] == label]
-            self.assertEqual(sorted(e["pgh_id"] for e in mine), [e["pgh_id"] for e in mine], label)
-            self.assertEqual(ids, {e["pgh_obj_id"] for e in mine}, label)
+            mine = [(e["pgh_obj_id"], e["pgh_id"]) for e in events if e["model"] == label]
+            self.assertEqual(sorted(mine), mine, label)
+            self.assertEqual(ids, {obj for obj, _ in mine}, label)
         self.assertEqual(set(self.AUDIT_LABELS), set(labels))
+
+    def test_audit_history_reads_key_ordered_pages(self):
+        for _ in range(3):
+            self.legacy_entry(self.finding)
+        mine = Finding.objects.filter(test__engagement__product_id=2).values("id")
+        events = FindingEvent.objects.filter(pgh_obj_id__in=mine).count()
+        entries = LogEntry.objects.filter(content_type=self.finding_type, object_id__in=mine).count()
+        expected = self.sent(self.export(audit_history="true"), "audit_event")
+        with mock.patch("dojo.export.api.views.EXPORT_CHUNK_SIZE", 2), CaptureQueriesContext(connection) as queries:
+            lines = self.export(audit_history="true")
+        reads = {
+            table: [query["sql"] for query in queries if f'FROM "{table}"' in query["sql"]]
+            for table in (FindingEvent._meta.db_table, LogEntry._meta.db_table)
+        }
+        of_findings = re.compile(rf'"auditlog_logentry"\."content_type_id" = {self.finding_type.id}\b')
+        finding_entries = [sql for sql in reads[LogEntry._meta.db_table] if of_findings.search(sql)]
+        self.assertEqual(events // 2 + 1, len(reads[FindingEvent._meta.db_table]))
+        self.assertEqual(entries // 2 + 1, len(finding_entries))
+        self.assertTrue(all("LIMIT 2" in sql for sqls in reads.values() for sql in sqls), reads)
+        self.assertEqual(expected, self.sent(lines, "audit_event"))
 
     def test_risk_acceptance_events_follow_either_link_and_skip_other_products(self):
         ids = {
