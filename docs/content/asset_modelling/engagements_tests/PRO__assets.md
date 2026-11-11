@@ -466,12 +466,14 @@ Versions appear as an optional widget on the Asset page. Add it from **Page Layo
 → Add Widget → Data Table**, then choose `Versions` as the record set. The widget's header counts
 the versions declared on the Asset.
 
-The newest version leads: its name, its optional release date, and three counts: how many BOM
-snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
-Earlier versions list below it, or beside it on a wide widget, one line each with their release
-date and their Found In and Fixed In counts. A long list scrolls inside the widget. Versions are
-ordered by release date, newest first, and a version without a release date sorts ahead of the
-dated ones. On a small widget only the newest version shows, with the number of earlier ones.
+The latest release leads, tagged **Newest**: the newest dated version, or the most recently declared
+one when no version has a release date. It shows its name, its release date, and three counts: how
+many BOM snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
+The rest list under **Earlier Versions**, below it or beside it on a wide widget, one line each with
+their release date and their Found In and Fixed In counts. A long list scrolls inside the widget.
+Versions are ordered by release date, newest first, and versions without a release date follow the
+dated ones, the most recently declared first, so an SBOM import newer than every dated release is
+listed after them. On a small widget only the leading version shows, with the number of the rest.
 
 **Add Version** declares one by hand, which is useful for a release you want to record claims
 against before any SBOM has been uploaded for it. Name it the way its producer does (`5.2.0`,
