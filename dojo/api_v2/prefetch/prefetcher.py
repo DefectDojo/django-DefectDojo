@@ -1,7 +1,8 @@
 import inspect
 import sys
+from operator import attrgetter
 
-from django.db.models import prefetch_related_objects
+from django.db.models import Prefetch, prefetch_related_objects
 from django.db.models.fields import related
 from rest_framework.serializers import ModelSerializer
 
@@ -77,15 +78,33 @@ def _prefetch_related_for(model):
     return lookups() if callable(lookups) else lookups
 
 
+def _load_accepted_risks(findings):
+    """
+    Load what accepted_risks reads for ``findings``: each acceptance's notes, engagements and accepted findings.
+
+    The accepted findings are read with no ORDER BY and put in id order here, the order the relation gives them
+    (Finding's manager orders by id). Ordered by dojo_finding.id over several acceptances at once, Postgres
+    merge-joins along dojo_finding's primary key instead of walking the through table's
+    (risk_acceptance_id, finding_id) index: 612 ms against 225 ms for one 100,001-finding acceptance.
+    """
+    prefetch_related_objects(
+        findings,
+        "risk_acceptance_set__notes",
+        "risk_acceptance_set__engagement_set",
+        Prefetch("risk_acceptance_set__accepted_findings", queryset=Finding.objects.order_by()),
+    )
+    for finding in findings:
+        for acceptance in finding.risk_acceptance_set.all():
+            if (accepted := acceptance._prefetched_objects_cache.get("accepted_findings")) is not None:
+                accepted._result_cache.sort(key=attrgetter("pk"))
+
+
 # Relations a prefetched model's serializer reads for some objects only, as (the serializer method that says whether
-# it reads them for an object, lookups). They are loaded onto those objects alone: accepted_risks is empty for a
-# requester who may not edit the finding, and an acceptance can hold a very large number of findings.
+# it reads them for an object, the function that loads them). They are loaded onto those objects alone:
+# accepted_risks is empty for a requester who may not edit the finding, and an acceptance can hold a very large
+# number of findings.
 _PREFETCH_PREFETCH_RELATED_WHEN_SHOWN = {
-    # each acceptance's notes, accepted findings and the engagement its path names
-    Finding: (
-        "shows_accepted_risks",
-        ("risk_acceptance_set__notes", "risk_acceptance_set__accepted_findings", "risk_acceptance_set__engagement_set"),
-    ),
+    Finding: ("shows_accepted_risks", _load_accepted_risks),
 }
 
 
@@ -93,12 +112,12 @@ def _prefetch_shown_relations(objects, serializer):
     """Load the relations ``serializer`` reads for some objects only onto the ``objects`` it reads them for."""
     if not objects or (entry := _PREFETCH_PREFETCH_RELATED_WHEN_SHOWN.get(type(objects[0]))) is None:
         return
-    method_name, lookups = entry
+    method_name, load = entry
     # A list serializer asks its child; a serializer without the method reads the relations lazily, as before
     if (shows := getattr(getattr(serializer, "child", serializer), method_name, None)) is None:
         return
     if shown := [obj for obj in objects if shows(obj)]:
-        prefetch_related_objects(shown, *lookups)
+        load(shown)
 
 
 # Reduce the scope of search for serializers.
