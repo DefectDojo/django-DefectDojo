@@ -40,7 +40,7 @@ from dojo.location.manager import (
     LocationProductReferenceQueryset,
     LocationQueryset,
 )
-from dojo.location.status import FindingLocationStatus, ProductLocationStatus
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus, status_from_finding
 from dojo.models import Dojo_User, Finding, Product, copy_model_util
 from dojo.tools.locations import LocationAssociationData
 
@@ -118,17 +118,7 @@ class Location(BaseModel):
 
     def status_from_finding(self, finding: Finding) -> str:
         """Determine the status the reference should carry based on the status of the finding"""
-        # Set the default status to Active to be on the safe side
-        status = FindingLocationStatus.Active
-        # First determine the status based on the finding status
-        finding_status = finding.status()
-        if any(f_status in finding_status for f_status in ["Mitigated", "Inactive", "Duplicate"]):
-            status = FindingLocationStatus.Mitigated
-        elif "False Positive" in finding_status:
-            status = FindingLocationStatus.FalsePositive
-        elif "Risk Accepted" in finding_status:
-            status = FindingLocationStatus.RiskAccepted
-        return status
+        return status_from_finding(finding)
 
     def status_from_product(self, product: Product) -> str:
         """Determine the status the reference should carry based on the status of the product"""
