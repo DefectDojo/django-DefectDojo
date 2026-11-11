@@ -203,7 +203,7 @@ class TestSlaTicketComments(_IsolatedRegistry, SlaNotifyTestBase):
         finding = self._finding("linked to JIRA", -1)
         issue = JIRA_Issue.objects.create(finding=finding, jira_id=f"{finding.id}", jira_key=f"SLA-{finding.id}")
         mock_get_instance.return_value = Mock(global_jira_sla_notification=True)
-        mock_get_project.return_value = Mock(product_jira_sla_notification=False)
+        mock_get_project.return_value = Mock(product_jira_sla_notification=False, suppress_sla_notification_comments=False)
 
         with self.assertLogs("dojo.notifications.ticket_comments", "ERROR"):
             sla_compute_and_notify()
