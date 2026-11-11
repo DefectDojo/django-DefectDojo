@@ -1,8 +1,8 @@
 import inspect
 import sys
-from operator import attrgetter
+from collections import defaultdict
 
-from django.db.models import Prefetch, prefetch_related_objects
+from django.db.models import prefetch_related_objects
 from django.db.models.fields import related
 from rest_framework.serializers import ModelSerializer
 
@@ -78,25 +78,46 @@ def _prefetch_related_for(model):
     return lookups() if callable(lookups) else lookups
 
 
+class _AcceptedFindingId:
+
+    """An accepted finding reduced to its primary key: all ``RiskAcceptanceSerializer.accepted_findings`` (a pk list) reads."""
+
+    __slots__ = ("pk",)
+
+    def __init__(self, pk):
+        self.pk = pk
+
+
 def _load_accepted_risks(findings):
     """
     Load what accepted_risks reads for ``findings``: each acceptance's notes, engagements and accepted findings.
 
-    The accepted findings are read with no ORDER BY and put in id order here, the order the relation gives them
-    (Finding's manager orders by id). Ordered by dojo_finding.id over several acceptances at once, Postgres
-    merge-joins along dojo_finding's primary key instead of walking the through table's
-    (risk_acceptance_id, finding_id) index: 612 ms against 225 ms for one 100,001-finding acceptance.
+    An acceptance's accepted findings are rendered as their ids, and an acceptance can hold a very large number of
+    them, so they are read as (acceptance, finding id) pairs, in the relation's own rows and order (Finding's manager
+    filters and orders by id), rather than as whole finding rows. Prefetched whole, 100,001 accepted findings were
+    100,001 model instances built to print their ids, and over several acceptances at once the query merge-joined
+    along dojo_finding's primary key (612 ms of SQL against 225 ms for one acceptance read on its own).
     """
-    prefetch_related_objects(
-        findings,
-        "risk_acceptance_set__notes",
-        "risk_acceptance_set__engagement_set",
-        Prefetch("risk_acceptance_set__accepted_findings", queryset=Finding.objects.order_by()),
+    prefetch_related_objects(findings, "risk_acceptance_set__notes", "risk_acceptance_set__engagement_set")
+    acceptances = [acceptance for finding in findings for acceptance in finding.risk_acceptance_set.all()]
+    if not acceptances:
+        return
+    ids_by_acceptance = defaultdict(list)
+    pairs = (
+        Finding.objects.filter(risk_acceptance__in={acceptance.pk for acceptance in acceptances})
+        .order_by("risk_acceptance", "id")
+        .values_list("risk_acceptance", "id")
     )
-    for finding in findings:
-        for acceptance in finding.risk_acceptance_set.all():
-            if (accepted := acceptance._prefetched_objects_cache.get("accepted_findings")) is not None:
-                accepted._result_cache.sort(key=attrgetter("pk"))
+    for acceptance_id, finding_id in pairs:
+        ids_by_acceptance[acceptance_id].append(_AcceptedFindingId(finding_id))
+    for acceptance in acceptances:
+        # What prefetch_related stores: the relation's queryset with its result cache filled
+        accepted = acceptance.accepted_findings.all()
+        accepted._result_cache = ids_by_acceptance.get(acceptance.pk, [])
+        accepted._prefetch_done = True
+        if not hasattr(acceptance, "_prefetched_objects_cache"):
+            acceptance._prefetched_objects_cache = {}
+        acceptance._prefetched_objects_cache["accepted_findings"] = accepted
 
 
 # Relations a prefetched model's serializer reads for some objects only, as (the serializer method that says whether

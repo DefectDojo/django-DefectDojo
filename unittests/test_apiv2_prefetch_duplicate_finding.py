@@ -18,7 +18,6 @@ import re
 from collections import Counter
 from contextlib import contextmanager
 from datetime import date
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from crum import impersonate
@@ -333,20 +332,29 @@ class PrefetchDuplicateFindingTest(DojoTestCase):
         # own acceptances, accepted findings and engagements are not loaded on top of it
         self._assert_no_risk_acceptance_reads_without_edit("accepted_findings")
 
-    def test_accepted_findings_keep_id_order_whatever_order_the_database_returns(self):
-        # The batch reads accepted findings with no ORDER BY (for the query plan) and puts them in id order itself,
-        # the order the relation gives them. Make the database return them backwards to see that it does.
+    def test_accepted_findings_are_read_as_ids_in_the_relations_order(self):
+        # accepted_findings renders ids, and an acceptance can hold a very large number of findings: the batch reads
+        # (acceptance, finding id) pairs, never whole finding rows, and hands each acceptance the ids its own
+        # relation would give, in the same order.
         self._add_duplicates_with_large_acceptances(2)
         originals = [duplicate.duplicate_finding for duplicate in Finding.objects.filter(test=self.duplicates_test)]
-        backwards = SimpleNamespace(objects=SimpleNamespace(order_by=lambda: Finding.objects.order_by("-id")))
-        with patch.object(prefetcher_module, "Finding", backwards), CaptureQueriesContext(connection) as queries:
+        with CaptureQueriesContext(connection) as queries:
             prefetcher_module._load_accepted_risks(originals)
-        self.assertTrue(any('ORDER BY "dojo_finding"."id" DESC' in query["sql"] for query in queries.captured_queries))
-        for original in originals:
-            [acceptance] = original.risk_acceptance_set.all()
-            ids = [finding.pk for finding in acceptance.accepted_findings.all()]
+        self.assertFalse(
+            [query["sql"] for query in queries.captured_queries if '"dojo_finding"."title"' in query["sql"]],
+            "accepted findings were read as whole rows",
+        )
+        with self.assertNumQueries(0):
+            loaded = {
+                acceptance.pk: [finding.pk for finding in acceptance.accepted_findings.all()]
+                for original in originals
+                for acceptance in original.risk_acceptance_set.all()
+            }
+        self.assertEqual(2, len(loaded))
+        for acceptance_id, ids in loaded.items():
+            relation = Risk_Acceptance.objects.get(pk=acceptance_id).accepted_findings.all()
+            self.assertEqual([finding.pk for finding in relation], ids)
             self.assertEqual(4, len(ids))
-            self.assertEqual(sorted(ids), ids)
 
     def test_many_path_still_lists_acceptances_for_an_editor(self):
         self._add_duplicates_with_large_acceptances(3)
