@@ -26,7 +26,7 @@ Rules can be triggered manually from the **Classic Rules** page, or scheduled to
 Each Rule can apply one or more of these changes to a Finding when it is triggered successfully (i.e. matches the set Filter conditions).
 
 ### Field Modifications
-* **Set a field** on a Finding, including Title, Description, Severity, CVSSv3 Vector, Active, Verified, Risk Accepted, False Positive, Mitigated. Setting False Positive or Mitigated on a risk-accepted Finding takes it out of its risk acceptance first, as closing it by hand does.
+* **Set a field** on a Finding, including Title, Description, Severity, CVSSv3 Vector, Active, Verified, Risk Accepted, False Positive, Mitigated. Setting False Positive or Mitigated on a risk-accepted Finding takes it out of its risk acceptance first, as closing it by hand does. Setting either also mitigates the Finding's open Endpoints (or Locations), as closing it by hand does.
 * **Append or Prepend text** to a Finding's Title or Description
 * **Set Priority** — override the calculated Priority value on a Finding (overrides automatic priority calculation)
 * **Set Risk** — override the calculated Risk level on a Finding (overrides automatic risk calculation)

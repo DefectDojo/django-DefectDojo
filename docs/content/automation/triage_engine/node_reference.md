@@ -388,6 +388,8 @@ Moves the Finding to a status.
 
 `false_positive` and `mitigated` take a risk-accepted Finding out of its risk acceptance first, as closing it by hand does: it leaves the acceptance, and a note on the Finding says so.
 
+As closing it by hand does, `false_positive` and `mitigated` also mitigate the Finding's open Endpoints (or, with Locations on, set its Locations to Mitigated), naming who closed the Finding and when. An Endpoint already mitigated keeps its own date. A preview changes nothing.
+
 ### Copy Status from Matched Finding
 
 `finding.copy_matched_status`
@@ -401,6 +403,8 @@ Gives the Finding the status of the Finding deduplication matched it to in anoth
 `Mitigated` and `Reopened` are off by default. They follow what each Asset's scans report rather than a decision someone made: a fix that reaches staging first would mitigate the production Finding while the issue is still live in production, and the next production scan would reopen it and send the reopen back. Turn them on only where both Assets are scanned together.
 
 A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner must be able to see the Finding the status comes from (the note names it) and edit the Finding it goes to, and to add a risk acceptance for that status; anything else is left alone, and so are duplicates. It does nothing after **On Dedupe Match** in **Mark as Duplicate** mode, because the new Finding is then a duplicate. A Finding already closed for a different reason takes the new status in place of the old one, so the two Findings end up with the same status.
+
+Carrying `False Positive`, `Out of Scope` or `Mitigated` also mitigates the Finding's open Endpoints (or, with Locations on, sets its Locations to Mitigated), as closing it by hand does.
 
 ### Apply Status to Linked Findings
 
