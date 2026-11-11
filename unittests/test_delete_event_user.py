@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pghistory
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.test import override_settings
@@ -117,6 +118,22 @@ class TestDeleteNotificationNamesDeleter(DojoTestCase):
         event_queries = [q["sql"] for q in queries.captured_queries if '"dojo_testevent"' in q["sql"]]
         self.assertEqual(len(event_queries), 1, msg=event_queries)
         self.assertNotIn("LIMIT", event_queries[0].upper())
+
+    def test_non_delete_event_with_a_user_names_nobody(self):
+        # The author of a create or update is not the deleter: only the delete event counts.
+        with pghistory.context(user=self.deleter.id):
+            test = Test.objects.create(
+                engagement=self.engagement, test_type=self.test.test_type,
+                target_start=timezone.now(), target_end=timezone.now(),
+            )
+            test.title = "edited"
+            test.save()
+        labels_and_users = sorted(
+            (event.pgh_label, event.pgh_context.metadata.get("user"))
+            for event in apps.get_model("dojo", "TestEvent").objects.filter(pgh_obj_id=test.id)
+        )
+        self.assertEqual(labels_and_users, [("insert", self.deleter.id), ("update", self.deleter.id)])
+        self.assertIsNone(get_delete_event_user(test))
 
     def test_untracked_model_runs_no_query(self):
         with self.assertNumQueries(0):
