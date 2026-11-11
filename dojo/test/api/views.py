@@ -64,7 +64,8 @@ class TestsViewSet(
         # (with their JIRA issue) are serialized per test, and notes/files are
         # already prefetched. Without these the list view's query count grows
         # with the number of tests returned, producing 400+ queries for a single
-        # page on large instances.
+        # page on large instances. A group's JIRA issue url reads the issue's
+        # jira_project and its jira_instance, so those are batched too.
         return (
             get_authorized_tests("view")
             .select_related("test_type")
@@ -72,7 +73,7 @@ class TestsViewSet(
                 notes_prefetch(),
                 "files",
                 "tags",
-                "finding_group_set__jira_issue",
+                "finding_group_set__jira_issue__jira_project__jira_instance",
             )
             .distinct()
         )
