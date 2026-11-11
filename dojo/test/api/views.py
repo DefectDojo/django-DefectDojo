@@ -3,13 +3,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
+from dojo.file_uploads.api.views import related_file_detail_response
 from dojo.location.feature import locations_enabled
 from dojo.models import (
     FileUpload,
@@ -264,6 +265,26 @@ class TestsViewSet(
             )
         # send file
         return generate_file_response(file_object)
+
+    @extend_schema(
+        methods=["PATCH"],
+        request=api_v2_serializers.FileSerializer,
+        responses={status.HTTP_200_OK: api_v2_serializers.FileSerializer},
+    )
+    @extend_schema(
+        methods=["DELETE"],
+        responses={status.HTTP_204_NO_CONTENT: None},
+    )
+    @action(
+        detail=True,
+        methods=["patch", "delete"],
+        url_path=r"files/(?P<file_id>\d+)",
+        parser_classes=(MultiPartParser, JSONParser),
+        permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
+    )
+    def file_detail(self, request, file_id, pk=None):
+        test = self.get_object()
+        return related_file_detail_response(request, test, file_id, "Test")
 
 
 # Authorization: authenticated, configuration

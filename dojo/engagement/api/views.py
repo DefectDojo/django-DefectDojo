@@ -5,7 +5,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -25,6 +25,7 @@ from dojo.engagement.api.serializer import (
 )
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reassign_engagement_product_endpoints, reopen_engagement
+from dojo.file_uploads.api.views import related_file_detail_response
 from dojo.jira import services as jira_services
 from dojo.models import (
     Check_List,
@@ -342,6 +343,26 @@ class EngagementViewSet(
             )
         # send file
         return generate_file_response(file_object)
+
+    @extend_schema(
+        methods=["PATCH"],
+        request=api_v2_serializers.FileSerializer,
+        responses={status.HTTP_200_OK: api_v2_serializers.FileSerializer},
+    )
+    @extend_schema(
+        methods=["DELETE"],
+        responses={status.HTTP_204_NO_CONTENT: None},
+    )
+    @action(
+        detail=True,
+        methods=["patch", "delete"],
+        url_path=r"files/(?P<file_id>\d+)",
+        parser_classes=(MultiPartParser, JSONParser),
+        permission_classes=(IsAuthenticated, permissions.UserHasEngagementFilePermission),
+    )
+    def file_detail(self, request, file_id, pk=None):
+        engagement = self.get_object()
+        return related_file_detail_response(request, engagement, file_id, "Engagement")
 
     @extend_schema(
         request=api_v2_serializers.EngagementUpdateJiraEpicSerializer,
