@@ -41,6 +41,14 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertEqual(("alpine://3.18:libcrypto3", "3.1.1-r1"), get_component_name_version("alpine://3.18:libcrypto3:3.1.1-r1"))
         with self.subTest("npm://desopmo"):
             self.assertEqual(("npm://desopmo", ""), get_component_name_version("npm://desopmo"))
+        with self.subTest("gav://ch.qos.logback:logback-classic:1.5.34"):
+            self.assertEqual(("gav://ch.qos.logback:logback-classic", "1.5.34"), get_component_name_version("gav://ch.qos.logback:logback-classic:1.5.34"))
+        with self.subTest("gav://org.scala-lang:scala-library:2.13.8"):
+            self.assertEqual(("gav://org.scala-lang:scala-library", "2.13.8"), get_component_name_version("gav://org.scala-lang:scala-library:2.13.8"))
+        with self.subTest("gav://com.typesafe.akka:akka-actor_2.13:2.6.20"):
+            self.assertEqual(("gav://com.typesafe.akka:akka-actor_2.13", "2.6.20"), get_component_name_version("gav://com.typesafe.akka:akka-actor_2.13:2.6.20"))
+        with self.subTest("npm://tough-cookie:2.2.2"):
+            self.assertEqual(("npm://tough-cookie", "2.2.2"), get_component_name_version("npm://tough-cookie:2.2.2"))
 
     def test_clean_title(self):
         with self.subTest(""):
@@ -56,6 +64,17 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
+
+    def test_parse_file_with_hyphenated_component_names(self):
+        testfile = (get_unit_tests_scans_path("jfrog_xray_on_demand_binary_scan") / "many_vulns_pypi.json").open(encoding="utf-8")
+        parser = JFrogXrayOnDemandBinaryScanParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(99, len(findings))
+        components = {(finding.component_name, finding.component_version) for finding in findings}
+        self.assertIn(("npm://adm-zip", "0.4.4"), components)
+        self.assertIn(("npm://tough-cookie", "2.2.2"), components)
+        self.assertNotIn(("npm://adm-zip:0.4.4", ""), components)
 
     def test_parse_file_with_many_vulns_pypi(self):
         testfile = (get_unit_tests_scans_path("jfrog_xray_on_demand_binary_scan") / "many_vulns_pypi.json").open(encoding="utf-8")
