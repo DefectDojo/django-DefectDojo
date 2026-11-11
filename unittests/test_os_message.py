@@ -411,6 +411,11 @@ class TestProDemoLinks(DojoTestCase):
         # One button in the Pro section's hero and one in its footer.
         self.assertEqual(html.count(self.SUPPORT_DEMO_URL), 2)
 
+    def test_demo_is_the_main_action_on_the_support_page(self):
+        html = self._support_page()
+        self.assertEqual(html.count(f'class="sp-btn sp-btn-primary" href="{self.SUPPORT_DEMO_URL}"'), 2)
+        self.assertEqual(html.count(f'class="sp-btn sp-btn-ghost" href="{self.PAYG_URL}"'), 2)
+
     def test_user_menu_links_to_demo_form(self):
         html = self._support_page()
         self.assertEqual(html.count(self.MENU_DEMO_URL), 1)
