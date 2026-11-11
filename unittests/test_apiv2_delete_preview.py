@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from django.apps import apps
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.models import Permission
 from django.db import DEFAULT_DB_ALIAS, connection
@@ -9,7 +10,23 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.api_v2.mixins import DELETE_PREVIEW_MAX_PAGE_SIZE
-from dojo.models import Endpoint, Finding, Notes, Product, Regulation, Test, User
+from dojo.models import (
+    Answered_Survey,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Endpoint,
+    Engagement,
+    Engagement_Survey,
+    Finding,
+    Notes,
+    Product,
+    Regulation,
+    Test,
+    TextAnswer,
+    TextQuestion,
+    User,
+)
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
@@ -136,6 +153,46 @@ class DeletePreviewBoundTest(DojoTestCase):
                 expected = self._collector_rows(obj)
                 self.assertEqual(expected, rows)
                 self.assertEqual(len(expected), count)
+
+    def test_polymorphic_survey_answers_match_what_the_collector_would_delete(self):
+        # Answered_Survey -> Answer -> TextAnswer/ChoiceAnswer sit behind django-polymorphic's PolymorphicGuard
+        # (a wrapped CASCADE), and the answers are multi-table children of Answer.
+        engagement = Engagement.objects.filter(product_id=2).first()
+        text_question = TextQuestion.objects.create(text="Preview text question", order=1)
+        choice_question = ChoiceQuestion.objects.create(text="Preview choice question", order=2)
+        choice = Choice.objects.create(label="Preview choice", order=1)
+        choice_question.choices.add(choice)
+        questionnaire = Engagement_Survey.objects.create(name="Preview questionnaire", description="d")
+        questionnaire.questions.add(text_question, choice_question)
+        answered = Answered_Survey.objects.create(survey=questionnaire, engagement=engagement, completed=True)
+        text_answer = TextAnswer.objects.create(question=text_question, answered_survey=answered, answer="yes")
+        choice_answer = ChoiceAnswer.objects.create(question=choice_question, answered_survey=answered)
+        choice_answer.answer.add(choice)
+
+        for basename, obj in (("engagement", engagement), ("product", Product.objects.get(id=2))):
+            with self.subTest(basename=basename), self.assertNoLogs("dojo.api_v2.mixins", "WARNING"):
+                rows, count = self._all_pages(basename, obj.id)
+                self.assertEqual(self._collector_rows(obj), rows)
+                self.assertEqual(len(rows), count)
+                for row in (
+                    ("Answered_Survey", answered.id),
+                    ("Answer", text_answer.id),
+                    ("TextAnswer", text_answer.id),
+                    ("Answer", choice_answer.id),
+                    ("ChoiceAnswer", choice_answer.id),
+                ):
+                    self.assertIn(row, rows)
+
+    def test_no_model_has_a_generic_relation(self):
+        # The Collector also deletes rows a GenericRelation points at; delete_preview_querysets does not walk
+        # them. If this fails, teach the walk that relation before adding it.
+        generic = [
+            f"{model._meta.label}.{field.name}"
+            for model in apps.get_models()
+            for field in model._meta.private_fields
+            if hasattr(field, "bulk_related_objects")
+        ]
+        self.assertEqual([], generic)
 
     def test_cascade_subqueries_are_not_sorted(self):
         # A model's Meta.ordering inside an IN (SELECT ...) makes Postgres sort every parent row on each

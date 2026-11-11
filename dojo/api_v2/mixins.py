@@ -28,7 +28,9 @@ def delete_preview_querysets(obj):
     One queryset per model a delete of ``obj`` cascades to, in the order the walk first reaches it.
 
     It follows the relations Django's deletion Collector follows (``get_candidate_relations_to_delete``,
-    hidden relations and many-to-many through rows included) but builds nested subqueries instead of
+    hidden relations and many-to-many through rows included, plus each collected row's multi-table
+    parent rows; no model has a generic relation, which the Collector would also follow, see
+    ``DeletePreviewBoundTest.test_no_model_has_a_generic_relation``) but builds nested subqueries instead of
     loading the rows, so its cost does not grow with the number of objects. The pk subqueries drop
     ``Meta.ordering``: sorted inside an ``IN (SELECT ...)`` they make Postgres sort every parent row on
     every step. A model reached along several paths gets one queryset over all of them, so a row is
@@ -36,6 +38,15 @@ def delete_preview_querysets(obj):
     """
     model = type(obj)
     filters = {}
+
+    def add_parents(child_model, pks):
+        # The Collector also deletes a collected row's multi-table parent rows (not their other relations).
+        for parent, ptr in child_model._meta.concrete_model._meta.parents.items():
+            if ptr is None:
+                continue
+            parent_pks = child_model._base_manager.filter(pk__in=Subquery(pks)).values(ptr.attname).order_by()
+            filters.setdefault(parent, []).append(Q(pk__in=Subquery(parent_pks)))
+            add_parents(parent, parent_pks)
 
     def walk(from_model, pks, depth):
         if depth > DELETE_PREVIEW_MAX_DEPTH:
@@ -53,13 +64,21 @@ def delete_preview_querysets(obj):
             if not related.exists():
                 continue
             filters.setdefault(related_model, []).append(condition)
-            walk(related_model, related.values("pk").order_by(), depth + 1)
+            related_pks = related.values("pk").order_by()
+            add_parents(related_model, related_pks)
+            walk(related_model, related_pks, depth + 1)
 
-    walk(model, model._base_manager.filter(pk=obj.pk).values("pk").order_by(), 0)
+    root_pks = model._base_manager.filter(pk=obj.pk).values("pk").order_by()
+    add_parents(model, root_pks)
+    walk(model, root_pks, 0)
 
     querysets = []
     for related_model, conditions in filters.items():
         queryset = related_model._base_manager.filter(reduce(or_, conditions))
+        if hasattr(queryset, "non_polymorphic"):
+            # As PolymorphicGuard hands them to the Collector: an Answer row is listed as an Answer, not
+            # again as the TextAnswer its own row already lists.
+            queryset = queryset.non_polymorphic()
         if related_model is model:
             queryset = queryset.exclude(pk=obj.pk)
         querysets.append(queryset.order_by("pk"))
