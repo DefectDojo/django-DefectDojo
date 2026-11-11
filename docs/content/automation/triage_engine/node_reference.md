@@ -69,6 +69,24 @@ Sweeps everything in scope when you press **Run Now** on the rule.
 | **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
 | **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
 
+### After Another Rule Completes
+
+`trigger.rule_completed`
+
+Sweeps everything in scope each time the rule you pick finishes a run successfully. Use it to run rules in a fixed order: Rule B picks Rule A, so B runs once A is done, and Rule C can pick B in turn. A run of A that fails does not start B.
+
+B does not receive anything from A. It sweeps its own scope, exactly as **Manual Run** does, so B can work on different Findings or Assets than A did. **Run Now** on B sweeps the same way, without waiting for A.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Rule** | none (required) | The rule to wait for. The list offers the rules you can see. A rule cannot pick itself. |
+| **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
+| **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
+
+Each of A's successful runs starts B once, whatever started A: a schedule, an event, or **Run Now**. If several rules pick A, they all start when A finishes, and run at the same time. To run them one after another, have each pick the one before it instead.
+
+Ordered rules are a chain, and the [cascade limits](../runs/#cascading) apply to it: a chain stops after 3 hops (A, B, C and D), and a rule never runs twice in one chain, so two rules that pick each other stop after one round. If B's owner can no longer see A, B's run sweeps nothing and its trace says why. An export carries the picked rule by its name. An import matches it to the rule of that name you can see, and leaves it blank, saying so in the import report, when no rule or more than one rule has that name.
+
 ### On a Missing Scan
 
 `trigger.scan_absence`
