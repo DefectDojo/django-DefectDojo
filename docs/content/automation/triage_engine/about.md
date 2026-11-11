@@ -45,7 +45,7 @@ Access is governed by four permissions, shared with the original Rules Engine:
 
 * **Rule View** is required to see the Triage Engine group and everything under it.
 * **Rule Add** is required to create a rule, including converting one from the original Rules Engine or importing one from a file.
-* **Rule Edit** is required to change, enable, schedule, run, replay, restore a version of, or take ownership of an existing rule.
+* **Rule Edit** is required to change, enable, schedule, run, replay, or restore a version of an existing rule. Taking ownership of someone else's rule also needs **Rule Add** and every node family the rule contains (see [Transferring a rule](../sharing_and_versions/#transferring-a-rule)).
 * **Rule Delete** is required to delete a rule.
 
 Validating and previewing a rule are accepted with either authoring permission, Rule Add or Rule Edit.
