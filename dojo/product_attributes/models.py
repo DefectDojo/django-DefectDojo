@@ -17,13 +17,15 @@ Each option carries:
 * ``icon`` -- an optional Font Awesome class used by the classic UI display tags.
 * ``display_order`` -- optional ordering for the dropdown.
 """
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 # The findings filters over these values (``product_lifecycle`` and friends) take a comma-separated
 # list, so a value with a comma in it could never be matched. New values may not contain one; existing
 # rows keep theirs, since ``value`` is immutable.
-VALUE_COMMA_ERROR = "Commas are not allowed, because the findings filters read a comma as a separator between values."
+VALUE_COMMA_ERROR = _("Commas are not allowed, because the findings filters read a comma as a separator between values.")
 
 
 class ProductAttributeOption(models.Model):
@@ -60,6 +62,13 @@ class ProductAttributeOption(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        # Runs for every ModelForm (the classic UI form and Django admin). Only a new option is checked: an existing
+        # row keeps its own value. The API serializers check the same thing in ``validate_value``.
+        super().clean()
+        if self._state.adding and "," in (self.value or ""):
+            raise ValidationError({"value": VALUE_COMMA_ERROR})
 
     def get_breadcrumbs(self):
         return [{"title": str(self),

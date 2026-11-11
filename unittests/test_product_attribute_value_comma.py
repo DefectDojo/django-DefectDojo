@@ -1,3 +1,4 @@
+from django.forms import modelform_factory
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
@@ -77,3 +78,18 @@ class TestProductAttributeValueComma(APITestCase):
                 form.save()
                 option.refresh_from_db()
                 self.assertEqual((option.value, option.name), ("legacy, comma", "Legacy Renamed"))
+
+    def test_default_model_form_refuses_a_comma_in_value(self):
+        # Django admin builds this form for the registered models; the check lives on the model, so it applies there too.
+        for _endpoint, model, _form in ENDPOINTS:
+            form_class = modelform_factory(model, fields="__all__")
+            with self.subTest(model=model.__name__):
+                form = form_class(data={"value": "web, mobile", "name": "Web and Mobile", "icon": "", "display_order": 0})
+                self.assertFalse(form.is_valid())
+                self.assertEqual(form.errors, {"value": [VALUE_COMMA_ERROR]})
+                legacy = model.objects.create(value="legacy, admin", name="Legacy")
+                form = form_class(
+                    data={"value": "legacy, admin", "name": "Legacy Renamed", "icon": "", "display_order": 0},
+                    instance=legacy,
+                )
+                self.assertTrue(form.is_valid(), form.errors)
