@@ -1,4 +1,5 @@
 import hashlib
+import re
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -236,6 +237,12 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
             result = context_processors.globalize_vars(self.request)
         self.assertTrue(result["SHOW_PLG_LINK"])
 
+    @override_settings(OS_MESSAGE_ENABLED=False)
+    def test_show_plg_link_is_false_when_os_message_disabled(self):
+        with patch.object(context_processors, "get_os_banner", return_value=None):
+            result = context_processors.globalize_vars(self.request)
+        self.assertFalse(result["SHOW_PLG_LINK"])
+
     def test_create_cloud_banner_not_in_context(self):
         with patch.object(context_processors, "get_os_banner", return_value=None):
             result = context_processors.globalize_vars(self.request)
@@ -370,3 +377,66 @@ class TestDismissOsMessageView(DojoTestCase):
         self.client.logout()
         response = self.client.post(self.url, {"token": "abc123"})
         self.assertIn(response.status_code, (302, 403))
+
+
+@versioned_fixtures
+class TestProDemoLinks(DojoTestCase):
+
+    """The "Book a demo" links next to the existing Pro links: where they point and when they show."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    DEMO_URL = (
+        "https://defectdojo.com/book-a-demo?utm_source=oss-app&amp;utm_medium=in-app"
+        "&amp;utm_campaign=oss-demo-prompt&amp;utm_content="
+    )
+    SUPPORT_DEMO_URL = DEMO_URL + "support-page"
+    MENU_DEMO_URL = DEMO_URL + "user-menu"
+    PAYG_URL = "https://cloud.defectdojo.com/onboarding?payg=1"
+
+    def setUp(self):
+        self.client.force_login(User.objects.get(username="admin"))
+        # Keep the page render off the network: the banner itself is covered above.
+        patcher = patch.object(context_processors, "get_os_banner", return_value=None)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def _support_page(self):
+        response = self.client.get(reverse("support"))
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def test_support_page_links_to_demo_form(self):
+        html = self._support_page()
+        # One button in the Pro section's hero and one in its footer.
+        self.assertEqual(html.count(self.SUPPORT_DEMO_URL), 2)
+
+    def test_user_menu_links_to_demo_form(self):
+        html = self._support_page()
+        self.assertEqual(html.count(self.MENU_DEMO_URL), 1)
+        # The pay-as-you-go link stays: once in the menu, twice on the Support page.
+        self.assertEqual(html.count(self.PAYG_URL), 3)
+
+    def test_pro_links_open_new_tab_without_referrer(self):
+        html = self._support_page()
+        anchors = re.findall(r"<a\b[^>]*>", html)
+        pro_links = [a for a in anchors if "book-a-demo" in a or self.PAYG_URL in a]
+        self.assertEqual(len(pro_links), 6)
+        for anchor in pro_links:
+            with self.subTest(anchor=anchor):
+                self.assertIn('target="_blank"', anchor)
+                self.assertIn('rel="noopener noreferrer"', anchor)
+
+    def test_demo_links_carry_nothing_about_the_instance(self):
+        html = self._support_page()
+        for url in re.findall(r'href="(https://defectdojo\.com/book-a-demo[^"]*)"', html):
+            with self.subTest(url=url):
+                self.assertIn(url, {self.SUPPORT_DEMO_URL, self.MENU_DEMO_URL})
+
+    @override_settings(OS_MESSAGE_ENABLED=False)
+    def test_user_menu_pro_links_hidden_when_os_message_disabled(self):
+        html = self._support_page()
+        self.assertNotIn(self.MENU_DEMO_URL, html)
+        # Only the Support page's own links are left.
+        self.assertEqual(html.count(self.PAYG_URL), 2)
+        self.assertEqual(html.count(self.SUPPORT_DEMO_URL), 2)
