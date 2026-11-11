@@ -69,7 +69,7 @@ Sweeps everything in scope when you press **Run Now** on the rule.
 | **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
 | **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
 
-### After Another Rule Completes
+### On Rule Complete
 
 `trigger.rule_completed`
 

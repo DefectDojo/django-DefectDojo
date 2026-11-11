@@ -76,7 +76,7 @@ Changes made *by* a running rule are attributed to that rule's own cascade rathe
 
 ### Running rules in order
 
-A cascade starts the next rule only when a change produces an event that rule listens for. To run rules in a fixed order whatever they change, give the next rule an [After Another Rule Completes](../node_reference/#after-another-rule-completes) trigger. Each successful run of the rule it picks starts it, one hop deeper in the same chain, so the depth and chain-membership limits above apply. The run it started points back through **Source run**, and the finished run's **Stats** list the rules it started under `woke_rules`.
+A cascade starts the next rule only when a change produces an event that rule listens for. To run rules in a fixed order whatever they change, give the next rule an [On Rule Complete](../node_reference/#on-rule-complete) trigger. Each successful run of the rule it picks starts it, one hop deeper in the same chain, so the depth and chain-membership limits above apply. The run it started points back through **Source run**, and the finished run's **Stats** list the rules it started under `woke_rules`.
 
 ## Scale and limits
 
