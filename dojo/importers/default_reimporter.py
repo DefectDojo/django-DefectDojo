@@ -802,7 +802,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding shares self.test the same way reimport matching's candidates do (see
         ProReImporter._reimport_hash_candidate_index's "share self.test" comment): one
         instance for the whole run instead of one lazy-loaded copy per finding closed.
+
+        A finding that is already closed (mitigated set and is_mitigated) is not loaded:
+        close_old_findings() leaves it as it is, and on a test whose findings are nearly all
+        closed it is nearly all of the to-mitigate set, so loading it kept every closed finding
+        of the test in memory at once. Its id goes to self.already_closed_to_mitigate instead,
+        which close_old_findings() reads for the one thing it still did with such a finding:
+        pushing its finding group to JIRA.
         """
+        self.already_closed_to_mitigate = []
         if not finding_ids:
             return []
         findings: list[Finding] = []
@@ -810,12 +818,29 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # jira_issue and the group's are read for every finding to decide the JIRA push
             for finding in (
                 Finding.objects.filter(id__in=chunk)
+                .filter(Q(mitigated__isnull=True) | Q(is_mitigated=False))
                 .select_related("jira_issue")
                 .prefetch_related("finding_group_set__jira_issue")
             ):
                 finding.test = self.test
                 findings.append(finding)
+        # Ids only: the ones not loaded above, deleted ones included. A deleted finding has no
+        # finding group, so reading the groups through these ids drops it the way the
+        # status refresh drops a loaded one.
+        loaded = {finding.id for finding in findings}
+        self.already_closed_to_mitigate = [finding_id for finding_id in finding_ids if finding_id not in loaded]
         return findings
+
+    def _finding_groups_of(self, finding_ids: list[int]) -> set[Finding_Group]:
+        """The finding group of each of these findings, read without loading the findings."""
+        groups: set[Finding_Group] = set()
+        for chunk in batched(finding_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            groups.update(
+                Finding_Group.objects.filter(findings__in=Finding.objects.filter(id__in=chunk))
+                .select_related("jira_issue")
+                .distinct(),
+            )
+        return groups
 
     def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> list[Finding]:
         """
@@ -874,7 +899,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         """
         Updates the status of findings that were detected as "old" by the reimport
         process findings methods
+
+        The already-closed findings _hydrate_findings_for_close_old() left out are still
+        here as ids (self.already_closed_to_mitigate): there is nothing to close on them, but
+        their finding groups are pushed to JIRA with the rest, as they were when every
+        to-mitigate finding was loaded. A subclass that drops findings from ``findings``
+        before calling this drops their ids from that list too.
         """
+        already_closed_ids = getattr(self, "already_closed_to_mitigate", None) or []
+        # Read once: the next reimport through this instance hydrates its own
+        self.already_closed_to_mitigate = []
         # First check if close old findings is desired
         if self.close_old_findings_toggle is False:
             return []
@@ -905,7 +939,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
-            for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
+            finding_groups = {finding.finding_group for finding in findings if finding.finding_group is not None}
+            finding_groups |= self._finding_groups_of(already_closed_ids)
+            for finding_group in finding_groups:
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(finding_group)
