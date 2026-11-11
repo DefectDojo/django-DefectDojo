@@ -470,8 +470,9 @@ The newest version leads: its name, its optional release date, and three counts:
 snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
 Earlier versions list below it, or beside it on a wide widget, one line each with their release
 date and their Found In and Fixed In counts. A long list scrolls inside the widget. Versions are
-ordered by release date, newest first, and a version without a release date sorts ahead of the
-dated ones. On a small widget only the newest version shows, with the number of earlier ones.
+ordered by release date, newest first, and versions without a release date follow the dated ones,
+the most recently declared first. On a small widget only the newest version shows, with the
+number of earlier ones.
 
 **Add Version** declares one by hand, which is useful for a release you want to record claims
 against before any SBOM has been uploaded for it. Name it the way its producer does (`5.2.0`,
