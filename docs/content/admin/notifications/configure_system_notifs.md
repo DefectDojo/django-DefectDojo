@@ -44,3 +44,13 @@ This restriction does not apply to System Notifications that are sent to a speci
 See our guide on [Role-Based Access Control](../../user_management/about_perms_and_roles/) for more information on RBAC and setting permissions.
 
 However, the connected System Email, Slack and Teams accounts cannot apply RBAC as they are not associated with a specific DefectDojo user.  **All selected system-wide notifications will be sent to these locations, so you should ensure that these channels can only be accessed by specific people in your organization.**
+
+## Notification webhooks a Group owns
+
+Notification webhooks are managed by superusers on **Notification Webhooks**. With Group Ownership on, a webhook can also belong to a Group, so the Group's Triage Engine rules post to it:
+
+* A member whose Role in the Group carries **Integration Edit** creates one for the Group (**Owned By**), and changes or deletes the Group's webhooks. Members whose Role carries **Integration View** see them. The header value is shown only to someone who can change the webhook.
+* A Group's webhook receives no personal or system notifications; it is used by the rules that name it.
+* **Share** shows it to other Groups, and **Transfer** moves it to another Group. Only a superuser moves one to the instance, which makes it a system webhook.
+* The **Owner** column shows who owns each webhook. System webhooks read as owned by the instance.
+

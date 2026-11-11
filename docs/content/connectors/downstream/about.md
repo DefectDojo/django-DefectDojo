@@ -80,6 +80,14 @@ These filters apply to automatic **creation** only. Updates to a Finding that al
 
 An Issue Tracker Assignment targets a single Asset or Engagement. To cover several assets, create one Assignment per Asset (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
 
+### Connectors and ticket templates a Group owns
+
+With Group Ownership on, a connector or a ticket template can belong to a Group. Choose the Group in **Owned By** when creating it, or start from the Group's **Owned Content** tab. Members whose Role in the Group carries **Integration View** see the Group's connectors and ticket templates, members whose Role carries **Integration Edit** change them, and the Group's rules use them. Members of other Groups neither see nor use them.
+
+* Each connector tile shows its owner. **Share** in the tile's menu shows a connector to other Groups, and **Transfer** moves it to another Group or to the instance.
+* **Ticket Templates** on the Downstream Connectors page lists the templates, with an **Owner** column, and offers **New Ticket Template**, **Share** and **Transfer**.
+* Connectors and ticket templates without a Group belong to the instance and keep needing the Integration permissions as a Global Role. Issue Tracker Mappings and Assignments, and a template's test render, stay with holders of the Global Role.
+
 #### Who can see and change an Assignment
 
 An Issue Tracker Assignment belongs to the Asset or Engagement it targets, so on top of the Integration permissions that open Downstream Connectors, it follows that Asset's or Engagement's permissions:
