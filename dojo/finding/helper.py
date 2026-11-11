@@ -1813,6 +1813,10 @@ def close_finding(
         note_date=mitigated_date,
     )
 
+    # Risk acceptance. Before the endpoint statuses: unaccepting reopens them, so it has to run
+    # first for the close to leave them mitigated.
+    ra_helper.risk_unaccept(user, finding, perform_save=False)
+
     if locations_enabled():
         # Related locations
         for ref in finding.locations.all():
@@ -1826,9 +1830,6 @@ def close_finding(
             status.mitigated = True
             status.last_modified = current_time
             status.save()
-
-    # Risk acceptance
-    ra_helper.risk_unaccept(user, finding, perform_save=False)
 
     # External issues (best effort)
     close_external_issue(finding.id, "Closed by defectdojo", "github")
