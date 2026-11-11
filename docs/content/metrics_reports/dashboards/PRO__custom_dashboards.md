@@ -11,7 +11,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Customizable Dashboards (layouts, widgets, and the widget catalog) are a DefectDojo Pro feature. They are off by default — a superuser can turn them on from **Settings > Feature Flags** on both Cloud and On-Premise instances.</span>
 
-DefectDojo Pro Customizable Dashboards let each user assemble their own dashboards out of **widgets** (counts, charts, leaderboards, feeds, and notes) arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, publish them to your whole team, set one as the default that opens on the Dashboards page, and clone any layout (yours or a shared template) as a starting point. The home page itself is the [Command Center](../command-center/), which every user has and which links to these grids.
+DefectDojo Pro Customizable Dashboards let each user assemble their own dashboards out of **widgets** (counts, charts, leaderboards, feeds, and notes) arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, share them with Groups, publish them to everyone, set one as the default that opens on the Dashboards page, and clone any layout (yours or a shared template) as a starting point. The home page itself is the [Command Center](../command-center/), which every user has and which links to these grids.
 
 ![A DefectDojo Pro customizable dashboard — the Default Dashboard layout.](images/pro_dashboard_v2_default.png)
 
@@ -64,6 +64,8 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Default** — one of your layouts is your **default**: the one that loads when you open the Dashboards page. You can change which layout is your default at any time.
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
+- **Share with Groups**: with Group Ownership on, **Share** in a layout's menu sets who can see it: **Only Me** (or **Group** for a Group's layout), **Specific Groups**, or **Everyone**. Members of a Group you share with can open the layout and set it as their default, but they cannot change it. **Everyone** is the shared layout described above, and publishing to everyone (or withdrawing it) needs the **Dashboard Share** permission held through a Global Role.
+- **Group dashboards**: **Transfer** in a layout's menu moves it into a Group, or back to you as **Only Me**. A Group's dashboard belongs to the Group rather than to the person who made it: every Member sees it in their layout picker (marked with the Group's name), and Members whose role in the Group carries **Dashboard Share** change, share, transfer and delete it. Moving a dashboard into a Group needs that permission in the Group, or as a Global Role. A Group's dashboards are counted on the **Owned Content** tab of the [Group's page](/admin/user_management/create_user_group/#viewing-a-group).
 - **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
 - **Read-only**: a Maintainer can also mark a collaborative layout as **read-only** (**Make Read-Only** in **Manage Layouts**, reversed with **Allow Editing**). It stays one live dashboard in every user's layout picker, and anyone can still set it as their default, but only a Maintainer or the layout's owner can change its widgets or arrangement. Everyone sees it tagged **Read-Only**; the owner and Maintainers keep the **Edit** button and everyone else has none, so a Maintainer can keep one dashboard current for the whole team without anyone else changing it. Anyone who wants a version of their own can still duplicate it. Stopping collaboration (or unsharing) also turns read-only off.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
@@ -71,7 +73,13 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 ### Restricting customization
 
-An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. Everyone else is shown the Instance Default dashboard, or the built-in starter dashboard when none is set, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
+An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. Everyone else switches among the dashboards approved for them instead of making their own:
+
+- the Instance Default dashboard (or the built-in starter dashboard when none is set), which opens until they pick another,
+- every dashboard shared with everyone, and
+- every dashboard owned by, or shared with, a Group they belong to.
+
+These dashboards are read-only to them, and the toolbar offers no options to create or manage layouts. The dashboard they pick opens again the next time, on any browser. A Member whose role in a Group carries **Dashboard Share** still changes that Group's own dashboards, and the toolbar shows **Managed by <Group>** on them. When nothing is approved beyond the default, the toolbar says so. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
 
 ### Default Profile and instance defaults
 
@@ -158,8 +166,10 @@ This **copies** the widget rather than linking to it. Editing the dashboard widg
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Saved Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts, and **Make Read-Only** / **Allow Editing** on collaborative ones. A read-only layout is tagged **Read-Only**.
-- **Create New** — start a fresh, empty layout to build from scratch.
+Every row's actions are in the menu at the start of the row.
+
+- **Saved Layouts**: rename, set as default, share, transfer, duplicate, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and so are your Groups' dashboards, tagged with the Group's name. Each can be set as your default or copied into a layout of your own. A Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts, and **Make Read-Only** / **Allow Editing** on collaborative ones. A read-only layout is tagged **Read-Only**.
+- **Group Dashboards**: for a superuser or a holder of **Dashboard Share** as a Global Role, the dashboards of Groups they are not in, with the same menu. A dashboard whose Group was deleted is listed here as **Unowned** until it is transferred.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
 ![The Manage Layouts dialog](images/pro_dashboard_v2_manage_layouts.png)

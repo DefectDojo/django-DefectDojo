@@ -62,7 +62,7 @@ In edit mode:
 
 ## Managing layouts
 
-**Manage Layouts** lists every layout for the page under the three headings above, and offers:
+**Manage Layouts** lists every layout for the page under the three headings above, plus **Group Layouts** (the page's layouts your Groups own or were given), and each row's menu offers:
 
 | Action | What it does |
 | --- | --- |
@@ -71,10 +71,11 @@ In edit mode:
 | **Clone** | Copy a layout, including a shared or shipped one, into Saved Layouts. |
 | **Delete** | Remove one of your layouts. |
 | **Set as My Default** / **Clear My Default** | Choose which layout you personally land on for this page. The layout carries a **My Default** tag. |
-| **Share** / **Unshare** | Publish one of your layouts as a shared template, or withdraw it. |
+| **Share** | Set who can see a layout: **Only Me**, **Specific Groups** (they can use it but not change it), or **Everyone** (a shared template). Without Group Ownership on, this is **Share** / **Unshare**: publish a layout as a shared template, or withdraw it. |
+| **Transfer** | Move a layout into a Group, or back to you. Members whose role in the Group carries **Page Layout Share** manage a Group's layouts; every other Member uses them as they are. |
 | **Set as Instance Default** / **Clear Instance Default** | Choose which layout everyone on the instance lands on for this page. A layout from a Default Profile reads **From <profile>**, or **Set by <profile>** when it is locked. |
 
-Sharing a layout and setting the Instance Default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
+Publishing to everyone and setting the Instance Default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
 
 ## Which layout you see
 
