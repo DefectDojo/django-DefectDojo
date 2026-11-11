@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dojo.auditlog.helpers import get_delete_event_user
-from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.celery_dispatch import dojo_dispatch_task_on_commit
 from dojo.labels import get_labels
 from dojo.models import Product
 from dojo.notifications.helper import async_create_notification, create_notification
@@ -22,7 +22,9 @@ def product_post_save(sender, instance, created, **kwargs):
     if kwargs.get("raw"):
         return
     if created:
-        dojo_dispatch_task(
+        # After the COMMIT: the task loads the new product by id, and a worker that picks it up
+        # before the creating transaction commits finds no row and sends nothing to anyone.
+        dojo_dispatch_task_on_commit(
             async_create_notification,
             event="product_added",
             title=instance.name,
