@@ -19,7 +19,9 @@ lists the current options with:
   is the part you edit.
 - **Value** — a fixed machine key stored on the asset and used by the API, imports and automation
   rules. It is set when an option is created and never changes afterward, so relabeling an option
-  never breaks an integration.
+  never breaks an integration. A value cannot contain a comma, because the findings filters take a
+  comma-separated list of values. Left blank in the Pro UI, it is derived from the label in lower
+  case, with any commas replaced by spaces.
 - **Icon** and **Display order** — optional. The icon is a Font Awesome name; display order controls
   where the option appears in the dropdown.
 - **Assets Using** — how many assets currently reference the option.

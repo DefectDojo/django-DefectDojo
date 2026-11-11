@@ -20,6 +20,11 @@ Each option carries:
 from django.db import models
 from django.urls import reverse
 
+# The findings filters over these values (``product_lifecycle`` and friends) take a comma-separated
+# list, so a value with a comma in it could never be matched. New values may not contain one; existing
+# rows keep theirs, since ``value`` is immutable.
+VALUE_COMMA_ERROR = "Commas are not allowed, because the findings filters read a comma as a separator between values."
+
 
 class ProductAttributeOption(models.Model):
 
