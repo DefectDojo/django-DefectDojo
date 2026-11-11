@@ -387,7 +387,7 @@ class TestProDemoLinks(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
     DEMO_URL = (
-        "https://defectdojo.com/book-a-demo?utm_source=oss-app&amp;utm_medium=in-app"
+        "https://defectdojo.com/book-a-demo/open-source?utm_source=oss-app&amp;utm_medium=in-app"
         "&amp;utm_campaign=oss-demo-prompt&amp;utm_content="
     )
     SUPPORT_DEMO_URL = DEMO_URL + "support-page"
