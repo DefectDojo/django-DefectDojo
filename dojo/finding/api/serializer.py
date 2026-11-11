@@ -469,15 +469,17 @@ class FindingSerializer(serializers.ModelSerializer):
                 if user else LocationFindingReference.objects.none(),
             )
 
+    def shows_accepted_risks(self, obj) -> bool:
+        """Whether accepted_risks lists obj's risk acceptances: only for a requester who may edit the finding."""
+        request = self.context.get("request")
+        return request is not None and user_has_permission(request.user, obj, "edit")
+
     def get_accepted_risks(self, obj):
         from dojo.api_v2.serializers import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
             RiskAcceptanceSerializer,
         )
         # schema annotation applied lazily at module bottom (avoids circular import)
-        request = self.context.get("request")
-        if request is None:
-            return []
-        if not user_has_permission(request.user, obj, "edit"):
+        if not self.shows_accepted_risks(obj):
             return []
         return RiskAcceptanceSerializer(
             obj.risk_acceptance_set.all(), many=True,

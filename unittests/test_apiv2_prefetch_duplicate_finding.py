@@ -16,6 +16,7 @@ byte, and that ``path`` names the same engagement it did.
 
 import re
 from collections import Counter
+from contextlib import contextmanager
 from datetime import date
 from unittest.mock import patch
 
@@ -93,6 +94,33 @@ def _get_path_before(serializer, acceptance):
         if request:
             path = request.build_absolute_uri(path)
     return path
+
+
+@contextmanager
+def _unbatched():
+    """The prefetcher and ``get_path`` as they were: each prefetched finding loads its own relations, lazily."""
+    shown = getattr(prefetcher_module, "_PREFETCH_PREFETCH_RELATED_WHEN_SHOWN", {})
+    with (
+        patch.dict(prefetcher_module._PREFETCH_PREFETCH_RELATED),
+        patch.dict(shown),
+        patch.object(prefetcher_module._Prefetcher, "_prefetch_single", _prefetch_single_before),
+        patch.object(RiskAcceptanceSerializer, "get_path", _get_path_before),
+    ):
+        prefetcher_module._PREFETCH_PREFETCH_RELATED.pop(Finding, None)
+        shown.pop(Finding, None)
+        yield
+
+
+def _may_not_edit():
+    """A requester who may view the findings but not edit them, so ``accepted_risks`` is empty for them."""
+    return patch(
+        "dojo.finding.api.serializer.user_has_permission",
+        side_effect=lambda _user, _obj, permission: permission != "edit",
+    )
+
+
+def _risk_acceptance_reads(sqls):
+    return [sql for sql in sqls if "dojo_risk_acceptance" in sql]
 
 
 @versioned_fixtures
@@ -195,10 +223,14 @@ class PrefetchDuplicateFindingTest(DojoTestCase):
             numerical_severity="S1", duplicate=True, duplicate_finding=original,
         )
 
-    def _prefetch(self, user):
-        # Fresh instances each time, so nothing loaded by an earlier call is reused
-        duplicates = list(Finding.objects.filter(test=self.duplicates_test).order_by("id"))
-        request = Request(APIRequestFactory().get("/api/v2/findings/", {"prefetch": "duplicate_finding"}))
+    def _prefetch(self, user, field="duplicate_finding"):
+        # Fresh instances each time, so nothing loaded by an earlier call is reused. duplicate_finding is the single
+        # path (each duplicate names one original); accepted_findings, on the originals' acceptances, the many path.
+        if field == "duplicate_finding":
+            entries = list(Finding.objects.filter(test=self.duplicates_test).order_by("id"))
+        else:
+            entries = list(Risk_Acceptance.objects.filter(engagement=self.engagement).order_by("id"))
+        request = Request(APIRequestFactory().get("/api/v2/findings/", {"prefetch": field}))
         request.user = user
         prefetcher = prefetcher_module._Prefetcher(request=request)
         # A request caches the member's authorized product ids once for all its permission checks (accepted_risks
@@ -206,7 +238,7 @@ class PrefetchDuplicateFindingTest(DojoTestCase):
         begin_task_cache()
         try:
             with impersonate(user), CaptureQueriesContext(connection) as queries:
-                prefetcher.prefetch_entries(duplicates, ["duplicate_finding"])
+                prefetcher.prefetch_entries(entries, [field])
         finally:
             end_task_cache()
         return [query["sql"] for query in queries.captured_queries], prefetcher.prefetched_data
@@ -254,15 +286,64 @@ class PrefetchDuplicateFindingTest(DojoTestCase):
             self._add_duplicate(index)
         for user in (self.admin, self.member):
             _, batched = self._prefetch(user)
-            with (
-                patch.dict(prefetcher_module._PREFETCH_PREFETCH_RELATED),
-                patch.object(prefetcher_module._Prefetcher, "_prefetch_single", _prefetch_single_before),
-                patch.object(RiskAcceptanceSerializer, "get_path", _get_path_before),
-            ):
-                prefetcher_module._PREFETCH_PREFETCH_RELATED.pop(Finding, None)
+            with _unbatched():
                 _, unbatched = self._prefetch(user)
             self.assertEqual(3, len(batched["duplicate_finding"]))
             self.assertEqual(JSONRenderer().render(unbatched), JSONRenderer().render(batched), user.username)
+
+    def _add_duplicates_with_large_acceptances(self, count):
+        """Duplicates whose originals' acceptances each hold three more findings than the original."""
+        for index in range(count):
+            self._add_duplicate(index)
+        for acceptance in Risk_Acceptance.objects.filter(engagement=self.engagement):
+            for extra in range(3):
+                acceptance.accepted_findings.add(
+                    Finding.objects.create(
+                        title=f"{acceptance.name} extra {extra}", test=self.originals_test, reporter=self.admin,
+                        severity="Low", numerical_severity="S3",
+                    ),
+                )
+
+    def _assert_no_risk_acceptance_reads_without_edit(self, field):
+        """A requester who may not edit reads no more risk-acceptance rows than before, and sees the same body."""
+        self._add_duplicates_with_large_acceptances(3)
+        with _may_not_edit():
+            sqls, batched = self._prefetch(self.member, field)
+            with _unbatched():
+                unbatched_sqls, unbatched = self._prefetch(self.member, field)
+        self.assertEqual(JSONRenderer().render(unbatched), JSONRenderer().render(batched))
+        findings = list(batched[field].values())
+        self.assertGreaterEqual(len(findings), 3)
+        self.assertEqual([[]] * len(findings), [finding["accepted_risks"] for finding in findings])
+        self.assertEqual(
+            len(_risk_acceptance_reads(unbatched_sqls)),
+            len(_risk_acceptance_reads(sqls)),
+            f"risk acceptance reads with the batch: {_risk_acceptance_reads(sqls)}",
+        )
+        return sqls
+
+    def test_single_path_loads_no_risk_acceptances_for_a_requester_who_may_not_edit(self):
+        # Before the batch, accepted_risks read nothing for this requester, and nothing else reads the acceptances
+        sqls = self._assert_no_risk_acceptance_reads_without_edit("duplicate_finding")
+        self.assertEqual([], _risk_acceptance_reads(sqls))
+
+    def test_many_path_loads_no_risk_acceptances_for_a_requester_who_may_not_edit(self):
+        # The entries are acceptances, so reading their accepted findings' ids is the field itself; the findings'
+        # own acceptances, accepted findings and engagements are not loaded on top of it
+        self._assert_no_risk_acceptance_reads_without_edit("accepted_findings")
+
+    def test_many_path_still_lists_acceptances_for_an_editor(self):
+        self._add_duplicates_with_large_acceptances(3)
+        _, batched = self._prefetch(self.member, "accepted_findings")
+        with _unbatched():
+            _, unbatched = self._prefetch(self.member, "accepted_findings")
+        self.assertEqual(JSONRenderer().render(unbatched), JSONRenderer().render(batched))
+        # The three originals and their acceptances' nine other findings, each listing its one acceptance of four
+        findings = list(batched["accepted_findings"].values())
+        self.assertEqual(12, len(findings))
+        for finding in findings:
+            [acceptance] = finding["accepted_risks"]
+            self.assertEqual(4, len(acceptance["accepted_findings"]))
 
 
 class RiskAcceptancePathTest(DojoTestCase):
