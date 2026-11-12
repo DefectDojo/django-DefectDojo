@@ -25,6 +25,7 @@ Find it under **Connect > Authorization > Login Settings**. Changing it takes th
 
 Session Age and Idle Timeout apply to every login, whether by username and password or by SSO. A user whose session ends, for either reason, is taken to the login page on their next click, and lands back on the page they were on once they sign in again.
 
+- Before a session ends, a **Session Expiring** warning counts down the time left, opening five minutes ahead by default (the `DD_SESSION_EXPIRE_WARNING` environment variable, in seconds). While inactivity is what will end the session, **Stay Signed In** starts a new Idle Timeout. When Session Age is what will end it, the warning says the session cannot be extended: save any work, then sign in again. Every open tab shares the session, so staying signed in from one tab closes the warning in the others.
 - Only requests the user makes count as activity. A page left open in a browser tab still reaches the Idle Timeout, even though it keeps refreshing its notification count in the background.
 - Activity is recorded at most once a minute, so an idle session can end up to a minute before the Idle Timeout, never after it.
 - A change to either setting reaches every running server within a minute, and applies to sessions that are already signed in. Shortening Session Age signs out anyone whose login is older than the new value.
