@@ -108,6 +108,7 @@ ctx.rule_name
 |-------|--------|
 | 識別情報 | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | 深刻度とスコアリング | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| 悪用の証跡 | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | テキスト | `description`, `mitigation`, `impact` |
 | ステータス | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | 日付 | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -119,6 +120,8 @@ ctx.rule_name
 日付は ISO-8601 形式の文字列です。これは意図的な設計で、`gt` や `lt` がテキストとして正しく順序付けできることを意味します。そのため `2026-07-28` は `2026-01-01` より正しく大きいと判定されます。
 
 `priority`、`risk`、`risk_score` は Pro の優先度付け機能から得られます。まだスコアリングされていない Finding には、これらの値は存在しません。
+
+`vendor_exploited` と `vendor_ransomware_used` は、CISA のカタログとは別に、スキャナー、コネクター、または人が報告した内容を保持し、`vendor_exploited_source` は報告した主体(スキャナーのテストタイプ名、コネクターの名前、`manual`、または `pre-upgrade`)を示します。どちらのソースにも反応すべきルールは、両方のフィールドを参照します。条件ビルダーでは、KEV フィールドは **KEV: Known Exploited**、**KEV: Ransomware Used**、**KEV: Date Added**、**KEV: Remediation Due** として表示され、Vendor Reported フィールドは **Vendor Reported Exploited**、**Vendor Reported Ransomware**、**Vendor Reported Source** として表示されます。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照してください。
 
 ### Conditions
 

@@ -136,11 +136,11 @@ Dies geschieht automatisch — die Priorität wird genau für die Befunde neu be
 
 Sobald Befunde angereichert sind, stehen die EPSS- und KEV-Werte in der gesamten Pro-Oberfläche zur Verfügung:
 
-- **Am Befund** — EPSS Score, EPSS Percentile, Known Exploited, Ransomware Used und KEV Date werden alle in der Befund-Detailansicht angezeigt.
+- **Am Befund** — EPSS Score, EPSS Percentile, **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** und KEV Date werden alle in der Befund-Detailansicht angezeigt. Die KEV-Werte stammen ausschließlich aus dem CISA-KEV-Katalog und können nicht von Hand gesetzt werden. Um festzuhalten, dass ein Scanner oder eine Person eine Schwachstelle als ausgenutzt meldet, verwenden Sie **Vendor Reported Exploited** und **Vendor Reported Ransomware**, die sich in den Formularen zum Hinzufügen und Bearbeiten von Befunden setzen und zurücksetzen lassen; siehe [Befunde](/asset_modelling/engagements_tests/pro__findings/#metadata). Die EPSS-Werte lassen sich weiterhin im Bereich **Threat Intelligence** von Hand setzen, was für einen Befund ohne CVE wichtig ist, da er nie angereichert wird. Bei einem Befund, der auf eine CVE verweist, überschreibt die nächste Synchronisierung von Hand eingetragene EPSS-Werte; siehe [Befunde bearbeiten](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 - **Sortierung** — Befundtabellen können nach EPSS Score / Percentile sortiert werden, um die am wahrscheinlichsten ausgenutzten Befunde zuerst anzuzeigen.
-- **Filterung** — die Befundliste bietet Filter für **Known Exploited** und **Ransomware Used**, sodass Sie Ansichten oder Berichte erstellen können, die sich auf bestätigt in der Praxis ausgenutzte Schwachstellen beschränken.
+- **Filterung** — die Befundliste bietet Filter für **Known Exploited (CISA KEV)** und **Ransomware Used (CISA KEV)**, sodass Sie Ansichten oder Berichte erstellen können, die sich auf bestätigt in der Praxis ausgenutzte Schwachstellen beschränken. Die Filter **Vendor Reported Exploited** und **Vendor Reported Ransomware** finden stattdessen, was ein Scanner, ein Connector oder eine Person gemeldet hat; das kann vom CISA-Katalog abweichen.
 
-Ein gängiger Workflow besteht darin, nach **Known Exploited = true** zu filtern und dann nach Priorität zu sortieren, um eine „das zuerst beheben"-Warteschlange zu erstellen, die auf bestätigter Ausnutzung basiert.
+Ein gängiger Workflow besteht darin, nach **Known Exploited (CISA KEV) = true** zu filtern und dann nach Priorität zu sortieren, um eine „das zuerst beheben"-Warteschlange zu erstellen, die auf bestätigter Ausnutzung basiert.
 
 ## Konfiguration
 
@@ -149,3 +149,5 @@ Bei **DefectDojo Cloud** ist die EPSS- und KEV-Anreicherung für Sie aktiviert u
 Wenn bei Befunden, bei denen Sie es erwarten, keine EPSS- oder KEV-Daten erscheinen (und diese Befunde tatsächlich CVEs tragen), prüfen Sie zunächst die Statuszeile im Vulnerability Explorer — sie meldet das Ergebnis der letzten Synchronisierung, einschließlich des Falls, dass keine Quelle konfiguriert ist. Sieht das unauffällig aus und fehlen die Daten weiterhin, wenden Sie sich an den DefectDojo-Support, der bestätigen kann, ob die tägliche Synchronisierung Daten an Ihre Instanz liefert.
 
 > *On-Premise-Installationen* konfigurieren die Anreicherung anders — jede Quelle kann unter den Finding-Enrichment-Einstellungen des Tuners aktiviert oder deaktiviert und auf eine benutzerdefinierte Feed-URL verwiesen werden. Diese Konfiguration gilt nicht für Cloud, wo die Daten von DefectDojo bereitgestellt werden.
+
+Auf einer selbst gehosteten Installation mit aktivierter Threat Intelligence müssen Sie diese Lookups nicht aktivieren, um KEV- und EPSS-Daten zu erhalten. Ist ein Lookup deaktiviert, liefert stattdessen das Threat-Intelligence-Bundle, das die Instanz ohnehin lädt, die Werte dieser Quelle, auch auf einer Air-Gapped-Installation, die das Bundle aus einer Datei lädt. Ein aktivierter Lookup hat immer Vorrang. Siehe [KEV und EPSS aus dem Bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).

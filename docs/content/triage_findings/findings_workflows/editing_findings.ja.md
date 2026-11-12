@@ -37,6 +37,11 @@ aliases:
 * **アクティブ / 検証済み** は、ツールが使用する主要な検出事項のステータスです。アクティブな検出事項とは、現在ネットワーク上で有効であり、ツールによって報告された検出事項のことです。検証済みとは、この検出事項がチームメンバーによって存在することが確認されたことを意味します。
 ​
 * **SAST / DAST** は、検出事項が発見されたコンテキストに応じて整理するために使用されるラベルです。通常このラベルは使用されたスキャンツールに基づいて自動的に設定されますが、より正確なレベルに調整することもできます(たとえば、SASTツールとDASTツールの両方によって検出事項が発見された場合など)。
+​
+* **Threat Intelligence**(**Optional Fields** の下にある折りたたまれたパネル)には、EPSSスコア、EPSSパーセンタイル、Known Exploited (CISA KEV)、Used in Ransomware、KEV Date Addedの値に加えて、**Exploit Maturity** と **Reachability** が含まれます。これらは通常、[EPSS / KEV同期](/triage_findings/finding_scoring/epss_kev/)、および[脅威インテリジェンス](/asset_modelling/pro_hierarchy/threat_intelligence/)と[到達可能性](/triage_findings/finding_scoring/reachability/)の機能によって書き込まれます。これらの機能は毎晩、各インポートの後、および脆弱性エクスプローラーからオンデマンドで実行されます。
+  * 3つのKEV値(Known Exploited (CISA KEV)、Used in Ransomware、KEV Date Added)はCISA KEVカタログからのみ取得され、手動で設定することはできません。スキャナー、同僚、または自分自身の分析によって脆弱性が悪用されていると報告されたことを記録するには、代わりにフォームで **Vendor Reported Exploited** または **Vendor Reported Ransomware** を設定してください。ここで設定した値はソース `manual` として記録され、スキャナーやエンリッチメントによって上書きされることはありません。同じ方法でクリアすることもできます。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照してください。
+  * EPSSの値、**Exploit Maturity**、**Reachability** は手動で設定できます。これはスキャナーやフィードがそれらを提供しない場合に重要です。ただし、CVEを参照する検出事項では、手動で入力した値は暫定的なものとして扱ってください。次回の同期で、EPSSの値と **Exploit Maturity** はフィードの値に置き換えられます。CVEを持たない検出事項は強化されないため、入力した値がそのまま保持されます。手動で設定した値は、同期された値とまったく同じように優先度とリスクの計算に反映されます。手動の **Exploit Maturity** が *Active in the wild* であれば実際に悪用されている場合のRiskフロアが適用され、手動の **Reachability** であれば到達可能リスクフロアが適用されます。
+  * 人が設定した悪用フラグに反応させたいルールエンジンのルールには、**Vendor Reported Exploited** に対する条件が必要です。**KEV: Known Exploited** は常にCISAカタログのみを反映するためです。FedRAMPの「route unrated findings for impact review」テンプレートは **Exploit Maturity** をキーにしており、この値は脅威インテリジェンスフィードから取得することも、ここで手動で設定することもできるようになりました。
 
 ### 緩和日と緩和実施者の編集
 

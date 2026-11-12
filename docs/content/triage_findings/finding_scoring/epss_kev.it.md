@@ -136,11 +136,11 @@ Questo processo avviene automaticamente — la priorità viene ricalcolata esatt
 
 Una volta che i Riscontri sono arricchiti, i valori EPSS e KEV sono disponibili in tutta l'interfaccia Pro:
 
-- **Sul Riscontro** — EPSS score, EPSS percentile, Known Exploited, Ransomware Used e KEV Date vengono tutti mostrati nel dettaglio del Riscontro.
+- **Sul Riscontro** — EPSS score, EPSS percentile, **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** e KEV Date vengono tutti mostrati nel dettaglio del Riscontro. I valori KEV provengono solo dal catalogo CISA KEV e non possono essere impostati manualmente. Per registrare che uno scanner o una persona segnala una vulnerabilità come sfruttata, usa **Vendor Reported Exploited** e **Vendor Reported Ransomware**, che i moduli di aggiunta e modifica del Riscontro possono impostare e azzerare; vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata). I valori EPSS possono ancora essere impostati manualmente nel pannello **Threat Intelligence**, il che è utile per un Riscontro che non ha un CVE e quindi non viene mai arricchito. Su un Riscontro che fa riferimento a un CVE, la sincronizzazione successiva sovrascrive i valori EPSS inseriti manualmente; vedi [Modifica dei Riscontri](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 - **Ordinamento** — le tabelle dei Riscontri possono essere ordinate per EPSS score / percentile per portare in cima i Riscontri più probabili da sfruttare.
-- **Filtraggio** — l'elenco dei Riscontri offre i filtri **Known Exploited** e **Ransomware Used**, così puoi creare viste o report limitati alle vulnerabilità con sfruttamento reale confermato.
+- **Filtraggio** — l'elenco dei Riscontri offre i filtri **Known Exploited (CISA KEV)** e **Ransomware Used (CISA KEV)**, così puoi creare viste o report limitati alle vulnerabilità con sfruttamento reale confermato. I filtri **Vendor Reported Exploited** e **Vendor Reported Ransomware** trovano invece quanto segnalato da uno scanner, un connettore o una persona, che può differire dal catalogo CISA.
 
-Un workflow comune consiste nel filtrare per **Known Exploited = true**, quindi ordinare per priorità, per produrre una coda "correggi prima questi" basata su uno sfruttamento confermato.
+Un workflow comune consiste nel filtrare per **Known Exploited (CISA KEV) = true**, quindi ordinare per priorità, per produrre una coda "correggi prima questi" basata su uno sfruttamento confermato.
 
 ## Configurazione
 
@@ -149,3 +149,5 @@ Su **DefectDojo Cloud**, l'arricchimento EPSS e KEV è abilitato e mantenuto per
 Se i dati EPSS o KEV non compaiono sui Riscontri in cui ti aspetti di vederli (e quei Riscontri contengono effettivamente dei CVE), inizia controllando la riga di stato nel Vulnerability Explorer — riporta l'esito della sincronizzazione più recente, incluso il caso in cui non sia configurata alcuna fonte. Se tutto sembra a posto ma i dati continuano a mancare, contatta il supporto DefectDojo, che può confermare se la sincronizzazione giornaliera sta distribuendo dati alla tua istanza.
 
 > *Le installazioni on-premise* configurano l'arricchimento in modo diverso — ogni fonte può essere abilitata o disabilitata e puntata verso un URL di feed personalizzato nelle impostazioni di arricchimento dei riscontri del Tuner. Questa configurazione non si applica a Cloud, dove i dati vengono forniti da DefectDojo.
+
+Su un'installazione self-hosted con la Threat Intelligence attiva, non è necessario attivare questi lookup per ottenere i dati KEV ed EPSS. Quando un lookup è disattivato, il bundle di threat intelligence che l'istanza già carica fornisce invece i valori di quella fonte, anche su un'installazione air-gapped che carica il bundle da un file. Un lookup attivo ha sempre la precedenza. Vedi [KEV ed EPSS dal bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).

@@ -108,6 +108,7 @@ Jedes Element trägt einen festen Satz von Befundfeldern. Diese Liste ist ein Ve
 |-------|--------|
 | Identität | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Schweregrad und Bewertung | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Exploit-Nachweise | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Text | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Daten | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -119,6 +120,8 @@ Neben `finding` trägt jedes Element `test` (`id`, `title`, `scan_type`), `engag
 Daten sind ISO-8601-Zeichenketten. Das ist beabsichtigt: Es bedeutet, dass `gt` und `lt` sie als Text korrekt ordnen, sodass `2026-07-28` korrekt größer ist als `2026-01-01`.
 
 `priority`, `risk` und `risk_score` stammen aus der Priorisierung von Pro. Ein Befund, der noch nicht bewertet wurde, trägt für sie keinen Wert.
+
+`vendor_exploited` und `vendor_ransomware_used` enthalten, was ein Scanner, ein Connector oder eine Person unabhängig vom CISA-Katalog gemeldet hat, und `vendor_exploited_source` nennt, wer die Meldung abgegeben hat (den Namen des Test Type des Scanners, den Namen des Connectors, `manual` oder `pre-upgrade`). Eine Regel, die auf eine der beiden Quellen reagieren soll, liest beide Felder. Im Bedingungs-Builder erscheinen die KEV-Felder als **KEV: Known Exploited**, **KEV: Ransomware Used**, **KEV: Date Added** und **KEV: Remediation Due** und die Vendor-Felder als **Vendor Reported Exploited**, **Vendor Reported Ransomware** und **Vendor Reported Source**. Siehe [Befunde](/asset_modelling/engagements_tests/pro__findings/#metadata).
 
 ### Bedingungen
 
