@@ -115,7 +115,7 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 #### Graph options
 
-A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**):
+A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**). Every dimension picker (the Graph, Top-N, Rate Chart, Sankey and Sunburst settings) lists its dimensions under the same headings as the chosen model's list page uses for **Add Filter**, in the same order, with every date dimension under Dates:
 
 - **Split By** draws one line, or one run of bars, per value of a second dimension. Grouping by **Created Date** by month and splitting by **Severity Group** gives new findings per month as two lines, one for Critical and High findings and one for Medium and Low findings. Split By takes any dimension that is not a date and not the Group By, and is available on bar, line and area charts (a pie or doughnut shows one dimension). A chart draws up to 10 series: past that, the smallest values are combined into one **Other** series. A chart that counts unique CWEs or vulnerability IDs cannot combine values that way, so it asks for a filter or a dimension with fewer values instead.
 - **Severity Group** is a finding dimension with three values: **Critical and High**, **Medium and Low**, and **Info**. It works as a Group By (a two or three slice doughnut) or as a Split By. Its lines and slices are red for Critical and High and green for Medium and Low unless you pick other colors. Clicking one opens the Findings list filtered to that group's severities.
