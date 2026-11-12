@@ -94,8 +94,10 @@ which component. Without it, every SBOM lands on the Asset as a whole.
 
 The CRA's Annex I Part I requires products to be made available without known exploitable
 vulnerabilities. The assessment's **PI-2(a)** requirement, and the Article 14 prompt in Part 4, read
-that from the **Known Exploited** flag on findings, which enrichment sets from the CISA Known
-Exploited Vulnerabilities (KEV) catalog. EPSS scores come from the same enrichment.
+that from the **Known Exploited (CISA KEV)** flag on findings, which enrichment sets from the CISA Known
+Exploited Vulnerabilities (KEV) catalog. EPSS scores come from the same enrichment. A **Vendor
+Reported Exploited** claim from a scanner, a connector or a person is kept separately and is not
+read here.
 
 * **DefectDojo Cloud:** enrichment is on already. There is nothing to set.
 * **Self-hosted:** in the left menu, go to **Settings > Finding Workflow > Finding Enrichment**, tick
@@ -108,7 +110,7 @@ period end, or today while the period is still running).
 
 | Expected | Where |
 | --- | --- |
-| After the next import or nightly run, findings for CVEs in the CISA KEV catalog are marked **Known Exploited** | The finding's details, or the **Known Exploited** column on a findings list |
+| After the next import or nightly run, findings for CVEs in the CISA KEV catalog are marked **Known Exploited (CISA KEV)** | The finding's details, or the **Known Exploited (CISA KEV)** column on a findings list |
 
 ### Step 4 — Create your remediation policy
 
@@ -317,14 +319,14 @@ The CRA assessment reads these findings and tests:
 * **VH-3** (regular security testing) needs a test whose target end date falls in the period and
   that is a static analysis test, or whose test type, title or scan type contains "scan",
   "vulnerability", "penetration" or "SAST".
-* **PI-2(a)** reads open and risk-accepted findings marked **Known Exploited** (Step 3).
+* **PI-2(a)** reads open and risk-accepted findings marked **Known Exploited (CISA KEV)** (Step 3).
 * **PI-2(b)** to **PI-2(m)**, apart from (g) and (i), read open findings whose CWE maps to the
   requirement.
 
 | Expected | Where |
 | --- | --- |
 | Findings with deadlines from your policy, counted from the scan date | The Asset's findings, **SLA** column |
-| Findings for CVEs in the KEV catalog marked **Known Exploited** | After enrichment (Step 3) |
+| Findings for CVEs in the KEV catalog marked **Known Exploited (CISA KEV)** | After enrichment (Step 3) |
 
 ## Part 4 — When an actively exploited vulnerability is found
 
@@ -337,7 +339,7 @@ ENISA's Single Reporting Platform.
 ### Step 12 — Start and track an Article 14 report
 
 **When DefectDojo prompts you.** When an Asset whose **CRA Product Class** is not **Not
-Applicable** has an open finding marked **Known Exploited**, the Regulatory card is tagged **Early
+Applicable** has an open finding marked **Known Exploited (CISA KEV)**, the Regulatory card is tagged **Early
 Warning Check** and its CRA group opens with an **Article 14 Early Warning** row saying how many
 findings are still to report. Each such finding is listed under it with a **Start CRA Report**
 button, or a link to the report once one names it. The finding itself shows a **CRA Early Warning
@@ -431,7 +433,7 @@ The assessment has 32 requirements. Once Parts 1 to 3 are done, expect:
 | **VH-4** Disclose fixed vulnerabilities | Unknown | Recorded by hand: see below |
 | **VH-5** Coordinated vulnerability disclosure | Satisfied | **Disclosure Policy URL** on the Regulatory card (Step 6) |
 | **VH-6** Vulnerability reporting contact | Satisfied | **Security Contact** on the Regulatory card (Step 6) |
-| **PI-2(a)** No known exploitable vulnerabilities | Not Satisfied while a **Known Exploited** finding is open or risk-accepted. Satisfied when there is none, a test ran in the period and a KEV enrichment run completed within 7 days; otherwise Unknown | Enrichment (Step 3) and your remediation |
+| **PI-2(a)** No known exploitable vulnerabilities | Not Satisfied while a **Known Exploited (CISA KEV)** finding is open or risk-accepted. Satisfied when there is none, a test ran in the period and a KEV enrichment run completed within 7 days; otherwise Unknown | Enrichment (Step 3) and your remediation |
 | Other **PI-2** requirements | Not Satisfied (Critical or High) or Partially Satisfied when open findings carry a CWE mapped to the requirement; otherwise Unknown | Your findings |
 | **RP-1** to **RP-6** Article 14 stages | Satisfied when every stage of that kind due or submitted in the period was submitted on time; Not Satisfied if one was late or missed; Unknown when none was due or submitted in the period yet | Your Article 14 reports (Step 12) |
 | The rest | Unknown | Recorded by hand |
@@ -490,7 +492,7 @@ and keep the downloads with your technical documentation. See
 | The **Regulatory Scope** widget | Every in-scope product counted on the CRA row |
 | Each in-scope product's **Service Level Agreement by Severity** | Your CRA policy |
 | The latest release of each product | An SBOM imported with its **Version** |
-| A finding for a CVE in the CISA KEV catalog | Marked **Known Exploited** |
+| A finding for a CVE in the CISA KEV catalog | Marked **Known Exploited (CISA KEV)** |
 | **Act > CRA Article 14 Reports** | The page opens with **New CRA Report**; your team knows who decides awareness and who submits |
 | **Settings > Notifications > Personal Notifications** | The people who own Article 14 have a channel set for **Other** events |
 | A current-period assessment per product, recomputed | VH-1, VH-2, VH-3, VH-5 and VH-6 Satisfied, or a known reason they are not; manual requirements recorded |
@@ -517,8 +519,8 @@ and keep the downloads with your technical documentation. See
 | CRA is missing from the **Regulations** list | The list shows only the first few until you search | Type `CRA` in its search box (Step 7) |
 | A product is missing from the **Regulatory Scope** widget | The CRA regulation is not on the Asset | Step 7 |
 | The **Regulatory Scope** severity columns are lower than the Asset's open findings | A known undercount in 3.4.201 and 3.4.202 (Step 5) | Use **Assets**, **Past SLA** and the Asset's own finding counts |
-| **Known Exploited** is never set on imported findings | Enrichment is not running | Step 3; on Cloud, contact DefectDojo Support |
-| No early-warning prompt for a **Known Exploited** finding | **CRA Product Class** is **Not Applicable**, or the finding is not active | Step 6 |
+| **Known Exploited (CISA KEV)** is never set on imported findings | Enrichment is not running | Step 3; on Cloud, contact DefectDojo Support |
+| No early-warning prompt for a **Known Exploited (CISA KEV)** finding | **CRA Product Class** is **Not Applicable**, or the finding is not active | Step 6 |
 | Findings are past their deadline right after import, and **VH-2** is Partially Satisfied | The report file carries an old date, and no **Scan Date** was set | Re-import with **Scan Date** set (Step 11) |
 | **VH-1** Not Satisfied | No SBOM components on the Asset | Step 10 |
 | **VH-1** Partially Satisfied right after an SBOM import | Component records are shared across the instance, so a component another product already carried keeps its original date | Expected. Document the SBOM review in the narrative |

@@ -154,11 +154,11 @@ This flows automatically — priority is recomputed for exactly the Findings upd
 
 Once Findings are enriched, the EPSS and KEV values are available throughout the Pro UI:
 
-- **On the Finding** — EPSS score, EPSS percentile, Known Exploited, Ransomware Used, and KEV Date all display on the Finding detail. They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms, which matters for a Finding that has no CVE and is therefore never enriched. On a Finding that does reference a CVE, the next sync overwrites hand-entered values; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
+- **On the Finding** — EPSS score, EPSS percentile, **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)**, and KEV Date all display on the Finding detail. The KEV values come only from the CISA KEV catalog and cannot be set by hand. To record that a scanner or a person reports a vulnerability as exploited, use **Vendor Reported Exploited** and **Vendor Reported Ransomware**, which the Add and Edit Finding forms can set and clear; see [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata). The EPSS values can still be set by hand in the **Threat Intelligence** panel, which matters for a Finding that has no CVE and is therefore never enriched. On a Finding that does reference a CVE, the next sync overwrites hand-entered EPSS values; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 - **Sorting** — Finding tables can be ordered by EPSS score / percentile to surface the most likely-to-be-exploited Findings first.
-- **Filtering** — the Findings list offers **Known Exploited** and **Ransomware Used** filters, so you can build views or reports scoped to confirmed real-world-exploited vulnerabilities.
+- **Filtering** — the Findings list offers **Known Exploited (CISA KEV)** and **Ransomware Used (CISA KEV)** filters, so you can build views or reports scoped to confirmed real-world-exploited vulnerabilities. The **Vendor Reported Exploited** and **Vendor Reported Ransomware** filters find what a scanner, a connector or a person reported instead, which can differ from the CISA catalog.
 
-A common workflow is to filter to **Known Exploited = true**, then sort by priority, to produce a "fix these first" queue backed by confirmed exploitation.
+A common workflow is to filter to **Known Exploited (CISA KEV) = true**, then sort by priority, to produce a "fix these first" queue backed by confirmed exploitation.
 
 ## Configuration
 
@@ -167,3 +167,5 @@ On **DefectDojo Cloud**, EPSS and KEV enrichment is enabled and maintained for y
 If EPSS or KEV data is not appearing on Findings you expect it to (and those Findings do carry CVEs), start by checking the status line on the Vulnerability Explorer — it reports the outcome of the most recent sync, including when no source is configured. If that looks healthy and data is still missing, contact DefectDojo support, who can confirm whether the daily sync is delivering data to your instance.
 
 > *On-premise installations* configure enrichment differently — each source can be enabled or disabled and pointed at a custom feed URL under the Tuner's finding-enrichment settings. That configuration does not apply to Cloud, where the data is delivered by DefectDojo.
+
+On a self-hosted install with threat intelligence on, you do not need to turn these lookups on to get KEV and EPSS data. When a lookup is off, the threat intelligence bundle the instance already loads supplies that source's values instead, including on an air-gapped install that loads the bundle from a file. A lookup that is on always takes precedence. See [KEV and EPSS from the bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).

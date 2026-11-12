@@ -263,7 +263,7 @@ Each item carries a fixed set of Finding fields. This list is a contract, so it 
 |-------|--------|
 | Identity | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Severity and scoring | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
-| Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
+| Exploit evidence | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Text | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date`, `risk_acceptance_expiration_date` |
@@ -282,6 +282,8 @@ That difference does not change how you write the condition. Whenever the value 
 The exploit-evidence fields come from KEV enrichment and threat intelligence. They are what a rule reaches for when it should treat a known-exploited vulnerability differently from an equally severe one nobody is attacking.
 
 `known_exploited` is true when any of the Finding's vulnerability ids is in the CISA Known Exploited Vulnerabilities catalog, and `ransomware_used` when CISA records known ransomware campaign use. `kev_date` is the earliest date CISA added any of them, and `kev_due_date` the earliest remediation date CISA assigned, so the deadline a rule sees is always the tightest one that applies.
+
+`vendor_exploited` and `vendor_ransomware_used` hold what a scanner, a connector or a person reported, apart from CISA's catalog, and `vendor_exploited_source` names who reported it (the scanner's Test Type name, the connector's name, `manual` or `pre-upgrade`). A rule that should act on either source reads both fields. In the condition builder the KEV fields appear as **KEV: Known Exploited**, **KEV: Ransomware Used**, **KEV: Date Added** and **KEV: Remediation Due**, and the vendor fields as **Vendor Reported Exploited**, **Vendor Reported Ransomware** and **Vendor Reported Source**. See [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata).
 
 `exploit_maturity` is the ladder those signals roll up to, and the condition builder offers it by name rather than by number:
 
