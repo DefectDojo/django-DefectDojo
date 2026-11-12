@@ -195,6 +195,12 @@ All properties are expected as strings and are required by the parser.
 }
 ~~~
 
+### Package URL and CPE
+With Locations enabled, each matched package is recorded as a dependency location identified by
+its Package URL (`artifact.purl`). The CPE identifiers Grype lists for the package
+(`artifact.cpes`) are stored on that dependency. A later import adds any CPE the dependency does
+not have yet and never removes one.
+
 ### Sample Scan Data
 Sample Grype scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/anchore_grype).
 

@@ -23,6 +23,12 @@ The status field contains the status as assigned by the OS/Package vendor such a
 It is recommended to assess the appropriate action in your Asset's context.
 If you want to exclude certain status from being imported into Defect Dojo, please [filter them in the export from Trivy](https://trivy.dev/latest/docs/configuration/filtering/)
 
+### Package URL
+With Locations enabled, each vulnerable package is recorded as a dependency location. When the
+report names the package's Package URL (`PkgIdentifier.PURL`),
+that PURL identifies the dependency, so its ecosystem, namespace and qualifiers are kept. Older
+reports carry only a name and version, which is what the dependency is built from.
+
 ### Sample Scan Data
 Sample Trivy scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/trivy).
 

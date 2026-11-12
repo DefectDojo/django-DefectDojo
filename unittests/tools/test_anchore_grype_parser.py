@@ -392,6 +392,21 @@ class TestAnchoreGrypeParser(DojoTestCase):
         self.assertFalse(finding_without_kev.known_exploited)
 
 
+class TestAnchoreGrypeParserDependencyLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_the_dependency_carries_the_package_url_and_every_cpe(self):
+        with (get_unit_tests_scans_path("anchore_grype") / "check_all_fields.json").open(encoding="utf-8") as test_file:
+            findings = AnchoreGrypeParser().get_findings(test_file, Test())
+        finding = next(f for f in findings if f.component_name == "libgssapi-krb5-2")
+        dependencies = [loc.data for loc in finding.unsaved_locations if loc.type == "dependency"]
+        self.assertEqual(1, len(dependencies))
+        self.assertEqual("pkg:deb/debian/libgssapi-krb5-2@1.17-3+deb10u3?arch=amd64", dependencies[0]["purl"])
+        self.assertEqual(10, len(dependencies[0]["cpes"]))
+        self.assertEqual(
+            "cpe:2.3:a:libgssapi-krb5-2:libgssapi-krb5-2:1.17-3+deb10u3:*:*:*:*:*:*:*", dependencies[0]["cpes"][0],
+        )
+
+
 class TestAnchoreGrypeParserImageLocations(DojoTestCase):
     @skip_unless_v3
     def test_image_source_attaches_the_manifest_digest_image(self):

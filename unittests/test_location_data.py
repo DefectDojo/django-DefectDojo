@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from django.utils import timezone
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.tools.locations import LocationData
+from dojo.tools.locations import LocationData, cpe_strings
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v3
 
@@ -51,6 +51,34 @@ class TestLocationDataDependencyFactory(DojoTestCase):
         data = LocationData.dependency(purl="pkg:huggingface/org/model", component_type="machine-learning-model")
         self.assertEqual("machine-learning-model", data.data["component_type"])
         self.assertEqual("pkg:huggingface/org/model", data.data["purl"])
+
+    def test_cpes_are_empty_when_the_report_names_none(self):
+        data = LocationData.dependency(purl="pkg:npm/lodash@4.17.21")
+        self.assertEqual([], data.data["cpes"])
+
+    def test_cpes_are_carried_as_given(self):
+        cpe = "cpe:2.3:a:lodash:lodash:4.17.21:*:*:*:*:node.js:*:*"
+        data = LocationData.dependency(purl="pkg:npm/lodash@4.17.21", cpes=[cpe])
+        self.assertEqual([cpe], data.data["cpes"])
+
+
+class TestCpeStrings(DojoTestCase):
+    def test_bare_strings_and_syft_objects_flatten_in_order_without_repeats(self):
+        self.assertEqual(
+            ["cpe:2.3:a:x:x:1:*:*:*:*:*:*:*", "cpe:2.3:a:y:y:1:*:*:*:*:*:*:*"],
+            cpe_strings([
+                "cpe:2.3:a:x:x:1:*:*:*:*:*:*:*",
+                {"cpe": "cpe:2.3:a:y:y:1:*:*:*:*:*:*:*", "source": "nvd-cpe-dictionary"},
+                " cpe:2.3:a:x:x:1:*:*:*:*:*:*:* ",
+            ]),
+        )
+
+    def test_values_that_are_not_cpes_are_skipped(self):
+        self.assertEqual([], cpe_strings([None, "", "  ", 7, {"source": "x"}, {"cpe": None}]))
+
+    def test_a_missing_or_malformed_list_gives_none(self):
+        self.assertEqual([], cpe_strings(None))
+        self.assertEqual([], cpe_strings("cpe:2.3:a:x:x:1:*:*:*:*:*:*:*"))
 
 
 @skip_unless_v3

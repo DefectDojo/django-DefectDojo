@@ -383,6 +383,35 @@ Number  Content
                 self.assertEqual(6.3, finding.cvssv4_score)
 
 
+class TestTrivyParserDependencyLocations(DojoTestCase):
+
+    """A vulnerability's package becomes a Dependency location, by Package URL when Trivy reports one."""
+
+    def _dependency_locations(self, finding):
+        return [loc.data for loc in finding.unsaved_locations if loc.type == "dependency"]
+
+    @skip_unless_v3
+    def test_the_reported_package_url_identifies_the_dependency(self):
+        with (get_unit_tests_scans_path("trivy") / "cvss_severity_source.json").open(encoding="utf-8") as test_file:
+            findings = TrivyParser().get_findings(test_file, Test())
+        curl = next(finding for finding in findings if finding.component_name == "curl")
+        dependencies = self._dependency_locations(curl)
+        self.assertEqual(1, len(dependencies))
+        self.assertEqual("pkg:deb/ubuntu/curl@7.81.0-1ubuntu1.14?arch=amd64&distro=ubuntu-22.04", dependencies[0]["purl"])
+        self.assertEqual("", dependencies[0]["name"])
+
+    @skip_unless_v3
+    def test_a_package_without_a_package_url_falls_back_to_name_and_version(self):
+        with (get_unit_tests_scans_path("trivy") / "cvss_severity_source.json").open(encoding="utf-8") as test_file:
+            findings = TrivyParser().get_findings(test_file, Test())
+        certifi = next(finding for finding in findings if finding.component_name == "certifi")
+        dependencies = self._dependency_locations(certifi)
+        self.assertEqual(1, len(dependencies))
+        self.assertEqual("", dependencies[0]["purl"])
+        self.assertEqual("certifi", dependencies[0]["name"])
+        self.assertEqual(certifi.component_version, dependencies[0]["version"])
+
+
 class TestTrivyParserImageLocations(DojoTestCase):
 
     """A container_image scan attaches the scanned image to every finding as an Image location."""

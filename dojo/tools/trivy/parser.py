@@ -393,7 +393,12 @@ class TrivyParser:
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
 
-                if locations_enabled() and package_name and package_version:
+                # Trivy names the exact package with a Package URL in PkgIdentifier; older
+                # reports have none, so fall back to the bare name and version.
+                purl = (vuln.get("PkgIdentifier") or {}).get("PURL")
+                if locations_enabled() and purl:
+                    finding.unsaved_locations.append(LocationData.dependency(purl=purl, file_path=file_path))
+                elif locations_enabled() and package_name and package_version:
                     finding.unsaved_locations.append(
                         LocationData.dependency(name=package_name, version=package_version, file_path=file_path),
                     )
