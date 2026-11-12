@@ -1,0 +1,252 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    }
+  ],
+  "targets": [
+    {
+      "target": "php:8.3.36-cli",
+      "type": "image",
+      "digest": "sha256:d716009046f4acac161ed7a14921111398228c2311696f132686be8613cb19ab",
+      "platform": "linux/amd64",
+      "files_scanned": 9113,
+      "files_read": 1214,
+      "findings": [
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/bin/php",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/bin/php",
+            "php_version": "8.3.36",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-web",
+          "path": "/usr/local/bin/php-cgi",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (cgi-fcgi)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "cgi-fcgi"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/bin/php-cgi",
+            "php_version": "8.3.36",
+            "sapi": "cgi-fcgi",
+            "web_facing": true,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/bin/phpdbg",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/bin/phpdbg",
+            "php_version": "8.3.36",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/lib/libphp.so",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (embed)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "embed"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/lib/libphp.so",
+            "php_version": "8.3.36",
+            "sapi": "embed",
+            "web_facing": false,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "annotations": {
+        "os": {
+          "id": "debian",
+          "version_id": "13",
+          "codename": "trixie",
+          "pretty_name": "Debian GNU/Linux 13 (trixie)"
+        }
+      }
+    }
+  ]
+}
