@@ -18,6 +18,8 @@ audience: pro
 
 期限は厳格に適用されており、CISA KEVカタログに掲載されている検出事項が、そのCISA期限を超えてスケジュールされることはありません。
 
+KEVのルックアップが無効になっているセルフホストのインスタンスでは、CISAの期限日はインスタンスがすでに読み込んでいる脅威インテリジェンスバンドルから取得されるため、ルックアップを有効にしなくてもこの上限が適用されます。[バンドルから取得するKEVとEPSS](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)を参照してください。
+
 ## FedRAMP VDR
 
 同じ基本期間を、悪用可能性と露出状況によってさらに厳格化したものです。

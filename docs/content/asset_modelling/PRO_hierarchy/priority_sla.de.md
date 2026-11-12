@@ -80,7 +80,8 @@ Befunde innerhalb eines Produkts können über zusätzliche Metadaten verfügen,
 * Ob der Befund einen **EPSS Score** aufweist oder nicht - dieser wird Befunden automatisch hinzugefügt und für Pro-Benutzer aktuell gehalten. Der **EPSS Score** ist das Feld, das in den Priority Score einfließt — **EPSS Percentile** wird am Befund zu Referenzzwecken erfasst, fließt aber nicht direkt in die Berechnung ein.
 * Wie viele Endpunkte im Produkt von diesem Befund betroffen sind
 * Ob ein Befund sich In Prüfung befindet
-* Ob sich der Befund in der KEV-Datenbank (Known Exploited Vulnerabilities) befindet, die von DefectDojo regelmäßig überprüft wird
+* Ob sich der Befund in der KEV-Datenbank (Known Exploited Vulnerabilities) befindet, die von DefectDojo regelmäßig überprüft wird.  Auf einer selbst gehosteten Instanz mit deaktiviertem KEV-Lookup stammt diese Angabe aus dem [Threat-Intelligence-Bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+* Ob ein Scanner, ein Connector oder eine Person den Befund als in freier Wildbahn ausgenutzt (**Vendor Reported Exploited**) oder als in Ransomware eingesetzt (**Vendor Reported Ransomware**) gemeldet hat.  Die Priority behandelt einen Befund als ausgenutzt, wenn CISA KEV oder die Herstellermeldung dies angibt, sodass die Warnung eines Scanners die Priority auch dann erhöht, wenn CISA die CVE nicht aufführt.  Siehe [Befunde](/asset_modelling/engagements_tests/pro__findings/#metadata).
 * Der vom Tool gemeldete Schweregrad eines Befunds (Info, Niedrig, Mittel, Hoch, Kritisch)
 
 #### EPSS Score vs. EPSS Percentile
@@ -244,6 +245,8 @@ SLA-Konfigurationen enthalten die Anzahl der Tage, die jedem **Schweregrad**- od
 Jedes Service Level Agreement kann über einen eindeutigen Namen sowie eine optionale Beschreibung verfügen.
 
 **Restart SLA on Finding Reactivation**: Ist diese Option aktiviert, beginnt die SLA von Neuem, wenn ein Befund wieder geöffnet (Reopened) wird.  Andernfalls basiert die SLA auf dem Erstellungszeitpunkt des Befunds.
+
+**Cap SLA by CISA KEV Due Date**: Ist diese Option aktiviert, wird die SLA-Frist eines im KEV gelisteten Befunds auf das CISA-Fälligkeitsdatum für diese CVE vorgezogen.  Auf einer selbst gehosteten Instanz mit deaktiviertem KEV-Lookup stammt das Fälligkeitsdatum aus dem [Threat-Intelligence-Bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle), sodass die Begrenzung dort greift, ohne dass der Lookup aktiviert werden muss.  Die meisten CISA-Fälligkeitsdaten liegen bereits in der Vergangenheit. Ist diese Option aktiviert, können daher viele im KEV gelistete Befunde direkt nach dem ersten Laden eines Bundles nach einem Upgrade als SLA-Verletzung angezeigt werden.
 
 Beim Bearbeiten einer SLA können Sie wählen, ob diese SLA **Schweregrad** oder **Risk** als Maßstab für die Zuweisung von Days To Remediate verwendet.  Dies geschieht durch Auswahl der entsprechenden Option im Abschnitt **Service Level configuration Type** des Formulars.
 

@@ -63,7 +63,8 @@ Les Constatations d'un Produit peuvent avoir des métadonnées supplémentaires 
 * Si la Constatation possède un **Score EPSS** ; celui-ci est ajouté automatiquement aux Constatations et tenu à jour pour les utilisateurs Pro.  Le **Score EPSS** est le champ qui contribue au Score de Priorité — le **Percentile EPSS** est suivi sur la Constatation à titre indicatif mais n'alimente pas directement le calcul.
 * Le nombre de Points de terminaison du Produit concernés par cette Constatation
 * Si la Constatation est en cours de révision (Under Review)
-* Si la Constatation figure dans la base KEV (Known Exploited Vulnerabilities), vérifiée régulièrement par DefectDojo
+* Si la Constatation figure dans la base KEV (Known Exploited Vulnerabilities), vérifiée régulièrement par DefectDojo.  Sur une instance auto-hébergée dont la recherche KEV est désactivée, cette information provient du [lot de renseignement sur les menaces](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+* Si un scanner, un connecteur ou une personne a signalé la Constatation comme exploitée en conditions réelles (**Vendor Reported Exploited**) ou comme utilisée dans un rançongiciel (**Vendor Reported Ransomware**).  La Priorité considère une Constatation comme exploitée dès que CISA KEV ou le signalement fournisseur l'indique : l'avertissement d'un scanner augmente donc toujours la Priorité lorsque CISA ne répertorie pas le CVE.  Voir [Constatations](/asset_modelling/engagements_tests/pro__findings/#metadata).
 * La Sévérité rapportée par l'outil pour une Constatation (Info, Faible, Moyenne, Élevée, Critique)
 
 #### Score EPSS et Percentile EPSS
@@ -213,6 +214,8 @@ Les configurations SLA contiennent le nombre de jours attribué à chaque valeur
 Chaque Accord de niveau de service peut avoir un nom unique, ainsi qu'une description facultative.
 
 **Redémarrer le SLA lors de la réactivation d'une Constatation** : si cette option est activée, elle relancera le SLA à zéro lorsqu'une Constatation est Rouverte.  Sinon, le SLA sera basé sur la date de création de la Constatation.
+
+**Cap SLA by CISA KEV Due Date** : si cette option est activée, l'échéance SLA d'une Constatation répertoriée dans KEV est avancée à la date d'échéance fixée par CISA pour ce CVE.  Sur une instance auto-hébergée dont la recherche KEV est désactivée, la date d'échéance provient du [lot de renseignement sur les menaces](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle) : le plafond s'applique donc sans activer la recherche.  La plupart des dates d'échéance CISA sont déjà passées : avec cette option activée, de nombreuses Constatations répertoriées dans KEV peuvent donc apparaître en violation de leur SLA juste après le premier chargement du lot qui suit une mise à niveau.
 
 Lors de la modification d'un SLA, vous pouvez choisir si ce SLA utilisera la **Sévérité** ou le **Risque** comme référence pour attribuer le nombre de jours pour remédier.  Cela se fait en sélectionnant l'option correspondante dans la section **Type de configuration du niveau de service** du formulaire.
 

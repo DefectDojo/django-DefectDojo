@@ -83,7 +83,8 @@ I Riscontri all’interno di un Prodotto possono avere metadati aggiuntivi che p
 * Se il Riscontro ha un **Punteggio EPSS**, questo viene aggiunto automaticamente ai Riscontri e mantenuto aggiornato per gli utenti Pro.  Il **Punteggio EPSS** è il campo che contribuisce al Punteggio di Priorità — il **Percentile EPSS** viene tracciato sul Riscontro come riferimento ma non alimenta direttamente il calcolo.
 * Quanti Endpoint del Prodotto sono interessati da questo Riscontro
 * Se il Riscontro è In revisione oppure no
-* Se il Riscontro è presente nel database KEV (Known Exploited Vulnerabilities), che viene verificato regolarmente da DefectDojo
+* Se il Riscontro è presente nel database KEV (Known Exploited Vulnerabilities), che viene verificato regolarmente da DefectDojo.  Su un’istanza self-hosted con il lookup KEV disattivato, questa informazione proviene dal [bundle di threat intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+* Se uno scanner, un connettore o una persona ha segnalato il Riscontro come sfruttato in the wild (**Vendor Reported Exploited**) o come utilizzato in ransomware (**Vendor Reported Ransomware**).  La Priorità considera un Riscontro come sfruttato quando lo indica CISA KEV oppure la segnalazione del fornitore, quindi l’avviso di uno scanner aumenta comunque la Priorità anche quando CISA non elenca il CVE.  Vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata).
 * La Gravità segnalata dallo strumento per un Riscontro (Info, Bassa, Media, Alta, Critica)
 
 #### Punteggio EPSS vs Percentile EPSS
@@ -247,6 +248,8 @@ Le configurazioni SLA contengono i giorni assegnati a ciascun valore di **Gravit
 Ogni Service Level Agreement può avere un nome univoco, oltre a una descrizione facoltativa.
 
 **Riavvia SLA alla riattivazione del Riscontro**: se abilitata, questa opzione farà ripartire da zero uno SLA quando un Riscontro viene Riaperto.  Altrimenti, lo SLA si baserà sul momento in cui il Riscontro è stato creato.
+
+**Cap SLA by CISA KEV Due Date**: se abilitata, la scadenza SLA di un Riscontro presente nel KEV viene anticipata alla data di scadenza fissata da CISA per quel CVE.  Su un’istanza self-hosted con il lookup KEV disattivato, la data di scadenza proviene dal [bundle di threat intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle), quindi il limite si applica anche lì senza attivare il lookup.  La maggior parte delle date di scadenza CISA è già passata, quindi con questa opzione attiva molti Riscontri presenti nel KEV possono risultare in violazione del proprio SLA subito dopo il primo caricamento del bundle successivo a un aggiornamento.
 
 Quando modifichi uno SLA, puoi scegliere se quello SLA utilizzerà **Gravità** o **Rischio** come parametro di riferimento per assegnare i Giorni per la Correzione.  Questo si fa selezionando l’opzione corrispondente nella sezione **Tipo di configurazione del Service Level** del modulo.
 

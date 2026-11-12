@@ -18,6 +18,8 @@ Deux configurations de SLA prêtes à l'emploi sont fournies avec la fonctionnal
 
 Les échéances sont appliquées de manière stricte, et une constatation figurant dans le catalogue CISA KEV n'est jamais planifiée au-delà de sa date d'échéance CISA.
 
+Sur une instance auto-hébergée dont la recherche KEV est désactivée, la date d'échéance CISA provient du lot de renseignement sur les menaces que l'instance charge déjà : ce plafond s'applique donc sans activer la recherche. Voir [KEV et EPSS depuis le lot](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Les mêmes fenêtres de base, encore resserrées en fonction de l'exploitabilité et de l'exposition :

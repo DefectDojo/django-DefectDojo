@@ -63,7 +63,8 @@ Los Hallazgos dentro de un Producto pueden tener metadatos adicionales que ajust
 * Si el Hallazgo tiene o no una **Puntuación EPSS**, esta se añade automáticamente a los Hallazgos y se mantiene actualizada para los usuarios de Pro.  La **Puntuación EPSS** es el campo que contribuye a la Puntuación de Prioridad — el **Percentil EPSS** se registra en el Hallazgo como referencia, pero no alimenta directamente el cálculo.
 * Cuántos Endpoints del Producto se ven afectados por este Hallazgo
 * Si el Hallazgo está o no En revisión
-* Si el Hallazgo está en la base de datos KEV (Known Exploited Vulnerabilities), que DefectDojo comprueba periódicamente
+* Si el Hallazgo está en la base de datos KEV (Known Exploited Vulnerabilities), que DefectDojo comprueba periódicamente.  En una instancia autoalojada con la consulta de KEV desactivada, este dato proviene del [paquete de inteligencia de amenazas](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+* Si un escáner, un conector o una persona reportó que el Hallazgo se está explotando en el mundo real (**Vendor Reported Exploited**) o que se ha utilizado en ransomware (**Vendor Reported Ransomware**).  La Prioridad trata un Hallazgo como explotado cuando CISA KEV o el reporte del proveedor así lo indican, de modo que la advertencia de un escáner sigue elevando la Prioridad cuando CISA no incluye el CVE.  Consulte [Hallazgos](/asset_modelling/engagements_tests/pro__findings/#metadata).
 * La Severidad reportada por la herramienta para un Hallazgo (Informativa, Baja, Media, Alta, Crítica)
 
 #### Puntuación EPSS frente a Percentil EPSS
@@ -212,6 +213,8 @@ Las configuraciones de SLA contienen los días asignados a cada valor de **Sever
 Cada Acuerdo de Nivel de Servicio puede tener un nombre único, junto con una descripción opcional.
 
 **Reiniciar SLA al reactivar un Hallazgo**: si se habilita, esta opción reiniciará el SLA cuando se Reabra un Hallazgo.  De lo contrario, el SLA se basará en la fecha de creación del Hallazgo.
+
+**Cap SLA by CISA KEV Due Date**: si se habilita, la fecha límite del SLA de un Hallazgo incluido en KEV se adelanta a la fecha límite que CISA fija para ese CVE.  En una instancia autoalojada con la consulta de KEV desactivada, la fecha límite proviene del [paquete de inteligencia de amenazas](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle), por lo que el límite se aplica allí sin activar la consulta.  La mayoría de las fechas límite de CISA ya han pasado, así que con esta opción activada, muchos Hallazgos incluidos en KEV pueden aparecer en incumplimiento de su SLA justo después de la primera carga del paquete tras una actualización.
 
 Al editar un SLA, puede elegir si ese SLA usará la **Severidad** o el **Riesgo** como referencia para asignar los Días para remediar.  Esto se hace seleccionando la opción correspondiente en la sección **Tipo de configuración de Nivel de Servicio** del formulario.
 

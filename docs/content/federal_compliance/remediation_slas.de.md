@@ -20,6 +20,10 @@ Mit der Funktion werden zwei fertige SLA-Konfigurationen ausgeliefert. Weisen Si
 Fristen werden durchgesetzt, und ein Befund, der im CISA-KEV-Katalog aufgeführt ist, wird nie über sein
 CISA-Fälligkeitsdatum hinaus terminiert.
 
+Auf einer selbst gehosteten Instanz mit deaktiviertem KEV-Lookup stammt das CISA-Fälligkeitsdatum aus dem
+Threat-Intelligence-Bundle, das die Instanz ohnehin lädt, sodass diese Begrenzung greift, ohne dass der Lookup
+aktiviert werden muss. Siehe [KEV und EPSS aus dem Bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Dieselben Basisfristen, weiter verschärft durch Ausnutzbarkeit und Exposition:

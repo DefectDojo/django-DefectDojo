@@ -20,6 +20,11 @@ nas configurações de SLA, ou copie uma delas e a ajuste.
 Os prazos são aplicados, e um achado listado no catálogo CISA KEV nunca é agendado além da sua data de
 vencimento da CISA.
 
+Em uma instância self-hosted cuja consulta de KEV está desativada, a data de vencimento da CISA vem do
+pacote de inteligência de ameaças que a instância já carrega, então esse limite se aplica sem que seja
+preciso ativar a consulta.
+Veja [KEV e EPSS a partir do pacote](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 As mesmas janelas básicas, ainda mais reduzidas conforme a explorabilidade e a exposição:

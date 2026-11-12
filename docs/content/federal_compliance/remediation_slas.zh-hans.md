@@ -18,6 +18,8 @@ audience: pro
 
 截止日期是强制执行的,列入 CISA KEV 目录的发现项,其排期永远不会晚于其 CISA 截止日期。
 
+在 KEV 查询处于关闭状态的自托管实例上,CISA 截止日期来自该实例本来就会加载的威胁情报数据包,因此无需开启该查询,这一上限也会生效。参见[从数据包获取 KEV 和 EPSS](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)。
+
 ## FedRAMP VDR
 
 基础时限相同,但会根据可利用性和暴露程度进一步收紧:

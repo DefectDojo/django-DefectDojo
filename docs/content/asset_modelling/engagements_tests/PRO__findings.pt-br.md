@@ -79,9 +79,16 @@ As políticas de mitigação podem ser encontradas e editadas na barra lateral e
     - Diferentemente dos IDs de Vulnerabilidade, esses identificadores são específicos da ferramenta de reporte e não são padronizados publicamente.
         - Exemplo: `semgrep.rule.lang.security.sql-injection`
 - **EPSS Score / Percentile**: A pontuação e o percentil de EPSS para o CVE.
-- **Known Exploited**: Se há confirmação de que a vulnerabilidade foi explorada.
-- **Ransomware Used**: Se houve uso de ransomware na exploração da vulnerabilidade.
+- **Known Exploited (CISA KEV)**: Se a vulnerabilidade está listada no catálogo CISA Known Exploited Vulnerabilities (KEV).
+- **Ransomware Used (CISA KEV)**: Se o catálogo CISA KEV registra a vulnerabilidade como usada em campanhas de ransomware.
 - **KEV Date**: A data em que o Achado foi adicionado ao catálogo KEV.
+    - Os valores de EPSS e KEV são mantidos pela [sincronização de EPSS / KEV](/triage_findings/finding_scoring/epss_kev/). Em uma instância self-hosted com as consultas de KEV e EPSS desativadas, eles vêm do [pacote de inteligência de ameaças](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle). Eles também podem ser definidos manualmente no painel **Threat Intelligence** dos formulários Add e Edit Finding; em um Achado que referencia um CVE, a próxima sincronização sobrescreve o que foi informado. Definir Known Exploited ou Ransomware Used manualmente também registra uma alegação de fornecedor com a origem `manual` (veja abaixo), e essa alegação permanece quando a sincronização sobrescreve o valor do CISA KEV.
+- **Vendor Reported Exploited**: Se um scanner, um conector ou uma pessoa reportou a vulnerabilidade como explorada em ambiente real. Esse valor é mantido separado de Known Exploited (CISA KEV), de modo que os valores e as contagens de KEV refletem apenas o catálogo da CISA, enquanto o relato continua sendo exibido e continua contando para a prioridade.
+- **Vendor Reported Ransomware**: Se um scanner, um conector ou uma pessoa reportou a vulnerabilidade como usada em ransomware. A sinalização de pacote malicioso de um scan do Mend não é registrada como ransomware.
+- **Vendor Reported Source**: Quem fez o relato. É o nome do Test Type do scanner ou o próprio nome do conector, `manual` quando uma pessoa ou um cliente da API o definiu, ou `pre-upgrade` para sinalizações que já existiam no Achado antes da atualização que adicionou esses campos.
+    - Na API v2, esses são os campos `vendor_exploited`, `vendor_ransomware_used` e `vendor_exploited_source`. Um valor gravado pela API é registrado com a origem `manual`.
+    - Uma alegação `manual` nunca é sobrescrita por um scanner nem pelo enriquecimento. Quando você reimporta um scan, o scanner pode retirar uma alegação que ele mesmo fez antes, mas não uma alegação de qualquer outra origem.
+    - A prioridade trata um Achado como explorado quando Known Exploited (CISA KEV) ou Vendor Reported Exploited está definido, de modo que o alerta de um scanner ainda eleva a prioridade quando a CISA não lista o CVE. As contagens de Achados sabidamente explorados, como a coluna **CISA KEV** do scorecard e o KPI **CISA KEV Open**, usam apenas o valor do CISA KEV.
 - **Found By**: O tipo de ferramenta que identificou a vulnerabilidade.
 - **CVSSv3 and CVSSv4 Vector and Score**: O vetor e a pontuação CVSS3 e CVSS4 do Achado selecionado.
 - **Integrator Tickets**: Números de tickets de rastreadores de issues de terceiros associados ao Achado.

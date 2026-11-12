@@ -349,6 +349,8 @@ EPSS 和 KEV 增强功能是一个值得配置的例外，因为它并不需要�
 
 该镜像必须以与公共数据源相同的格式提供相同的文件。查询操作会从您提供的 URL 中获取指定的文件，而不是自行发现该处存在的任意内容，因此对数据进行了重新打包或重组的镜像将无法正常工作。请按照适合您的计划定期刷新副本内容，因为部署环境只会读取您的镜像所提供的内容。
 
+您也可能根本不需要镜像。在威胁情报开启、EPSS 和 KEV 查询关闭（这是默认设置）的情况下，您加载的每个威胁情报数据包也会为您的发现项填入 CISA KEV 和 EPSS 值。请按照[离线加载威胁情报](/get_started/pro/onprem/airgapped/#loading-threat-intelligence-offline)中的说明加载数据包，然后查看 **Settings > System Settings** 下的 **Intelligence Sources** 卡片，确认已加载的是哪个数据包以及每个来源的新鲜程度。对于某个来源，一旦您开启其查询，该查询就会取代数据包来提供该来源的数据。请参阅[从数据包获取 KEV 和 EPSS](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)。
+
 ## Questions or support
 
 如需获取有关离线（气隙）安装或升级方面的帮助，请联系您的客户代表，或发送邮件至 [support@defectdojo.com](mailto:support@defectdojo.com)。

@@ -79,9 +79,16 @@ Behebungsrichtlinien finden Sie in der Seitenleiste unter **Konfiguration** → 
     - Im Gegensatz zu Schwachstellen-IDs sind diese Kennungen spezifisch für das meldende Tool und nicht öffentlich standardisiert.
         - Beispiel: `semgrep.rule.lang.security.sql-injection`
 - **EPSS-Score / Perzentil**: EPSS-Score und Perzentil für die CVE.
-- **Bekannt ausgenutzt**: Ob bestätigt wurde, dass die Schwachstelle ausgenutzt wurde.
-- **Ransomware eingesetzt**: Ob Ransomware bei der Ausnutzung der Schwachstelle beteiligt war.
+- **Known Exploited (CISA KEV)**: Ob die Schwachstelle im CISA-Katalog Known Exploited Vulnerabilities (KEV) aufgeführt ist.
+- **Ransomware Used (CISA KEV)**: Ob der CISA-KEV-Katalog die Schwachstelle als in Ransomware-Kampagnen eingesetzt verzeichnet.
 - **KEV-Datum**: Das Datum, an dem der Befund dem KEV-Katalog hinzugefügt wurde.
+    - Die EPSS- und KEV-Werte werden durch den [EPSS / KEV-Sync](/triage_findings/finding_scoring/epss_kev/) gepflegt. Auf einer selbst gehosteten Instanz mit deaktivierten KEV- und EPSS-Lookups stammen sie stattdessen aus dem [Threat-Intelligence-Bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle). Sie können auch manuell im Bereich **Threat Intelligence** der Formulare zum Hinzufügen und Bearbeiten von Befunden gesetzt werden; bei einem Befund, der auf eine CVE verweist, überschreibt der nächste Sync die Eingabe. Wenn Sie Known Exploited oder Ransomware Used manuell setzen, wird zusätzlich eine Herstellermeldung mit der Quelle `manual` erfasst (siehe unten), und diese Meldung bleibt bestehen, wenn der Sync den CISA-KEV-Wert überschreibt.
+- **Vendor Reported Exploited**: Ob ein Scanner, ein Connector oder eine Person die Schwachstelle als in freier Wildbahn ausgenutzt gemeldet hat. Dieser Wert wird getrennt von Known Exploited (CISA KEV) geführt, sodass KEV-Werte und -Zählungen nur den CISA-Katalog widerspiegeln, während die Meldung weiterhin angezeigt wird und weiterhin in die Priorität einfließt.
+- **Vendor Reported Ransomware**: Ob ein Scanner, ein Connector oder eine Person die Schwachstelle als in Ransomware eingesetzt gemeldet hat. Das Flag für bösartige Pakete aus einem Mend-Scan wird nicht als Ransomware erfasst.
+- **Vendor Reported Source**: Wer die Meldung abgegeben hat. Das ist der Name des Test Type des Scanners oder der eigene Name des Connectors, `manual`, wenn eine Person oder ein API-Client den Wert gesetzt hat, oder `pre-upgrade` für Flags, die bereits vor dem Upgrade, mit dem diese Felder hinzukamen, am Befund vorhanden waren.
+    - In API v2 sind dies die Felder `vendor_exploited`, `vendor_ransomware_used` und `vendor_exploited_source`. Ein über die API geschriebener Wert wird mit der Quelle `manual` erfasst.
+    - Eine `manual`-Meldung wird weder von einem Scanner noch durch die Anreicherung überschrieben. Wenn Sie einen Scan erneut importieren, kann der Scanner eine Meldung zurückziehen, die er zuvor selbst abgegeben hat, aber keine Meldung aus einer anderen Quelle.
+    - Die Priorität behandelt einen Befund als ausgenutzt, wenn Known Exploited (CISA KEV) oder Vendor Reported Exploited gesetzt ist, sodass die Warnung eines Scanners die Priorität auch dann erhöht, wenn CISA die CVE nicht aufführt. Zählungen bekannt ausgenutzter Befunde, etwa die Scorecard-Spalte **CISA KEV** und die KPI **CISA KEV Open**, verwenden nur den CISA-KEV-Wert.
 - **Gefunden von**: Der Typ des Tools, das die Schwachstelle identifiziert hat.
 - **CVSSv3- und CVSSv4-Vektor und -Score**: Der CVSS3- und CVSS4-Vektor und -Score des ausgewählten Befunds.
 - **Integrator-Tickets**: Ticketnummern von Drittanbieter-Issue-Trackern, die mit dem Befund verknüpft sind.

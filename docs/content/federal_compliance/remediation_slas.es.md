@@ -18,6 +18,8 @@ La función incluye dos configuraciones de SLA predefinidas. Asigne cualquiera d
 
 Los plazos se aplican de forma obligatoria, y un hallazgo incluido en el catálogo CISA KEV nunca se programa más allá de su fecha límite de CISA.
 
+En una instancia autoalojada cuya consulta de KEV está desactivada, la fecha límite de CISA proviene del paquete de inteligencia de amenazas que la instancia ya carga, por lo que este límite se aplica sin activar la consulta. Consulte [KEV y EPSS desde el paquete](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Las mismas ventanas base, ajustadas de forma más estricta según la explotabilidad y la exposición:

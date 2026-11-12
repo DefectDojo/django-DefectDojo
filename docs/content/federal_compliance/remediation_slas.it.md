@@ -20,6 +20,10 @@ configurazione SLA, oppure copiane una e personalizzala.
 Le scadenze sono vincolanti e un riscontro presente nel catalogo CISA KEV non viene mai pianificato oltre la sua
 data di scadenza CISA.
 
+Su un'istanza self-hosted con il lookup KEV disattivato, la data di scadenza CISA proviene dal bundle di
+threat intelligence che l'istanza già carica, quindi questo limite si applica senza attivare il lookup.
+Vedi [KEV ed EPSS dal bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Le stesse finestre di base, ulteriormente ridotte in base a sfruttabilità ed esposizione:

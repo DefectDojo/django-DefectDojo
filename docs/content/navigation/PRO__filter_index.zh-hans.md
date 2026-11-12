@@ -105,6 +105,8 @@ DefectDojo 中的发现项可按以下方式筛选:
 * 漏洞 ID(通常为 CVE)
 * EPSS 分数
 * EPSS 百分位
+* Known Exploited (CISA KEV) 和 Ransomware Used (CISA KEV):CISA 已知被利用漏洞目录是否列出了该漏洞,以及是否记录该漏洞被用于勒索软件
+* Vendor Reported Exploited 和 Vendor Reported Ransomware:扫描器、连接器或某个人是否报告该漏洞已在野外被利用,或被用于勒索软件。这些值与 CISA KEV 值分开保存;参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)
 * 服务
 * 计划修复日期
 * 计划修复版本

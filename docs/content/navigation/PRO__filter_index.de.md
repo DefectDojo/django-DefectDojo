@@ -105,6 +105,8 @@ Diese Felder haben keinen direkten Einfluss auf die Funktionalität von DefectDo
 * Vulnerability ID (in der Regel eine CVE)
 * EPSS Score
 * EPSS Percentile
+* Known Exploited (CISA KEV) und Ransomware Used (CISA KEV): ob der CISA-Katalog Known Exploited Vulnerabilities die Schwachstelle aufführt und sie als in Ransomware eingesetzt verzeichnet
+* Vendor Reported Exploited und Vendor Reported Ransomware: ob ein Scanner, ein Connector oder eine Person die Schwachstelle als in freier Wildbahn ausgenutzt oder als in Ransomware eingesetzt gemeldet hat. Diese Werte werden getrennt von den CISA-KEV-Werten geführt; siehe [Befunde](/asset_modelling/engagements_tests/pro__findings/#metadata)
 * Service
 * Planned Remediation Date
 * Planned Remediation Version

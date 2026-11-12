@@ -23,6 +23,12 @@ Jeder Befund mit einer CVE wird nächtlich mit einem kuratierten Intelligence-Fe
 * eine Kachel **„Dringend & aktiv ausgenutzt"** im Priority-Layout-Dashboard, die aktive Befunde mit Risiko „Dringend" zählt, die in freier Wildbahn ausgenutzt werden – ein Klick öffnet die entsprechend gefilterte Befundliste
 * ein **Benachrichtigungsereignis** (`threat_intel_alert`), wenn die CVE eines bestehenden Befunds neue Exploit-Nachweise erhält, etwa durch Aufnahme in CISA KEV oder ein neues Metasploit-Modul. Nur Höherstufungen – wenn Nachweise stillschweigend veralten, erfolgt keine Benachrichtigung.
 
+## Befunde, die über eine GitHub-Advisory-ID gemeldet werden {#findings-reported-by-a-github-advisory-id}
+
+Manche Scanner melden eine Schwachstelle nur über ihre GitHub-Advisory-ID (GHSA), nicht über die CVE, für die sie steht. Wenn DefectDojo weiß, dass das Advisory und eine CVE dieselbe Schwachstelle beschreiben, entweder aus dem Intelligence-Bundle oder aus einer auf Ihrer Instanz erfassten Verknüpfung, erhält der Befund den Exploit-Reifegrad, die Nachweise und den Threat Score dieser CVE, genau wie ein Befund, der die CVE nennt. Der Befund behält seine eigene Schwachstellen-ID.
+
+Wenn ein Advisory neu mit einer CVE verknüpft oder eine Verknüpfung abgelehnt wird, bewertet DefectDojo die betroffenen Befunde neu. Befunde, die bereits vor Einführung dieses Verhaltens auf Ihrer Instanz vorhanden waren, werden einmalig im Hintergrund neu bewertet, und zwar nach dem ersten Laden eines Bundles, das auf das Upgrade folgt.
+
 ## Wie sich dies auf die Bewertung auswirkt
 
 Die Priority-Engine kombinierte bisher bereits Schweregrad, Geschäftskontext und einen „externen Score", der aus EPSS + KEV gebildet wird. Threat Intelligence verallgemeinert diesen externen Score: Jede Art von Exploit-Nachweis wirkt als Untergrenze auf der EPSS-Skala.
@@ -63,6 +69,19 @@ Eine ehrliche Konsequenz daraus: In einer gemischten Warteschlange sinken Befund
 * **Kein Score-Flackern.** Höherstufungen durch neue Nachweise gelten ab der Nacht, in der sie erscheinen. Fällt ein Nachweis bei einer Quelle *weg*, bleiben die Scores für ein Stabilitätsfenster (standardmäßig 14 Tage) unverändert – ein kurzzeitiger Ausfall eines Feeds bringt Ihre Warteschlange nie ins Wanken, und echte Rückstufungen setzen sich nach diesem Fenster ruhig durch.
 * **Air-Gapped-Unterstützung.** Das tägliche Bundle (einschließlich EPSS-Daten) kann übertragen und offline importiert werden, sodass isolierte Instanzen dieselbe Anreicherung erhalten.
 
+## Karte „Intelligence Sources" {#intelligence-sources-card}
+
+Superuser können auf der schreibgeschützten Karte **Intelligence Sources** unter **Settings > System Settings** prüfen, welche Intelligence die Instanz verwendet. Die Karte zeigt:
+
+* die Version des geladenen Bundles
+* das Alter des Bundles, mit einer Warnung, sobald es 14 Tage oder älter ist
+* wann das Bundle abläuft
+* jede Quelle im Bundle, mit ihrer Lizenz und der Aktualität ihrer Daten
+* den letzten fehlgeschlagenen Ladevorgang, falls es einen gab, und den Grund für den Fehler
+* die Quellenangaben (Attributions) für die Quellen im Bundle
+
+Ein Bundle, das auf einer Air-Gapped-Instanz aus einer Datei geladen wurde, erscheint auf derselben Karte.
+
 ## Self-Hosted-Bereitstellungen
 
 DefectDojo-Cloud-Instanzen benötigen keine Konfiguration. Bei Self-Hosted-Instanzen stehen drei Optionen zur Verfügung:
@@ -72,6 +91,25 @@ DefectDojo-Cloud-Instanzen benötigen keine Konfiguration. Bei Self-Hosted-Insta
 * **Air-Gapped.** Übertragen Sie das Bundle und seine Signatur manuell und importieren Sie sie mit `manage.py load_threat_intel_bundle --file <bundle>`. Die Signatur wird beim Import verifiziert.
 
 Kann die Instanz den Feed nicht erreichen, schlägt die Funktion sicher fehl (fail closed): Der Lauf wird als fehlgeschlagen protokolliert, und Ihre bestehenden Scores und Nachweise bleiben exakt unverändert. Nichts verschlechtert sich außer der Aktualität der Intelligence.
+
+### KEV und EPSS aus dem Bundle {#kev-and-epss-from-the-bundle}
+
+Das Bundle, das eine Self-Hosted-Instanz ohnehin herunterlädt, enthält auch CISA-KEV- und EPSS-Daten. Nach jedem Laden eines Bundles verwendet DefectDojo diese Daten, um **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)**, das KEV-Datum, das CISA-KEV-Fälligkeitsdatum und die EPSS-Scores Ihrer Schwachstellen und Befunde auszufüllen. Sie erhalten diese Werte also, ohne separate KEV- und EPSS-Lookups zu aktivieren. KEV und EPSS werden getrennt behandelt, und jede der beiden Quellen wird nur dann aus dem Bundle ausgefüllt, wenn alle folgenden Bedingungen erfüllt sind:
+
+* Threat Intelligence ist aktiviert.
+* Der Lookup für diese Quelle unter Finding Enrichment im Tuner ist deaktiviert. Ein aktivierter Lookup hat immer Vorrang; ist also ein Lookup aktiviert, liefert das Bundle nur die andere Quelle.
+* Das Bundle enthält aktuelle Daten für diese Quelle.
+
+Die Schaltfläche **Sync KEV/EPSS Data** im Schwachstellen-Explorer, der tägliche Anreicherungsjob und die Anreicherung neuer CVEs beim Import verwenden unter denselben Bedingungen dieselben Bundle-Daten.
+
+Known Exploited und Ransomware Used bedeuten, dass die CVE im CISA-KEV-Katalog aufgeführt ist. Wenn ein Scanner, ein Connector oder eine Person eine Schwachstelle als ausgenutzt meldet, wird diese Meldung als separater Wert gespeichert, **Vendor Reported Exploited**, sodass sie nicht verloren geht, wenn CISA die CVE nicht aufführt. Siehe [Befunde](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
+#### Das erste Laden nach einem Upgrade {#the-first-load-after-upgrading}
+
+Auf einer Self-Hosted-Instanz mit deaktivierten KEV- und EPSS-Lookups waren diese Werte bisher leer oder enthielten das, was ein Scanner gemeldet hatte. Das erste Laden eines Bundles nach dem Upgrade füllt sie für jede CVE aus, die der Instanz bekannt ist. Rechnen Sie daher mit Folgendem:
+
+* **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** und das KEV-Datum ändern sich bei vielen Befunden, sowohl gesetzt (CISA führt die CVE auf) als auch zurückgesetzt (CISA führt sie nicht auf), und die Priorität verschiebt sich entsprechend. Ein Befund, den ein Scanner oder eine Person als ausgenutzt gemeldet hat, behält seine Priorität, weil die Priorität auch **Vendor Reported Exploited** berücksichtigt.
+* Ist in einer SLA-Konfiguration **Cap SLA by CISA KEV Due Date** aktiviert, wird bei im KEV gelisteten Befunden die SLA-Frist auf das CISA-Fälligkeitsdatum vorgezogen. Die meisten CISA-Fälligkeitsdaten liegen bereits in der Vergangenheit, sodass viele dieser Befunde direkt nach dem ersten Laden als SLA-Verletzung angezeigt werden.
 
 ## Aktivierung
 
