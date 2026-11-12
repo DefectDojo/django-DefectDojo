@@ -80,7 +80,7 @@ The **Automation Identity** card on the Group's **Overview** tab shows the token
 * **Replace Token** issues a new token; the old one stops working at once. OAuth access tokens already exchanged from it keep working until they expire, within the hour.
 * **Revoke Token** ends the token at once (OAuth access tokens already exchanged from it expire within the hour). Revoking works even while the feature flag is off.
 
-When the Group holds a Global Role, its token reaches every Organization, so only a superuser may issue it. The token is used like any [service user](../pro__service_users/#use-the-token) token, in the `Authorization` header with the `Token` keyword. Turning the **Group API Tokens** flag off refuses every group token, and every OAuth access token exchanged from one, until it is turned on again.
+When the Group holds a Global Role, its token reaches everything that Role grants, so only a superuser may issue it; the card still offers its other managers **Revoke Token**. The token is used like any [service user](../pro__service_users/#use-the-token) token, in the `Authorization` header with the `Token` keyword. Turning the **Group API Tokens** flag off refuses every group token, and every OAuth access token exchanged from one, until it is turned on again.
 
 ### Deleting a Group that owns content
 
