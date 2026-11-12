@@ -1,17 +1,11 @@
 from rest_framework import serializers
 
-from dojo.product_attributes.models import VALUE_COMMA_ERROR, Product_Lifecycle, Product_Origin, Product_Platform
+from dojo.product_attributes.models import Product_Lifecycle, Product_Origin, Product_Platform
 
 
 class ProductAttributeOptionSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ["id", "value", "name", "icon", "display_order"]
-
-    def validate_value(self, value):
-        # Only a new option is checked: an update ignores ``value``, and an existing row keeps its own.
-        if self.instance is None and "," in value:
-            raise serializers.ValidationError(VALUE_COMMA_ERROR)
-        return value
 
     def update(self, instance, validated_data):
         # ``value`` is the stable machine key that the Product foreign key, imports,
