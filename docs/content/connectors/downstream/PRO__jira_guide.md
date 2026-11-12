@@ -44,7 +44,7 @@ The one exception is **Engagement epics**. The Downstream Connector has no conce
 * Each **Jira Project** configuration becomes an issue tracker mapping, keeping its project key and issue type, and stays assigned to the same Asset or Engagement.
 * **Push All Issues** is preserved: projects that had it enabled keep pushing automatically.
 * **Push Notes** becomes **Push Notes as Comments** on the mapping. Private notes are still never posted.
-* **Send SLA Notifications As Comments** becomes **Post SLA Notifications as Comments** on the mapping. It is turned on when the Jira instance's global SLA notification setting or the project's own setting is on, as classic Jira decided it.
+* **Send SLA Notifications As Comments** becomes **Post SLA Notifications as Comments** on the mapping. It is turned on as classic Jira decides it: when the project is set to **Always Send**, or when it inherits the Jira instance's global SLA notification setting and that setting is on. A project set to **Never Send** gets it turned off.
 * **Send Risk Acceptance Expiration Notifications As Comment** becomes **Post Risk Acceptance Changes as Comments** on the mapping. Like the classic setting, it covers every risk acceptance comment: accepted, removed, reinstated, about to expire, and expired when the risk acceptance reactivates its Findings on expiry. See [Post SLA notifications and risk acceptance changes as comments](/connectors/toolreference/jira/#post-sla-notifications-and-risk-acceptance-changes-as-comments-optional).
 * **Custom fields**, **close/reopen transition fields**, **component**, **default assignee**, and **labels** are converted to field mappings. Where you used *Add Vulnerability Id as a Jira label*, that becomes a label mapping too.
 * A **custom issue template** directory becomes a ticket template. The stock templates are not copied, because the connector already ships equivalents.
@@ -308,7 +308,13 @@ If enabled, Jira comments will populate on the associated Finding in DefectDojo,
 
 #### Send SLA Notifications As Comments
 
-If enabled, any Issue which breaches DefectDojo's Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
+Decides whether Issues that approach or breach DefectDojo's Service Level Agreement rules get comments added to the Jira issue indicating this. These comments are posted daily until the Issue is resolved. The setting has three choices:
+
+* **Inherit From Jira Instance** (the default): follows the Jira instance's **Send Global SLA Notifications as Comment** setting.
+* **Always Send**: posts the comments for this Asset, even when the Jira instance setting is off.
+* **Never Send**: posts no comments for this Asset, even when the Jira instance setting is on. Email, in-app and other SLA notifications are still sent.
+
+Through the API (`/api/v2/jira_projects/`) the setting is two booleans. `product_jira_sla_notification: true` is **Always Send** and `suppress_sla_notification_comments: true` is **Never Send**. With both `false` the project follows the Jira instance. They cannot both be `true`. Existing projects and API clients that do not send `suppress_sla_notification_comments` keep working as before: the field defaults to `false`.
 
 Service Level Agreements can be configured under **Settings > Finding Workflow > Service Level Agreements** in DefectDojo and assigned to each Asset.
 
