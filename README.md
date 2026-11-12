@@ -91,7 +91,7 @@ if running DefectDojo in detached mode via `docker compose up -d`, obtain admin 
 
 ## Supported Installation Options
 
-* Pro - SaaS or self-hosted (via K8s or docker compose). [Speak to our team](https://defectdojo.com/contact) or [get Pro from $100/mo](https://cloud.defectdojo.com/onboarding?payg=1)
+* Pro - SaaS or self-hosted (via K8s or docker compose). [Book a demo](https://defectdojo.com/book-a-demo/open-source?utm_source=github&utm_medium=readme&utm_campaign=oss-demo-prompt&utm_content=install-options), [speak to our team](https://defectdojo.com/contact) or [get Pro from $100/mo](https://cloud.defectdojo.com/onboarding?payg=1)
 * OS - [docker compose](readme-docs/DOCKER.md)
 
 
@@ -127,9 +127,9 @@ Want to join them? Read the [contributing guidelines](readme-docs/CONTRIBUTING.m
 
 ## Pro Edition
 
-[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, risk-based vulnerability management, incredibile scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
+[Upgrade to DefectDojo Pro!](https://defectdojo.com/pricing) Pro transcends the do-it-yourself approach of open-source: A new UI, risk-based vulnerability management, incredible scalability, API connectors, ServiceNow, GitHub, GitLab, Azure DevOps, automatic data enrichment, prioritization, and more! See all the differentiators at the bottom of our pricing page: [defectdojo.com/pricing](https://defectdojo.com/pricing).
 
-Alternatively, for information please email hello@defectdojo.com
+To see Pro with our team, [book a demo](https://defectdojo.com/book-a-demo/open-source?utm_source=github&utm_medium=readme&utm_campaign=oss-demo-prompt&utm_content=pro-section). Alternatively, for information please email hello@defectdojo.com
 
 ## About Us
 

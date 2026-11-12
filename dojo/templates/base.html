@@ -530,8 +530,8 @@
                             {% if request.user.is_authenticated %}
                                 <div class="border-t border-gray-200 my-1"></div>
                                 {% if SHOW_PLG_LINK %}
-                                    <a href="https://cloud.defectdojo.com/onboarding?payg=1" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fa-solid fa-level-up fa-fw"></i> {% trans "Get Pro from $100/mo" %}
+                                    <a href="https://defectdojo.com/book-a-demo/open-source?utm_source=oss-app&amp;utm_medium=in-app&amp;utm_campaign=oss-demo-prompt&amp;utm_content=user-menu" target="_blank" rel="noopener noreferrer" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fa-solid fa-calendar-check fa-fw"></i> {% trans "Book a Pro demo" %}
                                     </a>
                                 {% endif %}
                                 <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

@@ -102,7 +102,7 @@ Findings can only be added to a single Risk Acceptance at once.  If the **Risk A
 
 A Finding belongs to one Risk Acceptance at a time. A Finding that is already Risk Accepted, through another Full Risk Acceptance or a Simple Risk Acceptance, cannot be added to a second one, and with Risk Acceptances 2.0 enabled neither can a Finding that an undecided security exception request already names. The Findings step of **New Risk Acceptance** and **Add Findings** on an existing Risk Acceptance list only Findings that are not Risk Accepted, not duplicates, and not waiting on an exception request.
 
-Approving a security exception request accepts only the Findings that nothing else holds by then. A Finding that was Risk Accepted another way while the request waited, for example by reinstating an expired Risk Acceptance that already listed it, is removed from the request and stays accepted where it is.
+Approving a security exception request accepts only the Findings that nothing else holds by then. A Finding that was Risk Accepted another way while the request waited, for example by reinstating an expired Risk Acceptance that already listed it, is removed from the request and stays accepted where it is. A Finding that was closed while the request waited (Mitigated, False Positive or Out of Scope) is removed from the request too and stays closed: approving the request never reopens it or accepts it. Its row in the request's **Acceptance History** is marked Removed, with the reason.
 
 The API applies the same rule. `POST /api/v2/risk_acceptance/`, a `PATCH` or `PUT` that adds Findings, and `POST /api/v2/risk_acceptance/request/` return `400` and name each Finding that is already held, for example:
 
@@ -465,9 +465,15 @@ records:
 - a per-Finding justification, separate from the acceptance's overall recommendation — auditors ask
   about individual Findings, and the answer is rarely the same for every Finding in a batch.
 
-Records are not backfilled. A Risk Acceptance created before you enabled the feature can be seeded
-from the Findings it still covers, but Findings whose membership was already severed cannot be
-recovered — that history was not kept.
+Risk Acceptances that existed before DefectDojo Pro 3.3.0, when records began, get them on
+upgrade: every Finding a Risk Acceptance still covers is recorded with the source `backfill`, with
+the status the acceptance has now (an expired acceptance's Findings read as expired), and with the
+date the acceptance was created as the date it took effect. Nobody is recorded as having added
+those Findings, because nobody was on record. Findings that already have a record keep it as it is.
+
+Findings whose membership was severed before 3.3.0 (by a re-import, or a person removing them)
+cannot be recovered: that history was never kept, and the backfill can only see the Findings that
+are still members.
 
 ### Standing acceptances
 

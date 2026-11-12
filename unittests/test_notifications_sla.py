@@ -7,9 +7,10 @@ from django.db.utils import DataError, OperationalError
 from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+from parameterized import parameterized
 
 from dojo.authorization.roles_permissions import Roles
-from dojo.jira.models import JIRA_Issue
+from dojo.jira.models import JIRA_Instance, JIRA_Issue, JIRA_Project
 from dojo.models import Dojo_User, Finding, Product_Member, Role, Test_Type, User
 from dojo.notifications import helper as notifications_helper
 from dojo.notifications.helper import sla_compute_and_notify
@@ -224,7 +225,7 @@ class TestSlaComputeAndNotify(SlaNotifyTestBase):
         issues = {f.id: self._link_jira_issue(f) for f in (first, second)}
         instances = {f.id: Mock(name=f"jira instance for {f.id}", global_jira_sla_notification=True) for f in (first, second)}
         mock_get_instance.side_effect = lambda finding: instances[finding.id]
-        mock_get_project.return_value = Mock(product_jira_sla_notification=False)
+        mock_get_project.return_value = Mock(product_jira_sla_notification=False, suppress_sla_notification_comments=False)
 
         sla_compute_and_notify()
 
@@ -345,7 +346,7 @@ class TestSlaComputeAndNotify(SlaNotifyTestBase):
         second = self._finding("JIRA comment works", -1)
         issues = {f.id: self._link_jira_issue(f) for f in (first, second)}
         mock_get_instance.return_value = Mock(global_jira_sla_notification=True)
-        mock_get_project.return_value = Mock(product_jira_sla_notification=False)
+        mock_get_project.return_value = Mock(product_jira_sla_notification=False, suppress_sla_notification_comments=False)
 
         def add_comment(jira_instance, jira_issue, comment):
             if jira_issue.id == issues[first.id].id:
@@ -707,3 +708,47 @@ class TestSlaNotifyQuerysetHook(SlaNotifyTestBase):
             sla_compute_and_notify()
 
         self.assertEqual(self._notified_finding_ids(mock_create_notification), [])
+
+
+# Regression: a Jira project's SLA comment setting could only turn Jira comments on. Unchecked, the Jira
+# instance's global setting still added a comment every day, because the two are OR-ed together. That OR
+# stays as it is (unchecked still means "follow the instance"), and suppress_sla_notification_comments
+# turns the comments off for one Jira project whatever the instance says.
+@versioned_fixtures
+class TestSlaJiraCommentSetting(SlaNotifyTestBase):
+
+    @parameterized.expand([
+        # (case, send, suppress, global, expect a comment)
+        ("unchecked_follows_global_on", False, False, True, True),
+        ("unchecked_follows_global_off", False, False, False, False),
+        ("send_overrides_global_off", True, False, False, True),
+        ("send_with_global_on", True, False, True, True),
+        ("suppress_overrides_global_on", False, True, True, False),
+        ("suppress_with_global_off", False, True, False, False),
+    ])
+    @patch("dojo.jira.services.add_simple_comment")
+    @patch("dojo.notifications.helper.create_notification")
+    def test_jira_project_setting_decides_the_jira_comment(self, case, send, suppress, global_setting, expect_comment, mock_create_notification, mock_add_comment):
+        self.system_settings(enable_jira=True)
+        jira_instance = JIRA_Instance.objects.get(pk=2)
+        jira_instance.global_jira_sla_notification = global_setting
+        jira_instance.save()
+        JIRA_Project.objects.create(
+            product=self.test.engagement.product,
+            jira_instance=jira_instance,
+            project_key="SLA",
+            product_jira_sla_notification=send,
+            suppress_sla_notification_comments=suppress,
+        )
+        finding = self._finding("breached, linked to JIRA", -1)
+        issue = JIRA_Issue.objects.create(finding=finding, jira_id=f"{finding.id}", jira_key=f"SLA-{finding.id}")
+
+        sla_compute_and_notify()
+
+        commented = [call.args[1].id for call in mock_add_comment.call_args_list]
+        self.assertEqual(
+            commented, [issue.id] if expect_comment else [],
+            msg=f"{case}: send={send}, suppress={suppress}, global={global_setting}: JIRA comments on {commented}",
+        )
+        # The other SLA notifications go out either way.
+        self.assertEqual(self._notified_finding_ids(mock_create_notification), [finding.id])

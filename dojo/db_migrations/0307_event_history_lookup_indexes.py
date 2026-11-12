@@ -35,6 +35,11 @@ class AddHistoryLookupIndexes(Operation):
     plain_build_lock_timeout = "2s"
     concurrent_build_lock_timeout = "1h"
     concurrent_build_wait_seconds = 3600
+    # A concurrent build on a large table is a full heap scan plus a sort. Postgres gives a build one
+    # parallel worker per 32 MB of maintenance_work_mem at most, so the 64 MB default spills the sort
+    # and allows a single worker. Raised for the build's own session only, never lowered.
+    concurrent_build_maintenance_work_mem = "512MB"
+    concurrent_build_parallel_workers = 4
     poll_seconds = 5
 
     def __init__(self, indexes):
@@ -64,14 +69,30 @@ class AddHistoryLookupIndexes(Operation):
         return connection.vendor == "postgresql" and not connection.in_atomic_block
 
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        concurrent = self._concurrent_allowed(schema_editor)
+        todo = []
         for model_name, index in self.indexes:
             model = to_state.apps.get_model(app_label, model_name)
-            if not self.allow_migrate_model(schema_editor.connection.alias, model):
-                continue
-            if self._concurrent_allowed(schema_editor):
-                self._add(schema_editor, model, index)
-            else:
+            if self.allow_migrate_model(schema_editor.connection.alias, model):
+                todo.append((model, index))
+        if not concurrent:
+            for model, index in todo:
                 schema_editor.add_index(model, index)
+            return
+        # Smallest tables first, so a run that fails or times out on a large table leaves every small
+        # one built, and a re-run only has the large ones left. sorted() keeps a table's own order.
+        sizes = {}
+        for model, _index in todo:
+            if model._meta.db_table not in sizes:
+                sizes[model._meta.db_table] = self._table_bytes(schema_editor, model)
+        for model, index in sorted(todo, key=lambda item: sizes[item[0]._meta.db_table]):
+            self._add(schema_editor, model, index)
+
+    @staticmethod
+    def _table_bytes(schema_editor, model):
+        with schema_editor.connection.cursor() as cursor:
+            cursor.execute("SELECT pg_table_size(%s::regclass)", [schema_editor.quote_name(model._meta.db_table)])
+            return cursor.fetchone()[0]
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         concurrently = self._concurrent_allowed(schema_editor)
@@ -90,17 +111,32 @@ class AddHistoryLookupIndexes(Operation):
                 return
             if row is not None:
                 cursor.execute(f"DROP INDEX CONCURRENTLY IF EXISTS {name}")
-            cursor.execute("SELECT pg_table_size(%s::regclass)", [schema_editor.quote_name(model._meta.db_table)])
-            small = cursor.fetchone()[0] <= self.plain_build_max_bytes
+        small = self._table_bytes(schema_editor, model) <= self.plain_build_max_bytes
         if small and self._add_plainly(schema_editor, model, index):
             return
         with schema_editor.connection.cursor() as cursor:
+            saved = {}
+            for setting in ("lock_timeout", "maintenance_work_mem", "max_parallel_maintenance_workers"):
+                cursor.execute("SELECT current_setting(%s)", [setting])
+                saved[setting] = cursor.fetchone()[0]
             cursor.execute("SELECT set_config('lock_timeout', %s, false)", [self.concurrent_build_lock_timeout])
+            # Only ever raised: a session already given more keeps it.
+            cursor.execute(
+                "SELECT set_config('maintenance_work_mem', %s, false)"
+                " WHERE pg_size_bytes(current_setting('maintenance_work_mem')) < pg_size_bytes(%s)",
+                [self.concurrent_build_maintenance_work_mem, self.concurrent_build_maintenance_work_mem],
+            )
+            cursor.execute(
+                "SELECT set_config('max_parallel_maintenance_workers', %s, false)"
+                " WHERE current_setting('max_parallel_maintenance_workers')::int < %s",
+                [str(self.concurrent_build_parallel_workers), self.concurrent_build_parallel_workers],
+            )
         try:
             schema_editor.add_index(model, index, concurrently=True)
         finally:
             with schema_editor.connection.cursor() as cursor:
-                cursor.execute("RESET lock_timeout")
+                for setting, value in saved.items():
+                    cursor.execute("SELECT set_config(%s, %s, false)", [setting, value])
 
     def _wait_for_other_build(self, cursor, index_name):
         """Wait, at most concurrent_build_wait_seconds, for another backend's build of this index to end."""

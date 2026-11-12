@@ -39,12 +39,12 @@ With Access Administration on (Pro), a Group's page has these tabs:
 * **Access**: what the Group reaches in its own right: its Global Roles, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each one is reached. Every member of the Group receives this access through it, and a Group that holds a Global Role is marked as having instance-wide access. The Group's own Roles are changed here, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
 * **Default Profile**: the [Default Profile](#default-profiles) the Group's Members start from, and what that profile sets. See [Set Group Defaults](#set-group-defaults).
 
-With Group Ownership on, the page also has an **Owned Content** tab: one row for each kind of content a Group can own (**Rules**, **Report Templates**, **Report Blocks**, **Report Themes**, **Generated Reports** and **Dashboards**), with how many of the Group's you can see. A report schedule belongs to its Template, as a rule's schedule belongs to the rule, so it has no row of its own. A kind's name opens its list filtered to the Group, and that page's title and breadcrumb name the Group (for example **Report Templates Owned By AppSec**, under a link back to the Group).
+With Group Ownership on, the page also has an **Owned Content** tab: one row for each kind of content a Group can own (**Rules**, **Report Templates**, **Report Blocks**, **Report Themes**, **Generated Reports**, **Dashboards**, **Webhook Receivers**, **Notification Webhooks**, **Downstream Connectors** and **Ticket Templates**), with how many of the Group's you can see. A report schedule belongs to its Template, as a rule's schedule belongs to the rule, so it has no row of its own. A kind's name opens its list filtered to the Group, and that page's title and breadcrumb name the Group (for example **Report Templates Owned By AppSec**, under a link back to the Group).
 
 * The kind's name opens its usual list filtered to the Group: the **Owner** filter is set to the Group, and clearing it shows the whole list again.
 * The row menu has **View** (the same filtered list) and, where you can create that kind for the Group, **New**, which opens the create page with **Owned By** already set to the Group. See [Group ownership of rules](/automation/triage_engine/sharing_and_versions/#group-ownership) and [of Report Builder content](/metrics_reports/reports/report-builder/#group-ownership).
 
-A kind is listed when the Group owns something of that kind that you can see, or when you can create it there (your Role in the Group, or a Global Role, carries its **Add** permission; for a rule you must also be a member of the Group), and only while Triage Engine or Reporting is turned on.
+A kind is listed when the Group owns something of that kind that you can see, or when you can create it there (your Role in the Group, or a Global Role, carries its **Add** permission, or **Integration Edit** for connectors, ticket templates and notification webhooks; for a rule or a webhook receiver you must also be a member of the Group), and only while the feature it belongs to (Triage Engine, Reporting or Downstream Connectors) is turned on.
 
 The Group's page shows what it owns. Who owns something is chosen where it is created (**Owned By**) and changed with **Transfer** in its row menu.
 
@@ -62,7 +62,7 @@ Rules and report schedules a Group owns do not run as the person who created the
 The identity has exactly the Group's access, and nothing of its own:
 
 * It sees and edits what the Group's Organization and Asset Roles allow, and what the Group's Global Roles allow. When the Group gains or loses access, so does the identity, immediately.
-* It has no password and no API token, and it cannot sign in.
+* It has no password and cannot sign in. It has no API token unless one is issued for the Group (see [The group's API token](#the-groups-api-token)).
 * It cannot be given a Global Role, a membership or any access of its own. Its access is set on the Group.
 * It is removed when the Group is deleted.
 
@@ -70,9 +70,21 @@ Because the identity carries the Group's access, a Group that holds a Global Rol
 
 Changing what a Group's rule or report schedule does needs membership of the Group as well as the permission to edit it, because the change acts with the Group's access. See [Group Content permissions](../pro__custom_rbac_roles/#group-content-permissions).
 
+### The group's API token
+
+With the **Group API Tokens** feature flag on, a Group's automation identity can hold one API token, so the Group's own automation (a pipeline, a script) calls the API as the Group. The token sees exactly what the Group owns and has been granted, nothing more. It acts as the Group, not as whoever issued it, so it can read Group content (connectors and ticket templates, for example, with their secrets masked) that the issuer's own Role in the Group does not show them.
+
+The **Automation Identity** card on the Group's **Overview** tab shows the token's first characters, who issued it and when, and when it expires. A superuser, or a member whose Role in the Group carries **Service User Edit**, manages it there:
+
+* **Issue Token** creates the token, with an expiry of 30, 60, 90 or 180 days or none. The token is shown once; DefectDojo keeps only a hash of it. Issuing creates the automation identity if the Group has none yet.
+* **Replace Token** issues a new token; the old one stops working at once. OAuth access tokens already exchanged from it keep working until they expire, within the hour.
+* **Revoke Token** ends the token at once (OAuth access tokens already exchanged from it expire within the hour). Revoking works even while the feature flag is off.
+
+When the Group holds a Global Role, its token reaches everything that Role grants, so only a superuser may issue it; the card still offers its other managers **Revoke Token**. The token is used like any [service user](../pro__service_users/#use-the-token) token, in the `Authorization` header with the `Token` keyword. Group API Tokens needs Service Users on: a group token is a service user token. Turning the **Group API Tokens** flag (or **Service Users**) off refuses every group token, and every OAuth access token exchanged from one, until it is turned on again.
+
 ### Deleting a Group that owns content
 
-Deleting a Group does not delete its rules, templates, blocks, themes or schedules. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. The rules, templates, blocks and themes appear under **Settings > Groups > Unowned Content** (a schedule waits with its Template and comes back when the Template is transferred), where an administrator holding **Rule Edit** or **Report Template Edit** as a Global Role transfers them to another Group or to the instance. The Group's automation identity is removed with the Group.
+Deleting a Group does not delete its rules, templates, blocks, themes, schedules, webhook receivers, notification webhooks, connectors or ticket templates. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. Its webhook receivers stop accepting deliveries, and its notification webhooks are made permanently inactive, so nothing is sent through them until they have a new owner. The rules, templates, blocks, themes, receivers, notification webhooks, connectors and ticket templates appear under **Settings > Groups > Unowned Content** (a schedule waits with its Template and comes back when the Template is transferred), where an administrator holding the matching global Edit permission (**Rule Edit**, **Report Template Edit** or **Integration Edit**) transfers them to another Group or to the instance. Only a superuser moves a notification webhook to the instance, because that makes it a system webhook. The Group's automation identity, and with it the Group's API token, is removed with the Group.
 
 Its dashboards, page layouts and saved table views are kept too, hidden from everyone except superusers and holders of the matching share permission (**Dashboard Share**, **Page Layout Share**, **Table Preference Share**) as a Global Role. A dashboard waits in the **Group Dashboards** section of **Manage Layouts**, tagged **Unowned**, until it is transferred. A layout the Group had shared with everyone stays shared.
 

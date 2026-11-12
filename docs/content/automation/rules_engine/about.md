@@ -26,7 +26,7 @@ Rules can be triggered manually from the **Classic Rules** page, or scheduled to
 Each Rule can apply one or more of these changes to a Finding when it is triggered successfully (i.e. matches the set Filter conditions).
 
 ### Field Modifications
-* **Set a field** on a Finding, including Title, Description, Severity, CVSSv3 Vector, Active, Verified, Risk Accepted, False Positive, Mitigated. Setting False Positive or Mitigated on a risk-accepted Finding takes it out of its risk acceptance first, as closing it by hand does.
+* **Set a field** on a Finding, including Title, Description, Severity, CVSSv3 Vector, Active, Verified, Risk Accepted, False Positive, Mitigated. Setting False Positive or Mitigated works as closing the Finding by hand does: a risk-accepted Finding leaves its risk acceptance first, and the Finding's open Endpoints (or Locations) are mitigated. Setting Active on a closed Finding, or clearing Mitigated, sets its Endpoints (or Locations) open again, as reopening it by hand does.
 * **Append or Prepend text** to a Finding's Title or Description
 * **Set Priority** — override the calculated Priority value on a Finding (overrides automatic priority calculation)
 * **Set Risk** — override the calculated Risk level on a Finding (overrides automatic risk calculation)
@@ -73,6 +73,8 @@ Once you have a set of Filters that you want to apply, Click the Next Button.
 From the **Action** dropdown, select the Action that you want to apply to a Finding that matches all filters from Step 2.  Multiple Actions can be applied.
 
 You can set an additional Conditional Values which allow you to take additional actions, if certain criteria are met.  
+
+The field pickers on each Action, including the comparison field of a Conditional Action, list their fields under the same headings as the Findings list's **Add Filter**: Finding, Threat Intel, Dates and People.
 
 ![image](images/rules_engine_4.png)
 

@@ -22,6 +22,37 @@ For features that are deprecated, scheduled for removal or already removed, see 
 
 ## November 2026: v3.5
 
+### November 12, 2026: v3.5.102
+
+New features:
+* **(Triage Engine)** The **On Rule Complete** trigger runs a rule each time another rule finishes a successful run, so rules can run in a fixed order whatever they change. The rule sweeps its own scope, as a Manual Run does, and a failed run starts nothing. See [On Rule Complete](/automation/triage_engine/node_reference/#on-rule-complete) and [Running rules in order](/automation/triage_engine/runs/#running-rules-in-order).
+
+Enhancements:
+* **(Triage Engine)** With **Restrict Triage Engine Emails to DefectDojo Users** on, a **Send an Email** batch also reaches recipients who can see only part of it. Each recipient gets an email that lists just the Findings, Assets or alerts they can see, with a count that matches. See [Restricting recipients to DefectDojo users](/automation/triage_engine/node_reference/#restricting-recipients-to-defectdojo-users).
+* **(AI)** AI Guardrails keeps Prompt Activity for a set number of days, 90 by default, which a superuser changes on the new **Settings** tab. A **Daily Activity** chart keeps each day's counts after the events themselves are deleted. See [Prompt Activity](/triage_findings/findings_workflows/pro__ai_guardrails/#prompt-activity).
+* **(Connectors)** When the license is refusing connector syncs, the Connections list and a connection's records page say so and link to the License page. See [Managing Operations](/connectors/upstream/manage_operations/).
+* **(Performance)** History tabs load faster on instances with a long audit history. Adding a tag to many Findings at once, the Tests API with Jira-linked Finding Groups or `response_fields`, Findings API pages that include duplicates, the Triage Engine **Rules** list, and the close step of a large connector sync are faster.
+
+Bug fixes:
+* **(Connectors)** A large connector sync that is cut off by its time limit, a deploy or a lost worker continues where it stopped. It finishes, closes the Findings the tool no longer reports and records the sync in Import History. See [Sync Operations](/connectors/upstream/manage_operations/#sync-operations).
+* **(Triage Engine)** Turning a rule on or off takes effect right away. A rule that changes Findings and then deletes them in the same run completes. A rule that sets an Organization or parent Asset by a computed name skips a name an archived Organization or Asset holds instead of failing the run. The **Import Rules** preview runs again when **Owned By** changes while a preview is running. See [Runs](/automation/triage_engine/runs/) and [Importing rules](/automation/triage_engine/sharing_and_versions/#importing-rules).
+* **(Risk Acceptance)** Closing a risk-accepted Finding marks its Endpoint statuses mitigated. See [Risk Acceptances](/triage_findings/findings_workflows/pro__risk_acceptance/).
+* **(Compliance)** Evidence packs for an assessment that covers several Assets or a whole Organization can be generated, opened and downloaded. The CMMC Assessment page opens an Asset's newest assessment, the same one the Asset's Compliance summary reports. See [Federal Compliance](/federal_compliance/) and [CMMC Level 2 Assessments](/federal_compliance/cmmc_assessments/).
+* **(Jira)** A classic Jira instance whose configuration name is longer than 255 characters migrates to a Jira Downstream Connector. See [Migrating to the Jira Downstream Connector](/connectors/downstream/pro__jira_guide/#migrating-to-the-jira-downstream-connector).
+* **(Dashboards)** A Graph over a date labels each period by its size, in the reader's language, instead of with an ISO date. A short Graph tile keeps room for its chart. The **Regulatory Scope** widget answers a malformed regulations value with a validation error instead of a server error. See [Graph options](/metrics_reports/dashboards/custom-dashboards/#graph-options).
+* **(Findings)** A Component with a blank name opens its own Findings from **All Components** and from the Asset's **Components** widget. See [Components](/asset_modelling/components/pro__components/).
+* **(UI)** The severity donut's ring labels stay off its legend. The source toggle on a Markdown field no longer covers the text. A failed table preference read or Location map save shows one toast instead of several. The column filter menus on the Components and Support Requests tables show their match modes in the app language, and Dedupe Pool counts use the app language's number format.
+
+Security fixes:
+* **(Hardening)** Date filters refuse a **Past Days** value outside the supported range. `dojo-deploy` is built with a Go release that includes the latest security fixes. See [Filter Index](/navigation/pro__filter_index/#how-date-filters-are-evaluated) and [Keeping the CLI up to date](/get_started/pro/onprem/dojo_deploy/#keeping-the-cli-up-to-date).
+
+Behavior changes:
+* **(Authentication)** Nobody is asked to accept the End User License Agreement after signing in. The organization's subscription agreement already covers its users.
+
+Upgrade notes:
+* **(Deployment)** The upgrade adds indexes to the audit history tables, which can take a minute or more on an instance with millions of Findings. One read of an object's History tab is limited by `DD_OBJECT_HISTORY_STATEMENT_TIMEOUT`, 30 seconds by default, and `0` leaves it only the web statement limit. See [Hardware Sizing](/get_started/pro/onprem/hardware_sizing/#sizing-and-tuning-the-application-tier).
+* **(Helm)** With `networkPolicy.profile: aggressive`, the Celery imports worker, the OSCAL validator, the Orchestrator workers and the `helm test` pods get the network access they need, including to the embedded Redis. See [Network Policies](/get_started/pro/onprem/kubernetes/installing_on_kubernetes/#network-policies) and [DefectDojo Pro Upgrade Guide (Kubernetes / Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/).
+
 ### November 11, 2026: v3.5.101
 
 **NOTE: Endpoints are deprecated and will be removed in 3.7.0 on January 4, 2027.**
