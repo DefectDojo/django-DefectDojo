@@ -14,7 +14,8 @@ Todo achado com um CVE é comparado, todas as noites, com um feed de inteligênc
 
 * um selo de **maturidade de exploração** — *Nenhum → PoC → Armado → Ativo em ambiente real*
 * uma **pontuação de ameaça** (0–100)
-* **chips de evidência que linkam para o comprovante** — a entrada no KEV (com sua data de listagem),
+* o **ID de vulnerabilidade de maior ameaça**, que abre a página dessa vulnerabilidade
+* **chips de evidência que linkam para o comprovante** — a entrada no KEV (com sua data de listagem, que abre a página da vulnerabilidade),
   uso em ransomware, um módulo do Metasploit, uma entrada no Exploit-DB, um template do Nuclei e
   repositórios públicos de prova de conceito
 * uma linha em linguagem simples explicando **por que** a prioridade do achado aumentou
@@ -29,6 +30,40 @@ Além do card, essa inteligência é uma camada funcional em todo o aplicativo:
 * um **evento de notificação** (`threat_intel_alert`) quando o CVE de um achado existente ganha nova
   evidência de exploração, como entrar no CISA KEV ou ganhar um módulo do Metasploit. Apenas atualizações
   para cima — evidências que silenciosamente perdem validade nunca geram notificação.
+
+## A página da vulnerabilidade
+
+Cada ID de vulnerabilidade tem sua própria página no Vulnerability Explorer (**Act > Vulnerability
+Explorer** e, em seguida, selecione um ID). Com a inteligência de ameaças habilitada, a página
+mostra o que o feed de inteligência sabe sobre o ID, mesmo quando nenhum Achado que você pode ver o
+contém:
+
+* um resumo de **Inteligência de Ameaças**: maturidade de exploração, pontuação de ameaça, a data de
+  listagem no CISA KEV, quando a exploração foi vista pela última vez, EPSS, uso em ransomware e
+  agentes de ameaça conhecidos
+* uma **Evidence Timeline**: uma linha por fonte que embasa a classificação, com o tipo de evidência
+  (explorado em ambiente real, armado, prova de conceito), um link para a fonte, a data quando a
+  fonte a informa e a classificação da fonte
+* **Proof of Concept Exploits**: código de exploit público por fonte, com uma contagem quando a
+  fonte a informa. Esta seção aparece assim que o feed inclui uma fonte de código de exploit.
+
+Quando pelo menos um Achado que você pode ver contém o ID, a página também mostra os Achados, Ativos
+e parsers envolvidos. Quando nenhum o contém, a página informa isso e mostra apenas a inteligência
+de ameaças. Um ID que é alias de outro (por exemplo, um GHSA vinculado a um CVE, no feed ou nos
+identificadores vinculados da sua instância) mostra a inteligência de ameaças dessa vulnerabilidade
+e indica o ID de onde ela veio. Um ID que não está nem nos seus Achados nem no feed de inteligência
+mostra "Vulnerability Not Found".
+
+Você pode chegar à página a partir de:
+
+* o card de Inteligência de Ameaças de um Achado (o ID de maior ameaça e o chip do CISA KEV)
+* a coluna **Known Exploited** na lista de Achados, onde a marca de seleção de um Achado listado
+  mostra o ID que a CISA lista e abre a página dele
+* a caixa de pesquisa: digite um ID de vulnerabilidade como `CVE-2021-44228` e o primeiro resultado
+  abre a página dele, quando seus Achados ou o feed de inteligência conhecem o ID
+
+A inteligência de ameaças nesta página é composta de dados públicos do feed. Ela é a mesma para
+todos os usuários e não diz nada sobre quais Ativos contêm o ID.
 
 ## Como isso muda a pontuação
 
