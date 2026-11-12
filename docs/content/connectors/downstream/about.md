@@ -80,6 +80,8 @@ These filters apply to automatic **creation** only. Updates to a Finding that al
 
 An Issue Tracker Assignment targets a single Asset or Engagement. To cover several assets, create one Assignment per Asset (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
 
+To create Assignments automatically, for example for every new Asset in an Organization, use the Triage Engine action [Assign an Issue Tracker Mapping](/automation/triage_engine/node_reference/#assign-an-issue-tracker-mapping) in a rule triggered on Asset creation.
+
 #### Who can see and change an Assignment
 
 An Issue Tracker Assignment belongs to the Asset or Engagement it targets, so on top of the Integration permissions that open Downstream Connectors, it follows that Asset's or Engagement's permissions:
