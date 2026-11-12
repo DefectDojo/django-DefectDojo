@@ -40,7 +40,7 @@
                 $('#calfilter').attr('action', '/calendar/' + $(this).val());
             });
             if (caltype) {
-                $('#caltype').val('{{ caltype }}');
+                $('#caltype').val('{{ caltype|escapejs }}');
                 $('#caltype').trigger('change');
             }
             $('#lead').val([{% for lead in leads %} '{{ lead|escapejs }}', {% endfor %}]);
