@@ -89,7 +89,7 @@ words:
 | Configuration baseline | ISO A.8.9 | Never satisfied automatically. With posture scans in the period, the result is partially satisfied at best, because the control also needs a documented baseline that DefectDojo does not hold. Without a posture scan it stays unknown with a note |
 | Drift and new vulnerabilities | SOC 2 CC7.1 | The weaker of enrichment freshness and the configuration baseline. Without a posture scan, only enrichment freshness counts |
 | Exposure ranking | SOC 2 CC3.2 | A prioritization engine is set on the Asset or an SLA configuration enforces a severity, and every open finding has a severity |
-| Detection monitoring | SOC 2 CC7.2, NIS2 7.1 | Rules are configured and at least one ran in the period. These counts cover the whole instance, not one Asset |
+| Detection monitoring | SOC 2 CC7.2, NIS2 7.1 | Rules are configured and at least one finished a run successfully in the period (a run that ended in an error does not count). These counts cover the whole instance, not one Asset |
 | Published advisories | NIS2 6.10 | A published PSIRT advisory that reaches the Asset was issued in the period. Otherwise the control stays unknown with a note |
 
 For the SLA check, the computed facts also count risk acceptances with no named accepter and

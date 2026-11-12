@@ -38,7 +38,7 @@ Every one of the six pages has a **Page Layout** button in its toolbar. Opening 
 - **New Layout**: create a layout from scratch or from an existing one.
 - **Manage Layouts**: open the full management dialog.
 
-Layouts in the list carry a marker showing where they came from: shipped with DefectDojo, a shared template, or your default.
+Layouts in the list carry a marker showing where they came from: shipped with DefectDojo, a shared template, or your **My Default**.
 
 ## Making your first change
 
@@ -49,7 +49,7 @@ The shipped layouts are read only, so the first time you customize a page Defect
 In edit mode:
 
 - **Move a widget** by dragging it.
-- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them.
+- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them. A Simple Table with chosen fields cannot be made shorter than the height those fields need on one line each, and one saved shorter than that is shown at that height, together with the widgets of the same height in its row so the row stays level. A long value or label that wraps in a narrow tile can still need more room. Other widgets keep the height you give them.
 - **Configure Widget** opens the widget's own settings. What is on offer depends on the widget: which columns a table shows, which fields a panel lists, what a chart plots, and so on. You can also retitle a widget here.
 - **Remove Widget** takes it off the layout. You can add it back later.
 - **Add Widget** opens the catalog of widgets available for that page.
@@ -70,20 +70,21 @@ In edit mode:
 | **Rename** | Change a layout's name. |
 | **Clone** | Copy a layout, including a shared or shipped one, into Saved Layouts. |
 | **Delete** | Remove one of your layouts. |
-| **Set Default** / **Clear Default** | Choose which layout you personally land on for this page. |
+| **Set as My Default** / **Clear My Default** | Choose which layout you personally land on for this page. The layout carries a **My Default** tag. |
 | **Share** / **Unshare** | Publish one of your layouts as a shared template, or withdraw it. |
-| **Set Shared Default** / **Clear Shared Default** | Choose which layout everyone on the instance lands on for this page. |
+| **Set as Instance Default** / **Clear Instance Default** | Choose which layout everyone on the instance lands on for this page. A layout from a Default Profile reads **From <profile>**, or **Set by <profile>** when it is locked. |
 
-Sharing a layout and setting the instance-wide default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
+Sharing a layout and setting the Instance Default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
 
 ## Which layout you see
 
 When you open one of the six pages, DefectDojo picks the first of these that applies:
 
 1. The layout you last chose for that page.
-2. Your personal default, if you have set one.
-3. The instance-wide shared default, if an administrator has set one.
-4. The layout shipped with DefectDojo.
+2. Your own default (**My Default**), if you have set one.
+3. The layout from a [Default Profile](/admin/user_management/create_user_group/#defaults): the one assigned to you directly, else your Groups' profiles in rank order (the first that sets one wins).
+4. The **Instance Default**, if an administrator has set one.
+5. The layout shipped with DefectDojo.
 
 ## Fields you can change in place
 
@@ -98,6 +99,8 @@ This affects only what is drawn. Your layout is unchanged, and the widget reappe
 In edit mode those widgets are shown as labelled placeholders that say why they are not appearing, so you can still position them.
 
 ### Hiding empty tabs
+
+A tab that holds a list, such as a table, Notes or Files, shows how many items it has beside its label, and a tab with none is dimmed, so an empty tab reads as empty before you open it.
 
 Some tabs in a tab group always show, even when they are empty, such as a table with no rows or a Notes feed with no notes. You can choose to hide them on records where they have nothing to show, one tab at a time:
 
@@ -116,15 +119,15 @@ A hidden tab comes back as soon as the record has something for it, the next tim
 
 ## When customization is restricted
 
-An administrator can turn on **Restrict Layout Customization** in **Settings > UI Defaults > Layout Defaults**. With it on:
+An administrator can turn on **Restrict Layout Customization** in **Settings > Defaults > Instance Defaults** (the **Layout Customization** card). With it on:
 
 - Only superusers can create or change layouts.
-- Everyone else sees the layout designated as the default, or the shipped layout when none has been designated.
+- Everyone else sees the Instance Default layout, or the shipped layout when none has been set.
 - The Page Layout menu no longer offers the editing and management actions.
 
 Layouts you saved before the switch was turned on are kept. If it is turned back off, they are available again exactly as they were.
 
-A [Default Profile](/admin/user_management/create_user_group/#default-profiles) can override the switch for the Members of its Groups in either direction, with **Allow** or **Restrict to Selected Layouts**. A profile can also set the layout each View page opens with, and under **Restrict to Selected Layouts** list the other layouts Members may switch to; the layout switcher then offers only those, with no edit menu. Superusers are never restricted.
+A [Default Profile](/admin/user_management/create_user_group/#defaults) can override the switch for its Members (its Groups' Members and users it is assigned to directly) in either direction, with **Allow** or **Restrict to Selected Layouts**. The first profile in the resolution order that sets it decides. A profile can also set the layout each View page opens with, and under **Restrict to Selected Layouts** list the other layouts Members may switch to; the layout switcher then offers only those, with no edit menu. Superusers are never restricted.
 
 For the administrator's side of this, see [The Sidebar Menu](/navigation/pro__sidebar/).
 
@@ -133,7 +136,8 @@ For the administrator's side of this, see [The Sidebar Menu](/navigation/pro__si
 Which widgets a page offers depends on the page, and **Add Widget** shows what is available with a short description of each. Widgets come in four shapes:
 
 - **Panels** present the record's own fields as a list of labelled values.
-- **Tables** list related records, such as the Engagements on an Asset or the Findings on a Test. These behave like the product's other data tables, so you can pick columns and sort them.
+- **Tables** list related records, such as the Engagements on an Asset or the Findings on a Test. Most behave like the product's other data tables, so you can pick columns and sort them.
+  The **Engagements** table on an Asset is built to fit its tile instead. It keeps search, filters, sorting, export and your saved preferences (the filters and sort open from its **Filters** button), and shows a fixed set of columns: the engagement with its type, status, dates, lead and active findings. Lead and then dates give way as the tile narrows, and a narrow tile shows each engagement on two lines. The tile's header counts the open engagements past their end date, or the ones in progress when none is overdue.
 - **Feeds** present a running history in date order, such as notes on a record.
 - **Charts** plot the record's data, such as severity breakdowns and counts over time.
 

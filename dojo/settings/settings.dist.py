@@ -310,6 +310,12 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
+    # When enabled, the Trufflehog Scan parser reports one finding per secret per file in a report, however
+    # many commits the secret appears in (the commit and the line leave the in-report fold key). Off by
+    # default: the parser then reports one finding per commit, as it always has, so existing findings keep
+    # their identity. Turn it on together with the "Unique ID from tool" deduplication algorithm for the
+    # scan type, which matches on the stable unique_id_from_tool the parser sets.
+    DD_TRUFFLEHOG_FOLD_COMMITS=(bool, False),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     # For HTTP requests, how long connection is open before timeout
@@ -2002,6 +2008,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
     "OPF Scan": DEDUPE_ALGO_HASH_CODE,
+    # The parser builds a stable unique_id_from_tool for every finding (detector, kind, target, path and the
+    # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
+    "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
@@ -2317,6 +2326,7 @@ AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
+TRUFFLEHOG_FOLD_COMMITS = env("DD_TRUFFLEHOG_FOLD_COMMITS")
 MASS_HASH_CODE_USE_SQL_WRITER = env("DD_MASS_HASH_CODE_USE_SQL_WRITER")
 
 # ------------------------------------------------------------------------------

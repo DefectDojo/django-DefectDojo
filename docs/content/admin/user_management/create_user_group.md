@@ -37,16 +37,16 @@ With Access Administration on (Pro), a Group's page has these tabs:
 * **Overview**: the Group's details, its description, the read-only **Configuration Permissions** card and, with Group Ownership on, the **Automation Identity** card (see [The group's automation identity](#the-groups-automation-identity)).
 * **Members**: the Group's members and their Group Roles. When **View As User** is on, each member's row has a **View As** button.
 * **Access**: what the Group reaches in its own right: its Global Roles, its Configuration Permissions, and the Organizations and Assets it holds a Role on, with how each one is reached. Every member of the Group receives this access through it, and a Group that holds a Global Role is marked as having instance-wide access. The Group's own Roles are changed here, with **Add to Organization**, **Add to Asset**, **Change Role** and **Remove**. Each change is checked against your permissions on that Organization or Asset, exactly as on its own Members dialog.
-* **Defaults**: the [Default Profile](#default-profiles) the Group's Members start from, and what that profile sets. See [Set Group Defaults](#set-group-defaults).
+* **Default Profile**: the [Default Profile](#default-profiles) the Group's Members start from, and what that profile sets. See [Set Group Defaults](#set-group-defaults).
 
-With Group Ownership on, the page also has a tab for each kind of content the Group can own:
+With Group Ownership on, the page also has an **Owned Content** tab: one row for each kind of content a Group can own (**Rules**, **Report Templates**, **Report Blocks**, **Report Themes** and **Generated Reports**), with how many of the Group's you can see. A report schedule belongs to its Template, as a rule's schedule belongs to the rule, so it has no row of its own. A kind's name opens its list filtered to the Group, and that page's title and breadcrumb name the Group (for example **Report Templates Owned By AppSec**, under a link back to the Group).
 
-* **Rules**: the Triage Engine rules the Group owns. **New Rule** here creates a rule owned by the Group. See [Group ownership](/automation/triage_engine/sharing_and_versions/#group-ownership).
-* **Report Templates**: the Report Builder templates, blocks and themes the Group owns, with **New** creating each into the Group. See [the Report Builder](/metrics_reports/reports/report-builder/#group-ownership).
-* **Schedules**: the report schedules the Group owns.
+* The kind's name opens its usual list filtered to the Group: the **Owner** filter is set to the Group, and clearing it shows the whole list again.
+* The row menu has **View** (the same filtered list) and, where you can create that kind for the Group, **New**, which opens the create page with **Owned By** already set to the Group. See [Group ownership of rules](/automation/triage_engine/sharing_and_versions/#group-ownership) and [of Report Builder content](/metrics_reports/reports/report-builder/#group-ownership).
 
-Each of these tabs is the normal list for that kind of content, limited to this Group, so it has the same columns, filters and row menus. **Rules** and **Report Templates** are shown when the Group owns something of that kind that you can see, or when you can create it here (your Role in the Group, or a Global Role, carries **Rule Add** or **Report Template Add**), and only while Triage Engine or Reporting is turned on. **Schedules** is shown when the Group owns a report schedule you can see.
+A kind is listed when the Group owns something of that kind that you can see, or when you can create it there (your Role in the Group, or a Global Role, carries its **Add** permission; for a rule you must also be a member of the Group), and only while Triage Engine or Reporting is turned on.
 
+The Group's page shows what it owns. Who owns something is chosen where it is created (**Owned By**) and changed with **Transfer** in its row menu.
 
 Viewing a group displays all Group information, such as ID, name, description, global roles, etc. The Group Members, Organizations, and Assets associated with the group are also displayed.
 
@@ -72,7 +72,7 @@ Changing what a Group's rule or report schedule does needs membership of the Gro
 
 ### Deleting a Group that owns content
 
-Deleting a Group does not delete its rules, templates, blocks, themes or schedules. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. All of them appear under **Settings > Groups > Unowned Content**, where an administrator holding **Rule Edit** or **Report Template Edit** as a Global Role transfers them to another Group or to the instance. The Group's automation identity is removed with the Group.
+Deleting a Group does not delete its rules, templates, blocks, themes or schedules. Its rules are turned off, its templates, blocks and themes are hidden from everyone except superusers and holders of the matching global permission, and its schedules stop running. The rules, templates, blocks and themes appear under **Settings > Groups > Unowned Content** (a schedule waits with its Template and comes back when the Template is transferred), where an administrator holding **Rule Edit** or **Report Template Edit** as a Global Role transfers them to another Group or to the instance. The Group's automation identity is removed with the Group.
 
 ## Create a User Group
 
@@ -194,37 +194,46 @@ If you want the Members in your Group to access Configuration functions, and con
 
 The Group page's **Configuration Permissions** card shows the result. Only a Superuser can grant Configuration Permissions this way.
 
-## Default Profiles
+## Defaults
 
-With Access Administration on (Pro), a Superuser defines what Members start with as **Default Profiles** on **Settings > UI Defaults > Default Profiles**, and each Group picks one. Many Groups can share one profile, so a large instance needs only a handful of profiles rather than settings on every Group.
+With Access Administration on (Pro), **Settings > Defaults** holds the defaults Members start from. It has two tabs: **Instance Defaults** (the Restrict Layout Customization switch, the Instance Landing Page, and an Instance Default for Dashboards, Page Layouts, Sidebar Presets and Table Views) and **Default Profiles**.
 
-### The ranked list
+### Default Profiles
 
-The Default Profiles page lists every profile in rank order, with how many Groups use it and its layout setting. Drag a row by its handle to change its rank. The order saves at once.
+A Superuser defines what Members start with as **Default Profiles** on **Settings > Defaults > Default Profiles**, and each Group picks one, or a profile is assigned to a user directly (see [Assign a profile to a user](#assign-a-profile-to-a-user)). Many Groups can share one profile, so a large instance needs only a handful of profiles rather than settings on every Group.
 
-The rank settles conflicts. When a Member belongs to several Groups with different profiles, each default comes from the highest-ranked of those profiles that sets it. There are no numbers to pick, so two profiles can never claim the same rank.
+#### The ranked list
 
-Click **New Default Profile** to create one, or a profile's name to edit it. Deleting a profile clears it from every Group that uses it, and their Members fall to their next profile. The delete dialog says how many Groups are affected.
+The Default Profiles tab lists every profile in rank order, with how many Groups and how many Users use it (users it is assigned to directly) and its layout setting. Drag a row by its handle to change its rank. The order saves at once.
 
-### What a profile sets
+The list has three filters: **Search** (name or description), **Layout Customization**, and **Assignment** (Assigned to Groups, Assigned to Users, Not Assigned). While a filter is on, rows cannot be dragged to change the rank; clear the filters to rank.
 
-A profile's page has one card per area. The link at the top right of each card opens the page where those items are built.
+The rank settles conflicts. When a Member belongs to several Groups with different profiles, each default comes from the highest-ranked of those profiles that sets it. Profiles do not combine: for each setting, the first profile in the resolution order that sets it wins, rather than a union of everything the profiles set. There are no numbers to pick, so two profiles can never claim the same rank.
 
-* **Profile**: its **Name** (unique) and **Description**.
-* **Layout Customization**: **Inherit**, **Allow** or **Restrict to Selected Layouts**. See [Restrict to Selected Layouts](#restrict-to-selected-layouts).
-* **Navigation**: the **Landing Page** Members open after signing in (see [Default Landing Page](/navigation/pro__landing_page/)), with **Lock Landing Page** to make it binding so Members cannot choose their own, and the **Default Sidebar Preset** (see [Sidebar Presets](/navigation/pro__sidebar_presets/)).
-* **Forms**: the [Form Configuration](/navigation/pro__form_configuration/) Members' create and edit forms follow.
+Click **New Default Profile** to create one, or a profile's name to edit it. Deleting a profile clears it from every Group and User that uses it, and they fall to their next profile. The delete dialog says how many are affected.
+
+A profile that sets nothing decides nothing: its Members fall through to their next profile. It can still be saved; the form warns above **Submit**.
+
+The row menu of a profile has **Assign to Groups** (Superuser only). Pick any number of Groups and click **Submit**. If any picked Group already uses another profile, the form lists every such Group with its current profile and asks you to check **Replace Their Profiles** before you submit again.
+
+#### What a profile sets
+
+A profile's form is one full-width card per area. Links on the cards go to Instance Defaults.
+
+* **Profile**: its **Name** (unique), **Layout Customization** and **Description**. **Layout Customization** is **Inherit**, **Allow** or **Restrict to Selected Layouts**. See [Restrict to Selected Layouts](#restrict-to-selected-layouts).
+* **Navigation**: the **Landing Page** Members open after signing in (see [Landing Page](/navigation/pro__landing_page/)), with **Lock Landing Page** beside it to make it binding so Members cannot choose their own, and the **Default Sidebar Preset** (see [Sidebar Presets](/navigation/pro__sidebar_presets/)). **Lock Landing Page** needs a Landing Page and is cleared when the Landing Page is cleared.
 * **Dashboards**: the **Default Dashboard** Members open the Dashboards page with.
-* **Page Layouts**: for each View page, the [page layout](/navigation/pro__page_layouts/) it opens with.
 * **Table Views**: for each list, the saved view it opens with (see [Customizing Tables](/navigation/pro__table_customization/)).
+* **Page Layouts**: for each View page, the [page layout](/navigation/pro__page_layouts/) it opens with.
+* **Forms**: the [Form Configuration](/navigation/pro__form_configuration/) Members' create and edit forms follow.
 
-Only dashboards, sidebar presets, page layouts and saved views shared with everyone can be chosen, so every Member of every Group using the profile can open them. Leave a field empty to set nothing for it; Members then fall to their next profile, or to the instance default.
+Only dashboards, sidebar presets, page layouts and saved views shared with everyone can be chosen, so every Member of every Group using the profile can open them. Leave a field empty to set nothing for it; Members then fall to their next profile, or to the Instance Default.
 
 Click **Submit** to save the profile. Members pick up the change on their next page navigation.
 
-### Restrict to Selected Layouts
+#### Restrict to Selected Layouts
 
-The instance-wide **Restrict Layout Customization** switch lives on **Settings > UI Defaults > Layout Defaults**. A profile can override it for its Members, in either direction:
+The instance-wide **Restrict Layout Customization** switch lives on **Settings > Defaults > Instance Defaults** (the **Layout Customization** card). A profile can override it for its Members, in either direction:
 
 * **Inherit** (the default): the profile follows the instance setting.
 * **Allow**: Members create, edit and choose their own dashboards, page layouts, table views and sidebar presets, even when the instance setting is on.
@@ -232,24 +241,29 @@ The instance-wide **Restrict Layout Customization** switch lives on **Settings >
 
 Under **Restrict to Selected Layouts**, the Navigation, Dashboards, Page Layouts and Table Views cards show an **Also Allowed** field next to each default. Members may switch between the default and the layouts listed there: the dashboard picker, the page layout switcher, the table **Views** menu and the sidebar preset on the User Profile page offer only those (picking a preset there also needs the **Sidebar Preset View** permission). An area with nothing listed pins Members to its default, as the instance switch does.
 
-The highest-ranked profile among a Member's Groups that sets **Allow** or **Restrict to Selected Layouts** decides, and the layouts Members may switch among come from that same profile. Profiles set to **Inherit** are skipped. When none of a Member's profiles sets either, the instance setting applies. Superusers are never restricted.
+The same order that resolves every default decides this: the Default Profile assigned to the user directly, then their Groups' profiles in rank order. The first profile that sets **Allow** or **Restrict to Selected Layouts** decides, and the layouts Members may switch among come from that same profile. Profiles set to **Inherit** are skipped. When none of a Member's profiles sets either, the instance setting applies. **Lock Landing Page** resolves the same way. Superusers are never restricted.
 
 ## Set Group Defaults
 
-The **Defaults** tab on a Group's page shows the Group's Default Profile. A Superuser picks the profile from the **Default Profile** list and clicks **Submit**; clearing it means the Group sets nothing. Below the picker, a card named for the profile lists what it sets, area by area, with **Locked** beside a locked landing page and an **Edit Profile** link for a Superuser.
+The **Default Profile** tab on a Group's page shows the Group's Default Profile. A Superuser picks the profile from the **Default Profile** list and clicks **Submit**; clearing it means the Group sets nothing. Below the picker, a card named for the profile lists what it sets, area by area, with **Locked** beside a locked landing page and an **Edit Profile** link for a Superuser.
 
 Anyone else who can view the Group sees the tab read-only.
+
+### Assign a profile to a user
+
+A Superuser can assign a profile to one user directly. Open the user's page, go to the **Default Profile** tab, pick a profile and click **Submit**. A user has one profile. It comes before the profiles of the user's Groups. There is no separate per-user lock: the assigned profile's own **Layout Customization** and **Lock Landing Page** apply to that user. Superusers are never restricted.
 
 ### Which default a Member gets
 
 Every default resolves the same way:
 
 1. The Member's own choice. A restricted Member's own dashboard, page layouts, table views and sidebar preset are set aside; their landing page is not, since it is not a layout, unless the profile that sets it has **Lock Landing Page** on.
-2. Otherwise, the highest-ranked Default Profile among their Groups that sets it, and that they can open.
-3. Otherwise, the instance default: the **Instance Landing Page** on **Settings > UI Defaults > Layout Defaults**, the instance sidebar preset and the default Form Configuration. The global default dashboard, page layouts and table views on Layout Defaults apply while customization is restricted, as they always have.
-4. Otherwise, the built-in behavior (Home, the starter dashboard, the full sidebar, the stock forms).
+2. Otherwise, the Default Profile assigned to the user directly, if it sets it and they can open it.
+3. Otherwise, their Groups' Default Profiles in rank order: the first one that sets it, and that they can open, wins. Profiles do not combine.
+4. Otherwise, the Instance Default: the **Instance Landing Page** on **Settings > Defaults > Instance Defaults**, the Instance Default dashboard, page layouts, sidebar preset and table views, and the default Form Configuration. The Instance Default dashboard, page layouts and table views apply while customization is restricted, as they always have.
+5. Otherwise, the built-in behavior (Home, the starter dashboard, the full sidebar, the stock forms).
 
-A Member whose own choice is empty can see where a value comes from on their **User Profile** page, for example "Using Security Leads's default: Findings > All". A restricted Member reads "Set by" followed by the profile's name.
+A Member whose own choice is empty can see where a value comes from on their **User Profile** page, for example "From Security Leads: Findings > All" or "Instance Default: Findings > All". A value that comes from a profile reads **From** followed by the profile's name, or **Set by** followed by the profile's name when it is locked.
 
 ### When a chosen item is deleted
 

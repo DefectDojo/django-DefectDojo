@@ -19,7 +19,7 @@ An Asset is in scope for the Cyber Resilience Act when its [regulatory profile](
 
 Every way to start a report opens the same short form.
 
-**From an Asset.** When an in-scope Asset has an open finding marked as known exploited, the **Regulatory** section of the Asset page shows a **CRA Article 14 Early Warning Check** message listing those findings. Each one has a **Start CRA Report** button that fills in the Asset and the finding's vulnerability ID. Once a report names that ID, a link to the report takes the button's place.
+**From an Asset.** When an in-scope Asset has an open finding marked as known exploited, the **Regulatory** card on the Asset page is tagged **Early Warning Check**, and an **Article 14 Early Warning** row at the top of its CRA group lists those findings. Each one has a **Start CRA Report** button that fills in the Asset and the finding's vulnerability ID. Once a report names that ID, a link to the report takes the button's place, and once every listed finding has one the tag reads **Reports Started**.
 
 **From a finding.** The same finding shows a **CRA Early Warning Check** tag next to its title, or a link to its report once one exists. For anyone who can edit the Asset, the finding's menu has a **Start CRA Report** action that fills in the Asset and the finding's primary vulnerability ID, whether or not the finding is known exploited.
 

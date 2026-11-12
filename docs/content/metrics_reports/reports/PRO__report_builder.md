@@ -239,11 +239,13 @@ You can build this in the UI (below) or automate it with the [API](../report-bui
 
 ### Who can see Generated Reports
 
-The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. Deleting a Generated Report needs a global role.
+The **Generated Reports** list is open to anyone who can view generated reports, either through a global role or through a role on any Organization (every built-in role includes it). With Group Ownership on, a group role that carries **Generated Report View** opens it too, showing that group's reports; the group's **Owned Content** tab links there. An Organization Reader who runs a **Quick Export** from a Findings list finds the stored report there afterwards. Everyone sees the reports they requested themselves. A report somebody else requested appears only when the viewer could see everything that report could show, because a report is rendered with the access of the person who requested it. With [Group ownership](#generated-reports-and-groups) on, a group's members also see the reports generated for their group and the reports shared with it.
 
-**Templates**, **Blocks** and **Themes** are owned either by the instance or by a group (see [Group ownership](#group-ownership)). The Report Builder's **Templates**, **Blocks** and **Themes** pages, and the matching entries under **Reporting** in the sidebar, need a global role. A member of a group whose membership role carries **Report Template View** finds the group's templates, blocks and themes on the **Report Templates** tab of the group's page. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
+Whoever requested a Generated Report can delete it, as long as they can still open **Generated Reports**. Anyone holding **Generated Report Delete** as a global role can delete any report they can see, and a member of a group whose membership role carries **Generated Report Delete** can delete the reports generated for that group. **Delete Report** appears in a report's menu only when you can delete it.
 
-A group's report schedule runs as the group's automation identity, so the reports it generates are requested by that identity. Members of the group hold the same access the identity holds, so they can read those reports in **Generated Reports**.
+**Templates**, **Blocks** and **Themes** are owned either by the instance or by a group (see [Group ownership](#group-ownership)). The Report Builder's **Templates**, **Blocks** and **Themes** pages, and the matching entries under **Reporting** in the sidebar, need a global role. A member of a group whose membership role carries **Report Template View** finds the group's templates, blocks and themes on the group's **Owned Content** tab. Its **Generated Reports** row counts the reports generated for the group that you can read, and opens **Generated Reports** filtered to the group. A user whose access comes only from an Organization role sees **Generated Reports** alone under **Reporting**.
+
+A group's report schedule runs as the group's automation identity, so the reports it generates are requested by that identity and belong to the group. Members of the group hold the same access the identity holds, so they can read those reports in **Generated Reports**.
 
 ### Report retention
 
@@ -301,8 +303,8 @@ The **Report Template** permissions sit in the **Group Content** table of a role
 
 ### Creating, sharing and moving
 
-* **Owned By**, on the new Template, Block and Theme forms, chooses the owner: a group where your membership role carries **Report Template Add**, or **Instance** if you hold **Report Template Add** as a global role. With one choice it is already selected. **New** on a group's **Report Templates** tab selects that group.
-* The **Templates**, **Blocks** and **Themes** lists have an **Owner** column (the group, **Instance**, or **Unowned** for something whose group was deleted) and a **Scope** filter: **My Groups**, **Shared With Me**, **Everyone** and **Instance**.
+* **Owned By**, on the new Template, Block and Theme forms, chooses the owner: a group where your membership role carries **Report Template Add**, or **Instance** if you hold **Report Template Add** as a global role. With one choice it is already selected. **New** on a group's **Owned Content** tab selects that group.
+* The **Templates**, **Blocks** and **Themes** lists have an **Owner** column (the group, **Instance**, or **Unowned** for something whose group was deleted) and an **Owner** filter: **My Groups**, **Shared With Me**, **Everyone**, **Instance**, or one group by name. A group's **Owned Content** tab opens these lists with the filter set to that group, titled for it (**Report Templates Owned By** the group).
 * **Share**, in a row's menu, sets **Visible To**: **Group** (the owning group only), **Specific Groups** (the owning group plus groups you choose, which can read but not change it), or **Everyone**. Sharing with everyone needs **Report Template Edit** as a global role.
 * **Transfer**, in the same menu, moves it to another group or to the instance. You need **Report Template Edit** on it and **Report Template Add** where it is going. Sharing starts over after a transfer.
 * **Duplicate** asks where the copy goes (**Owned By**), starting on the original's owner when you can create there. For an item another group shared with you, pick one of your own groups.
@@ -318,7 +320,9 @@ A report schedule belongs to the owner of its Template. A schedule on a group's 
 * it keeps running when the person who created it leaves; and
 * the group's members can read the reports it generates.
 
-The group's page lists its schedules on its **Schedules** tab.
+A schedule moves with its Template. **Transfer** on a Template takes its schedules along: into a group they run as that group's automation identity, and to the instance they run as the person who moved them. Because its schedules would then run as the group, a Template that has schedules can be moved into a group only by a member of that group. A move is also refused when a schedule's variables name something its new identity cannot see (a Finding outside the group's access, for example), since every run of that schedule would fail; the refusal names the schedule.
+
+**Reporting > Schedules** lists the schedules you can see, with each one's Template, format, cadence, next run and creator, and an **Owner** column (the group, or **Instance**). Its **Owner** filter offers **My Groups**, **Instance** and each group by name. **Delete** in a row's menu stops a schedule; the reports it already generated are kept. Schedules are created through the API (see [Report Builder API](../report-builder-api/)).
 
 Who can change a schedule depends on its owner:
 
@@ -330,9 +334,27 @@ Who can change a schedule depends on its owner:
 
 Membership is required to create or change a group's schedule because the schedule acts with the group's access.
 
+### Generated reports and groups
+
+A Generated Report holds the data of whoever it was generated as. Group Ownership gives a group's members two ways to read a report, and both keep that data within what the group can see.
+
+**Generate for a group.** The **Generate Report** and **Quick Export** dialogs have a **Generate For** field. It offers **Myself** and each group where your membership role carries **Generated Report Add**, and it appears only when there is such a group. A report generated for a group is built as the group's automation identity, so it holds only the Organizations and Assets the group has been granted, even when you can see more. Its graphs are drawn on the server with the group's access rather than captured in your browser, so they can look a little different from the graphs in a report you generate for yourself. You stay its requester.
+
+* Members of the group whose membership role carries **Generated Report View** can read and download it.
+* Its requester, a member whose membership role in the group carries **Generated Report Delete**, or anyone holding **Generated Report Delete** as a global role can delete it.
+* Reports from a group's [report schedule](#report-schedules), or from a Triage Engine rule the group owns, belong to the group in the same way.
+
+**Share a report you generated.** **Share**, in a report's menu, sets **Visible To**: **Not Shared**, or **Specific Groups** with the groups you choose. Only the person who requested the report, or someone holding **Generated Report Delete** as a global role, can share it. A report can only be shared with a group that can see all of the data in it: for every Organization and Asset the requester could see, the group must hold the same access for what the report's Template reads. If a group cannot, sharing is refused and the message suggests generating the report for that group instead. DefectDojo checks this again every time the report is read, so if the requester later gains access the group does not have, the report stops showing for the group's members. A report generated for a group is not shared further.
+
+The **Generated Reports** list has an **Owner** column (the group a report was generated for, and **Shared** when it is shared with groups) and a filter on it: **My Groups**, **Shared With Me** and **No Group**.
+
+Reports generated before Group Ownership was turned on, and reports generated as yourself, belong to no group. While Group Ownership is off, every report is read under the requester rule in [Who can see Generated Reports](#who-can-see-generated-reports) alone.
+
 ### Unowned items
 
-Deleting a group does not delete what it owned. Its templates, blocks and themes are hidden from everyone except superusers and holders of **Report Template View** as a global role, and its schedules stop running. They wait under **Settings > Groups > Unowned Content**, which also lists report schedules whose creator was deleted or deactivated. Anyone holding **Report Template Edit** as a global role can open that page, select rows, and **Transfer** them to a group or to the instance in one step. A schedule moves into a group only once its Template is that group's, so transfer the Template first.
+Deleting a group does not delete what it owned. Its templates, blocks and themes are hidden from everyone except superusers and holders of **Report Template View** as a global role, and its schedules stop running. They wait under **Settings > Groups > Unowned Content**, which also lists instance report schedules whose creator was deleted or deactivated. Anyone holding **Report Template Edit** as a global role can open that page, select rows, and **Transfer** them to a group or to the instance in one step. A deleted group's schedules are not listed on their own: they come back with their Template when it is transferred.
+
+A deleted group's Generated Reports are not transferred. Each is shown as **Unowned** and only the person who requested it (and superusers) can still read it. A report for the group that had not finished generating fails rather than running with its requester's access.
 
 ## Building a report in the UI
 
@@ -380,17 +402,56 @@ The trash icon on a Block's row takes it out of this Template only; the Block it
 
 ### Step 4: Generate and download
 
-When the Template is ready, generate the report. If the Template uses [template variables](#template-variables), the dialog first asks what the report is about: a finding, an asset or a vulnerability ID, only the ones the Template uses. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
+When the Template is ready, generate the report. If the Template uses [template variables](#template-variables), the dialog first asks what the report is about: a finding, an asset or a vulnerability ID, only the ones the Template uses. The generate dialog confirms the Template and lets you choose the output format: **HTML**, **PDF**, **CSV**, **Excel**, or **JSON**. With Group Ownership on, **Generate For** lets you generate the report for one of your groups instead of yourself (see [Generated reports and groups](#generated-reports-and-groups)). Pick one of the data formats and the dialog tells you which of the Template's Blocks it will include and which it will leave out, so you know before you generate rather than after you open the file.
 
 ![Generate report dialog](images/pro_generate_report_dialog.png)
 
 When the report finishes, a notice says it is ready and links to its row in the Generated Reports list. A large report can take longer than the dialog waits for (about a minute). It then keeps generating in the background, the dialog closes, and the notice links to its row in the Generated Reports list.
 
-Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser or download it.
+Generated reports are collected in the Generated Reports list, which shows each report's status (with the reason, when a report could not be generated), its file format, and the time it was requested and completed. Open a report's menu to open it in the browser, download it, share it with groups or delete it.
 
 ![Generated reports list](images/pro_generated_reports_list.png)
 
 You can generate a Template again at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time: it reflects your data as of when it was generated and will not change as DefectDojo data changes, so generate the Template again whenever you need an up-to-date snapshot.
+
+## Move templates between instances
+
+Build and check a Template on a test instance, then carry it to production as a file. The same file is a good thing to keep in version control.
+
+### Export a Template
+
+Open a Template's menu on *All Report Templates* and choose **Export Template**. The browser saves a JSON file that holds everything the Template needs:
+
+- its Theme, with the header and footer images,
+- its Blocks in order, each with its configuration, its filters and, for an image Block, the image itself.
+
+A filter that names an object (an Asset, an Organization, an Engagement, a user) is written with that object's name beside its id, so the other instance can find its own copy of it. Ids are never trusted on import.
+
+Exporting needs only permission to see the Template. A filter that names an object you cannot see is exported empty, and the export says so.
+
+### Import Templates
+
+On *All Report Templates*, choose **Import** and pick an export file. Nothing is created yet: DefectDojo checks the file first and shows one row per Template with what would happen to it. Choose **Import** in the dialog to create the Templates once the report has no problems. A file holds at most 25 Templates and 250 Blocks. Once it has run, the report marks each Template **Imported** or **Not Imported**.
+
+- **Blocks are created new.** Each imported Template gets its own copy of its Blocks, so importing never changes a Block another Template uses.
+- **A Theme is reused only when it is identical.** A Theme here with the same name, colors, footer and images is reused; anything else creates a new Theme.
+- **Every named object must exist here.** A filter whose Asset, Organization or user cannot be found on this instance (or that you cannot see) stops the import, because the Template would otherwise report on more than it did before. Create or share that object, then import the file again.
+- **Filters on records of the source instance only** (a particular Test or Finding) cannot travel. Remove them on the source instance and export again.
+- **Columns this version does not have** are left out, and the report lists them.
+
+When a Template with the same name and owner already exists, choose what happens:
+
+| Choice | Result |
+|--------|--------|
+| **Create** | The file's Template is added beside the existing one. |
+| **Skip** | The existing Template is left alone. |
+| **Overwrite** | The existing Template's description, Theme and Blocks are replaced. Only a Template you can edit can be overwritten. Its old Blocks stay in the Block library. |
+
+With group ownership on, the dialog also asks which group the imported Templates, Blocks and Themes belong to.
+
+### Versions
+
+The file records the DefectDojo version that exported it. A file from an earlier version imports, and is brought up to date on the way in. A file from a later version is refused: upgrade this instance, or export from a matching version.
 
 ## Moving off the classic report engine
 

@@ -15,7 +15,7 @@ Every filter below can be set from a column's header or from the filter bar abov
 
 ## How date filters are evaluated
 
-Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — offer five operators:
+Filters that take a date (**Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below) offer six operators:
 
 | Operator | Matches |
 | --- | --- |
@@ -24,14 +24,17 @@ Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last S
 | **After** | Everything past the start of the named day — so the named day **is** included. |
 | **During** | A start day through an end day, both **inclusive**. |
 | **Within** | A rolling window ending now: Past 7, 14, 30, 90 or 180 Days, or Past Year. |
+| **Full Months** | Whole calendar months before the current one: Last Full Month, or Last 3, 6 or 12 Full Months. The current month is not included, so the window starts on the first day of a month and ends on the last day of the previous month. |
 
 Note that **Before** and **After** are deliberately not mirror images of each other: *Before 8 August* excludes 8 August, while *After 8 August* includes it.
 
 ### Day boundaries and your timezone
 
-**On**, **Before**, **After** and **During** resolve their day boundaries in **your own timezone**, detected from your browser. A date range therefore covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can see slightly different results from the same filter for Findings falling close to a day boundary.
+**On**, **Before**, **After**, **During** and **Full Months** resolve their day boundaries in **your own timezone**, detected from your browser. A date range therefore covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can see slightly different results from the same filter for Findings falling close to a day boundary.
 
 **Within** is unaffected — it is a rolling window measured back from the current moment, so it has no day boundary to resolve.
+
+**Within** or **Full Months**? A rolling window such as Past 180 Days usually starts partway through a month, so a chart grouped by month shows a short first month that reads like a drop. **Full Months** always covers complete months, which suits monthly charts and management reports. On 15 July, for example, Last 6 Full Months covers 1 January through 30 June.
 
 > **Where this does not apply.** Only requests from the Pro UI carry your timezone. Anything that runs without a browser — the `/api/v2` REST API, scheduled reports, and the Rules Engine — falls back to the server's configured timezone (`DD_TIME_ZONE`, `UTC` unless your administrator changed it). If your browser timezone differs from the server's, a scheduled report and an on-screen filter using the same date can return slightly different rows. Exports started from a filtered table in the UI are not affected — they use your timezone, matching what you were looking at.
 

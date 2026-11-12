@@ -19,7 +19,9 @@ lists the current options with:
   is the part you edit.
 - **Value** — a fixed machine key stored on the asset and used by the API, imports and automation
   rules. It is set when an option is created and never changes afterward, so relabeling an option
-  never breaks an integration.
+  never breaks an integration. A value may contain a comma: the findings filters that take a
+  comma-separated list of values (`product_lifecycle` on `/api/v2/findings/`) read a value in
+  double quotes as one value, for example `"beta, ga",production`.
 - **Icon** and **Display order** — optional. The icon is a Font Awesome name; display order controls
   where the option appears in the dropdown.
 - **Assets Using** — how many assets currently reference the option.
@@ -33,6 +35,17 @@ reassign or clear those assets first.
 New and renamed options show up immediately in the **Platform / Lifecycle / Origin** dropdowns on the
 asset add and edit forms, and their labels are what appears on the asset detail page, in the asset
 list, in reports and on dashboard tiles.
+
+## Filtering findings by Platform
+
+The Findings table can be filtered by the Platform of each finding's asset, so there is no need to tag
+assets by platform to report on them. Open **Add Filter**, pick **Asset Platform** (listed with the other
+asset filters) and check one or more platforms. Choosing **Exclude** keeps every finding except those on
+the chosen platforms, including findings on assets with no platform set.
+
+The filter is saved with the table's other filters, so it stays in place when the page is reloaded or
+shared as a link. Dashboard widgets that count or chart findings use the same filters in their
+**Filters** step, so a Count or Graph widget can be limited to one platform the same way.
 
 ## What the API sees
 
