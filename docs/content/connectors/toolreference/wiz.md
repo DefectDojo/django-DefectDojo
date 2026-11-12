@@ -21,6 +21,7 @@ The service account must meet all of the following requirements. A service accou
 1. Enter your Wiz Client ID in the Client ID field.
 2. Enter the Wiz Client Secret in the Secret field.
 3. Choose which data classes to import in **Import Finding Types**. Both are selected by default.
+4. Optionally, list the subscription tags to copy onto Issue findings in **Subscription Tags to Copy**. See [Subscription Tags](#subscription-tags).
 
 #### **Import Finding Types**
 
@@ -39,6 +40,26 @@ Two things to know before you change this setting:
 * **Deselecting a data class closes its existing findings.** The next sync sends none of that class, and DefectDojo closes what it no longer receives. Suppose you turn off Vulnerability Findings on a connector that already imported a million of them. That sync closes all one million.
 
 Minimum Severity is a separate control and cannot be changed after the connector is created.
+
+#### **Subscription Tags**
+
+Cloud teams often record who owns an account, subscription or project as tags on it, for example `Owner`, `OwnerName` and `OwnerEmail` on an AWS account. **Subscription Tags to Copy** brings those tags onto the findings, so you can filter findings and build reports by owner in DefectDojo.
+
+Enter the tag keys as a comma\-separated list, for example `Owner, OwnerName, OwnerEmail`. Leave the field blank to copy no tags, which is the default.
+
+Every Issue from a subscription that carries one of the listed tags gets a finding tag of the form `wiz-sub-<key>:<value>`. A subscription tagged `Owner: cloud-team@example.com` and `OwnerName: Jane Doe` gives each of its Issues the tags `wiz-sub-owner:cloud-team@example.com` and `wiz-sub-ownername:jane-doe`:
+
+* Keys match without regard to case, so `owner` finds a tag named `Owner`.
+* Tags are lowercase, spaces become hyphens, and commas and quotes are removed, because DefectDojo tags cannot contain them.
+* A listed key that a subscription does not carry, or carries empty, adds nothing.
+
+To list every finding one owner is responsible for, filter findings by the tag, for example `wiz-sub-owneremail:cloud-team@example.com`.
+
+Things to know:
+
+* **Only Issues are tagged.** Wiz does not return subscription tags with Vulnerability Findings, so those findings get no `wiz-sub-` tags.
+* **The tags stay current.** When a subscription's tag changes in Wiz, the next sync replaces the old `wiz-sub-` tag on findings DefectDojo already imported. Other tags on the finding, including ones added by hand, are left alone. Do not add `wiz-sub-` tags by hand: a sync treats them as its own and removes any the subscription does not carry.
+* **Changing the list triggers one full resync**, as with **Import Finding Types**, so findings imported before the change get their tags on the next sync. Removing a key removes its tags from the findings.
 
 #### **Asset Exposure**
 
