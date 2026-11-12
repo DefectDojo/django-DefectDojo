@@ -44,7 +44,9 @@ def begin_task_cache():  # noqa: RUF067
 
     Returns the cache it replaced (``None`` at a top-level task boundary). A task run
     in the foreground inside another one (``dojo_dispatch_task(..., force_sync=True)``)
-    passes it back to ``end_task_cache``, so the outer task keeps its cache.
+    passes it back to ``end_task_cache``, so the outer task keeps its cache: what the
+    outer task memoized stays memoized for the whole task, and an invalidation made
+    inside the nested task clears only the nested task's cache.
     """
     previous = get_task_cache()
     _task_cache_local.cache = _TaskCache()
@@ -56,6 +58,8 @@ def end_task_cache(previous=None):  # noqa: RUF067
     Drop the task cache. Called at the END of every task so nothing lingers on the
     thread after the task completes. ``previous`` is what ``begin_task_cache``
     returned: the enclosing task's cache when this task ran nested in it, else ``None``.
+    A nested task's cache, and anything it invalidated, is dropped here; the enclosing
+    task gets back the cache it had, with what it had memoized.
     """
     _task_cache_local.cache = previous
 

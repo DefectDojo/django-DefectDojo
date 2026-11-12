@@ -202,6 +202,12 @@ class NestedTaskCacheTest(DojoTestCase):
             calls["n"] += 1
             return calls["n"]
 
+        # Registered for this test only. Celery hands back an already registered task for a name it
+        # has seen, so a second run in one process would otherwise call the first run's closures.
+        for name in ("unittests.test_caching.nested_inner", "unittests.test_caching.nested_outer"):
+            app.tasks.pop(name, None)
+            self.addCleanup(app.tasks.pop, name, None)
+
         @app.task(base=DojoAsyncTask, name="unittests.test_caching.nested_inner")
         def inner(*_args, **_kwargs):  # absorbs the dispatch kwargs (force_sync, async_user_id)
             seen["inner"] = get_task_cache()
