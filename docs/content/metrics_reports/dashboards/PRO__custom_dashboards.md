@@ -73,13 +73,15 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 ### Restricting customization
 
-An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. Everyone else switches among the dashboards approved for them instead of making their own:
+An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. With Group Ownership on, everyone else switches among the dashboards approved for them instead of making their own:
 
 - the Instance Default dashboard (or the built-in starter dashboard when none is set), which opens until they pick another,
 - every dashboard shared with everyone, and
 - every dashboard owned by, or shared with, a Group they belong to.
 
 These dashboards are read-only to them, and the toolbar offers no options to create or manage layouts. The dashboard they pick opens again the next time, on any browser. A Member whose role in a Group carries **Dashboard Share** still changes that Group's own dashboards, and the toolbar shows **Managed by <Group>** on them. When nothing is approved beyond the default, the toolbar says so. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
+
+With Group Ownership off, everyone else sees only the Instance Default (or the starter dashboard), or, under **Restrict to Selected Layouts**, the dashboards their Default Profile lists. A dashboard they switch to there is not remembered.
 
 ### Default Profile and instance defaults
 
