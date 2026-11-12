@@ -420,6 +420,29 @@ The items themselves are not changed, and pass through unchanged. A rule never r
 
 A Finding the rule runs on is never also a target. So **Run Now** of a rule ending in this node over a scope that covers both Assets carries nothing between two linked Findings that are both in the run. Scope such a run to the Asset whose statuses should be carried, so the Findings in the other Asset are only targets.
 
+### Merge Findings
+
+`finding.merge`
+
+Merges the active Findings of one Asset that share a key into one Finding, the same merge the Findings list's **Merge** action and `POST /api/v2/findings/merge/` make. The Finding that is kept gets a note listing the Findings merged into it, and each merged Finding gets a note naming the one it was merged into.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Group By** | Hash Code | Findings of one Asset with the same value here are merged: Hash Code, Title, Vulnerability ID or Unique ID From Tool. A Finding with no value is left alone. |
+| **Keep** | Oldest Finding | Which Finding of each group the others merge into: Oldest Finding, Newest Finding, or Highest Severity (the oldest among equals). |
+| **Add Endpoints** | on | Copy the merged Findings' Endpoints (or Locations) onto the Finding that is kept. |
+| **Append Descriptions** | off | Append the merged Findings' descriptions. |
+| **Append References** | off | Append the merged Findings' references. |
+| **Append Vulnerability IDs** | on | Add the merged Findings' vulnerability IDs. |
+| **Append Tags** | off | Add the merged Findings' tags. |
+| **Merged Findings** | Set Inactive | Set Inactive, or Delete Permanently. Delete Permanently is offered only while the **Archive** feature flag is on (see [Archive](/asset_modelling/pro__archive/)), needs the rule owner to be allowed to delete those Findings, and asks you to confirm. |
+
+Findings of different Assets are never merged, and neither are inactive Findings. A merged Finding is inactive afterwards, so running the rule again finds nothing more to merge.
+
+The rule owner needs edit permission on every Finding a merge touches. A Finding the owner can only see is neither kept nor merged, and the run trace counts it as not edited.
+
+The run trace lists which Findings merged into which (the first 50 merges, with a count of the rest), so a dry run shows the merges before you enable the rule. A sweep that runs over many Findings works through them in chunks: the Finding chosen to keep in the first chunk that reaches a group is the one later chunks merge into, which for **Oldest Finding** is always the oldest. Up to 100,000 groups are carried from chunk to chunk this way; past that, a group first reached in a later chunk merges within its chunk, and the run trace counts those groups.
+
 ### Add Tags
 
 `finding.add_tags`
