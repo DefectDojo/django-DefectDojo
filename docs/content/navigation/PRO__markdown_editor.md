@@ -13,6 +13,8 @@ The toolbar above the editor covers the common cases: headings, **bold**, *itali
 
 To read a value exactly as it was typed rather than as formatted text, use the toggle in the top right of the displayed text.
 
+A note's markdown source is under its row menu instead: choose **View Source** to read the note as it was typed, and **View Formatted** (or **Show Formatted** under the note) to switch back.
+
 ## Adding images
 
 You can put a screenshot straight into any markdown field without uploading it somewhere else first. There are three ways:
