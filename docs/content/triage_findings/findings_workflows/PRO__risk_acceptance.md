@@ -465,9 +465,15 @@ records:
 - a per-Finding justification, separate from the acceptance's overall recommendation — auditors ask
   about individual Findings, and the answer is rarely the same for every Finding in a batch.
 
-Records are not backfilled. A Risk Acceptance created before you enabled the feature can be seeded
-from the Findings it still covers, but Findings whose membership was already severed cannot be
-recovered — that history was not kept.
+Risk Acceptances that existed before DefectDojo Pro 3.3.0, when records began, get them on
+upgrade: every Finding a Risk Acceptance still covers is recorded with the source `backfill`, with
+the status the acceptance has now (an expired acceptance's Findings read as expired), and with the
+date the acceptance was created as the date it took effect. Nobody is recorded as having added
+those Findings, because nobody was on record. Findings that already have a record keep it as it is.
+
+Findings whose membership was severed before 3.3.0 (by an expiry or a re-import) cannot be
+recovered: that history was never kept, and the backfill can only see the Findings that are still
+members.
 
 ### Standing acceptances
 
