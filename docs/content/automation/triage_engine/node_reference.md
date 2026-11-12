@@ -424,11 +424,13 @@ A Finding the rule runs on is never also a target. So **Run Now** of a rule endi
 
 `finding.merge`
 
-Merges the active Findings of one Asset that share a key into one Finding, the same merge the Findings list's **Merge** action and `POST /api/v2/findings/merge/` make. The Finding that is kept gets a note listing the Findings merged into it, and each merged Finding gets a note naming the one it was merged into.
+Merges the active Findings that reach the node and share a key, per Asset, into one Finding, the same merge the Findings list's **Merge** action and `POST /api/v2/findings/merge/` make. The Finding that is kept gets a note listing the Findings merged into it. With **Set Inactive**, each merged Finding also gets a note naming the one it was merged into.
+
+Only the Findings that reach the node are grouped. A rule on **On Finding Event** (for example after an import) merges that event's Findings among themselves, never into the Asset's existing Findings. To merge an Asset's existing Findings, sweep it with **Manual Run** or **On a Schedule**.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Group By** | Hash Code | Findings of one Asset with the same value here are merged: Hash Code, Title, Vulnerability ID or Unique ID From Tool. A Finding with no value is left alone. |
+| **Group By** | Hash Code | Findings that reach the node from one Asset with the same value here are merged: Hash Code, Title, Vulnerability ID or Unique ID From Tool. A Finding with no value is left alone. |
 | **Keep** | Oldest Finding | Which Finding of each group the others merge into: Oldest Finding, Newest Finding, or Highest Severity (the oldest among equals). |
 | **Add Endpoints** | on | Copy the merged Findings' Endpoints (or Locations) onto the Finding that is kept. |
 | **Append Descriptions** | off | Append the merged Findings' descriptions. |
@@ -439,9 +441,9 @@ Merges the active Findings of one Asset that share a key into one Finding, the s
 
 Findings of different Assets are never merged, and neither are inactive Findings. A merged Finding is inactive afterwards, so running the rule again finds nothing more to merge.
 
-The rule owner needs edit permission on every Finding a merge touches. A Finding the owner can only see is neither kept nor merged, and the run trace counts it as not edited.
+The rule owner needs edit permission on every Finding a merge touches. A Finding the owner can only see is neither kept nor merged, and the run trace counts it as not edited. With **Delete Permanently**, a merged Finding the owner may edit but not delete is left in place, and the run trace counts it as not deleted.
 
-The run trace lists which Findings merged into which (the first 50 merges, with a count of the rest), so a dry run shows the merges before you enable the rule. A sweep that runs over many Findings works through them in chunks: the Finding chosen to keep in the first chunk that reaches a group is the one later chunks merge into, which for **Oldest Finding** is always the oldest. Up to 100,000 groups are carried from chunk to chunk this way; past that, a group first reached in a later chunk merges within its chunk, and the run trace counts those groups.
+The run trace lists which Findings merged into which (the first 50 merges, with a count of the rest), so a dry run shows the merges before you enable the rule. A sweep that runs over many Findings works through them in chunks, and a group can arrive over several of them: the Finding kept is still the one **Keep** names across the whole sweep. Up to 100,000 groups are followed from chunk to chunk this way; past that, a group first reached in a later chunk merges within its chunk, and the run trace counts those groups.
 
 ### Add Tags
 
