@@ -37,8 +37,9 @@ In the Pro UI, open the Asset, then choose **Notifications** from the ⚙️ gea
 * **Test Added** and **Scan Added**
 * **SLA Breach** and **SLA Breach (Combined)**
 * **Risk Acceptance Expiring**
+* **Finding Risk Accepted**, **Threat Intel Escalation** and **AI Component Discovered**: the Pro events that are sent about one Asset
 
-Tick a box to receive that event over that method, then **Submit**. The box under a method's name ticks or clears it for every event. Opening the dialog changes nothing: an Asset starts with every event off until settings are submitted for it.
+Tick a box to receive that event over that method, then **Submit**. The box under a method's name ticks or clears it for every event. Opening the dialog changes nothing: an Asset starts with every event off until settings are submitted for it. Other Pro events (connector health, work assignments, review requests and the like) are sent to named people or are not about one Asset, so they are set on Personal Notifications only.
 
 In the Classic UI, this configuration is changed from the **Notifications** section on the **Asset** page: e.g. `your-instance.defectdojo.com/product/{id}`.
 
