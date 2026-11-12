@@ -89,12 +89,13 @@ Numeric filters — including **Age** and **SLA** — offer a match operator alo
 
 ## SLA filters
 
-Three filters cover SLA, and they answer different questions:
+Four filters cover SLA, and they answer different questions:
 
 | Filter | Type | What it matches |
 | --- | --- | --- |
 | **SLA Expiration Date** | Date, with the operators above | The date the Finding's SLA runs out. |
-| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline, and `Less Than 7` finds what is due within the week. |
+| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline. `Less Than or Equal To 7` finds what is due within the week **and** everything already overdue; add **SLA Status** to leave the overdue ones out. |
+| **SLA Status** | Breached / Within SLA | Whether the Finding has breached its SLA, the same verdict as the icon in the **SLA** column. **Breached** matches open Findings past their SLA Expiration Date and Mitigated Findings that were Mitigated after it. **Within SLA** matches the rest, including an open Finding due today. Findings with no SLA match neither value. |
 | **Mitigated Within SLA** | True / False | Whether a Finding that **has been mitigated** was mitigated before its SLA expired. |
 
 **Mitigated Within SLA is narrower than it sounds, and this catches people out.** Both values only ever match Findings that are **already mitigated** and are **not Info severity**:
@@ -103,6 +104,15 @@ Three filters cover SLA, and they answer different questions:
 * **False** — mitigated after the SLA expiration date.
 
 An **open** Finding that is already overdue matches **neither** value, because it has not been mitigated yet. To find those, use **SLA** `Less Than 0` instead. Info-severity Findings are excluded from both sides.
+
+### Findings due soon, without the overdue ones
+
+The **SLA** filter holds one condition, so it cannot say "between 0 and 7 days" on its own. Combine it with **SLA Status**:
+
+1. Add **SLA** with **Less Than or Equal To** `7`.
+2. Add **SLA Status** with **Within SLA**.
+
+The list then shows Findings due today or within the next 7 days, and none that have already breached. Add **Status** `Active` to keep only open Findings.
 
 > If a Finding's SLA configuration has **Cap SLA by CISA KEV Due Date** enabled, both **SLA** and **SLA Expiration Date** reflect the tightened, KEV-capped deadline rather than the plain severity-based window. There is no separate indicator for this in the filters — see [EPSS / KEV](/triage_findings/finding_scoring/epss_kev/).
 
@@ -129,6 +139,7 @@ These Filters are assigned at the time of issue creation, and cannot be directly
 * Age (Finding age in days)
 * SLA (days remaining on the SLA clock — negative means overdue; see [SLA filters](#sla-filters))
 * SLA Expiration Date (see [SLA filters](#sla-filters))
+* SLA Status (Breached or Within SLA; see [SLA filters](#sla-filters))
 * Mitigated Within SLA (True or False — note this only matches Findings that have already been Mitigated; see [SLA filters](#sla-filters))
 * Reporter (user or service who created the Finding)
 * Found by (refers to the Tool)
