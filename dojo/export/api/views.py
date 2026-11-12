@@ -259,7 +259,9 @@ def audit_history_lines(product: Product, counts: dict, render) -> Iterator[byte
         rows = pages(
             events,
             ("pgh_obj_id", "pgh_id"),
-            lambda event: Q(pgh_obj_id__gt=event.pgh_obj_id) | Q(pgh_obj_id=event.pgh_obj_id, pgh_id__gt=event.pgh_id),
+            # Without the >= bound, Postgres scans every page from the start.
+            lambda event: Q(pgh_obj_id__gte=event.pgh_obj_id)
+            & (Q(pgh_obj_id__gt=event.pgh_obj_id) | Q(pgh_id__gt=event.pgh_id)),
         )
         for event in rows:
             counts["audit_events"] += 1
