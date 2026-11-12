@@ -101,8 +101,9 @@ last computed). **Insert Number** under the formula, in the field's row and when
 lists every number it can read and adds the one you pick to the end of the formula.
 
 A computed field holds what its formula gives and nothing else. Where the formula has no result for a
-record (an input it reads is missing, it divides by zero, or it averages no Findings), the record's
-value is empty, including a value typed in before the field became computed.
+record (an input it reads is missing, it divides by zero, it averages no Findings, or a step is too
+large to be a number), the record's value is empty, including a value typed in before the field became
+computed.
 
 A formula reads the record's own numbers:
 
@@ -162,7 +163,10 @@ When a computed field gets a new value, the Triage Engine hears it the same way 
 field. On an Asset, a rule triggered [On Asset Event](/automation/triage_engine/node_reference/#on-asset-event)
 for updates sees `custom_fields.<name>` in `ctx.changed_fields`, so an If / Filter node with
 `ctx.changed_fields` `contains` `custom_fields.<name>` runs only when that value moves. On a Finding,
-it is a Finding update. A recompute that leaves the value unchanged raises no event.
+it is a Finding update. A recompute that leaves the value unchanged raises no event. The one
+recompute that announces no Finding updates is the one after the formula itself changes: a new formula
+can move the value on every Finding at once, so a rule reading it sees the new value on that Finding's
+next change instead. Asset updates are announced as usual.
 
 When a rule's write is what moved the computed value (the rule set a field the formula reads), the
 event belongs to that rule's run, as a change the rule made itself would: it does not start the same
@@ -173,7 +177,7 @@ rather than feeding itself forever.
 Counts and aggregates include every Finding of the record, whoever is looking, so everyone sees the
 same value, as with the Asset grade. An Integer field rounds half away from zero; a Decimal field keeps
 up to four decimal places. A record whose formula reads a number it does not have, or divides by zero
-with `/`, keeps its previous value: use `div` or `coalesce` to give such a record a value of its own.
+with `/`, is left empty: use `div` or `coalesce` to give such a record a value of its own.
 
 A computed value cannot be typed on the record, set through the API, or written by a rule; on the
 record and its forms it shows read-only, with its formula. A field cannot be made computed while an
