@@ -214,7 +214,7 @@ SLA 配置包含分配给 DefectDojo 每个**严重程度**或**风险**值的�
 
 **发现项重新激活时重启 SLA**:如果启用此选项,当发现项被重新打开时,SLA 将重新开始计时。否则,SLA 将基于发现项的创建时间计算。
 
-**Cap SLA by CISA KEV Due Date**:如果启用此选项,列入 KEV 的发现项的 SLA 截止日期会被提前到 CISA 为该 CVE 规定的截止日期。在 KEV 查询处于关闭状态的自托管实例上,该截止日期来自[威胁情报数据包](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle),因此无需开启该查询,这一上限也会生效。大多数 CISA 截止日期都已过去,因此开启此选项后,在升级后的首次数据包加载之后,许多列入 KEV 的发现项可能会立即显示为违反 SLA。
+**Cap SLA by CISA KEV Due Date**:如果启用此选项,列入 KEV 的发现项的 SLA 截止日期会被提前到 CISA 为该 CVE 规定的截止日期。在 KEV 查询处于关闭状态的自托管实例上,该截止日期来自[威胁情报数据包](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle),因此无需开启该查询,这一上限也会生效。该上限只依据 CISA KEV 列表:**Vendor Reported Exploited** 报告不会使截止日期提前。大多数 CISA 截止日期都已过去,因此开启此选项后,在升级后的首次数据包加载之后,许多列入 KEV 的发现项可能会立即显示为违反 SLA。
 
 在编辑 SLA 时,您可以选择该 SLA 使用**严重程度**还是**风险**作为分配修复天数的基准。这可以通过在表单的**服务级别配置类型**部分中选择相应选项来完成。
 

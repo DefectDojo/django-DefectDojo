@@ -36,7 +36,10 @@ Le stesse finestre di base, ulteriormente ridotte in base a sfruttabilità ed es
 | Nessuna delle due | Le finestre FedRAMP Rev 5 indicate sopra |
 
 **Sfruttabile in modo credibile** significa che il riscontro è presente nell'elenco KEV, oppure che il suo punteggio
-EPSS è pari o superiore alla soglia impostata. **Raggiungibile da internet** è segnalato da un tag del riscontro —
+EPSS è pari o superiore alla soglia impostata. Presente nell'elenco KEV significa presente nel catalogo CISA KEV.
+Una segnalazione **Vendor Reported Exploited** proveniente da uno scanner, da un connettore o da una persona non rende
+un riscontro sfruttabile in modo credibile, e non ne modifica la scadenza, a meno che tu non scriva una regola che lo
+preveda. **Raggiungibile da internet** è segnalato da un tag del riscontro —
 `internet-reachable` per impostazione predefinita.
 
 Tutte le soglie, i nomi dei tag e i conteggi dei giorni sono modificabili nella configurazione SLA.

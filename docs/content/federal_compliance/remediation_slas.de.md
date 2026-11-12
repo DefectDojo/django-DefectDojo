@@ -36,7 +36,10 @@ Dieselben Basisfristen, weiter verschärft durch Ausnutzbarkeit und Exposition:
 | Keines von beidem | Die oben genannten FedRAMP-Rev-5-Fristen |
 
 **Glaubhaft ausnutzbar** bedeutet, dass der Befund im KEV gelistet ist oder sein EPSS-Score Ihren
-Schwellenwert erreicht oder überschreitet. **Über das Internet erreichbar** wird durch einen Befund-Tag
+Schwellenwert erreicht oder überschreitet. Im KEV gelistet heißt, dass er im CISA-KEV-Katalog aufgeführt ist. Eine
+**Vendor Reported Exploited**-Meldung eines Scanners, eines Connectors oder einer Person macht einen Befund
+nicht glaubhaft ausnutzbar und ändert seine Frist nicht, es sei denn, Sie schreiben eine Regel, die dies vorsieht.
+**Über das Internet erreichbar** wird durch einen Befund-Tag
 signalisiert — standardmäßig `internet-reachable`.
 
 Alle Schwellenwerte, Tag-Namen und Tagesangaben sind in der SLA-Konfiguration bearbeitbar.

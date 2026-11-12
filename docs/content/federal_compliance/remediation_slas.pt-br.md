@@ -37,7 +37,9 @@ As mesmas janelas básicas, ainda mais reduzidas conforme a explorabilidade e a 
 | Nenhum dos dois | As janelas do FedRAMP Rev 5 acima |
 
 **Exploração crível** significa que o achado está listado no KEV, ou que sua pontuação EPSS está no seu
-limite ou acima dele. **Acessível pela internet** é sinalizado por uma tag de achado — `internet-reachable`
+limite ou acima dele. Listado no KEV significa listado no catálogo CISA KEV. Uma alegação
+**Vendor Reported Exploited** de um scanner, de um conector ou de uma pessoa não faz com que um achado
+tenha exploração crível, nem altera o seu prazo, a menos que você escreva uma regra que diga isso. **Acessível pela internet** é sinalizado por uma tag de achado — `internet-reachable`
 por padrão.
 
 Todos os limites, nomes de tags e contagens de dias são editáveis na configuração de SLA.

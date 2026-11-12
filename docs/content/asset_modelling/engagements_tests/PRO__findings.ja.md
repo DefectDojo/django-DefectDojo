@@ -82,13 +82,16 @@ weight: 5
 - **Known Exploited (CISA KEV)**: 脆弱性がCISA Known Exploited Vulnerabilities(KEV)カタログに掲載されているかどうか。
 - **Ransomware Used (CISA KEV)**: その脆弱性がランサムウェアキャンペーンで使用されたとCISA KEVカタログに記録されているかどうか。
 - **KEV登録日**: 検出事項がKEVカタログに追加された日付。
-    - EPSSとKEVの値は[EPSS / KEV同期](/triage_findings/finding_scoring/epss_kev/)によって維持されます。KEVとEPSSのルックアップが無効になっているセルフホストのインスタンスでは、代わりに[脅威インテリジェンスバンドル](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)から取得されます。これらの値は、検出事項の追加フォームおよび編集フォームにある**Threat Intelligence**パネルで手動で設定することもできますが、CVEを参照している検出事項では、次回の同期で入力した値が上書きされます。Known ExploitedまたはRansomware Usedを手動で設定すると、ソースが`manual`のベンダー報告(後述)も記録され、同期によってCISA KEVの値が上書きされても、その報告は残ります。
+    - EPSSとKEVの値は[EPSS / KEV同期](/triage_findings/finding_scoring/epss_kev/)によって維持されます。KEVとEPSSのルックアップが無効になっているセルフホストのインスタンスでは、代わりに[脅威インテリジェンスバンドル](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)から取得されます。
+    - Known Exploited (CISA KEV)、Ransomware Used (CISA KEV)、KEV登録日は、CISA KEVカタログからのみ設定されます。これらはUIでもAPIでも読み取り専用であるため、スキャナー、コネクター、または人が設定することはできません。CISAが掲載していない脆弱性が悪用されていることを記録するには、後述のVendor Reportedフィールドを使用してください。
+    - EPSSの値は、引き続き検出事項の追加フォームおよび編集フォームにある**Threat Intelligence**パネルで手動で設定できますが、CVEを参照している検出事項では、次回の同期で入力した値が上書きされます。
 - **Vendor Reported Exploited**: スキャナー、コネクター、または人が、その脆弱性を実際に悪用されている(in the wild)と報告したかどうか。この値はKnown Exploited (CISA KEV)とは別に保持されるため、KEVの値と件数はCISAカタログのみを反映し、報告のほうも引き続き表示され、優先度に反映されます。
 - **Vendor Reported Ransomware**: スキャナー、コネクター、または人が、その脆弱性をランサムウェアで使用されたと報告したかどうか。Mendスキャンの悪意のあるパッケージのフラグは、ランサムウェアとしては記録されません。
-- **Vendor Reported Source**: 報告を行った主体。スキャナーのテストタイプ名またはコネクター自体の名前、人またはAPIクライアントが設定した場合は`manual`、これらのフィールドを追加したアップグレードより前から検出事項に存在していたフラグの場合は`pre-upgrade`になります。
-    - API v2では、これらは`vendor_exploited`、`vendor_ransomware_used`、`vendor_exploited_source`フィールドです。API経由で書き込まれた値は、ソース`manual`として記録されます。
+- **Vendor Reported Source**: 報告を行った主体。スキャナーのテストタイプ名またはコネクター自体の名前、人またはAPIクライアントが設定した場合は`manual`、アップグレード時に移行されたフラグ(後述)の場合は`pre-upgrade`になります。
+    - Vendor Reported ExploitedとVendor Reported Ransomwareは、検出事項の追加フォームおよび編集フォームで設定およびクリアできます。API v2では、これらは`vendor_exploited`、`vendor_ransomware_used`、`vendor_exploited_source`フィールドです。フォームまたはAPI経由で設定された値は、ソース`manual`として記録されます。
     - `manual`の報告が、スキャナーやエンリッチメントによって上書きされることはありません。スキャンを再インポートすると、スキャナーは自身が以前に行った報告を取り下げることができますが、他のソースによる報告を取り下げることはできません。
-    - Known Exploited (CISA KEV)またはVendor Reported Exploitedのいずれかが設定されていれば、優先度の計算ではその検出事項を悪用済みとして扱います。そのため、CISAがそのCVEを掲載していない場合でも、スキャナーの警告によって優先度は引き上げられます。**CISA KEV**スコアカード列や**CISA KEV Open** KPIなど、既知の悪用済み検出事項の件数には、CISA KEVの値のみが使用されます。
+    - アップグレード時には、スキャナーまたは人が設定していたKnown ExploitedとRansomware Usedのフラグが、CISA KEVフィールドからVendor Reportedフィールドへ、ソース`pre-upgrade`として移行されます。そのため、アップグレード後にCISA KEVの件数が減ることがありますが、失われるフラグはありません。
+    - 優先度の計算では両方が参照されます。Known Exploited (CISA KEV)またはVendor Reported Exploitedのいずれかが設定されていれば、その検出事項を悪用済みとして扱います。そのため、CISAがそのCVEを掲載していない場合でも、スキャナーの警告によって優先度は引き上げられます。**CISA KEV**スコアカード列や**CISA KEV Open** KPIなど、既知の悪用済み検出事項の件数には、CISA KEVの値のみが使用されます。規制上の期限(FedRAMP VDRの階層、脆弱性対応ポリシーの期限、CISA KEVの期限日による上限)も、CISA KEV、EPSS、および悪用が現実的かどうかについての直接の判断のみを使用します。Vendor Reportedの報告がこれらの期限を変更するのは、そうするルールを作成した場合のみです。
 - **検出元**: 脆弱性を特定したツールの種類。
 - **CVSSv3およびCVSSv4のベクターとスコア**: 選択した検出事項のCVSS3およびCVSS4のベクターとスコア。
 - **インテグレーターチケット**: 検出事項に関連付けられたサードパーティ製課題管理システムのチケット番号。

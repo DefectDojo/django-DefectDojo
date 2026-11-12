@@ -214,7 +214,7 @@ SLA構成には、DefectDojoの各**Severity(深刻度)**または**Risk**値に
 
 **Restart SLA on Finding Reactivation**:このオプションを有効にすると、検出事項がReopened(再オープン)された際にSLAが最初からやり直されます。無効の場合、SLAは検出事項が作成された時点を基準にします。
 
-**Cap SLA by CISA KEV Due Date**:このオプションを有効にすると、KEVに掲載されている検出事項のSLA期限が、そのCVEに対するCISAの期限日まで前倒しされます。KEVのルックアップが無効になっているセルフホストのインスタンスでは、期限日は[脅威インテリジェンスバンドル](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)から取得されるため、ルックアップを有効にしなくてもこの上限が適用されます。CISAの期限日の多くはすでに過ぎているため、このオプションを有効にしていると、アップグレード後の最初のバンドル読み込みの直後に、KEVに掲載されている多くの検出事項がSLA違反として表示されることがあります。
+**Cap SLA by CISA KEV Due Date**:このオプションを有効にすると、KEVに掲載されている検出事項のSLA期限が、そのCVEに対するCISAの期限日まで前倒しされます。KEVのルックアップが無効になっているセルフホストのインスタンスでは、期限日は[脅威インテリジェンスバンドル](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)から取得されるため、ルックアップを有効にしなくてもこの上限が適用されます。この上限はCISA KEVへの掲載のみを参照するため、**Vendor Reported Exploited**の報告によって期限が前倒しされることはありません。CISAの期限日の多くはすでに過ぎているため、このオプションを有効にしていると、アップグレード後の最初のバンドル読み込みの直後に、KEVに掲載されている多くの検出事項がSLA違反として表示されることがあります。
 
 SLAを編集する際、Days To Remediate(修復までの日数)を割り当てる基準として、そのSLAが**Severity(深刻度)**と**Risk**のどちらを使用するかを選択できます。これはフォームの**Service Level configuration Type**セクションから該当のオプションを選択することで設定します。
 

@@ -31,7 +31,7 @@ Les mêmes fenêtres de base, encore resserrées en fonction de l'exploitabilit�
 | Accessible depuis Internet uniquement | 30 jours |
 | Ni l'un ni l'autre | Les fenêtres FedRAMP Rev 5 ci-dessus |
 
-**Exploitabilité crédible** signifie que la constatation figure dans la liste KEV, ou que son score EPSS est égal ou supérieur à votre seuil. **Accessible depuis Internet** est signalé par une étiquette de constatation — `internet-reachable` par défaut.
+**Exploitabilité crédible** signifie que la constatation figure dans la liste KEV, ou que son score EPSS est égal ou supérieur à votre seuil. Figurer dans la liste KEV signifie figurer dans le catalogue CISA KEV. Une déclaration **Vendor Reported Exploited** provenant d'un scanner, d'un connecteur ou d'une personne ne confère pas à une constatation une exploitabilité crédible, et ne modifie pas son échéance, sauf si vous écrivez une règle en ce sens. **Accessible depuis Internet** est signalé par une étiquette de constatation — `internet-reachable` par défaut.
 
 Tous les seuils, noms d'étiquettes et nombres de jours sont modifiables dans la configuration du SLA.
 

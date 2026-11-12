@@ -31,7 +31,7 @@ Las mismas ventanas base, ajustadas de forma más estricta según la explotabili
 | Solo accesible desde internet | 30 días |
 | Ninguna de las anteriores | Las ventanas de FedRAMP Rev 5 indicadas arriba |
 
-**Explotable de forma creíble** significa que el hallazgo está incluido en KEV, o que su puntuación EPSS es igual o superior a su umbral. **Accesible desde internet** se indica mediante una etiqueta del hallazgo — `internet-reachable` de forma predeterminada.
+**Explotable de forma creíble** significa que el hallazgo está incluido en KEV, o que su puntuación EPSS es igual o superior a su umbral. Incluido en KEV significa incluido en el catálogo CISA KEV. Una declaración **Vendor Reported Exploited** de un escáner, un conector o una persona no hace que un hallazgo sea explotable de forma creíble, ni modifica su plazo, a menos que usted escriba una regla que así lo indique. **Accesible desde internet** se indica mediante una etiqueta del hallazgo — `internet-reachable` de forma predeterminada.
 
 Todos los umbrales, nombres de etiquetas y cantidades de días se pueden editar en la configuración de SLA.
 
