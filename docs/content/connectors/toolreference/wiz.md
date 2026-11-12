@@ -58,8 +58,9 @@ To list every finding one owner is responsible for, filter findings by the tag, 
 Things to know:
 
 * **Only Issues are tagged.** Wiz does not return subscription tags with Vulnerability Findings, so those findings get no `wiz-sub-` tags.
-* **The tags stay current.** When a subscription's tag changes in Wiz, the next sync replaces the old `wiz-sub-` tag on findings DefectDojo already imported. Other tags on the finding, including ones added by hand, are left alone. Do not add `wiz-sub-` tags by hand: a sync treats them as its own and removes any the subscription does not carry.
-* **Changing the list triggers one full resync**, as with **Import Finding Types**, so findings imported before the change get their tags on the next sync. Removing a key removes its tags from the findings.
+* **A tag change reaches existing findings at the next full resync.** After the first sync, the connector asks Wiz only for Issues whose status changed since the last sync. Changing a subscription's tags does not change any Issue's status, so a finding keeps its old `wiz-sub-` tag until its Issue changes status in Wiz or a full resync runs. Each time a finding is synced, its `wiz-sub-` tags are replaced with the subscription's current ones. Other tags on the finding, including ones added by hand, are left alone. Do not add `wiz-sub-` tags by hand: a sync treats them as its own and removes any the subscription does not carry.
+* **To pick up a tag change everywhere, force a full resync** by changing **Subscription Tags to Copy**, for example by adding a key. Reordering the keys or changing their case does not count as a change.
+* **Changing the list triggers one full resync**, as with **Import Finding Types**, so findings imported before the change get their tags on the next sync. Removing a key removes its tags from the findings at that resync.
 
 #### **Asset Exposure**
 
