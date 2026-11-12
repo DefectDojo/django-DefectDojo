@@ -5,6 +5,10 @@ A location reference the importer creates carries the status of what it referenc
 # already mitigated, and never reactivated an Asset reference that was Mitigated when a new Active finding
 # reference joined it. The Locations list then counted closed findings as active on a location whose Asset
 # reference read Mitigated.
+
+# Only a finding the report marks mitigated gets a Mitigated reference. An inactive, unverified, duplicate,
+# False Positive, Out Of Scope or Risk Accepted finding keeps the Active reference imports have always created
+# (test_import_reimport pins that contract for inactive imports).
 """
 
 from django.test import override_settings
@@ -52,12 +56,15 @@ class TestLocationReferenceStatusOnCreate(DojoTestCase):
     def _asset_ref_status(self):
         return LocationProductReference.objects.get(product=self.product).status
 
-    def test_a_new_finding_reference_follows_the_findings_status(self):
+    def test_a_new_finding_reference_is_mitigated_only_for_a_mitigated_finding(self):
         cases = [
             ("open finding", {"active": True}, FindingLocationStatus.Active),
             ("mitigated finding", {"active": False, "is_mitigated": True, "mitigated": timezone.now()}, FindingLocationStatus.Mitigated),
-            ("inactive finding", {"active": False}, FindingLocationStatus.Mitigated),
-            ("duplicate", {"active": False, "duplicate": True}, FindingLocationStatus.Mitigated),
+            ("inactive, not mitigated finding", {"active": False, "verified": False}, FindingLocationStatus.Active),
+            ("duplicate", {"active": False, "duplicate": True}, FindingLocationStatus.Active),
+            ("false positive", {"active": False, "false_p": True}, FindingLocationStatus.Active),
+            ("out of scope", {"active": False, "out_of_scope": True}, FindingLocationStatus.Active),
+            ("risk accepted", {"active": False, "risk_accepted": True}, FindingLocationStatus.Active),
         ]
         for label, status, expected in cases:
             with self.subTest(label):
@@ -69,6 +76,7 @@ class TestLocationReferenceStatusOnCreate(DojoTestCase):
     def test_a_new_asset_reference_is_active_only_when_a_finding_reference_is_active(self):
         cases = [
             ("only a mitigated finding", [{"active": False, "is_mitigated": True}], ProductLocationStatus.Mitigated),
+            ("only an inactive, not mitigated finding", [{"active": False}], ProductLocationStatus.Active),
             ("an open finding", [{"active": True}], ProductLocationStatus.Active),
             ("an open and a mitigated finding", [{"active": False, "is_mitigated": True}, {"active": True}], ProductLocationStatus.Active),
         ]

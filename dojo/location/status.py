@@ -39,19 +39,6 @@ HUMAN_FINDING_LOCATION_STATUSES = (
 )
 
 
-def status_from_finding(finding) -> str:
-    """The status a location reference carries for ``finding``, from the finding's own status."""
-    finding_status = finding.status()
-    if any(f_status in finding_status for f_status in ["Mitigated", "Inactive", "Duplicate"]):
-        return FindingLocationStatus.Mitigated
-    if "False Positive" in finding_status:
-        return FindingLocationStatus.FalsePositive
-    if "Risk Accepted" in finding_status:
-        return FindingLocationStatus.RiskAccepted
-    # Active, to be on the safe side
-    return FindingLocationStatus.Active
-
-
 def rollup_finding_location_status(statuses: Iterable[str]) -> str | None:
     """
     Return the status of one location on a finding, given the status of each of its reference rows.

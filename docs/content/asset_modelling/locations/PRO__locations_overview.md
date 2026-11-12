@@ -71,7 +71,7 @@ This separation is what allows a library to exist on an Asset *without* needing 
 When a parser produces a Finding that references a URL or library, the importer:
 
 1. Looks up an existing Location matching the URL or pURL; if none exists, it creates one.
-2. Creates a Finding Reference linking the Finding to the Location. The reference takes the Finding's status: `Active` for an open Finding, `Mitigated` for one the report already marks mitigated or inactive.
+2. Creates a Finding Reference linking the Finding to the Location. The reference is `Mitigated` when the report already marks the Finding mitigated, and `Active` otherwise (including an inactive, duplicate, False Positive, Out of Scope or Risk Accepted Finding).
 3. Creates (or reuses) an Asset Reference so the Location also lives on the parent Asset.
 
 Existing parsers have been updated to emit Location data when the feature flag is on, and to fall back to the legacy Endpoint model when it is off. No reconfiguration is needed when Locations are enabled — the next import will route through the Locations pipeline automatically.

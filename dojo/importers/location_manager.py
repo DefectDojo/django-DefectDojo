@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
-from dojo.location.status import FindingLocationStatus, ProductLocationStatus, status_from_finding
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
@@ -33,6 +33,19 @@ class StatusUpdateEntry(NamedTuple):
     existing_finding: Finding
     new_finding: Finding
     user: Dojo_User
+
+
+def new_finding_ref_status(finding: Finding) -> str:
+    """
+    The status of a finding ref an import creates: Mitigated when the report marks the finding mitigated.
+
+    Every other finding (inactive, unverified, duplicate, false positive, out of scope, risk accepted) gets an Active
+    ref, as imports always have. A false positive or out of scope finding is saved with is_mitigated set, so those
+    are excluded explicitly.
+    """
+    if finding.is_mitigated and not (finding.false_p or finding.out_of_scope or finding.risk_accepted):
+        return FindingLocationStatus.Mitigated
+    return FindingLocationStatus.Active
 
 
 class LocationManager(BaseLocationManager):
@@ -191,8 +204,8 @@ class LocationManager(BaseLocationManager):
         # List of all location IDs, for querying existing refs
         all_location_ids = [loc.location_id for loc in saved]
 
-        # Determine necessary finding refs to create. Each new ref carries its finding's status: a finding the
-        # report already marks mitigated does not leave an Active ref behind.
+        # Determine necessary finding refs to create. A finding the report already marks mitigated gets a Mitigated
+        # ref, so it does not leave an Active ref behind (see new_finding_ref_status).
         if self._locations_by_finding:
             all_finding_ids = [finding.id for finding, _ in self._locations_by_finding]
             # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
@@ -207,7 +220,7 @@ class LocationManager(BaseLocationManager):
 
             for finding, cleaned_locations in self._locations_by_finding:
                 test_id = self.attribution_test_id(finding)
-                status = status_from_finding(finding)
+                status = new_finding_ref_status(finding)
                 # Locations were already cleaned at record time — identity_hash is set, so we can
                 # look up the persisted location directly.
                 for location in cleaned_locations:
@@ -227,7 +240,7 @@ class LocationManager(BaseLocationManager):
         all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
 
         # Determine necessary product refs to create. A product ref is Active unless every new finding ref to its
-        # location is closed; a location recorded for the product alone stays Active, as before.
+        # location is Mitigated; a location recorded for the product alone stays Active, as before.
         new_ref_statuses: dict[int, set[str]] = {}
         for ref in all_finding_refs:
             new_ref_statuses.setdefault(ref.location_id, set()).add(ref.status)
