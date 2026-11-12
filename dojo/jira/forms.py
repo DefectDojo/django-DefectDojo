@@ -278,12 +278,27 @@ class JIRAProjectForm(forms.ModelForm):
             self.fields["project_key"].required = True
             self.fields["epic_issue_type_name"].required = True
 
+    def legacy_sla_notification_posted(self):
+        """True when the post checks the product_jira_sla_notification checkbox the SLA comment select replaced."""
+        return self.data.get(self.add_prefix("product_jira_sla_notification"), "").lower() in {"on", "true", "1"}
+
+    def has_changed(self):
+        # The legacy checkbox is no form field, so it would not count as a change on its own.
+        return super().has_changed() or (
+            self.legacy_sla_notification_posted() and sla_notification_comment_choice(self.instance) != "always"
+        )
+
     def clean(self):
         logger.debug("validating jira project form")
         cleaned_data = super().clean()
 
-        # A post without the choice keeps the stored setting; the model's clean() rejects send and suppress together.
-        choice = cleaned_data.get("sla_notification_comments") or sla_notification_comment_choice(self.instance)
+        # A post without the choice keeps the stored setting, unless it sends the checkbox this select replaced
+        # (a script or a saved form): "on" there still means always send. The model's clean() rejects send and
+        # suppress together.
+        choice = cleaned_data.get("sla_notification_comments")
+        if not choice and self.legacy_sla_notification_posted():
+            choice = "always"
+        choice = choice or sla_notification_comment_choice(self.instance)
         self.instance.product_jira_sla_notification, self.instance.suppress_sla_notification_comments = SLA_NOTIFICATION_COMMENT_FIELDS[choice]
 
         logger.debug("clean: inherit: %s", self.cleaned_data.get("inherit_from_product", False))

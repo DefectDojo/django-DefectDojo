@@ -192,6 +192,35 @@ class JIRAConfigProductTest(DojoTestCase):
         response = self.client.get(reverse("edit_product", args=(product.id,)))
         self.assertContains(response, f'<option value="{choice}" selected>', html=False)
 
+    # A post from before the select (scripts, saved forms) sends the old checkbox and no choice: "on" still means
+    # always send. A post with neither keeps what is stored, as before.
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
+    def test_legacy_sla_comment_checkbox_post_still_sends(self, jira_mock):
+        jira_mock.return_value = True
+        data = self.get_new_product_with_jira_project_data()
+        data.pop("jira-project-form-sla_notification_comments", None)
+        data["jira-project-form-product_jira_sla_notification"] = "on"
+        product = self.add_product_jira_with_data(data, expected_delta_jira_project_db=1)
+
+        persisted = JIRA_Project.objects.get(product=product)
+        self.assertEqual((persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (True, False))
+
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
+    def test_post_without_sla_comment_fields_keeps_the_stored_setting(self, jira_mock):
+        jira_mock.return_value = True
+        data = self.get_new_product_with_jira_project_data()
+        data["jira-project-form-sla_notification_comments"] = "never"
+        product = self.add_product_jira_with_data(data, expected_delta_jira_project_db=1)
+
+        edit = self.get_product_with_jira_project_data2(product)
+        edit.pop("jira-project-form-sla_notification_comments", None)
+        edit.pop("jira-project-form-product_jira_sla_notification", None)
+        self.edit_jira_project_for_product_with_data(product, edit, expected_delta_jira_project_db=0)
+
+        persisted = JIRA_Project.objects.get(product=product)
+        self.assertEqual(persisted.project_key, edit["jira-project-form-project_key"], "the edit was not saved")
+        self.assertEqual((persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (False, True))
+
     def test_jira_project_cannot_both_send_and_suppress_sla_comments(self):
         project = JIRA_Project(
             jira_instance=JIRA_Instance.objects.get(pk=2), project_key="BOTH",
