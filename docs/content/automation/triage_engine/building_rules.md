@@ -214,7 +214,7 @@ ctx.rule_name
 
 A path that does not resolve produces no value rather than an error.
 
-The path suggestions in a condition, and in a mapping's target, are listed under the same headings as the list page's **Add Filter**, in the same order: a Finding rule follows the Findings list (Finding, Threat Intel, Asset, Engagement and Test, Dates, People, Integrations, Custom Fields) and an Asset rule follows the Assets list. Paths no heading covers, such as `ctx.*`, are listed under **Other**, and an inbound webhook's sample paths under **Webhook Payload**. An Alert rule lists its paths without headings.
+The path suggestions in a condition, and in a mapping's target, are listed under the same headings as the list page's **Add Filter**, in the same order: a Finding rule follows the Findings list (Finding, Threat Intel, Asset, Engagement and Test, Dates, People, Integrations, Custom Fields) and an Asset rule follows the Assets list. The run's own `ctx.*` paths are listed under **This Run**, any other path no heading covers under **Other**, and an inbound webhook's sample paths under **Webhook Payload**. An Alert rule lists its paths without headings. The **Insert Field** menu under a template field uses the same headings (an Alert rule's in the Findings order), and so does the **Field** list of the **Set Finding Field** and **Set Asset Field** actions.
 
 An Asset rule reads its items the same way, through `product.*`, `product_type.*` and `ctx.*` paths. `ctx.changed_fields` carries the names of the fields an update changed, and the insert menu only offers paths the rule's items actually carry.
 
