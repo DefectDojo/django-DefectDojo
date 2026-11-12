@@ -289,6 +289,8 @@ def auto_import_scan(
         "product_type_name": product_type_name,
         "test_title": test_title,
         "auto_create_context": auto_create_context,
+        # A report's tool picks between tests that share a title (get_target_test_if_exists).
+        "scan": scan_file,
     }
     try:
         auto.process_import_meta_data_from_dict(context)

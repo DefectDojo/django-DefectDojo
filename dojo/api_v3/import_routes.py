@@ -135,7 +135,7 @@ def _resolve_test_for_reimport(request: HttpRequest, test_id: int) -> Test:
     return test
 
 
-def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object | None:
+def _check_auto_permission(request: HttpRequest, payload: ImportForm, scan_file: UploadedFile | None = None) -> object | None:
     """
     Mirror UserHasReimportPermission: resolve target and check, else check auto-create.
 
@@ -153,6 +153,8 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object 
         "product_type_name": payload.organization_name,
         "test_title": payload.test_title,
         "auto_create_context": payload.auto_create_context,
+        # A report's tool picks between tests that share a title (get_target_test_if_exists).
+        "scan": scan_file,
     }
     auto.process_import_meta_data_from_dict(context)
     context["product_type"] = auto.get_target_product_type_if_exists(**context)
@@ -228,7 +230,7 @@ def build_import_router(*, auth=NOT_SET) -> Router:
                 )
             else:
                 # mode == "auto", or reimport without an explicit test id -> resolve/auto-create.
-                jira_driver = _check_auto_permission(request, payload)
+                jira_driver = _check_auto_permission(request, payload, file)
                 common["push_to_jira"] = _resolve_push_to_jira(payload, jira_driver)
                 result = auto_import_scan(
                     engagement=get_object_or_none(Engagement, pk=payload.engagement) if payload.engagement else None,

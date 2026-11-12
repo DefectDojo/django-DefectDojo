@@ -311,6 +311,8 @@ When `do_not_reactivate` is `True`, a reimport keeps a closed finding closed whe
 
 A reimport will automatically select the latest test inside the provided engagement that satisfies the provided `scan_type` and (optionally) provided `test_title`.
 
+Some scan types carry reports from more than one tool, and DefectDojo names the test type after the tool the report declares: a GitLab SAST report from Semgrep becomes a `Semgrep Scan (GitLab SAST Report)` test, and SARIF and Generic Findings Import reports work the same way. For these scan types a reimport by `test_title` only selects a test of the report's tool. Reports from two tools can share a `test_title` in one engagement, and each reimports into its own test. A test whose type is the bare scan type names no tool, and takes a report from any tool.
+
 If no existing Test is found, the reimport endpoint will use the import function to import the provided report into a new Test. This means a (CI/CD) script using the API doesn't need to know if a Test already exists, or if it is a first time upload for this Asset / Engagement.
 
 A classic way of reimporting a scan is by specifying the ID of the test instead:
