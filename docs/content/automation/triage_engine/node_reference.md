@@ -69,6 +69,26 @@ Sweeps everything in scope when you press **Run Now** on the rule.
 | **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
 | **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
 
+### On Rule Complete
+
+`trigger.rule_completed`
+
+Sweeps everything in scope each time the rule you pick finishes a run successfully. Use it to run rules in a fixed order: Rule B picks Rule A, so B runs once A is done, and Rule C can pick B in turn. A run of A that fails does not start B.
+
+B does not receive anything from A. It sweeps its own scope, exactly as **Manual Run** does, so B can work on different Findings or Assets than A did. **Run Now** on B sweeps the same way, without waiting for A.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Rule** | none (required) | The rule to wait for. The list offers the rules you can see. A rule cannot pick itself. |
+| **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
+| **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
+
+Each of A's successful runs starts B, whatever started A: a schedule, an event, or **Run Now**. When A runs on every event (for example **On Finding Event**), completions that arrive while B is still waiting to start share one run of B, so a burst of events gives one sweep rather than one per event. A completion that arrives while B is already running starts B once more afterwards. If several rules pick A, they all start when A finishes, and run at the same time. To run them one after another, have each pick the one before it instead.
+
+A rule with an AI step (such as **Check for False Positive**) is done when the step's answers have been applied, not when it hands its Findings to the model. B starts after the run that applies the last answers, once.
+
+Ordered rules are a chain, and the [cascade limits](../runs/#cascading) apply to it: a chain stops after 3 hops (A, B, C and D), and a rule never runs twice in one chain, so two rules that pick each other stop after one round. If B's owner can no longer see A, B's run sweeps nothing, its trace says why, and the rules that pick B do not start either. An export carries the picked rule by its name. When the rule it picks is in the same file, an import picks that rule, so an exported chain imports as a working chain. Otherwise it matches the rule of that name you can see, and leaves it blank, saying so in the import report, when no rule or more than one rule has that name.
+
 ### On a Missing Scan
 
 `trigger.scan_absence`
@@ -917,7 +937,7 @@ Emails a fixed list of addresses over a Messaging Connector. The recipients are 
 
 #### Restricting recipients to DefectDojo users
 
-The **Restrict Triage Engine Emails to DefectDojo Users** feature flag, under **Settings > Feature Flags**, is on by default. It keeps rule emails inside DefectDojo's access control. While it is on, every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each email then goes only to the recipients who can see every Finding, Asset or alert it lists (an email about an import, an import group or a missed scan lists its Asset): a recipient who can see only some of them gets nothing from that send, and the delivery records who was left out and why. A rule that already names another address keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
+The **Restrict Triage Engine Emails to DefectDojo Users** feature flag, under **Settings > Feature Flags**, is on by default. It keeps rule emails inside DefectDojo's access control. While it is on, every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each recipient then gets only what they can see (an email about an import, an import group or a missed scan lists its Asset). An email about a batch whose items some recipients can see only part of is sent in parts: each recipient gets an email listing just the Findings, Assets or alerts they can see, with a count that matches, and each part is a delivery of its own that records who it went to and what it listed. A recipient who can see none of the batch gets nothing, and the delivery records who was left out and why. A batch larger than 500 items is not split: it goes only to the recipients who can see everything it lists. A one-email-per-item send goes to the recipients who can see that item. A rule that already names another address keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
 
 An instance whose rules need to email addresses outside DefectDojo can turn the flag off. The Feature Flags page asks for confirmation first, because while it is off a rule emails any address in its Recipients, including people outside the organization, and sends them what the rule lists whatever their access.
 

@@ -123,11 +123,13 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField())
     def get_path(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
         path = "No proof has been supplied"
-        if engagement and obj.filename() is not None:
+        if obj.filename() is None:
+            return path
+        # Read through the relation, so a prefetched engagement_set serves it with no query. Same row as
+        # Engagement.objects.filter(risk_acceptance=obj).first(): Engagement's manager orders by id, prefetched or not.
+        engagement = next(iter(obj.engagement_set.all()), None)
+        if engagement:
             path = reverse(
                 "download_risk_acceptance", args=(engagement.id, obj.id),
             )
