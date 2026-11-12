@@ -157,6 +157,7 @@ class TestForegroundAddedNotificationsWaitForCommit(SimpleTestCase):
         UserContactInfo.objects.create(user=self.user, block_execution=True)
         # What the task body passed on: (event, id of the product type, whether it was committed then).
         self.delivered = []
+        self.delivery_error = None
         deliver = patch("dojo.notifications.helper.create_notification", side_effect=self._deliver)
         deliver.start()
         self.addCleanup(deliver.stop)
@@ -164,6 +165,8 @@ class TestForegroundAddedNotificationsWaitForCommit(SimpleTestCase):
     def _deliver(self, event=None, **kwargs):
         product_type = kwargs["product_type"]
         self.delivered.append((event, product_type.id, _committed(Product_Type, product_type.id)))
+        if self.delivery_error is not None:
+            raise self.delivery_error
 
     def test_runs_after_commit(self):
         with impersonate(self.user), transaction.atomic():
@@ -176,3 +179,30 @@ class TestForegroundAddedNotificationsWaitForCommit(SimpleTestCase):
         with impersonate(self.user):
             product_type = Product_Type.objects.create(name=f"On Commit FG PT {self.suffix}")
             self.assertEqual(self.delivered, [("product_type_added", product_type.id, True)])
+
+    def test_a_failing_notification_does_not_fail_the_committed_write(self):
+        """The row is committed when the task raises: the error is logged, the caller gets none and later hooks still run."""
+        self.delivery_error = RuntimeError("mail down")
+        later_hooks = []
+
+        with (
+            self.assertLogs("django.db.backends.base", level="ERROR") as logged,
+            impersonate(self.user),
+            transaction.atomic(),
+        ):
+            product_type = Product_Type.objects.create(name=f"On Commit FG PT {self.suffix}")
+            transaction.on_commit(lambda: later_hooks.append("ran"))
+
+        self.assertEqual(self.delivered, [("product_type_added", product_type.id, True)])
+        self.assertEqual(later_hooks, ["ran"])
+        self.assertTrue(_committed(Product_Type, product_type.id))
+        self.assertIn("mail down", "\n".join(logged.output))
+
+    def test_a_failing_notification_in_autocommit_does_not_fail_the_create(self):
+        self.delivery_error = RuntimeError("mail down")
+
+        with self.assertLogs("django.db.backends.base", level="ERROR"), impersonate(self.user):
+            product_type = Product_Type.objects.create(name=f"On Commit FG PT {self.suffix}")
+
+        self.assertEqual(self.delivered, [("product_type_added", product_type.id, True)])
+        self.assertTrue(_committed(Product_Type, product_type.id))

@@ -94,8 +94,11 @@ def dojo_dispatch_task_on_commit(task_or_sig: _SupportsSi | _SupportsApplyAsync 
     - The acting user, the pghistory context and the foreground/background choice are
       taken now, so the task runs as the user who made the change even if the commit
       happens after that context has ended.
+    - A dispatch that fails (a broker error, or a foreground task that raises) is logged
+      and does not fail the caller, whose write has already committed, or stop the
+      on_commit hooks registered after it.
     """
-    transaction.on_commit(_prepare_dispatch(task_or_sig, *args, **kwargs))
+    transaction.on_commit(_prepare_dispatch(task_or_sig, *args, **kwargs), robust=True)
 
 
 def _prepare_dispatch(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signature, *args: Any, **kwargs: Any) -> Callable[[], Any]:
