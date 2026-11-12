@@ -49,7 +49,7 @@ The shipped layouts are read only, so the first time you customize a page Defect
 In edit mode:
 
 - **Move a widget** by dragging it.
-- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them.
+- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them. A Simple Table with chosen fields cannot be made shorter than the height those fields need on one line each, and one saved shorter than that is shown at that height, together with the widgets of the same height in its row so the row stays level. A long value or label that wraps in a narrow tile can still need more room. Other widgets keep the height you give them.
 - **Configure Widget** opens the widget's own settings. What is on offer depends on the widget: which columns a table shows, which fields a panel lists, what a chart plots, and so on. You can also retitle a widget here.
 - **Remove Widget** takes it off the layout. You can add it back later.
 - **Add Widget** opens the catalog of widgets available for that page.
