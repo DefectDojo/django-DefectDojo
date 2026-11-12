@@ -617,6 +617,7 @@ Key facts:
 - [Dragos](https://docs.defectdojo.com/supported_tools/parsers/file/dragos/)
 - [DrHeader](https://docs.defectdojo.com/supported_tools/parsers/file/drheader/)
 - [DSOP Scan](https://docs.defectdojo.com/supported_tools/parsers/file/dsop/)
+- [Early Light](https://docs.defectdojo.com/supported_tools/parsers/file/earlylight/)
 - [Edgescan](https://docs.defectdojo.com/supported_tools/parsers/file/edgescan/)
 - [Elastic Security CNVM](https://docs.defectdojo.com/supported_tools/parsers/file/elastic_security_cnvm/)
 - [Elastic Security Detections](https://docs.defectdojo.com/supported_tools/parsers/file/elastic_security_detections/)
