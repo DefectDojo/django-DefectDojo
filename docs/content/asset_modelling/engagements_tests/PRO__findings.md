@@ -80,10 +80,16 @@ Mitigation policies can be found and edited in the sidebar under **Settings > Fi
     - Unlike Vulnerability IDs, these identifiers are specific to the reporting tool and are not publicly standardized.
         - Example: `semgrep.rule.lang.security.sql-injection`
 - **EPSS Score / Percentile**: EPSS score and percentile for the CVE.
-- **Known Exploited**: Whether there is confirmation that the vulnerability has been exploited. 
-- **Ransomware Used**: Whether ransomware was involved in the exploitation of the vulnerability. 
+- **Known Exploited (CISA KEV)**: Whether the vulnerability is listed in the CISA Known Exploited Vulnerabilities (KEV) catalog. 
+- **Ransomware Used (CISA KEV)**: Whether the CISA KEV catalog records the vulnerability as used in ransomware campaigns. 
 - **KEV Date**: The date the Finding was added to the KEV catalog.
-    - The EPSS and KEV values are maintained by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/). They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms; on a Finding that references a CVE, the next sync overwrites what was entered.
+    - The EPSS and KEV values are maintained by the [EPSS / KEV sync](/triage_findings/finding_scoring/epss_kev/). On a self-hosted instance with the KEV and EPSS lookups off, they come from the [threat intelligence bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle) instead. They can also be set by hand in the **Threat Intelligence** panel of the Add and Edit Finding forms; on a Finding that references a CVE, the next sync overwrites what was entered. Setting Known Exploited or Ransomware Used by hand also records a vendor claim with the source `manual` (see below), and that claim stays when the sync overwrites the CISA KEV value.
+- **Vendor Reported Exploited**: Whether a scanner, a connector or a person reported the vulnerability as exploited in the wild. This is kept apart from Known Exploited (CISA KEV), so KEV values and counts reflect only the CISA catalog, while the report is still shown and still counts toward priority.
+- **Vendor Reported Ransomware**: Whether a scanner, a connector or a person reported the vulnerability as used in ransomware. A Mend scan's malicious package flag is not recorded as ransomware.
+- **Vendor Reported Source**: Who made the report. This is the scanner's Test Type name or the connector's own name, `manual` when a person or an API client set it, or `pre-upgrade` for flags that existed on the Finding before the upgrade that added these fields.
+    - In API v2 these are the `vendor_exploited`, `vendor_ransomware_used` and `vendor_exploited_source` fields. A value written through the API is recorded with the source `manual`.
+    - A `manual` claim is never overwritten by a scanner or by enrichment. When you reimport a scan, the scanner can withdraw a claim it made earlier, but not a claim from any other source.
+    - Priority treats a Finding as exploited when either Known Exploited (CISA KEV) or Vendor Reported Exploited is set, so a scanner's warning still raises priority when CISA does not list the CVE. Counts of known exploited Findings, such as the **CISA KEV** scorecard column and the **CISA KEV Open** KPI, use the CISA KEV value only.
 - **Found By**: The type of tool that identified the vulnerability.
 - **CVSSv3 and CVSSv4 Vector and Score**: The CVSS3 and CVSS4 vector and score of the selected Finding.
 - **Connector Tickets**: Third-party issue tracker ticket numbers associated with the Finding. In the Findings list this column is hidden by default; turn it on from the column picker.

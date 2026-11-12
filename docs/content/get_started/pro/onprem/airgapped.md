@@ -47,6 +47,8 @@ Airgapped mode only stops calls that DefectDojo makes on its own. Integrations y
 - LLM providers
 - PSIRT feed sources, and the KEV, EPSS and OSV finding enrichment lookups. These are off until you turn them on. Leave them off unless you point them at an internal mirror.
 
+With threat intelligence on and the KEV and EPSS lookups off, the threat intelligence bundles you load supply KEV and EPSS values instead (see below).
+
 ## Loading threat intelligence offline
 
 Download the bundle and its `.sig` signature file on a connected machine, copy both into the instance side by side, and load the bundle with:
@@ -56,6 +58,16 @@ python manage.py load_threat_intel_bundle --file /path/to/intel-<date>.tar.zst
 ```
 
 The loader verifies the signature and re-scores the affected findings, the same as the scheduled download. Run without `--file`, the command would download a bundle, so on an airgapped instance it refuses and asks for a file instead.
+
+With threat intelligence on and the KEV and EPSS lookups off, which is the default, the load also fills in CISA KEV and EPSS values on your findings from the bundle, so an airgapped instance gets them without an internal mirror. See [KEV and EPSS from the bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle), including what changes on the first load after upgrading.
+
+By default the re-scoring and the KEV and EPSS update run in the background on the Celery workers. On a small instance, add `--sync` to run them in the command itself:
+
+```
+python manage.py load_threat_intel_bundle --file /path/to/intel-<date>.tar.zst --sync
+```
+
+To confirm which bundle is in use, a superuser can open the **Intelligence Sources** card under **Settings > System Settings**. It shows the loaded bundle's version, age and expiry, the freshness of each source, and the last failed load, the same as on a connected instance. See [Intelligence Sources card](/asset_modelling/pro_hierarchy/threat_intelligence/#intelligence-sources-card).
 
 ## The cloud portal URL
 

@@ -458,6 +458,8 @@ EPSS and KEV enrichment is an exception worth setting up, because it does not re
 
 The mirror has to serve the same files in the same format as the public sources. The lookups fetch a specific file from the URL you give them rather than discovering whatever is there, so a mirror that repackages or reorganizes the data will not work. Refresh your copies on a schedule that suits you, since the deployment only reads what your mirror serves.
 
+You may not need a mirror at all. With threat intelligence on and the EPSS and KEV lookups off, which is the default, every threat intelligence bundle you load also fills in CISA KEV and EPSS values on your findings. Load the bundle as described in [Loading threat intelligence offline](/get_started/pro/onprem/airgapped/#loading-threat-intelligence-offline), then check the **Intelligence Sources** card under **Settings > System Settings** to confirm which bundle is loaded and how fresh each source is. A lookup you turn on takes over from the bundle for that source. See [KEV and EPSS from the bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## Questions or support
 
 For help with an air-gapped install or upgrade, contact your account representative or [support@defectdojo.com](mailto:support@defectdojo.com).

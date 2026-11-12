@@ -99,7 +99,8 @@ Findings within an Asset can have additional metadata which can further adjust t
 * Whether or not the Finding has an **EPSS Score**, this is automatically added to Findings and kept up to date for Pro users.  The **EPSS Score** is the field that contributes to the Priority Score — **EPSS Percentile** is tracked on the Finding for reference but does not directly feed the calculation.
 * How many Endpoints in the Asset are affected by this Finding
 * Whether or not a Finding is Under Review
-* Whether the Finding is in the KEV (Known Exploited Vulnerabilities) database, which is checked by DefectDojo on a regular basis
+* Whether the Finding is in the KEV (Known Exploited Vulnerabilities) database, which is checked by DefectDojo on a regular basis.  On a self-hosted instance with the KEV lookup off, this comes from the [threat intelligence bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+* Whether a scanner, a connector or a person reported the Finding as exploited in the wild (**Vendor Reported Exploited**) or as used in ransomware (**Vendor Reported Ransomware**).  Priority treats a Finding as exploited when either CISA KEV or the vendor report says so, so a scanner's warning still raises priority when CISA does not list the CVE.  See [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata).
 * The tool-reported Severity of a Finding (Info, Low, Medium, High, Critical)
 
 #### EPSS Score vs EPSS Percentile
@@ -338,6 +339,8 @@ SLA configurations contain the days assigned to each **Severity** or **Risk** va
 Each Service Level Agreement can have a unique name, along with an optional description.
 
 **Restart SLA on Finding Reactivation**: if enabled, this option will start an SLA over when a Finding is Reopened.  Otherwise, the SLA will be based on when the Finding was created.
+
+**Cap SLA by CISA KEV Due Date**: if enabled, a KEV-listed Finding's SLA deadline is pulled in to CISA's due date for that CVE.  On a self-hosted instance with the KEV lookup off, the due date comes from the [threat intelligence bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle), so the cap applies there without turning the lookup on.  Most CISA due dates are already in the past, so with this option on, many KEV-listed Findings can show as breaching their SLA right after the first bundle load following an upgrade.
 
 When editing an SLA, you can choose whether that SLA will use **Severity** or **Risk** as a benchmark for assigning Days To Remediate.  This is done by selecting the related option from the **Service Level configuration Type** section of the form.
 

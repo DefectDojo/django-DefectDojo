@@ -20,6 +20,10 @@ configuration settings, or copy one and adjust it.
 Deadlines are enforced, and a finding listed in the CISA KEV catalog is never scheduled past its
 CISA due date.
 
+On a self-hosted instance whose KEV lookup is off, the CISA due date comes from the threat
+intelligence bundle the instance already loads, so this cap applies without turning the lookup on.
+See [KEV and EPSS from the bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 The same base windows, further tightened by exploitability and exposure:
