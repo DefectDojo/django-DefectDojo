@@ -33,13 +33,32 @@ Templates are starting points, not links. Editing an adopted rule does not affec
 adopting the same one twice is fine — you get two independent rules, which is how the same watchdog
 gets pointed at two different sets of Assets. The second one is named with a suffix.
 
+The **Notifications** pack holds one template for being told about new Findings: **Alert on new
+findings that match a set of filters**. It is an **On Finding Event** trigger on **Created** wired to
+one in-app alert node. Pick the filters in the trigger's scope, the same ones the Findings list
+offers, and the rule sends one alert for each batch of new Findings that match all of them, however
+the Findings were added. An import usually sends one alert; a very large one sends one per batch of
+500 Findings by default, and the count in each alert is that batch's. Every Finding an import
+creates counts as new, including one that duplicates a Finding already reported. To leave those out,
+add the **Duplicate** filter to the scope, set to **No**.
+
+The alert names the rule, so rename the adopted rule after what it watches. The alert node takes
+usernames, or alerts the administrators when left empty. The title and description arrive
+pre-filled with the rule's name and the number of matching Findings, and are edited on the node like
+any other rule's. The alert goes only to DefectDojo users, and each recipient's own **Rules Engine
+Match** notification setting decides whether it reaches them: a recipient who has turned off alerts
+for it gets nothing, though the delivery still reads Sent.
+
 **New Rule** starts from an empty canvas instead. Both need the same permission as authoring any
-rule, because both create one.
+rule, because both create one: **Rule Add**, either as a global role or through your membership role
+in the group that will own the rule. Both ask who owns the new rule in **Owned By**: a group, or
+**Instance**. A group's rule runs as the group's automation identity rather than as you. See
+[Group ownership](../sharing_and_versions/#group-ownership).
 
 A rule started with **New Rule** has no name until you type one into the heading at the top of the
-editor, and **Save** (or **Run Now**, which saves first) refuses it until you do. Rule names are
-unique, and the name is how you find the rule again in the rule list, on **Runs** and on
-**Deliveries**. The description under the name is optional.
+editor, and **Save** (or **Run Now**, which saves first) refuses it until you do. The name is how you find the rule again in the rule list, on **Runs** and on
+**Deliveries**. Names do not have to be unique: two groups can each have a rule with the same name,
+and the rule list's **Owner** column tells them apart. The description under the name is optional.
 
 ## The editor
 
@@ -56,6 +75,29 @@ The palette is grouped into five categories, which is also the order items flow 
 | **Egress** | Send something outward: a ticket, a message, a report. |
 
 The palette is generated from the engine itself, so what you see in the editor is always exactly what the engine can execute.
+
+### Node family permissions
+
+Nodes that send something out of DefectDojo, or that spend something, belong to a family, and each family has its own permission. To place one of these nodes in a rule you need its family's permission in the rule's scope:
+
+| Permission | Nodes |
+|---|---|
+| **Webhook Nodes** | **Call a Webhook** |
+| **Messaging Nodes** | **Send a Slack Message**, **Send a Microsoft Teams Message**, **Send an Email**, **Publish to an SNS Topic** |
+| **Ticket Nodes** | **Create a JIRA Issue**, **Create a Downstream Ticket** |
+| **Report Nodes** | **Generate a Report** |
+| **Scan Nodes** | **Launch DAST Scan** |
+| **Sensor Nodes** | **Send a Sensor Command** |
+| **AI Nodes** | Every AI node, and **Request Triage** |
+
+The rule's scope decides where the permission has to come from:
+
+* For a group's rule, your membership role in the owning group, or a global role.
+* For an Instance rule, a global role.
+
+The permissions sit under **Rule** in the **Group Content** table of a role (see [Group Content permissions](/admin/user_management/pro__custom_rbac_roles/#group-content-permissions)). Every role that held **Rule Edit** before these permissions existed was given all seven, so nothing changes for an existing rule until an administrator removes a family from a role.
+
+The palette hides the families you may not use in the rule you are editing. A graph is checked again whenever it is accepted: saving or enabling a rule that contains a node from a family you may not use is refused, and the rule's problems name the family and the node, for example "You cannot use Webhook nodes in this rule (node n3)." This also applies to a rule you did not build: if it already contains such a node, ask someone who holds the permission to make the change. Transferring a rule to a group checks the same permissions in the destination.
 
 ### Graph rules
 
@@ -116,12 +158,26 @@ A Finding trigger's scope is the same filter vocabulary the original Rules Engin
 
 Asset type is not one of those filters. The scope picker offers exactly what the Assets list can filter on, and type is not among them today. To act on Assets of one type, scope broadly and add an **If / Filter** node with a condition on `product.kind`, which compares the type's code rather than its display label.
 
-Two things about scope are worth understanding, and both hold for either kind of rule:
+Three things about scope are worth understanding, and all of them hold for either kind of rule:
 
-* **Scope is applied on top of authorization, never instead of it.** The rule runs as its owner, so scope narrows an already-authorized set. Leaving scope empty does not mean "everything in the instance", it means "everything the rule owner can see".
+* **Scope is applied on top of authorization, never instead of it.** The rule runs as an identity (the group's automation identity for a group's rule, the owner for an Instance rule), so scope narrows an already-authorized set. Leaving scope empty does not mean "everything in the instance", it means "everything the rule's identity can see". The editor's **Runs As** panel says who that is. See [Runs As](../sharing_and_versions/#runs-as).
+* **A rule only changes Findings its identity may edit.** A Finding the identity can see but not edit still enters the graph, so conditions and messages can use it, but nodes that change Findings leave it alone. The run trace counts these on each node, for example "12 findings not edited: no edit permission".
 * **An invalid scope fails the run rather than widening it.** If a filter key does not exist, or a value is one the filter would silently discard, the run errors out. A rule that does nothing is recoverable. A rule that quietly edits everything in the instance is not.
 
 For an event trigger, scope acts as a second gate: the Findings or Assets named in the event are matched against it, and only those that pass enter the graph.
+
+#### Scoping a rule to servers or subnets
+
+A Finding rule can be scoped to where a Finding was seen. On the Findings list, add the **Host** filter from **Add Filter** in the filter bar, or open the **Endpoints** column filter (the **Locations** column filter, when Locations are enabled), and enter one or more values in the **Host, IP address or CIDR network** field:
+
+* A hostname or a bare IP address (`web01.example.com`, `10.20.30.5`) matches Findings seen on exactly that host. Hostnames are not case-sensitive.
+* A CIDR network (`10.20.30.0/24`, `2001:db8::/32`) matches Findings seen on any IP address inside it. Hostnames are never matched against a network.
+
+Entries are combined with OR, up to 100 per filter, and the scope is stored as a single `location_host` filter.
+
+A Finding is "seen on" a host if it has any Endpoint or Location on that host, whatever that Endpoint's or Location's status: one marked Mitigated or False Positive still counts. The match is per Finding, not per host. A Finding seen on `10.20.30.5` and on `10.20.31.5` is in a `10.20.30.0/24` scope, and the rule acts on the whole Finding, including its host outside the network. A rule that reacts to **On Finding Event** with this scope and ends in an **Accept Risk** node is how to risk-accept, at import time, everything found on a set of servers that will not be fixed for now, without opening each Endpoint by hand. A malformed network (`10.20.30.0/99`) is rejected when the rule is saved rather than matching nothing at run time.
+
+An **Accept Risk** node in its simple mode only accepts Findings on Assets that have **Simple Risk Acceptance** enabled; on any other Asset the run reports the Finding as unchanged. Enable it in the Asset's settings, or use the node's acceptance mode to add the Findings to an existing Risk Acceptance instead.
 
 ### Scheduling
 

@@ -70,7 +70,7 @@ The sidebar groups every page into six sections. Which entries you see depends o
    - **All Settings** lists and searches every settings page.
    - Superusers also see **Feature Flags** at the top of this section.
 
-The bottom of the sidebar holds your account menu and a row of buttons for your alerts and, where they apply, What's New, Ask Sensei and the Production/Sandbox switch. The account menu has your profile, your API token, the API documentation, the external tools downloads, links to this documentation, your language and the light/dark theme switch, and **Logout**.
+The bottom of the sidebar holds your account row (your username and email, with the alerts bell beside them) and, where they apply, a What's New button and a button to switch between Production and the Sandbox. Ask Sensei is an **Ask** button in the sidebar's search field. The account menu has your profile, your API token, the API documentation, the external tools downloads, links to this documentation, your language and the light/dark theme switch, and **Logout**.
 
 See [The Sidebar Menu](/navigation/pro__sidebar/) for searching, pinning and collapsing the sidebar.
 

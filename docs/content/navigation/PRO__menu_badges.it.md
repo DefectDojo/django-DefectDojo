@@ -44,7 +44,7 @@ Entrambi i badge sono link, perché un tooltip si chiude nel momento in cui il p
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-Entrambe verranno rimosse nella versione **3.5.0**, insieme ai parser basati su API (pull) che servono a configurare. Le [note di aggiornamento alla 3.2](/releases/os_upgrading/3.2/) spiegano verso cosa effettuare la migrazione ed entro quando.
+Entrambe verranno rimosse nella versione **3.6.0**, insieme ai parser basati su API (pull) che servono a configurare. Le [note di aggiornamento alla 3.2](/releases/os_upgrading/3.2/) spiegano verso cosa effettuare la migrazione ed entro quando.
 
 ![Badge DEPRECATED sotto Settings > Configuration](images/menu_badge_deprecated.png)
 

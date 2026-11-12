@@ -22,6 +22,47 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
+# Indexes for reading an object's history
+# ---------------------------------------------------------------------------
+
+
+def history_lookup_index(name, field_name, *, nullable=False):
+    """
+    Index an event table's copy of a foreign key, so an object's history can be read through it.
+
+    ``Events.objects.references(obj)`` reads every event table with a foreign key to ``obj``'s model,
+    filtering each on ``<fk column> = <obj id>``. The copies carry no index of their own
+    (``PGHISTORY_FOREIGN_KEY_FIELD`` sets ``db_index=False``, which keeps event writes cheap), so
+    without this each history read scans its whole event table, a cost that grows with every event
+    the instance has ever recorded rather than with the object's own. A nullable column is indexed
+    only where it is set: the lookup never asks for NULL, and most rows of a column like
+    ``duplicate_finding`` are NULL.
+    """
+    condition = models.Q(**{f"{field_name}__isnull": False}) if nullable else None
+    return models.Index(fields=[field_name], name=name, condition=condition)
+
+
+def _event_indexes(*lookup_indexes, previous_event=True):
+    """
+    The indexes a tracked model's event table carries, plus ``lookup_indexes``.
+
+    ``previous_event`` adds ``(pgh_obj, pgh_id)``. pghistory computes each event's diff from the
+    object's previous event (``pgh_obj_id = <obj> AND pgh_id < <event> ORDER BY pgh_id DESC LIMIT
+    1``). With only ``pgh_obj_id`` indexed, Postgres reads every event of the object to find that
+    one row, for every event on a page: a page of 250 events of a finding with 20,000 took 60 s.
+    A many-to-many through table leaves it out: each of its rows has an insert and maybe a delete.
+    """
+    indexes = [
+        models.Index(fields=["pgh_created_at"]),
+        models.Index(fields=["pgh_label"]),
+        models.Index(fields=["pgh_context_id"]),
+    ]
+    if previous_event:
+        indexes.append(models.Index(fields=["pgh_obj", "pgh_id"]))
+    return [*indexes, *lookup_indexes]
+
+
+# ---------------------------------------------------------------------------
 # Retention / cleanup
 # ---------------------------------------------------------------------------
 
@@ -177,11 +218,7 @@ def register_django_pghistory_models():
         pghistory.ManualEvent(label="initial_backfill"),
         exclude=["password"],
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(),
         },
     )(Dojo_User)
 
@@ -191,11 +228,9 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_endpointevt_product_hist", "product", nullable=True),
+            ),
         },
     )(Endpoint)
 
@@ -205,11 +240,9 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_engagementevt_prod_hist", "product"),
+            ),
         },
     )(Engagement)
 
@@ -219,11 +252,10 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_findingevt_test_hist", "test"),
+                history_lookup_index("dojo_findingevt_dupe_hist", "duplicate_finding", nullable=True),
+            ),
         },
     )(Finding)
 
@@ -233,11 +265,9 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_findinggroupevt_test_hist", "test"),
+            ),
         },
     )(Finding_Group)
 
@@ -247,11 +277,7 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(),
         },
     )(Product_Type)
 
@@ -261,11 +287,9 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_productevt_prodtype_hist", "prod_type"),
+            ),
         },
     )(Product)
 
@@ -275,11 +299,10 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_testevt_engagement_hist", "engagement"),
+                history_lookup_index("dojo_testevt_testtype_hist", "test_type"),
+            ),
         },
     )(Test)
 
@@ -289,11 +312,7 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(),
         },
     )(Risk_Acceptance)
 
@@ -303,11 +322,7 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(),
         },
     )(Finding_Template)
 
@@ -318,11 +333,7 @@ def register_django_pghistory_models():
         pghistory.ManualEvent(label="initial_backfill"),
         exclude=["header_name", "header_value"],
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(),
         },
     )(Notification_Webhooks)
 
@@ -341,11 +352,9 @@ def register_django_pghistory_models():
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
             "db_table": "dojo_finding_reviewersevent",
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_findingrevevt_find_hist", "finding"), previous_event=False,
+            ),
         },
     )(FindingReviewers)
 
@@ -355,11 +364,7 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(),
         },
     )(Location)
 
@@ -369,11 +374,9 @@ def register_django_pghistory_models():
         pghistory.DeleteEvent(),
         pghistory.ManualEvent(label="initial_backfill"),
         meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
+            "indexes": _event_indexes(
+                history_lookup_index("dojo_urlevt_location_hist", "location"),
+            ),
         },
     )(URL)
 
@@ -396,6 +399,9 @@ def register_django_pghistory_models():
         (Objects_Product, "tags", "ObjectsProductTags"),
     ]
 
+    # Models whose own changes are not tracked, so nothing reads a history of them and their tag
+    # tables need no lookup index (an index there would only tax every tag write).
+    untracked_tag_parents = {App_Analysis, Objects_Product}
     for parent_model, field_name, proxy_name in tag_through_models:
         TAG_MODEL_MAPPING[proxy_name] = (parent_model, field_name)
 
@@ -407,6 +413,13 @@ def register_django_pghistory_models():
         })
 
         db_table = through_model._meta.db_table + "event"
+        lookup_indexes = []
+        if parent_model not in untracked_tag_parents:
+            # The tagged object's history reads its tag events by the through row's key to it.
+            # Index names stop at 30 characters: dojo_engagementinhtags_hist is the longest.
+            tagged_field = next(f.name for f in through_model._meta.fields if f.related_model is parent_model)
+            lookup_index_name = f"dojo_{proxy_name.lower().replace('inherited', 'inh')}_hist"
+            lookup_indexes.append(history_lookup_index(lookup_index_name, tagged_field))
 
         pghistory.track(
             pghistory.InsertEvent(),
@@ -414,11 +427,7 @@ def register_django_pghistory_models():
             pghistory.ManualEvent(label="initial_backfill"),
             meta={
                 "db_table": db_table,
-                "indexes": [
-                    models.Index(fields=["pgh_created_at"]),
-                    models.Index(fields=["pgh_label"]),
-                    models.Index(fields=["pgh_context_id"]),
-                ],
+                "indexes": _event_indexes(*lookup_indexes, previous_event=False),
             },
         )(proxy_class)
 

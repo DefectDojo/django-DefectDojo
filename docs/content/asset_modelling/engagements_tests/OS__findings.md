@@ -28,6 +28,8 @@ Overall, Findings are designed to work with the Asset Hierarchy to standardize y
 
 Findings are accessible via the sidebar. The submenu provides access to Open and Closed Findings, All Findings (regardless of Open or Closed status), [Risk Accepted Findings](/triage_findings/findings_workflows/os__risk_acceptance/), as well as Findings Templates. Individual Findings are also accessible from within the Test that contains them. 
 
+Through the API, `/api/v2/findings/?engagement=<id>` lists the Findings of one Engagement, `?product=<id>` those of one Asset and `?prod_type=<id>` those of one Organization. Each takes a comma-separated list of ids and combines with every other filter. The longer `test__engagement`, `test__engagement__product` and `test__engagement__product__prod_type` names do the same.
+
 ![image](images/osfindings_ss1.png)
 
 ### Permissions

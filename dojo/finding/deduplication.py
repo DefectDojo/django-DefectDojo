@@ -219,6 +219,20 @@ def is_duplicate_reopen(new_finding, existing_finding) -> bool:
     return finding_mitigated(existing_finding) and finding_not_human_set_status(existing_finding) and not finding_mitigated(new_finding)
 
 
+def manual_duplicate_hides_open_finding(duplicate, original) -> bool:
+    """
+    Whether marking ``duplicate`` as a duplicate of ``original`` by hand would hide an open finding.
+
+    A duplicate is inactive, and a mitigated original is not shown in any active view either, so a
+    finding that is still open would disappear entirely. Automatic deduplication already refuses
+    this case (``is_duplicate_reopen``, PR 9558); the manual paths (mark as duplicate, set as
+    original) apply the same rule. ``original`` is resolved to the root of its cluster first,
+    because that is the finding ``duplicate`` would end up pointing at.
+    """
+    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+    return is_duplicate_reopen(duplicate, root)
+
+
 def finding_mitigated(finding: Finding) -> bool:
     return finding.active is False and (finding.is_mitigated is True or finding.mitigated is not None)
 

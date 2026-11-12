@@ -44,6 +44,8 @@ add the fields that apply to it. Each definition has:
   sorted.
 - **Required**: whether a value has to be filled in on the record type's create and edit forms. A
   required field always appears on those forms and cannot be hidden from them.
+- **Allow Other** (Single Select and Multi Select only): whether the field also offers an **Other**
+  choice that takes a typed value. See [The Other choice](#the-other-choice).
 
 ### Data types
 
@@ -60,6 +62,30 @@ add the fields that apply to it. Each definition has:
 For **Single Select** and **Multi Select**, you also supply the list of options when you define the
 field. You can change a field's data type later; existing values are re-evaluated against the new
 type, and any that no longer fit stop being shown as typed values.
+
+### The Other choice
+
+A select field's options do not always cover every answer. Turn on **Allow Other** for the field
+(when you add it, or with the **Other** checkbox in its row) and its dropdown gains an **Other**
+choice after the options you defined. Choosing **Other** shows a text box, and what you type there is
+saved as the field's value:
+
+- On a **Single Select** field, the typed text is the value, in place of an option.
+- On a **Multi Select** field, the typed text is saved alongside any options you picked. Each record
+  holds at most one Other value.
+
+Options match exactly, letter case included: typing `major release` when the field has a `Major
+Release` option saves an Other value, not that option. The typed value is shown, filtered and sorted
+like any other value of the field. When you open a record whose value is not one of the options, the
+editor shows **Other** chosen with the text filled in. Through the API, write the typed text as the
+value itself (`value` for a Single Select field, one entry of `value_options` for a Multi Select
+field).
+
+**Allow Other** cannot be turned off while any record holds an Other value: the change is refused and
+says how many records hold one. Change those records to one of the defined options first, or add their
+typed text to the field's options, which makes it an ordinary option. It is also refused while an
+enabled rule sets the field to a value outside its options, and the message names those rules: update
+or disable them first.
 
 ## Filling in values
 
@@ -108,6 +134,10 @@ sorts according to its data type: numbers filter by range, dates by before or af
 Yes/No, text by contains, and select fields by their options. Columns, filters, and the sort
 parameter use the field's **Name**, so sorting a list by a `cost_center` field appears in the URL as
 `o=cost_center`.
+
+A select field that allows Other also gets a **<Label>: Other** filter (Yes or No), which finds the
+records whose value is a typed Other value, or the records whose value is not. Its parameter is the
+field's Name followed by `_other`, for example `reason_other=true`.
 
 ## Moving from the earlier metadata
 

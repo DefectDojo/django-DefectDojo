@@ -97,7 +97,7 @@ Each table below covers one part of a vulnerability management program. **The va
 | Configuration advice | ❌ Not included | ✅ [Sensei Advisor](/sensei/sensei_advisor/) suggests changes to your deduplication and prioritization settings and shows how each would affect your own findings. Nothing changes until someone applies it, and applied changes can be undone (Sensei license) | Tuning is based on what your own data shows, not guesswork, and it is safe to try. |
 | AI inventory | ❌ Not included | ✅ **AI Inventory** lists the AI coding assistants, MCP servers, models and AI packages found in your code repositories. **AI Governance Policies** create a finding whenever an unapproved one turns up | You can see, and govern, the AI your developers are actually using. |
 
-Sensei is never trained on your data, and DefectDojo's AI provider does not train on it either. On DefectDojo Cloud, Sensei is an AI agent built by DefectDojo. It runs inside your dedicated DefectDojo instance and reaches its models within DefectDojo's Google Cloud environment, using credentials unique to your instance, and your data is never mixed with another customer's. On self-hosted Pro, Sensei is the agent harness and you bring the model: connect the provider you already use (Anthropic, OpenAI, Amazon Bedrock or Google Vertex AI) under [AI Model Settings](/sensei/ai_model_settings/), and model traffic goes directly from your instance to your own provider account.
+Sensei is never trained on your data, and DefectDojo's AI provider does not train on it either. On DefectDojo Cloud, Sensei is an AI agent built by DefectDojo. It runs inside your dedicated DefectDojo instance and reaches its models within DefectDojo's Google Cloud environment, using credentials unique to your instance, and your data is never mixed with another customer's. On self-hosted Pro, Sensei is the agent harness and you bring the model: connect the provider you already use (Anthropic, OpenAI, Amazon Bedrock or Google Vertex AI) under [AI Model Settings](/sensei/ai_model_settings/), and model traffic goes directly from your instance to your own provider account. Cloud customers who want the same can [bring their own model](/sensei/ai_model_settings/#bring-your-own-model-on-defectdojo-cloud) as an enterprise option: contact [hello@defectdojo.com](mailto:hello@defectdojo.com).
 
 ### Compliance and product security
 
@@ -130,6 +130,8 @@ Sensei is never trained on your data, and DefectDojo's AI provider does not trai
 | Support | Community support on GitHub and Slack | ✅ Commercial support for cloud-hosted, self-hosted and air-gapped deployments, a dedicated customer success manager, and feature requests that are prioritized and guaranteed a review. Support requests, including requests for a connector to any tool you want supported, can be raised and tracked from inside the product | Help when you need it from the people who build the product, and a direct say in what gets built next. |
 
 Some Pro capabilities need an add-on license; they are marked with the license name.
+
+To see any Pro capability on your own use case, [book a demo](https://defectdojo.com/book-a-demo/open-source?utm_source=docs&utm_medium=docs&utm_campaign=oss-demo-prompt&utm_content=editions) with our team.
 
 ## A closer look at specific Pro features
 

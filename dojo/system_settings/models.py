@@ -349,6 +349,15 @@ class System_Settings(models.Model):
             "When turned on, all filter operations in the UI will require string matches rather than ID. "
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
+    read_only_mode = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Read-only mode"),
+        help_text=_(
+            "Rejects all changes from the UI and the API, and pauses scheduled background jobs. "
+            "Superusers can still change System Settings, so they can turn this off. "
+            "Turn it on to freeze this instance before a migration.",
+        ))
     install_id = models.UUIDField(
         default=uuid4,
         editable=False,

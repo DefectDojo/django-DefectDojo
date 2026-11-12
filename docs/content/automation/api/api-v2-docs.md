@@ -116,81 +116,75 @@ Plan the change before making it: pick a window, ask token owners to rotate firs
 
 ## Sample Code
 
-Here are some simple python examples and their results produced against
-the `/users` endpoint:
+Here are two simple Python examples against the `/findings` endpoint. Any user with an API token can run them: the response holds only the findings that user has permission to view.
+
+The first lists findings and prints each one's id and title:
 
 {{< highlight python >}}
 import requests
 
-url = 'http://127.0.0.1:8000/api/v2/users'
-headers = {'content-type': 'application/json',
-            'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
-r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
+url = 'https://defectdojo.example.com/api/v2/findings/'
+headers = {
+    'content-type': 'application/json',
+    'Authorization': 'Token <Your API Token>',
+}
+r = requests.get(url, headers=headers, verify=True)  # set verify to False if the SSL certificate is self-signed
+r.raise_for_status()
 
-for key, value in r.__dict__.items():
-  print(f"'{key}': '{value}'")
-  print('------------------')
+for finding in r.json()['results']:
+    print(finding['id'], finding['title'])
 {{< /highlight >}}
 
-This code will return the list of all the users defined in DefectDojo.
-The json object result looks like:
+The output is one line per finding:
+
+{{< highlight text >}}
+101 Example SQL Injection
+102 Example Cross-Site Scripting
+{{< /highlight >}}
+
+The second filters the list to active findings of High severity, using query parameters. Severity values are case-sensitive: use `Critical`, `High`, `Medium`, `Low` or `Info`.
+
+{{< highlight python >}}
+import requests
+
+url = 'https://defectdojo.example.com/api/v2/findings/'
+headers = {
+    'content-type': 'application/json',
+    'Authorization': 'Token <Your API Token>',
+}
+params = {'severity': 'High', 'active': 'true'}
+r = requests.get(url, headers=headers, params=params, verify=True)  # set verify to False if the SSL certificate is self-signed
+r.raise_for_status()
+
+print(r.json())
+{{< /highlight >}}
+
+List endpoints are paginated. The response holds the total `count`, the URLs of the `next` and `previous` pages (`null` when there are none), and the current page of findings in `results`. `prefetch` stays empty unless you ask for related objects with the `prefetch` parameter. Each finding carries every field of the Finding model; the example below is trimmed to a few of them:
 
 {{< highlight json >}}
-    [
+{
+    "count": 2,
+    "next": null,
+    "previous": null,
+    "prefetch": {},
+    "results": [
         {
-          "first_name": "Tyagi",
-          "id": 22,
-          "last_login": "2019-06-18T08:05:51.925743",
-          "last_name": "Paz",
-          "username": "dev7958"
+            "id": 101,
+            "title": "Example SQL Injection",
+            "severity": "High",
+            "active": true
         },
         {
-          "first_name": "saurabh",
-          "id": 31,
-          "last_login": "2019-06-06T11:44:32.533035",
-          "last_name": "",
-          "username": "saurabh.paz"
+            "id": 103,
+            "title": "Example Server-Side Request Forgery",
+            "severity": "High",
+            "active": true
         }
     ]
+}
 {{< /highlight >}}
 
-Here is another example against the `/users` endpoint, this
-time we will filter the results to include only the users whose user
-name includes `jay`:
-
-{{< highlight python >}}
-import requests
-
-url = 'http://127.0.0.1:8000/api/v2/users/?username__contains=jay'
-headers = {'content-type': 'application/json',
-            'Authorization': 'Token c8572a5adf107a693aa6c72584da31f4d1f1dcff'}
-r = requests.get(url, headers=headers, verify=True) # set verify to False if ssl cert is self-signed
-
-for key, value in r.__dict__.items():
-  print(f"'{key}': '{value}'")
-  print('------------------')
-{{< /highlight >}}
-
-The json object result is:
-
-{{< highlight json >}}
-[
-    {
-        "first_name": "Jay",
-        "id": 22,
-        "last_login": "2015-10-28T08:05:51.925743",
-        "last_name": "Paz",
-        "username": "jay7958"
-    },
-    {
-        "first_name": "",
-        "id": 31,
-        "last_login": "2015-10-13T11:44:32.533035",
-        "last_name": "",
-        "username": "jay.paz"
-    }
-]
-{{< /highlight >}}
+A page holds 25 results by default. Set `limit` to change the page size and `offset` to start further in, or follow the `next` URL until it is `null` to read every page.
 
 See [Django Rest Framework\'s documentation on interacting with an
 API](https://www.django-rest-framework.org/) for
@@ -313,7 +307,7 @@ A reimport can be performed by specifying the names of these entities in the API
 
 When `auto_create_context` is `True`, the Organization, Asset and Engagement will be created if they do not already exist. Make sure your user has sufficient [permissions](/admin/user_management/about_perms_and_roles/) to create an Asset/Organization.
 
-When `do_not_reactivate` is `True`, the importing/reimporting will ignore uploaded active findings and not reactivate previously closed findings, while still creating new findings if there are new ones. You will get a note on the finding to explain that it was not reactivated for that reason.
+When `do_not_reactivate` is `True`, a reimport keeps a closed finding closed when it appears in the report again, instead of reactivating it, and adds a note to that finding saying it was not reactivated. New findings in the report are still created, and findings that are already open are processed as usual. A first import has no existing findings to reactivate, so the option only changes a reimport.
 
 A reimport will automatically select the latest test inside the provided engagement that satisfies the provided `scan_type` and (optionally) provided `test_title`.
 

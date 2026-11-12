@@ -26,6 +26,8 @@ Overall, Findings are designed to work with the Asset Hierarchy to standardize y
 ## Accessing Findings 
 Findings are accessible from the sidebar under **Act > Explore > Findings**. The submenu provides access to **Active** and **Mitigated** Findings, **All** Findings (regardless of Open or Closed status), Finding **Groups**, **Risk Accepted** Findings and Finding **Templates**; new Findings are created with the **New Finding** button at the top of a Findings list. Individual Findings are also accessible from within the Test that contains them. 
 
+Through the API, `/api/v2/findings/?engagement=<id>` lists the Findings of one Engagement, `?product=<id>` those of one Asset and `?prod_type=<id>` those of one Organization. Each takes a comma-separated list of ids and combines with every other filter. The longer `test__engagement`, `test__engagement__product` and `test__engagement__product__prod_type` names do the same.
+
 [Risk Accepted Findings](/triage_findings/findings_workflows/os__risk_acceptance/) are listed under **Act > Explore > Findings > Risk Accepted**; the Risk Acceptance records themselves are managed from **Act > Risk Acceptances** in the sidebar. 
 
 ![image](images/profindings_ss1.png)
@@ -284,6 +286,8 @@ Pages that show a list of Findings or a list of Engagements have a CSV and Excel
 The CSV and Excel export dialog lets you choose which fields to include and which field to sort by. Findings exports can include **Priority**, **Risk** and **Risk Score**, the same values shown in the Findings table. **Export From Table Preference** selects them when the Risk and Priority columns are visible in the table, and carries a Risk or Priority sort from the table into the export. Risk is exported as its label (for example, Needs Action), so sort by Risk Score to order an export by risk.
 
 Findings exports can also name the systems each Finding affects. With Locations enabled, select the **Locations** field: each row lists the values of the Finding's Locations, and you only see Locations you have permission to view. (On instances still using Endpoints, the equivalent field is **Endpoints**.) The Locations column of a report template's Findings table carries the same values, so a scheduled or templated report can pair each Finding with its affected hosts.
+
+Findings exports can carry the version and build metadata recorded on each Finding's Test and Engagement, so an export can be matched to the application version that was tested. Select **Test Version**, **Test Build ID**, **Test Commit Hash** or **Test Branch/Tag** for the values set on the Test (for example at import time), and the matching **Engagement Version**, **Engagement Build ID**, **Engagement Commit Hash** or **Engagement Branch/Tag** fields for the values set on the Engagement. A Test or Engagement without these values exports empty cells.
 
 Selecting Quick Export opens a dialog with three choices:
 

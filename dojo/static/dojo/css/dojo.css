@@ -919,6 +919,15 @@ input#simple_search {
     margin-top: 20px;
 }
 
+.sp-pro-footer .sp-pro-actions {
+    margin-top: 0;
+}
+
+.sp .sp-pro-copy p.sp-pro-note {
+    margin: 12px 0 0;
+    font-size: 0.875rem;
+}
+
 .sp a.sp-btn {
     display: inline-flex;
     align-items: center;

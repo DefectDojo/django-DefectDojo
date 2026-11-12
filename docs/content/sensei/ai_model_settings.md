@@ -20,9 +20,36 @@ hardening suggestions and runtime checks. Every provider below works for all of 
 You reach it from the sidebar under **Sensei + AI > AI Model Settings**. You need a global
 **Maintainer** or **Owner** role to change it.
 
-> **On-premise only.** This page exists only on **on-premise** ("local") deployments, where you
-> bring your own model. On DefectDojo **Cloud** the LLM is managed for you and this page is not
-> shown.
+> **Where this page appears.** Every **on-premise** ("local") deployment has this page, because
+> there you always bring your own model. On DefectDojo **Cloud**, DefectDojo manages the model by
+> default and the page is not shown. Cloud customers can also bring their own model: see
+> [Bring your own model on DefectDojo Cloud](#bring-your-own-model-on-defectdojo-cloud).
+
+## Bring your own model on DefectDojo Cloud
+
+A DefectDojo Cloud instance can run Sensei, and the in-app AI features listed above, on your own
+model provider account instead of the model DefectDojo provides. This is an enterprise option
+that DefectDojo turns on for your instance. To request it, contact
+[hello@defectdojo.com](mailto:hello@defectdojo.com).
+
+Once it is on, **AI Model Settings** appears in the sidebar and works as described on this page,
+with these differences:
+
+- **Your instance uses only your model.** It never falls back to the model DefectDojo provides.
+  Until you save a working configuration, Sensei scans and fixes, and the other AI features, are
+  refused with a message that points you to this page.
+- **Credentials are required.** A Cloud instance has no ambient cloud identity of yours to fall
+  back on, so every provider needs its own secret: an API key for Claude or OpenAI, an **AWS
+  Access Key ID** and **Secret Access Key** for Amazon Bedrock, or a **Service Account Key
+  (JSON)** for Google Vertex AI. The "leave the keys blank" setups described below for Bedrock and
+  Vertex apply only on-premise.
+- **The API Base URL must be a public address.** A base URL that points at a private network
+  address, loopback or a cloud metadata service is refused when you save or test it, and again
+  every time the model is called. A custom Amazon Bedrock endpoint is not available on Cloud:
+  leave Bedrock's **API Base URL** blank.
+
+Model traffic goes from your DefectDojo Cloud instance to your own provider account, and your
+provider's data terms apply to those requests.
 
 ## Providers
 

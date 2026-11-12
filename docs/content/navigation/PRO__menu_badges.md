@@ -59,9 +59,9 @@ Every page that belongs to a `DEPRECATED` feature opens with a warning banner. T
 
 **`DEPRECATED`**
 
-* **Settings > Configuration > Tool Types** and **Tool Configurations**, removed in **3.5.0 (November 2026)** along with the API-based (pull) parsers they exist to configure. The [3.2 upgrade notes](/releases/os_upgrading/3.2/) explain what to migrate to and by when.
-* **API Scan Configurations** on an Asset, removed in **3.5.0 (November 2026)** for the same reason.
-* **Endpoints** (the Endpoints menu, the Endpoint and Host list pages, and a Finding's endpoint tables), removed in **3.6.0 (December 2026)** in favour of Locations. See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/).
+* **Settings > Configuration > Tool Types** and **Tool Configurations**, removed in **3.6.0 (December 2026)** along with the API-based (pull) parsers they exist to configure. The [3.2 upgrade notes](/releases/os_upgrading/3.2/) explain what to migrate to and by when.
+* **API Scan Configurations** on an Asset, removed in **3.6.0 (December 2026)** for the same reason.
+* **Endpoints** (the Endpoints menu, the Endpoint and Host list pages, and a Finding's endpoint tables), removed in **3.7.0 (January 2027)** in favour of Locations. See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/).
 
 ![DEPRECATED badges under Settings > Configuration](images/menu_badge_deprecated.png)
 

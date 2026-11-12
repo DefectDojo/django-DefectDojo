@@ -55,9 +55,9 @@ Five resources make up the Report Builder API. Each supports the standard list (
 
 | Resource | Path | What it is | Custom actions |
 |----------|------|------------|----------------|
-| Themes | `/report_themes/` | Colors, fonts, header/footer images, page numbers | — |
-| Blocks | `/report_blocks/` | A single piece of content: a cover page, a table, or a detail section | `field_options/`, `preview/`, `{id}/preview/`, `{id}/duplicate/` |
-| Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/` |
+| Themes | `/report_themes/` | Colors, fonts, header/footer images, page numbers | `{id}/share/`, `{id}/transfer/` |
+| Blocks | `/report_blocks/` | A single piece of content: a cover page, a table, or a detail section | `field_options/`, `preview/`, `{id}/preview/`, `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/` |
+| Templates | `/report_templates/` | An ordered list of blocks plus a theme | `{id}/duplicate/`, `{id}/share/`, `{id}/transfer/`, `{id}/export/`, `export/`, `import/` |
 | Generated reports | `/generated_reports/` | A run of a template that produces a downloadable file | `{id}/download/`, `{id}/content/` |
 | Report schedules | `/report_schedules/` | A standing request that runs a template on a cron cadence | — |
 
@@ -67,6 +67,37 @@ Two more endpoints help you discover the vocabulary you need:
 |----------|---------|
 | `GET /report_blocks/field_options/` | Valid column field paths and ordering options for each model |
 | `GET /oa3/schema/?format=json` | The full OpenAPI schema — used to discover valid filter names |
+
+### Group ownership
+
+Themes, blocks and templates can be owned by a group instead of by the instance (see [Group ownership](../report-builder/#group-ownership)). Every row in their responses carries `owner_group` (the group's id, or `null` for the instance), `owner_group_name`, `visibility` (`group`, `shared`, `everyone`, or `orphaned` once the owning group has been deleted) and, for a shared row, `shared_groups` (each with `id` and `name`).
+
+- **Create into a group** by sending `owner_group` with the create request. Leaving it out creates an instance row, which needs **Report Template Add** as a global role. `owner_group` can only be set on create: a different value on an update answers `400`. Use `transfer/` instead.
+- **List by owner** with `scope` (`mine`: owned by a group you belong to; `shared`: shared with one of your groups; `everyone`; `instance`) or `owner_group=<id>` (`owner_group=instance` for rows with no group). Both narrow what you can already see.
+- **Share** with `POST {id}/share/` and a body of `visibility` (`group`, `shared` or `everyone`) plus `shared_groups` (a list of group ids) for `shared`. Sharing with `everyone` needs **Report Template Edit** as a global role.
+- **Transfer** with `POST {id}/transfer/` and a body of `owner_group` (a group id, or `null` for the instance). You need **Report Template Edit** on the row and **Report Template Add** in the destination.
+
+`share/` and `transfer/` answer `403` with a `detail` sentence when you may not make the change, and `400` for invalid input. A template can only reference blocks and a theme the caller can see; naming one you cannot see answers `400`.
+
+### Export and import templates
+
+`GET /report_templates/{id}/export/` returns one template as an export file, and `GET /report_templates/export/?id=4,7` several (at most 25 templates and 250 blocks). The file is JSON with `format` set to `defectdojo.report_template`, `format_version`, the `source_version` of DefectDojo that wrote it, and a `templates` list. Each template carries its theme, its blocks in order and the images they show. Every filter value that names an object also carries the object's name, under `refs`.
+
+`POST /report_templates/import/` takes the file as `bundle`:
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Token [YOUR-API-TOKEN]" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/report_templates/import/" \
+  -d '{"bundle": '"$(cat report-template-4.json)"', "dry_run": true, "conflict": "create"}'
+```
+
+- `dry_run` defaults to `true`: the answer is the report and nothing is written. Send `false` to import.
+- `conflict` is `create` (the default), `skip` or `overwrite`, for a template with the same name and owner.
+- `owner_group` is the group the new templates, blocks and themes belong to; leave it out for the instance.
+
+The answer has one row per template (`action`, `template_id`, `warnings`, `problems`, `written`). If any row has a problem, nothing is written and the status is `400`. A file that is not a report template export, that a newer version of DefectDojo wrote, or that holds more than 250 blocks answers `400` with a `detail` sentence. Importing needs **Report Template Add**.
 
 ## Step 1: Discover the vocabulary
 
@@ -89,9 +120,9 @@ The response is shaped like this (truncated):
 {
   "fields": {
     "finding": [
-      {"path": "title", "label": "Title"},
-      {"path": "severity", "label": "Severity"},
-      {"path": "age_days", "label": "Age (days)"}
+      {"path": "title", "label": "Title", "group": "finding", "block_types": "both"},
+      {"path": "severity", "label": "Severity", "group": "finding", "block_types": "both"},
+      {"path": "age_days", "label": "Age (Days)", "group": "dates", "block_types": "both"}
     ],
     "asset": [ ... ]
   },
@@ -100,6 +131,8 @@ The response is shaped like this (truncated):
   }
 }
 ```
+
+Each entry's `group`, where present, is a key naming the heading the report builder lists the field under (`finding`, `threatIntel`, `asset`, `organization`, `engagement`, `test`, `engagementAndTest`, `findings`, `dates` or `people`). It only arranges the picker, so a script can ignore it. Entries of the `organization`, `asset`, `engagement`, `test` and `finding` models carry it; the other models' entries do not.
 
 Use only the `path` values returned here for a block's `fields` list. Some paths are long-form or markdown and are intended for **detail** blocks rather than narrow tabular columns — `field_options` is the authoritative list, so confirm against it rather than hardcoding an exhaustive set.
 
@@ -433,6 +466,29 @@ A few rules keep this endpoint cheap to call, whatever the size of the underlyin
 - Like `download/`, the endpoint responds `404` until the run is `completed`.
 - `csv`, `xlsx` and `json` runs have no text rendition — their rows are already machine-readable through `download/` — so `content/` answers `200` with `"content": null` for them.
 
+**Delete a run.** `DELETE /generated_reports/{id}/` answers `204` and removes the file and its text rendition. The user who requested the report can delete it while they can still view generated reports; so can anyone holding **Generated Report Delete** as a global role, and, for a report generated for a group, a member whose membership role in that group carries **Generated Report Delete**. Anyone else who can see the report gets `403`. Each report in a response carries `can_delete`, which is `true` exactly when this call would succeed for you.
+
+### Generated reports and groups
+
+With [Group ownership](../report-builder/#generated-reports-and-groups) on, every report in a `/generated_reports/` response also carries `owner_group` (the group it was generated for, or `null`), `owner_group_name`, `visibility` (`group`, `shared`, or `orphaned` once its group has been deleted), `shared_groups` (each with `id` and `name`, for a shared report) and `can_share`.
+
+- **Generate for a group** by adding `owner_group` (a group id) to the `POST /generated_reports/` or `POST /generated_reports/quick_report/` body. The report is built with that group's access rather than yours, and its graphs are drawn on the server with that access: any `chart_snapshots` in the body are ignored. You must be a member of the group with a membership role that carries **Generated Report Add**. A group you cannot see, or one that does not exist, answers `400` with `"That group does not exist."` under `owner_group`. `GET /generated_reports/owner_choices/` lists the groups you can generate for under `groups`.
+- **Share** a report generated as yourself with `POST /generated_reports/{id}/share/` and a body of `visibility` (`group` to stop sharing, or `shared`) plus `shared_groups` (a list of group ids) for `shared`. There is no `everyone`. Each group must be able to see all of the data in the report for its Template, or the call answers `400` and names the group; that check runs again on every read. Only the requester, or someone holding **Generated Report Delete** as a global role, can share (`403` otherwise).
+- **List by owner** with `scope` (`mine`: generated for a group you belong to; `shared`: shared with one of your groups; `instance`: generated for no group) or `owner_group=<id>`. Both narrow what you can already see.
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/generated_reports/" \
+  -d '{
+    "template_id": 5,
+    "file_format": "pdf",
+    "owner_group": 3
+  }'
+```
+
 ## Step 4: Run a report on a schedule
 
 A report schedule is a standing version of the request in Step 3: the template, format and runtime filters to run, plus a cron cadence. DefectDojo's scheduling service generates a new report on every tick, and each one appears in `/generated_reports/` as an ordinary run, so the polling, download and `content/` calls above work unchanged. Report schedules are available from DefectDojo Pro 3.3.300.
@@ -488,12 +544,12 @@ The response is the schedule with the scheduling service's view of it nested as 
 
 A few things to know about how schedules behave:
 
-- **Every run is generated as the schedule's creator.** `created_by` is the user whose token created the schedule, each run is requested by that user with that user's visibility, and `created_by` never changes — a PATCH by someone else does not move the schedule to them.
+- **A schedule belongs to its template's owner.** A schedule on a group's template has that group as its `owner_group` (set from the template, never sent), can only use that group's templates, and every run is generated as the group's automation identity, with the group's visibility. A schedule on an instance template has no `owner_group`, and every run is generated as the schedule's creator: `created_by` is the user whose token created it, each run is requested by that user with that user's visibility, and `created_by` never changes (a PATCH by someone else does not move the schedule to them).
 - **A new schedule is always enabled.** To create one without running it yet, create it and then pause it (below).
 - **Registering a new cadence resumes the schedule**, even if the same PATCH also sends `"enabled": false`. To move a paused schedule and keep it paused, PATCH the cadence first and pause it in a second call. The `schedule.enabled` value in every response is the schedule's real state.
 - **Creating and registering are one transaction.** If the scheduling service cannot register the cadence, the request answers `503` and no schedule row is kept.
 
-**List, filter and read back.** `GET /report_schedules/` lists the schedules the caller may see, newest first; filter with `template`, `created_by`, `file_format` or `id`, and retrieve one with `GET /report_schedules/{id}/`. To see the reports a schedule has produced, list `/generated_reports/` with the same `template` and the creator as `requested_by`.
+**List, filter and read back.** `GET /report_schedules/` lists the schedules the caller may see, newest first; filter with `template`, `created_by`, `file_format`, `owner_group` or `id`, and retrieve one with `GET /report_schedules/{id}/`. To see the reports a schedule has produced, list `/generated_reports/` with the same `template` and the creator (for a group's schedule, the group's automation identity) as `requested_by`.
 
 **Pause, resume or change a schedule.** PATCH the report-side fields (`name`, `file_format`, `runtime_filters`) or a `schedule` object. `schedule` may carry only `enabled` to pause or resume without touching the cadence:
 
@@ -508,7 +564,7 @@ curl -s -X PATCH \
 
 **Delete a schedule.** `DELETE /report_schedules/{id}/` answers `204` and stops future runs; the reports it already generated stay in `/generated_reports/`.
 
-Any organization member who may run a template may schedule it. Updating or deleting a schedule is limited to its creator and to users with the global permission to delete generated reports; anyone else receives `403`. As with every other Report Builder endpoint, the routes require the **Reporting** feature and answer `403` with `"code": "feature_disabled"` when it is off.
+Any organization member who may run an instance template may schedule it. Updating an instance schedule is limited to its creator, and deleting one to its creator and to users with the global permission to delete generated reports. A group's schedule is created and updated by members of the group holding **Report Template Edit** in it (through their membership role or a global role), and deleted by anyone holding **Report Template Edit** in the group. Anyone else receives `403`. As with every other Report Builder endpoint, the routes require the **Reporting** feature and answer `403` with `"code": "feature_disabled"` when it is off.
 
 ## Putting it together: a full lifecycle script
 

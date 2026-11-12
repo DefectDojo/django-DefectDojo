@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "3.5.0-dev",
+  "version": "3.6.0-dev",
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -30,6 +30,9 @@
     "@tailwindcss/cli": "^4.3",
     "@tailwindcss/forms": "^0.5",
     "tailwindcss": "^4.3"
+  },
+  "resolutions": {
+    "undici": "^7.30.1"
   },
   "scripts": {
     "copy:fonts": "mkdir -p ../dojo/static/dojo/css/files && rm -f ../dojo/static/dojo/css/files/*.woff2 && cp node_modules/@fontsource-variable/inter/files/inter-*-wght-normal.woff2 node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-*-wght-normal.woff2 ../dojo/static/dojo/css/files/",

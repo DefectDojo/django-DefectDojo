@@ -65,18 +65,23 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
 - **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
+- **Read-only**: a Maintainer can also mark a collaborative layout as **read-only** (**Make Read-Only** in **Manage Layouts**, reversed with **Allow Editing**). It stays one live dashboard in every user's layout picker, and anyone can still set it as their default, but only a Maintainer or the layout's owner can change its widgets or arrangement. Everyone sees it tagged **Read-Only**; the owner and Maintainers keep the **Edit** button and everyone else has none, so a Maintainer can keep one dashboard current for the whole team without anyone else changing it. Anyone who wants a version of their own can still duplicate it. Stopping collaboration (or unsharing) also turns read-only off.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
-- **Global default**: a user who can share dashboards can mark a shared layout as the **global default** from **Manage Layouts** (**Set as Global Default**, cleared with **Clear Global Default**). It carries a "Global Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on the Layout Defaults settings page (**Settings > UI Defaults > Layout Defaults**).
+- **Instance Default**: a user who can share dashboards can mark a shared layout as the **Instance Default** from **Manage Layouts** (**Set as Instance Default**, cleared with **Clear Instance Default**). It carries an "Instance Default" badge, and it is the dashboard everyone is shown when dashboard customization is restricted (see below). It can also be chosen from a dropdown on **Settings > Defaults > Instance Defaults** (the **Dashboards** card).
 
 ### Restricting customization
 
-An administrator can enable **Restrict Layout Customization** (Settings, then UI Defaults, then Layout Defaults) to limit dashboard changes to superusers. Everyone else is shown the global default dashboard, or the built-in starter dashboard when none is designated, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
+An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. Everyone else is shown the Instance Default dashboard, or the built-in starter dashboard when none is set, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
+
+### Default Profile and instance defaults
+
+When you have not chosen a default dashboard (with **Set as My Default** in the layout manager, tagged **My Default**), the Dashboards page opens the one from the first [Default Profile](/admin/user_management/create_user_group/#defaults) that sets one and that you can open (the profile assigned to you directly, then your Groups' profiles in rank order), else the Instance Default, else your own copy of the starter dashboard. The dashboard picker marks it, as **From <profile>** or **Set by <profile>** when it is locked. Opening the Dashboards page before you had a profile does not count as a choice, so a profile added later still applies. While your customization is restricted, the profile's dashboard is enforced over the Instance Default, which applies when no profile of yours sets one. Under **Restrict to Selected Layouts** the picker offers only the dashboards your profile allows, and New, Edit and Duplicate are not available.
 
 ## Building a dashboard in the UI
 
 ### The dashboard toolbar
 
-The toolbar across the top of the Dashboards page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout, any shared layouts/templates, and collaborative layouts shared with you), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
+The toolbar across the top of the Dashboards page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout, any shared layouts/templates, collaborative layouts shared with you, and a lock on read-only layouts), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
 
 ![The dashboard toolbar (highlighted): the layout picker, plus New Layout, Manage Layouts, Refresh, and Edit](images/pro_dashboard_v2_home.png)
 
@@ -108,21 +113,44 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 ![Configuring a Graph widget](images/pro_dashboard_v2_widget_config.png)
 
+#### Graph options
+
+A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**):
+
+- **Split By** draws one line, or one run of bars, per value of a second dimension. Grouping by **Created Date** by month and splitting by **Severity Group** gives new findings per month as two lines, one for Critical and High findings and one for Medium and Low findings. Split By takes any dimension that is not a date and not the Group By, and is available on bar, line and area charts (a pie or doughnut shows one dimension). A chart draws up to 10 series: past that, the smallest values are combined into one **Other** series. A chart that counts unique CWEs or vulnerability IDs cannot combine values that way, so it asks for a filter or a dimension with fewer values instead.
+- **Severity Group** is a finding dimension with three values: **Critical and High**, **Medium and Low**, and **Info**. It works as a Group By (a two or three slice doughnut) or as a Split By. Its lines and slices are red for Critical and High and green for Medium and Low unless you pick other colors. Clicking one opens the Findings list filtered to that group's severities.
+- **Created Date** is when a finding was created in DefectDojo (when it was imported or added), as opposed to **Discovered Date**, the date the scanner reported. Charting new findings per month by Created Date counts each finding in the month it arrived.
+- **Show Values** prints the number on each bar, point or slice. A pie or doughnut also shows each slice's share of the total.
+- **Stacked** stacks the series of a split chart on top of each other instead of drawing them side by side. It appears once Split By is set.
+- **Colors** sets the color of each series (with Split By) or of each slice or bar (without). **Default** keeps the color the chart would pick, such as the severity colors.
+
+A chart over a date (**Created Date**, **Discovered Date**, **Mitigated Date** and the others) shows every period between its first and last, with 0 for a month in which nothing happened, so a line never skips a gap. When the widget filters on the same date (for example Created Date in the past 180 days), the chart spans that whole window. Records with no value for the date, such as open findings on a Mitigated Date chart, are not counted, so a fixed-findings-per-month chart needs no extra Mitigated filter.
+
+Each period is labeled by its size, in your language: a day or a week by the date it starts (May 4, 2026), a month by its month and year (May 2026), a quarter as Q2 2026 and a year as 2026. Clicking a period opens the list filtered to that period.
+
+A management pack of three monthly charts, for example, is three Graph widgets over findings:
+
+| Chart | Chart Type | Group By | Split By | Filters |
+|-------|------------|----------|----------|---------|
+| Open findings by severity | Doughnut, with Show Values | Severity | | Active findings |
+| New findings per month | Line, with Show Values | Created Date, by Month | Severity Group | Created Date in the past 180 days |
+| Fixed findings per month | Line, with Show Values | Mitigated Date, by Month | Severity Group | Mitigated Date in the past 180 days |
+
 > **💡 Tip:** A widget's data always respects your permissions. If a shared layout includes a "My Work" widget, every viewer sees *their own* assignments and mentions — not the layout author's.
 
 ### Step 4: Arrange, then save
 
-Drag widgets to rearrange them and drag a corner to resize. Use the gear icon on a widget to reconfigure it, the duplicate icon to copy it, and the trash icon to remove it. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+Drag widgets to rearrange them and drag a corner to resize. Each widget's title bar holds a **Widget Actions** menu (the three dots beside the refresh button). While editing it offers **Edit Widget** to reconfigure the widget, **Title Style** to set the title's weight and size, **Duplicate Widget** to copy it, and **Remove Widget**, which asks for confirmation. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
 
-Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Open its gear icon to rename it and change the one filter that differs.
+Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Choose **Edit Widget** from its menu to rename it and change the one filter that differs.
 
-A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its gear icon to leave the widget's title bar blank.
+A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its **Edit Widget** form to leave the widget's title bar blank.
 
 ### Putting a widget into a report
 
 Customizable Dashboards and the [Report Builder](../../reports/report-builder/) share one widget catalog, so a figure your team reads on a dashboard can go straight into a document you send out.
 
-Click the export icon on a widget and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates.
+Open a widget's **Widget Actions** menu and choose **Add to Report**. Name the block, optionally pick a report Template to append it to, and it is created carrying the widget's current filters. The action appears on widgets a report can draw, when Reporting is enabled and you have permission to add report templates; a widget that offers nothing else shows no menu while you are viewing.
 
 This **copies** the widget rather than linking to it. Editing the dashboard widget later does not change the report block, and the reverse is also true, so a shared dashboard never depends on who can see which report block.
 
@@ -130,7 +158,7 @@ This **copies** the widget rather than linking to it. Editing the dashboard widg
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Saved Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts.
+- **Saved Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts, and **Make Read-Only** / **Allow Editing** on collaborative ones. A read-only layout is tagged **Read-Only**.
 - **Create New** — start a fresh, empty layout to build from scratch.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
@@ -147,7 +175,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 | **Mitigation Layout** | A remediation-velocity board (closure trends, MTTR/MTTD, aging). |
 | **Tool Layout** | A scanner-effectiveness board built around test types and recent scan activity. |
 
-> **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it. A **collaborative** layout is the exception by design: it is used live rather than copied, so edits made to it are visible to everyone. Take your own copy of a collaborative layout only when you want a private version that no longer follows the shared one.
+> **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it. A **collaborative** layout is the exception by design: it is used live rather than copied, so edits made to it are visible to everyone. Take your own copy of a collaborative layout only when you want a private version that no longer follows the shared one. A read-only collaborative layout works the same way, except that only a Maintainer or its owner can change it.
 
 ### The empty state
 
@@ -166,10 +194,31 @@ Single-glance metrics — counts, KPIs, and gauges.
 | Widget | What it shows |
 |--------|---------------|
 | **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. For findings, the **Measure** option can count unique CWEs or unique vulnerability IDs instead of rows. |
-| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. |
+| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. With the **Snapshot** source it can instead show a chart of open findings at the end of each month or week (see [Open findings at each month end](#open-findings-at-each-month-end)). |
 | **Gauge** | A ratio drawn as an arc gauge — a "universe" filter as the denominator and a "pass" filter as the numerator. Use for SLA compliance, mitigation rate, or scan coverage, with configurable warning/OK thresholds. |
 | **License Usage** | Your account's license-usage status with a per-signal breakdown (database size, weekly finding volume, and so on). *Requires the Maintainer role.* |
 | **Scan Coverage** | What fraction of assets were scanned within 30 / 90 / 180 / 365 days, as a multi-window rollup. |
+
+### Open findings at each month end
+
+A management pack usually reports how many findings were open at the end of each month, split by severity. A **Graph** widget cannot show that: it counts the findings as they are now. The **KPI / Trend** widget can, because its **Snapshot** source reads the nightly metrics snapshots, which record the open findings of every severity each night.
+
+To chart the last six months with Critical and High as one line and Medium and Low as another:
+
+1. Enter edit mode, choose **Add Widget**, and pick **KPI / Trend**.
+2. Set **Source** to **Snapshot** and **Show As** to **Chart**.
+3. In **Severities**, keep Critical, High, Medium and Low (remove Info if you do not want it).
+4. Leave **Series** on **Critical and High, Medium and Low, Info**. Choose **One Series per Severity** instead to draw a line for each severity.
+5. Leave **Period** on **Month** and **Periods Shown** at 6. **Week** charts the end of each week instead.
+6. Pick **Line** or **Bar** in **Chart Type**, keep **Show Values** to print each count on its point, and change a series color if you need to (by default Critical and High is red, Medium and Low is green, and Info uses the Info severity color).
+7. Submit. The widget is saved as soon as you submit; click **Done** to leave edit mode.
+
+How to read the chart:
+
+* Each point is the number of findings open on the last night of that month: the month end for a closed month, and the latest night for the current one. Hover a point to see which night it was read from.
+* A month with no snapshot is left as a gap rather than drawn as zero. If the snapshots stopped partway through a month, the point shows the last night that was recorded, and the tooltip names that night.
+* The numbers count the findings of the Assets you can view, so two people with different access can see different numbers on the same dashboard.
+* History starts with the first nightly snapshot. Until then the widget says that history arrives after it.
 
 ### Charts
 
@@ -177,7 +226,7 @@ Time-series and distribution visualizations.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Graph** | A general-purpose chart over any model and group-by dimension — bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. |
+| **Graph** | A general-purpose chart over any model and group-by dimension: bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. **Split By** draws one series per value of a second dimension, such as new findings per month by Severity Group (see [Graph options](#graph-options)). For a chart by month, filter its date with **Full Months** (for example Last 6 Full Months) so that every month on the chart is complete; see [date filters](/navigation/pro__filter_index/#how-date-filters-are-evaluated). |
 | **Sankey** | A flow diagram from a source dimension to a target dimension — e.g. Severity → Status. |
 | **Sunburst** | A one- or two-level radial breakdown — e.g. Severity, then Test Type within each severity. |
 | **Risk Matrix** | An EPSS-probability × risk heatmap of findings — bottom-left safe, top-right dangerous. |
@@ -203,6 +252,8 @@ Ranked lists, feeds, and embedded tables.
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
 | **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
+An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the table's filter bar or column filters. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
+
 ### Static & Utility
 
 Notes, shortcuts, and structure.
@@ -213,6 +264,30 @@ Notes, shortcuts, and structure.
 | **Section Break** | A labeled divider for grouping related widgets under a heading. |
 | **Markdown / Notes** | An inline rich-text panel for headers, context notes, or reference links. |
 | **Quick Actions** | One-click action buttons that navigate to a chosen page. |
+
+## Charting scans by category
+
+Every Test Type belongs to a **category** that says what kind of scan it is: **SAST**, **DAST**, **SCA**, **API**, **Container**, **IaC**, **Secrets**, **Cloud**, **Infrastructure**, **Mobile** or **Penetration Test**. Charts and lists can group and filter by it, so a report of scans per category does not need a list of tools kept by hand.
+
+- On a **Graph** widget with the **Test** model, choose **Category** as the group-by dimension to count tests (scans) in each category. To count scans per month in each category, group by **Created** with a **Month** time bucket and set **Split By** to **Category** (see [Graph options](#graph-options)); to chart one category on its own, filter the widget on **Category** instead.
+- On the **Finding** model, the same breakdown is the **Test Category** dimension: findings grouped by the category of the test that reported them.
+- The **Tests** list has a **Category** column (hidden by default; add it from the column picker) and a **Category** filter. The **Findings** list has a **Test Category** filter. Clicking a bar or slice of a chart grouped by category opens the matching list filtered to that category.
+
+### Where a category comes from
+
+Built-in scanners have a default category, chosen from the Test Type's name (for example, **ZAP Scan** is DAST, **Semgrep JSON Report** is SAST, **Trivy Scan** is Container, **Checkov Scan** is IaC). A Test Type whose name no default covers, such as a custom tool, takes **SAST** when it is marked **Static**, **DAST** when it is marked **Dynamic**, and otherwise **Uncategorized**.
+
+**Uncategorized** is a category of its own: its tests show as their own bar or slice and can be selected in a filter, so no test is left out of a chart because its tool is unknown.
+
+### Setting a Test Type's category
+
+1. Go to **Settings > Test Types**. The **Category** column shows each Test Type's category, marked **(default)** when it comes from the default rather than from a choice someone made.
+2. Open a Test Type's menu and choose **Edit Test Type**.
+3. Pick a **Category** and click **Submit**.
+
+The change applies to every test of that type, including tests imported before it, and charts show it the next time they load. To go back to the default, clear the **Category** field and submit. The placeholder names the default the Test Type returns to.
+
+Changing a category needs permission to edit Test Types.
 
 ## Next steps
 

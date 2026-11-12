@@ -41,6 +41,8 @@ Inside a run, every node records its own row:
 
 The trace is what you read when a rule did not do what you expected. An If / Filter node reporting 400 items in and 0 down the true branch tells you the conditions are wrong, without you having to guess.
 
+A node that changes Findings acts only on Findings the rule's owner (for a group's rule, the group's automation identity) may edit. Findings it can see but not edit are left alone, and the node's summary counts them, for example "12 findings not edited: no edit permission".
+
 ## Execution model
 
 Nodes execute in topological order: a node runs once everything feeding into it has run. A node with several incoming edges receives all of their outputs concatenated. A node with nothing feeding into it still runs, with an empty input list.
@@ -72,6 +74,10 @@ A run's **Depth** and **Source run** fields let you follow a chain back to the c
 
 Changes made *by* a running rule are attributed to that rule's own cascade rather than looking like fresh user activity, so a rule delegating work internally does not inflate the chain.
 
+### Running rules in order
+
+A cascade starts the next rule only when a change produces an event that rule listens for. To run rules in a fixed order whatever they change, give the next rule an [On Rule Complete](../node_reference/#on-rule-complete) trigger. Each successful run of the rule it picks starts it, one hop deeper in the same chain, so the depth and chain-membership limits above apply. The run it started points back through **Source run**, and the finished run's **Stats** list the rules it started under `woke_rules`.
+
 ## Scale and limits
 
 **A run is not capped.** A rule processes everything its scope matches, however large that is. A rule that silently stopped at the first N Findings would be a rule you could not trust.
@@ -94,6 +100,10 @@ Two windows apply, both configurable:
 * A run that goes 30 minutes without a heartbeat is treated as abandoned, errored, and its lock released.
 * A run is killed outright after six hours, as a guard against one that will never finish.
 
+## When a scheduled rule stops running
+
+A rule on a schedule that stops firing raises no error: there is simply no run. With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, every enabled rule that runs on a cron schedule is listed on **Settings > Operations > Ingestion Health** with its last scheduled run and its next expected one. It is flagged **Stale** once its schedule has fired three times since its last scheduled run (the number is a per-rule threshold), and the **Ingestion Health Warning** notification goes out once. Runs started by hand do not count toward this.
+
 ## Retention
 
 Runs are kept for **180 days** by default, along with their per-node rows and their Finding provenance. Deliveries are kept for 180 days separately.
@@ -104,7 +114,7 @@ Both windows are configurable, and either can be set to keep records indefinitel
 
 ## Running a rule by hand
 
-**Run Now** runs a rule straight away, whatever its trigger, except a trigger that acts only on what woke it: a webhook, **When a Scan Has Landed** or **On DAST Scan Completed**. It is on the editor's toolbar and in each rule's menu on the rule list, for the rule's owner when they hold Rule Edit, and for superusers. What a hand-started run works on depends on the trigger:
+**Run Now** runs a rule straight away, whatever its trigger, except a trigger that acts only on what woke it: a webhook, **When a Scan Has Landed** or **On DAST Scan Completed**. It is on the editor's toolbar and in each rule's menu on the rule list, for whoever may change the rule: for an Instance rule, its owner when they hold Rule Edit; for a group's rule, a member of the group holding Rule Edit there; and superusers. What a hand-started run works on depends on the trigger:
 
 * **Manual Run** and **On a Schedule** sweep everything in scope, Findings or Assets per the **Sweep Over** setting, exactly as a scheduled run does.
 * **On Finding Event** and **On Asset Event** replay the rule over the Findings or Assets currently in the trigger's scope, as if the trigger's event had just happened to each of them. A replay covers at most 500 of them, lowest id first.

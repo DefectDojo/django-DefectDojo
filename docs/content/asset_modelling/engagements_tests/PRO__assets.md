@@ -88,7 +88,7 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
     - **Endpoints**: vulnerable (an open Finding still affects it), not vulnerable (everything else, including Endpoints no Finding has touched), and those still affected by an active Critical Finding. With Locations enabled, the card counts active, mitigated, and critical Locations instead.
     - Every figure counts only what you have permission to view.
 - **Open Finding Severity**
-    - A list of open Findings within the Asset, grouped by severity
+    - One bar of the Asset's open Findings split by severity, with each severity's count and share underneath. The panel header shows the total open count, and each severity links to the Asset's open Findings at that severity.
 - **Asset Overview**
     - A breakdown of various features of the Asset, including Description, Components, Contacts, [User Groups](/admin/user_management/create_user_group/
 ), Members, Technologies, and Regulations.
@@ -98,9 +98,10 @@ Asset views contain a variety of tables and charts to interpret an Asset’s sta
 - **Service Level Agreement by Severity**
     - Applies the Asset’s SLA configuration from settings to the Findings within the Asset. 
 - **Finding Severity Breakdown**
-    - A graph of the Findings within the Asset, organized by severity. 
+    - A ring of the Asset's open Findings (active, and not duplicates, false positives or out of scope) by severity, with the open total in the middle. Beside it, each severity's count and share, each linking to the Asset's open Findings at that severity. The panel header shows the total open count.
 - **Finding Distribution**
-    - A breakdown of the Findings within the Asset, organized by status (e.g., Active, Mitigated, Static, and Dynamic)
+    - A ring of the Asset's Findings by status: Active, Mitigated, and Other (Findings that are neither active nor mitigated, such as false positives and accepted risks). The three add up to the total, which the panel header shows, and each status in the legend links to the Asset's Findings with that status.
+    - Beside the ring, the share of Findings reported by static and by dynamic tools. Each is measured against the total on its own, because a Finding can be both static and dynamic, or neither.
 - **All Engagements**
     - A list of Engagements contained within the Asset. 
 
@@ -282,7 +283,7 @@ recognise the Asset from whichever name a source happens to use.
 
 Each alias has three parts:
 
-- a **namespace**, naming the system that issued the identifier — `dns`, `oci`, `purl`, `git`,
+- a **namespace**, naming the system that issued the identifier: `dns`, `oci`, `purl`, `git`, `hw`, `cloud`,
 or a specific Connector configuration;
 - a **type**, saying what kind of identifier it is — `external_id`, `hostname`, `image_digest`,
 and so on;
@@ -306,20 +307,46 @@ writes to a `connector:` namespace. Everything else is yours to declare, through
 ### Managing aliases from the Asset page
 
 The **Asset Identity** card on the Asset page lists every identifier that resolves to that
-Asset, with its type, its namespace, and where it came from — a Connector's name for the ones
-its sync asserted, or *User* for the ones you added.
+Asset, with its type, its namespace, and where it came from: a Connector's name for the ones
+its sync asserted, or *User* for the ones you added. The namespace appears once the card is wide
+enough for it. Above the list, the card counts the identifiers and how many of them people
+added, and the card's title shows the same count (or the number of repository conflicts, when
+there are any). A long identifier is cut to fit the card: hover over it, or move keyboard focus
+to it, to read it in full.
 
 Use **Add Identity** to declare one. You pick the namespace first, then the type, because only
 some pairings mean anything: a hostname belongs in `dns`, an image digest in `oci`. The
 namespaces offered are the shared, semantic ones; a Connector's own namespace is not offered,
 because those belong to its sync.
 
-Removing an alias **withdraws** it rather than editing it. Withdrawing one you added means
-sources that knew the Asset by that identifier fall back to matching it by name. Withdrawing
-one a Connector asserted only lasts until that Connector's next sync, which will assert it
-again — to stop a Connector claiming an Asset, change its mapping rather than its aliases.
+Removing an alias **withdraws** it rather than editing it: choose **Withdraw** from the menu at
+the start of its row. Withdrawing one you added means sources that knew the Asset by that
+identifier fall back to matching it by name. Withdrawing one a Connector asserted only lasts
+until that Connector's next sync, which will assert it again. To stop a Connector claiming an
+Asset, change its mapping rather than its aliases.
 
-Adding and withdrawing an alias requires edit permission on the Asset.
+Adding and withdrawing an alias requires edit permission on the Asset. Without it, the card
+lists the identifiers with no **Add Identity** button and no row menus.
+
+### Device identifiers
+
+Two namespaces identify a machine rather than software:
+
+- **Hardware** (`hw`): a **MAC Address**, a **Hardware UUID** (the SMBIOS UUID) or a **Serial
+  Number**. These stay with one machine for its life.
+- **Cloud** (`cloud`): a **Cloud Instance ID**, written with its provider, for example
+  `aws:i-0abc1234def567890`, `azure:<VM id>` or `gcp:<instance id>`.
+
+DefectDojo stores each in one spelling, so `00-1B-A9-12-34-56` and `00:1b:a9:12:34:56` are the
+same address. It refuses values that cannot identify one machine: randomized and locally
+administered MAC addresses, the MAC addresses of virtual machines and of USB or dock network
+adapters, and the placeholder UUIDs and serial numbers firmware leaves when nobody set one.
+
+Connectors that report one machine per Record (for example CrowdStrike Falcon, Qualys, runZero,
+Wazuh and ServiceNow CMDB) also record the IP addresses and host names they see for each
+machine. These are kept as observations, with when each source first and last saw them, rather
+than as aliases: an IP address can move to another machine, so it is evidence for matching two
+Assets, never an identifier on its own.
 
 ### Turning Asset Identity on and off
 
@@ -382,9 +409,11 @@ reporting a repository whose alias names a different Asset, or if you map a Reco
 different Asset than its repository's alias names, DefectDojo does not move the Record or its
 Findings, and does not re-point the alias. It records a **repository conflict** instead.
 
-Conflicts appear at the top of the Asset Identity card, on both Assets involved, naming the
-repository, the Record and its Connector, and the two Assets. (If you cannot view the other
-Asset, the card says so without naming it.) To settle one, either:
+When there are conflicts, a strip at the top of the Asset Identity card says how many, on both
+Assets involved, and the identifier a conflict names is marked at the start of its row. Select
+**Review** on the strip to list them: each names the repository, the Record and its Connector,
+and the two Assets. (If you cannot view the other Asset, the list says so without naming it.)
+To settle one, either:
 
 - remap the Record onto the Asset the repository resolves to, choosing **Move** so its Findings
 travel with it (see [Managing Records](/connectors/upstream/manage_records/)); or
@@ -431,20 +460,29 @@ Versions require `DD_V3_ASSET_VERSIONS` to be enabled: set it on a self-hosted d
 contact support on Cloud. While it is off, none of the surfaces below are offered. An Asset with
 no versions behaves exactly as it does today.
 
-### The Versions table
+### The Versions widget
 
-Versions appear as an optional table on the Asset page. Add it from **Page Layout → Edit Layout
-→ Add Widget → Data Table**, then choose `Versions` as the record set. Each row shows the
-version, its optional release date, how many BOM snapshots it has, and how many Findings are
-recorded as found in or fixed as of it.
+Versions appear as an optional widget on the Asset page. Add it from **Page Layout → Edit Layout
+→ Add Widget → Data Table**, then choose `Versions` as the record set. The widget's header counts
+the versions declared on the Asset.
+
+The latest release leads, tagged **Newest**: the newest dated version, or the most recently declared
+one when no version has a release date. It shows its name, its release date, and three counts: how
+many BOM snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
+The rest list under **Earlier Versions**, below it or beside it on a wide widget, one line each with
+their release date and their Found In and Fixed In counts. A long list scrolls inside the widget.
+Versions are ordered by release date, newest first, and versions without a release date follow the
+dated ones, the most recently declared first, so an SBOM import newer than every dated release is
+listed after them. On a small widget only the leading version shows, with the number of the rest.
 
 **Add Version** declares one by hand, which is useful for a release you want to record claims
-against before any SBOM has been uploaded for it. Name it the way its producer does — `5.2.0`,
-`2026.08`, a build tag — because that is the string imports match against. The release date is
+against before any SBOM has been uploaded for it. Name it the way its producer does (`5.2.0`,
+`2026.08`, a build tag), because that is the string imports match against. The release date is
 optional and is a display hint: DefectDojo does not parse or order version names.
 
-Removing a version removes the snapshots and claims bound to it. The Findings themselves are
-untouched; only the per-version claims about them go.
+Each version, the newest included, has a menu at the start of its line with **Remove**. Removing
+a version removes the snapshots and claims bound to it. The Findings themselves are untouched;
+only the per-version claims about them go.
 
 ### Uploading an SBOM for a version
 

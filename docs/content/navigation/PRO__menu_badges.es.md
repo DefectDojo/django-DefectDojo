@@ -44,7 +44,7 @@ Ambas insignias son enlaces, porque un texto emergente se cierra en el momento e
 * **Settings > Configuration > Tool Types**
 * **Settings > Configuration > Tool Configurations**
 
-Ambas se eliminan en **3.5.0**, junto con los parsers basados en API (pull) que existen para configurarlas. Las [notas de actualización de 3.2](/releases/os_upgrading/3.2/) explican a qué migrar y para cuándo.
+Ambas se eliminan en **3.6.0**, junto con los parsers basados en API (pull) que existen para configurarlas. Las [notas de actualización de 3.2](/releases/os_upgrading/3.2/) explican a qué migrar y para cuándo.
 
 ![DEPRECATED badges under Settings > Configuration](images/menu_badge_deprecated.png)
 

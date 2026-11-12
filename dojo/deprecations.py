@@ -12,6 +12,7 @@ RELEASE_DATES = {
     "3.4.0": date(2026, 10, 5),
     "3.5.0": date(2026, 11, 2),
     "3.6.0": date(2026, 12, 7),
+    "3.7.0": date(2027, 1, 4),
 }
 
 _MINOR_RELEASE = re.compile(r"\d+\.\d+\.0")
@@ -85,13 +86,13 @@ def overdue_deprecations(version: str) -> list[Deprecation]:
 _UPGRADING_3_2 = "https://docs.defectdojo.com/releases/os_upgrading/3.2/"
 
 register_deprecation(
-    Deprecation(key="tool_type", title=_("Tool Types"), removal_version="3.5.0", notice_url=_UPGRADING_3_2),
+    Deprecation(key="tool_type", title=_("Tool Types"), removal_version="3.6.0", notice_url=_UPGRADING_3_2),
 )
 register_deprecation(
     Deprecation(
         key="tool_configuration",
         title=_("Tool Configurations"),
-        removal_version="3.5.0",
+        removal_version="3.6.0",
         notice_url=_UPGRADING_3_2,
     ),
 )
@@ -99,7 +100,7 @@ register_deprecation(
     Deprecation(
         key="api_scan_configuration",
         title=_("API Scan Configurations"),
-        removal_version="3.5.0",
+        removal_version="3.6.0",
         notice_url=_UPGRADING_3_2,
     ),
 )

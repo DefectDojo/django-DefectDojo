@@ -38,7 +38,7 @@ In Pro, check these in order:
 1. **Feature Flags.** Many capabilities are switched on by an administrator under [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 2. **License.** Sensei and PSIRT need an add-on license.
 3. **Permissions.** The sidebar only shows the pages your role can open.
-4. **Deployment.** A few settings exist only on self-hosted instances (for example AI Model Settings and Version Manager) or only on DefectDojo Cloud (for example Firewall Rules).
+4. **Deployment.** A few settings exist only on self-hosted instances (for example Version Manager, and AI Model Settings unless your Cloud instance brings its own model) or only on DefectDojo Cloud (for example Firewall Rules).
 
 In Open-Source, check that the page describes Open-Source: the edition switch at the top of the navigation shows the pages for the edition you choose.
 
@@ -274,6 +274,8 @@ Sensei is never trained on your data. DefectDojo uses your data only to complete
 **On self-hosted DefectDojo Pro**, Sensei is the agent harness and you bring the model. Connect the provider you already use (Anthropic, OpenAI, Amazon Bedrock or Google Vertex AI) in [AI Model Settings](/sensei/ai_model_settings/).
 
 Model traffic goes directly from your instance to your own provider account and never passes through DefectDojo. Your provider's data terms apply to those requests.
+
+**On DefectDojo Cloud, you can also bring your own model.** This is an enterprise option: DefectDojo turns on [AI Model Settings](/sensei/ai_model_settings/#bring-your-own-model-on-defectdojo-cloud) for your instance, and Sensei then runs only on the provider account you connect there. To request it, contact [hello@defectdojo.com](mailto:hello@defectdojo.com).
 
 If you connect an AI assistant through the [MCP server](/metrics_reports/ai/mcp_server_pro/), the data it reads goes to that assistant, under that assistant's terms.
 

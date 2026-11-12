@@ -29,16 +29,26 @@ fields, while PCI DSS scope confirmation and the scope inventory export stay clo
 
 ## Where to edit it
 
-With the flag on, the Asset page shows a **Regulatory** card. Fill in the fields and select
-**Submit**. An Asset has at most one profile. It does not exist until the first save, and
-until then every field reads as its default.
+With the flag on, the Asset page shows a **Regulatory** card. It reads as a checklist: the CRA
+facts with how many of them are set, then **DORA and SLA**. A CRA fact the profile lacks shows
+**Not set**, marked in amber while the **CRA Product Class** is anything other than **Not
+Applicable**.
 
-You need permission to edit the Asset to change its profile. A user who can only view the
-Asset sees the card read-only.
+To change the profile, select **Edit Profile** at the foot of the card, fill in the fields in the
+**Edit Regulatory Profile** dialog, and select **Submit**. Closing the dialog without **Submit**
+changes nothing. An Asset has at most one profile. It does not exist until the first save: until
+then the card says so and offers **Set Up Profile** instead, which opens the same dialog.
+
+The tag beside the card's title sums the profile up: **Early Warning Check** while a known
+exploited finding has no report, **Reports Started** once each one has a report, **Not Set Up**
+before the first save, and otherwise the CRA product class.
+
+You need permission to edit the Asset to change its profile or start a report. A user who can only
+view the Asset sees the card without **Edit Profile** or **Start CRA Report**.
 
 ## Fields
 
-| Field on the card | API field | Values | What it records |
+| Field in the dialog | API field | Values | What it records |
 |---|---|---|---|
 | **Supports a Critical or Important Function** | `supports_critical_or_important_function` | `true` or `false`, default `false` | Whether the Asset supports a critical or important function, per DORA Article 8(1). Scan cadence policies read it to apply a weekly scanning expectation. |
 | **CRA Product Class** | `cra_product_class` | See the table below, default `not_applicable` | The product's class under the CRA (Article 7, Annexes III and IV), which sets its conformity assessment route. |

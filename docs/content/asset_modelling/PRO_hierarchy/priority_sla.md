@@ -41,17 +41,17 @@ Learn more about Priority and Risk with DefectDojo, Inc.'s May 2025 Office Hours
 
 
 ## How Priority & Risk are calculated
-The range of Priority values is from 0 to 1150. The higher the number, the more urgency
-the Finding is to triage or remediate.
+Priority runs from 0 to the highest Priority the Finding's [Prioritization Engine](#prioritization-engines)
+can produce: about 1250 with the default settings. The higher the number, the more urgent the Finding is to
+triage or remediate.
 
-The upper bound is not a fixed property of the scale.  It is the highest Priority a
-hypothetical worst-case Finding could reach under the default Prioritization Engine
-settings: a Finding with the highest Severity, the strongest possible exploit evidence,
-and every Asset-level risk factor at its maximum.  The bound is derived entirely from the
-engine's configuration — never from the Findings or Assets in your instance.  If you
-adjust the multipliers in your [Prioritization Engine](#prioritization-engines), the
-attainable maximum changes with them, and the recommended
-[Risk Thresholds](#risk-thresholds) are recalculated to match.
+That upper bound is the Priority of a hypothetical worst-case Finding: the highest Severity, the strongest
+possible exploit evidence, and every Finding-level and Asset-level factor at its maximum. It is computed from
+the engine's multipliers alone, never from the Findings or Assets in your instance, and it counts every
+factor whether or not the feature behind it is enabled, so turning a feature on does not rescale anything.
+
+A Finding's **Risk Score** is its Priority as a share of that bound, on a scale from 0 to 100. A worst-case
+Finding scores 100, and no Finding scores more.
 
 Similar to Severity, Risk is scored from Low -> Medium -> Needs Action -> Urgent.  **Risk** considers Priority fields and may be different from a tool's reported Severity as a result.
 
@@ -200,8 +200,9 @@ A few more things to know when tuning:
 * Because the percentages are relative multipliers, typing a target distribution directly
   into the sliders (for example "40% Severity, 30% Exploitability") will not produce that
   split in the final score.  Tune iteratively instead: adjust a slider, then read the
-  effect off the recommended [Risk Thresholds](#risk-thresholds), which always reflect
-  the Priority range attainable under the current settings.
+  effect off the Priority range table above the sliders.
+* Changing a multiplier moves the highest Priority the engine can produce, and the Risk
+  Score scale moves with it, so the [Risk Thresholds](#risk-thresholds) keep their meaning.
 
 The exact weight each factor carries is intentionally not published.  If you need to map
 an in-house scoring model onto the Prioritization Engine, contact DefectDojo support —
@@ -229,21 +230,29 @@ High)
 
 ### Risk Thresholds
 
-Based on the tuning of the Priority Engine, DefectDojo will automatically recommend Risk Thresholds.  However, these thresholds can be adjusted as well and set to whatever values you deem appropriate.
+Risk Thresholds decide which Risk band a Finding lands in. They are set on the Risk Score scale, from 0 to 100:
 
-A few notes on how the recommendations behave:
+| Threshold | Default | A Finding is in this band when its Risk Score is |
+| --- | --- | --- |
+| Low | 10 | at or below the Low threshold |
+| Medium | 47 | above Low, at or below the Medium threshold |
+| Needs Action | 66 | above Medium, at or below the Needs Action threshold |
+| Urgent | | above the Needs Action threshold, up to 100 |
 
-* The recommended values are computed from the Prioritization Engine's settings alone —
-  they describe the theoretical Priority range attainable under the current multipliers.
-  They are never derived from the Findings or Assets in your instance, so two instances
-  with the same engine settings see the same recommendations regardless of their data.
-* Each threshold is the highest Priority value that still falls **inside** its band: a
-  Finding at exactly the Low threshold is Low, a Finding at exactly the Medium threshold
-  is Medium, and so on.  A Finding whose Priority exceeds the Urgent threshold is still
-  Urgent.
-* Because the attainable range depends on the multipliers, moving any slider changes the
-  recommendations.  If you have set custom thresholds, review them after changing
-  multipliers — the same threshold value covers a different share of the new range.
+The three thresholds must be in ascending order and below 100.
+
+A few notes on how they behave:
+
+* Because the Risk Score is always relative to the engine's own highest Priority, a threshold keeps its
+  meaning when you change the multipliers. You do not need to revisit the thresholds after tuning a slider.
+* The thresholds are never derived from the Findings or Assets in your instance, so two instances with the
+  same engine settings band Findings the same way.
+* Each threshold is the highest Risk Score that still falls **inside** its band: a Finding at exactly the Low
+  threshold is Low, and a Finding at exactly the Medium threshold is Medium.
+* The API still returns each threshold in Priority units as well (`low_risk_threshold`, `medium_risk_threshold`,
+  `needs_action_risk_threshold`, and `urgent_risk_threshold`, which is the engine's highest Priority). Those
+  values are derived from the Risk Score thresholds. Writing one of the first three sets the matching Risk Score
+  threshold; a written `urgent_risk_threshold` is ignored.
 
 ![image](images/risk_threshold.png)
 
@@ -280,9 +289,27 @@ You can use SLAs as a way to represent your organizations remediation policies. 
 * In **DefectDojo Pro**, SLA performance is also tracked on the [Executive and Remediation Insights](/metrics_reports/pro_metrics/pro__overview/) dashboards under **Overview > Insights**.
 * SLA compliance can also be surfaced on a custom [dashboard](/metrics_reports/dashboards/custom-dashboards/) in **DefectDojo Pro** — for example with an SLA Burndown or a filtered Count widget.
 
+### How SLA days are counted
+
+Every SLA count in DefectDojo Pro (the SLA column on the Findings and Finding Groups lists, a
+Finding's SLA row, the Within SLA and Outside of SLA counts on the Insights dashboards, the Past SLA
+charts and the dashboard widgets) uses the same calendar and the same rule:
+
+* **Today is your date.** The Pro UI counts from the date in your browser's time zone, so the
+  number of days matches the SLA Expiration Date you see.  The API, notifications and scheduled
+  reports count from the instance's time zone.
+* **A Finding due today is within SLA.** Its SLA column reads **Due Today** with a ✅ green check.
+  It moves outside of SLA the next day, at -1.
+* **The Insights drill-downs split the count exactly.** **Within SLA** opens the active Findings with
+  0 or more SLA days left, and **Outside of SLA** opens those below 0, so every active Finding with
+  an SLA appears in one of the two lists.
+* **A Finding Group shows its fewest SLA days.** While the group has an open Finding, the SLA column
+  counts only its open Findings; once every Finding in it is Mitigated, it shows the fewest days any
+  of them had left when it was closed.
+
 ### Mitigated Within SLA status
 
-If a Finding is successfully Mitigated by the SLA deadline, the Finding will record a ✅ green check mark in the Mitigated Within SLA column.
+If a Finding is successfully Mitigated by the SLA deadline, the Finding will record a ✅ green check mark in the Mitigated Within SLA column.  A Finding Mitigated on the day its SLA expires is within SLA: the date it was Mitigated on is compared with its SLA Expiration Date, in your time zone.
 
 ![image](images/sla_mitigated_within.png)
 

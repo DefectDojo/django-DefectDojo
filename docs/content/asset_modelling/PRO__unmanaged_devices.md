@@ -1,13 +1,13 @@
 ---
-title: "Unmanaged Devices"
+title: "Asset Discovery"
 description: "Devices your EDR sees on the network that have no agent of its own, reported by the CrowdStrike Falcon and Microsoft Defender connectors"
 weight: 12
 audience: pro
 ---
 
-**Unmanaged Devices** lists the devices your endpoint security tool sees on your network that do not run its agent: printers, phones, cameras, network gear, and servers and laptops nobody onboarded. Your EDR already finds them, because its agents watch the network around them. DefectDojo collects those lists from the connectors you already run, so you can see the gap in one place.
+**Asset Discovery** lists the devices your endpoint security tool sees on your network that do not run its agent: printers, phones, cameras, network gear, and servers and laptops nobody onboarded. Your EDR already finds them, because its agents watch the network around them. DefectDojo collects those lists from the connectors you already run, so you can see the gap in one place.
 
-> Unmanaged Devices is a beta feature. Turn on **Unmanaged Devices** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/), then turn on **Report Unmanaged Devices** on each connection that should send its list.
+> Asset Discovery is a beta feature. Turn on **Asset Discovery** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/), then turn on **Report Unmanaged Devices** on each connection that should send its list.
 
 ## Where the devices come from
 

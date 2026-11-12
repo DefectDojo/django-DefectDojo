@@ -159,6 +159,8 @@ env = environ.FileAwareEnv(
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, "defectdojo"),
     DD_SECRET_KEY=(str, ""),
+    # Older secret keys, comma separated, kept readable while DD_SECRET_KEY changes
+    DD_SECRET_KEY_FALLBACKS=(list, []),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_DATA_UPLOAD_MAX_NUMBER_FIELDS=(int, 10240),  # Max number of GET/POST parameters in a request
@@ -308,6 +310,12 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
+    # When enabled, the Trufflehog Scan parser reports one finding per secret per file in a report, however
+    # many commits the secret appears in (the commit and the line leave the in-report fold key). Off by
+    # default: the parser then reports one finding per commit, as it always has, so existing findings keep
+    # their identity. Turn it on together with the "Unique ID from tool" deduplication algorithm for the
+    # scan type, which matches on the stable unique_id_from_tool the parser sets.
+    DD_TRUFFLEHOG_FOLD_COMMITS=(bool, False),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     # For HTTP requests, how long connection is open before timeout
@@ -382,6 +390,7 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
+SECRET_KEY_FALLBACKS = env("DD_SECRET_KEY_FALLBACKS")
 
 # Default cache backend (django.core.cache). Redis when DD_CACHE_URL is set,
 # else per-process LocMemCache. General framework caching only; the singleton
@@ -629,6 +638,30 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}forgot_username",
     rf"^{URL_PREFIX}reset/",
 )
+
+# Unsafe requests that still pass while read-only mode is on: sign-in and System Settings,
+# so a superuser can always turn the mode off again.
+READ_ONLY_MODE_EXEMPT_URLS = (
+    rf"^{URL_PREFIX}login$",
+    rf"^{URL_PREFIX}logout$",
+    r"complete/",
+    r"oauth2/idpresponse",
+    rf"^{URL_PREFIX}password_reset/",
+    rf"^{URL_PREFIX}reset/",
+    rf"^{URL_PREFIX}forgot_username",
+    rf"^{URL_PREFIX}change_password$",
+    rf"^{URL_PREFIX}api/v2/api-token-auth/",
+    rf"^{URL_PREFIX}system_settings$",
+    rf"^{URL_PREFIX}api/v2/system_settings/",
+)
+
+# Inbound webhooks blocked by read-only mode get a 503 with Retry-After instead of a redirect.
+# A sender reads a redirect as delivered and drops the event, but it retries a 503.
+READ_ONLY_MODE_RETRY_URLS = (
+    rf"^{URL_PREFIX}webhook/",
+    rf"^{URL_PREFIX}jira/webhook/",
+)
+READ_ONLY_MODE_RETRY_AFTER_SECONDS = 300
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -951,6 +984,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
+    "dojo.middleware.ReadOnlyModeMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.authorization.middleware.AuthorizationMiddleware",
@@ -2289,6 +2323,7 @@ AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
+TRUFFLEHOG_FOLD_COMMITS = env("DD_TRUFFLEHOG_FOLD_COMMITS")
 MASS_HASH_CODE_USE_SQL_WRITER = env("DD_MASS_HASH_CODE_USE_SQL_WRITER")
 
 # ------------------------------------------------------------------------------

@@ -11,6 +11,8 @@ from django.utils.translation import gettext as _
 from django_extensions.db.models import TimeStampedModel
 from django_tagulous.models import TagField
 
+from dojo.query_hooks import HookedManager, UnfilteredManager
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -80,8 +82,17 @@ class Test(models.Model):
                                    null=True, blank=True, help_text=_("Tag or branch that was tested, a reimport may update this field."), verbose_name=_("Branch/Tag"))
     api_scan_configuration = models.ForeignKey("dojo.Product_API_Scan_Configuration", null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name=_("API Scan Configuration"))
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_test_archive_batch"),
             models.Index(fields=["engagement", "test_type"]),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
@@ -249,6 +260,14 @@ class Test_Import(TimeStampedModel):
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text=_("Tag or branch that was tested, a reimport may update this field."), verbose_name=_("Branch/Tag"))
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     def get_queryset(self):
         logger.debug("prefetch test_import counts")
         super_query = super().get_queryset()
@@ -288,8 +307,17 @@ class Test_Import_Finding_Action(TimeStampedModel):
     finding = models.ForeignKey("dojo.Finding", editable=False, null=False, blank=False, on_delete=models.CASCADE)
     action = models.CharField(max_length=100, null=True, blank=True, choices=IMPORT_ACTIONS)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_tifa_archive_batch"),
             models.Index(fields=["finding", "action", "test_import"]),
         ]
         unique_together = (("test_import", "finding"))

@@ -7,7 +7,7 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and a footer. The footer shows your username on a row of its own and, under it, one row of icon buttons: alerts, [What's New](#whats-new), Ask Sensei and the Production/Sandbox switch, each when it applies to your instance and account (hover a button for its name). Your username opens the account menu: User Profile, API v2 Token (when your instance has API tokens enabled), the API docs, External Tools and Documentation, then your preferences (**Language**, when your instance offers more than one, and the switch between light and dark mode), then Logout. When the sidebar is collapsed to its icon strip, the footer stacks the same buttons in one column. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
+The DefectDojo Pro sidebar is the application shell: it runs the full height of the window and carries the brand, the search field, the menu, and a footer. The footer ends with your account row: your username, your email address under it, and the alerts bell beside them. Above that row, where they apply to your instance and account, sit a **What's New** button while a release has highlights you have not opened (see [What's New](#whats-new)) and a button that says whether you are in Production or the Sandbox and switches to the other. Your username opens the account menu just above the row: User Profile, API v2 Token (when your instance has API tokens enabled), the API docs, External Tools and Documentation, then your preferences (**Language**, with the language in use shown beside it, when your instance offers more than one, and the switch between light and dark mode), then Logout. When the sidebar is collapsed to its icon strip, each of these becomes an icon in one column, with its name on hover. There is no separate top bar on desktop; on phones and small windows the sidebar becomes a drawer behind a top-bar menu button.
 
 The menu groups every page in the product into six sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you browse follow in their own section. It is the only layout; the classic sidebar has been removed (see [The classic sidebar](#the-classic-sidebar)).
 
@@ -28,7 +28,7 @@ You only ever see the entries your account has permission to open, your license 
 
 ## Searching
 
-The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two modes, switched with **Tab**:
+The **Search** field at the top of the sidebar, and **Cmd+K** (Mac) or **Ctrl+K** anywhere, open one **Global Search** dialog with two modes, switched with **Tab**. Where Ask Sensei is available to you, the field also carries an **Ask** button that opens the Sensei panel, so asking and searching start in the same place (a wand icon under the search icon when the sidebar is collapsed).
 
 - **Search**: your records (findings, assets, engagements and the rest), through the same engine as the full results page, with the pages whose name matches ranked in. **See All Results** at the end opens that page. See [Global Search](/navigation/pro__global_search/).
 - **Navigate**: pages only, every menu destination your account can currently reach. Its tabs are the sidebar's top-level sections.
@@ -50,7 +50,7 @@ Four conventions run through the whole menu:
 
 ![The Pinned section at the top of the sidebar](images/sidebar_pinned_pages.png)
 
-Hover any page row in the sidebar or in a collapsed-rail flyout and a pin appears at its end; on touch screens the pin always shows. In Global Search, a page result's row actions menu (the **...** button, or **Option+Enter** / **Alt+Enter**) offers **Pin to Sidebar** and **Remove Sidebar Pin**. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
+Hover any page row in the sidebar or in a collapsed-rail flyout and a pin appears at its end; on touch screens the pin always shows. In Global Search, a page result's row actions menu (the **...** button, or **Option+Enter** / **Alt+Enter**) offers **Pin to Sidebar** and **Remove Sidebar Pin**. Pinning a page adds it to a **Pinned** section at the very top of the menu, which exists only while you have pins. A pinned row is the real menu entry, so its badge, its permissions, and the active highlight all keep working, and a page you lose access to, or one your [sidebar preset](/navigation/pro__sidebar_presets/) hides, simply stops appearing without losing its pin. The pin stands upright on rows that are pinned; select it again to unpin.
 
 A page pinned from inside a group keeps the group's name and icon, since the entry's own name often leans on the group it came from: pinning **All** from **Findings** shows **Findings › All**, so it cannot be mistaken for the **All** under Assets. When the sidebar is too narrow, the group name shortens first and the page name stays whole; hover the row to see its full location. Pages that sit directly in a section, such as **My Work**, show just their name.
 
@@ -66,7 +66,7 @@ The bell in the sidebar footer opens your notification inbox: unread alerts grou
 
 ## What's New
 
-The gift button in the sidebar footer, beside **Alerts**, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. A number on the button counts the highlights you have not opened yet. Opening the panel clears it, and it stays cleared until the next release arrives. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.
+The **What's New** button in the sidebar footer, which names the release and counts the highlights you have not opened, opens the highlights of the release your instance runs: the new features and enhancements from the [Pro changelog](/releases/pro/changelog/), each tagged with the area of the product it changes, with an **Open** link to that area's page where there is one. Opening the panel clears the count and removes the button from the footer until the next release arrives; **What's New** in the account menu opens the panel again in the meantime. The count is remembered with your account, so it stays cleared in every browser you sign in from, including after a reload or a cleared browser cache.
 
 Below the highlights, **Badged in the Menu** lists every sidebar entry that carries a `NEW` or `BETA` badge right now (see [Menu Badges](/navigation/pro__menu_badges/)), each linking to its page, and **Full Changelog** opens the complete release notes on this site.
 
@@ -98,7 +98,7 @@ The AI capabilities sit together in their own section rather than being spread t
 
 **AI Proposals** lists the verdicts the Triage Engine's AI steps have left for a person to confirm. It appears only when your license includes Sensei.
 
-**MCP** is shown to superusers, and to everyone once the MCP server is enabled. **AI Model Settings** appears only on on-premise instances, because DefectDojo manages the model credentials on Cloud.
+**MCP** is shown to superusers, and to everyone once the MCP server is enabled. **AI Model Settings** appears on on-premise instances. On Cloud, DefectDojo manages the model credentials, so it appears only on an instance that [brings its own model](/sensei/ai_model_settings/#bring-your-own-model-on-defectdojo-cloud).
 
 ## Act
 
@@ -158,7 +158,7 @@ Settings is divided into eight groups, named for what you are trying to do rathe
 | Group | What it holds |
 | --- | --- |
 | **System** | System Settings, Appearance, Announcement Banner, Login Banner, and on on-premise instances, Email |
-| **UI Defaults** | Form Configuration, Layout Defaults |
+| **UI Defaults** | Form Configuration, Defaults |
 | **Users & Permissions** | Users, Groups, Roles |
 | **Finding Workflow** | Dedupe Pools, Matching Configuration, Finding Enrichment (on-premise), Reachability Probe, Service Level Agreements, Framework Presets, Remediation Center, Prioritization Engines, Mitigation Policies, AI Governance Policies |
 | **Configuration** | Custom Fields, Environments, Platforms, Lifecycles, Origins, Regulations, Note Types, Test Types, CI/CD Infrastructure, Tool Types, Tool Configurations |
@@ -181,7 +181,12 @@ The last category, **Elsewhere in the app**, lists pages that configure DefectDo
 The **UI Defaults** group collects the settings that control how much of the interface each person can tailor:
 
 - **[Form Configuration](/navigation/pro__form_configuration/)**: choose which fields the create and edit forms show and require, and whether the Optional Fields panel starts expanded.
-- **Layout Defaults**: the **Restrict Layout Customization** switch, plus the global defaults designated for dashboards, [page layouts](/navigation/pro__page_layouts/), and table views. With the switch on, only superusers can create or change dashboards, page layouts, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
+- **[Sidebar Presets](/navigation/pro__sidebar_presets/)**: named presets that hide sidebar entries, shared with everyone or kept to one person, with one shared preset as the Instance Default. A preset hides, it never denies: direct links and the API keep working.
+- **Defaults** (**Settings > Defaults**): two tabs. **Instance Defaults** holds the **Layout Customization** switch (**Restrict Layout Customization**), plus the Instance Default designated for dashboards, [page layouts](/navigation/pro__page_layouts/), [sidebar presets](/navigation/pro__sidebar_presets/), and table views, on cards named Layout Customization, Instance Landing Page, Dashboards, Page Layouts, Sidebar Presets and Table Views. **Default Profiles** holds the ranked list of Default Profiles. With the switch on, only superusers can create or change dashboards, page layouts, sidebar presets, table views, and [pinned sidebar pages](#pinned-pages); everyone else is shown the designated defaults, or the built-in defaults when none are chosen. Personal layouts saved earlier are kept and reappear if the switch is turned back off. You choose each default from a dropdown of the layouts an administrator has shared, or designate one in context (a shared dashboard's Manage dialog, a view page's layout menu, or a table's Views menu).
+
+  Instance Defaults also holds the **Instance Landing Page**: the [landing page](/navigation/pro__landing_page/) for users who have not chosen one and whose Default Profiles set none. Pick a page and click **Submit**; empty means Home.
+
+  **Default Profile and instance defaults**: a [Default Profile](/admin/user_management/create_user_group/#defaults) sets a landing page, dashboard, page layouts, sidebar preset, Form Configuration and table views for the users it is assigned to and the Members of its Groups, and can allow or restrict customization whatever this switch says. Each default resolves to the user's own choice, else the profile assigned to the user directly, else their Groups' profiles in rank order, else the Instance Default here, else the built-in behavior. Profiles do not combine: for each setting, the first profile that sets it wins.
 
 ## What moved
 
@@ -241,6 +246,8 @@ Most optional entries follow a flag on the [Feature Flags](/admin/feature_flags/
 
 The others work the other way round: they are off by default, and the entry appears when the flag is turned on. Examples are the Triage Engine, the Remediation Center, Root Causes and PSIRT (which also needs Locations and a license).
 
+Flags remove an entry for the whole instance. To take entries away for some people and not others, or for yourself, use a [sidebar preset](/navigation/pro__sidebar_presets/): a named list of hidden entries that leaves every page reachable by its link.
+
 The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place, and the System Settings checkbox is gone. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off.
 
 ## The classic sidebar
@@ -249,5 +256,6 @@ This layout is the only sidebar. The classic sidebar it replaced, and the **Menu
 
 ## Related
 
+* [Sidebar Presets](/navigation/pro__sidebar_presets/): hiding entries with named, sharable presets
 * [Menu Badges](/navigation/pro__menu_badges/): what the `NEW`, `BETA`, `SOON`, `LEGACY` and `DEPRECATED` tags mean
 * [Feature Flags](/admin/feature_flags/pro__feature_flags/): turning optional features on and off

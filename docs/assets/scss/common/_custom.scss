@@ -481,6 +481,39 @@ html:not([data-dd-version='pro']) .version-pro {
   display: none;
 }
 
+// "Book a demo" link in the header. It is for readers of the open-source
+// edition, so the attribute that swaps the sidebar also hides it from Pro
+// readers. Without JS the attribute is absent and the link shows.
+.dd-header .dd-demo-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #ffffff;
+  border: 1px solid var(--dd-hairline-dark);
+  padding: 0.3rem 0.75rem;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    color: #ffffff;
+    border-color: var(--dd-orange);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .dd-header .offcanvas .dd-demo-link {
+    color: var(--dd-ink);
+    border-color: var(--dd-border);
+  }
+}
+
+html[data-dd-version='pro'] .dd-demo-link {
+  display: none;
+}
+
 // Pro badge — appears next to sidebar items with audience: pro
 .pro-badge {
   display: inline-flex;
@@ -714,6 +747,28 @@ html:not([data-dd-version='pro']) .version-pro {
     tbody tr:hover {
       background: var(--dd-surface-2);
     }
+
+    // Bootstrap gives code `overflow-wrap: break-word`, which does not lower
+    // a cell's minimum width, so one long path or env var stretched the whole
+    // table past the content column. `anywhere` lets it break.
+    code {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  // Every Markdown table is wrapped in this (layouts/_markup/render-table.html).
+  // A table that still cannot fit, such as six columns on a phone, scrolls
+  // inside it instead of widening the page.
+  // The table's own margins move to the wrapper: an overflow box does not
+  // collapse margins with its child, so leaving them on the table would add
+  // its 3rem top margin (doks-core _tables.scss) to the paragraph's.
+  .table-scroll {
+    overflow-x: auto;
+    margin: 3rem 0 1.5rem;
+
+    > table {
+      margin: 0;
+    }
   }
 
   // Blockquotes as quiet callouts
@@ -892,15 +947,98 @@ html:not([data-dd-version='pro']) .version-pro {
   }
 }
 
-// Bare <pre> without a fence wrapper (rare) gets the same card look
+// Code without an expressive-code frame gets the same card look in both
+// modes: indented code blocks (bare <pre><code>) and the {{< highlight >}}
+// shortcode (.highlight > pre.chroma), which otherwise keeps the theme's
+// light gray background under our light ink.
 .docs-content > pre,
-.docs-content td > pre {
+.docs-content td > pre,
+.docs-content > .highlight > pre,
+.docs-content li > .highlight > pre,
+.docs-content td > .highlight > pre {
   background: var(--dd-code-bg);
   border: 1px solid var(--dd-code-border);
   border-radius: 0;
   color: var(--dd-code-ink);
   padding: 0.9375rem 1.125rem;
   font-size: 0.875rem;
+
+  // Drop the inline-code chip styling from the inner <code>
+  code {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+}
+
+// Copy button on those un-framed .highlight blocks. clipboard.js injects
+// .copy > .btn-copy > div into every .highlight, but the theme only styles
+// it inside .expressive-code, so here it rendered as a stray sliver above
+// the card. Mirror the framed button: teal square, copy icon, check on click.
+$dd-icon-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75'%3E%3Cpath d='M3 19a2 2 0 0 1-1-2V2a2 2 0 0 1 1-1h13a2 2 0 0 1 2 1'/%3E%3Crect x='6' y='5' width='16' height='18' rx='1.5' ry='1.5'/%3E%3C/svg%3E");
+$dd-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke-width='1.25' stroke='black' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E");
+
+.docs-content > .highlight,
+.docs-content li > .highlight,
+.docs-content td > .highlight {
+  position: relative;
+
+  // Start the text below the button (a header-height band, as on framed
+  // blocks) so long first lines that scroll horizontally never run under it
+  > pre {
+    padding-top: 2.75rem;
+  }
+
+  > .copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1;
+  }
+
+  > .copy .btn-copy {
+    position: relative;
+    width: 1.875rem;
+    height: 1.875rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0.2rem;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.85;
+
+    > div {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background-color: #7fa9a0;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      margin: 0.4rem;
+      pointer-events: none;
+      background-color: #e8f2ee;
+      // Prefixed too: Sass only, no autoprefixer (older Safari/Chrome)
+      -webkit-mask: $dd-icon-copy no-repeat center / contain;
+      mask: $dd-icon-copy no-repeat center / contain;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &:focus::after,
+    &:active::after {
+      -webkit-mask-image: $dd-icon-check;
+      mask-image: $dd-icon-check;
+    }
+  }
 }
 
 // --- Chroma syntax palette, tuned for the navy card ---

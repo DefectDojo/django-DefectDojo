@@ -45,8 +45,8 @@ The five roles below are DefectDojo Pro's **built-in roles**. They are locked pr
 |  | Edit Benchmarks |  | ☑️ | ☑️ | ☑️ |  |
 |  | Delete Benchmarks |  |  | ☑️ | ☑️ |  |
 |  | View Note History | ☑️ | ☑️ | ☑️ | ☑️ |  |
-|  | Add, Edit, Delete Own Notes | ☑️ | ☑️ | ☑️ | ☑️ | ☑️ |
-|  | Edit Other Notes |  | ☑️ | ☑️ | ☑️ | ☑️ |
+|  | Add, Edit, Delete Own Notes | ☑️ | ☑️ | ☑️ | ☑️ |  |
+|  | Edit Other Notes |  | ☑️ | ☑️ | ☑️ |  |
 |  | Delete Other Notes |  |  | ☑️ | ☑️ |  |
 
 1. A user who is assigned permissions at the Asset level only cannot view the Organization it is contained in.
@@ -58,11 +58,11 @@ The five roles below are DefectDojo Pro's **built-in roles**. They are locked pr
 
 Each Configuration Permission refers to a particular function in the software, and has an associated set of actions a user can perform related to this function.
 
-The majority of Configuration Permissions give users access to certain pages in the UI. 
+The majority of Configuration Permissions give users access to certain pages in the UI. They are granted on a Role, in the **Configuration Permissions** table of the role editor, and take effect when that Role is held as a Global Role (see [Custom Roles](../pro__custom_rbac_roles/#configuration-permissions)). Only a Superuser can grant them.
 
 | **Configuration Permission** | **View ☑️** | **Add ☑️** | **Edit ☑️** | **Delete ☑️** |
 | --- | --- | --- | --- | --- |
-| Credential Manager | Access the Credential Manager page | Add new entries to the Credential Manager | Edit Credential Manager entries | Delete Credential Manager entries |
+| Asset Platforms, Asset Lifecycles, Asset Origins | Access the **Settings > Configuration > Asset Attributes** pages | Add a new attribute option | Edit an existing attribute option | Delete an attribute option |
 | Development Environments | n/a | Add new Development Environments to the **Settings > Configuration > Environments** list | Edit Development Environments in the **Settings > Configuration > Environments** list | Delete Development Environments from the **Settings > Configuration > Environments** list |
 | Finding Templates¹ | Access the **Act > Explore > Findings > Templates** page | Add a Finding Template | Edit a Finding Template | Delete a Finding Template |
 | Groups | Access the **Settings > Users & Permissions > Groups** page | Add a new User Group | Superuser only | Superuser only |
@@ -76,7 +76,7 @@ The majority of Configuration Permissions give users access to certain pages in 
 | Questionnaires | Access the **Act > Explore > Surveys > Surveys** page | Add a new Questionnaire | Edit an existing Questionnaire | Delete a Questionnaire |
 | Questions | Access the **Act > Explore > Surveys > Questions** page | Add a new Question | Edit an existing Question | n/a |
 | Regulations | n/a | Add a Regulation to the **Settings > Configuration > Regulations** page | Edit an existing Regulation | Delete a Regulation |
-| Rules Engine | Access **Act > Triage Engine** and everything under it (Rules, Runs, and Deliveries) | Create a rule, including converting one from Classic Rules | Change, enable, schedule, run, replay, or take ownership of an existing rule | Delete a rule |
+| Rules Engine | Access **Act > Triage Engine** and everything under it (Rules, Runs, and Deliveries) | Create a rule, including converting one from Classic Rules | Change, enable, schedule, run, or replay an existing rule; take ownership of one (with Rule Add) | Delete a rule |
 | Scheduling Service Schedule | Access the **Settings > Operations > Schedules** page | Superuser only | Edit an existing Schedule (change trigger, enable/disable) | Delete a Schedule |
 | SLA Configuration | Access the **Settings > Finding Workflow > Service Level Agreements** page | Add a new SLA Configuration | Edit an existing SLA Configuration | Delete an SLA Configuration |
 | Test Types | n/a | Add a new Test Type (under **Settings > Configuration > Test Types**) | Edit an existing Test Type | n/a |

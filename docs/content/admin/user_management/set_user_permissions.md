@@ -49,7 +49,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 ​  
 For Superuser Status, check off the ☑️ Superuser Status box, located in the user's Default Information.  
 ​  
-To assign a Global Role, select one from the dropdown Global Role menu at the bottom of the page.  
+To assign Global Roles, pick them in the **Global Roles** field at the bottom of the page. A user may hold several, and they add up: a Maintainer who also holds a Role carrying Configuration Permissions keeps everything Maintainer grants and reaches the settings pages as well.  
 ​
 ![image](images/Set_a_User's_Permissions_3.png)
 ​
@@ -112,11 +112,28 @@ An Asset Role will supersede a user’s standard Organization Role or Global Rol
 
 However, this does not work in reverse. If a User has an Organization Role or Global Role of **Owner**, assigning them a **Reader** role on a particular Asset will not take away their **Owner** permissions. **Roles cannot take away permissions granted to a User by other Roles, they can only add additional permissions.**
 
+### Give a Role from the User's page (Pro)
+
+With Access Administration on, a user's page has **Organizations** and **Assets** tabs that list the Roles the user holds directly, and change them without leaving the user.
+
+1. Navigate to **Settings > Users & Permissions > Users** and open the User.
+2. Select the **Organizations** or **Assets** tab and click **Add to Organization** or **Add to Asset**.
+3. Choose one or more Organizations or Assets. Only those where you can manage Members are listed, and those the User already holds a Role on are left out.
+4. Choose the Role and click **Submit**.
+
+Each item is checked exactly as it is on its own Members dialog: the **Owner** Role is offered only when you can grant it on every selected item, and an item that refuses is listed in the window with the reason while the others are saved. The ⋮ menu on each row offers **Change Role** and **Remove**.
+
+The **Access** tab on the same page lists everything the User reaches and why. See [Permission Audit and Effective Access](../pro__permission_audit/).
+
+### Add or remove several Users at once (Pro)
+
+On the Users list, select the Users and use **Add To** or **Remove From** above the table, then choose **Group**, **Organization** or **Asset**. The window lists the selected Users; pick the targets (and, when adding, the Role) and click **Submit**. Each User and target pair is its own request with its own permission check. When some pairs are refused, the window stays open and names each one with the reason, for example a User who is already a Member or not a Member at all.
+
 ## Configuration Permissions
 
 Many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their superuser status. These Configuration Permissions allow regular users to access and contribute to parts of DefectDojo outside of their standard Asset or Asset Role assignment.
 
-Configuration Permissions are not related to a specific Asset or Organization \- users can have configuration permissions assigned without the need for other statuses or Asset / Organization Membership.  
+Configuration Permissions are not related to a specific Asset or Organization \- users can hold them without the need for other statuses or Asset / Organization Membership. They are granted through Roles: a Role carries them in its **Configuration Permissions** table, and they take effect when that Role is held as a Global Role, by the user or by a Group the user belongs to.  
 ​
 ### List of Configuration Permissions
 
@@ -129,7 +146,8 @@ Configuration Permissions are not related to a specific Asset or Organization \-
 * **Login Banner**: Edit the **Settings > System > Login Banner** page
 * **Announcements**: Access **Settings > System > Announcement Banner**
 * **Note Types:** Access the **Settings > Configuration > Note Types** page
-* **Organizations:** n/a
+* **Organizations:** Create a new Organization (the **Add** action of the Organizations row in the role editor's Object Permissions table)
+* **Asset Platforms, Asset Lifecycles, Asset Origins:** Access the **Settings > Configuration > Asset Attributes** pages
 * **Questionnaires**: Access the **Act > Explore > Surveys > Surveys** page
 * **Questions**: Access the **Act > Explore > Surveys > Questions** page
 * **Regulations**: Access the **Settings > Configuration > Regulations** page
@@ -141,16 +159,16 @@ Configuration Permissions are not related to a specific Asset or Organization \-
 
 ### Add Configuration Permissions to a User
 
-**Only Superusers can add Configuration Permissions to a User**.
+**Only Superusers can grant Configuration Permissions.** They are granted on a Role, and the Role is then added to the user's Global Roles (or to the Global Roles of a Group the user belongs to), beside whatever Global Role the user already holds.
 
-1. Navigate to the **Settings > Users & Permissions > Users** page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
+1. Navigate to **Settings > Users & Permissions > Roles** and create a Role for the settings pages (for example **Users Manager**), or open one that already carries them. See [Custom Roles](../pro__custom_rbac_roles/).  
 ​
-![image](images/Set_a_User's_Permissions_7.png)
+2. In the role editor, enable the rows you want in the **Configuration Permissions** table (for example **Users: View** and **Users: Add**) and save the Role.  
+​
+3. Navigate to **Settings > Users & Permissions > Users**, open the account you wish to edit, and add the Role under **Global Roles** on the **Edit User** form. The user's other Global Roles stay as they are.  
+​
+The **Configuration Permissions** card on the User page then lists what the user holds and where it comes from. It is read-only: to change it, edit the Role.
 
-2. Click the name of the account that you wish to edit.  
-​
-3. Navigate to the Configuration Permissions List. This is located on the right\-hand side of the User Page.  
-​
-4. Select the User Configuration Permissions you wish to add.  
-​
+To grant the same permissions to a whole team, add the Role to the Global Roles of a Group instead; every member of the Group holds them.
+
 For a detailed breakdown of User Configuration Permissions, please refer to our [Permission Chart](../user_permission_chart/).

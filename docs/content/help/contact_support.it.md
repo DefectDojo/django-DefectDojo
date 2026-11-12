@@ -14,7 +14,7 @@ Hai bisogno di aiuto con DefectDojo? Ecco alcuni modi per ottenere assistenza.
 
 Gli utenti Open-Source possono ricevere aiuto e consigli tramite i nostri canali della community.
 
-Per gli utenti Open-Source, il modo più rapido per ottenere aiuto è tramite l'[OWASP Slack Channel](https://owasp.org/slack/invite).  I membri della nostra community sono attivi sul **canale # defectdojo** e possono aiutarti con i problemi che stai affrontando.
+Per gli utenti Open-Source, il modo più rapido per ottenere aiuto è tramite lo [Slack della community di DefectDojo](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email).  I membri della nostra community e i maintainer sono attivi sul canale **#02-help** e possono aiutarti con i problemi che stai affrontando.
 
 Per segnalare un bug, è possibile aprire una issue sul nostro [GitHub](https://github.com/DefectDojo/django-DefectDojo).
 

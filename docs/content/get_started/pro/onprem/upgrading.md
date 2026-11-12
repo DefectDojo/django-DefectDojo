@@ -41,6 +41,18 @@ A jump across many releases runs many migrations, some of which rewrite data in 
 - **Migrations do not roll back.** Rolling the deployment back to the old version leaves the database on the new schema. To go back, restore the backup you took before the upgrade.
 - **On Kubernetes, consider holding the pods until the migrations finish.** By default the new pods start while the initializer is still migrating, so for a while new code runs against the old schema. Setting `dojo.migrationCheck.enabled: true` in your values makes each application pod wait for the migrations first, at the cost of a longer `helm upgrade --wait`. The [Kubernetes upgrade guide](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/) covers the `--timeout` this needs.
 
+## Revoked releases
+
+Now and then a release ships with a problem serious enough that nobody should stay on it, and a later release fixes it. That release is then **revoked**. Its container images are never deleted or retagged, so a deployment already running it keeps working, can restart, and can roll back. What changes:
+
+- **In DefectDojo,** users who can see the Version Manager get a banner on every page naming the revoked release, the reason, and the release to upgrade to. The Version Manager never offers a revoked release as the latest version.
+- **The deployment CLIs** refuse to install or upgrade to a revoked release, and name the release to use instead. Choosing a revoked release on purpose, for example to roll back to it, needs `--allow-revoked`.
+- **The [DefectDojo Pro Changelog](/releases/pro/changelog/)** marks the release with a note giving the reason and the release to upgrade to.
+
+To leave a revoked release, follow the [supported upgrade procedure](#supported-upgrade-procedure) to the release the notice names.
+
+DefectDojo reads the list of revoked releases about once an hour from a signed public feed at `https://intel.defectdojo.com/releases/revocations.json`. An air-gapped instance does not read it, so check the changelog before choosing a target version. A forward proxy that blocks that address only hides the banner; nothing else depends on it.
+
 ## Reading the initializer's result
 
 Every upgrade runs the initializer once before the application starts: the `init` container on Docker Compose, the initializer Job on Kubernetes. It applies the database migrations and then runs DefectDojo's system checks. Its exit code says how far it got:
