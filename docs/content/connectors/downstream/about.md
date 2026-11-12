@@ -82,7 +82,7 @@ An Issue Tracker Assignment targets a single Asset or Engagement. To cover sever
 
 ### Connectors and ticket templates a Group owns
 
-With Group Ownership on, a connector or a ticket template can belong to a Group. Choose the Group in **Owned By** when creating it, or start from the Group's **Owned Content** tab. Members whose Role in the Group carries **Integration View** see the Group's connectors and ticket templates, members whose Role carries **Integration Edit** change them and send a test message over a Group connector, and the Group's rules use them. Members of other Groups neither see nor use them.
+With Group Ownership on, a connector or a ticket template can belong to a Group. Choose the Group in **Owned By** when creating it, or start from the Group's **Owned Content** tab. Members whose Role in the Group carries **Integration View** see the Group's connectors and ticket templates, members whose Role carries **Integration Edit** change them and send a test message over a Group connector, and the Group's rules use them. Members of other Groups neither see nor use them, and a rule can name only a connector its author can see.
 
 * Each connector tile shows its owner. **Share** in the tile's menu shows a connector to other Groups, and **Transfer** moves it to another Group or to the instance.
 * **Ticket Templates** on the Downstream Connectors page lists the templates, with an **Owner** column, and offers **New Ticket Template**, **Share** and **Transfer**.

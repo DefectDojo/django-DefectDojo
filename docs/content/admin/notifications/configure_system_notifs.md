@@ -51,6 +51,7 @@ Notification webhooks are managed by superusers on **Notification Webhooks**. Wi
 
 * A member whose Role in the Group carries **Integration Edit** creates one for the Group (**Owned By**), and changes or deletes the Group's webhooks. Members whose Role carries **Integration View** see them. The header value is shown only to someone who can change the webhook.
 * A Group's webhook receives no personal or system notifications; it is used by the rules that name it.
+* A Group's webhook may not post to a private, loopback or link-local address. Creating, editing or transferring one with such an address into a Group is refused, and so is a send to it, unless the instance allows private destinations for the Triage Engine (`DD_RULES_V2_ALLOW_PRIVATE_EGRESS`).
 * **Share** shows it to other Groups, and **Transfer** moves it to another Group. Only a superuser moves one to the instance, which makes it a system webhook.
 * The **Owner** column shows who owns each webhook. System webhooks read as owned by the instance.
 

@@ -145,8 +145,9 @@ Webhook receivers use the Triage Engine permissions. Viewing needs **Rule View**
 
 - A receiver belongs to the person who created it. Others do not see it, except superusers, who see every receiver.
 - With Group Ownership on, a receiver can belong to a Group instead: choose the Group in **Owned By** when creating it, or open **Webhook Receivers** from the Group's **Owned Content** tab. Members whose Role in the Group carries **Rule View** see it; members whose Role carries **Rule Edit** change it. Creating or changing one also needs membership of the Group, because its managed rule runs as the Group's automation identity.
+- A receiver's URL, with its token, is shown only to someone who can change the receiver. Anyone else who can see it reads the URL with the token hidden.
 - A Group's receiver wakes only the rules that Group owns. A rule of another Group, or an instance rule, that names it is refused when it is saved, and a rule that names it cannot be transferred to another owner.
-- **Share** shows a Group's receiver to other Groups (read-only), and **Transfer** moves it to another Group or back to its mover. A move that would leave a rule naming the receiver unable to hear it (a rule of another Group, or a rule its new owner cannot read) is refused, with those rules named, until they are changed. The **Owner** column and its filter show who owns each receiver.
+- **Share** shows a Group's receiver to other Groups (read-only), and **Transfer** moves it to another Group or back to its mover. A move that would leave a rule naming the receiver unable to hear it (a rule of another Group, or a rule its new owner cannot read) is refused until they are changed. The refusal names the rules you can see and counts the others. The **Owner** column and its filter show who owns each receiver.
 - A rule can only listen to a receiver its owner can see.
 - Labels are unique among one person's receivers, and among one Group's, so two people, or two Groups, can each have a receiver called "Jira".
 - Binding any receiver, custom or supported, to a Downstream Connector connection needs permission to view that connection.
