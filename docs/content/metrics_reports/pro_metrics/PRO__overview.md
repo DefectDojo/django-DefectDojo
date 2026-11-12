@@ -20,11 +20,13 @@ Before elaborating on each particular dashboard, there are some commonalities be
 
 ### Filtering
 
-All Metrics can be filtered by timeframe, Organization, Asset, and Tag. After adjusting the filter as desired, Apply Filters must be clicked in order for the filter to take effect. If you wish to export a PDF of all charts, tables, and graphs on the dashboard as currently filtered, click Export as PDF. 
+All Metrics can be filtered by timeframe, Organization, Asset, Tag, Test Type, and Test Type Category. After adjusting the filter as desired, Apply Filters must be clicked in order for the filter to take effect. If you wish to export a PDF of all charts, tables, and graphs on the dashboard as currently filtered, click Export as PDF. 
 
 The filtering timeframe is limited to the past year, but can otherwise be adjusted to include the past 7, 14, 30, 90, or 180 days.
 
 Each dashboard opens filtered to the past 90 days. DefectDojo remembers the timeframe you last applied on any Metrics dashboard, so the next time you open one from the menu it uses that timeframe instead. Clicking Clear Filters is remembered too: dashboards then open with no timeframe filter until you apply a new one. The timeframe is saved in your browser, so it applies per browser rather than following your account to another device. A bookmarked or shared link always keeps the timeframe written in its URL.
+
+The Test Type and Test Type Category filters narrow every chart and table on the dashboard to findings from the chosen scanners. Test Types picks individual test types (for example, a single dependency scanner). Test Type Categories picks whole groups of them, such as SCA, DAST, Container or Secrets, so you can follow dependency debt, runtime risk, base image vulnerabilities or exposed credentials on their own. Each test type belongs to one category: built-in scanners get a default category from their name, and the Category field on the Edit Test Type form sets another one. When both filters are set, a finding has to match both.
 
 Note that filter parameters are rendered in the URL, so you can bookmark multiple pages with various filter parameters.  This can be useful for quick reference, or for consistently generating a particular kind of report.
 
