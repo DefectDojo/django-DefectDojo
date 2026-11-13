@@ -95,7 +95,7 @@ If you are seeing Reimport close old Findings and create new Findings when only 
 
 A Finding that keeps closing and coming back is usually reimport doing exactly what it was asked to, on data that does not match what the user expects. The evidence is on two pages:
 
-* the **Import History** on the Test page counts the Findings each Reimport **closed** and **reactivated** (see [Actions](#actions));
+* the **Import History** on the Test page counts the Findings each Reimport **closed** and **reactivated** (see [Working with Import History](#working-with-import-history));
 * the Finding's **Notes** say which Reimport changed it: "Mitigated by *scan type* re-upload." when a Reimport closed it, and "Re-activated by *scan type* re-upload." when one reopened it. A Finding closed by hand has neither note.
 
 Three causes account for most cases:
@@ -116,20 +116,36 @@ The **Re\-import Findings** **Form** will **not** allow you to import a differen
 
 ## Working with Import History
 
-Import History for a given test is listed under the **Test Overview** header on the **Test** page.
-
-This table shows each Import or Reimport as a single line with a **Timestamp**, along with **Branch Tag, Build ID, Commit Hash** and **Version** columns if those were specified.
+The **Import History** widget on a **Test** page lists every Import and Reimport into that Test, newest first, one row per Import.
 
 ![image](images/using_reimport_3.png)
 
-### Actions
+Each row shows:
 
-This header indicates the actions taken by an Import/Reimport.
+* **When it ran**, and whether it was an **Import** or a **Reimport**. Hover over or focus the time to see the full timestamp.
+* **What it did to the Test's Findings**, as counts:
+    * **created**: new Findings created by the Import or Reimport.
+    * **closed**: Findings closed because they were missing from the incoming report: by a Reimport, or by an Import with **Close Old Findings** set, which can close Findings in other Tests of the same Engagement or Product.
+    * **reactivated**: Closed Findings reopened because they appeared again in the incoming report.
+    * **untouched**: Open Findings left unchanged because they also appeared in the incoming report.
 
-* **\# created indicates the number of new Findings created at the time of Import/Reimport**
-* **\# closed shows the number of Findings that were closed by a Reimport (due to not existing in the incoming report).**
-* **\# left untouched shows the count of Open Findings which were unchanged by a Reimport (because they also existed in the incoming report).**
-* **\#** **reactivated** shows any Closed Findings which were reopened by an incoming Reimport.
+  A Reimport that changed nothing reads **No findings changed**.
+* **The scan's Version, Branch/Tag, Build ID and Commit Hash**, when they were sent with the Import. A field that was not set is left out. A long value is shortened and the Commit Hash shows its first 12 characters: hover over or focus a value to see all of it.
+
+On a wide widget each Import takes one line; on a narrow one it takes three short lines, and the Branch/Tag and Build ID drop out until there is room. The list scrolls inside the widget, so a Test with many Reimports does not lengthen the page.
+
+### A Reimport that closed every open Finding
+
+A Reimport that closed Findings and matched none of the existing ones usually means the report was empty or failed to parse, rather than that every vulnerability was fixed. That row is marked **Closed All Open Findings**. While it is the newest Import in the list, the widget's header reads **Closed all on** and its date; once another Import runs, the header goes back to **Last import** and that Import's date, and the older row keeps its mark. Check the report before you triage the Findings it closed.
+
+Only a Reimport is marked. An Import that closes Findings through **Close Old Findings** is doing what that option asks, so it shows its **closed** count without the warning.
+
+### Row menu
+
+Each row starts with a menu:
+
+* **View Findings** opens the Findings list filtered to the Findings that Import recorded an action on (created, closed, reactivated or left untouched). The filter shows in the filter bar as **Import ID**, where you can remove it.
+* **Copy Commit Hash** copies the full commit hash. It appears only when the Import has one.
 
 ## Reimport via API - special note
 
