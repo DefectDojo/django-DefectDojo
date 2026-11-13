@@ -218,14 +218,6 @@ class AppAnalysisViewSet(
         return get_authorized_app_analysis("view")
 
 
-# Authorization: configuration
-from dojo.jira.api.views import (  # noqa: E402, F401 backward compat
-    JiraInstanceViewSet,
-    JiraIssuesViewSet,
-    JiraProjectViewSet,
-)
-
-
 # Authorization: superuser
 class SonarqubeIssueViewSet(
     DojoModelViewSet,
@@ -557,10 +549,6 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # Update test_id if it wasn't available before save
         if test_id_from_response := serializer.data.get("test"):
             pghistory.context(test_id=test_id_from_response)
-
-
-from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401
-from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401
 
 
 def _report_url_location_refs(product, user=None):
@@ -1065,6 +1053,11 @@ _LAZY_VIEWSET_EXPORTS = {
     "BurpRawRequestResponseViewSet":      "dojo.finding.api.views",
     "FindingViewSet":                     "dojo.finding.api.views",
     "FindingTemplatesViewSet":            "dojo.finding.api.views",
+    "JiraInstanceViewSet":                "dojo.jira.api.views",
+    "JiraIssuesViewSet":                  "dojo.jira.api.views",
+    "JiraProjectViewSet":                 "dojo.jira.api.views",
+    "NoteTypeViewSet":                    "dojo.note_type.api.views",
+    "NotesViewSet":                       "dojo.notes.api.views",
     "ProductAPIScanConfigurationViewSet": "dojo.product.api.views",
     "ProductTypeViewSet":                 "dojo.product_type.api.views",
     "RiskAcceptanceViewSet":              "dojo.risk_acceptance.api.views",
