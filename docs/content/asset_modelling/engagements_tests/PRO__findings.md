@@ -92,7 +92,7 @@ Mitigation policies can be found and edited in the sidebar under **Settings > Fi
 This section includes a table of the Endpoints that the selected Finding affects, along with any relevant metadata.
 
 ### Additional Details 
-- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request.
+- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request. Each pair is listed by its method, URL and status, opens in place to the raw request and response as plain text, and each side can be copied.
 - **Steps to Reproduce**: Steps for reproducing the Finding.
 - **Severity Justification**: Written description of why a certain Severity rating was associated with the Finding. 
 
