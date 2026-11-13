@@ -34,13 +34,13 @@ Image locations are **scan-managed**: they are created by imports and connectors
 - **All Images** in the sidebar (under Locations, or under Attack Surface in the reorganized menu) lists every image on the instance, with filters for registry, repository, tag and whether the digest is known.
 - **View Images** in an Asset's Locations menu scopes the list to one asset.
 - The asset **location map** draws a Container Images region, grouping images by registry and then repository. A repository with one image collapses to that image.
-- A finding's page has a **Runs In** tile listing the images the finding was found in, each with its registry, repository, tag and short digest, and the assets that run it.
+- A finding's page has a **Runs In** tile: a table of the images the finding was found in, one row per image, with its reference, its short digest (or **Digest Unknown**), the asset that built it, and the assets that run it. Each reference links to its image page, and a long one shortens in the middle (the registry path first), so its tag and the start of its name stay in view. When more assets run an image than fit in its row, a **+N** chip lists the rest. The tile's header counts the assets, among those you can view, that run any of the images.
 
 ## Built From: the Image to Repository Link
 
 An image's `org.opencontainers.image.source` label names the repository that built it. When the label is present, DefectDojo matches it against, in order, Sensei repository configurations, the **Repo** field of engagements, and repositories mapped through the SCM asset connectors (GitHub, GitLab, Azure DevOps, Bitbucket), and records the matching asset as the image's **Built From** owner together with the `.revision` label.
 
-- One match is linked automatically and shown on the image page and in the finding's **Runs In** tile as "Built From *asset* at *revision*".
+- One match is linked automatically and shown on the image page as "Built From *asset* at *revision*", and in the **Built From** column of the finding's **Runs In** tile as the asset, the short revision and how the link was found.
 - More than one match is recorded as **candidates** rather than guessed at. The image page lists them, and a person can link one, or any other asset, with **Link Repository**.
 - A link made by hand outranks everything the scanners say and is never overwritten; **Unlink** hands the decision back to the resolver.
 - Images built from one asset and seen running in another feed the [suggested edges](/asset_modelling/pro_hierarchy/asset_hierarchy/#suggested-edges-from-container-evidence) on the hierarchy page. No edge is ever drawn without a person accepting it.
