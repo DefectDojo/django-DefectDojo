@@ -740,6 +740,20 @@ GET /api/v2/findings/{id}/acceptance_history/
 visibility is a separate grant from Finding visibility, so being able to read the Finding does not
 show you the exceptions raised against it.
 
+Each record names its Finding and the people involved:
+
+- `finding_title` and `finding_severity` are the Finding's title and severity. They are `null` for a
+  Finding you may not see: a Risk Acceptance can span Assets you have no access to, and its record
+  then shows the Finding's id only.
+- `added_by_name` and `removed_by_name` are the display names of the people who added the Finding
+  and ended its acceptance. `added_by` and `removed_by` still carry their usernames.
+
+A page of `finding_records/` also describes the whole Risk Acceptance, not only the page:
+
+- `status_counts` is how many records are in each status (`pending`, `accepted`, `removed`,
+  `expired`, `superseded`), zero included.
+- `shared_justification` is the justification every record carries, or `null` when they differ.
+
 ## Risk Acceptance Best Practices 
 
 While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than having both enabled at once. 
