@@ -1171,16 +1171,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             self.unchanged_items.append(existing_finding.id)
             return existing_finding, True
-        # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
-        # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
-        # (Risk accepted findings are not set to mitigated by Defectdojo)
+        # The statuses differ, but we do not sync a false positive, out of scope or risk accepted status
+        # from the scanner. The report still contains the finding, so it goes in 'unchanged_items': otherwise
+        # close_old_findings would mitigate it, and a status set without a save (false-positive history's
+        # bulk update) leaves the finding unmitigated, so nothing would stop it.
         # We however do not exit the loop as we do want to update the endpoints/locations (in case some
         # endpoints/locations were fixed)
-        if existing_finding.risk_accepted and not existing_finding.active:
-            self.unchanged_items.append(existing_finding.id)
-            return existing_finding, False
-        # The finding was not an exact match, so we need to add more details about from the
-        # new finding to the existing. Return False here to make process further
+        self.unchanged_items.append(existing_finding.id)
         return existing_finding, False
 
     def process_matched_mitigated_finding(

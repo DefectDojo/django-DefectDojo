@@ -35,6 +35,8 @@ Any vulnerabilities which were not contained in the previous import will be adde
 
 If any incoming Findings match Findings that already exist, the incoming Findings will be discarded rather than recorded as Duplicates. These Findings have been recorded already \- no need to add a new Finding object. The Test page will show these Findings as **Left Untouched**.
 
+A matched Finding marked **False Positive**, **Out of Scope** or **Risk Accepted** keeps that status and is also **Left Untouched**: the report still contains it, so **Close Old Findings** does not close it.
+
 ### Fields fix_available and fix_version
 
 If any incoming Findings match Findings that already exist, the incoming Finding is checked if the fields `fix_available` and `fix_version` differ and are updated if yes. These Findings have been recorded already \- no need to add a new Finding object. The Test page will show these Findings as **Left Untouched**.
