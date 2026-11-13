@@ -412,5 +412,10 @@ class AutoCreateContextManager:
                     copy[key] = value if len(value) > 1 else value[0]
                 else:
                     copy[key] = value
+        # Trim names the way the serializers' CharFields do, so a permission check
+        # resolves the same objects the import later uses
+        for key in ("product_type_name", "product_name", "engagement_name", "test_title"):
+            if isinstance(copy.get(key), str):
+                copy[key] = copy[key].strip()
         # Convert to a regular dict
         return copy

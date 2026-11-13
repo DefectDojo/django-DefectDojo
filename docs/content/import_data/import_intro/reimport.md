@@ -149,6 +149,21 @@ Each row starts with a menu:
 * **View Findings** opens the Findings list filtered to the Findings that Import recorded an action on (created, closed, reactivated or left untouched). The filter shows in the filter bar as **Import ID**, where you can remove it.
 * **Copy Commit Hash** copies the full commit hash. It appears only when the Import has one.
 
+## One Import at a time into a Test
+
+DefectDojo runs one Import or Reimport into a Test at a time. When a Reimport arrives while another Import or Reimport into the same Test is still running, it waits for that one to finish and then runs as usual.
+
+This matters most for a CI/CD pipeline that retries a Reimport after its HTTP client times out. The first Reimport is still running on the server, and the retry used to run alongside it and compete for the same Findings, which could end in a database deadlock or a cancelled statement. The retry now waits its turn.
+
+A request stops waiting after 10 minutes. It then fails with `409 Conflict` and a message naming the Test, and nothing from it is imported. Run it again once the other Import has finished. A Pro Reimport sent with `background_import=true` waits the same way in the background. If it gives up, the Test's status shows **Failed**, and its `error` holds the same message.
+
+Self-hosted instances can tune this with two environment variables:
+
+- `DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS` (default `600`) sets how long a request waits. `0` fails at once instead of waiting. A synchronous request that waits still has to finish its own Import within your web server's and proxy's request timeouts, so keep this well below them.
+- `DD_SERIALIZE_TEST_IMPORTS` (default `True`) turns the waiting on. Set it to `False` only if DefectDojo reaches PostgreSQL through a connection pooler in transaction mode (such as PgBouncer with `pool_mode = transaction`), where the lock cannot be held across an Import.
+
+If every database connection holding a Test's lock has been idle for `DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES` (default `30`), no Import is running, so the next one goes ahead without waiting.
+
 ## Reimport via API - special note
 
 Note that the /reimport API endpoint can both **extend an existing Test** (apply the method in this article) **or create a new Test** with new data \- an initial call to `/import`, or setting up a Test in advance is not required.
