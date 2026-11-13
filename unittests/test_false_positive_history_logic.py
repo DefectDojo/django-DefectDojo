@@ -1826,6 +1826,24 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         self.assert_finding(find_a, false_p=True)
         self.assert_finding(find_b, false_p=True)
 
+    def test_fp_history_batch_without_false_positives_loads_no_locations(self):
+        """Candidates share the hash but none is a false positive: no pair can change the outcome, so no locations load."""
+        for _ in range(3):
+            find, _f = self.copy_and_reset_finding(find_id=2)
+            find.save()
+        find_incoming, _f = self.copy_and_reset_finding(find_id=2)
+        find_incoming.save()
+
+        batch = [Finding.objects.get(id=find_incoming.id)]
+        # 5 queries, however many candidates share the hash:
+        #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+        #   1 candidates SELECT (with .only())
+        # No locations prefetch and no UPDATE.
+        with self.assertNumQueries(5):
+            do_false_positive_history_batch(batch)
+
+        self.assert_finding(find_incoming, false_p=False)
+
     def test_fp_history_batch_retroactive_marks_existing_active_fp(self):
         """do_false_positive_history_batch retroactively marks pre-existing active findings as FP."""
         # Create a finding before the batch import so it pre-exists.

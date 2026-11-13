@@ -45,9 +45,9 @@ False Positive History decides whether two Findings are "the same" using **the d
 
 | Tool's deduplication algorithm | Findings match when they share |
 | --- | --- |
-| **Hash Code** | the same hash code, built from that tool's configured Hash Code Fields |
+| **Hash Code** | the same hash code, built from that tool's configured Hash Code Fields, and a location (see below) |
 | **Unique ID From Tool** | the same unique ID from the tool |
-| **Unique ID From Tool or Hash Code** | either one |
+| **Unique ID From Tool or Hash Code** | either one, and a location (see below) |
 | **Legacy** | the same title (case-insensitive) and the same severity |
 
 So the accuracy of this feature is entirely determined by how well that tool's deduplication is configured. **Tune the tool's algorithm and hash fields before enabling False Positive History** — see [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/) (Pro) or [Deduplication Tuning](/triage_findings/finding_deduplication/os__deduplication_tuning/) (Open Source).
@@ -64,7 +64,7 @@ In DefectDojo Pro, matching also respects the **set-based Hash Code Fields** —
 
 This makes Pro's matching **narrower** than Open Source's, and that is the point: without it, False Positive History could replicate a false positive to Findings that same-tool deduplication would not have considered duplicates at all. The refinement can only ever reduce the set of Findings that get marked — enabling Pro will never cause *more* Findings to be auto-marked.
 
-On Open Source, matching uses the hash code and the location alone, so it is broader. Bear that in mind when tuning.
+On Open Source, matching uses only the algorithm's key (and, for the hash code algorithms, the location), so it is broader. Bear that in mind when tuning.
 
 ## Risks worth understanding before you enable it
 

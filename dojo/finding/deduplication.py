@@ -1548,6 +1548,17 @@ def _do_false_positive_history_batch_in_scope(findings, scope_filter):
         existing_by_finding.append((finding, existing))
 
     if _fp_history_compares_locations(dedup_alg):
+        # Only a pair that can change the outcome is compared: a false-positive candidate marks the
+        # finding, and with retroactive history a finding that is or becomes a false positive marks
+        # its active candidates. The loop below reads no other candidate, so a batch where nothing
+        # is a false positive loads no locations.
+        retroactive = system_settings.retroactive_false_positive_history
+
+        def _deciding(finding, existing):
+            may_be_false_p = finding.false_p or any(ef.false_p for ef in existing)
+            return [ef for ef in existing if ef.false_p or (retroactive and may_be_false_p and ef.active)]
+
+        existing_by_finding = [(finding, _deciding(finding, existing)) for finding, existing in existing_by_finding]
         # After the hook, so a candidate it added is held to the same rule. One prefetch for the
         # whole batch, findings with candidates and those candidates together; instances already
         # prefetched are skipped, and a batch with no candidates loads nothing.
