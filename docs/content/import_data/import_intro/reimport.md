@@ -136,7 +136,7 @@ On a wide widget each Import takes one line; on a narrow one it takes three shor
 
 ### A Reimport that closed every open Finding
 
-A Reimport that closed Findings and matched none of the existing ones usually means the report was empty or failed to parse, rather than that every vulnerability was fixed. That row is marked **Closed all open findings**. While it is the newest Import in the list, the widget's header reads **Closed all on** and its date; once another Import runs, the header goes back to **Last import** and that Import's date, and the older row keeps its mark. Check the report before you triage the Findings it closed.
+A Reimport that closed Findings and matched none of the existing ones usually means the report was empty or failed to parse, rather than that every vulnerability was fixed. That row is marked **Closed All Open Findings**. While it is the newest Import in the list, the widget's header reads **Closed all on** and its date; once another Import runs, the header goes back to **Last import** and that Import's date, and the older row keeps its mark. Check the report before you triage the Findings it closed.
 
 Only a Reimport is marked. An Import that closes Findings through **Close Old Findings** is doing what that option asks, so it shows its **closed** count without the warning.
 
