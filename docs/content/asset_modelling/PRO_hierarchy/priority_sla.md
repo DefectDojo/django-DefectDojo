@@ -438,7 +438,8 @@ DefectDojo takes it from a value someone set by hand, then from a CISA KEV listi
 an EPSS score at or above the configured threshold, then from threat intelligence showing a
 weaponized exploit. A proof of concept on its own is not enough. A **Vendor Reported Exploited**
 claim from a scanner, a connector or a person is not one of these sources. It makes a finding
-credibly exploitable only if you write a rule that says so.
+credibly exploitable only through a rule that checks **Vendor Reported Exploited** and sets the
+fact with the **Set a vulnerability response fact** action.
 
 A value set by hand is never replaced by a later recalculation. The same applies to a value
 set by a rule, because that is an automation the customer configured rather than one

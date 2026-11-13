@@ -37,8 +37,10 @@ The same base windows, further tightened by exploitability and exposure:
 
 **Credibly exploitable** means the finding is KEV-listed, or its EPSS score is at or above your
 threshold. KEV-listed means listed in the CISA KEV catalog. A **Vendor Reported Exploited** claim
-from a scanner, a connector or a person does not make a finding credibly exploitable, and does not
-change its deadline, unless you write a rule that says so. **Internet-reachable** is signalled by a finding tag — `internet-reachable` by default.
+from a scanner, a connector or a person does not make a finding credibly exploitable here, and does
+not change its deadline. Only a vulnerability response policy can take such a claim into account,
+through a rule that sets credible exploitability from it; see
+[Vulnerability response policies](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Internet-reachable** is signalled by a finding tag — `internet-reachable` by default.
 
 All the thresholds, tag names, and day counts are editable on the SLA configuration, in the
 **FedRAMP VDR & PAIN Tiering** section of the SLA configuration form (create or edit an SLA

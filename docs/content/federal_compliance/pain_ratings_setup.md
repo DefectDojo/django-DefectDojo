@@ -53,8 +53,7 @@ exploitable**, which is read from two fields:
 * `epss_score` — is EPSS at or above the configuration's threshold, `0.1` by default?
 
 A **Vendor Reported Exploited** claim from a scanner, a connector or a person is not one of these
-fields. It does not by itself make a finding likely exploitable, so it does not change the PAIN or
-VDR result unless you write a rule that says so.
+fields. It does not make a finding likely exploitable, so it does not change the PAIN or VDR result.
 
 For the clearest demonstration, pick a finding in the tightest column: **Critical severity, likely
 exploitable through its EPSS score, and tagged `internet-reachable`**.

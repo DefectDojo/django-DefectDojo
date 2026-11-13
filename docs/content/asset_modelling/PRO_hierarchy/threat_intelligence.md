@@ -226,8 +226,11 @@ See [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata).
 #### The first load after upgrading
 
 On a self-hosted instance with the KEV and EPSS lookups off, these values were empty until now,
-or held whatever a scanner reported. The first bundle load after upgrading fills them in for every
-CVE the instance knows, so expect:
+or held whatever a scanner or a person had set. The upgrade itself, before any bundle load, moves
+every such flag that no CISA KEV listing backs to **Vendor Reported Exploited** or **Vendor
+Reported Ransomware**, so counts under CISA KEV can already drop at that point (see
+[Findings](/asset_modelling/engagements_tests/pro__findings/#metadata)). The first bundle load
+after upgrading then fills the CISA values in for every CVE the instance knows, so expect:
 
 * **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** and the KEV date to change on
   many findings, both set (CISA lists the CVE) and cleared (it does not), and priority to move
