@@ -27,17 +27,26 @@ class TestReportFindingFilterScoping(DojoTestCase):
         cls.test_a, cls.test_b = tests
         cls.user = Dojo_User.objects.create_user(username="report_filter_scoping", password="not-a-real-secret")  # noqa: S106
         cls.test_a.engagement.product.authorized_users.add(cls.user)
+        cls.superuser = Dojo_User.objects.create_user(username="report_filter_scoping_admin", is_superuser=True)
 
-    def test_test_choices_are_limited_to_authorized_tests(self):
+    def assert_test_choices(self, user, visible, hidden=()):
         client = Client()
-        client.force_login(self.user)
+        client.force_login(user)
         for url in (
             reverse("report_findings"),
             reverse("report_builder"),
             reverse("test_report", args=(self.test_a.id,)),
         ):
-            with self.subTest(url=url):
+            with self.subTest(user=user.username, url=url):
                 response = client.get(url)
                 self.assertEqual(response.status_code, 200)
-                self.assertContains(response, self.TITLE_A)
-                self.assertNotContains(response, self.TITLE_B)
+                for test in visible:
+                    self.assertContains(response, f'<option value="{test.id}">{test}</option>', html=True)
+                for test in hidden:
+                    self.assertNotContains(response, test.title)
+
+    def test_test_choices_are_limited_to_authorized_tests(self):
+        self.assert_test_choices(self.user, visible=[self.test_a], hidden=[self.test_b])
+
+    def test_superuser_test_choices_include_every_test(self):
+        self.assert_test_choices(self.superuser, visible=[self.test_a, self.test_b])
