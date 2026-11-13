@@ -257,14 +257,16 @@ Ranked lists, feeds, and embedded tables.
 | Widget | What it shows |
 |--------|---------------|
 | **Top-N Leaderboard** | A ranked list in one of two modes: *aggregate* (top dimension buckets by count, e.g. Top 10 CWEs) or *records* (top individual records by a metric, e.g. Top 10 Assets by Grade). |
-| **Embedded Table** | A full list view (Findings, Assets, Engagements, Tests, Risk Acceptances, Organizations, or Test Types) with preset filters and ordering — pagination, sorting, and CSV export included. |
+| **Embedded Table** | A list (Findings, Assets, Engagements, Tests, Risk Acceptances, Organizations, or Test Types) with preset filters and ordering, as compact rows that fit the widget. The **Full Table** switch shows the whole list view, with column filters, sorting, paging and CSV export. |
 | **Recent Activity** | A scrolling feed of the most-recently updated records, clickable through to detail pages. |
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
 | **My Work** | Your personal queue — assignments, mentions, and pending risk-acceptance reviews. Always scoped to the viewer. |
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
 | **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
-An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the table's filter bar or column filters. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
+An **Embedded Table** shows as many rows as fit the widget, with a pager below them, so a taller widget shows more rows. Findings, Assets, Engagements, Tests and Risk Acceptances show compact rows whose columns give way as the widget narrows (each Finding names its Asset under its title); Organizations and Test Types show their full list. The **Full Table** button in the widget's toolbar switches to the whole list view, with its column filters, column picker and paging; its **Page Size** is the one set in **Edit Widget**. Your choice of compact rows or Full Table is remembered for you, per widget. The **Export Button** display option shows the whole Export menu (CSV export and Quick Report), and it is off by default.
+
+An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the **Filters** button, or from the column filters in the Full Table. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
 
 ### Static & Utility
 
