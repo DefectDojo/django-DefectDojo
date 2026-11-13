@@ -39,7 +39,7 @@ Permissions in <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo 
 
 When looking at Organization or Asset, you can open the Permissions window to set permissions quickly.  This menu can be found in a Table by clicking the horizontal dots **"⋮"**.  IF looking at an individual **Asset** or **Organization** page, this menu can be found under the blue gear ‘⚙️’.
 
-On an **Organization** page, the **Members** and **Groups** widgets manage the same access without opening the Permissions window. Each lists the users or groups that hold a role on the Organization, Owners first, with their role. **Add User** and **Add Group** under the list open a form to pick a user or group and a Role. The menu at the left of a row offers **Change Role**, which opens a form, and **Remove**, which asks you to confirm. These controls are shown only to someone who can manage the Organization's members or groups, and an Owner row can be changed only by someone who can grant the Owner role: for anyone else it shows a lock.
+On an **Organization** page, the **Members** and **Groups** widgets manage the same access without opening the Permissions window. Each lists the users or groups that hold a role on the Organization, Owners first, with their role. **Add User** and **Add Group** under the list open a form to pick a user or group and a **Role**. The menu at the left of a row offers **Change Role**, which opens a form, and **Remove**, which asks you to confirm. These controls are shown only to someone who can manage the Organization's members or groups, and an Owner row can be changed only by someone who can grant the Owner role: for anyone else it shows a lock.
 
 ## Setting Permissions through the permissions window
 
