@@ -47,6 +47,8 @@ See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-Defect
 
 The Helm chart repo at `charts.defectdojo.com` is run by DefectDojo, Inc. and logs each request: the IP address is used to identify the organization and deleted within three days, and DefectDojo may reach out about its products or to ask for feedback. See [section 1.4 of the privacy policy](https://defectdojo.com/privacy-policy) for details and how to object, or add the repo from `https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts` instead.
 
+The chart is also published as an OCI artifact on GHCR. With Helm 3.8 or later, `helm install defectdojo oci://ghcr.io/defectdojo/defectdojo --version <chart-version>` installs a released version directly.
+
 ### Local install with godojo
 
 See instructions in [README.md](<https://github.com/DefectDojo/godojo/blob/master/README.md>)
