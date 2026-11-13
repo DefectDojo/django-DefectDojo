@@ -106,7 +106,7 @@ The fields can sit under named headers, and each header folds its group away. To
 
 The field list offers every field the page has, whatever record you edit the layout from: the Jira and connector fields, for example, are on offer whenever Jira or connectors are turned on, even when the record open at the time has no ticket. On a record without a value for one of them, its row is left out.
 
-On the page, each group's header shows its name and how many fields it shows for that record, so a field left out because it is empty or does not apply is not counted. Select it, or press Enter or Space on it, to fold the group to its header or to open it again. Which groups you fold is remembered for you and for that table only: it does not change the layout, the record or what anyone else sees. In a wide table the groups flow into columns; in a narrow one the label sits above its value.
+On the page, each group's header shows its name and counts the fields it shows for that record, so a field left out because it is empty or does not apply is not counted. Select it, or press Enter or Space on it, to fold the group to its header or to open it again. Which groups you fold is remembered for you and for that table only: it does not change the layout, the record or what anyone else sees. In a wide table the groups flow into columns; in a narrow one the label sits above its value.
 
 The default layouts already group the larger tables, for example the Finding's **Details** table into **Triage**, **Ownership and Plan**, **Where Found**, **Scores and Intel** and **Tracking**.
 
