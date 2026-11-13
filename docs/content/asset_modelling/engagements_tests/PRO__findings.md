@@ -175,9 +175,9 @@ Supported file types include:
 .sarif  .xlsx  .doc  .html  .js  .nessus  .zip  .fpr
 ```
 
-To attach a file to a Finding, click **Add File** from within either the ⋮ kebab menu or the gear menu of the selected Finding. Enter a Title for the file, choose the file from your computer, and click **Submit**.
+To attach a file to a Finding, click **Add File** from within either the ⋮ kebab menu or the gear menu of the selected Finding, or **Add File** in the **Files** tab of the Finding's **Overview**. Enter a Title for the file, choose the file from your computer, and click **Submit**.
 
-The file will then appear in the Files section of the **Test Overview** table within the Finding’s view.
+The file then appears in the **Files** tab of the Finding's **Overview**, listed by name. Click a file's name to open it in a new tab. Users who can edit the Finding can rename or delete a file from the ⋮ menu at the start of its row.
 
 #### Bulk Edit Findings 
 Findings can be edited in bulk from a Finding List, such as the table of All Findings (**Act > Explore > Findings > All** in the sidebar), or from the table of Findings within a specific Test.
