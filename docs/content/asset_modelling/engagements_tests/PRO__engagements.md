@@ -212,9 +212,14 @@ once: a partial checklist saves, so you can record categories as the review prog
 to it later. The Findings picker for each category is limited to the Findings in that Engagement,
 and to those you have permission to view.
 
-Once saved, the panel lists each category with its status, its note, and its linked Findings as
-chips you can select to open the Finding. The panel also shows who last saved the checklist and
+Once saved, the panel counts how many categories are Pass, Fail, N/A and Not Evaluated, and lists
+each category on one line with its status, its note and its linked Findings. Select the arrow
+beside a category to open it to its full note and every linked Finding; select a Finding to open
+it. The panel's header shows the result at a glance: how many categories failed, **All Pass**, or
+how many of the eight have been evaluated. The panel also shows who last saved the checklist and
 when.
+
+If the checklist cannot be loaded, the panel says so rather than offering to start a new one.
 
 ### Availability
 
