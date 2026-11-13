@@ -3,12 +3,14 @@ import logging
 from unittest.mock import call, patch
 
 import requests
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.http import urlencode
 from jira.exceptions import JIRAError
+from parameterized import parameterized
 
 import dojo.jira.helper as jira_helper
-from dojo.models import JIRA_Instance, Product
+from dojo.models import JIRA_Instance, JIRA_Project, Product
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
@@ -165,6 +167,68 @@ class JIRAConfigProductTest(DojoTestCase):
         product = self.add_product_with_jira_project(expected_delta_jira_project_db=1)
         self.assertIsNotNone(product)
         self.assertEqual(jira_mock.call_count, 1)
+
+    # The classic form shows the SLA comment setting as one select with three choices, stored on two booleans:
+    # product_jira_sla_notification (send) and suppress_sla_notification_comments (never send).
+    @parameterized.expand([
+        ("inherit", False, False),
+        ("always", True, False),
+        ("never", False, True),
+    ])
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
+    def test_add_product_stores_the_sla_comment_setting(self, choice, send, suppress, jira_mock):
+        jira_mock.return_value = True
+        data = self.get_new_product_with_jira_project_data()
+        data["jira-project-form-sla_notification_comments"] = choice
+        product = self.add_product_jira_with_data(data, expected_delta_jira_project_db=1)
+
+        persisted = JIRA_Project.objects.get(product=product)
+        self.assertEqual(
+            (persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (send, suppress),
+            msg=f"chose {choice!r}",
+        )
+
+        # The edit page shows the stored choice, so saving it again does not change it.
+        response = self.client.get(reverse("edit_product", args=(product.id,)))
+        self.assertContains(response, f'<option value="{choice}" selected>', html=False)
+
+    # A post from before the select (scripts, saved forms) sends the old checkbox and no choice: "on" still means
+    # always send. A post with neither keeps what is stored, as before.
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
+    def test_legacy_sla_comment_checkbox_post_still_sends(self, jira_mock):
+        jira_mock.return_value = True
+        data = self.get_new_product_with_jira_project_data()
+        data.pop("jira-project-form-sla_notification_comments", None)
+        data["jira-project-form-product_jira_sla_notification"] = "on"
+        product = self.add_product_jira_with_data(data, expected_delta_jira_project_db=1)
+
+        persisted = JIRA_Project.objects.get(product=product)
+        self.assertEqual((persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (True, False))
+
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
+    def test_post_without_sla_comment_fields_keeps_the_stored_setting(self, jira_mock):
+        jira_mock.return_value = True
+        data = self.get_new_product_with_jira_project_data()
+        data["jira-project-form-sla_notification_comments"] = "never"
+        product = self.add_product_jira_with_data(data, expected_delta_jira_project_db=1)
+
+        edit = self.get_product_with_jira_project_data2(product)
+        edit.pop("jira-project-form-sla_notification_comments", None)
+        edit.pop("jira-project-form-product_jira_sla_notification", None)
+        self.edit_jira_project_for_product_with_data(product, edit, expected_delta_jira_project_db=0)
+
+        persisted = JIRA_Project.objects.get(product=product)
+        self.assertEqual(persisted.project_key, edit["jira-project-form-project_key"], "the edit was not saved")
+        self.assertEqual((persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (False, True))
+
+    def test_jira_project_cannot_both_send_and_suppress_sla_comments(self):
+        project = JIRA_Project(
+            jira_instance=JIRA_Instance.objects.get(pk=2), project_key="BOTH",
+            product_jira_sla_notification=True, suppress_sla_notification_comments=True,
+        )
+        with self.assertRaises(ValidationError) as raised:
+            project.full_clean(exclude=["product", "engagement"])
+        self.assertIn("suppress_sla_notification_comments", raised.exception.message_dict)
 
     @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_product_with_jira_project_invalid_jira_project(self, jira_mock):

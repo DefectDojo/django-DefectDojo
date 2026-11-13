@@ -31,20 +31,28 @@ Uploading a file whose extension is not in the list is rejected.
 ## How to Attach a File to a Finding
 
 1. Open the Finding you want to attach a file to.
-2. Click the **gear (⚙) menu** in the top-right of the Finding and choose **Add File**.
-3. Enter a **Title** for the file and choose the file from your computer, then save.
+2. Click the **gear (⚙) menu** in the top-right of the Finding and choose **Add File**, or
+   click **Add File** in the **Files** tab of the Finding's **Overview**.
+3. Enter a **Title** for the file and choose the file from your computer, then click **Submit**.
 
-   ![The Add File action in the Finding gear menu, with the Files tab below](images/PRO_attach_files_menu.png)
+   ![The Add File action in the Finding gear menu, with the empty Files tab and its own Add File button below](images/PRO_attach_files_menu.png)
 
-The same gear menu is available on **Engagement** and **Test** pages, so files can be
-attached to any of these objects the same way.
+The same gear menu and the same **Files** tab are available on **Engagement** and **Test**
+pages, so files can be attached to any of these objects the same way. **Add File** shows for
+users who can add files to the parent Asset.
 
 ## Viewing and Downloading Files
 
 Attached files are listed under the **Files** tab of the **Finding Overview** (and the
-equivalent section on Engagements and Tests). Click a file's title to download it.
+equivalent tab on Engagements and Tests), sorted by title, and the tab shows how many there
+are. Click a file's title to open it in a new browser tab, where the browser shows or downloads
+it. Hover over a title that is cut short to read it in full.
 
-![The Files tab on a Finding listing an attached file](images/PRO_finding_files_tab.png)
+Each file carries a short type label, such as **PDF**, **ZIP** or **CSV**. The label is read from
+the end of the file's **Title**, not from the stored file, so a file titled without one of the
+supported extensions shows **FILE**.
+
+![The Files tab on a Finding listing five attached files](images/PRO_finding_files_tab.png)
 
 Access is permission-checked: a user must have **view** permission on the parent Finding,
 Engagement, or Test to download its files.

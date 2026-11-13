@@ -1,4 +1,5 @@
 import collections
+import csv
 import decimal
 import logging
 from datetime import datetime, timedelta
@@ -71,6 +72,14 @@ def custom_filter(queryset, name, value):
     values = value.split(",")
     cust_filter = (f"{name}__in")
     return queryset.filter(Q(**{cust_filter: values}))
+
+
+def quoted_list_filter(queryset, name, value):
+    # custom_filter for values that may hold a comma (an Asset attribute option's value): such a
+    # value travels in double quotes, CSV-style (``"beta, ga",production``). A list without quotes
+    # splits on every comma exactly as custom_filter does.
+    values = next(csv.reader([value]), [])
+    return queryset.filter(Q(**{f"{name}__in": values}))
 
 
 def custom_vulnerability_id_filter(queryset, name, value):

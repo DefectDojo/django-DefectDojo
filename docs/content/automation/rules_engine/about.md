@@ -74,6 +74,8 @@ From the **Action** dropdown, select the Action that you want to apply to a Find
 
 You can set an additional Conditional Values which allow you to take additional actions, if certain criteria are met.  
 
+The field pickers on each Action, including the comparison field of a Conditional Action, list their fields under the same headings as the Findings list's **Add Filter**: Finding, Threat Intel, Dates and People.
+
 ![image](images/rules_engine_4.png)
 
 

@@ -6,7 +6,15 @@ from django.utils import timezone
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
-from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, User
+from dojo.models import (
+    Development_Environment,
+    Engagement,
+    Finding,
+    Finding_Group,
+    Product,
+    Product_Type,
+    User,
+)
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -391,3 +399,126 @@ class TestReimportCloseOldVanishedFindings(DojoTestCase):
             {finding.pk for finding in closed_findings},
         )
         self.assertIsNone(unsaved_finding.pk, msg="close_old_findings must not save a new finding")
+
+
+class TestReimportCloseOldSkipsAlreadyClosedFindings(DojoTestCase):
+
+    """
+    Regression: reimport hydrated every to-mitigate finding, closed ones included.
+
+    The to-mitigate set is every finding of the test the report no longer carries, so on a
+    test whose findings are almost all closed it is almost all closed findings. Each one was
+    loaded as a full instance (with its JIRA relations) only for close_old_findings() to drop
+    it again as already closed, and a test with a few hundred thousand closed findings ran
+    the worker out of memory on a reimport that closed nothing.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.scan_type = "Acunetix Scan"
+        self.user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="closeold_already_closed")
+        self.environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        product, _ = Product.objects.get_or_create(
+            name="TestReimportCloseOldAlreadyClosed",
+            description="Test",
+            prod_type=product_type,
+        )
+        self.engagement, _ = Engagement.objects.get_or_create(
+            name="Close Old Already Closed Findings",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        with (get_unit_tests_scans_path("acunetix") / "acunetix360_many_findings.json").open(encoding="utf-8") as scan:
+            importer = DefaultImporter(
+                close_old_findings=False,
+                user=self.user,
+                lead=self.user,
+                scan_date=None,
+                environment=self.environment,
+                active=True,
+                verified=False,
+                engagement=self.engagement,
+                scan_type=self.scan_type,
+            )
+            self.test, _, len_new_findings, _, _, _, _ = importer.process_scan(scan)
+        self.assertGreaterEqual(len_new_findings, 6)
+
+        pks = sorted(self.test.finding_set.values_list("pk", flat=True))
+        self.closed_at = timezone.now() - timezone.timedelta(days=30)
+        # Closed the way a reimport or a person closes a finding: both flags set
+        self.already_closed_pks = set(pks[:-3])
+        Finding.objects.filter(pk__in=self.already_closed_pks).update(
+            active=False, is_mitigated=True, mitigated=self.closed_at,
+        )
+        # Half-closed rows close_old_findings still closes (it requires both flags to skip one)
+        self.flagged_without_date_pk = pks[-3]
+        Finding.objects.filter(pk=self.flagged_without_date_pk).update(active=False, is_mitigated=True, mitigated=None)
+        self.dated_without_flag_pk = pks[-2]
+        Finding.objects.filter(pk=self.dated_without_flag_pk).update(is_mitigated=False, mitigated=self.closed_at)
+        self.open_pks = {self.flagged_without_date_pk, self.dated_without_flag_pk, pks[-1]}
+
+    def _reimporter(self, **kwargs):
+        return DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            lead=self.user,
+            scan_date=None,
+            environment=self.environment,
+            active=True,
+            verified=False,
+            scan_type=self.scan_type,
+            close_old_findings=True,
+            **kwargs,
+        )
+
+    def test_reimport_hydrates_only_findings_it_can_close(self):
+        hydrated = []
+        hydrate = DefaultReImporter._hydrate_findings_for_close_old
+
+        def spy(importer, finding_ids):
+            findings = hydrate(importer, finding_ids)
+            hydrated.extend(findings)
+            return findings
+
+        with (
+            mock.patch.object(DefaultReImporter, "_hydrate_findings_for_close_old", spy),
+            (get_unit_tests_scans_path("acunetix") / "acunetix360_zero_finding.json").open(encoding="utf-8") as scan,
+        ):
+            _, _, len_new_findings, len_closed_findings, _, _, _ = self._reimporter().process_scan(scan)
+
+        self.assertEqual(0, len_new_findings)
+        self.assertEqual(
+            self.open_pks, {finding.pk for finding in hydrated},
+            msg="only the to-mitigate findings that are not already closed may be loaded as instances",
+        )
+        # Same outcome as before: the open ones close, the closed ones are left as they were
+        self.assertEqual(len(self.open_pks), len_closed_findings)
+        for finding in Finding.objects.filter(pk__in=self.open_pks):
+            self.assertTrue(finding.is_mitigated, msg=f"finding {finding.pk} should be closed")
+            self.assertIsNotNone(finding.mitigated, msg=f"finding {finding.pk} should carry a mitigated date")
+        for finding in Finding.objects.filter(pk__in=self.already_closed_pks):
+            self.assertEqual(self.closed_at, finding.mitigated, msg=f"finding {finding.pk} was closed again")
+            self.assertFalse(finding.notes.exists(), msg=f"finding {finding.pk} got a mitigation note")
+
+    def test_close_old_still_pushes_the_groups_of_already_closed_findings(self):
+        """The finding-group JIRA push covers every to-mitigate finding's group, closed or not."""
+        closed_pk = min(self.already_closed_pks)
+        open_pk = max(self.open_pks)
+        closed_group = Finding_Group.objects.create(name="closed group", test=self.test, creator=self.user)
+        closed_group.findings.add(closed_pk)
+        open_group = Finding_Group.objects.create(name="open group", test=self.test, creator=self.user)
+        open_group.findings.add(open_pk)
+        importer = self._reimporter(push_to_jira=True)
+        importer.findings_groups_enabled = True
+
+        with mock.patch("dojo.importers.default_reimporter.jira_services.push") as push:
+            closed = importer.close_old_findings(importer._hydrate_findings_for_close_old({closed_pk, open_pk}))
+
+        self.assertEqual([open_pk], [finding.pk for finding in closed])
+        self.assertEqual(
+            {closed_group.pk, open_group.pk},
+            {call.args[0].pk for call in push.call_args_list},
+        )
+        self.assertEqual(2, push.call_count, msg="each group is pushed once")

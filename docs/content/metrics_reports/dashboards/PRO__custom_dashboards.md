@@ -11,7 +11,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Customizable Dashboards (layouts, widgets, and the widget catalog) are a DefectDojo Pro feature. They are off by default — a superuser can turn them on from **Settings > Feature Flags** on both Cloud and On-Premise instances.</span>
 
-DefectDojo Pro Customizable Dashboards let each user assemble their own dashboards out of **widgets** (counts, charts, leaderboards, feeds, and notes) arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, publish them to your whole team, set one as the default that opens on the Dashboards page, and clone any layout (yours or a shared template) as a starting point. The home page itself is the [Command Center](../command-center/), which every user has and which links to these grids.
+DefectDojo Pro Customizable Dashboards let each user assemble their own dashboards out of **widgets** (counts, charts, leaderboards, feeds, and notes) arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, share them with Groups, publish them to everyone, set one as the default that opens on the Dashboards page, and clone any layout (yours or a shared template) as a starting point. The home page itself is the [Command Center](../command-center/), which every user has and which links to these grids.
 
 ![A DefectDojo Pro customizable dashboard — the Default Dashboard layout.](images/pro_dashboard_v2_default.png)
 
@@ -64,6 +64,8 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 - **Default** — one of your layouts is your **default**: the one that loads when you open the Dashboards page. You can change which layout is your default at any time.
 - **Clone** — copy any layout (one of yours, or a shared template) into your own space as a fresh, independent starting point. Cloning gives the copy its own widgets, so editing the clone never touches the original.
 - **Share** — publish one of your layouts to the whole team as a **shared layout**. Other users can see it and clone it, but only a team **Maintainer** can publish, edit, or unshare a shared layout (unless it is collaborative, below). Sharing a layout shares only its *design* — every viewer still sees only the data their own permissions allow.
+- **Share with Groups**: with Group Ownership on, **Share** in a layout's menu sets who can see it: **Only Me** (or **Group** for a Group's layout), **Specific Groups**, or **Everyone**. Members of a Group you share with can open the layout and set it as their default, but they cannot change it. **Everyone** is the shared layout described above, and publishing to everyone (or withdrawing it) needs the **Dashboard Share** permission held through a Global Role.
+- **Group dashboards**: **Transfer** in a layout's menu moves it into a Group, or back to you as **Only Me**. A Group's dashboard belongs to the Group rather than to the person who made it: every Member sees it in their layout picker (marked with the Group's name), and Members whose role in the Group carries **Dashboard Share** change, share, transfer and delete it. Moving a dashboard into a Group needs that permission in the Group, or as a Global Role. A Group's dashboards are counted on the **Owned Content** tab of the [Group's page](/admin/user_management/create_user_group/#viewing-a-group).
 - **Collaborative** — a Maintainer can mark a shared layout as **collaborative** from **Manage Layouts** (**Make Collaborative**, reversed with **Stop Collaborating**). A collaborative layout is one live dashboard rather than a template to copy: it appears in every user's layout picker, anyone can set it as their default, and anyone can add, remove, rearrange, or configure its widgets. Every change is saved to the same layout, so everyone using it sees it. Renaming, unsharing, deleting, and the collaborative setting itself stay with a Maintainer. If a layout stops being collaborative (or is unshared), users who had it as their default fall back to their own layouts. Edits are saved as they are made, so two people editing at the same moment can overwrite each other's change; the layout re-syncs from the server when you enter edit mode.
 - **Read-only**: a Maintainer can also mark a collaborative layout as **read-only** (**Make Read-Only** in **Manage Layouts**, reversed with **Allow Editing**). It stays one live dashboard in every user's layout picker, and anyone can still set it as their default, but only a Maintainer or the layout's owner can change its widgets or arrangement. Everyone sees it tagged **Read-Only**; the owner and Maintainers keep the **Edit** button and everyone else has none, so a Maintainer can keep one dashboard current for the whole team without anyone else changing it. Anyone who wants a version of their own can still duplicate it. Stopping collaboration (or unsharing) also turns read-only off.
 - **Starter & shared templates** — DefectDojo ships a set of curated **shared templates** you can clone as a head start (see [Shared templates](#shared-templates) below). The **Default Dashboard** is the special "starter" template that new users are given automatically.
@@ -71,7 +73,15 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 ### Restricting customization
 
-An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. Everyone else is shown the Instance Default dashboard, or the built-in starter dashboard when none is set, with no toolbar options to create, switch, edit, or manage layouts. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
+An administrator can enable **Restrict Layout Customization** (**Settings > Defaults > Instance Defaults**, the **Layout Customization** card) to limit dashboard changes to superusers. With Group Ownership on, everyone else switches among the dashboards approved for them instead of making their own:
+
+- the Instance Default dashboard (or the built-in starter dashboard when none is set), which opens until they pick another,
+- every dashboard shared with everyone, and
+- every dashboard owned by, or shared with, a Group they belong to.
+
+These dashboards are read-only to them, and the toolbar offers no options to create or manage layouts. The dashboard they pick opens again the next time, on any browser. A Member whose role in a Group carries **Dashboard Share** still changes that Group's own dashboards, and the toolbar shows **Managed by <Group>** on them. When nothing is approved beyond the default, the toolbar says so. Personal dashboards saved earlier are kept and reappear if the setting is turned back off.
+
+With Group Ownership off, everyone else sees only the Instance Default (or the starter dashboard), or, under **Restrict to Selected Layouts**, the dashboards their Default Profile lists. A dashboard they switch to there is not remembered.
 
 ### Default Profile and instance defaults
 
@@ -115,11 +125,12 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 #### Graph options
 
-A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**):
+A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**). Every dimension picker (the Graph, Top-N, Rate Chart, Sankey and Sunburst settings) lists its dimensions under the same headings as the chosen model's list page uses for **Add Filter**, in the same order, with every date dimension under Dates:
 
 - **Split By** draws one line, or one run of bars, per value of a second dimension. Grouping by **Created Date** by month and splitting by **Severity Group** gives new findings per month as two lines, one for Critical and High findings and one for Medium and Low findings. Split By takes any dimension that is not a date and not the Group By, and is available on bar, line and area charts (a pie or doughnut shows one dimension). A chart draws up to 10 series: past that, the smallest values are combined into one **Other** series. A chart that counts unique CWEs or vulnerability IDs cannot combine values that way, so it asks for a filter or a dimension with fewer values instead.
 - **Severity Group** is a finding dimension with three values: **Critical and High**, **Medium and Low**, and **Info**. It works as a Group By (a two or three slice doughnut) or as a Split By. Its lines and slices are red for Critical and High and green for Medium and Low unless you pick other colors. Clicking one opens the Findings list filtered to that group's severities.
 - **Created Date** is when a finding was created in DefectDojo (when it was imported or added), as opposed to **Discovered Date**, the date the scanner reported. Charting new findings per month by Created Date counts each finding in the month it arrived.
+- **Order**: a chart grouped by **Severity**, **Status**, **Risk** or a band (**Severity Group**, **SLA Band**, **Age Band**, the CVSS bands) lists its values in that dimension's own order: Critical, High, Medium, Low, Info for severity; Active first, then each way a finding is closed, for status; Urgent, Needs Action, Medium, Low for risk. Any other dimension (a component, an Asset, a test type) lists the biggest values first. With a limit on the number of values, the chart keeps the biggest ones and then puts them in that order. The **Top-N Leaderboard** always ranks by count, whatever the dimension, so its first row is the biggest. The `/api/v2/dashboards/widget_data/aggregate/` endpoint returns its labels in the same order as the chart, and ranks them by count when the request sets `"order": "count"`.
 - **Show Values** prints the number on each bar, point or slice. A pie or doughnut also shows each slice's share of the total.
 - **Stacked** stacks the series of a split chart on top of each other instead of drawing them side by side. It appears once Split By is set.
 - **Colors** sets the color of each series (with Split By) or of each slice or bar (without). **Default** keeps the color the chart would pick, such as the severity colors.
@@ -158,8 +169,10 @@ This **copies** the widget rather than linking to it. Editing the dashboard widg
 
 The **Manage Layouts** dialog (the gear button on the toolbar) is the hub for everything layout-level:
 
-- **Saved Layouts** — rename, set as default, share/unshare, clone, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and can be set as your default or copied into a layout of your own; a Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts, and **Make Read-Only** / **Allow Editing** on collaborative ones. A read-only layout is tagged **Read-Only**.
-- **Create New** — start a fresh, empty layout to build from scratch.
+Every row's actions are in the menu at the start of the row.
+
+- **Saved Layouts**: rename, set as default, share, transfer, duplicate, or delete each layout you own. Collaborative layouts shared with you are listed here too, tagged **Collaborative**, and so are your Groups' dashboards, tagged with the Group's name. Each can be set as your default or copied into a layout of your own. A Maintainer also sees **Make Collaborative** / **Stop Collaborating** on shared layouts, and **Make Read-Only** / **Allow Editing** on collaborative ones. A read-only layout is tagged **Read-Only**.
+- **Group Dashboards**: for a superuser or a holder of **Dashboard Share** as a Global Role, the dashboards of Groups they are not in, with the same menu. A dashboard whose Group was deleted is listed here as **Unowned** until it is transferred.
 - **Shared Templates** — browse curated and team-published layouts grouped by category, and click **Use Layout** to clone one into your own space.
 
 ![The Manage Layouts dialog](images/pro_dashboard_v2_manage_layouts.png)
@@ -194,7 +207,7 @@ Single-glance metrics — counts, KPIs, and gauges.
 | Widget | What it shows |
 |--------|---------------|
 | **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. For findings, the **Measure** option can count unique CWEs or unique vulnerability IDs instead of rows. |
-| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. With the **Snapshot** source it can instead show a chart of open findings at the end of each month or week (see [Open findings at each month end](#open-findings-at-each-month-end)). |
+| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. The change is red when it is bad news (more open findings) and green when it is good news; for a count with no better direction (Assets, Engagements, Tests, submitted findings) it stays gray. With the **Snapshot** source it can instead show a chart of open findings at the end of each month or week (see [Open findings at each month end](#open-findings-at-each-month-end)). |
 | **Gauge** | A ratio drawn as an arc gauge — a "universe" filter as the denominator and a "pass" filter as the numerator. Use for SLA compliance, mitigation rate, or scan coverage, with configurable warning/OK thresholds. |
 | **License Usage** | Your account's license-usage status with a per-signal breakdown (database size, weekly finding volume, and so on). *Requires the Maintainer role.* |
 | **Scan Coverage** | What fraction of assets were scanned within 30 / 90 / 180 / 365 days, as a multi-window rollup. |
@@ -227,8 +240,8 @@ Time-series and distribution visualizations.
 | Widget | What it shows |
 |--------|---------------|
 | **Graph** | A general-purpose chart over any model and group-by dimension: bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. **Split By** draws one series per value of a second dimension, such as new findings per month by Severity Group (see [Graph options](#graph-options)). For a chart by month, filter its date with **Full Months** (for example Last 6 Full Months) so that every month on the chart is complete; see [date filters](/navigation/pro__filter_index/#how-date-filters-are-evaluated). |
-| **Sankey** | A flow diagram from a source dimension to a target dimension — e.g. Severity → Status. |
-| **Sunburst** | A one- or two-level radial breakdown — e.g. Severity, then Test Type within each severity. |
+| **Sankey** | A flow diagram from a source dimension to a target dimension, for example Severity → Status. Severity, status and risk values take their own colors (the severity colors for severities), and each column lists its values in their own order. |
+| **Sunburst** | A one- or two-level radial breakdown, for example Severity, then Test Type within each severity. Severity, status and risk slices take their own colors; a slice of a dimension without colors (a test type) takes a muted shade of the slice it sits in. |
 | **Risk Matrix** | An EPSS-probability × risk heatmap of findings — bottom-left safe, top-right dangerous. |
 | **Priority Histogram** | The distribution of finding **priority** scores from the prioritization engine, auto-binned. |
 | **Rate by Category** | A per-category ratio (numerator / denominator) — e.g. False-Positive Rate by Tool or Mitigation Rate by Asset. |
@@ -236,7 +249,7 @@ Time-series and distribution visualizations.
 | **MTTR / MTTD** | Mean Time to Remediate and Mean Time to Detect, as paired time-series. |
 | **Vulnerability Aging** | Open findings bucketed by age band (0–30d / 30–90d / 90–180d / 180d+), stacked by severity. |
 | **Activity Heatmap** | A GitHub-style calendar of daily activity over a rolling window. |
-| **Portfolio Treemap** | Nested rectangles for a portfolio rollup (Organization → Asset), sized by count and tinted by severity. |
+| **Portfolio Treemap** | Nested rectangles for a portfolio rollup (Organization → Asset), sized by count and tinted by the average severity of the findings in each rectangle, on the Low to High scale its legend shows: an Asset with a few Critical findings reads hotter than a bigger one full of Low findings. |
 
 ### Lists & Feeds
 
@@ -248,9 +261,11 @@ Ranked lists, feeds, and embedded tables.
 | **Embedded Table** | A full list view (Findings, Assets, Engagements, Tests, Risk Acceptances, Organizations, or Test Types) with preset filters and ordering — pagination, sorting, and CSV export included. |
 | **Recent Activity** | A scrolling feed of the most-recently updated records, clickable through to detail pages. |
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
-| **My Work** | Your personal queue — assignments, mentions, and pending risk-acceptance reviews. Always scoped to the viewer. |
+| **My Work** | Everything waiting on the viewer in one queue, soonest deadline first: findings assigned to the viewer or their team, reviews waiting on them, and their risk acceptances. Always scoped to the viewer. |
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
 | **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
+
+**My Work** merges its sources into one list, one row per Finding or Risk Acceptance, ordered by days left before the SLA or expiry date, then by severity. A Finding that several sources hold is listed once. The chips above the list turn each source on or off for the viewer and show its total; **Requested Reviews** (reviews the viewer asked of someone else) starts off and shows as a count. A row's menu, the first control in the row, opens the Finding or Risk Acceptance and offers its next step: **Close Finding**, **Claim Review**, **Clear Review** or **Edit Risk Acceptance**. Each step opens its form, and nothing changes until the form is submitted. A step the viewer has no permission to take is not offered. On a wide tile the next step also shows as a **Next Step** column. In **Edit Widget**, **Sources** picks the sources and their order, and **Rows per Source** sets how many rows each source loads (1 to 50).
 
 An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the table's filter bar or column filters. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
 
