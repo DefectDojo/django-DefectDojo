@@ -1574,35 +1574,56 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
             **kwargs,
         )
-        for findings in self.group_names_to_findings_dict.values():
-            # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
-            # but this is a way to at least make it that far
-            if self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False):
-                object_to_push = findings[0].finding_group if findings[0].finding_group is not None else findings[0]
+        # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
+        # but this is a way to at least make it that far
+        if self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False):
+            # The decision reads each name's group and JIRA issue: loaded for every name at once, not per group
+            first_findings = self._first_findings_with_jira(self.group_names_to_findings_dict.values())
+            for findings in self.group_names_to_findings_dict.values():
+                first = first_findings.get(findings[0].id, findings[0])
+                object_to_push = first.finding_group if first.finding_group is not None else first
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or jira_services.is_keep_in_sync(object_to_push, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(object_to_push)
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
-            # reactivated_items/unchanged_items are ids (M1), so the group membership this
-            # used to read straight off in-memory instances is resolved in one query instead.
-            # finding_group is the reverse M2M query name (Finding has no finding_group_id
-            # column -- Finding.finding_group is a cached_property over finding_group_set), so
-            # select that relation, not a non-existent *_id field, which raises FieldError.
-            finding_group_ids = (
-                Finding.objects.filter(
-                    id__in=self.reactivated_items + self.unchanged_items,
-                    is_mitigated=False,
-                    finding_group__isnull=False,
-                )
-                .values_list("finding_group", flat=True)
-                .distinct()
-            )
-            for finding_group in Finding_Group.objects.filter(id__in=finding_group_ids):
+            finding_group_ids = self._open_finding_group_ids(self.reactivated_items + self.unchanged_items)
+            for finding_group in Finding_Group.objects.filter(id__in=finding_group_ids).select_related("jira_issue"):
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(finding_group)
+
+    @staticmethod
+    def _first_findings_with_jira(grouped_findings) -> dict[int, Finding]:
+        """The first finding of each name by id, with its JIRA issue, its group and the group's JIRA issue."""
+        first_ids = [findings[0].id for findings in grouped_findings]
+        loaded: dict[int, Finding] = {}
+        for chunk in batched(first_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            loaded.update(
+                Finding.objects.filter(id__in=chunk)
+                .select_related("jira_issue")
+                .prefetch_related("finding_group_set__jira_issue")
+                .in_bulk(),
+            )
+        return loaded
+
+    @staticmethod
+    def _open_finding_group_ids(finding_ids: list[int]) -> set[int]:
+        """
+        Ids of the groups of these findings that are not mitigated.
+
+        Read from id lists, a chunk at a time. A subquery joining dojo_finding to the membership
+        table under the group read let the planner, on statistics that saw few groups, probe the
+        whole id list once per membership for every group (94 s for 200 groups on 10M findings).
+        """
+        through = Finding_Group.findings.through
+        group_ids: set[int] = set()
+        for chunk in batched(finding_ids, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            open_ids = list(Finding.objects.filter(id__in=chunk, is_mitigated=False).values_list("id", flat=True))
+            if open_ids:
+                group_ids.update(through.objects.filter(finding_id__in=open_ids).values_list("finding_group_id", flat=True))
+        return group_ids
 
     def calculate_unsaved_finding_hash_code(
         self,
