@@ -34,7 +34,7 @@ Image locations are **scan-managed**: they are created by imports and connectors
 - **All Images** in the sidebar (under Locations, or under Attack Surface in the reorganized menu) lists every image on the instance, with filters for registry, repository, tag and whether the digest is known.
 - **View Images** in an Asset's Locations menu scopes the list to one asset.
 - The asset **location map** draws a Container Images region, grouping images by registry and then repository. A repository with one image collapses to that image.
-- A finding's page has a **Runs In** tile: a table of the images the finding was found in, one row per image, with its reference, its short digest (or **Digest Unknown**), the asset that built it, and the assets that run it. Each reference links to its image page, and a long one shortens in the middle (the registry path first), so its tag and the start of its name stay in view. When more assets run an image than fit in its row, a **+N** chip lists the rest. The tile's header counts the assets, among those you can view, that run any of the images.
+- A finding's page has a **Runs In** tile: a table of the images the finding was found in, one row per image, with its reference, its short digest (or **Digest Unknown**), the asset that built it, and the assets that run it. Each reference links to its image page and stays on one line: a long one shortens the registry path first, then the image name, and the tag last, and the full reference is in its tooltip. When more assets run an image than fit in its row, a **+N** chip lists the rest. The tile's header counts the assets, among those you can view, that run any of the images.
 
 ## Built From: the Image to Repository Link
 
