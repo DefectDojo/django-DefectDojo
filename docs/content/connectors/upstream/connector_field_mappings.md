@@ -136,7 +136,8 @@ changes nothing about an import, so there is no identity decision to make yet.
 
 Each row is one mapping: the **Target Field** to write, the **Expression** to write into it,
 and an optional **Strip Pattern**. The target list is the set of finding fields DefectDojo will
-accept, so you cannot select one that would be rejected on save.
+accept, so you cannot select one that would be rejected on save. It lists them under the same
+headings as the Findings list's **Add Filter**.
 
 Fields that reach identity for this scan type are tagged **Identity** as you select them. That
 tag follows your deduplication settings for the scan type, so it reflects what this instance

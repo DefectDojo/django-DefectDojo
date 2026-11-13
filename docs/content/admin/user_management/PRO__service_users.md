@@ -94,7 +94,7 @@ On the Service Users page it is marked with a **Group Automation** chip, and the
 
 * It has no password and no token, and none can be issued, so it can never authenticate to the API or the UI.
 * Its access is exactly its group's: the group's Organization and Asset Roles and its Global Roles. Its access cards say the access is set at the group level, and it cannot be given a Global Role, a membership or a group of its own.
-* Its menu offers only **View Service User**. It cannot be edited, disabled, given a new token or deleted here, and the Users API refuses to deactivate it. Change its access by changing the group's, and remove it by deleting the group.
+* Its menu offers only **View Service User**. It cannot be edited, disabled, given a new token or deleted here, and the Users API refuses to deactivate it. Change its access by changing the group's, and remove it by deleting the group. Its API token, when the **Group API Tokens** flag is on, is issued and revoked on the group's page: see [the group's API token](../create_user_group/#the-groups-api-token).
 * Its name and description follow the group's current name.
 
 Group Automation identities do not count toward the licensed user total, the same as any service user.

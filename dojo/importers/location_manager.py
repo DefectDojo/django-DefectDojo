@@ -35,6 +35,19 @@ class StatusUpdateEntry(NamedTuple):
     user: Dojo_User
 
 
+def new_finding_ref_status(finding: Finding) -> str:
+    """
+    The status of a finding ref an import creates: Mitigated when the report marks the finding mitigated.
+
+    Every other finding (inactive, unverified, duplicate, false positive, out of scope, risk accepted) gets an Active
+    ref, as imports always have. A false positive or out of scope finding is saved with is_mitigated set, so those
+    are excluded explicitly.
+    """
+    if finding.is_mitigated and not (finding.false_p or finding.out_of_scope or finding.risk_accepted):
+        return FindingLocationStatus.Mitigated
+    return FindingLocationStatus.Active
+
+
 class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
@@ -191,26 +204,8 @@ class LocationManager(BaseLocationManager):
         # List of all location IDs, for querying existing refs
         all_location_ids = [loc.location_id for loc in saved]
 
-        # Determine necessary product refs to create
-        existing_product_refs: set[int] = set(
-            LocationProductReference.objects.filter(
-                location_id__in=all_location_ids,
-                product=self._product,
-            ).values_list("location_id", flat=True),
-        )
-        for location in saved:
-            if location.location_id not in existing_product_refs:
-                assoc = location.get_association_data()
-                all_product_refs.append(LocationProductReference(
-                    location_id=location.location_id,
-                    product=self._product,
-                    status=ProductLocationStatus.Active,
-                    relationship=assoc.relationship_type,
-                    relationship_data=assoc.relationship_data,
-                ))
-                existing_product_refs.add(location.location_id)
-
-        # Determine necessary finding refs to create
+        # Determine necessary finding refs to create. A finding the report already marks mitigated gets a Mitigated
+        # ref, so it does not leave an Active ref behind (see new_finding_ref_status).
         if self._locations_by_finding:
             all_finding_ids = [finding.id for finding, _ in self._locations_by_finding]
             # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
@@ -225,6 +220,7 @@ class LocationManager(BaseLocationManager):
 
             for finding, cleaned_locations in self._locations_by_finding:
                 test_id = self.attribution_test_id(finding)
+                status = new_finding_ref_status(finding)
                 # Locations were already cleaned at record time — identity_hash is set, so we can
                 # look up the persisted location directly.
                 for location in cleaned_locations:
@@ -236,14 +232,51 @@ class LocationManager(BaseLocationManager):
                             location_id=saved_loc.location_id,
                             finding=finding,
                             test_id=test_id,
-                            status=FindingLocationStatus.Active,
+                            status=status,
                             relationship=assoc.relationship_type,
                             relationship_data=assoc.relationship_data,
                         ))
                         existing_finding_ref_keys.add(finding_ref_key)
+        all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
+
+        # Determine necessary product refs to create. A product ref is Active unless every new finding ref to its
+        # location is Mitigated; a location recorded for the product alone stays Active, as before.
+        new_ref_statuses: dict[int, set[str]] = {}
+        for ref in all_finding_refs:
+            new_ref_statuses.setdefault(ref.location_id, set()).add(ref.status)
+        newly_active = {
+            location_id for location_id, statuses in new_ref_statuses.items()
+            if FindingLocationStatus.Active in statuses
+        }
+        existing_product_refs: dict[int, str] = dict(
+            LocationProductReference.objects.filter(
+                location_id__in=all_location_ids,
+                product=self._product,
+            ).values_list("location_id", "status"),
+        )
+        for location in saved:
+            if location.location_id not in existing_product_refs:
+                assoc = location.get_association_data()
+                status = (
+                    ProductLocationStatus.Mitigated
+                    if location.location_id in new_ref_statuses and location.location_id not in newly_active
+                    else ProductLocationStatus.Active
+                )
+                all_product_refs.append(LocationProductReference(
+                    location_id=location.location_id,
+                    product=self._product,
+                    status=status,
+                    relationship=assoc.relationship_type,
+                    relationship_data=assoc.relationship_data,
+                ))
+                existing_product_refs[location.location_id] = status
+        # A new Active finding ref makes its location Active on the product again.
+        product_refs_to_reactivate = {
+            location_id for location_id in newly_active
+            if existing_product_refs.get(location_id) == ProductLocationStatus.Mitigated
+        }
 
         # Bulk create references
-        all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
         if all_finding_refs:
             LocationFindingReference.objects.bulk_create(
                 all_finding_refs, batch_size=1000, ignore_conflicts=True,
@@ -252,6 +285,12 @@ class LocationManager(BaseLocationManager):
             LocationProductReference.objects.bulk_create(
                 all_product_refs, batch_size=1000, ignore_conflicts=True,
             )
+        if product_refs_to_reactivate:
+            LocationProductReference.objects.filter(
+                location_id__in=product_refs_to_reactivate,
+                product=self._product,
+                status=ProductLocationStatus.Mitigated,
+            ).update(status=ProductLocationStatus.Active)
 
         # Trigger bulk tag inheritance only when the Location's product
         # membership actually changed. New product refs are the only thing

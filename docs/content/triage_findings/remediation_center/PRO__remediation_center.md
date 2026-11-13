@@ -60,6 +60,14 @@ Each action records:
 The **target version** is the highest fixed version the Findings name, so one upgrade covers
 every lower fix.
 
+Findings on one host whose remediation text names a product to upgrade are one **Upgrade** action
+for that product, even when the scanner titles each Finding by its own CVE. The text can name a
+version ("Update OpenSSH to 9.8p1 or later") or only say to take the latest release ("Upgrade to
+the latest version of Microsoft Office"). When no Finding names a version, the action has no target
+version and is titled "Upgrade Microsoft Office to a fixed version". General wording such as "the
+plugin" or "the affected software" is not read as a product, so it never groups different products
+together.
+
 Findings on one host whose remediation text names the same vendor patch, such as an Oracle Patch
 Set Update or a Microsoft KB update, are one **Patch** action named for that patch ("Apply Patch
 Set Update 40069954"), even when the scanner titles each Finding by its own CVE. Remediation text

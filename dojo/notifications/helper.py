@@ -1662,18 +1662,24 @@ def sla_compute_and_notify(*args, **kwargs):
                                 jira_instance = jira_services.get_instance(finding)
                                 if jira_instance is not None:
                                     logger.debug("JIRA config for finding is %s", jira_instance)
-                                    # global config or product config set, product level takes precedence
+                                    # comment when the global config or the JIRA project config asks for it, unless the
+                                    # JIRA project suppresses SLA comments, which overrides both
                                     product_jira_sla_comment_enabled = False
+                                    product_jira_sla_comment_suppressed = False
                                     try:
                                         # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                                        product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
+                                        jira_project = jira_services.get_project(finding)
+                                        product_jira_sla_comment_enabled = jira_project.product_jira_sla_notification
+                                        product_jira_sla_comment_suppressed = jira_project.suppress_sla_notification_comments
                                     except Exception as e:
                                         logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
                                         logger.error("Error is: %s", e)
 
                                     jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
-                                    if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                                    if product_jira_sla_comment_suppressed:
+                                        logger.debug("SLA notifications as JIRA comments are suppressed for this JIRA project")
+                                    elif jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
                                         logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
                                         do_jira_sla_comment = True
                                         logger.debug(f"JIRA issue is {jira_issue.jira_key}")

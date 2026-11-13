@@ -218,14 +218,6 @@ class AppAnalysisViewSet(
         return get_authorized_app_analysis("view")
 
 
-# Authorization: configuration
-from dojo.jira.api.views import (  # noqa: E402, F401 backward compat
-    JiraInstanceViewSet,
-    JiraIssuesViewSet,
-    JiraProjectViewSet,
-)
-
-
 # Authorization: superuser
 class SonarqubeIssueViewSet(
     DojoModelViewSet,
@@ -557,10 +549,6 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # Update test_id if it wasn't available before save
         if test_id_from_response := serializer.data.get("test"):
             pghistory.context(test_id=test_id_from_response)
-
-
-from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401
-from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401
 
 
 def _report_url_location_refs(product, user=None):
@@ -1052,7 +1040,10 @@ class SLAConfigurationViewset(
 # moved into per-module api/views packages, and those modules import base
 # classes back from dojo.api_v2.views at import time. Eagerly importing them
 # here would create entry-order-dependent circular imports, so expose them
-# lazily via PEP 562 __getattr__ instead.
+# lazily via PEP 562 __getattr__ instead. __dir__ lists them, so dir() and
+# inspect.getmembers() still see them. A star import does not: the module has no
+# __all__, so "from dojo.api_v2.views import *" only copies names already bound
+# here. Import these names explicitly.
 import importlib  # noqa: E402
 
 _LAZY_VIEWSET_EXPORTS = {
@@ -1065,6 +1056,11 @@ _LAZY_VIEWSET_EXPORTS = {
     "BurpRawRequestResponseViewSet":      "dojo.finding.api.views",
     "FindingViewSet":                     "dojo.finding.api.views",
     "FindingTemplatesViewSet":            "dojo.finding.api.views",
+    "JiraInstanceViewSet":                "dojo.jira.api.views",
+    "JiraIssuesViewSet":                  "dojo.jira.api.views",
+    "JiraProjectViewSet":                 "dojo.jira.api.views",
+    "NoteTypeViewSet":                    "dojo.note_type.api.views",
+    "NotesViewSet":                       "dojo.notes.api.views",
     "ProductAPIScanConfigurationViewSet": "dojo.product.api.views",
     "ProductTypeViewSet":                 "dojo.product_type.api.views",
     "RiskAcceptanceViewSet":              "dojo.risk_acceptance.api.views",
@@ -1089,3 +1085,7 @@ def __getattr__(name):
         msg = f"module 'dojo.api_v2.views' has no attribute {name!r}"
         raise AttributeError(msg)
     return getattr(importlib.import_module(module_path), name)
+
+
+def __dir__():
+    return sorted(set(globals()) | set(_LAZY_VIEWSET_EXPORTS))

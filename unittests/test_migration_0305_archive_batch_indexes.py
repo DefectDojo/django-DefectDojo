@@ -138,14 +138,29 @@ class TestMigration0305Rerun(SimpleTestCase):
             in_flight_oid, valid, _ = _index()
             self.assertFalse(valid, "the build should still be running")
 
-            release = threading.Timer(1, snapshot_holder.commit)
-            release.start()
+            # The snapshot is released from inside the wait, not on a timer: a timer that fires
+            # before the operation first looks lets the build finish unseen on a slow runner.
+            # The second check is the wait loop's first, so the wait has started by then. The
+            # build is let finish and its transaction end before that check answers (still in
+            # progress, as it was when the check began), so the next one sees it done.
+            real_build_in_progress = self.operation._build_in_progress
+            checks = []
+
+            def build_in_progress(cursor, quoted_name):
+                checks.append(quoted_name)
+                if len(checks) == 2:
+                    snapshot_holder.commit()
+                    builder_thread.join(WAIT_TIMEOUT_SECONDS)
+                    return True
+                return real_build_in_progress(cursor, quoted_name)
+
             with (
                 patch.object(self.operation, "poll_seconds", 0.1),
+                patch.object(self.operation, "_build_in_progress", build_in_progress),
                 self.assertLogs(f"dojo.db_migrations.{NAME[1]}", "WARNING") as logs,
             ):
                 self._run_operation()
-            release.join()
+            self.assertGreaterEqual(len(checks), 2)
             # Once when the wait starts and once when it ends, however many polls it took.
             self.assertEqual(2, len(logs.records))
 

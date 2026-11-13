@@ -49,7 +49,7 @@ The shipped layouts are read only, so the first time you customize a page Defect
 In edit mode:
 
 - **Move a widget** by dragging it.
-- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them.
+- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them. A Simple Table with chosen fields cannot be made shorter than the height those fields need on one line each, and one saved shorter than that is shown at that height, together with the widgets of the same height in its row so the row stays level. A long value or label that wraps in a narrow tile can still need more room. A Field widget is at least two rows tall, so its value shows under its title, and one saved shorter is shown at two rows in the same way. Other widgets keep the height you give them.
 - **Configure Widget** opens the widget's own settings. What is on offer depends on the widget: which columns a table shows, which fields a panel lists, what a chart plots, and so on. You can also retitle a widget here.
 - **Remove Widget** takes it off the layout. You can add it back later.
 - **Add Widget** opens the catalog of widgets available for that page.
@@ -62,7 +62,7 @@ In edit mode:
 
 ## Managing layouts
 
-**Manage Layouts** lists every layout for the page under the three headings above, and offers:
+**Manage Layouts** lists every layout for the page under the three headings above, plus **Group Layouts** (the page's layouts your Groups own or were given), and each row's menu offers:
 
 | Action | What it does |
 | --- | --- |
@@ -71,10 +71,11 @@ In edit mode:
 | **Clone** | Copy a layout, including a shared or shipped one, into Saved Layouts. |
 | **Delete** | Remove one of your layouts. |
 | **Set as My Default** / **Clear My Default** | Choose which layout you personally land on for this page. The layout carries a **My Default** tag. |
-| **Share** / **Unshare** | Publish one of your layouts as a shared template, or withdraw it. |
+| **Share** | Set who can see a layout: **Only Me**, **Specific Groups** (they can use it but not change it), or **Everyone** (a shared template). Without Group Ownership on, this is **Share** / **Unshare**: publish a layout as a shared template, or withdraw it. |
+| **Transfer** | Move a layout into a Group, or back to you. Members whose role in the Group carries **Page Layout Share** manage a Group's layouts; every other Member uses them as they are. |
 | **Set as Instance Default** / **Clear Instance Default** | Choose which layout everyone on the instance lands on for this page. A layout from a Default Profile reads **From <profile>**, or **Set by <profile>** when it is locked. |
 
-Sharing a layout and setting the Instance Default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
+Publishing to everyone and setting the Instance Default require the **Page Layout Share** permission, which Maintainer and Owner hold by default. If you do not have it, the sharing controls are not shown. Publishing a shared template applies to the whole instance, not to a single Organization.
 
 ## Which layout you see
 
@@ -137,7 +138,12 @@ Which widgets a page offers depends on the page, and **Add Widget** shows what i
 
 - **Panels** present the record's own fields as a list of labelled values.
 - **Tables** list related records, such as the Engagements on an Asset or the Findings on a Test. Most behave like the product's other data tables, so you can pick columns and sort them.
+  The **Finding Groups** table on a Test is built to fit its tile. It keeps search, filters, sorting and your saved preferences (the filters and sort open from its **Filters** button), and shows a fixed set of columns: each group's severity, name, findings, SLA, status, tickets (its Jira issue and connector tickets) and creator. The creator gives way as the tile narrows, then the status (when it is not Active) and the tickets move under the group's name, and a narrow tile shows each group on two lines with its SLA under the name. The tile's header counts the groups past their SLA; a mitigated group never counts.
   The **Engagements** table on an Asset is built to fit its tile instead. It keeps search, filters, sorting, export and your saved preferences (the filters and sort open from its **Filters** button), and shows a fixed set of columns: the engagement with its type, status, dates, lead and active findings. Lead and then dates give way as the tile narrows, and a narrow tile shows each engagement on two lines. The tile's header counts the open engagements past their end date, or the ones in progress when none is overdue.
+  The **Tests** table on an Engagement is built the same way. It keeps search, filters, sorting and your saved preferences, and shows each test with its notes count, its test type, its import status in words (an import that failed shows in red), when it was last updated with its reimports, and its active and total findings. Updated and total findings give way as the tile narrows, then the test type moves under the test's name, and a narrow tile shows each test on two lines. The tile's header counts the tests whose import failed, or the ones still processing when none failed.
+  The **Findings** table on a Test is built the same way. Its fixed columns are the finding's severity, its risk (when risk scoring is turned on), the finding with its notes count, status, SLA and age. Risk and then age give way as the tile narrows, and a narrow tile shows each finding on two lines, with its severity, status and SLA under the title. The tile's header counts the open findings past their SLA.
+  The **Locations** table on a Finding (shown when Locations is turned on) is built the same way. It keeps New Location, Add Existing, search, filters, sorting, row selection with its bulk actions, and your saved preferences, and shows each location's type, the location with up to two of its tags, this finding's status there, its relationship, and its active and total findings in the finding's Asset. The findings and tags give way as the tile narrows, and a narrow tile shows each location on two lines: the location with this finding's status beside it, then its type and relationship. The tile's header counts the locations the finding is still active on.
+  The Engagements, Tests, Findings and Locations tables show as many rows as their tile holds, so resizing the tile changes how many rows a page shows without changing your saved page size. In a tab group, and in the single column a narrow screen shows, a tile has no height of its own, so these tables show your saved page size there instead. The **Full Table** button in the toolbar shows the complete table inside the tile, with every column, the column picker and the page size; select it again to go back. Your choice is remembered for you and for that widget only: it does not change the Engagements, Tests, Findings or Locations pages, the layout, or what anyone else sees.
 - **Feeds** present a running history in date order, such as notes on a record.
 - **Charts** plot the record's data, such as severity breakdowns and counts over time.
 

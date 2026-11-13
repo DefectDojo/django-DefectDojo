@@ -108,7 +108,9 @@ The dot compares against the table as it was when the page loaded or a preferenc
 
 To switch between preferences, pick one from the list in the preferences menu. Selecting **Default** returns the table to its built-in columns and widths without deleting any of your saved preferences.
 
-Shared preferences created by other users appear under the **Shared Preferences** tab of the menu. You can load or set a shared preference as your **My Default**, but only its creator can change or delete it.
+Preferences created by other users appear under the **Shared Preferences** tab of the menu: the ones shared with everyone, and the ones your Groups own or were given. You can load or set any of them as your **My Default**. A preference shared with everyone is changed or deleted only by its creator, and a Group's preference by the Members whose role in the Group carries **Table Preference Share**.
+
+With Group Ownership on, the menu also offers **Share** and **Transfer** on a preference you manage. **Share** sets who can see it (**Only Me**, **Specific Groups**, or **Everyone**, which needs **Table Preference Share** as a Global Role), and **Transfer** moves it into a Group or back to you. **Reset All Preferences** removes only your own preferences, never a Group's.
 
 ## Instance defaults and restricted customization
 
