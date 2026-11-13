@@ -24,7 +24,7 @@ The card's other tab, **Linked Findings**, lists the Findings a Keep Both Active
 
 ## How Findings are matched
 
-DefectDojo searches the **same Asset** for Findings with the same test type as the current one that also share every one of its values that is set: CWE, file path, line number, unique ID from tool, and Vulnerability IDs (for example, CVE identifiers). The current Finding is always excluded from its own results, and matching never reaches across Assets. Hover over the help icon beside **Similar, Not in This Cluster** to see the values the matches share.
+DefectDojo searches the **same Asset** for Findings with the same test type as the current one that also share every one of its values that is set among CWE, file path, line number and unique ID from tool. When the current Finding has Vulnerability IDs (for example, CVE identifiers), a match carries at least one of them, not necessarily all. The current Finding is always excluded from its own results, and matching never reaches across Assets. Hover over the help icon beside **Similar, Not in This Cluster** to see what the matches share.
 
 This is different from the automatic deduplication algorithm, which compares `hash_code` (or Unique ID from tool) to decide matches. Similar Findings deliberately casts a wider net so you can discover related Findings that strict hash matching would miss.
 
@@ -37,12 +37,12 @@ This is different from the automatic deduplication algorithm, which compares `ha
 **The Cluster column.** Each similar Finding says which cluster it already belongs to:
 
 - **Not a duplicate**: it is in no cluster.
-- **Original of _n_**: it is the original of another cluster with _n_ duplicates.
+- **Original of _n_**: it is the original of another cluster with _n_ duplicates you can view. When you can view none of them, the row reads **Original of another cluster**.
 - **Duplicate of #_id_**: it is a duplicate of another Finding, which the number links to.
 
 A similar Finding that is already in this cluster is listed in the tree, not again under it.
 
-**Open in Findings.** The tab shows up to 100 Findings in each part. Search, filters, sorting, export and bulk actions live in the Findings list: **Open in Findings** opens it filtered to every duplicate in the cluster.
+**Open in Findings.** The tab shows up to 100 Findings in each part; past that, each part says how many it holds (for example, **First 100 of 250**). Search, filters, sorting, export and bulk actions live in the Findings list: **Open in Findings** opens it filtered to every duplicate in the cluster. It covers the cluster only: the Findings list has no filter for similar Findings, so similar Findings past the first 100 are counted but not listed.
 
 ## Actions
 
