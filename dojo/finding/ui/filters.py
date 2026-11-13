@@ -944,6 +944,8 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
                 "test__engagement__product"].queryset = get_authorized_products("view")
         if "test__engagement" in self.form.fields:
             self.form.fields["test__engagement"].queryset = get_authorized_engagements("view")
+        if "test" in self.form.fields:
+            self.form.fields["test"].queryset = get_authorized_tests("view").prefetch_related("test_type")
 
 
 class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):
