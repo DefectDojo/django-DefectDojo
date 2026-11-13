@@ -107,6 +107,8 @@ The permission appears in the picker only when the PSIRT feature flag is on.
 7. **[Advisories](advisories/)** — write, review and publish your *own* advisories
    about your own products, with fingerprint-bound signoffs and honest delivery
    states.
+   Where it is turned on for your instance, an approved advisory can also be
+   published to the public advisory site.
 8. **[PSIRT dashboard](dashboard/)** — a shared template that leads with the
    affected question, beside whether the pipeline is actually working.
 
@@ -116,6 +118,7 @@ Two pages are configuration rather than workflow:
   triage clock warns and breaches.
 - **[PSIRT Settings](settings/)** — the case-worthiness calibration, the "new"
   item window, and which upstream changes count as material.
+  It also holds the Advisory Site publisher profile.
 
 All of it is also reachable from an AI assistant: the
 **[MCP Server's PSIRT Toolset](../metrics_reports/ai/mcp_server_pro/#psirt-toolset)**
