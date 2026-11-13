@@ -49,7 +49,7 @@ The first time you open Customizable Dashboards, DefectDojo gives you a personal
 
 A **widget** is a single panel on the dashboard. Every widget is an instance of a **type** from the catalog (a Count, a Graph, a Top-N leaderboard, and so on), and carries its own **configuration**: which data **model** it reads (`finding`, `product`, `engagement`, or `test`), what **filters** scope it, and type-specific display options like chart type, colors, or grouping. Two widgets of the same type with different filters are completely independent.
 
-Each widget also has an optional **auto-refresh interval** (off, 30 seconds, 1 minute, 5 minutes, or 15 minutes) and an editable **title**.
+Each widget also has an optional **auto-refresh interval** (off, 30 seconds, 1 minute, 5 minutes, or 15 minutes) and an editable **title**. A widget's title bar has a refresh button, and on a wide enough tile the time its numbers were last updated beside it; on a small tile the refresh button's tooltip carries that time. Markdown, Section Break, Quick Actions and Favorites read nothing that changes, so they show neither.
 
 ### The widget catalog
 
@@ -57,7 +57,7 @@ The **catalog** is the fixed menu of widget types the platform supports, grouped
 
 ### The grid
 
-Widgets are placed on a **12-column grid**. In edit mode you drag widgets to move them and drag the bottom-right corner to resize them; the grid compacts upward to fill gaps. Each widget type has sensible minimum and maximum sizes so charts and tables stay legible.
+Widgets are placed on a **12-column grid**. In edit mode you drag widgets to move them and drag the bottom-right corner to resize them; the grid compacts upward to fill gaps. Each widget type has sensible minimum and maximum sizes so charts and tables stay legible. A newly added list widget (SLA Burndown, Recent Activity, Top N and the like) is sized to show every row it is set to show; a taller tile can show more rows by raising the widget's row limit.
 
 ### Sharing, cloning, and defaults
 
@@ -151,11 +151,11 @@ A management pack of three monthly charts, for example, is three Graph widgets o
 
 ### Step 4: Arrange, then save
 
-Drag widgets to rearrange them and drag a corner to resize. Each widget's title bar holds a **Widget Actions** menu (the three dots beside the refresh button). While editing it offers **Edit Widget** to reconfigure the widget, **Title Style** to set the title's weight and size, **Duplicate Widget** to copy it, and **Remove Widget**, which asks for confirmation. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
+Drag widgets to rearrange them and drag a corner to resize. Each widget's title bar holds a **Widget Actions** menu (the three dots at the right end of the bar). When a tile's title does not fit beside them, as on a small Count, the refresh button and the menu sit over the end of the title and appear when you point at the tile or tab to them, so the title has the whole bar; a title still too long to fit shows in full as its tooltip. While editing it offers **Edit Widget** to reconfigure the widget, **Title Style** to set the title's weight and size, **Duplicate Widget** to copy it, and **Remove Widget**, which asks for confirmation. Position and size changes are saved automatically as you go. Click **Done** to leave edit mode.
 
 Duplicating a tile is the fastest way to build a row of related tiles: the copy keeps the original's type, filters, size, title style, and refresh cadence, lands in the next free space on the grid, and gets a **(Copy)** suffix on its title. Choose **Edit Widget** from its menu to rename it and change the one filter that differs.
 
-A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break's title is optional. Clear the **Title** field in its **Edit Widget** form to leave the widget's title bar blank.
+A **Section Break** is the exception: its header already labels it, so a copy keeps the original's title as it is, with no **(Copy)** suffix. A Section Break shows its header once: while you view the dashboard it has no title bar of its own unless its title says something other than its header. In edit mode its title bar comes back as the handle you drag it by, with its **Widget Actions** menu. A Section Break's title is optional; clear the **Title** field in its **Edit Widget** form to leave it blank.
 
 ### Putting a widget into a report
 
