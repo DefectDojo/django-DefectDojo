@@ -18,29 +18,53 @@ whether the dashboard was broken or you were genuinely unaffected.
 The lead widget, full width, and the reason the page exists. It counts advisories that
 arrived in the window and splits them **four ways**:
 
-| Bucket | Means |
+| Answer | Means |
 |---|---|
 | **Affected** | A component you run has a version inside a published affected range. |
-| **Unknown** | A component corresponds, but its recorded version cannot be judged — nothing recorded, or something that is not a version like `latest`. |
+| **Unknown** | A component corresponds, but its recorded version cannot be judged: nothing recorded, or something that is not a version like `latest`. |
 | **Not Affected** | Matching ran, and every corresponding component is provably outside the range. |
-| **No Signal** | Nothing in your inventory corresponds — or matching has not run yet. |
+| **No Signal** | Nothing in your inventory corresponds, or matching has not run yet. |
 
 **"Not affected" and "no signal" are never merged, and you should not read them as the
 same thing.** "Not affected" is an answer: the engine looked and your components are
 outside the range. "No signal" is the absence of one. Collapsing them would report
 ignorance as safety, which is the single wrong answer a product security team cannot
-afford — and a dashboard that did it would be worse than no dashboard, because it would
+afford, and a dashboard that did it would be worse than no dashboard, because it would
 be trusted.
 
-Below the tiles, the affected advisories are named, with how many components and products
-each one touches. Clicking a tile opens Feed Findings filtered to that bucket.
+The headline names how many advisories affect you in the window, and how many cannot be
+judged yet. Under it, one bar shows the window's advisories by answer, and its legend
+carries the four counts. No Signal is drawn hatched and grey, never green, and the widget
+says on screen that it is not a safe answer wherever it is the answer. Hover or focus a
+legend entry or a bar segment to read its definition. A small tag beside the legend shows
+a severity floor when the widget has one.
+
+Below the bar, the affected advisories are named, worst severity first: severity, advisory
+id, title, and how many components and assets each one touches. The widget names up to
+eight; when more are affected, a last row links to the rest.
+
+Where each link goes:
+
+* **A count** (a legend entry or a bar segment) opens Feed Findings filtered to that
+  answer over the same window, and to the floored severities when the widget has a floor,
+  so the list total matches the count. **Open Unknown**, **Open No Signal** and the
+  "more affected" row open the same lists.
+* **An advisory** (its id or title) opens Feed Findings filtered to that advisory.
+* **The menu at the start of each row** offers **View in Feed Findings**; **Affected
+  Components** when the row names components (PSIRT Components narrowed to the components
+  whose version the advisory's range was verified against); and, when a case already holds
+  the advisory, **Open Case** (PSIRT Cases narrowed to those cases). Nothing in the menu
+  changes data.
+
+Each filtered list shows the filter as a chip above the table; remove the chip to see the
+whole list again.
 
 The counts come from stored match rows rather than from re-running the matcher, so they
 are a few minutes behind rather than exact to the second. The alternative would make a
 dashboard load re-match every advisory in the window.
 
-**Configuration:** window in days (1–90, default 7), and an optional severity floor. Leave
-the floor off unless you have another panel covering the rest — it can hide the
+**Configuration:** window in days (1 to 90, default 7), and an optional severity floor.
+Leave the floor off unless you have another panel covering the rest: it can hide the
 low-severity advisory that turns out to matter.
 
 ## Is the pipeline healthy?
@@ -99,9 +123,14 @@ tell you which.
 ## Adding the widgets individually
 
 All four are in **Add Widget** under Numbers and Lists, prefixed `PSIRT:`. Add them to any
-dashboard. The three operational widgets take no configuration beyond a title and a
-refresh interval — and they reject unknown configuration rather than ignoring it, so a knob
-that did nothing cannot leave you believing the panel is filtered.
+dashboard. **Add Widget** offers them only when the license includes the PSIRT Advisory
+Engine and you can read PSIRT (the PSIRT View or PSIRT Change permission, a global
+Maintainer or Owner role, or superuser), the same access their data needs. A dashboard
+that already holds one shows a placeholder in its place for a viewer without that access
+("Not Licensed" or "Insufficient Permissions"), rather than an error. The three
+operational widgets take no configuration beyond a title and a refresh interval. They
+reject unknown configuration rather than ignoring it, so a knob that did nothing cannot
+leave you believing the panel is filtered.
 
 ## Notifications
 
