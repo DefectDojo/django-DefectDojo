@@ -659,9 +659,11 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # engagement and test lookups run once per request with their parents
     # select_related, and the statistics are read in one grouped query (per queryset,
     # and across all import actions) instead of an extra aggregate per set.
-    EXPECTED_ZAP_IMPORT_V2 = 285
-    EXPECTED_ZAP_IMPORT_V3 = 311
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 64
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 75
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 143
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 172
+    # +2 on every path (measured, both modes): an import takes its test's one-import-at-a-time
+    # lock before the first finding and releases it when it ends (dojo/importers/import_lock.py).
+    EXPECTED_ZAP_IMPORT_V2 = 287
+    EXPECTED_ZAP_IMPORT_V3 = 313
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 66
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 77
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 145
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 174

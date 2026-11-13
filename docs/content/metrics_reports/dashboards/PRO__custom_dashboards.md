@@ -130,6 +130,7 @@ A Graph widget groups its records by one dimension (**Group By**) and can split 
 - **Split By** draws one line, or one run of bars, per value of a second dimension. Grouping by **Created Date** by month and splitting by **Severity Group** gives new findings per month as two lines, one for Critical and High findings and one for Medium and Low findings. Split By takes any dimension that is not a date and not the Group By, and is available on bar, line and area charts (a pie or doughnut shows one dimension). A chart draws up to 10 series: past that, the smallest values are combined into one **Other** series. A chart that counts unique CWEs or vulnerability IDs cannot combine values that way, so it asks for a filter or a dimension with fewer values instead.
 - **Severity Group** is a finding dimension with three values: **Critical and High**, **Medium and Low**, and **Info**. It works as a Group By (a two or three slice doughnut) or as a Split By. Its lines and slices are red for Critical and High and green for Medium and Low unless you pick other colors. Clicking one opens the Findings list filtered to that group's severities.
 - **Created Date** is when a finding was created in DefectDojo (when it was imported or added), as opposed to **Discovered Date**, the date the scanner reported. Charting new findings per month by Created Date counts each finding in the month it arrived.
+- **Order**: a chart grouped by **Severity**, **Status**, **Risk** or a band (**Severity Group**, **SLA Band**, **Age Band**, the CVSS bands) lists its values in that dimension's own order: Critical, High, Medium, Low, Info for severity; Active first, then each way a finding is closed, for status; Urgent, Needs Action, Medium, Low for risk. Any other dimension (a component, an Asset, a test type) lists the biggest values first. With a limit on the number of values, the chart keeps the biggest ones and then puts them in that order. The **Top-N Leaderboard** always ranks by count, whatever the dimension, so its first row is the biggest. The `/api/v2/dashboards/widget_data/aggregate/` endpoint returns its labels in the same order as the chart, and ranks them by count when the request sets `"order": "count"`.
 - **Show Values** prints the number on each bar, point or slice. A pie or doughnut also shows each slice's share of the total.
 - **Stacked** stacks the series of a split chart on top of each other instead of drawing them side by side. It appears once Split By is set.
 - **Colors** sets the color of each series (with Split By) or of each slice or bar (without). **Default** keeps the color the chart would pick, such as the severity colors.
@@ -206,7 +207,7 @@ Single-glance metrics — counts, KPIs, and gauges.
 | Widget | What it shows |
 |--------|---------------|
 | **Count** | A single number from a filtered query — e.g. "Open Critical Findings" or "Active Engagements." Works with finding / asset / engagement / test. For findings, the **Measure** option can count unique CWEs or unique vulnerability IDs instead of rows. |
-| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. With the **Snapshot** source it can instead show a chart of open findings at the end of each month or week (see [Open findings at each month end](#open-findings-at-each-month-end)). |
+| **KPI / Trend** | A headline number plus its change versus the prior period, with an optional sparkline. The change is red when it is bad news (more open findings) and green when it is good news; for a count with no better direction (Assets, Engagements, Tests, submitted findings) it stays gray. With the **Snapshot** source it can instead show a chart of open findings at the end of each month or week (see [Open findings at each month end](#open-findings-at-each-month-end)). |
 | **Gauge** | A ratio drawn as an arc gauge — a "universe" filter as the denominator and a "pass" filter as the numerator. Use for SLA compliance, mitigation rate, or scan coverage, with configurable warning/OK thresholds. |
 | **License Usage** | Your account's license-usage status with a per-signal breakdown (database size, weekly finding volume, and so on). *Requires the Maintainer role.* |
 | **Scan Coverage** | What fraction of assets were scanned within 30 / 90 / 180 / 365 days, as a multi-window rollup. |
@@ -239,8 +240,8 @@ Time-series and distribution visualizations.
 | Widget | What it shows |
 |--------|---------------|
 | **Graph** | A general-purpose chart over any model and group-by dimension: bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. **Split By** draws one series per value of a second dimension, such as new findings per month by Severity Group (see [Graph options](#graph-options)). For a chart by month, filter its date with **Full Months** (for example Last 6 Full Months) so that every month on the chart is complete; see [date filters](/navigation/pro__filter_index/#how-date-filters-are-evaluated). |
-| **Sankey** | A flow diagram from a source dimension to a target dimension — e.g. Severity → Status. |
-| **Sunburst** | A one- or two-level radial breakdown — e.g. Severity, then Test Type within each severity. |
+| **Sankey** | A flow diagram from a source dimension to a target dimension, for example Severity → Status. Severity, status and risk values take their own colors (the severity colors for severities), and each column lists its values in their own order. |
+| **Sunburst** | A one- or two-level radial breakdown, for example Severity, then Test Type within each severity. Severity, status and risk slices take their own colors; a slice of a dimension without colors (a test type) takes a muted shade of the slice it sits in. |
 | **Risk Matrix** | An EPSS-probability × risk heatmap of findings. The hue marks the zone (bottom-left green is safe, top-right red is dangerous), and each cell's fill deepens in steps with its share of the findings in the matrix, so the cells where findings concentrate stand out. |
 | **Priority Histogram** | The distribution of finding **priority** scores from the prioritization engine, auto-binned. |
 | **Rate by Category** | A per-category ratio (numerator / denominator) — e.g. False-Positive Rate by Tool or Mitigation Rate by Asset. |
@@ -248,7 +249,7 @@ Time-series and distribution visualizations.
 | **MTTR / MTTD** | Mean Time to Remediate and Mean Time to Detect, as paired time-series. |
 | **Vulnerability Aging** | Open findings bucketed by age band (0–30d / 30–90d / 90–180d / 180d+), stacked by severity. |
 | **Activity Heatmap** | A GitHub-style calendar of daily activity over a rolling window. |
-| **Portfolio Treemap** | Nested rectangles for a portfolio rollup (Organization → Asset), sized by count and tinted by severity. |
+| **Portfolio Treemap** | Nested rectangles for a portfolio rollup (Organization → Asset), sized by count and tinted by the average severity of the findings in each rectangle, on the Low to High scale its legend shows: an Asset with a few Critical findings reads hotter than a bigger one full of Low findings. |
 
 ### Lists & Feeds
 

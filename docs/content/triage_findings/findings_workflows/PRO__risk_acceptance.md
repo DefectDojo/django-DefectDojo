@@ -516,7 +516,39 @@ criteria are refused rather than quietly broadened.
 
 **From the UI:** *Edit Standing Criteria* on the Risk Acceptance menu. It asks how far the acceptance
 should reach — this engagement, this asset, this asset's type, or everywhere — rather than asking you
-to pick ids, and refuses to save until both a scope and at least one matchable attribute are set.
+to pick ids, and refuses to save until a scope is set along with at least one matchable attribute
+or **Every New Finding in Scope**.
+
+#### Every New Finding in an Asset
+
+To accept every Finding that later scans bring into an Asset (or an Engagement, or an Organization)
+for a fixed period, ask for it by name with `match_all_in_scope`:
+
+```json
+{
+    "acceptance_criteria": {
+        "scope": { "type": "product", "ids": [12] },
+        "match_all_in_scope": true
+    }
+}
+```
+
+In the UI this is the **Every New Finding in Scope** checkbox in *Edit Standing Criteria*. Every
+Finding newly imported into that scope is accepted while the Risk Acceptance is Active, and its
+expiration date is what ends the period: once it expires, new Findings are imported as usual.
+
+Like all standing criteria, this applies to Findings as they are created by an import. Saving it does
+not add the Findings already in the Asset, and a Finding a reimport reopens is not accepted again
+either. To cover those for the same period, open **Add Findings to Risk Acceptance** on the Risk
+Acceptance menu and pick them there.
+
+A few rules apply:
+
+- `match_all_in_scope` takes only `true`. Any other value is refused with `400`.
+- It is refused with a `global` scope: accepting every Finding everywhere would silence the whole
+  instance.
+- It replaces the matchable attributes rather than adding to them, so it is refused alongside any of
+  them. To accept only part of an Asset, set the attributes instead.
 
 Three rules keep this safe to leave switched on:
 
@@ -526,7 +558,8 @@ Three rules keep this safe to leave switched on:
 - **Only inside its scope.** A Finding outside the scope never matches, however well its
   vulnerability lines up.
 - **Criteria with nothing to match are refused.** A scope with no matchable attribute would mean
-  "every Finding in this Asset", so the API returns `400` rather than accepting it. An acceptance
+  "every Finding in this Asset" by omission, so the API returns `400` rather than accepting it;
+  covering a whole Asset takes `match_all_in_scope`, set on purpose. An acceptance
   with *no* criteria at all is fine and covers exactly what was added to it — which is every Risk
   Acceptance that existed before this feature.
 
