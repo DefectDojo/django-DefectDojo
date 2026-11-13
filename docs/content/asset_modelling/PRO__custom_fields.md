@@ -237,6 +237,14 @@ A select field that allows Other also gets a **<Label>: Other** filter (Yes or N
 records whose value is a typed Other value, or the records whose value is not. Its parameter is the
 field's Name followed by `_other`, for example `reason_other=true`.
 
+## Custom fields as priority factors
+
+Asset custom fields of the integer, decimal, boolean, single select and multi select types can feed
+Finding Priority, computed integer and decimal fields included (unless their formula reads Finding
+Priority, Risk or Risk Score). Add them to a Prioritization Engine as described in
+[Custom Field Multipliers](/asset_modelling/pro_hierarchy/priority_sla/#custom-field-multipliers). A field
+that an engine scores cannot be deleted or change its data type until it is removed from the engine.
+
 ## Moving from the earlier metadata
 
 Enabling the feature does not move any data on its own: it switches Findings and Assets over to the
