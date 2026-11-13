@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from dojo.models import Dojo_User, Engagement, Finding, Product, Product_Type, Test, Test_Type
+from dojo.models import Development_Environment, Dojo_User, Engagement, Finding, Product, Product_Type, Test, Test_Type
 
 from .dojo_test_case import DojoTestCase
 
@@ -36,6 +36,15 @@ class TestImportTargetAuthorization(DojoTestCase):
         cls.own_engagement = Engagement.objects.create(
             name="Import Target Own Engagement", product=cls.own_product, target_start=today, target_end=today,
         )
+        Development_Environment.objects.get_or_create(name="Development")
+        test_type = Test_Type.objects.get_or_create(name=SCAN_TYPE)[0]
+        cls.own_test = Test.objects.create(
+            engagement=cls.own_engagement,
+            test_type=test_type,
+            scan_type=SCAN_TYPE,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
 
         cls.other_product = Product.objects.create(
             name="Import Target Other Product",
@@ -45,14 +54,14 @@ class TestImportTargetAuthorization(DojoTestCase):
         other_engagement = Engagement.objects.create(
             name="Import Target Other Engagement", product=cls.other_product, target_start=today, target_end=today,
         )
-        other_test = Test.objects.create(
+        cls.other_test = Test.objects.create(
             engagement=other_engagement,
-            test_type=Test_Type.objects.get_or_create(name=SCAN_TYPE)[0],
+            test_type=test_type,
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
         cls.other_finding = Finding.objects.create(
-            test=other_test, title="Import Target Other Finding", severity="High", description="other",
+            test=cls.other_test, title="Import Target Other Finding", severity="High", description="other",
             reporter=cls.member, active=True,
         )
 
@@ -68,6 +77,16 @@ class TestImportTargetAuthorization(DojoTestCase):
             SimpleUploadedFile("report.json", report, "application/json"),
             scan_type=SCAN_TYPE,
             auto_create_context=True,
+            **fields,
+        )
+
+    def _reimport(self, **fields):
+        report = json.dumps({"findings": [{"title": "again", "severity": "Low", "description": "x", "date": "2026-11-13"}]}).encode()
+        return self._post(
+            "reimport-scan",
+            SimpleUploadedFile("report.json", report, "application/json"),
+            scan_type=SCAN_TYPE,
+            engagement_name=self.own_engagement.name,
             **fields,
         )
 
@@ -113,3 +132,21 @@ class TestImportTargetAuthorization(DojoTestCase):
         )
         self.assertEqual(response.status_code, 201, response.content[:500])
         self.assertEqual(response.json()["engagement_id"], self.own_engagement.id)
+
+    def test_padded_name_of_own_product_reimports_into_own_test(self):
+        response = self._reimport(product_name=f" {self.own_product.name}")
+        self.assertEqual(response.status_code, 201, response.content[:500])
+        self.assertEqual(response.json()["test_id"], self.own_test.id)
+
+    def test_reimport_ignores_test_id(self):
+        response = self._reimport(product_name=self.own_product.name, test_id=self.other_test.id)
+        self.assertEqual(response.status_code, 201, response.content[:500])
+        self.assertEqual(response.json()["test_id"], self.own_test.id)
+
+    def test_endpoint_meta_import_ignores_product_id(self):
+        response = self._post(
+            "endpoint_meta_import",
+            SimpleUploadedFile("meta.csv", b"hostname,team\nimport-target.example.com,own\n", "text/csv"),
+            product_id=self.own_product.id,
+        )
+        self.assertEqual(response.status_code, 400, response.content[:500])
