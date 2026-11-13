@@ -517,12 +517,12 @@ criteria are refused rather than quietly broadened.
 **From the UI:** *Edit Standing Criteria* on the Risk Acceptance menu. It asks how far the acceptance
 should reach — this engagement, this asset, this asset's type, or everywhere — rather than asking you
 to pick ids, and refuses to save until a scope is set along with at least one matchable attribute
-or **Every Finding in Scope**.
+or **Every New Finding in Scope**.
 
-#### Every Finding in an Asset
+#### Every New Finding in an Asset
 
-To accept everything in an Asset (or an Engagement, or an Organization) for a fixed period, including
-the Findings later scans bring, ask for it by name with `match_all_in_scope`:
+To accept every Finding that later scans bring into an Asset (or an Engagement, or an Organization)
+for a fixed period, ask for it by name with `match_all_in_scope`:
 
 ```json
 {
@@ -533,9 +533,16 @@ the Findings later scans bring, ask for it by name with `match_all_in_scope`:
 }
 ```
 
-In the UI this is the **Every Finding in Scope** checkbox in *Edit Standing Criteria*. Every Finding
-imported into that scope is accepted while the Risk Acceptance is Active, and its expiration date is
-what ends the period: once it expires, new Findings are imported as usual. A few rules apply:
+In the UI this is the **Every New Finding in Scope** checkbox in *Edit Standing Criteria*. Every
+Finding newly imported into that scope is accepted while the Risk Acceptance is Active, and its
+expiration date is what ends the period: once it expires, new Findings are imported as usual.
+
+Like all standing criteria, this applies to Findings as they are created by an import. Saving it does
+not add the Findings already in the Asset, and a Finding a reimport reopens is not accepted again
+either. To cover those for the same period, open **Add Findings to Risk Acceptance** on the Risk
+Acceptance menu and pick them there.
+
+A few rules apply:
 
 - `match_all_in_scope` takes only `true`. Any other value is refused with `400`.
 - It is refused with a `global` scope: accepting every Finding everywhere would silence the whole
