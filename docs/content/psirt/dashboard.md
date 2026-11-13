@@ -73,34 +73,75 @@ Two widgets, side by side on purpose.
 
 ### Feed health
 
-Which enabled feeds are **failing to poll**, and which have gone **silent** — enabled, but
-nothing delivered for two days.
+Every feed source is counted in exactly one state, worst first:
 
-It leads with what is wrong rather than a count of successes, because a feed that stopped
-polling produces no advisories, and no advisories looks exactly like a quiet week. A
-widget that counted successes would look healthy at precisely the moment it should not.
+| State | Means |
+|---|---|
+| **Failing** | Enabled, and its last poll failed after its last success. |
+| **Silent** | Enabled, but it has delivered nothing for two days, or it has never polled. |
+| **Polling** | Enabled and delivering. |
+| **Disabled** | Not polled. A source nobody enabled is not a fault. |
 
-It also distinguishes a feed that has *never* polled from one that has *stopped*: those
-need different actions.
-
-There is no filter on this widget, deliberately. Anything that could hide a silent feed
-would remove the only signal separating a broken pipeline from a calm week.
-
-When nothing is wrong it says nothing is wrong with the feeds — not "all clear". Working
+The headline leads with what is wrong rather than a count of successes, because a feed
+that stopped polling produces no advisories, and no advisories looks exactly like a quiet
+week. A widget that counted successes would look healthy at precisely the moment it should
+not. When nothing is wrong it says the enabled feeds are polling, not "all clear": working
 feeds are a narrower claim than being unaffected.
+
+Under the headline, one bar shows the sources by state, and its legend carries the four
+counts. Hover or focus an entry to read its definition. Below the bar, the failing feeds
+are listed, then the silent ones: the feed's name, a short error class such as **Timed
+Out** or **HTTP 503** (or **Never Polled** and **Silent**), and the date of its last
+successful poll. The full error text is in the error class's tooltip (on hover and on
+keyboard focus) and on the feed's own page, never in the tile itself. A feed that has
+*never* polled is told apart from one that has *stopped*: those need different actions.
+
+Where each link goes:
+
+* **A count** (a legend entry or a bar segment) opens PSIRT Feeds filtered to the sources
+  in that state, so the list matches the count.
+* **A feed** (its name, or **Open Feed** in the menu at the start of its row) opens PSIRT
+  Feeds filtered to that feed.
+
+There is no configuration on this widget, deliberately. Anything that could hide a silent
+feed would remove the only signal separating a broken pipeline from a calm week.
 
 ### Triage SLA
 
-Live SLA clocks by state, and **breached is counted apart from overdue**:
+Live SLA clocks by state, most urgent first, and **breached is counted apart from
+overdue**:
 
-* **Overdue** — the deadline has passed and the breach scanner has not been round yet.
-* **Breached** — the miss is on the record, appears in reporting, and does **not** clear
+* **Breached**: the miss is on the record, appears in reporting, and does **not** clear
   when the work is finished.
+* **Overdue**: the deadline has passed and the breach scanner has not been round yet.
+* **Due Soon**: inside the warning window before the deadline.
+* **Paused**: the count is stopped and the deadline moves with it.
+* **On Track**: inside the time the tier allows.
 
-One combined "late" number would hide which of those you are looking at.
+One combined "late" number would hide which of the first two you are looking at.
 
-It also shows how many scheduled publishes are armed, and how many **gave up** — a
-schedule that exhausted its retries is invisible everywhere else.
+The headline names the most urgent fact. Under it, one bar shows the clocks by state, and
+its legend carries the five counts. Below the bar, up to five clocks that are breached,
+overdue or due soon are listed, soonest deadline first: the tier, the case reference and
+title (or the advisory's own id and title when no case holds it yet), and the deadline.
+Hover or focus the deadline for its state and full date and time. When more clocks need
+attention than are listed, a last line says how many.
+
+Where each link goes:
+
+* **A count** opens PSIRT Cases filtered to the cases holding an advisory whose clock is in
+  that state. The count is of clocks, the list is of cases: a case holding two overdue
+  advisories is one row, and a clock on an in-house advisory or a regulatory report is
+  counted but sits in no case.
+* **A row** opens what the clock runs on: PSIRT Cases filtered to the cases holding the
+  advisory (or Feed Findings filtered to the advisory when no case holds it yet), the
+  advisory's workbench for an in-house advisory, or the report for a regulatory stage. The
+  menu at the start of the row offers the same, and **View in Feed Findings** for an
+  advisory.
+
+It also shows how many scheduled publishes are armed, and how many **gave up**: a schedule
+that exhausted its retries is invisible everywhere else. Each opens Advisories filtered to
+those advisories.
 
 Why these two sit together: an SLA that looks perfectly healthy while a feed has silently
 stopped polling is the worst combination there is, and it is only visible when both are in
@@ -109,10 +150,21 @@ view at once.
 ## Our advisories
 
 Your own advisories by lifecycle status, plus the ones sitting in review or approved with
-**no movement for a fortnight**.
+**no movement for a fortnight**. The template saves this widget with the title "Our
+advisories", and a saved title is shown as saved; the widget added on its own is titled
+**In-House Advisories**.
+
+The headline counts the stalled advisories. Under it, one bar shows the advisories by
+status (a status with none is left out), and its legend carries the counts; only
+**Published** is drawn green. A count opens Advisories filtered to that status.
 
 The stalled list is the useful part. A plain status breakdown buries a two-week-old review
-among the drafts.
+among the drafts. Each row shows the advisory id, its title, its status and the date it
+last changed (hover or focus for the time), and opens the advisory's workbench. On a narrow
+tile the title moves to a second line rather than scrolling sideways.
+
+Each filtered list (PSIRT Cases, PSIRT Feeds, Advisories) shows the dashboard's filter as a
+chip above the table; remove the chip to see the whole list again.
 
 ## What is deliberately not here
 
