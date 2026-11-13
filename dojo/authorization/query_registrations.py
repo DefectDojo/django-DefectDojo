@@ -13,7 +13,7 @@ the API filter classes that look them up via ``get_auth_filter()`` keep
 working without code changes.
 """
 from crum import get_current_user
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
 from dojo.authorization.query_filters import register_auth_filter
 from dojo.authorization.roles_permissions import Action, permission_to_action
@@ -334,7 +334,18 @@ def _get_authorized_locations(permission, queryset=None, user=None):
     if _requires_staff(action):
         return qs.none()
     authorized_products = _authorized_product_ids(user)
-    return qs.filter(products__product__id__in=authorized_products).distinct()
+    # Filter through an EXISTS subquery instead of a join plus .distinct():
+    # a plain .distinct() replaces any distinct_fields the caller set (for
+    # example the .distinct("url__host") grouping of the hosts views), which
+    # turned those grouped rows back into one row per location.
+    return qs.filter(
+        Exists(
+            LocationProductReference.objects.filter(
+                location=OuterRef("pk"),
+                product_id__in=authorized_products,
+            ),
+        ),
+    )
 
 
 register_auth_filter("location.get_authorized_locations", _get_authorized_locations)
