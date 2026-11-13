@@ -39,7 +39,7 @@ python3 manage.py set_feature --list
 
 The same commands work for `performance_diagnostics_reporting`. The change applies to every container without a restart.
 
-An air-gapped instance (`DD_AIRGAPPED=true`, or the **Airgapped instance** flag) never sends either report, whatever the flags say.
+An air-gapped instance (`DD_AIRGAPPED=true`, or the **Airgapped Instance** flag) never sends either report, whatever the flags say.
 
 ## The cloud portal secret on a self-hosted instance
 
