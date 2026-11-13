@@ -242,6 +242,58 @@ class TestImportThatWaitsTooLongIsRefused(_SerializedImportMixin, SimpleTestCase
         self.assertIn("without waiting for the import lock", "\n".join(logs.output))
 
 
+@override_settings(SERIALIZE_TEST_IMPORTS_WAIT_SECONDS=WAIT_TIMEOUT_SECONDS)
+class TestTryingForTheTestWithoutWaiting(_SerializedImportMixin, SimpleTestCase):
+
+    """
+    A caller that must not block (a background import in a worker, which re-queues itself instead) asks for the
+    test's turn with wait_seconds=0, whatever DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS says.
+    """
+
+    def test_wait_seconds_zero_refuses_at_once(self):
+        importer = DefaultReImporter(test=self.target, **self._options())
+        with (
+            _import_turn_held_elsewhere(self.target.id),
+            importer.import_lock_scope(),
+            self.assertRaises(TestImportInProgress) as raised,
+        ):
+            importer.lock_test_under_import(self.target, wait_seconds=0)
+
+        self.assertIn("waited 0 seconds", str(raised.exception))
+        self.assertEqual(_import_turn_holders(self.target.id), [], msg="the refused import kept something locked")
+
+    def test_the_turn_taken_up_front_is_the_one_process_scan_keeps(self):
+        importer = DefaultReImporter(test=self.target, **self._options())
+        real_wait = import_lock.wait_for_test_import_turn
+        asked = []
+
+        def counting_wait(test_id, *args, **kwargs):
+            asked.append(test_id)
+            return real_wait(test_id, *args, **kwargs)
+
+        with patch("dojo.importers.base_importer.wait_for_test_import_turn", counting_wait), importer.import_lock_scope():
+            importer.lock_test_under_import(self.target, wait_seconds=0)
+            importer.process_scan(self._report())
+
+        self.assertEqual(asked, [self.target.id], msg="process_scan asked for a turn its importer already had")
+        self.assertEqual(self._findings_of(self.target), self.FINDINGS_IN_REPORT)
+        self.assertEqual(_import_turn_holders(self.target.id), [], msg="the import left the test locked")
+
+    def test_a_test_whose_lock_was_left_behind_is_not_asked_for_again(self):
+        importer = DefaultReImporter(test=self.target, **self._options())
+        asked = []
+
+        def abandoned(test_id, *_args, **_kwargs):
+            asked.append(test_id)
+            return False  # not taken: turned off, or the holder is gone
+
+        with patch("dojo.importers.base_importer.wait_for_test_import_turn", abandoned), importer.import_lock_scope():
+            importer.lock_test_under_import(self.target, wait_seconds=0)
+            importer.lock_test_under_import(self.target)
+
+        self.assertEqual(asked, [self.target.id], msg="the second call waited again, in a worker that must not wait")
+
+
 @override_settings(DUPE_DELETE_GRACE_MINUTES=0, DUPE_DELETE_MAX_PER_RUN=1_000_000)
 class TestDupeDeleteIgnoresTheImportTurnLock(_SerializedImportMixin, SimpleTestCase):
 

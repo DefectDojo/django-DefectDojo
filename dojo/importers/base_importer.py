@@ -939,26 +939,34 @@ class BaseImporter(ImporterOptions):
                     unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
                 finally:
                     self._import_locked_tests = []
+                    self._import_turn_checked = []
                     release_test_import_turns(getattr(self, "_import_turn_tests", []))
                     self._import_turn_tests = []
 
-    def lock_test_under_import(self, test: Test) -> None:
+    def lock_test_under_import(self, test: Test, *, wait_seconds: int | None = None) -> None:
         """
         Tell the excess-duplicate delete this test is being imported, until the import ends.
 
         Call before the first finding is created or matched. Waits first for any other import into
         this test to finish (raising TestImportInProgress, a 409, if that takes longer than
-        DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS), then if a delete is removing this test's duplicates
-        right now, so the import starts from what both left.
+        DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS, or ``wait_seconds`` when given), then if a delete is
+        removing this test's duplicates right now, so the import starts from what both left.
+
+        The test's turn is asked for once per scope: a caller that took it up front (a background
+        import trying without waiting) is not made to wait again by process_scan, and neither is one
+        that was let through because the lock is off or was left behind.
         """
         if getattr(self, "_import_lock_depth", 0) == 0:
             msg = "lock_test_under_import must run inside import_lock_scope"
             raise RuntimeError(msg)
         if test is None or test.pk is None:
             return
-        turns = getattr(self, "_import_turn_tests", [])
-        if test.pk not in turns and wait_for_test_import_turn(test.pk):
-            self._import_turn_tests = [*turns, test.pk]
+        checked = getattr(self, "_import_turn_checked", [])
+        if test.pk not in checked:
+            taken = wait_for_test_import_turn(test.pk, wait_seconds=wait_seconds)
+            self._import_turn_checked = [*checked, test.pk]
+            if taken:
+                self._import_turn_tests = [*getattr(self, "_import_turn_tests", []), test.pk]
         locked = getattr(self, "_import_locked_tests", [])
         if test.pk in locked:
             return

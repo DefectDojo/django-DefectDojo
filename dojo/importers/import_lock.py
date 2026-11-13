@@ -249,15 +249,18 @@ def _abandoned(test_ids):
     return abandoned
 
 
-def wait_for_test_import_turn(test_id):
+def wait_for_test_import_turn(test_id, wait_seconds=None):
     """
     Take the lock that lets one import at a time into the test, waiting for an import holding it to end.
+
+    ``wait_seconds`` overrides DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS for a caller that must not block: 0 only
+    tries, which is what a background import in a worker does before it queues itself again.
 
     Returns True when this connection holds the lock (release it with release_test_import_turns),
     False when it was not taken: the lock is turned off, or the import holding it has been idle
     long enough to count as abandoned (see abandoned_tests), so this import goes ahead the way every
     import did before the lock existed. Raises TestImportInProgress when the other import has not
-    finished within DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS.
+    finished within the wait.
 
     The lock is per connection and counted, so an import nested in another on the same connection
     (a background import run in-process) gets it at once. It is polled with a try-lock rather than
@@ -266,7 +269,7 @@ def wait_for_test_import_turn(test_id):
     """
     if not settings.SERIALIZE_TEST_IMPORTS:
         return False
-    wait_seconds = max(settings.SERIALIZE_TEST_IMPORTS_WAIT_SECONDS, 0)
+    wait_seconds = max(settings.SERIALIZE_TEST_IMPORTS_WAIT_SECONDS if wait_seconds is None else wait_seconds, 0)
     deadline = time.monotonic() + wait_seconds
     waited = False
     with connection.cursor() as cursor:
