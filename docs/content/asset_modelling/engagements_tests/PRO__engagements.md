@@ -141,6 +141,10 @@ A few fields can also be changed on the Engagement page itself, without opening 
 
 The same rules as Findings apply: only users who can edit the Engagement can open a value, Form Configuration's hidden and required settings apply in place, and the **Inline Editing** feature flag turns it all off. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
 
+### Finding Severity by Test
+
+The **Finding Severity by Test** panel on the Engagement page lists the Engagement's 50 newest Tests, newest first, with their open Findings counted by severity (active Findings that are not duplicates, false positives or out of scope) and a total per Test and per severity. Select a Test's name to open the Test, or select a count to open that Test's open Findings at that severity. When the Engagement has more than 50 Tests, the total row says how many it shows out of how many, and links to the Engagement's full list of Tests.
+
 ### Copy Engagements 
 
 You can easily duplicate Engagements by selecting “Copy Engagement” within the Engagement’s settings. This will create an exact copy of the original Engagement within the parent Asset, including the metadata, Tests, and Findings within it.
