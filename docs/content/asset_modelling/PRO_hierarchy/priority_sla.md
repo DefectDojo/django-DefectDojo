@@ -263,7 +263,12 @@ A few things to know:
 * The **Default** engine always keeps the original algorithm and cannot score custom fields. Create a
   separate engine and assign it to the Assets that should use custom fields.
 * Changing a scored field's value on an Asset recalculates the affected Findings. A numeric field
-  recalculates the whole Organization, because the Organization's total changed.
+  recalculates the whole Organization, because the Organization's total changed, even when the Asset
+  whose value changed uses another engine. Moving, deleting or archiving an Asset that holds a numeric
+  value recalculates its Organization for the same reason.
+* A computed numeric field changes whenever the Findings its formula counts change, so scoring one
+  recalculates its Organization after each import that moves its value. On a large Organization, prefer a
+  field that changes less often.
 * While an engine scores a custom field, that field cannot be deleted, its data type cannot change, and
   an option with a weight cannot be removed. Remove the field from the engine (or clear the option's
   weight) first.
