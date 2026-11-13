@@ -143,7 +143,7 @@ The same rules as Findings apply: only users who can edit the Engagement can ope
 
 ### Finding Severity by Test
 
-The **Finding Severity by Test** panel on the Engagement page lists every Test in the Engagement, newest first, with its open Findings counted by severity (active Findings that are not duplicates, false positives or out of scope) and a total per Test and per severity. Select a Test's name to open the Test, or select a count to open that Test's open Findings at that severity.
+The **Finding Severity by Test** panel on the Engagement page lists the Engagement's 50 newest Tests, newest first, with their open Findings counted by severity (active Findings that are not duplicates, false positives or out of scope) and a total per Test and per severity. Select a Test's name to open the Test, or select a count to open that Test's open Findings at that severity. When the Engagement has more than 50 Tests, the total row says how many it shows out of how many, and links to the Engagement's full list of Tests.
 
 ### Copy Engagements 
 
