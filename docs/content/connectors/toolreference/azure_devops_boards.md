@@ -21,6 +21,18 @@ These details dictate how DefectDojo will map Finding or Finding Group attribute
 
 The `Project ID` field corresponds to the name or the ID of the Project in Azure.
 
+The `Work Item Type` field sets the type DefectDojo creates each work item as, by name: `Issue`
+(the default), `Bug`, `Task`, or a custom type your process defines, such as `Vulnerability`.
+DefectDojo sets the type when it creates a work item, and never changes it afterwards, so this
+field is the only place to set it. DefectDojo does not check this when a mapping is saved: a
+Custom Field Mapping on `System.WorkItemType` (or its display name, Work Item Type) can be
+saved, but every push through that mapping then fails, creates and updates alike, with an error
+naming the field, until that custom field mapping is removed. The type must exist in the
+project. If it does not, creating a work item through this mapping fails with an error naming
+the type and the project; updates and closures of existing work items are not affected. Changing
+the type only affects work items created afterwards: existing ones keep the type they were
+created with.
+
 #### Severity Mapping Details
 
 The attributes in the form are supplied as defaults, and are as follows:
@@ -52,6 +64,7 @@ Custom field mappings set additional Azure DevOps fields on the work items Defec
 creates or updates. The **Vendor Field** must be the Azure DevOps field's *reference name*
 (for example `System.AreaPath`, `System.Tags`, or `Custom.MyField` - not its display name),
 and the field must exist on the work item type in your project's process.
+The work item type itself is set by the mapping's **Work Item Type**. A custom field mapping on `System.WorkItemType` can be saved, but every push through the mapping then fails with an error naming that field.
 
 Two mappings are especially useful for routing work items to a team:
 
@@ -65,6 +78,7 @@ Two mappings are especially useful for routing work items to a team:
   error saying so.
 
 Note that Azure DevOps boards and backlogs only display work item types that belong to a
-backlog level. DefectDojo creates work items of type **Issue**; if that type is not part of
+backlog level. DefectDojo creates work items of the mapping's **Work Item Type** (**Issue** by
+default); if that type is not part of
 a backlog level in your project's process, the pushed items are only visible in the
 **Boards → Work items** view regardless of their area or iteration.
