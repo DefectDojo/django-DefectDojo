@@ -383,7 +383,8 @@ side:
 Every move opens a form for its reason and changes nothing until it is submitted. Rejecting or
 expiring a Risk Acceptance requires a reason. Only the moves you are allowed to make are offered:
 approving, rejecting and activating need Risk Acceptance Approve, the others need Risk Acceptance
-Edit. An expired Risk Acceptance is offered **Propose Again** (see
+Edit. Whoever requested a Risk Acceptance is not offered **Approve** or **Activate** on it while
+self-approval is blocked. An expired Risk Acceptance is offered **Propose Again** (see
 [Extending an expired acceptance](#extending-an-expired-acceptance)); it is offered **Activate** only
 while an administrator allows direct reinstatement.
 
@@ -676,9 +677,10 @@ can offer the actions that exist rather than guessing:
 {"workflow_state": "under_review", "allowed_next_states": ["approved", "proposed", "rejected"]}
 ```
 
-`allowed_next_states` lists only the moves the server will make. An expired Risk Acceptance does not
-list `active` while **Require Review to Extend an Expired Risk Acceptance** is on, because that move
-would be refused with `409`.
+`allowed_next_states` lists only the moves the server will make for you. It leaves out `approved` and
+`active` for the person who requested the Risk Acceptance while **Block Self-Approval of Risk
+Acceptances** is on (that move would be refused with `403`), and `active` for an expired Risk
+Acceptance while **Require Review to Extend an Expired Risk Acceptance** is on (refused with `409`).
 
 `transition/` makes a move:
 
