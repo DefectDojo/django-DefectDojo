@@ -31,9 +31,12 @@ class MetricsDevicesWithoutFindingsFilterSerializer(serializers.Serializer):
 
 
 class MetricsDevicesWithoutFindingsSerializer(serializers.ModelSerializer):
+    idEngagement = serializers.IntegerField(source="id", read_only=True)
+
     class Meta:
         model = Engagement
         fields = (
+            "idEngagement",
             "name",
             "product_name",
             "product_type_name",
