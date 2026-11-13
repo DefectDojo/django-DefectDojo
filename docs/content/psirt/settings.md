@@ -98,7 +98,7 @@ include advisory publishing. With the flag on and no such license, the card says
 so and nothing can be saved. Contact
 [DefectDojo Support](mailto:support@defectdojo.com) for either one.
 
-The profile asks for five things:
+The profile has five fields.
 
 | Field | What it is |
 |---|---|
@@ -112,7 +112,7 @@ Saving needs the **Change PSIRT** permission, and it sends the profile to
 DefectDojo. DefectDojo staff review every new publisher and activate it by hand.
 Nothing goes public until they have.
 
-The card shows where the publisher stands:
+The card shows where the publisher stands.
 
 | Status | What it means for publishing |
 |---|---|
@@ -121,8 +121,8 @@ The card shows where the publisher stands:
 | Active | DefectDojo activated the publisher. The card shows your public address on the advisory site, and approved TLP:WHITE advisories can be published there. |
 | Suspended | DefectDojo suspended the publisher. The site refuses new advisories and new versions until DefectDojo lifts the suspension. |
 
-If DefectDojo refuses a profile, the card shows the reason. Correct the field it
-names and save again.
+If DefectDojo refuses a profile, the card shows the reason. Correct the profile
+and save again.
 
 Once the publisher is active, the display name, the namespace and the slug are
 fixed. The card shows them as DefectDojo activated them, and every public document
