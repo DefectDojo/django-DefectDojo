@@ -94,6 +94,13 @@ class ApiV2ViewsImportCycleTest(SimpleTestCase):
         self.assertIs(MovedNoteTypeViewSet, NoteTypeViewSet)
         self.assertIs(MovedNotesViewSet, NotesViewSet)
 
+    def test_dir_lists_every_lazy_export(self):
+        names = dir(api_v2_views)
+        for name in api_v2_views._LAZY_VIEWSET_EXPORTS:
+            with self.subTest(name=name):
+                self.assertIn(name, names)
+        self.assertIn("DojoModelViewSet", names)
+
     def test_an_unknown_name_still_raises_attribute_error(self):
         with self.assertRaises(AttributeError):
             api_v2_views.NoSuchViewSet  # noqa: B018

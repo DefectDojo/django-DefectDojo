@@ -1040,7 +1040,10 @@ class SLAConfigurationViewset(
 # moved into per-module api/views packages, and those modules import base
 # classes back from dojo.api_v2.views at import time. Eagerly importing them
 # here would create entry-order-dependent circular imports, so expose them
-# lazily via PEP 562 __getattr__ instead.
+# lazily via PEP 562 __getattr__ instead. __dir__ lists them, so dir() and
+# inspect.getmembers() still see them. A star import does not: the module has no
+# __all__, so "from dojo.api_v2.views import *" only copies names already bound
+# here. Import these names explicitly.
 import importlib  # noqa: E402
 
 _LAZY_VIEWSET_EXPORTS = {
@@ -1082,3 +1085,7 @@ def __getattr__(name):
         msg = f"module 'dojo.api_v2.views' has no attribute {name!r}"
         raise AttributeError(msg)
     return getattr(importlib.import_module(module_path), name)
+
+
+def __dir__():
+    return sorted(set(globals()) | set(_LAZY_VIEWSET_EXPORTS))
