@@ -228,6 +228,59 @@ High)
 * **External Audience** - whether or not the related Asset has an external audience
 * **Internet Accessible** - whether or not the related Asset is internet accessible
 
+#### Custom Field Multipliers
+
+When [Custom Fields](/asset_modelling/pro__custom_fields/) are enabled, a Prioritization Engine can also
+score Asset custom fields. Open the engine's edit form, choose **Add Custom Field** in the **Custom Field
+Multipliers** group, and pick an Asset custom field. Each added field gets the same multiplier slider as
+the built-in factors, and an engine can score up to ten custom fields.
+
+How a custom field contributes depends on its data type. Each type works the same way as one of the
+built-in Asset factors:
+
+| Data type | How it scores | Works like |
+| --- | --- | --- |
+| Integer, Decimal | The Asset's value as a share of the total for that field across its Organization | Revenue, User Records |
+| Boolean | A bonus when the value is Yes | External Audience |
+| Single select | A weight you set for each option, from -25% to +25% | Business Criticality |
+| Multi select | The highest weight among the selected options | Business Criticality |
+
+A few things to know:
+
+* An Asset with no value for a field gets no contribution from it, and is not counted in its
+  Organization's total. A negative number counts as zero.
+* An option you leave unweighted, and an **Other** value, weigh nothing.
+* Text and date fields cannot be priority factors.
+* A computed integer or decimal field can be a factor (for example, a count of the Asset's open Critical
+  Findings). A computed field whose formula reads Finding Priority, Risk or Risk Score cannot, directly or
+  through another computed field, because its value would then follow the score it feeds. Editing the
+  formula of a field an engine scores so that it reads them is refused for the same reason.
+* Custom fields keep the 0 to 100 Risk Score scale. Each one's largest possible contribution is part of
+  the engine's maximum Priority, so adding, removing or reweighting a custom field rescales the engine the
+  same way changing a built-in multiplier does, and the Risk Thresholds keep their meaning.
+* Custom fields add to the score on top of the built-in factors. The built-in factors are scored exactly
+  as before, and an engine with no custom fields scores exactly as it would without this feature.
+* The **Default** engine always keeps the original algorithm and cannot score custom fields. Create a
+  separate engine and assign it to the Assets that should use custom fields.
+* Changing a scored field's value on an Asset recalculates the affected Findings. A numeric field
+  recalculates the whole Organization, because the Organization's total changed, even when the Asset
+  whose value changed uses another engine. Moving, deleting or archiving an Asset that holds a numeric
+  value recalculates its Organization for the same reason.
+* A computed numeric field changes whenever the Findings its formula counts change, so scoring one
+  recalculates its Organization after each import that moves its value. On a large Organization, prefer a
+  field that changes less often.
+* While an engine scores a custom field, that field cannot be deleted, its data type cannot change, and
+  an option with a weight cannot be removed. Remove the field from the engine (or clear the option's
+  weight) first.
+
+The **Priority Drivers** card on an Asset's page lists each custom field the Asset's engine scores, with
+the Asset's value and what it contributes.
+
+#### Turning a factor off
+
+Every factor, built-in or custom, has an **Off** toggle next to its slider. Turning a factor off sets its
+multiplier to 0%, which removes it from the calculation entirely. Turning it back on restores 100%.
+
 ### Risk Thresholds
 
 Risk Thresholds decide which Risk band a Finding lands in. They are set on the Risk Score scale, from 0 to 100:
