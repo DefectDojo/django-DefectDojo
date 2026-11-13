@@ -32,7 +32,12 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
 from dojo.finding.cwe import finding_cwe_labels
-from dojo.importers.import_lock import lock_tests_under_import, unlock_tests_under_import
+from dojo.importers.import_lock import (
+    lock_tests_under_import,
+    release_test_import_turns,
+    unlock_tests_under_import,
+    wait_for_test_import_turn,
+)
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.jira.services import is_keep_in_sync
@@ -920,7 +925,8 @@ class BaseImporter(ImporterOptions):
 
         process_scan opens one; a caller that goes on writing this import's findings after
         process_scan returns opens its own around the call, and the lock is held until that one
-        exits. See dojo.importers.import_lock.
+        exits. The same goes for the lock that lets one import at a time into the test. See
+        dojo.importers.import_lock.
         """
         depth = getattr(self, "_import_lock_depth", 0)
         self._import_lock_depth = depth + 1
@@ -929,21 +935,32 @@ class BaseImporter(ImporterOptions):
         finally:
             self._import_lock_depth = depth
             if depth == 0:
-                unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
-                self._import_locked_tests = []
+                try:
+                    unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
+                finally:
+                    self._import_locked_tests = []
+                    release_test_import_turns(getattr(self, "_import_turn_tests", []))
+                    self._import_turn_tests = []
 
     def lock_test_under_import(self, test: Test) -> None:
         """
         Tell the excess-duplicate delete this test is being imported, until the import ends.
 
-        Call before the first finding is created or matched. Waits if a delete is removing this
-        test's duplicates right now, so the import starts from what that delete left.
+        Call before the first finding is created or matched. Waits first for any other import into
+        this test to finish (raising TestImportInProgress, a 409, if that takes longer than
+        DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS), then if a delete is removing this test's duplicates
+        right now, so the import starts from what both left.
         """
         if getattr(self, "_import_lock_depth", 0) == 0:
             msg = "lock_test_under_import must run inside import_lock_scope"
             raise RuntimeError(msg)
+        if test is None or test.pk is None:
+            return
+        turns = getattr(self, "_import_turn_tests", [])
+        if test.pk not in turns and wait_for_test_import_turn(test.pk):
+            self._import_turn_tests = [*turns, test.pk]
         locked = getattr(self, "_import_locked_tests", [])
-        if test is None or test.pk is None or test.pk in locked:
+        if test.pk in locked:
             return
         self._import_locked_tests = locked + lock_tests_under_import([test.pk])
 

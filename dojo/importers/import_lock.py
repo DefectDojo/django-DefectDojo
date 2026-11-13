@@ -26,12 +26,28 @@ A lock must never outlive its import, or that test's duplicates would never be d
 - The delete treats a lock as abandoned once every connection holding it has sat idle for
   DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES. An import issues statements continuously, so only a
   lock left behind (a host that died without closing its connection, a pooler) looks like that.
+
+A second lock, on its own key, keeps two imports out of one test at the same time. Two imports
+or reimports into one test match and write the same finding rows, and running together they
+deadlock (SQLSTATE 40P01) or have their statements cancelled (57014); a client that times out on a
+long reimport and retries it starts exactly that. So an import takes this lock exclusively before
+its first finding is matched or created, and holds it until it ends. An import that finds it
+taken waits its turn, for up to DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS, then runs as it would have; only
+a wait that runs out fails, with TestImportInProgress (HTTP 409). It is a separate key because
+the first one is shared by design: an import's deduplication batches take it while that import
+waits for them (deduplication mode "async_wait"), and the delete must keep seeing every one of
+them. The same caveats hold: DD_SERIALIZE_TEST_IMPORTS=False turns it off behind a pooler in
+transaction mode, and a holder idle for DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES no longer
+holds an import back.
 """
 import logging
 import time
 
 from django.conf import settings
 from django.db import DatabaseError, connection
+from django.utils.translation import gettext as _
+from rest_framework.exceptions import APIException
+from rest_framework.status import HTTP_409_CONFLICT
 
 from dojo.models import Finding, System_Settings
 
@@ -40,6 +56,18 @@ logger = logging.getLogger(__name__)
 # First key of the two-key pg_advisory_lock form; the second is the test id. Any constant works as
 # long as nothing else in the application locks on it.
 TEST_IMPORT_LOCK_CLASS = 0x44440001
+# First key of the lock that lets one import at a time into a test; the second is the test id.
+TEST_IMPORT_TURN_LOCK_CLASS = 0x44440002
+# How often an import waiting for its turn on a test asks again.
+TEST_IMPORT_TURN_POLL_SECONDS = 1.0
+
+
+class TestImportInProgress(APIException):
+
+    """Another import into the test did not finish within DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS."""
+
+    status_code = HTTP_409_CONFLICT
+    default_code = "test_import_in_progress"
 
 
 def import_lock_enabled():
@@ -158,9 +186,9 @@ def _abandoned_threshold_seconds():
     return settings.DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES * 60
 
 
-def _import_lock_holders(test_ids=None):
+def _import_lock_holders(test_ids=None, lock_class=TEST_IMPORT_LOCK_CLASS):
     """
-    (test id, backend pid, backend state, seconds since its state changed) for each import-lock holder.
+    (test id, backend pid, backend state, seconds since its state changed) for each holder of an import lock.
 
     The state and its age are NULL for a backend this database user may not see, such as one of
     another role.
@@ -180,7 +208,7 @@ def _import_lock_holders(test_ids=None):
               AND locks.database = (SELECT oid FROM pg_database WHERE datname = current_database())
               AND locks.classid::bigint = %s AND (%s::bigint[] IS NULL OR locks.objid::bigint = ANY(%s::bigint[]))
             """,
-            [TEST_IMPORT_LOCK_CLASS, test_ids, test_ids],
+            [lock_class, test_ids, test_ids],
         )
         return cursor.fetchall()
 
@@ -219,3 +247,93 @@ def _abandoned(test_ids):
             sorted({pid for test_id, pid, *_ in holders if test_id in abandoned}),
         )
     return abandoned
+
+
+def wait_for_test_import_turn(test_id):
+    """
+    Take the lock that lets one import at a time into the test, waiting for an import holding it to end.
+
+    Returns True when this connection holds the lock (release it with release_test_import_turns),
+    False when it was not taken: the lock is turned off, or the import holding it has been idle
+    long enough to count as abandoned (see abandoned_tests), so this import goes ahead the way every
+    import did before the lock existed. Raises TestImportInProgress when the other import has not
+    finished within DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS.
+
+    The lock is per connection and counted, so an import nested in another on the same connection
+    (a background import run in-process) gets it at once. It is polled with a try-lock rather than
+    waited for in PostgreSQL: a blocking wait would be cancelled by a statement timeout, and it
+    leaves the transaction usable whatever happens to the wait.
+    """
+    if not settings.SERIALIZE_TEST_IMPORTS:
+        return False
+    wait_seconds = max(settings.SERIALIZE_TEST_IMPORTS_WAIT_SECONDS, 0)
+    deadline = time.monotonic() + wait_seconds
+    waited = False
+    with connection.cursor() as cursor:
+        while True:
+            cursor.execute("SELECT pg_try_advisory_lock(%s, %s)", [TEST_IMPORT_TURN_LOCK_CLASS, test_id])
+            if cursor.fetchone()[0]:
+                if waited:
+                    logger.info("test %s: the other import has finished, this one starts now", test_id)
+                return True
+            holders = _import_lock_holders([test_id], TEST_IMPORT_TURN_LOCK_CLASS)
+            if test_id in abandoned_tests(holders, _abandoned_threshold_seconds()):
+                logger.warning(
+                    "importing into test %s without waiting for the import lock that is held on it: every connection "
+                    "holding it has been idle for over %s minutes, so no import is running (holding backends: %s)",
+                    test_id, settings.DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES, sorted({holder[1] for holder in holders}),
+                )
+                return False
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                logger.warning(
+                    "test %s: gave up after waiting %s seconds for another import into it to finish",
+                    test_id, wait_seconds,
+                )
+                raise TestImportInProgress(test_import_in_progress_message(test_id, wait_seconds))
+            if not waited:
+                logger.info("test %s: another import into it is running, waiting for it to finish", test_id)
+                waited = True
+            time.sleep(min(TEST_IMPORT_TURN_POLL_SECONDS, remaining))
+
+
+def test_import_in_progress_message(test_id, wait_seconds):
+    return _(
+        "Another import or reimport into test %(test_id)s is still running. This one waited %(seconds)s seconds for it "
+        "to finish and then gave up, so nothing was imported. Run it again once the other import has finished.",
+    ) % {"test_id": test_id, "seconds": wait_seconds}
+
+
+def release_test_import_turns(test_ids):
+    """
+    Release locks taken by wait_for_test_import_turn.
+
+    If the release fails, the connection is marked to be closed at the end of the request or task,
+    which releases the lock with it, as unlock_tests_under_import does.
+    """
+    if not test_ids:
+        return
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT test_id, pg_advisory_unlock(%s, test_id) FROM unnest(%s::int[]) AS test_id",
+                [TEST_IMPORT_TURN_LOCK_CLASS, list(test_ids)],
+            )
+            not_held = [test_id for test_id, released in cursor.fetchall() if not released]
+    except BaseException as exc:
+        connection.close_at = time.monotonic()
+        logger.warning(
+            "could not release the lock that lets one import at a time into tests %s; closing the connection at the "
+            "end of this request or task releases it",
+            test_ids,
+        )
+        if not isinstance(exc, DatabaseError):
+            raise
+        return
+    if not_held:
+        logger.error(
+            "the lock that lets one import at a time into tests %s was not held by this connection when the import "
+            "released it. DefectDojo is probably connected to PostgreSQL through a pooler in transaction mode, where the "
+            "lock cannot work and is left behind; set DD_SERIALIZE_TEST_IMPORTS=False",
+            not_held,
+        )
