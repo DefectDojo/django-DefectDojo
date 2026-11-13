@@ -1,3 +1,5 @@
+import io
+import json
 import re
 
 from dojo.models import Test
@@ -410,6 +412,34 @@ class TestTrivyParserDependencyLocations(DojoTestCase):
         self.assertEqual("", dependencies[0]["purl"])
         self.assertEqual("certifi", dependencies[0]["name"])
         self.assertEqual(certifi.component_version, dependencies[0]["version"])
+
+    @skip_unless_v3
+    def test_a_package_url_that_does_not_parse_falls_back_to_name_and_version(self):
+        report = {
+            "SchemaVersion": 2,
+            "Results": [
+                {
+                    "Target": "requirements.txt",
+                    "Class": "lang-pkgs",
+                    "Type": "pip",
+                    "Vulnerabilities": [
+                        {
+                            "VulnerabilityID": "CVE-2023-37920",
+                            "PkgName": "certifi",
+                            "PkgIdentifier": {"PURL": "not-a-package-url"},
+                            "InstalledVersion": "2022.12.7",
+                            "Severity": "HIGH",
+                        },
+                    ],
+                },
+            ],
+        }
+        (finding,) = TrivyParser().get_findings(io.BytesIO(json.dumps(report).encode()), Test())
+        dependencies = self._dependency_locations(finding)
+        self.assertEqual(1, len(dependencies))
+        self.assertEqual("", dependencies[0]["purl"])
+        self.assertEqual("certifi", dependencies[0]["name"])
+        self.assertEqual("2022.12.7", dependencies[0]["version"])
 
 
 class TestTrivyParserImageLocations(DojoTestCase):

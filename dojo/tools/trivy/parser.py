@@ -3,12 +3,25 @@
 import json
 import logging
 
+from packageurl import PackageURL
+
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData, split_image_reference
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
+
+
+def _parses_as_purl(value) -> bool:
+    """Whether ``value`` is a Package URL a dependency location can be built from."""
+    if not value or not isinstance(value, str):
+        return False
+    try:
+        PackageURL.from_string(value)
+    except ValueError:
+        return False
+    return True
 
 
 TRIVY_SEVERITIES = {
@@ -394,9 +407,10 @@ class TrivyParser:
                     finding.unsaved_vulnerability_ids = [vuln_id]
 
                 # Trivy names the exact package with a Package URL in PkgIdentifier; older
-                # reports have none, so fall back to the bare name and version.
+                # reports have none, and a PURL that does not parse is no better, so both fall
+                # back to the bare name and version.
                 purl = (vuln.get("PkgIdentifier") or {}).get("PURL")
-                if locations_enabled() and purl:
+                if locations_enabled() and _parses_as_purl(purl):
                     finding.unsaved_locations.append(LocationData.dependency(purl=purl, file_path=file_path))
                 elif locations_enabled() and package_name and package_version:
                     finding.unsaved_locations.append(

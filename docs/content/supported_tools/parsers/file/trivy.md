@@ -27,7 +27,13 @@ If you want to exclude certain status from being imported into Defect Dojo, plea
 With Locations enabled, each vulnerable package is recorded as a dependency location. When the
 report names the package's Package URL (`PkgIdentifier.PURL`),
 that PURL identifies the dependency, so its ecosystem, namespace and qualifiers are kept. Older
-reports carry only a name and version, which is what the dependency is built from.
+reports carry only a name and version, which is what the dependency is built from, and so does a
+report whose PURL does not parse.
+
+When upgrading an instance that already has Trivy findings with Locations enabled: the first
+reimport after the upgrade identifies each dependency by its full PURL rather than by its name and
+version. New dependency locations appear for those packages, and the earlier name-and-version
+dependency locations are no longer referenced by those findings.
 
 ### Sample Scan Data
 Sample Trivy scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/trivy).
