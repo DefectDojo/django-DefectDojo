@@ -365,20 +365,36 @@ data:
 Combine them with `workflow_state` to build a review queue: `?workflow_state=proposed&workflow_state=under_review`
 is everything nobody has decided yet.
 
-### The review thread
+### The Review tile
 
-The **Approvals** tab shows the decisions and the discussion as one conversation, oldest first:
-every state change with the reason recorded against it, interleaved with comments people have
-added.
+The **Review** tile on a Risk Acceptance page holds the review and the conversation about it, side by
+side:
 
-They are two different records — a reason belongs to the move that carried it, a comment belongs to
-nobody's decision — but a reviewer reads one thread. Kept apart, "why was this approved?" is
-answered by a reason in one place and the argument that produced it in another, with nothing saying
-which came first.
+- **Decisions**, on the left: when the Risk Acceptance expires (and how many days are left), what
+  happens to its Findings on that date, the moves available to you from here, and every decision
+  made so far, newest first. Each decision shows who made it, what it did and when, with the reason
+  recorded against it. A decision made without a reason shows none. A Risk Acceptance that is still
+  being reviewed shows the date it asks for (**Requested until**); an expired one shows the date it
+  expired on. A move made by the scheduled expiry job is shown as made by **System**.
+- **Comments**, on the right: a box to add a comment, then the comments, newest first. Comments are
+  ordinary Risk Acceptance notes, so anything written before the tile existed is already there, and
+  each comment keeps its menu (Edit, View History, Delete).
 
-Comments are ordinary Risk Acceptance notes, so anything written before this existed is already in
-the thread, and anything written here is visible to every other view of those notes. Line breaks are
-preserved.
+Every move opens a form for its reason and changes nothing until it is submitted. Rejecting or
+expiring a Risk Acceptance requires a reason. Only the moves you are allowed to make are offered:
+approving, rejecting and activating need Risk Acceptance Approve, the others need Risk Acceptance
+Edit. Whoever requested a Risk Acceptance is not offered **Approve** or **Activate** on it while
+self-approval is blocked. An expired Risk Acceptance is offered **Propose Again** (see
+[Extending an expired acceptance](#extending-an-expired-acceptance)); it is offered **Activate** only
+while an administrator allows direct reinstatement.
+
+On a narrow screen the expiry and the moves stay at the top, and a switch shows either the Decisions
+or the Comments. When the tile is short, the comment box folds into a **Comment** button that opens
+it.
+
+With Risk Acceptances 2.0 turned off, the tile is the Risk Acceptance's **Notes**.
+
+To show the Decisions alone in a layout of your own, add the **Review Lifecycle** widget instead.
 
 ### In reports
 
@@ -516,7 +532,39 @@ criteria are refused rather than quietly broadened.
 
 **From the UI:** *Edit Standing Criteria* on the Risk Acceptance menu. It asks how far the acceptance
 should reach — this engagement, this asset, this asset's type, or everywhere — rather than asking you
-to pick ids, and refuses to save until both a scope and at least one matchable attribute are set.
+to pick ids, and refuses to save until a scope is set along with at least one matchable attribute
+or **Every New Finding in Scope**.
+
+#### Every New Finding in an Asset
+
+To accept every Finding that later scans bring into an Asset (or an Engagement, or an Organization)
+for a fixed period, ask for it by name with `match_all_in_scope`:
+
+```json
+{
+    "acceptance_criteria": {
+        "scope": { "type": "product", "ids": [12] },
+        "match_all_in_scope": true
+    }
+}
+```
+
+In the UI this is the **Every New Finding in Scope** checkbox in *Edit Standing Criteria*. Every
+Finding newly imported into that scope is accepted while the Risk Acceptance is Active, and its
+expiration date is what ends the period: once it expires, new Findings are imported as usual.
+
+Like all standing criteria, this applies to Findings as they are created by an import. Saving it does
+not add the Findings already in the Asset, and a Finding a reimport reopens is not accepted again
+either. To cover those for the same period, open **Add Findings to Risk Acceptance** on the Risk
+Acceptance menu and pick them there.
+
+A few rules apply:
+
+- `match_all_in_scope` takes only `true`. Any other value is refused with `400`.
+- It is refused with a `global` scope: accepting every Finding everywhere would silence the whole
+  instance.
+- It replaces the matchable attributes rather than adding to them, so it is refused alongside any of
+  them. To accept only part of an Asset, set the attributes instead.
 
 Three rules keep this safe to leave switched on:
 
@@ -526,7 +574,8 @@ Three rules keep this safe to leave switched on:
 - **Only inside its scope.** A Finding outside the scope never matches, however well its
   vulnerability lines up.
 - **Criteria with nothing to match are refused.** A scope with no matchable attribute would mean
-  "every Finding in this Asset", so the API returns `400` rather than accepting it. An acceptance
+  "every Finding in this Asset" by omission, so the API returns `400` rather than accepting it;
+  covering a whole Asset takes `match_all_in_scope`, set on purpose. An acceptance
   with *no* criteria at all is fine and covers exactly what was added to it — which is every Risk
   Acceptance that existed before this feature.
 
@@ -564,7 +613,7 @@ risk_acceptance:
 ```
 
 Notifications are reinforcement, not the mechanism: every state change is already visible on the
-Risk Acceptance, in its Approvals tab and in the review queue, whether or not a message is sent or
+Risk Acceptance, in its Review tile and in the review queue, whether or not a message is sent or
 ever arrives. A send that fails is logged and does not undo the decision.
 
 ### Triage Engine conditions
@@ -627,6 +676,11 @@ can offer the actions that exist rather than guessing:
 ```json
 {"workflow_state": "under_review", "allowed_next_states": ["approved", "proposed", "rejected"]}
 ```
+
+`allowed_next_states` lists only the moves the server will make for you. It leaves out `approved` and
+`active` for the person who requested the Risk Acceptance while **Block Self-Approval of Risk
+Acceptances** is on (that move would be refused with `403`), and `active` for an expired Risk
+Acceptance while **Require Review to Extend an Expired Risk Acceptance** is on (refused with `409`).
 
 `transition/` makes a move:
 
@@ -695,7 +749,8 @@ GET /api/v2/findings/{id}/acceptance_history/
 ```
 
 - `transitions/` is the approval chain, oldest first: which state each move left and entered, who
-  made it, when, and why.
+  made it (`actor`, their username, and `actor_name`, their full name or their username when they
+  have none; both are `null` for a move the scheduled expiry made), when, and why.
 - `finding_records/` is what the Risk Acceptance has covered — **including Findings that have since
   left it**, which the accepted-findings list cannot show.
 - `acceptance_history/` is the same records from the Finding's side: every Risk Acceptance this
@@ -706,6 +761,20 @@ GET /api/v2/findings/{id}/acceptance_history/
 `acceptance_history/` only lists Risk Acceptances you may see in your own right. Risk Acceptance
 visibility is a separate grant from Finding visibility, so being able to read the Finding does not
 show you the exceptions raised against it.
+
+Each record names its Finding and the people involved:
+
+- `finding_title` and `finding_severity` are the Finding's title and severity. They are `null` for a
+  Finding you may not see: a Risk Acceptance can span Assets you have no access to, and its record
+  then shows the Finding's id only.
+- `added_by_name` and `removed_by_name` are the display names of the people who added the Finding
+  and ended its acceptance. `added_by` and `removed_by` still carry their usernames.
+
+A page of `finding_records/` also describes the whole Risk Acceptance, not only the page:
+
+- `status_counts` is how many records are in each status (`pending`, `accepted`, `removed`,
+  `expired`, `superseded`), zero included.
+- `shared_justification` is the justification every record carries, or `null` when they differ.
 
 ## Risk Acceptance Best Practices 
 

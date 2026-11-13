@@ -41,16 +41,23 @@ As Findings belong to Tests, access to Findings is determined by a User’s acce
 Finding views contain a variety of tables to help interpret a Finding’s status at a glance. 
 
 ### Finding Overview
-- **Description**: The description of the Finding (added automatically depending on the type of Finding, or created manually). 
-- **Mitigation**: Suggested steps to mitigate.
-- **General Mitigation Policy**: The standardized mitigation policy for the selected Finding. 
-Mitigation policies can be found and edited in the sidebar under **Settings > Finding Workflow > Mitigation Policies**.
-- **Impact**: Potential impact of leaving the Finding unresolved.
-- **References**: URL to cross-reference the third-party scan tool’s specific description of the Finding. For example, References could be links to a relevant entry in a Finding catalog, or a single advisory URL. 
-- **Files**: Any files that have been added to contextualize the Finding. 
-- **Notes**: Notes left by Users related to the Finding. Marking a note as Private will mean it will not be included in any generated reports that include the selected Finding. 
+The Overview tabs hold the Finding's long-form text and its related records:
+
+- **Description**: The description of the Finding (added automatically depending on the type of Finding, or created manually), followed by:
+    - **Impact**: Potential impact of leaving the Finding unresolved.
+    - **References**: URL to cross-reference the third-party scan tool’s specific description of the Finding. For example, References could be links to a relevant entry in a Finding catalog, or a single advisory URL.
+
+  A field the Finding leaves blank is left out of the tab.
+- **Remediation**: Suggested steps to mitigate, followed by the **Mitigation Policy**: the standardized mitigation policy for the selected Finding, shown when the Finding has one. Mitigation policies can be found and edited in the sidebar under **Settings > Finding Workflow > Mitigation Policies**.
+- **Files**: Any files that have been added to contextualize the Finding.
+- **Notes**: Notes left by Users related to the Finding. Marking a note as Private will mean it will not be included in any generated reports that include the selected Finding.
+- **Automation History**: What automation rules did to the Finding, when the rules engine is in use.
 
 ### Metadata 
+The **Details** table lists the Finding's fields one per line, in five groups: **Triage**, **Ownership and Plan**, **Where Found**, **Scores and Intel** and **Tracking**. Each group's header counts the fields it shows for this Finding, so a field left out because it is empty or does not apply is not counted; select it to fold the group to its header, or to open it again. Which groups you fold is remembered for you, for that table only, and changes nothing about the Finding or what anyone else sees. A value too long for its line ends in an ellipsis: hover over it, or move to it with the keyboard, to read all of it. When custom fields are in use, they show under their own **Custom Fields** header at the end.
+
+The Finding's Organization, Asset, Engagement and Test are named in the breadcrumb at the top of the page, so the default table leaves them out; you can add them back in the table's settings (see [Page Layouts](/navigation/pro__page_layouts/)).
+
 - **ID**: DefectDojo’s unique Finding ID. 
 - **Organization, Asset, Engagement, and Test**: The parent objects of the selected Finding. 
 - **Status**: The status of the Finding (e.g., Active, Verified, False Positive, Duplicate, Out of Scope, and Under Defect Review).
@@ -92,7 +99,7 @@ Mitigation policies can be found and edited in the sidebar under **Settings > Fi
 This section includes a table of the Endpoints that the selected Finding affects, along with any relevant metadata.
 
 ### Additional Details 
-- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request. Each pair is listed by its method, URL, status and response body size, opens in place to the raw request and response as plain text, and each side can be copied. The tab shows how many pairs the Finding has and lists the first 100; when there are more, it says how many there are in all.
+- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request. Each pair is listed by its method, URL, status and response body size, opens in place to the raw request and response as plain text, and each side can be copied. The tab shows how many pairs the Finding has and lists the first 100; when there are more, it says how many there are in all. This tab appears once the Finding has a pair; add the first one with **Add Request/Response Pair** in the gear menu at the top of the Finding's page, and further ones from the tab itself.
 - **Steps to Reproduce**: Steps for reproducing the Finding.
 - **Severity Justification**: Written description of why a certain Severity rating was associated with the Finding. 
 
@@ -159,6 +166,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Add Risk Acceptance**: Initiates the Risk Acceptance process. More information can be found [here](/triage_findings/findings_workflows/pro__risk_acceptance/).
 - **Add File**: Initiates the process to add a file to the Finding (see the section below).
 - **Add Note**: Initiates the process to add a note to the Finding. 
+- **Add Request/Response Pair** (on the Finding's own page): Adds a request sent to the target and the response it returned, as evidence for the Finding. The pair appears in the **Request/Response Pairs** tab under Additional Details.
 - **Add Custom Field**: Adds a free-form metadata field to the Finding. With the typed [Custom Fields](/asset_modelling/pro__custom_fields/) feature enabled, this becomes **Custom Fields** and opens the typed editor, where you fill in a value for each field an administrator has defined for Findings. 
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
 - **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.

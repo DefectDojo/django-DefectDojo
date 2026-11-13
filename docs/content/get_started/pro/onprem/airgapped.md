@@ -22,7 +22,7 @@ Restart the stack after setting it. The variable takes effect from the first boo
 
 On Docker Compose deployments the shipped compose files pass `DD_AIRGAPPED` through, so it can go in your environment file. On Kubernetes, add it to the chart's extra environment variables for the Django pods.
 
-You can also turn it on without a restart: a superuser turns on the **Airgapped instance** feature flag under **Settings → Feature Flags**. The flag and the variable do the same thing, but the variable wins. While `DD_AIRGAPPED` is set, the flag shows as on and is marked as managed by the deployment, so it cannot be turned off from the page.
+You can also turn it on without a restart: a superuser turns on the **Airgapped Instance** feature flag under **Settings → Feature Flags**. The flag and the variable do the same thing, but the variable wins. While `DD_AIRGAPPED` is set, the flag shows as on and is marked as managed by the deployment, so it cannot be turned off from the page.
 
 ## What stops
 

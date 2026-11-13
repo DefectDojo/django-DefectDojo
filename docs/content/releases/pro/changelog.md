@@ -55,6 +55,8 @@ Upgrade notes:
 
 ### November 11, 2026: v3.5.101
 
+**NOTE: v3.5.101 was revoked: This release shows each user a license agreement acceptance screen that was not intended. No additional agreement is required. Upgrade to [v3.5.102](#november-12-2026-v35102).**
+
 **NOTE: Endpoints are deprecated and will be removed in 3.7.0 on January 4, 2027.**
 
 New features:
@@ -101,6 +103,8 @@ Upgrade notes:
 * **(Helm)** New values `dojo.V3OrganizationNonexclusive` and `dojo.V3OrganizationTypeRoles` (both `false`) set the same Organization flags, and `dojo.trufflehogFoldCommits` (`false`) sets `DD_TRUFFLEHOG_FOLD_COMMITS`. An install that set these through `config.extra` keeps working. See [Organizations](/asset_modelling/engagements_tests/pro__organizations/#roles-scoped-to-an-organization-type) and [DefectDojo Pro Upgrade Guide (Kubernetes / Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/).
 
 ### November 9, 2026: v3.5.100
+
+**NOTE: v3.5.100 was revoked: This release shows each user a license agreement acceptance screen that was not intended. No additional agreement is required. Upgrade to [v3.5.102](#november-12-2026-v35102).**
 
 **NOTE: Tool Types, Tool Configurations and API Scan Configurations are deprecated and will be removed in 3.6.0 on December 7, 2026.**
 
