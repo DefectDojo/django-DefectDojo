@@ -54,13 +54,17 @@ So the accuracy of this feature is entirely determined by how well that tool's d
 
 Matching is scoped **within an Asset**. It never reaches across Assets, and never applies instance-wide.
 
+### Findings on different hosts
+
+With the **Hash Code** and **Unique ID From Tool or Hash Code** algorithms, two Findings must also share a location, compared the way deduplication compares them: on the URL parts listed in `DEDUPE_ALGO_ENDPOINT_FIELDS` (the host and the path by default). Many network scanners build the hash code from the title, severity and vulnerability IDs alone, so one issue reported on several hosts has one hash code. Marking it False Positive on one host does not mark it on the others, and retroactive mode follows the same rule. Two Findings with no location count as sharing one. **Unique ID From Tool** and **Legacy** do not compare locations.
+
 ### Set-based matching (Pro)
 
 In DefectDojo Pro, matching also respects the **set-based Hash Code Fields** — the vulnerability-ID and CWE matchers (`vulnerability_ids_partial`, `vulnerability_ids_subset`, `cwes_partial`, `cwes_subset`, and their exact-match forms), with the same meaning they have in deduplication.
 
 This makes Pro's matching **narrower** than Open Source's, and that is the point: without it, False Positive History could replicate a false positive to Findings that same-tool deduplication would not have considered duplicates at all. The refinement can only ever reduce the set of Findings that get marked — enabling Pro will never cause *more* Findings to be auto-marked.
 
-On Open Source, matching uses the hash code alone, so it is broader. Bear that in mind when tuning.
+On Open Source, matching uses the hash code and the location alone, so it is broader. Bear that in mind when tuning.
 
 ## Risks worth understanding before you enable it
 

@@ -185,6 +185,13 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
             super().run(result)
 
     def setUp(self):
+        # Finding 2 is on ftp://localhost, and copy_and_reset_finding copies no location. Under
+        # hash_code, false-positive history compares locations as deduplication does, so a copy
+        # with no location is another host's finding. These tests are about scope (test,
+        # engagement, product), so finding 2 loses its location and its copies share it again;
+        # test_reimport_false_positive_location covers the location rule.
+        Endpoint_Status.objects.filter(finding_id=2).delete()
+        LocationFindingReference.objects.filter(finding_id=2).delete()
         logger.debug("disabling dedupe")
         self.disable_dedupe()
         logger.debug("enabling false positive history")
@@ -1806,11 +1813,11 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
         with patch("dojo.finding.deduplication._fetch_fp_candidates_for_batch", wraps=__import__("dojo.finding.deduplication", fromlist=["_fetch_fp_candidates_for_batch"])._fetch_fp_candidates_for_batch) as mock_fetch:
             # 7 queries regardless of batch size:
-            #   1 System_Settings SELECT
             #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
             #   1 candidates SELECT (with .only())
+            #   1 locations of the findings with candidates and of those candidates (one prefetch)
             #   1 bulk UPDATE
-            with self.assertNumQueries(6):
+            with self.assertNumQueries(7):
                 do_false_positive_history_batch(batch)
             # One candidate-fetch call for the whole batch — not one per finding.
             self.assertEqual(mock_fetch.call_count, 1, "Expected exactly one call to _fetch_fp_candidates_for_batch")
@@ -1835,11 +1842,11 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
         batch = [Finding.objects.get(id=find_incoming.id)]
         # 7 queries regardless of how many findings are retroactively marked:
-        #   1 System_Settings SELECT
         #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
         #   1 candidates SELECT (with .only())
+        #   1 locations of the findings with candidates and of those candidates (one prefetch)
         #   1 bulk UPDATE
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(7):
             do_false_positive_history_batch(batch)
 
         # The pre-existing active finding must now be retroactively marked FP.
@@ -1847,11 +1854,11 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def test_fp_history_batch_query_count_does_not_grow_with_affected_findings(self):
         """
-        Query count must stay flat (6) no matter how many findings are retroactively marked.
+        Query count must stay flat (7) no matter how many findings are retroactively marked.
 
         With the old per-finding approach this would have been 6 + N queries where N is the
         number of pre-existing findings that get marked as FP. With the batch approach it is
-        always 7: System_Settings, 4 lazy-load chain, candidates SELECT, one bulk UPDATE.
+        always 7: 4 lazy-load chain, candidates SELECT, one locations prefetch, one bulk UPDATE.
         """
         NUM_PRE_EXISTING = 5
 
@@ -1870,11 +1877,11 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
         batch = [Finding.objects.get(id=find_incoming.id)]
         # 7 queries regardless of NUM_PRE_EXISTING:
-        #   1 System_Settings SELECT
         #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
         #   1 candidates SELECT (with .only())
+        #   1 locations of the findings with candidates and of those candidates (one prefetch)
         #   1 bulk UPDATE covering all retroactively marked findings
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(7):
             do_false_positive_history_batch(batch)
 
         # All pre-existing findings must now be marked as FP.
