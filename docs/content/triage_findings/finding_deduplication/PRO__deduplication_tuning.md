@@ -295,6 +295,6 @@ By tuning deduplication settings to your specific tools, you can significantly r
 
 ## Where a tool's matching came from
 
-A tool's row on **Settings > Finding Workflow > Matching Configuration** marks configuration that has been changed from the shipped default. A test's **Matching Policy** panel shows the same thing from the other direction: the algorithm actually in force for that test, and the pool its Asset matches within.
+A tool's row on **Settings > Finding Workflow > Matching Configuration** marks configuration that has been changed from the shipped default. A test's **Matching Policy** panel shows the same thing from the other direction: the algorithm actually in force for that test, and the pool its Asset matches within. The panel links to that tool's row on Matching Configuration, and to the Dedupe Pools page when a pool overrides the row: as **Edit** links for users who can edit matching configuration, and as **View** links for users who can only view it.
 
 That pairing is what answers "why did these two findings deduplicate differently" without a support ticket: the panel names the scope each test matched within, so two tests on the same tool with different results point at different pools rather than at a fault.
