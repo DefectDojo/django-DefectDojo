@@ -170,9 +170,13 @@ In order to deploy a Linked Questionnaire:
 
 The Linked Questionnaire will now be active for any Users with access to the Engagement. 
 
+In DefectDojo Pro, open the Engagement, select the **Questionnaires** tab of the **Overview** tile, click **Add Questionnaire**, choose the Questionnaire and click **Submit**. The button shows to Users who can edit the Engagement while a Questionnaire template is still left to link. The tab lists the unanswered Questionnaires first, then the answered ones with who answered and when, and is shown only while **Enable Questionnaires** is on in System Settings. The ⋮ menu at the left of each row holds **Assign User**, **Link to a Different Engagement** (for Users with the permission to change Questionnaires) and **Delete Questionnaire**.
+
 #### Sharing a Linked Questionnaire 
 
 To share the Linked Questionnaire directly with internal DefectDojo Users, click the ⋮ kebab menu and select **Share Questionnaire** from the dropdown. A link will appear which can be copied and forwarded to the intended recipient.
+
+In DefectDojo Pro, open the ⋮ menu at the left of the Questionnaire's row on the **Questionnaires** tab and select **Share Questionnaire**: the link to its answer page is copied to the clipboard.
 
 ![image](images/q_ss10.png)
 
@@ -212,6 +216,8 @@ To respond to a Linked Questionnaire:
 5. Click **Answer Questionnaire**.
 
 ![image](images/q_ss15.png)
+
+In DefectDojo Pro, open the **Questionnaires** tab of the Engagement's **Overview** tile and click **Answer** on the Questionnaire's row (or **Edit Responses** in its ⋮ menu once it has been answered), fill in the answers and click **Submit**. Answering is open to Users who can edit the Engagement, and the page returns to the Engagement once the responses are saved. **View Responses** on an answered row shows who answered, when, and every answer.
 
 Linked Questionnaires do not permit external/anonymous responses because DefectDojo access is required in order to access the Engagement.
 
