@@ -21,7 +21,7 @@ The service account must meet all of the following requirements. A service accou
 1. Enter your Wiz Client ID in the Client ID field.
 2. Enter the Wiz Client Secret in the Secret field.
 3. Choose which data classes to import in **Import Finding Types**. Both are selected by default.
-4. Optionally, list the subscription tags to copy onto Issue findings in **Subscription Tags to Copy**. See [Subscription Tags](#subscription-tags).
+4. Optionally, list the Wiz tags to copy onto findings in **Wiz Tags to Copy**. See [Wiz Tags](#wiz-tags).
 
 #### **Import Finding Types**
 
@@ -41,25 +41,25 @@ Two things to know before you change this setting:
 
 Minimum Severity is a separate control and cannot be changed after the connector is created.
 
-#### **Subscription Tags**
+#### **Wiz Tags**
 
-Cloud teams often record who owns an account, subscription or project as tags on it, for example `Owner`, `OwnerName` and `OwnerEmail` on an AWS account. **Subscription Tags to Copy** brings those tags onto the findings, so you can filter findings and build reports by owner in DefectDojo.
+Cloud teams often record who owns a resource as tags on it, for example `OwnerName` and `OwnerEmail` on each VM, bucket or cluster, or on the account or subscription that holds it. **Wiz Tags to Copy** brings those tags onto the findings, so you can filter findings and build reports by owner in DefectDojo.
 
-Enter the tag keys as a comma\-separated list, for example `Owner, OwnerName, OwnerEmail`. Leave the field blank to copy no tags, which is the default.
+Enter the tag keys as a comma\-separated list, for example `OwnerName, OwnerEmail`. Leave the field blank to copy no tags, which is the default.
 
-Every Issue from a subscription that carries one of the listed tags gets a finding tag of the form `wiz-sub-<key>:<value>`. A subscription tagged `Owner: cloud-team@example.com` and `OwnerName: Jane Doe` gives each of its Issues the tags `wiz-sub-owner:cloud-team@example.com` and `wiz-sub-ownername:jane-doe`:
+Every finding whose resource carries one of the listed tags gets a finding tag of the form `wiz-tag-<key>:<value>`. A resource tagged `OwnerName: Platform Team` and `OwnerEmail: platform@example.com` gives each finding on it the tags `wiz-tag-ownername:platform-team` and `wiz-tag-owneremail:platform@example.com`:
 
-* Keys match without regard to case, so `owner` finds a tag named `Owner`.
+* Each key is read from the resource's own tags first. For Issues, a key the resource does not carry is then read from its subscription's tags, so an owner tagged on the account still reaches Issues on untagged resources. Vulnerability Findings use the resource's tags only, because Wiz does not return subscription tags with them.
+* Keys match without regard to case, so `ownername` finds a tag named `OwnerName`.
 * Tags are lowercase, spaces become hyphens, and commas and quotes are removed, because DefectDojo tags cannot contain them.
-* A listed key that a subscription does not carry, or carries empty, adds nothing.
+* A listed key that neither the resource nor its subscription carries, or that is empty, adds nothing.
 
-To list every finding one owner is responsible for, filter findings by the tag, for example `wiz-sub-owneremail:cloud-team@example.com`.
+To list every finding one owner is responsible for, filter findings by the tag, for example `wiz-tag-owneremail:platform@example.com`.
 
 Things to know:
 
-* **Only Issues are tagged.** Wiz does not return subscription tags with Vulnerability Findings, so those findings get no `wiz-sub-` tags.
-* **A tag change reaches existing findings at the next full resync.** After the first sync, the connector asks Wiz only for Issues whose status changed since the last sync. Changing a subscription's tags does not change any Issue's status, so a finding keeps its old `wiz-sub-` tag until its Issue changes status in Wiz or a full resync runs. Each time a finding is synced, its `wiz-sub-` tags are replaced with the subscription's current ones. Other tags on the finding, including ones added by hand, are left alone. Do not add `wiz-sub-` tags by hand: a sync treats them as its own and removes any the subscription does not carry.
-* **To pick up a tag change everywhere, force a full resync** by changing **Subscription Tags to Copy**, for example by adding a key. Reordering the keys or changing their case does not count as a change.
+* **A tag change reaches existing findings at the next full resync.** After the first sync, the connector asks Wiz only for findings that changed since the last sync. Retagging a resource does not change its findings in Wiz, so a finding keeps its old `wiz-tag-` tag until the finding itself changes in Wiz or a full resync runs. Each time a finding is synced, its `wiz-tag-` tags are replaced with the current ones. Other tags on the finding, including ones added by hand, are left alone. Do not add `wiz-tag-` tags by hand: a sync treats them as its own and removes any Wiz does not report.
+* **To pick up a tag change everywhere, force a full resync** by changing **Wiz Tags to Copy**, for example by adding a key. Reordering the keys or changing their case does not count as a change.
 * **Changing the list triggers one full resync**, as with **Import Finding Types**, so findings imported before the change get their tags on the next sync. Removing a key removes its tags from the findings at that resync.
 
 #### **Asset Exposure**
