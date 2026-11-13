@@ -18,14 +18,19 @@ Always verify updated counts by:
 4. Investigating any unexpected increases in query or task counts
 """
 
+import json
 import logging
+import tempfile
 from contextlib import contextmanager
+from pathlib import Path
 from unittest.mock import patch
 
 from crum import impersonate
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.db import connection
 from django.test import override_settings, tag
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
@@ -40,7 +45,11 @@ from dojo.models import (
     Endpoint_Status,
     Engagement,
     Finding,
+    Finding_Group,
     FindingVulnerabilityReference,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
     Product,
     Product_Type,
     Test,
@@ -850,4 +859,94 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks1=3,
             expected_num_queries2=113,
             expected_num_async_tasks2=3,
+        )
+
+
+GENERIC_SCAN_TYPE = "Generic Findings Import"
+
+
+@tag("performance")
+@override_settings(V3_FEATURE_LOCATIONS=False, SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
+class TestDojoReimportGroupJiraPerformance(TestDojoImporterPerformanceBase):
+
+    """
+    A reimport with group_by and a JIRA instance that keeps findings in sync decides, per group, whether to push
+    the group to JIRA. Regression: that decision read each group and its JIRA issue one query at a time, so the
+    reimport's statement count grew with the number of groups. The same findings are reimported here into 2 and
+    into 10 groups, and the reimport runs the same number of statements either way.
+    """
+
+    FINDINGS = 20  # per report: the second half of the import is reimported, plus as many new findings
+
+    def setUp(self):
+        super().setUp()
+        self.system_settings(enable_finding_groups=True, enable_jira=True)
+
+    def _report(self, directory, name, titles, first):
+        path = Path(directory) / f"{name}.json"
+        findings = [
+            {
+                # Title case, as saved findings carry it: the reimport names a new finding's group from the
+                # parsed title, so a lowercase one would land in a second group instead of the imported one.
+                "title": f"Group Jira Rule {index % titles}",
+                "severity": "High",
+                "description": f"finding {index}",
+                "file_path": f"src/file_{index}.py",
+                "line": index + 1,
+            }
+            for index in range(first, first + self.FINDINGS)
+        ]
+        path.write_text(json.dumps({"findings": findings}), encoding="utf-8")
+        return path
+
+    def _reimport(self, titles):
+        product, engagement, lead, environment = self._create_test_objects(f"Group JIRA {titles}", f"Group JIRA {titles}")
+        jira_instance = JIRA_Instance.objects.create(
+            configuration_name=f"group jira {titles}", url="https://jira.example.com", username="user", password="token",  # noqa: S106
+            default_issue_type="Bug", epic_name_id=1, open_status_key=1, close_status_key=2,
+            info_mapping_severity="Info", low_mapping_severity="Low", medium_mapping_severity="Medium",
+            high_mapping_severity="High", critical_mapping_severity="Critical", finding_jira_sync=True,
+        )
+        jira_project = JIRA_Project.objects.create(jira_instance=jira_instance, product=product, project_key="GJP")
+        common = {
+            "user": lead, "lead": lead, "scan_date": None, "minimum_severity": "Info", "active": True, "verified": True,
+            "sync": True, "scan_type": GENERIC_SCAN_TYPE, "group_by": "finding_title",
+            "create_finding_groups_for_all_findings": True,
+        }
+        pushed = []
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            impersonate(Dojo_User.objects.get(username="admin")),
+            patch("dojo.jira.services.push", side_effect=lambda obj, *_args, **_kwargs: pushed.append(obj)),
+        ):
+            with self._report(directory, "import", titles, 0).open(encoding="utf-8") as scan:
+                test, *_ = DefaultImporter(engagement=engagement, environment=environment, **common).process_scan(scan)
+            groups = list(Finding_Group.objects.filter(test=test))
+            JIRA_Issue.objects.bulk_create(
+                [JIRA_Issue(jira_project=jira_project, jira_id=str(g.id), jira_key=f"GJP-{g.id}", finding_group=g) for g in groups],
+            )
+            del pushed[:]
+            with (
+                self._report(directory, "reimport", titles, self.FINDINGS // 2).open(encoding="utf-8") as scan,
+                CaptureQueriesContext(connection) as queries,
+            ):
+                DefaultReImporter(test=test, close_old_findings=False, **common).process_scan(scan)
+        return groups, len(queries), pushed
+
+    def test_reimport_group_jira_pass_does_not_grow_with_groups(self):
+        """Ten groups cost the reimport no more statements than two; every group with a JIRA issue is still pushed."""
+        counts = {}
+        for titles in (2, 10):
+            groups, statements, pushed = self._reimport(titles)
+            self.assertEqual(len(groups), titles, f"groups formed by the import of {titles} titles")
+            # each group gets a new finding (first pass) and keeps unchanged ones (second pass): pushed once per pass
+            self.assertEqual(
+                sorted((type(obj).__name__, obj.id) for obj in pushed),
+                sorted(("Finding_Group", group.id) for group in groups for _ in range(2)),
+                f"JIRA pushes with {titles} groups",
+            )
+            counts[titles] = statements
+        self.assertEqual(
+            counts[2], counts[10],
+            f"the reimport ran {counts[2]} statements with 2 groups and {counts[10]} with 10",
         )
