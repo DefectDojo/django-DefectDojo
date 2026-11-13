@@ -111,13 +111,17 @@ class CSVParserV2:
 
     def _handle_hostname(self, column_value: str):
         # strip due to https://github.com/greenbone/gvmd/issues/2378
-        get_location(self.finding).host = column_value.strip()
+        hostname = column_value.strip()
+        self.aux_info.hostname = hostname
+        get_location(self.finding).host = hostname
 
     def _handle_ip(self, column_value: str):
+        ip = column_value.strip()
+        self.aux_info.ip_address = ip
         # fallback to ip if hostname is not aviable
         if not get_location(self.finding).host:
             # strip due to https://github.com/greenbone/gvmd/issues/2378
-            get_location(self.finding).host = column_value.strip()
+            get_location(self.finding).host = ip
 
     def _handle_port(self, column_value: str):
         if column_value.isdigit():

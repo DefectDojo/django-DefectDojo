@@ -28,15 +28,12 @@ class OpenVASXMLParser:
                 if field.tag == "name":
                     title = field.text
                     description = [f"**Name**: {field.text}"]
-                if field.tag == "hostname":
-                    title = title + "_" + field.text
-                    description.append(f"**Hostname**: {field.text}")
-                    if field.text:
-                        host_val = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
-                        loc_host = host_val
                 if field.tag == "host":
                     title = title + "_" + field.text
                     description.append(f"**Host**: {field.text}")
+                    hostname_field = field.find("hostname")
+                    if hostname_field is not None and hostname_field.text:
+                        description.append(f"**Hostname**: {hostname_field.text.strip()}")
                     if not loc_host and field.text:
                         host_val = field.text.strip()  # strip due to https://github.com/greenbone/gvmd/issues/2378
                         loc_host = host_val
