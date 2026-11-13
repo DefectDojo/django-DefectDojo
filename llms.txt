@@ -102,7 +102,7 @@ Key facts:
 - [About Deduplication](https://docs.defectdojo.com/triage_findings/finding_deduplication/about_deduplication/): Deduplication fundamentals and key concepts
 - [Enabling Deduplication (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro_enabling_product_deduplication/): How to enable Deduplication at the Asset or Engagement level
 - [Similar Findings (Open Source)](https://docs.defectdojo.com/triage_findings/finding_deduplication/os__similar_findings/): Find related Findings on the View Finding page and manually link them as duplicates
-- [Similar Findings (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__similar_findings/): Find related Findings on the View Finding page and manually link them as duplicates
+- [Similar Findings (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__similar_findings/): See a Finding's duplicate cluster and the Findings similar to it, and link them as duplicates by hand
 - [Avoiding Excess Duplicates](https://docs.defectdojo.com/triage_findings/finding_deduplication/avoid_excess_duplicates/)
 - [Deduplication Tuning (Pro)](https://docs.defectdojo.com/triage_findings/finding_deduplication/pro__deduplication_tuning/): Configure how DefectDojo identifies and manages duplicate findings
 - [Deduplication Tuning (Open Source)](https://docs.defectdojo.com/triage_findings/finding_deduplication/os__deduplication_tuning/): Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service
