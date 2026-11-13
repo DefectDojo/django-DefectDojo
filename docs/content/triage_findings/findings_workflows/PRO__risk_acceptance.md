@@ -365,20 +365,36 @@ data:
 Combine them with `workflow_state` to build a review queue: `?workflow_state=proposed&workflow_state=under_review`
 is everything nobody has decided yet.
 
-### The review thread
+### The Review tile
 
-The **Approvals** tab shows the decisions and the discussion as one conversation, oldest first:
-every state change with the reason recorded against it, interleaved with comments people have
-added.
+The **Review** tile on a Risk Acceptance page holds the review and the conversation about it, side by
+side:
 
-They are two different records — a reason belongs to the move that carried it, a comment belongs to
-nobody's decision — but a reviewer reads one thread. Kept apart, "why was this approved?" is
-answered by a reason in one place and the argument that produced it in another, with nothing saying
-which came first.
+- **Decisions**, on the left: when the Risk Acceptance expires (and how many days are left), what
+  happens to its Findings on that date, the moves available to you from here, and every decision
+  made so far, newest first. Each decision shows who made it, what it did and when, with the reason
+  recorded against it. A decision made without a reason shows none. A Risk Acceptance that is still
+  being reviewed shows the date it asks for (**Requested until**); an expired one shows the date it
+  expired on. A move made by the scheduled expiry job is shown as made by **System**.
+- **Comments**, on the right: a box to add a comment, then the comments, newest first. Comments are
+  ordinary Risk Acceptance notes, so anything written before the tile existed is already there, and
+  each comment keeps its menu (Edit, View History, Delete).
 
-Comments are ordinary Risk Acceptance notes, so anything written before this existed is already in
-the thread, and anything written here is visible to every other view of those notes. Line breaks are
-preserved.
+Every move opens a form for its reason and changes nothing until it is submitted. Rejecting or
+expiring a Risk Acceptance requires a reason. Only the moves you are allowed to make are offered:
+approving, rejecting and activating need Risk Acceptance Approve, the others need Risk Acceptance
+Edit. Whoever requested a Risk Acceptance is not offered **Approve** or **Activate** on it while
+self-approval is blocked. An expired Risk Acceptance is offered **Propose Again** (see
+[Extending an expired acceptance](#extending-an-expired-acceptance)); it is offered **Activate** only
+while an administrator allows direct reinstatement.
+
+On a narrow screen the expiry and the moves stay at the top, and a switch shows either the Decisions
+or the Comments. When the tile is short, the comment box folds into a **Comment** button that opens
+it.
+
+With Risk Acceptances 2.0 turned off, the tile is the Risk Acceptance's **Notes**.
+
+To show the Decisions alone in a layout of your own, add the **Review Lifecycle** widget instead.
 
 ### In reports
 
@@ -597,7 +613,7 @@ risk_acceptance:
 ```
 
 Notifications are reinforcement, not the mechanism: every state change is already visible on the
-Risk Acceptance, in its Approvals tab and in the review queue, whether or not a message is sent or
+Risk Acceptance, in its Review tile and in the review queue, whether or not a message is sent or
 ever arrives. A send that fails is logged and does not undo the decision.
 
 ### Triage Engine conditions
@@ -660,6 +676,11 @@ can offer the actions that exist rather than guessing:
 ```json
 {"workflow_state": "under_review", "allowed_next_states": ["approved", "proposed", "rejected"]}
 ```
+
+`allowed_next_states` lists only the moves the server will make for you. It leaves out `approved` and
+`active` for the person who requested the Risk Acceptance while **Block Self-Approval of Risk
+Acceptances** is on (that move would be refused with `403`), and `active` for an expired Risk
+Acceptance while **Require Review to Extend an Expired Risk Acceptance** is on (refused with `409`).
 
 `transition/` makes a move:
 
@@ -728,7 +749,8 @@ GET /api/v2/findings/{id}/acceptance_history/
 ```
 
 - `transitions/` is the approval chain, oldest first: which state each move left and entered, who
-  made it, when, and why.
+  made it (`actor`, their username, and `actor_name`, their full name or their username when they
+  have none; both are `null` for a move the scheduled expiry made), when, and why.
 - `finding_records/` is what the Risk Acceptance has covered — **including Findings that have since
   left it**, which the accepted-findings list cannot show.
 - `acceptance_history/` is the same records from the Finding's side: every Risk Acceptance this
