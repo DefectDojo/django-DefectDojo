@@ -178,9 +178,13 @@ incluye el CVE. Consulte [Hallazgos](/asset_modelling/engagements_tests/pro__fin
 #### La primera carga después de actualizar {#the-first-load-after-upgrading}
 
 En una instancia autoalojada con las consultas de KEV y EPSS desactivadas, estos valores estaban
-vacíos hasta ahora, o contenían lo que hubiera reportado un escáner. La primera carga del paquete
-después de actualizar los completa para cada CVE que conoce la instancia, así que puede esperar lo
-siguiente:
+vacíos hasta ahora, o contenían lo que hubiera establecido un escáner o una persona. La propia
+actualización, antes de cualquier carga del paquete, traslada cada uno de esos indicadores que
+ninguna inclusión en CISA KEV respalda a **Vendor Reported Exploited** o **Vendor Reported
+Ransomware**, por lo que los recuentos de CISA KEV ya pueden disminuir en ese momento (consulte
+[Hallazgos](/asset_modelling/engagements_tests/pro__findings/#metadata)). La primera carga del
+paquete después de actualizar completa luego los valores de CISA para cada CVE que conoce la
+instancia, así que puede esperar lo siguiente:
 
 * Que **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** y la fecha de KEV cambien en
   muchos hallazgos, tanto activándose (CISA incluye el CVE) como desactivándose (no lo incluye), y que

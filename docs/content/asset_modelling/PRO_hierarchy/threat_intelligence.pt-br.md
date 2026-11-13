@@ -171,8 +171,13 @@ Veja [Achados](/asset_modelling/engagements_tests/pro__findings/#metadata).
 #### O primeiro carregamento após a atualização {#the-first-load-after-upgrading}
 
 Em uma instância self-hosted com as consultas de KEV e EPSS desativadas, esses valores ficavam vazios até
-agora, ou continham o que um scanner tivesse reportado. O primeiro carregamento do pacote após a
-atualização os preenche para todo CVE que a instância conhece, então espere que:
+agora, ou continham o que um scanner ou uma pessoa tivesse definido. A própria atualização, antes de
+qualquer carregamento do pacote, transfere toda sinalização desse tipo que nenhuma listagem do CISA KEV
+sustenta para **Vendor Reported Exploited** ou **Vendor Reported Ransomware**, então as contagens de
+CISA KEV já podem cair nesse momento (veja
+[Achados](/asset_modelling/engagements_tests/pro__findings/#metadata)). Depois, o primeiro
+carregamento do pacote após a atualização preenche os valores da CISA para todo CVE que a instância
+conhece, então espere que:
 
 * **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** e a data do KEV mudem em muitos
   achados, tanto sendo definidos (a CISA lista o CVE) quanto sendo limpos (ela não lista), e que a

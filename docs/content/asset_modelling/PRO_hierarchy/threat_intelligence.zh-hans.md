@@ -105,7 +105,7 @@ Known Exploited 和 Ransomware Used 表示该 CVE 已列入 CISA KEV 目录。�
 
 #### 升级后的首次加载 {#the-first-load-after-upgrading}
 
-在 KEV 和 EPSS 查询处于关闭状态的自托管实例上,这些值此前一直为空,或者保存的是扫描器报告的内容。升级后的首次数据包加载会为实例已知的每个 CVE 填入这些值,因此预计会出现以下情况:
+在 KEV 和 EPSS 查询处于关闭状态的自托管实例上,这些值此前一直为空,或者保存的是扫描器或某个人设置的内容。升级本身(在任何数据包加载之前)就会将每个没有 CISA KEV 列表支持的此类标记迁移到 **Vendor Reported Exploited** 或 **Vendor Reported Ransomware**,因此 CISA KEV 下的计数在那时就可能已经下降(参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata))。随后,升级后的首次数据包加载会为实例已知的每个 CVE 填入 CISA 值,因此预计会出现以下情况:
 
 * 许多发现项上的 **Known Exploited (CISA KEV)**、**Ransomware Used (CISA KEV)** 和 KEV 日期会发生变化,有的被设置(CISA 列出了该 CVE),有的被清除(CISA 未列出该 CVE),优先级也会随之变动。被扫描器或某个人报告为已被利用的发现项会保持其优先级,因为优先级计算也会读取 **Vendor Reported Exploited**。
 * 如果某个 SLA 配置开启了 **Cap SLA by CISA KEV Due Date**,KEV 所列发现项的 SLA 截止日期会被提前到 CISA 的截止日期。大多数 CISA 截止日期都已过去,因此其中许多发现项在首次加载后会立即显示为违反 SLA。

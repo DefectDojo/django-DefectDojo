@@ -38,7 +38,9 @@ Dieselben Basisfristen, weiter verschärft durch Ausnutzbarkeit und Exposition:
 **Glaubhaft ausnutzbar** bedeutet, dass der Befund im KEV gelistet ist oder sein EPSS-Score Ihren
 Schwellenwert erreicht oder überschreitet. Im KEV gelistet heißt, dass er im CISA-KEV-Katalog aufgeführt ist. Eine
 **Vendor Reported Exploited**-Meldung eines Scanners, eines Connectors oder einer Person macht einen Befund
-nicht glaubhaft ausnutzbar und ändert seine Frist nicht, es sei denn, Sie schreiben eine Regel, die dies vorsieht.
+hier nicht glaubhaft ausnutzbar und ändert seine Frist nicht. Nur eine Vulnerability Response Policy kann
+eine solche Meldung berücksichtigen, über eine Regel, die aus ihr die glaubhafte Ausnutzbarkeit setzt; siehe
+[Vulnerability Response Policies](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies).
 **Über das Internet erreichbar** wird durch einen Befund-Tag
 signalisiert — standardmäßig `internet-reachable`.
 

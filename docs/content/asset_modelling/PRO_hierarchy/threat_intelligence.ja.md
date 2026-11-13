@@ -105,7 +105,7 @@ Known ExploitedとRansomware Usedは、そのCVEがCISA KEVカタログに掲載
 
 #### アップグレード後の最初の読み込み {#the-first-load-after-upgrading}
 
-KEVとEPSSのルックアップが無効になっているセルフホストのインスタンスでは、これまでこれらの値は空のままか、スキャナーが報告した値が入っていました。アップグレード後の最初のバンドル読み込みで、インスタンスが把握しているすべてのCVEについてこれらの値が設定されるため、次のことを想定しておいてください。
+KEVとEPSSのルックアップが無効になっているセルフホストのインスタンスでは、これまでこれらの値は空のままか、スキャナーまたは人が設定した値が入っていました。バンドルを読み込む前のアップグレードそのものの時点で、CISA KEVへの掲載による裏付けのないそのようなフラグはすべて **Vendor Reported Exploited** または **Vendor Reported Ransomware** に移行されるため、この時点ですでにCISA KEVの件数が減ることがあります([検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照)。その後、アップグレード後の最初のバンドル読み込みで、インスタンスが把握しているすべてのCVEについてCISAの値が設定されるため、次のことを想定しておいてください。
 
 * 多くの検出事項で**Known Exploited (CISA KEV)**、**Ransomware Used (CISA KEV)**、KEV登録日が変化します。CISAがそのCVEを掲載している場合は設定され、掲載していない場合はクリアされ、それに合わせてPriorityも変動します。ただし、スキャナーまたは人が悪用済みとして報告した検出事項は、Priorityが**Vendor Reported Exploited**も参照するため、そのPriorityが維持されます。
 * SLA設定で**Cap SLA by CISA KEV Due Date**が有効になっている場合、KEVに掲載されている検出事項のSLA期限がCISAの期限日まで前倒しされます。CISAの期限日の多くはすでに過ぎているため、それらの検出事項の多くは、最初の読み込みの直後にSLA違反として表示されます。

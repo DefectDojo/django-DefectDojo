@@ -175,8 +175,12 @@ pas le CVE. Voir [Constatations](/asset_modelling/engagements_tests/pro__finding
 #### Le premier chargement après une mise à niveau {#the-first-load-after-upgrading}
 
 Sur une instance auto-hébergée dont les recherches KEV et EPSS sont désactivées, ces valeurs étaient jusqu'ici
-vides, ou contenaient ce qu'un scanner avait signalé. Le premier chargement du lot après la mise à niveau les
-renseigne pour chaque CVE connu de l'instance. Attendez-vous donc aux changements suivants :
+vides, ou contenaient ce qu'un scanner ou une personne avait défini. La mise à niveau elle-même, avant tout
+chargement du lot, transfère chacun de ces indicateurs qu'aucune inscription au catalogue CISA KEV ne justifie
+vers **Vendor Reported Exploited** ou **Vendor Reported Ransomware** : les décomptes CISA KEV peuvent donc
+diminuer dès ce moment (voir [Constatations](/asset_modelling/engagements_tests/pro__findings/#metadata)).
+Le premier chargement du lot après la mise à niveau renseigne ensuite les valeurs CISA pour chaque CVE connu de
+l'instance. Attendez-vous donc aux changements suivants :
 
 * **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** et la date KEV changent sur de nombreuses
   constatations, dans les deux sens : activés (CISA répertorie le CVE) ou effacés (CISA ne le répertorie

@@ -176,8 +176,11 @@ il CVE. Vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metad
 #### Il primo caricamento dopo l’aggiornamento {#the-first-load-after-upgrading}
 
 Su un’istanza self-hosted con i lookup KEV ed EPSS disattivati, finora questi valori erano vuoti,
-oppure contenevano quanto segnalato da uno scanner. Il primo caricamento del bundle dopo l’aggiornamento
-li compila per ogni CVE noto all’istanza, quindi aspettati che:
+oppure contenevano quanto impostato da uno scanner o da una persona. L’aggiornamento stesso, prima di qualsiasi
+caricamento del bundle, sposta ogni flag di questo tipo che nessuna presenza nell’elenco CISA KEV conferma in
+**Vendor Reported Exploited** o **Vendor Reported Ransomware**, quindi i conteggi CISA KEV possono già
+diminuire in quel momento (vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata)). Il primo
+caricamento del bundle dopo l’aggiornamento compila poi i valori CISA per ogni CVE noto all’istanza, quindi aspettati che:
 
 * **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** e la data KEV cambino su molti
   riscontri, sia impostati (CISA elenca il CVE) sia azzerati (CISA non lo elenca), e che la Priorità

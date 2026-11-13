@@ -38,8 +38,8 @@ aliases:
 ​
 * **SAST / DAST** 是用于根据发现项被发现的上下文来组织发现项的标签。通常,该标签会根据所使用的扫描工具自动填充,但您可以将其调整为更准确的级别(例如,如果该发现项同时被 SAST 和 DAST 工具发现)。
 ​
-* **Threat Intelligence**(位于 **Optional Fields** 下的一个折叠面板)包含 EPSS Score、EPSS Percentile、Known Exploited (CISA KEV)、Used in Ransomware 和 KEV Date Added 值,以及 **Exploit Maturity** 和 **Reachability**。这些值通常由 [EPSS / KEV 同步](/triage_findings/finding_scoring/epss_kev/)以及[威胁情报](/asset_modelling/pro_hierarchy/threat_intelligence/)和[可达性](/triage_findings/finding_scoring/reachability/)功能写入,这些功能会每晚运行、在每次导入后运行,也可以在漏洞浏览器中按需运行。
-  * 三个 KEV 值(Known Exploited (CISA KEV)、Used in Ransomware 和 KEV Date Added)只来自 CISA KEV 目录,无法手动设置。如需记录扫描器、同事或您自己的分析认为某个漏洞已被利用,请改为在表单上设置 **Vendor Reported Exploited** 或 **Vendor Reported Ransomware**。您在此处设置的值会以来源 `manual` 记录,且绝不会被扫描器或丰富过程覆盖;您也可以用同样的方式清除它。参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。
+* **Threat Intelligence**(位于 **Optional Fields** 下的一个折叠面板)包含 EPSS Score 和 EPSS Percentile、只读的 **CISA KEV** 状态、**Vendor Reported Exploited** 和 **Vendor Reported Ransomware** 复选框,以及 **Exploit Maturity** 和 **Reachability**。这些值通常由 [EPSS / KEV 同步](/triage_findings/finding_scoring/epss_kev/)以及[威胁情报](/asset_modelling/pro_hierarchy/threat_intelligence/)和[可达性](/triage_findings/finding_scoring/reachability/)功能写入,这些功能会每晚运行、在每次导入后运行,也可以在漏洞浏览器中按需运行。
+  * **CISA KEV** 显示 CISA KEV 目录是否列出了该漏洞,以及该漏洞被添加的时间。只有 KEV 同步会设置它,因此无法在此处编辑。如需记录扫描器、同事或您自己的分析认为某个漏洞已被利用,请改为勾选 **Vendor Reported Exploited** 或 **Vendor Reported Ransomware**。勾选会以来源 `manual` 记录一条报告,任何扫描器或丰富过程都不会覆盖它;取消勾选则会清除该报告。参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。
   * EPSS 值、**Exploit Maturity** 和 **Reachability** 可以手动设置,这在没有扫描器或数据源提供这些值时很有用,但对于任何引用了 CVE 的发现项,请将手动输入的值视为临时值:下一次同步会用数据源的值替换 EPSS 值和 **Exploit Maturity**。没有 CVE 的发现项永远不会被丰富,因此会保留您输入的任何值。手动设置的值与同步得到的值一样参与优先级和风险计算:手动将 **Exploit Maturity** 设为 *Active in the wild* 会应用主动利用下限,手动设置 **Reachability** 会应用可达性下限。
   * 如果 Rules Engine 规则需要对某个人设置的已被利用标记作出反应,则需要在 **Vendor Reported Exploited** 上设置条件,因为 **KEV: Known Exploited** 只反映 CISA 目录;FedRAMP“route unrated findings for impact review”模板以 **Exploit Maturity** 为依据,该字段现在既可以由威胁情报数据源提供,也可以在此处手动设置。
 
