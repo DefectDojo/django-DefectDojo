@@ -41,16 +41,23 @@ As Findings belong to Tests, access to Findings is determined by a User’s acce
 Finding views contain a variety of tables to help interpret a Finding’s status at a glance. 
 
 ### Finding Overview
-- **Description**: The description of the Finding (added automatically depending on the type of Finding, or created manually). 
-- **Mitigation**: Suggested steps to mitigate.
-- **General Mitigation Policy**: The standardized mitigation policy for the selected Finding. 
-Mitigation policies can be found and edited in the sidebar under **Settings > Finding Workflow > Mitigation Policies**.
-- **Impact**: Potential impact of leaving the Finding unresolved.
-- **References**: URL to cross-reference the third-party scan tool’s specific description of the Finding. For example, References could be links to a relevant entry in a Finding catalog, or a single advisory URL. 
-- **Files**: Any files that have been added to contextualize the Finding. 
-- **Notes**: Notes left by Users related to the Finding. Marking a note as Private will mean it will not be included in any generated reports that include the selected Finding. 
+The Overview tabs hold the Finding's long-form text and its related records:
+
+- **Description**: The description of the Finding (added automatically depending on the type of Finding, or created manually), followed by:
+    - **Impact**: Potential impact of leaving the Finding unresolved.
+    - **References**: URL to cross-reference the third-party scan tool’s specific description of the Finding. For example, References could be links to a relevant entry in a Finding catalog, or a single advisory URL.
+
+  A field the Finding leaves blank is left out of the tab.
+- **Remediation**: Suggested steps to mitigate, followed by the **Mitigation Policy**: the standardized mitigation policy for the selected Finding, shown when the Finding has one. Mitigation policies can be found and edited in the sidebar under **Settings > Finding Workflow > Mitigation Policies**.
+- **Files**: Any files that have been added to contextualize the Finding.
+- **Notes**: Notes left by Users related to the Finding. Marking a note as Private will mean it will not be included in any generated reports that include the selected Finding.
+- **Automation History**: What automation rules did to the Finding, when the rules engine is in use.
 
 ### Metadata 
+The **Details** table lists the Finding's fields one per line, in five groups: **Triage**, **Ownership and Plan**, **Where Found**, **Scores and Intel** and **Tracking**. Each group's header shows how many fields it holds; select it to fold the group to its header, or to open it again. Which groups you fold is remembered for you, for that table only, and changes nothing about the Finding or what anyone else sees. A value too long for its line ends in an ellipsis: hover over it, or move to it with the keyboard, to read all of it. When custom fields are in use, they show under their own **Custom Fields** header at the end.
+
+The Finding's Organization, Asset, Engagement and Test are named in the breadcrumb at the top of the page, so the default table leaves them out; you can add them back in the table's settings (see [Page Layouts](/navigation/pro__page_layouts/)).
+
 - **ID**: DefectDojo’s unique Finding ID. 
 - **Organization, Asset, Engagement, and Test**: The parent objects of the selected Finding. 
 - **Status**: The status of the Finding (e.g., Active, Verified, False Positive, Duplicate, Out of Scope, and Under Defect Review).
