@@ -41,8 +41,8 @@ limite ou acima dele. Listado no KEV significa listado no catálogo CISA KEV. Um
 **Vendor Reported Exploited** de um scanner, de um conector ou de uma pessoa não faz com que um achado
 tenha exploração crível aqui, nem altera o seu prazo. Apenas uma política de resposta a vulnerabilidades
 pode levar essa alegação em conta, por meio de uma regra que define a exploração crível a partir dela; veja
-[Políticas de resposta a vulnerabilidades](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Acessível pela internet** é sinalizado por uma tag de achado — `internet-reachable`
-por padrão.
+[Políticas de resposta a vulnerabilidades](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Acessível pela internet** é sinalizado por uma tag de achado (`internet-reachable`
+por padrão).
 
 Todos os limites, nomes de tags e contagens de dias são editáveis na configuração de SLA.
 

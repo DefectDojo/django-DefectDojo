@@ -49,7 +49,7 @@ two.
 Which column of the matrix a finding lands in depends on whether DefectDojo considers it **likely
 exploitable**, which is read from two fields:
 
-* `known_exploited` — is it in the CISA KEV catalog? On a finding this is **Known Exploited (CISA KEV)**.
+* `known_exploited`: is it in the CISA KEV catalog? On a finding this is **Known Exploited (CISA KEV)**.
 * `epss_score` — is EPSS at or above the configuration's threshold, `0.1` by default?
 
 A **Vendor Reported Exploited** claim from a scanner, a connector or a person is not one of these

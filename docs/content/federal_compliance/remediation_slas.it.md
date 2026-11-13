@@ -41,8 +41,8 @@ Una segnalazione **Vendor Reported Exploited** proveniente da uno scanner, da un
 qui un riscontro sfruttabile in modo credibile, e non ne modifica la scadenza. Solo una policy di risposta alle
 vulnerabilità può tenere conto di una segnalazione di questo tipo, tramite una regola che imposta la sfruttabilità
 credibile a partire da essa; vedi
-[Policy di risposta alle vulnerabilità](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Raggiungibile da internet** è segnalato da un tag del riscontro —
-`internet-reachable` per impostazione predefinita.
+[Policy di risposta alle vulnerabilità](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Raggiungibile da internet** è segnalato da un tag del riscontro
+(`internet-reachable` per impostazione predefinita).
 
 Tutte le soglie, i nomi dei tag e i conteggi dei giorni sono modificabili nella configurazione SLA.
 

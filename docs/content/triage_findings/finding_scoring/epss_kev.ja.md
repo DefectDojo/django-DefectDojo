@@ -135,9 +135,9 @@ EPSSとKEVは単なる情報バッジではなく、DefectDojo Pro の**優先�
 
 検出事項が強化されると、EPSSとKEVの値はPro UI全体で利用できるようになります。
 
-- **検出事項上** — EPSSスコア、EPSSパーセンタイル、**Known Exploited (CISA KEV)**、**Ransomware Used (CISA KEV)**、KEV登録日がすべて検出事項の詳細に表示されます。KEVの値はCISA KEVカタログからのみ取得され、手動で設定することはできません。スキャナーや人が脆弱性を悪用されていると報告したことを記録するには、**Vendor Reported Exploited**と**Vendor Reported Ransomware**を使用してください。これらは検出事項の追加フォームおよび編集フォームで設定およびクリアできます。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照してください。EPSSの値は引き続き**Threat Intelligence**パネルで手動で設定できます。これは、CVEを持たないため強化されることのない検出事項にとって重要です。CVEを参照する検出事項では、次回の同期で手動入力したEPSSの値が上書きされます。[検出事項の編集](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields)を参照してください。
+- **検出事項上**: EPSSスコア、EPSSパーセンタイル、**Known Exploited (CISA KEV)**、**Ransomware Used (CISA KEV)**、KEV登録日がすべて検出事項の詳細に表示されます。KEVの値はCISA KEVカタログからのみ取得され、手動で設定することはできません。スキャナーや人が脆弱性を悪用されていると報告したことを記録するには、**Vendor Reported Exploited**と**Vendor Reported Ransomware**を使用してください。これらは検出事項の追加フォームおよび編集フォームで設定およびクリアできます。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照してください。EPSSの値は引き続き**Threat Intelligence**パネルで手動で設定できます。これは、CVEを持たないため強化されることのない検出事項にとって重要です。CVEを参照する検出事項では、次回の同期で手動入力したEPSSの値が上書きされます。[検出事項の編集](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields)を参照してください。
 - **並べ替え** — 検出事項テーブルはEPSSスコア/パーセンタイルで並べ替えられ、最も悪用される可能性が高い検出事項を先頭に表示できます。
-- **絞り込み** — 検出事項一覧には**Known Exploited (CISA KEV)** と **Ransomware Used (CISA KEV)** のフィルターがあり、実際の悪用が確認された脆弱性に絞ったビューやレポートを作成できます。**Vendor Reported Exploited**と**Vendor Reported Ransomware**のフィルターは、代わりにスキャナー、コネクター、または人が報告したものを検索します。これはCISAカタログと異なる場合があります。
+- **絞り込み**: 検出事項一覧には**Known Exploited (CISA KEV)** と **Ransomware Used (CISA KEV)** のフィルターがあり、実際の悪用が確認された脆弱性に絞ったビューやレポートを作成できます。**Vendor Reported Exploited**と**Vendor Reported Ransomware**のフィルターは、代わりにスキャナー、コネクター、または人が報告したものを検索します。これはCISAカタログと異なる場合があります。
 
 よくある使い方は、**Known Exploited (CISA KEV) = true** で絞り込み、優先度で並べ替えて、確認済みの悪用実績に裏付けられた「これから直すべきもの」の一覧を作ることです。
 

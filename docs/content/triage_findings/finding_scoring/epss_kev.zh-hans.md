@@ -135,9 +135,9 @@ EPSS 和 KEV 并不只是信息性标记——它们是 DefectDojo Pro **优先�
 
 发现项一旦被丰富,EPSS 和 KEV 取值就会在 Pro 界面的各个位置显示:
 
-- **在发现项上**——EPSS 分数、EPSS 百分位、**Known Exploited (CISA KEV)**、**Ransomware Used (CISA KEV)** 和 KEV Date 均显示在发现项详情中。KEV 值只来自 CISA KEV 目录,无法手动设置。如需记录扫描器或某个人报告某个漏洞已被利用,请使用 **Vendor Reported Exploited** 和 **Vendor Reported Ransomware**,添加和编辑发现项表单可以设置和清除这两个字段;参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。EPSS 值仍可在 **Threat Intelligence** 面板中手动设置,这对没有 CVE、因而永远不会被丰富的发现项很重要。对于确实引用了 CVE 的发现项,下一次同步会覆盖手动输入的 EPSS 值;参见[编辑发现项](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields)。
+- **在发现项上**:EPSS 分数、EPSS 百分位、**Known Exploited (CISA KEV)**、**Ransomware Used (CISA KEV)** 和 KEV Date 均显示在发现项详情中。KEV 值只来自 CISA KEV 目录,无法手动设置。如需记录扫描器或某个人报告某个漏洞已被利用,请使用 **Vendor Reported Exploited** 和 **Vendor Reported Ransomware**,添加和编辑发现项表单可以设置和清除这两个字段;参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。EPSS 值仍可在 **Threat Intelligence** 面板中手动设置,这对没有 CVE、因而永远不会被丰富的发现项很重要。对于确实引用了 CVE 的发现项,下一次同步会覆盖手动输入的 EPSS 值;参见[编辑发现项](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields)。
 - **排序**——发现项表格可按 EPSS 分数/百分位排序,将最可能被利用的发现项排在最前面。
-- **筛选**——发现项列表提供 **Known Exploited (CISA KEV)** 和 **Ransomware Used (CISA KEV)** 筛选条件,让您可以构建仅限于已确认真实世界被利用漏洞的视图或报告。**Vendor Reported Exploited** 和 **Vendor Reported Ransomware** 筛选条件则用于查找扫描器、连接器或某个人报告的内容,这些内容可能与 CISA 目录不同。
+- **筛选**:发现项列表提供 **Known Exploited (CISA KEV)** 和 **Ransomware Used (CISA KEV)** 筛选条件,让您可以构建仅限于已确认真实世界被利用漏洞的视图或报告。**Vendor Reported Exploited** 和 **Vendor Reported Ransomware** 筛选条件则用于查找扫描器、连接器或某个人报告的内容,这些内容可能与 CISA 目录不同。
 
 一种常见的工作流程是先筛选出 **Known Exploited (CISA KEV) = true** 的发现项,再按优先级排序,从而生成一份以已确认利用情况为依据的“优先修复”队列。
 
