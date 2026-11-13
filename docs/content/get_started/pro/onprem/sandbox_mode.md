@@ -70,7 +70,7 @@ At rest the three databases take a few hundred megabytes. What people add to the
 
 If the sandbox is on but no switch appears, the initializer could not prepare it. Production is never affected: a sandbox failure is reported and the start continues.
 
-Superusers see **Sandbox Unavailable** in the sidebar where the switch would be. Hover over it (or focus it) to read the reason: the database user lacks `CREATEROLE`, lacks `CREATEDB`, lacks another privilege the sandbox needs, or the database server could not be reached. The same failure is recorded in **Diagnostics** as a System event. Other users see nothing. The reason is a category, not the database's error text, which can name roles and hosts.
+Superusers see **Sandbox Unavailable** in the sidebar where the switch would be. Select it to read the reason: the database user lacks `CREATEROLE`, lacks `CREATEDB`, lacks another privilege the sandbox needs, the database refused a sign-in for one of the sandbox's roles, or the database server could not be reached. The same failure is recorded in **Diagnostics** as a System event. Other users see nothing. The reason is a category, not the database's error text, which can name roles and hosts.
 
 For the full error, look for `Sandbox preparation failed` in the initializer's output:
 
