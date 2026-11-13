@@ -5,7 +5,7 @@ description: "Measure scan frequency, investigate overdue assets, and export cad
 weight: 7
 ---
 
-Scan cadence policies measure how often products receive qualifying Tests. Enable Scan Cadence Assurance in feature flags to expose the page and dashboard widget. A global Maintainer or Owner can create and change policies. Product readers see only the statuses and attestation rows for products they can view.
+Scan cadence policies measure how often products receive qualifying Tests. Enable Scan Cadence Assurance in feature flags to expose the page and dashboard widget. The dashboard widget lists the status counts worst first (overdue, never scanned, due, compliant), then the most overdue products, as many as the tile holds, and each count opens the Scan Cadence page filtered to that status. A global Maintainer or Owner can create and change policies. Product readers see only the statuses and attestation rows for products they can view.
 
 A policy can cover all products, one product type, a regulation, a business criticality, or one product. Exactly one scope selector is populated. The critical-functions option narrows that scope to products whose regulatory profile says they support a critical or important function. If the critical-function flag is not available, High and Very High business criticality provide the fallback.
 
