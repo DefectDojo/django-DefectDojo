@@ -100,7 +100,7 @@ Each row shows:
 * **When it ran**, and whether it was an **Import** or a **Reimport**. Hover over or focus the time to see the full timestamp.
 * **What it did to the Test's Findings**, as counts:
     * **created**: new Findings created by the Import or Reimport.
-    * **closed**: Findings closed by a Reimport because they were missing from the incoming report.
+    * **closed**: Findings closed because they were missing from the incoming report: by a Reimport, or by an Import with **Close Old Findings** set, which can close Findings in other Tests of the same Engagement or Product.
     * **reactivated**: Closed Findings reopened because they appeared again in the incoming report.
     * **untouched**: Open Findings left unchanged because they also appeared in the incoming report.
 
@@ -111,7 +111,9 @@ On a wide widget each Import takes one line; on a narrow one it takes three shor
 
 #### A Reimport that closed every open Finding
 
-A Reimport that closed Findings and matched none of the existing ones usually means the report was empty or failed to parse, rather than that every vulnerability was fixed. That row is marked **Closed all open findings**, and the widget's header reads **Closed all on** the date of the newest such Reimport (otherwise it reads **Last import** and the date of the newest Import). Check the report before you triage the Findings it closed.
+A Reimport that closed Findings and matched none of the existing ones usually means the report was empty or failed to parse, rather than that every vulnerability was fixed. That row is marked **Closed all open findings**. While it is the newest Import in the list, the widget's header reads **Closed all on** and its date; once another Import runs, the header goes back to **Last import** and that Import's date, and the older row keeps its mark. Check the report before you triage the Findings it closed.
+
+Only a Reimport is marked. An Import that closes Findings through **Close Old Findings** is doing what that option asks, so it shows its **closed** count without the warning.
 
 #### Row menu
 
