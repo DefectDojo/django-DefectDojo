@@ -92,7 +92,7 @@ Mitigation policies can be found and edited in the sidebar under **Settings > Fi
 This section includes a table of the Endpoints that the selected Finding affects, along with any relevant metadata.
 
 ### Additional Details 
-- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request.
+- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request. This tab appears once the Finding has a pair; add the first one with **Add Request/Response Pair** in the gear menu at the top of the Finding's page, and further ones from the tab itself.
 - **Steps to Reproduce**: Steps for reproducing the Finding.
 - **Severity Justification**: Written description of why a certain Severity rating was associated with the Finding. 
 
@@ -159,6 +159,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Add Risk Acceptance**: Initiates the Risk Acceptance process. More information can be found [here](/triage_findings/findings_workflows/pro__risk_acceptance/).
 - **Add File**: Initiates the process to add a file to the Finding (see the section below).
 - **Add Note**: Initiates the process to add a note to the Finding. 
+- **Add Request/Response Pair** (on the Finding's own page): Adds a request sent to the target and the response it returned, as evidence for the Finding. The pair appears in the **Request/Response Pairs** tab under Additional Details.
 - **Add Custom Field**: Adds a free-form metadata field to the Finding. With the typed [Custom Fields](/asset_modelling/pro__custom_fields/) feature enabled, this becomes **Custom Fields** and opens the typed editor, where you fill in a value for each field an administrator has defined for Findings. 
 - **Push to Jira**: Pushes the Finding to Jira for ticketing purposes. 
 - **Push to Connector**: Pushes the Finding to the issue tracker assigned to its Asset or Engagement through a [Downstream Connector](/connectors/downstream/about/). When no Issue Tracker Assignment covers either, nothing is sent and DefectDojo says so.
