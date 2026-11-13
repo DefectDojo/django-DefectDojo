@@ -103,6 +103,12 @@ Where each link goes:
 * **A feed** (its name, or **Open Feed** in the menu at the start of its row) opens PSIRT
   Feeds filtered to that feed.
 
+PSIRT Feeds shows each source's state from this widget in its **Poll State** column, so a
+list opened from a count reads the same word on every row. The **Health** column beside it
+is a separate signal: the pattern of the source's last five polls. A failing source can
+still read **Degraded** there while its recent polls are mixed, and a silent one can read
+**Healthy** when its last polls succeeded but it has not polled since.
+
 There is no configuration on this widget, deliberately. Anything that could hide a silent
 feed would remove the only signal separating a broken pipeline from a calm week.
 
@@ -147,12 +153,11 @@ Why these two sit together: an SLA that looks perfectly healthy while a feed has
 stopped polling is the worst combination there is, and it is only visible when both are in
 view at once.
 
-## Our advisories
+## In-House Advisories
 
 Your own advisories by lifecycle status, plus the ones sitting in review or approved with
-**no movement for a fortnight**. The template saves this widget with the title "Our
-advisories", and a saved title is shown as saved; the widget added on its own is titled
-**In-House Advisories**.
+**no movement for a fortnight**. The widget is titled **In-House Advisories**, in the
+reader's language, until someone gives it a title of their own.
 
 The headline counts the stalled advisories. Under it, one bar shows the advisories by
 status (a status with none is left out), and its legend carries the counts; only
