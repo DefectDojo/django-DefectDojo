@@ -50,10 +50,11 @@ Where each link goes:
   so the list total matches the count. **Open Unknown**, **Open No Signal** and the
   "more affected" row open the same lists.
 * **An advisory** (its id or title) opens Feed Findings filtered to that advisory.
-* **The menu at the start of each row** offers **View in Feed Findings**, **Affected
-  Components** (PSIRT Components narrowed to the components the advisory matched) and,
-  when a case already holds the advisory, **Open Case** (PSIRT Cases narrowed to those
-  cases). Nothing in the menu changes data.
+* **The menu at the start of each row** offers **View in Feed Findings**; **Affected
+  Components** when the row names components (PSIRT Components narrowed to the components
+  whose version the advisory's range was verified against); and, when a case already holds
+  the advisory, **Open Case** (PSIRT Cases narrowed to those cases). Nothing in the menu
+  changes data.
 
 Each filtered list shows the filter as a chip above the table; remove the chip to see the
 whole list again.
@@ -126,9 +127,10 @@ dashboard. **Add Widget** offers them only when the license includes the PSIRT A
 Engine and you can read PSIRT (the PSIRT View or PSIRT Change permission, a global
 Maintainer or Owner role, or superuser), the same access their data needs. A dashboard
 that already holds one shows a placeholder in its place for a viewer without that access
-("Not Licensed" or "Insufficient Permissions"), rather than an error. The three operational widgets take no configuration beyond a title and a
-refresh interval — and they reject unknown configuration rather than ignoring it, so a knob
-that did nothing cannot leave you believing the panel is filtered.
+("Not Licensed" or "Insufficient Permissions"), rather than an error. The three
+operational widgets take no configuration beyond a title and a refresh interval. They
+reject unknown configuration rather than ignoring it, so a knob that did nothing cannot
+leave you believing the panel is filtered.
 
 ## Notifications
 
