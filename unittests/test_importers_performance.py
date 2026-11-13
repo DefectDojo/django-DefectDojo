@@ -925,7 +925,7 @@ class TestDojoReimportGroupJiraPerformance(TestDojoImporterPerformanceBase):
             JIRA_Issue.objects.bulk_create(
                 [JIRA_Issue(jira_project=jira_project, jira_id=str(g.id), jira_key=f"GJP-{g.id}", finding_group=g) for g in groups],
             )
-            del pushed[:]
+            pushed.clear()
             with (
                 self._report(directory, "reimport", titles, self.FINDINGS // 2).open(encoding="utf-8") as scan,
                 CaptureQueriesContext(connection) as queries,
