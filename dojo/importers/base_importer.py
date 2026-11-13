@@ -963,10 +963,10 @@ class BaseImporter(ImporterOptions):
             return
         checked = getattr(self, "_import_turn_checked", [])
         if test.pk not in checked:
-            taken = wait_for_test_import_turn(test.pk, wait_seconds=wait_seconds)
+            # Recorded for release by wait_for_test_import_turn itself, the moment the lock is taken.
+            self._import_turn_tests = getattr(self, "_import_turn_tests", [])
+            wait_for_test_import_turn(test.pk, wait_seconds=wait_seconds, on_taken=self._import_turn_tests.append)
             self._import_turn_checked = [*checked, test.pk]
-            if taken:
-                self._import_turn_tests = [*getattr(self, "_import_turn_tests", []), test.pk]
         locked = getattr(self, "_import_locked_tests", [])
         if test.pk in locked:
             return

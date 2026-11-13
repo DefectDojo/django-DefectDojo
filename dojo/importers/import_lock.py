@@ -249,12 +249,17 @@ def _abandoned(test_ids):
     return abandoned
 
 
-def wait_for_test_import_turn(test_id, wait_seconds=None):
+def wait_for_test_import_turn(test_id, wait_seconds=None, on_taken=None):
     """
     Take the lock that lets one import at a time into the test, waiting for an import holding it to end.
 
     ``wait_seconds`` overrides DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS for a caller that must not block: 0 only
     tries, which is what a background import in a worker does before it queues itself again.
+
+    ``on_taken(test_id)`` runs as soon as the lock is taken, before this returns, so the caller records it for
+    release in the same guarded step. Anything that interrupts the take before it is recorded (a time limit, a
+    broken connection, ``on_taken`` itself) gives the lock back, so nothing is left holding a test that no
+    import will release.
 
     Returns True when this connection holds the lock (release it with release_test_import_turns),
     False when it was not taken: the lock is turned off, or the import holding it has been idle
@@ -274,8 +279,7 @@ def wait_for_test_import_turn(test_id, wait_seconds=None):
     waited = False
     with connection.cursor() as cursor:
         while True:
-            cursor.execute("SELECT pg_try_advisory_lock(%s, %s)", [TEST_IMPORT_TURN_LOCK_CLASS, test_id])
-            if cursor.fetchone()[0]:
+            if _try_test_import_turn(cursor, test_id, on_taken):
                 if waited:
                     logger.info("test %s: the other import has finished, this one starts now", test_id)
                 return True
@@ -298,6 +302,40 @@ def wait_for_test_import_turn(test_id, wait_seconds=None):
                 logger.info("test %s: another import into it is running, waiting for it to finish", test_id)
                 waited = True
             time.sleep(min(TEST_IMPORT_TURN_POLL_SECONDS, remaining))
+
+
+def _try_test_import_turn(cursor, test_id, on_taken):
+    """One try for the test's turn; a take that is interrupted before ``on_taken`` has recorded it is given back."""
+    recorded = False
+    try:
+        cursor.execute("SELECT pg_try_advisory_lock(%s, %s)", [TEST_IMPORT_TURN_LOCK_CLASS, test_id])
+        if not cursor.fetchone()[0]:
+            return False
+        if on_taken is not None:
+            on_taken(test_id)
+        recorded = True
+    except BaseException:
+        if not recorded:
+            _give_back_test_import_turn(test_id)
+        raise
+    return True
+
+
+def _give_back_test_import_turn(test_id):
+    """
+    Release a turn that may or may not have been taken, without a word if it was not.
+
+    pg_advisory_unlock on a lock this session does not hold only returns false. If the release itself fails (an
+    aborted transaction, a broken connection), the connection is marked to be closed at the end of the request
+    or task, which releases the lock with it, as release_test_import_turns does.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_unlock(%s, %s)", [TEST_IMPORT_TURN_LOCK_CLASS, test_id])
+    except BaseException as exc:
+        connection.close_at = time.monotonic()
+        if not isinstance(exc, DatabaseError):
+            raise
 
 
 def test_import_in_progress_message(test_id, wait_seconds):

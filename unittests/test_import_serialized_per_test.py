@@ -279,6 +279,29 @@ class TestTryingForTheTestWithoutWaiting(_SerializedImportMixin, SimpleTestCase)
         self.assertEqual(self._findings_of(self.target), self.FINDINGS_IN_REPORT)
         self.assertEqual(_import_turn_holders(self.target.id), [], msg="the import left the test locked")
 
+    def test_a_turn_taken_as_the_caller_is_interrupted_is_given_back(self):
+        # A time limit (SoftTimeLimitExceeded) or any other exception can land right after the lock is taken and
+        # before the importer has recorded it for release; nothing would ever release it then.
+        class Interrupted(BaseException):
+            pass
+
+        def interrupted(_test_id):
+            raise Interrupted
+
+        with self.assertRaises(Interrupted):
+            import_lock.wait_for_test_import_turn(self.target.id, wait_seconds=0, on_taken=interrupted)
+
+        self.assertEqual(_import_turn_holders(self.target.id), [], msg="the interrupted take left the test locked")
+
+    def test_a_turn_is_recorded_for_release_as_it_is_taken(self):
+        importer = DefaultReImporter(test=self.target, **self._options())
+        with importer.import_lock_scope():
+            importer.lock_test_under_import(self.target, wait_seconds=0)
+            self.assertEqual(importer._import_turn_tests, [self.target.id])
+            self.assertEqual(len(_import_turn_holders(self.target.id)), 1)
+
+        self.assertEqual(_import_turn_holders(self.target.id), [], msg="the scope did not release the turn")
+
     def test_a_test_whose_lock_was_left_behind_is_not_asked_for_again(self):
         importer = DefaultReImporter(test=self.target, **self._options())
         asked = []
