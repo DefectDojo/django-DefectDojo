@@ -12,7 +12,7 @@ FINDING_FIELD_GROUPS = OrderedDict([
         "title", "component_name", "component_version",
         "vulnerability_id",
         "file_path", "unique_id_from_tool", "vuln_id_from_tool",
-        "endpoints__host",
+        "endpoints__host", "location_os",
     ]),
     ("Severity & Risk", [
         "severity", "cwe", "epss_score", "epss_score_range",

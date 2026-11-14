@@ -1,10 +1,11 @@
 import datetime
 
+from defusedxml.ElementTree import fromstring
 from django.test import override_settings
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.nexpose.parser import NexposeParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestNexposeParser(DojoTestCase):
@@ -194,6 +195,25 @@ class TestNexposeParser(DojoTestCase):
             self.assertEqual("dns", str(self.get_unsaved_locations(finding)[0].protocol))
             self.assertEqual("udp", str(self.get_unsaved_locations(finding)[0].fragment))
             self.assertEqual("dns://192.168.1.1#udp", str(self.get_unsaved_locations(finding)[0]))
+
+    @skip_unless_v3
+    def test_nexpose_parser_attaches_host_os(self):
+        with (get_unit_tests_scans_path("nexpose") / "dns.xml").open(encoding="utf-8") as testfile:
+            findings = NexposeParser().get_findings(testfile, Test())
+        for finding in findings:
+            for location in self.get_unsaved_locations(finding):
+                with self.subTest(finding=finding.title, location=str(location)):
+                    self.assertEqual({"os": "Linux 2.6.32"}, location.get_association_data().relationship_data)
+
+    def test_nexpose_parse_os_fingerprint(self):
+        node = fromstring(
+            "<node><fingerprints>"
+            '<os certainty="0.60" vendor="Linux" product="Linux" version="5.4"/>'
+            '<os certainty="0.85" vendor="Microsoft" product="Windows Server 2019" version="1809"/>'
+            "</fingerprints></node>",
+        )
+        self.assertEqual("Microsoft Windows Server 2019 1809", NexposeParser.parse_os_fingerprint(node))
+        self.assertEqual("", NexposeParser.parse_os_fingerprint(fromstring("<node/>")))
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_nexpose_parser_use_first_seen(self):

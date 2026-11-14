@@ -84,6 +84,13 @@ supported_thumbnail_file_formats = [
 
 
 @register.filter
+def host_os_matches(location_ref, query):
+    """True if the host OS reported for a LocationFindingReference contains `query` (case-insensitive)."""
+    os_name = (location_ref.relationship_data or {}).get("os") or ""
+    return bool(query and os_name and query.strip().lower() in os_name.lower())
+
+
+@register.filter
 def markdown_render(value):
     if value:
         markdown_text = markdown.markdown(value,

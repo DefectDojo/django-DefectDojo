@@ -2,7 +2,7 @@ import datetime
 
 from dojo.models import Test
 from dojo.tools.nmap.parser import NmapParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestNmapParser(DojoTestCase):
@@ -49,6 +49,26 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("mocha2005.mochahost.com", location.host)
                 self.assertEqual(21, location.port)
                 self.assertEqual("tcp", location.protocol)
+
+    @skip_unless_v3
+    def test_parse_file_with_os_detection_attaches_host_os(self):
+        with (get_unit_tests_scans_path("nmap") / "nmap_os_detection.xml").open(encoding="utf-8") as testfile:
+            parser = NmapParser()
+            findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
+            self.assertEqual(2, len(findings))
+            locations = {
+                location.host: location
+                for finding in findings
+                for location in self.get_unsaved_locations(finding)
+            }
+            # The highest-accuracy OS match is used
+            self.assertEqual(
+                {"os": "Microsoft Windows Server 2019"},
+                locations["win-dc01.corp.example"].get_association_data().relationship_data,
+            )
+            # A host without OS detection gets no association data
+            self.assertFalse(locations["10.0.0.20"].get_association_data())
 
     def test_parse_file_with_script_vulner(self):
         with (get_unit_tests_scans_path("nmap") / "nmap_script_vulners.xml").open(encoding="utf-8") as testfile:
