@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import re
@@ -31,7 +32,7 @@ def register_parser(scan_type, parser):
 
 
 def get_parser(scan_type):
-    """Return a parser by the scan type"""
+    """Return a fresh copy of the parser for the scan type"""
     if scan_type not in PARSERS:
         msg = f"Parser '{scan_type}' does not exist"
         raise ValueError(msg)
@@ -39,7 +40,7 @@ def get_parser(scan_type):
     # update DB dynamically
     test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
     if test_type.active:
-        return PARSERS[scan_type]
+        return copy.deepcopy(PARSERS[scan_type])
 
     msg = f"Parser {scan_type} is not active"
     raise ValueError(msg)
