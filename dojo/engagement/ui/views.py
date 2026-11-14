@@ -1220,7 +1220,7 @@ def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
     if fid:
-        finding = get_object_or_404(Finding, id=fid)
+        finding = get_object_or_404(Finding, id=fid, test__engagement=eng)
 
     if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied

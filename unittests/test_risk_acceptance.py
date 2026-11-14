@@ -118,6 +118,15 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertFalse(Risk_Acceptance.objects.filter(name=ra_data["name"]).exists())
         self.assertTrue(self.assert_all_active_not_risk_accepted(Finding.objects.filter(id__in=[2, 22])))
 
+    def test_add_risk_acceptance_form_only_suggests_the_engagements_findings(self):
+        own = self.client.get(reverse("add_risk_acceptance", args=(1, 2)))
+        self.assertEqual(200, own.status_code)
+        self.assertEqual(f"Accept: {Finding.objects.get(id=2).title}", own.context["form"].initial["name"])
+
+        other = self.client.get(reverse("add_risk_acceptance", args=(1, 22)))
+        self.assertEqual(404, other.status_code)
+        self.assertNotContains(other, Finding.objects.get(id=22).title, status_code=404)
+
     def test_add_findings_to_risk_acceptance_only_covers_the_engagements_findings(self):
         self.test_add_risk_acceptance_multiple_findings_accepted()
         ra = Risk_Acceptance.objects.last()
