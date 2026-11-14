@@ -1,22 +1,47 @@
 ---
 title: "Migrating from Open Source to Self-Hosted DefectDojo Pro"
-description: "Move your open source DefectDojo database and media files into a self-hosted DefectDojo Pro deployment"
+description: "Move your open source DefectDojo data into a self-hosted DefectDojo Pro deployment, with a database dump or with the DefectDojo connector"
 draft: false
 weight: 3
 audience: pro
 ---
 
-This page describes how to move the data from an open source DefectDojo instance into a self-hosted DefectDojo Pro deployment.
+This page describes two ways to move data from an open source DefectDojo instance into self-hosted DefectDojo Pro:
+
+* **The database dump.** You export the database and the media files, and restore them into an empty Pro deployment. The result is an exact copy.
+* **The DefectDojo connector.** DefectDojo Pro pulls the open source instance over its export API, from the Connectors UI. You run it as often as you need, until you cut over.
+
+Because you host the deployment, your data stays inside your own environment for the whole migration. DefectDojo support can assist at any step. If DefectDojo hosts your Pro instance in the cloud, follow [Migrating from Open Source to DefectDojo Cloud](/get_started/pro/cloud/migrating_from_open_source/) instead. The DefectDojo team performs the restore for you there.
+
+## Which path
+
+| | Database dump | DefectDojo connector |
+| --- | --- | --- |
+| What moves | An exact copy of the database and the media files | Product Types, Products, engagements, tests, findings and their related data |
+| Source version | Any 2.x release, or 3.0.200 and later | 3.4.300 and later |
+| Target | An empty Pro deployment. The restore replaces what is there. | A Pro instance, with or without data in it |
+| Who runs it | You, from a restore host with the PostgreSQL client tools | You, from the Connectors UI |
+| How often | Once per cutover, in a scheduled window | As often as you need, until you cut over |
+| Secrets, settings and history | Cross with the dump | Secrets do not cross. The import and audit history of the migrated objects crosses by default. Notification settings and most system settings cross once, on the first Sync |
+| Finding templates, engagement presets, API scan configurations and tool configurations | Cross with the dump | Cross, but tool configurations arrive without their password, SSH key, API key and extras |
+| Users | Cross, with passwords, groups and roles | Cross as inactive accounts, without passwords. The connector adds no group and sets no global role. The users in the Authorized Users list of a Product or Product Type become its members. They get the Writer role, or Maintainer for a staff user. The default group rule of DefectDojo Pro still applies to a new user. |
+| The source during the move | Frozen with read-only mode from the final dump | Read-only during each Sync, and open between Syncs |
+
+Take the dump path if you want an exact copy, and you can schedule a window. Users, groups, settings and history come across as they are. The target must be empty.
+
+Take the connector path to move Products over time, or into a Pro instance that already holds data. You set it up yourself in the Connectors UI, and you run it again until the cutover. The open source instance keeps running meanwhile. Secrets do not cross with the connector. The import and audit history of the migrated objects crosses by default. Notification settings and most system settings cross once, on the first Sync. Tool configurations cross without their password, SSH key, API key and extras. You set up notification channels and tool credentials in DefectDojo Pro yourself.
+
+## Path 1: The database dump
 
 The examples use Amazon Web Services, with either Docker Compose on EC2 or Kubernetes on EKS, and the database on Amazon RDS for PostgreSQL. That is the combination this procedure was validated against. The same sequence applies to other providers that offer managed PostgreSQL and equivalent compute, and to on-premise hardware, with the provider-specific commands changed to suit.
 
-Because you host the deployment, your data stays inside your own environment for the whole migration. You run the export and the restore, and DefectDojo support can assist at any step. If your DefectDojo Pro instance is cloud-hosted by DefectDojo rather than self-hosted, follow [Migrating from Open Source to DefectDojo Cloud](/get_started/pro/cloud/migrating_from_open_source/) instead, because the DefectDojo team performs the restore for you.
+You run the export and the restore, and DefectDojo support can assist at any step.
 
 At a high level, you export the database and the media files from the open source instance, restore them into the database and the storage your Pro deployment uses, point Pro at the restored database, and then validate the result.
 
 Running on Kubernetes? The [Kubernetes Migration Runbook & Troubleshooting](/get_started/pro/onprem/kubernetes/migration_runbook/) turns this into a validated, end-to-end Helm sequence, with an error-keyed troubleshooting index and a post-migration verification checklist.
 
-## Before you start
+### Before you start
 
 Confirm the following before you export anything.
 
@@ -36,7 +61,7 @@ Free disk space. The source server needs room for the database dump and the comp
 
 Your encryption keys. Record the `DD_CREDENTIAL_AES_256_KEY` and `DD_SECRET_KEY` values your open source instance runs with, and give Pro the same ones in Step 6. Tool Configuration credentials are encrypted with the credential key, and a Pro instance with a different key cannot read them.
 
-## Step 1: Export your database
+### Step 1: Export your database
 
 The default Docker Compose configuration uses `defectdojo` as both the database username and the database name. These can be overridden, so check the `DD_DATABASE_URL` value in your `docker-compose.yml` or `.env` file. The default connection string is:
 
@@ -71,7 +96,7 @@ pg_dump -h <remote_ip_or_hostname> -p 5432 \
 
 A plain text SQL dump, produced by omitting `-Fc`, also works. It tends to embed `CREATE ROLE`, `ALTER ROLE`, and `CREATE DATABASE` statements that a managed database will reject, so see the note in Step 4 if you use one.
 
-## Step 2: Export your media files
+### Step 2: Export your media files
 
 DefectDojo stores uploaded artifacts such as screenshots, threat models, and risk acceptance documents in a media directory. Scan files used for import and reimport are not kept on disk by open source DefectDojo, since they are discarded once parsed, so the media directory holds only user-uploaded artifacts.
 
@@ -98,7 +123,7 @@ From a path on disk:
 tar czf defectdojo_media.tar.gz -C /opt/dojo/media .
 ```
 
-## Step 3: Name your files
+### Step 3: Name your files
 
 Put your open source version in both filenames so the version in play is unambiguous during the restore. For an instance running 2.38.1:
 
@@ -109,7 +134,7 @@ Put your open source version in both filenames so the version in play is unambig
 
 Move both files to your restore host. You can copy them directly with a tool such as `scp`, or stage them in private object storage in your own account and pull them down to the restore host. On AWS that means a private S3 bucket and `aws s3 cp`. Either way the data stays inside your own environment.
 
-## Step 4: Restore the database
+### Step 4: Restore the database
 
 Run the restore from your restore host, pointed at the database endpoint. Managed PostgreSQL services differ in what they support here. Amazon RDS has no one-step import of a dump file from a bucket, so a client-side `pg_restore` is the supported path.
 
@@ -144,7 +169,7 @@ psql -h <db-endpoint> -U <master_user> -d defectdojo \
 
 If the restore reports errors, capture the output and contact support before you strip anything further out of the dump. Removing too much can leave the database in an inconsistent state that is harder to diagnose than the original error.
 
-## Step 5: Restore your media files
+### Step 5: Restore your media files
 
 Put the contents of the media archive where your Pro deployment reads uploaded files from. The application looks for them at `/app/media`, which your deployment backs with either a bind mount or a persistent volume. Check the installation documentation supplied with your license for the host path or volume your deployment uses.
 
@@ -168,7 +193,7 @@ docker run --rm \
 {{< /tab >}}
 {{< /tabs >}}
 
-## Step 6: Point DefectDojo Pro at the restored database
+### Step 6: Point DefectDojo Pro at the restored database
 
 Update the database connection so Pro uses the database you just restored, then start the application. On first start, Pro runs the database migrations that upgrade the schema from your open source version to the Pro version. Depending on the size of your database and the size of the version gap, this can take a while, and the application is not available until it finishes.
 
@@ -204,7 +229,7 @@ sudo -E dojo-compose-cli app start
 
 Which Pro capabilities are available to your deployment depends on your license and on how you deploy, since some of them are not applicable to a self-hosted install. DefectDojo confirms the set that applies to you during the migration.
 
-## Step 7: Validate your data
+### Step 7: Validate your data
 
 Once the application is running against the restored database:
 
@@ -214,7 +239,7 @@ Once the application is running against the restored database:
 4. Check that user accounts and groups are intact. SSO and other authentication settings usually have to be reconfigured for the new deployment.
 5. Report any discrepancies to your DefectDojo contact.
 
-## Planning the cutover
+### Planning the cutover
 
 The dump is a point-in-time snapshot, so anything created in the open source instance after you take it will not be in the Pro deployment. To avoid losing data, turn on read-only mode in the open source instance before the final dump or the final sync. Read-only mode is available in DefectDojo 3.5.100 and later.
 
@@ -226,20 +251,164 @@ While read-only mode is on, DefectDojo rejects changes to your data from the UI 
 
 A dry run is worth the time. Migrate a recent copy first, validate it, and then repeat the process for the real cutover. The second run is faster, and it tells you how long the schema migration in Step 6 is going to take.
 
-## Migration checklist
+### Migration checklist
 
 - Database engine, database location, and open source version identified
 - Open source version aligned with the target Pro version
 - Target PostgreSQL provisioned, reachable from a restore host with the PostgreSQL client tools
+- Read-only mode turned on in the open source instance, with no Celery task queued or running
 - Database exported, with a custom-format dump if possible
 - Media directory located and compressed
 - Both files named with the open source version
 - Database and application role created on the target
 - Dump restored, with restore output reviewed for errors
+- Read-only mode turned off in the restored database
 - Media files restored to the path or volume your deployment uses
 - Pro pointed at the restored database and started, with schema migrations complete
 - Data validated in the new deployment
 
+## Path 2: The DefectDojo connector
+
+The DefectDojo Migration connector pulls the open source instance into DefectDojo Pro over the source's [export API](/automation/api/product_export/). It runs from the Connectors UI, like every other [Upstream Connector](/connectors/upstream/about/), and its tile is **DefectDojo Migration**. It reads the source. The only change it makes there is read-only mode, which it turns on for each Sync and off at the end. The [DefectDojo Migration connector reference](/connectors/toolreference/defectdojo/) lists every option, what crosses and what does not.
+
+The connector ships in a coming DefectDojo Pro release.
+
+### Before you start
+
+Confirm the following before you add the connector.
+
+* **The feature flag.** The DefectDojo Migration is a beta feature and is off by default. A superuser turns on **DefectDojo Migration** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/). Until then, the connector's tile and **Activate and Invite** do not show.
+* **The open source version.** Upgrade the open source instance to 3.4.300 or later. That release added the export API. The connector refuses an older source.
+* **HTTPS.** Serve the open source instance over HTTPS, on a URL your Pro deployment can reach. The connector refuses a plain `http://` URL.
+* **A superuser API key.** Create a superuser on the source for the connector alone, and an API v2 key for it. The export API answers only a superuser. Revoke the key after the cutover.
+* **Email.** Set up a mail server under **Settings > System > Email** in DefectDojo Pro. Migrated users get their set-password link by email. While users would migrate and DefectDojo Pro cannot send email, **Begin Migration** stays off. SSO or LDAP sign-in and DefectDojo Pro cloud need no mail server here.
+* **What does not cross.** Secrets stay on the source: JIRA, API tokens and passwords. The Slack, Microsoft Teams, email and webhook setup stays too. Notification settings and most system settings cross once, on the first Sync. A tool configuration arrives without its password, SSH key, API key and extras. JIRA issue links, groups and global roles stay on the source too. So does the history of users, finding templates, Product Types and other reference data. Files over the size limit stay. Duplicates stay, unless you ask for them. Plan to set up notification channels and tool credentials in DefectDojo Pro yourself.
+* **History.** The connector copies the import history and the audit history of the objects it migrates. The fields **Migrate Import History** and **Migrate Audit History** are on by default. The source needs an export version that offers history. Audit retention is on when `DD_AUDITLOG_FLUSH_RETENTION_PERIOD` is 0 or above. The next flush then deletes migrated audit events older than that many months. It keeps legacy audit entries. To keep the events, raise the period before the Sync, or set it to `-1` to turn the flush off. The [connector reference](/connectors/toolreference/defectdojo/#what-crosses) explains which history crosses.
+* **The owner fields.** The product manager, technical contact and team manager of a Product become members of the Product in DefectDojo Pro. The three fields stay empty.
+* **Access.** The users in the Authorized Users list of a Product become members of the Product. The users in the list of its Product Type become members of the Product Type. A user that was staff on the source gets the Maintainer role. Every other user gets the Writer role. A user that is already a member keeps the membership. An owner of the Product is the one exception: the owner gets the Maintainer role again on each Sync.
+
+### Step 1: Add the connector
+
+1. In the Pro UI, open **Connect > Upstream**.
+2. Click **Add Configuration** on the **DefectDojo Migration** tile.
+3. Enter the URL of the source in **Location URL** and the superuser API key in **API Token**.
+4. Keep the other defaults, or change them. The [connector reference](/connectors/toolreference/defectdojo/#connector-mappings) explains each field. Auto-Mapping is always on for this connector: each source Product gets a Product of the same name, under a Product Type of the same name.
+5. Keep **One-Time** in both **Frequency** fields: Discover and Sync then run only when you click their buttons. For a migration in one Sync, also turn on **Delete the Connection After the Migration**. Pick **Daily**, **Weekly** or **Monthly** if you want to sync on a schedule until you cut over.
+6. Click **Submit**. DefectDojo Pro checks the key and the version of the source, and tells you if either check fails. Discover then starts at once, on every frequency, and the connection's migration page opens.
+
+The [Add or Edit Upstream Connectors](/connectors/upstream/add_edit/) page covers the shared parts of the form: the schedule and the label.
+
+### Step 2: Discover and map
+
+[Discover](/connectors/upstream/manage_operations/#discover-operations) runs once after you submit the form, and again whenever you choose **Discover** in the gear menu of the migration page. The connector creates one Record per Product on the source, and Auto-Mapping maps every Record at once.
+
+Discover also fills the connection's migration page with the [preflight report](/connectors/toolreference/defectdojo/#the-preflight-report). The top of the page shows the number of findings, the estimated duration and the number of warnings, and the sections below show the full report. To leave a source Product behind, clear its **Include** box in the **Products** section. Read the report before the first Sync:
+
+* **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it. It also warns when audit retention is on and audit events cross.
+* **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync. The totals include the imports, import actions, audit events and legacy audit entries that the Sync copies.
+* **To Be Created** lists the users and the reference data that the Sync creates.
+* **Not Migrated** lists what stays on the source. It names the secrets, and the settings and feature areas that you set up in DefectDojo Pro yourself. It names Audit History and Import History when the source sends no such history. It also names them when you turned the field off.
+* **Estimated Duration** tells you how long the first Sync takes.
+
+### Step 3: Sync
+
+Click **Begin Migration** on the migration page and confirm. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends (DefectDojo 3.5.100 and later; see [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync)). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The run copies the import history and the audit history of these objects, unless you turned those fields off. The run also creates the users and the reference data they refer to. It also brings the finding templates and the tool configurations without their password, SSH key, API key and extras. It brings the engagement presets and API scan configurations of each Product too. A large estate takes a while. **History** on the migration page shows each run.
+
+The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. The migration page shows a progress bar during that time, and **Migration Complete** when it ends. If it shows **Migration Stalled**, click **Begin Migration** again to finish the import. A notification then sums up the migration. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
+
+### Step 4: Validate your data
+
+Compare the two instances once the first Sync ends:
+
+1. Check that every Product Type and every Product you mapped is present, with its description and tags. The owners of each source Product are members of it, with the Maintainer role. So are the users in its Authorized Users list, with the Writer role, or Maintainer for a staff user.
+2. Open a Product and check its engagements and tests, with their names and dates.
+3. Open one finding of each scan type. Check its fields, its notes, its files and its endpoints. Its test has the test type and the scan type of the source test. Only a test with no test type on the source gets the test type `DefectDojo - Connectors Import`.
+4. Check the risk acceptances and the finding groups of a Product that has them.
+5. Open a test and a finding that had imports and edits on the source. Check their import history and their audit history. **All Audit Logs** shows the last 31 days by default. For older events, open the history of the object or change the date filter.
+6. Check the finding templates, and the engagement presets and API scan configurations of a Product that has them. Enter the password, SSH key, API key or extras of each tool configuration that the connector created. They do not cross.
+7. Check that the users are present. New users arrive inactive, with no usable password, and none of them is a superuser. Activate the users you need and invite them, as [How Migrated Users Sign In](#how-migrated-users-sign-in) explains. Then give them roles, and set up SSO. A migrated user does not use a license seat until it is activated.
+8. Report any discrepancies to your DefectDojo contact.
+
+### How Migrated Users Sign In
+
+The connector creates each new user inactive, with no password. No password crosses from the source, so each new user sets a new one. A user that is not active cannot sign in with a password or with SSO.
+
+To activate users and send them an invitation:
+
+1. Sign in as a superuser, or as a user with the Global Owner role who can change users.
+2. Open **Settings > Users & Permissions > Users**. The page shows **Active Users** first, so it hides the migrated users. Choose **Inactive Users** in the view list above the table. Then select the users you need. Do not select your own account.
+3. Click **Activate and Invite**, and confirm. Each active user takes a license seat.
+
+Do not use the **Active** box on **Edit User** for this. The box activates a user, but it sends no link, and **Activate and Invite** skips a user that is already active. To send the link to such a user, deactivate it with **Deactivate Users**. Then choose **Inactive Users**, select the user, and click **Activate and Invite**.
+
+For each selected user, DefectDojo Pro does the following:
+
+* It activates the user, if the user is inactive.
+* It emails a migrated user a link to set a password, if the user has no password. A user that no migration created gets no link.
+* If SSO or LDAP sign-in is on, it sends no link. The users sign in with SSO or LDAP.
+* It sends no link to a user that has no password and signed in before. That user signs in with SSO.
+* It skips service users, and it skips every account that is already active.
+
+The user opens the link and chooses a password. The link stops working when the user sets a password or signs in. It also stops after 3 days, or after the number of seconds you set in `DD_PASSWORD_RESET_TIMEOUT`. To make a new link, deactivate the user with **Deactivate Users**. Then choose **Inactive Users**, select the user, and click **Activate and Invite** again.
+
+If an email cannot go out, DefectDojo Pro still activates the user. The **Pass On These Links** window then lists each such user with the link and a copy button. An email cannot go out in these cases:
+
+* The user has no email address.
+* The deployment has no working email server, or the send fails.
+* The address reached its mail limit.
+
+Copy each link and send it to its user yourself. A link works like a password, so send it only to that user. The window shows the links once. If you close it before you copy them, make new links: deactivate the same users with **Deactivate Users**, then select them under **Inactive Users** and click **Activate and Invite** again.
+
+How each sign-in method treats a migrated user:
+
+* **Password.** The user signs in with the new password. The **Forgot Password?** link on the login page works only for a user that already has a password. It also works only while **Allow Password Reset** is on in [Login Settings](/admin/sso/pro__login_settings/). Until the user sets one with the link, **Forgot Password?** sends nothing.
+* **OAuth and OIDC.** Social sign-in finds the user by email address, and only after you activate the user. Before that, the sign-in stops with this message: "This account came from a migration and is not active yet. Ask an administrator to activate it." SSO creates no second account for the user, and it never activates anyone.
+* **SAML.** SAML finds the user by username, and it refuses a user that is not active. Activate the users before they sign in with SAML.
+
+A user that signs in only with [SSO](/admin/sso/) does not need a password. After the first SSO sign-in, **Activate and Invite** skips that user and sends no link.
+
+### Step 5: Repeat until you cut over
+
+Run Sync again by hand, or on the recurring frequency you set. If the connection deleted itself after the first Sync, add it again: the new connection continues where the old one stopped. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro. A run adds only the imports and audit events made since the last run.
+
+Each Sync locks the source with read-only mode while it reads, and unlocks it at the end. On 3.4.300 the source has no read-only mode, so stop all writes by hand before the final Sync: pause CI pipelines, scheduled imports, and anything else that pushes findings.
+
+On cutover day:
+
+1. Optional, for a fully quiet source: go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes.
+2. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync leaves read-only mode as it found it, so a source you locked in step 1 stays locked.
+3. If you skipped step 1, turn read-only mode on now in **System Settings** to keep the source frozen.
+4. Point CI jobs, scripts, and integrations at your Pro deployment's `/api/v2/` API. Automate against `/api/v2/` only. Paths under `/api/vue/` belong to the Pro UI and reject API tokens.
+5. Retire the open source instance. If you keep it running, revoke the connector's superuser API key. Read-only mode blocks that change, so revoke the key before step 3. If the source was locked since step 1, unlock it in a quiet moment with CI paused, revoke the key, and lock it again at once.
+
+While read-only mode is on, DefectDojo rejects every change from the UI and the API, and pauses scheduled background jobs. Superusers can still sign in and change System Settings. To turn it off, clear **Read-only mode** and click **Submit**.
+
+The open source instance keeps running until that day, so your team loses no working time.
+
+### If a migration went wrong
+
+A wrong mapping or a wrong Include choice shows in the first Sync. To start over:
+
+1. Delete the Products that the Sync created in DefectDojo Pro. **Target** on the migration page marks them as **New**. Deleting a Product deletes its engagements, tests and findings. A Product that existed before the migration also holds the engagements that the Sync added to it. Delete those engagements, not the Product.
+2. Run Discover again, fix the Include boxes, and run Sync again.
+
+The first Sync copies notification settings and system settings once. A second run does not copy them again, so correct them by hand under **System Settings** and in each user's notification settings. Migrated users stay too: deactivate or delete them under **Users**. Deleting the connection deletes its Records and nothing else.
+
+### Connector checklist
+
+- Open source instance on 3.4.300 or later, served over HTTPS
+- Superuser created on the source for the connector, with an API v2 key
+- Connector added in **Connect > Upstream**
+- Discover run, with **Include** cleared on every Product to leave behind
+- Preflight report read: warnings, counts, what is created and what does not cross
+- Audit retention in DefectDojo Pro checked, when the report shows audit events
+- First Sync run, finding counts checked, and validated
+- Notification channels and tool credentials set up in DefectDojo Pro
+- Users activated with **Activate and Invite**, and given roles
+- Final Sync run, finding counts checked, and validated
+- Read-only mode turned on again in the source
+- Automation pointed at the Pro deployment, and the source retired or its key revoked
+
 ## Questions or support
 
-DefectDojo supports this migration end to end. For help at any step, contact your account representative or [support@defectdojo.com](mailto:support@defectdojo.com).
+DefectDojo supports both paths end to end. For help at any step, contact your account representative or [support@defectdojo.com](mailto:support@defectdojo.com).

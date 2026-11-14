@@ -8,6 +8,8 @@ audience: pro
 
 このページでは、オープンソース版DefectDojoインスタンスのデータをセルフホスト型DefectDojo Proのデプロイメントに移行する方法について説明します。
 
+このページでは、データベースダンプによる方法を説明します。2つ目の方法は、[英語のページ](/get_started/pro/onprem/migrating_from_open_source/#path-2-the-defectdojo-connector)で説明しています。この方法は、DefectDojo Migrationコネクタを使い、ConnectorsのUIからAPI経由で移行します。切り替えまで複数回実行でき、すでにデータがあるProインスタンスにも移行できます。
+
 以下の例では、Amazon Web Servicesを使用し、EC2上のDocker ComposeまたはEKS上のKubernetesのいずれかと、Amazon RDS for PostgreSQLのデータベースを組み合わせています。この手順は、この組み合わせに対して検証されています。マネージドPostgreSQLと同等のコンピューティングを提供する他のプロバイダーや、オンプレミスのハードウェアにも、プロバイダー固有のコマンドを適宜変更すれば同じ手順を適用できます。
 
 デプロイメントはお客様自身がホストするため、移行作業全体を通してデータはお客様自身の環境内にとどまります。エクスポートとリストアはお客様自身が実行しますが、DefectDojoサポートはどのステップでも支援できます。DefectDojo Proインスタンスがセルフホストではなく、DefectDojoによってクラウドホストされている場合は、代わりに[support@defectdojo.com](mailto:support@defectdojo.com)までご連絡ください。その場合はDefectDojoチームがリストアを代行します。
