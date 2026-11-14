@@ -3,7 +3,7 @@ Regression: a finding write carrying its endpoints cost queries per endpoint.
 
 A client that reads a finding and writes the whole body back sends the finding's ``endpoints`` with it. The
 field resolved each id with its own query, and with Locations on the update deleted every location reference
-of the finding and created it again (a dozen queries per reference), which also reset each reference's status,
+of the finding and created it again (about 22 queries per reference), which also reset each reference's status,
 audit and test. A write of about a hundred endpoints ran more than two thousand queries.
 
 These tests pin the fix: the field resolves the list with one query (with DRF's errors for an id it cannot
