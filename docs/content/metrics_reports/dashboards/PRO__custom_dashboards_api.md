@@ -326,9 +326,11 @@ The full set of `widget_data` actions:
 | `my_work` | GET | `?buckets=`, `?limit=` | your assignments / mentions / pending reviews |
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | findings nearing SLA breach |
 | `recent_activity` | GET | `?model=`, `?limit=` | recent records feed |
-| `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting)* |
+| `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting and permission to view generated reports, from a global role or an Organization role; a role on an Asset alone does not grant it)* |
 | `root_causes` | POST | `limit?` | ranked Root Cause clusters *(requires Root Cause Correlation)* |
 | `usage` | GET | — | license-usage breakdown *(requires Maintainer)* |
+
+Some actions need more than the Customizable Dashboards feature: another feature turned on, a license that includes a capability, or a permission. Each widget in `GET /dashboards/widget_catalog/` lists these in its `requires` object, as three lists: `feature_flags` (feature keys, such as `pci_dss`), `licensed_features` (license capabilities, such as `shogun`) and `permissions` (such as `global_maintainer`). An empty object means the widget needs nothing more. While any requirement is missing, the widget's `widget_data` action answers `403` rather than an empty result, so "this widget is not available to you" is never mistaken for "nothing to show". The one exception is Shogun: the catalog lists **Sensor Coverage** only while the Shogun feature is on and licensed, and while the feature is off its action answers `404`, as though it did not exist. Read `requires` before placing a widget for someone, or before rendering it yourself.
 
 ## Putting it together: a full lifecycle script
 
