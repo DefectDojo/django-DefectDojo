@@ -80,6 +80,7 @@ from dojo.utils import (
     get_system_setting,
     process_tag_notifications,
 )
+from dojo.vulnerability.queries import prefetch_vulnerability_ids
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +206,15 @@ class FindingViewSet(
             raise DRFValidationError({"push_to_jira": error.detail}) from error
         finding_helper.delete_finding_with_conflict_retry(instance, push_to_jira=push_to_jira)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        # vulnerability_ids is serialized on every row; unprefetched it costs a query per finding.
+        # Loaded for the page instead of in get_queryset(), so a subclass that adds its own
+        # vulnerability_id_prefetch() to the queryset doesn't get a duplicate-lookup error.
+        if page is not None:
+            prefetch_vulnerability_ids(page)
+        return page
 
     def get_queryset(self):
         if locations_enabled():

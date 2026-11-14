@@ -24,6 +24,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher  # noqa: PLC2701 -- the class under test
+from dojo.finding.api.views import FindingViewSet
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.models import (
     Dojo_User,
     Engagement,
@@ -36,6 +38,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.notes.api.serializer import NoteSerializer
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 from .dojo_test_case import DojoAPITestCase
 
@@ -95,11 +98,6 @@ class ListQueryScalingTest(DojoAPITestCase):
         for idx in range(small, large):
             add_row(idx)
         large_sqls, payload = self._count(user, url, params)
-        # vulnerability_ids still reads per row here. A plugin that extends this queryset (Pro) adds its own
-        # vulnerability_id_prefetch(), and a second Prefetch on the same lookup raises, so it is left out of the
-        # count rather than prefetched in this queryset.
-        small_sqls = [sql for sql in small_sqls if "dojo_findingvulnerabilityreference" not in sql]
-        large_sqls = [sql for sql in large_sqls if "dojo_findingvulnerabilityreference" not in sql]
         grown = _shapes(large_sqls) - _shapes(small_sqls)
         self.assertEqual(
             len(small_sqls), len(large_sqls),
@@ -116,6 +114,8 @@ class ListQueryScalingTest(DojoAPITestCase):
         public = Notes.objects.create(entry=f"public {idx}", author=self.admin)
         private = Notes.objects.create(entry=f"private {idx}", author=self.admin, private=True)
         finding.notes.add(public, private)
+        # Two ids, so the page has vulnerability ids to load and an order to keep
+        save_vulnerability_ids(finding, [f"CVE-2026-{idx:04d}", f"GHSA-list-scaling-{idx}"])
         return finding
 
     def _add_engagement(self, idx):
@@ -129,6 +129,33 @@ class ListQueryScalingTest(DojoAPITestCase):
         # The member still sees only the public note of each finding.
         for row in payload["results"]:
             self.assertEqual(["public"], [note["entry"].split()[0] for note in row["notes"]])
+
+    def test_findings_list_vulnerability_ids_are_flat(self):
+        payload = self._assert_flat(
+            self.admin, "/api/v2/findings/", {"limit": 100, "test": self.test.id}, self._add_finding,
+        )
+        by_id = {row["id"]: row["vulnerability_ids"] for row in payload["results"]}
+        # _add_finding creates them in idx order
+        ids = list(Finding.objects.filter(test=self.test).order_by("id").values_list("id", flat=True))
+        self.assertEqual(6, len(ids))
+        for idx, finding_id in enumerate(ids):
+            self.assertEqual(
+                [{"vulnerability_id": f"CVE-2026-{idx:04d}"}, {"vulnerability_id": f"GHSA-list-scaling-{idx}"}],
+                by_id[finding_id],
+            )
+
+    def test_findings_list_with_a_queryset_that_already_prefetches_vulnerability_ids(self):
+        """A subclass (a plugin) that adds its own vulnerability_id_prefetch() keeps working and stays flat."""
+        original = FindingViewSet.get_queryset
+
+        def get_queryset(viewset):
+            return original(viewset).prefetch_related(vulnerability_id_prefetch())
+
+        with patch.object(FindingViewSet, "get_queryset", get_queryset):
+            payload = self._assert_flat(
+            self.admin, "/api/v2/findings/", {"limit": 100, "test": self.test.id}, self._add_finding,
+        )
+        self.assertEqual(6, sum(1 for row in payload["results"] if len(row["vulnerability_ids"]) == 2))
 
     def test_findings_list_prefetch_test_is_flat_for_a_member(self):
         payload = self._assert_flat(
