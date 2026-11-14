@@ -92,11 +92,12 @@ contact that readers see on every advisory you publish to the
 before the first advisory can go public.
 
 Publishing to the advisory site needs two things beyond PSIRT itself. The
-`psirt_advisory_site` feature flag must be on, and DefectDojo turns it on for your
-instance, so it is not a switch on the Feature Flags page. Your license must also
-include advisory publishing. With the flag on and no such license, the card says
-so and nothing can be saved. Contact
-[DefectDojo Support](mailto:support@defectdojo.com) for either one.
+**PSIRT: Advisory Site** feature flag (`psirt_advisory_site`) must be on. DefectDojo
+turns it on for your instance, so it is not a switch on the Feature Flags page.
+Your license must also include advisory publishing, and the flag does nothing
+without it. With the flag on and no such license, the card says so and nothing
+can be saved. Contact [DefectDojo Support](mailto:support@defectdojo.com) for
+either one.
 
 The profile has five fields.
 
@@ -116,10 +117,10 @@ The card shows where the publisher stands.
 
 | Status | What it means for publishing |
 |---|---|
-| Not sent | DefectDojo has no profile from this instance yet. Nothing can be published to the site. |
+| Not Sent | DefectDojo has no profile from this instance yet. Nothing can be published to the site. |
 | Pending | The profile was sent and is waiting for review. Nothing can be published to the site yet. |
 | Active | DefectDojo activated the publisher. The card shows your public address on the advisory site, and approved TLP:WHITE advisories can be published there. |
-| Suspended | DefectDojo suspended the publisher. The site refuses new advisories and new versions until DefectDojo lifts the suspension. |
+| Suspended | DefectDojo suspended the publisher. All of its pages and files are removed from the site, and nothing new can be published. They come back when DefectDojo lifts the suspension. |
 
 If DefectDojo refuses a profile, the card shows the reason. Correct the profile
 and save again.
@@ -129,6 +130,13 @@ fixed. The card shows them as DefectDojo activated them, and every public docume
 carries those values. A later save that changes one of them leaves it as it was,
 and the card names the fields that were ignored. Only DefectDojo Support can
 change them. The contact and the aggregator choice stay yours to edit.
+
+If your subscription stops including advisory publishing, publishing stops at
+once. Pages already on the site stay up for 90 days and then come down, and each
+address keeps a notice saying the advisory was withdrawn. The subscription's
+contacts get an email on the day it lapses and another 14 days before the pages
+come down. If the subscription includes advisory publishing again within the 90
+days, nothing comes down.
 
 An [airgapped instance](/get_started/pro/onprem/airgapped/) cannot use the
 advisory site. The card says that publishing is unavailable, saving is refused,

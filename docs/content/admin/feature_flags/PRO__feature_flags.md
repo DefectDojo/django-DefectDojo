@@ -47,7 +47,7 @@ Nothing changes for your instance if you had one of these turned on. If you had 
 **Enabled by DefectDojo on request.** A few capabilities depend on infrastructure that is provisioned per instance, so they are switched on by DefectDojo rather than from this page:
 
 * **Scheduling Service** — see [Scheduling Rules](/automation/rules_engine/scheduling/)
-* **PSIRT advisory site** (`psirt_advisory_site`): see [Advisory Site](/psirt/settings/#advisory-site) in PSIRT Settings. It also needs a license that includes advisory publishing.
+* **PSIRT: Advisory Site**, which does nothing without a license that includes advisory publishing. See [Advisory Site](/psirt/settings/#advisory-site) in PSIRT Settings.
 
 Contact [DefectDojo Support](mailto:support@defectdojo.com) to have one of these enabled. If it is already on for your instance, it stays on.
 

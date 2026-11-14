@@ -59,7 +59,7 @@ the covered set is fixed; changing it means a revision.
 
 ## Preflight
 
-**Run preflight** before publishing. Six checks, and only failures block:
+**Run preflight** before publishing. Seven checks, and only failures block.
 
 | Check | Fails when |
 |---|---|
@@ -68,15 +68,12 @@ the covered set is fixed; changing it means a revision.
 | Recipients | The advisory resolves to nobody. |
 | Comments | An unresolved blocking comment remains. |
 | Embargo | The embargo date has not passed. |
-| CSAF export | Not implemented — reported as pending, never as a pass. |
+| CSAF export | Never. It builds the advisory's CSAF document and validates it, and a problem is reported as a warning. |
+| Advisory site | **Publish to the advisory site** is on and one of the [readiness checks](#readiness-checks) fails. |
 
-The last row matters more than it looks. A check that has not been built reports
-**pending**, not success. A green checklist that included un-built checks would tell you
-the advisory had been verified in ways it had not.
-
-With **Publish to the advisory site** turned on, preflight also runs the
-[readiness checks](#readiness-checks) for the advisory site, and a failure there blocks
-like any other.
+The last two rows behave differently from the rest. A problem with the CSAF export is a
+warning, and a warning never blocks the publish. The advisory site check does block, but
+only when the switch is on. With the switch off it has nothing to check and cannot fail.
 
 ## Recipients
 
@@ -112,9 +109,10 @@ classified, and the three kinds behave differently:
 
 Delivery states are honest about what did not happen:
 
-* `skipped_not_configured` — no mail server is set up. Not a failure; nothing was
-  attempted.
-* `not_implemented` — a channel that does not exist yet. Never reported as sent.
+* `skipped_not_configured`, shown as Not Configured. No mail server is set up. This is
+  not a failure, because nothing was attempted.
+* `not_implemented`, shown as Not Built. The channel does not exist yet. It is never
+  reported as sent.
 
 Neither counts as a success, and neither counts as a failure. An advisory whose email
 was skipped because nothing is configured has not been delivered, and the status says so.
@@ -200,28 +198,39 @@ The send does not hold up the publish. Recipients get the advisory whether or no
 site answers, and the **Advisory Site** row in the delivery list shows what happened
 there. Once the site has the document, the row links to the public page.
 
-The row is held to the same standard as the other delivery states.
+The row is held to the same standard as the other delivery states. Its tag reads one of
+six things.
 
 | State | Means |
 |---|---|
-| Delivered | The site has this version, and the row links to its public page. |
+| Not Attempted | Nothing has been sent yet. |
 | Sending | A send is under way. |
-| Retrying | The last attempt failed for a temporary reason, such as the site being unreachable or busy. DefectDojo sends again by itself, after five minutes at first and after longer waits each time, up to eight times. The row says when the next attempt is due. |
-| Failed | The site refused the document, and the row gives the reason. A refusal is not retried, because the same document would be refused again. A row that used up its eight retries also ends here. |
+| Delivered | The site has this version, and the row links to its public page. |
+| Failed | The last send did not succeed. The row's message says why, and what happens next. |
+| Not Configured | Nothing was sent, because the switch is off or the advisory site is not available to this instance. |
 | Withdrawn | You withdrew the advisory. The public page is a withdrawal notice. |
-| Taken down | DefectDojo staff took the advisory down from the site. Nothing is public, and only DefectDojo Support can restore it. |
 
-With the switch off, the row reads `skipped_not_configured`, as the email row does with
-no mail server. Nothing was attempted.
+A Failed row covers three different situations, and its message tells them apart.
+
+The first is a temporary failure, such as the site being unreachable or busy. DefectDojo
+sends again by itself, and the row shows when the next attempt is due. Waits start at
+five minutes, double each time and are capped at six hours, and the site can ask for a
+longer wait. It makes up to eight attempts in a row, after which it stops and Re-deliver
+starts it again.
+
+The second is a refusal. The row gives the site's reason, and a refusal is not retried,
+because the same document would be refused again. Fix the cause first. When the cause is
+in the document, that means publishing a revision.
+
+The third is a takedown. The message says that DefectDojo staff took the document down
+from the advisory site. Nothing is public, and only DefectDojo Support can restore it.
 
 A temporary failure leaves one thing unknown, which is whether the document reached the
 site before the attempt failed. Until that is settled the advisory is treated as
 possibly public: it cannot be deleted, and Withdraw is offered.
 
 **Re-deliver** sends the same version again. If the site already has that version,
-nothing changes there. On a row that used up its retries, Re-deliver starts them again.
-After a refusal, fix the cause first. When the cause is in the document, that means
-publishing a revision.
+nothing changes there.
 
 ### Revisions on the site
 
