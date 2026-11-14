@@ -262,7 +262,7 @@ Ranked lists, feeds, and embedded tables.
 | **Recent Activity** | A scrolling feed of the most-recently updated records, clickable through to detail pages. |
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
 | **My Work** | Everything waiting on the viewer in one queue, soonest deadline first: findings assigned to the viewer or their team, reviews waiting on them, and their risk acceptances. Always scoped to the viewer. |
-| **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature and permission to view generated reports.* |
+| **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature and permission to view generated reports, from a global role or an Organization role (a role on an Asset alone does not grant it).* |
 | **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
 **My Work** merges its sources into one list, one row per Finding or Risk Acceptance, ordered by days left before the SLA or expiry date, then by severity. A Finding that several sources hold is listed once. The chips above the list turn each source on or off for the viewer and show its total; **Requested Reviews** (reviews the viewer asked of someone else) starts off and shows as a count. A row's menu, the first control in the row, opens the Finding or Risk Acceptance and offers its next step: **Close Finding**, **Claim Review**, **Clear Review** or **Edit Risk Acceptance**. Each step opens its form, and nothing changes until the form is submitted. A step the viewer has no permission to take is not offered. On a wide tile the next step also shows as a **Next Step** column. In **Edit Widget**, **Sources** picks the sources and their order, and **Rows per Source** sets how many rows each source loads (1 to 50).
@@ -290,7 +290,7 @@ Some widgets read data that only exists when a feature is turned on, the license
 |--------|-------|
 | **Scan Cadence** | The Scan Cadence Assurance feature |
 | **License Usage**, **Ingest Health** | The global Maintainer role |
-| **Saved Reports** | The Reporting feature, and permission to view generated reports (every built-in role grants it) |
+| **Saved Reports** | The Reporting feature, and permission to view generated reports, from a global role or an Organization role, held directly or through a group (a role on an Asset alone does not grant it) |
 | **Top Root Causes** | The Root Cause Correlation feature |
 | **PCI Quarter Status** | The PCI DSS feature |
 | **Onboarding** | The Onboarding Inbox feature (on for every instance unless an administrator turned it off) |
