@@ -78,6 +78,10 @@ O **Vulnerability Explorer** lista uma linha por ID de vulnerabilidade, com as m
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+Na tabela de Achados, a marca de seleção de **Known Exploited** de um Achado listado também mostra o
+ID de vulnerabilidade que a CISA lista, e selecioná-la abre a página desse ID no Vulnerability
+Explorer.
+
 Esses valores descrevem a própria vulnerabilidade, então são idênticos independentemente de quantos Achados a referenciam. EPSS Score, EPSS Percentile, Known Exploited e KEV Date são todos ordenáveis, o que torna essa a forma mais rápida de responder "quais vulnerabilidades no meu ambiente estão realmente sendo exploradas?" — ordene por **EPSS Score** decrescente, ou ordene por **Known Exploited** para trazer os CVEs listados no catálogo para o topo.
 
 A contagem de **Total Findings** de cada linha leva à lista de Achados filtrada por aquela vulnerabilidade, permitindo ir de "esse CVE está listado no KEV" a "aqui está tudo o que ele afeta" em um único clique.

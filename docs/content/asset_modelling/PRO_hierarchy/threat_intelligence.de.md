@@ -14,7 +14,8 @@ Jeder Befund mit einer CVE wird nächtlich mit einem kuratierten Intelligence-Fe
 
 * ein **Exploit-Reifegrad**-Badge – *Keiner → PoC → Weaponized → Aktiv ausgenutzt*
 * ein **Threat Score** (0–100)
-* **Nachweis-Chips, die auf den jeweiligen Beleg verlinken** – der KEV-Eintrag (mit Aufnahmedatum), Einsatz in Ransomware, ein Metasploit-Modul, ein Exploit-DB-Eintrag, ein Nuclei-Template sowie öffentliche Proof-of-Concept-Repositories
+* die **Schwachstellen-ID mit der höchsten Bedrohung**, die die Seite dieser Schwachstelle öffnet
+* **Nachweis-Chips, die auf den jeweiligen Beleg verlinken** – der KEV-Eintrag (mit Aufnahmedatum; er öffnet die Seite der Schwachstelle), Einsatz in Ransomware, ein Metasploit-Modul, ein Exploit-DB-Eintrag, ein Nuclei-Template sowie öffentliche Proof-of-Concept-Repositories
 * eine leicht verständliche Zeile, die erklärt, **warum** die Priorität des Befunds gestiegen ist
 
 Über die Karte hinaus ist diese Intelligence in der gesamten Anwendung nutzbar:
@@ -22,6 +23,24 @@ Jeder Befund mit einer CVE wird nächtlich mit einem kuratierten Intelligence-Fe
 * eine **Spalte „Exploit-Reifegrad"** in der Befundliste – sortier- und filterbar (zum Beispiel „Nur Weaponized oder Aktiv")
 * eine Kachel **„Dringend & aktiv ausgenutzt"** im Priority-Layout-Dashboard, die aktive Befunde mit Risiko „Dringend" zählt, die in freier Wildbahn ausgenutzt werden – ein Klick öffnet die entsprechend gefilterte Befundliste
 * ein **Benachrichtigungsereignis** (`threat_intel_alert`), wenn die CVE eines bestehenden Befunds neue Exploit-Nachweise erhält, etwa durch Aufnahme in CISA KEV oder ein neues Metasploit-Modul. Nur Höherstufungen – wenn Nachweise stillschweigend veralten, erfolgt keine Benachrichtigung.
+
+## Die Schwachstellenseite
+
+Jede Schwachstellen-ID hat im Vulnerability Explorer eine eigene Seite (**Act > Vulnerability Explorer**, dann eine ID auswählen). Ist Threat Intelligence aktiviert, zeigt die Seite, was der Intelligence-Feed über die ID weiß, auch wenn kein für Sie sichtbarer Befund sie trägt:
+
+* eine **Threat-Intelligence**-Zusammenfassung: Exploit-Reifegrad, Threat Score, das Datum der Aufnahme in CISA KEV, wann zuletzt eine Ausnutzung beobachtet wurde, EPSS, Einsatz in Ransomware und bekannte Bedrohungsakteure
+* eine **Evidence Timeline**: eine Zeile pro Quelle hinter der Bewertung, mit der Art des Nachweises (in freier Wildbahn ausgenutzt, Weaponized, Proof of Concept), einem Link zur Quelle, dem Datum, sofern die Quelle eines angibt, und der Bewertung der Quelle
+* **Proof of Concept Exploits**: öffentlicher Exploit-Code nach Quelle, mit einer Anzahl, sofern die Quelle eine angibt. Dieser Abschnitt erscheint, sobald der Feed eine Quelle für Exploit-Code enthält.
+
+Trägt mindestens ein für Sie sichtbarer Befund die ID, zeigt die Seite außerdem die betroffenen Befunde, Assets und Parser. Ist das nicht der Fall, weist die Seite darauf hin und zeigt nur die Threat Intelligence. Eine ID, die ein Alias einer anderen ist (zum Beispiel eine GHSA, die im Feed oder in den verknüpften Kennungen Ihrer Instanz mit einer CVE verknüpft ist), zeigt die Threat Intelligence dieser Schwachstelle und nennt die ID, von der sie stammt. Eine ID, die weder in Ihren Befunden noch im Intelligence-Feed vorkommt, zeigt „Vulnerability Not Found".
+
+Sie erreichen die Seite über:
+
+* die Threat-Intelligence-Karte eines Befunds (die ID mit der höchsten Bedrohung und den CISA-KEV-Chip)
+* die Spalte **Known Exploited** in der Befundliste: Bei einem gelisteten Befund zeigt das Häkchen die von CISA gelistete ID und öffnet deren Seite
+* das Suchfeld: Geben Sie eine Schwachstellen-ID wie `CVE-2021-44228` ein, und das erste Ergebnis öffnet ihre Seite, sofern Ihre Befunde oder der Intelligence-Feed die ID kennen
+
+Die Threat Intelligence auf dieser Seite besteht aus öffentlichen Daten aus dem Feed. Sie ist für alle Benutzer gleich und sagt nichts darüber aus, welche Assets die ID tragen.
 
 ## Wie sich dies auf die Bewertung auswirkt
 

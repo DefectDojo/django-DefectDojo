@@ -18,7 +18,8 @@ concept. Lorsqu'il existe une preuve d'exploit, la constatation affiche une cart
 
 * un badge de **maturité d'exploit** — *Aucune → PoC → Armé → Actif en conditions réelles*
 * un **score de menace** (0–100)
-* des **puces de preuve renvoyant à la source** — l'entrée KEV (avec sa date d'inscription),
+* l'**identifiant de vulnérabilité présentant la menace la plus élevée**, qui ouvre la page de cette vulnérabilité
+* des **puces de preuve renvoyant à la source** — l'entrée KEV (avec sa date d'inscription, qui ouvre la page de la vulnérabilité),
   l'utilisation dans un ransomware, un module Metasploit, une entrée Exploit-DB, un modèle Nuclei, et des
   dépôts publics de preuves de concept
 * une ligne en langage clair expliquant **pourquoi** la priorité de la constatation a augmenté
@@ -33,6 +34,43 @@ Au-delà de la carte, ce renseignement est exploité dans toute l'application :
 * un **événement de notification** (`threat_intel_alert`) lorsque le CVE d'une constatation existante gagne une nouvelle
   preuve d'exploit, par exemple en entrant dans CISA KEV ou en obtenant un module Metasploit. Seules les montées
   en niveau notifient — une preuve qui s'estompe discrètement ne déclenche jamais de notification.
+
+## La page de la vulnérabilité
+
+Chaque identifiant de vulnérabilité dispose de sa propre page dans l'Explorateur de vulnérabilités
+(**Act > Vulnerability Explorer**, puis sélectionnez un identifiant). Lorsque le renseignement sur
+les menaces est activé, la page affiche ce que le flux de renseignement sait de l'identifiant, même
+lorsqu'aucune Constatation visible pour vous ne le porte :
+
+* un résumé **Renseignement sur les menaces** : maturité d'exploit, score de menace, date
+  d'inscription dans CISA KEV, date de la dernière exploitation observée, EPSS, utilisation dans un
+  ransomware et acteurs de la menace connus
+* une **Evidence Timeline** : une ligne par source à l'origine de la notation, avec le type de
+  preuve (exploité en conditions réelles, armé, preuve de concept), un lien vers la source, la date
+  lorsque la source en fournit une, et la notation de la source
+* **Proof of Concept Exploits** : le code d'exploit public par source, avec un décompte lorsque la
+  source en fournit un. Cette section apparaît dès que le flux inclut une source de code d'exploit.
+
+Lorsqu'au moins une Constatation visible pour vous porte l'identifiant, la page affiche aussi les
+Constatations, les Actifs et les parsers concernés. Dans le cas contraire, la page l'indique et
+n'affiche que le renseignement sur les menaces. Un identifiant qui est un alias d'un autre (par
+exemple un GHSA lié à un CVE, dans le flux ou dans les identifiants liés de votre instance) affiche
+le renseignement sur les menaces de cette vulnérabilité et nomme l'identifiant dont il provient. Un
+identifiant absent à la fois de vos Constatations et du flux de renseignement affiche
+« Vulnerability Not Found ».
+
+Vous pouvez accéder à la page depuis :
+
+* la carte Renseignement sur les menaces d'une Constatation (l'identifiant présentant la menace la
+  plus élevée, et la puce CISA KEV)
+* la colonne **Known Exploited** de la liste des Constatations, où la coche d'une Constatation
+  listée affiche l'identifiant listé par la CISA et ouvre sa page
+* la zone de recherche : saisissez un identifiant de vulnérabilité tel que `CVE-2021-44228` et le
+  premier résultat ouvre sa page, lorsque vos Constatations ou le flux de renseignement connaissent
+  l'identifiant
+
+Le renseignement sur les menaces affiché sur cette page provient de données publiques du flux. Il
+est identique pour tous les utilisateurs et n'indique pas quels Actifs portent l'identifiant.
 
 ## Comment cela modifie le calcul du score
 

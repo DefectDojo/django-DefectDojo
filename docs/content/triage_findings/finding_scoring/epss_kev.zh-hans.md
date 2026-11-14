@@ -77,6 +77,8 @@ KEV 信号绝不会被另一个 EPSS 分数更高的 CVE 所压制。如果一�
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+在发现项表格中,已列入目录的发现项上的 **Known Exploited** 勾选标记还会显示 CISA 列出的漏洞 ID,选择它即可在漏洞浏览器中打开该 ID 的页面。
+
 这些取值描述的是漏洞本身,因此无论有多少个发现项引用它,取值都是相同的。EPSS Score、EPSS Percentile、Known Exploited 和 KEV Date 均可排序,这使其成为回答“我的环境中哪些漏洞正在被实际利用?”这一问题最快捷的方式——按 **EPSS Score** 降序排序,或按 **Known Exploited** 排序,将目录中列出的 CVE 排到最前面。
 
 每一行的 **Total Findings** 计数都会链接到按该漏洞筛选的发现项列表,让您可以一键从“这个 CVE 已列入 KEV”跳转到“它所影响的全部内容”。

@@ -78,6 +78,10 @@ Vulnerability Explorer muestra una fila por cada ID de vulnerabilidad, con las m
 
 ![imagen](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+En la tabla de Hallazgos, la marca de verificación de **Known Exploited** de un Hallazgo incluido en
+el catálogo también muestra el ID de vulnerabilidad que figura en la lista de CISA, y al
+seleccionarla se abre la página de ese ID en Vulnerability Explorer.
+
 Estos valores describen la propia vulnerabilidad, por lo que son idénticos sin importar cuántos Hallazgos la referencien. EPSS Score, EPSS Percentile, Known Exploited y KEV Date se pueden ordenar, lo que convierte esto en la forma más rápida de responder "¿qué vulnerabilidades de mi entorno se están explotando realmente?" — ordene por **EPSS Score** de forma descendente, o por **Known Exploited** para llevar los CVE listados en el catálogo a la parte superior.
 
 El número de **Total Findings** de cada fila enlaza a la lista de Hallazgos filtrada por esa vulnerabilidad, de modo que puede pasar de "este CVE está en el catálogo KEV" a "esto es todo lo que afecta" con un solo clic.

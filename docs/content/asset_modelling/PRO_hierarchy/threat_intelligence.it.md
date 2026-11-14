@@ -18,7 +18,8 @@ proof-of-concept. Quando è presente un’evidenza di exploit, il riscontro most
 
 * un badge di **maturità dell’exploit** — *Nessuna → PoC → Weaponized → Attivo in the wild*
 * un **punteggio di minaccia** (0–100)
-* **chip di evidenza che rimandano alla fonte** — la voce KEV (con la relativa data di inserimento),
+* l’**ID di vulnerabilità con la minaccia più alta**, che apre la pagina di quella vulnerabilità
+* **chip di evidenza che rimandano alla fonte** — la voce KEV (con la relativa data di inserimento, che apre la pagina della vulnerabilità),
   l’uso in ransomware, un modulo Metasploit, una voce Exploit-DB, un template Nuclei e
   repository pubblici di proof-of-concept
 * una riga in linguaggio semplice che spiega **perché** la priorità del riscontro è aumentata
@@ -33,6 +34,39 @@ Oltre alla scheda, l’intelligence è una superficie di lavoro in tutta l’app
 * un **evento di notifica** (`threat_intel_alert`) quando il CVE di un riscontro esistente acquisisce nuova
   evidenza di exploit, ad esempio entrando nel CISA KEV o ottenendo un modulo Metasploit. Solo
   aggiornamenti al rialzo — un’evidenza che invecchia silenziosamente non genera mai una notifica.
+
+## La pagina della vulnerabilità
+
+Ogni ID di vulnerabilità ha una propria pagina nel Vulnerability Explorer (**Act > Vulnerability
+Explorer**, quindi seleziona un ID). Con la Threat Intelligence abilitata, la pagina mostra ciò che
+il feed di intelligence sa sull’ID, anche quando nessun Riscontro che puoi vedere lo riporta:
+
+* un riepilogo **Threat Intelligence**: maturità dell’exploit, punteggio di minaccia, la data di
+  inserimento nel CISA KEV, quando è stato osservato l’ultimo sfruttamento, EPSS, uso in ransomware
+  e threat actor noti
+* una **Evidence Timeline**: una riga per ogni fonte alla base della valutazione, con il tipo di
+  evidenza (sfruttato in the wild, weaponized, proof-of-concept), un link alla fonte, la data quando
+  la fonte la fornisce e la valutazione della fonte
+* **Proof of Concept Exploits**: codice di exploit pubblico per fonte, con un conteggio quando la
+  fonte lo fornisce. Questa sezione compare quando il feed include una fonte di codice di exploit.
+
+Quando almeno un Riscontro che puoi vedere riporta l’ID, la pagina mostra anche i Riscontri, gli
+Asset e i parser coinvolti. Quando nessuno lo riporta, la pagina lo indica e mostra solo la Threat
+Intelligence. Un ID che è alias di un altro (ad esempio un GHSA collegato a un CVE, nel feed o negli
+identificatori collegati della tua istanza) mostra la Threat Intelligence di quella vulnerabilità e
+indica l’ID da cui proviene. Un ID che non compare né nei tuoi Riscontri né nel feed di intelligence
+mostra “Vulnerability Not Found”.
+
+Puoi raggiungere la pagina da:
+
+* la scheda Threat Intelligence di un Riscontro (l’ID con la minaccia più alta e il chip CISA KEV)
+* la colonna **Known Exploited** nell’elenco dei Riscontri, dove il segno di spunta su un Riscontro
+  presente nel catalogo mostra l’ID elencato da CISA e apre la sua pagina
+* la casella di ricerca: digita un ID di vulnerabilità come `CVE-2021-44228` e il primo risultato
+  apre la sua pagina, quando i tuoi Riscontri o il feed di intelligence conoscono l’ID
+
+La Threat Intelligence su questa pagina è costituita da dati pubblici del feed. È la stessa per
+tutti gli utenti e non dice nulla su quali Asset riportano l’ID.
 
 ## Come cambia il punteggio
 

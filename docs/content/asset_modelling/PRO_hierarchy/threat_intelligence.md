@@ -17,8 +17,9 @@ tracking. When there's exploit evidence, the finding shows a **Threat Intelligen
 
 * an **exploit-maturity** badge — *None → PoC → Weaponized → Active in the wild*
 * a **threat score** (0–100)
-* **evidence chips that link to the receipt** — the KEV entry (with its listing date),
-  used-in-ransomware, a Metasploit module, an Exploit-DB entry, a Nuclei template, and
+* the **highest-threat vulnerability ID**, which opens that vulnerability's page
+* **evidence chips that link to the receipt** — the KEV entry (with its listing date, which opens
+  the vulnerability's page), used-in-ransomware, a Metasploit module, an Exploit-DB entry, a Nuclei template, and
   public proof-of-concept repositories
 * a plain-language line explaining **why** the finding's priority rose
 
@@ -49,6 +50,38 @@ Beyond the card, the intelligence is a working surface across the app:
 * a **notification event** (`threat_intel_alert`) when an existing finding's CVE gains new
   exploit evidence, such as landing in CISA KEV or gaining a Metasploit module. Upgrades
   only — evidence quietly aging out never notifies.
+
+## The vulnerability page
+
+Each vulnerability ID has its own page in the Vulnerability Explorer
+(**Act > Vulnerability Explorer**, then select an ID). With threat intelligence enabled, the page
+shows what the intelligence feed knows about the ID, even when no Finding you can see carries it:
+
+* a **Threat Intelligence** summary: exploit maturity, threat score, the CISA KEV listing date,
+  when exploitation was last seen, EPSS, ransomware use and known threat actors
+* an **Evidence Timeline**: one row per source behind the rating, with the kind of evidence
+  (exploited in the wild, weaponized, proof of concept), a link to the source, the date where the
+  source gives one, and the source's rating
+* **Proof of Concept Exploits**: public exploit code by source, with a count where the source gives
+  one. This section appears once the feed includes an exploit-code source.
+
+When at least one Finding you can see carries the ID, the page also shows the Findings, Assets
+and parsers involved. When none does, the page says so and shows only the threat intelligence.
+An ID that is an alias of another (for example a GHSA linked to a CVE, in the feed or in your
+instance's linked identifiers) shows that vulnerability's threat intelligence and names the ID it
+came from. An ID that is in neither your Findings nor the intelligence feed shows "Vulnerability
+Not Found".
+
+You can reach the page from:
+
+* a Finding's Threat Intelligence card (the highest-threat ID, and the CISA KEV chip)
+* the **Known Exploited** column on the Findings list, where a check mark on a listed Finding
+  shows the ID CISA lists and opens its page
+* the search box: type a vulnerability ID such as `CVE-2021-44228` and the first result opens its
+  page, when your Findings or the intelligence feed know the ID
+
+The threat intelligence on this page is public data from the feed. It is the same for every user
+and says nothing about which Assets carry the ID.
 
 ## Source ratings
 

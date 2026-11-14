@@ -77,6 +77,9 @@ The **Vulnerability Explorer** (**Act > Vulnerability Explorer** in the sidebar)
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+On the Findings table, the **Known Exploited** check mark of a listed Finding also shows the
+vulnerability ID CISA lists, and selecting it opens that ID's page in the Vulnerability Explorer.
+
 These values describe the vulnerability itself, so they are identical no matter how many Findings reference it. EPSS Score, EPSS Percentile, Known Exploited and KEV Date are all sortable, which makes this the fastest way to answer "which vulnerabilities in my environment are actually being exploited?" — sort by **EPSS Score** descending, or sort by **Known Exploited** to bring the catalog-listed CVEs to the top.
 
 Blank values always sort last, in both directions, so sorting by **EPSS Score** descending opens on the highest-scoring vulnerabilities rather than on the ones that have not been enriched yet. To sort by more than one column, hold Ctrl (Cmd on macOS) and click each additional column header. For example, sort by **Known Exploited** and then by **EPSS Score** to rank the catalog-listed vulnerabilities by exploit probability.
