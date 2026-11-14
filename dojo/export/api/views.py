@@ -9,7 +9,7 @@ from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Count, OuterRef, Prefetch, Q, QuerySet, Subquery
+from django.db.models import Count, F, OuterRef, Prefetch, Q, QuerySet, Subquery
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -28,41 +28,57 @@ from dojo.endpoint.models import Endpoint_Status
 from dojo.export.api.serializers import (
     CHECK_LIST_ISSUE_FIELDS,
     ExportAnnouncementSerializer,
+    ExportAnsweredSurveySerializer,
     ExportAPIScanConfigurationSerializer,
     ExportAuditEventSerializer,
+    ExportBenchmarkResultSerializer,
+    ExportBenchmarkTypeSerializer,
     ExportContactSerializer,
     ExportEngagementPresetSerializer,
     ExportEngagementSerializer,
     ExportFindingSerializer,
+    ExportGeneralSurveySerializer,
     ExportLegacyAuditEntrySerializer,
     ExportLoginBannerSerializer,
     ExportParamsSerializer,
     ExportProductSerializer,
+    ExportQuestionnaireSerializer,
     ExportReportTypeSerializer,
     ExportRiskAcceptanceSerializer,
     ExportTestImportSerializer,
     ExportTestSerializer,
     ExportTestTypeSerializer,
     ExportToolConfigurationSerializer,
+    ExportTrackingFileSerializer,
     ExportUserSerializer,
     ManifestParamsSerializer,
     audit_event_model,
     file_size,
+    prefetch_answers,
+    prefetch_questions,
     render_datetime,
 )
 from dojo.finding.api.serializer import FindingTemplateSerializer
 from dojo.location.feature import locations_enabled
 from dojo.location.models import LocationProductReference
 from dojo.models import (
+    Answered_Survey,
+    Benchmark_Category,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Benchmark_Type,
     BurpRawRequestResponse,
     Check_List,
     Dojo_User,
     Endpoint,
     Engagement,
     Engagement_Presets,
+    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Group,
+    Objects_Product,
     Product,
     Product_API_Scan_Configuration,
     Product_Type,
@@ -93,6 +109,7 @@ COUNT_KEYS = (
 )
 IMPORT_HISTORY_COUNT_KEYS = ("test_imports", "test_import_actions")
 AUDIT_HISTORY_COUNT_KEYS = ("audit_events", "legacy_audit_entries")
+PRODUCT_EXTRAS_COUNT_KEYS = ("tracking_files", "benchmarks", "answered_surveys")
 HISTORY_FEATURES = ("import_history", "audit_history")
 AUDIT_MODELS = (Product, Engagement, Test, Finding, Finding_Group, Risk_Acceptance)
 # From an audited object to its product id. A risk acceptance has two paths: see risk_acceptance_in.
@@ -117,6 +134,7 @@ REFERENCE_SERIALIZERS = {
     "tool_configurations": ExportToolConfigurationSerializer,
     "contacts": ExportContactSerializer,
     "report_types": ExportReportTypeSerializer,
+    "general_surveys": ExportGeneralSurveySerializer,
 }
 
 
@@ -250,6 +268,72 @@ def pages(queryset: QuerySet, ordering: tuple[str, ...], after) -> Iterator:
         page = list(queryset.filter(after(page[-1])).order_by(*ordering)[:EXPORT_CHUNK_SIZE])
 
 
+def tracking_file_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
+    rows = pages(
+        Objects_Product.objects.filter(product=product).select_related("review_status").prefetch_related("tags"),
+        ("id",),
+        lambda row: Q(id__gt=row.id),
+    )
+    serializer = ExportTrackingFileSerializer()
+    for row in rows:
+        counts["tracking_files"] += 1
+        yield render({"type": "tracking_file", "data": serializer.to_representation(row)})
+
+
+def benchmark_lines(product: Product, counts: dict, render, context: dict) -> Iterator[bytes]:
+    summaries = {row.benchmark_type_id: row for row in Benchmark_Product_Summary.objects.filter(product=product)}
+    rows = pages(
+        Benchmark_Product.objects.filter(product=product)
+        .annotate(benchmark_type_id=F("control__category__type_id"))
+        .prefetch_related(notes_prefetch()),
+        ("benchmark_type_id", "control_id"),
+        lambda row: Q(benchmark_type_id__gte=row.benchmark_type_id)
+        & (Q(benchmark_type_id__gt=row.benchmark_type_id) | Q(control_id__gt=row.control_id)),
+    )
+    serializer = ExportBenchmarkResultSerializer(many=True, context=context)
+
+    def line(type_id: int, results: list) -> bytes:
+        summary = summaries.get(type_id)
+        counts["benchmarks"] += 1
+        return render({
+            "type": "benchmark",
+            "data": {
+                "benchmark_type": type_id,
+                "desired_level": summary.desired_level if summary else None,
+                "publish": summary.publish if summary else None,
+                "controls": serializer.to_representation(results),
+            },
+        })
+
+    # A type with a summary and no result still gets its line, in type order.
+    waiting = sorted(summaries)
+    for type_id, results in groupby(rows, key=attrgetter("benchmark_type_id")):
+        while waiting and waiting[0] < type_id:
+            yield line(waiting.pop(0), [])
+        if waiting and waiting[0] == type_id:
+            waiting.pop(0)
+        yield line(type_id, list(results))
+    for type_id in waiting:
+        yield line(type_id, [])
+
+
+def answered_survey_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
+    rows = pages(Answered_Survey.objects.filter(engagement__product=product), ("id",), lambda row: Q(id__gt=row.id))
+    serializer = ExportAnsweredSurveySerializer()
+    for page in batched(rows, EXPORT_CHUNK_SIZE, strict=False):
+        surveys = list(page)
+        prefetch_answers(surveys)
+        for row in surveys:
+            counts["answered_surveys"] += 1
+            yield render({"type": "answered_survey", "data": serializer.to_representation(row)})
+
+
+def product_extras_lines(product: Product, counts: dict, render, context: dict) -> Iterator[bytes]:
+    yield from tracking_file_lines(product, counts, render)
+    yield from benchmark_lines(product, counts, render, context)
+    yield from answered_survey_lines(product, counts, render)
+
+
 def audit_history_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
     for model in AUDIT_MODELS:
         events = audit_event_model(model).objects.filter(
@@ -285,7 +369,13 @@ def audit_history_lines(product: Product, counts: dict, render) -> Iterator[byte
 
 
 def product_lines(
-    product: Product, request, max_file_bytes: int, *, import_history: bool = False, audit_history: bool = False,
+    product: Product,
+    request,
+    max_file_bytes: int,
+    *,
+    import_history: bool = False,
+    audit_history: bool = False,
+    product_extras: bool = False,
 ) -> Iterator[bytes]:
     context = {"request": request, "max_file_bytes": max_file_bytes}
     render = NDJSONRenderer().render
@@ -347,6 +437,9 @@ def product_lines(
                 finding_groups.update(group["id"] for group in data["finding_groups"])
             yield render({"type": line_type, "data": data})
     counts["finding_groups"] = len(finding_groups)
+    if product_extras:
+        counts.update(dict.fromkeys(PRODUCT_EXTRAS_COUNT_KEYS, 0))
+        yield from product_extras_lines(product, counts, render, context)
     if import_history:
         counts.update(dict.fromkeys(IMPORT_HISTORY_COUNT_KEYS, 0))
         yield from import_history_lines(product, counts, render)
@@ -356,9 +449,10 @@ def product_lines(
     yield render({"type": "end", "counts": counts})
 
 
-def count_keys(*, import_history: bool, audit_history: bool) -> tuple[str, ...]:
+def count_keys(*, import_history: bool, audit_history: bool, product_extras: bool) -> tuple[str, ...]:
     return (
         *COUNT_KEYS,
+        *(PRODUCT_EXTRAS_COUNT_KEYS if product_extras else ()),
         *(IMPORT_HISTORY_COUNT_KEYS if import_history else ()),
         *(AUDIT_HISTORY_COUNT_KEYS if audit_history else ()),
     )
@@ -397,10 +491,22 @@ def add_audit_history_counts(counts: dict) -> None:
                     counts[product_id][key] += n
 
 
+def add_benchmark_counts(counts: dict) -> None:
+    # A type counts once per product, whether the product has a summary, a result or both for it.
+    types = defaultdict(set)
+    for product_id, type_id in Benchmark_Product_Summary.objects.order_by().values_list("product_id", "benchmark_type_id"):
+        types[product_id].add(type_id)
+    results = Benchmark_Product.objects.order_by().values_list("product_id", "control__category__type_id").distinct()
+    for product_id, type_id in results:
+        types[product_id].add(type_id)
+    for product_id, found in types.items():
+        counts[product_id]["benchmarks"] += len(found)
+
+
 def product_counts(
-    max_file_bytes: int, *, file_counts: bool, import_history: bool, audit_history: bool,
+    max_file_bytes: int, *, file_counts: bool, import_history: bool, audit_history: bool, product_extras: bool,
 ) -> dict[int, dict[str, int | None]]:
-    keys = count_keys(import_history=import_history, audit_history=audit_history)
+    keys = count_keys(import_history=import_history, audit_history=audit_history, product_extras=product_extras)
     counts = defaultdict(lambda: {**dict.fromkeys(keys, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
@@ -413,6 +519,11 @@ def product_counts(
         ("notes", Finding.notes.through, "finding__test__engagement__product_id"),
         ("finding_groups", Finding_Group, "test__engagement__product_id"),
     )
+    if product_extras:
+        sources += (
+            ("tracking_files", Objects_Product, "product_id"),
+            ("answered_surveys", Answered_Survey, "engagement__product_id"),
+        )
     if import_history:
         sources += (
             ("test_imports", Test_Import, "test__engagement__product_id"),
@@ -428,6 +539,8 @@ def product_counts(
     for key, model, prefix in (("risk_acceptances", Risk_Acceptance, ""), ("notes", Risk_Acceptance.notes.through, "risk_acceptance__")):
         for product_id, found in ids_by_product(model, prefix).items():
             counts[product_id][key] += len(found)
+    if product_extras:
+        add_benchmark_counts(counts)
     if audit_history:
         add_audit_history_counts(counts)
     storage = FileUpload._meta.get_field("file").storage
@@ -450,10 +563,12 @@ def product_counts(
     return counts
 
 
-def _summed(products: list[dict], *, file_counts: bool, import_history: bool, audit_history: bool) -> dict[str, int | None]:
+def _summed(
+    products: list[dict], *, file_counts: bool, import_history: bool, audit_history: bool, product_extras: bool,
+) -> dict[str, int | None]:
     return {
         key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
-        for key in count_keys(import_history=import_history, audit_history=audit_history)
+        for key in count_keys(import_history=import_history, audit_history=audit_history, product_extras=product_extras)
     }
 
 
@@ -486,10 +601,44 @@ def deduplication_rules() -> dict:
     }
 
 
+def questionnaires() -> list[dict]:
+    rows = list(Engagement_Survey.objects.order_by("id"))
+    prefetch_questions(rows)
+    return ExportQuestionnaireSerializer(rows, many=True).data
+
+
+def open_survey_responses() -> list[dict]:
+    rows = list(Answered_Survey.objects.filter(engagement=None).order_by("id"))
+    prefetch_answers(rows)
+    return ExportAnsweredSurveySerializer(rows, many=True).data
+
+
+def benchmark_types() -> list[dict]:
+    requirements = Prefetch("benchmark_requirement_set", queryset=Benchmark_Requirement.objects.order_by("id"))
+    categories = Prefetch(
+        "benchmark_category_set", queryset=Benchmark_Category.objects.order_by("id").prefetch_related(requirements),
+    )
+    return ExportBenchmarkTypeSerializer(
+        Benchmark_Type.objects.order_by("id").prefetch_related(categories), many=True,
+    ).data
+
+
 def build_manifest(
-    request, max_file_bytes: int, *, file_counts: bool, import_history: bool = False, audit_history: bool = False,
+    request,
+    max_file_bytes: int,
+    *,
+    file_counts: bool,
+    import_history: bool = False,
+    audit_history: bool = False,
+    product_extras: bool = False,
 ) -> dict:
-    counts = product_counts(max_file_bytes, file_counts=file_counts, import_history=import_history, audit_history=audit_history)
+    counts = product_counts(
+        max_file_bytes,
+        file_counts=file_counts,
+        import_history=import_history,
+        audit_history=audit_history,
+        product_extras=product_extras,
+    )
     products = [
         {
             "id": product.id,
@@ -518,7 +667,13 @@ def build_manifest(
             "name": name,
             "counts": {
                 "products": len(members[pk]),
-                **_summed(members[pk], file_counts=file_counts, import_history=import_history, audit_history=audit_history),
+                **_summed(
+                    members[pk],
+                    file_counts=file_counts,
+                    import_history=import_history,
+                    audit_history=audit_history,
+                    product_extras=product_extras,
+                ),
             },
         }
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
@@ -534,7 +689,7 @@ def build_manifest(
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
-        "features": ["check_lists", *HISTORY_FEATURES],
+        "features": ["check_lists", *HISTORY_FEATURES, "product_extras"],
         "deduplication": deduplication_rules(),
         "announcement": single_row(ExportAnnouncementSerializer),
         "login_banner": single_row(ExportLoginBannerSerializer),
@@ -547,13 +702,22 @@ def build_manifest(
                 for key, serializer in REFERENCE_SERIALIZERS.items()
             },
             "users": ExportUserSerializer(users, many=True).data,
+            "questionnaires": questionnaires(),
+            "open_survey_responses": open_survey_responses(),
+            "benchmark_types": benchmark_types(),
         },
         "product_types": product_types,
         "products": products,
         "totals": {
             "product_types": len(product_types),
             "products": len(products),
-            **_summed(products, file_counts=file_counts, import_history=import_history, audit_history=audit_history),
+            **_summed(
+                products,
+                file_counts=file_counts,
+                import_history=import_history,
+                audit_history=audit_history,
+                product_extras=product_extras,
+            ),
         },
     }
 
@@ -580,6 +744,7 @@ class ProductExportView(APIView):
                 params["max_file_bytes"],
                 import_history=params["import_history"],
                 audit_history=params["audit_history"],
+                product_extras=params["product_extras"],
             ),
             content_type="application/x-ndjson",
             headers={
@@ -610,5 +775,6 @@ class ExportManifestView(APIView):
                 file_counts=params["file_counts"],
                 import_history=params["import_history"],
                 audit_history=params["audit_history"],
+                product_extras=params["product_extras"],
             ),
         )

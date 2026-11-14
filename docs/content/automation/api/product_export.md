@@ -42,12 +42,12 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
-| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history` and `audit_history` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines) and [Audit history lines](#audit-history-lines). An older instance has no `features` key. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history`, `audit_history` and `product_extras` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines), [Audit history lines](#audit-history-lines) and [Product extras lines](#product-extras-lines). An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
 | `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
 | `deduplication` | The deduplication rules that the customer set on the instance, as `{algorithm_per_parser, hashcode_fields_per_scanner, hashcode_allows_null_cwe}`. Each one is a map from a scan type to a value. The value is an algorithm or a list of hash fields. In `hashcode_allows_null_cwe` it is `true` or `false`, and says whether the hash accepts a missing CWE. A map holds the scan types whose value differs from the shipped settings. It also holds the scan types that DefectDojo does not ship. A scan type that the customer removed is listed with the value that DefectDojo then uses. That value is the `legacy` algorithm, an empty list of hash fields, or `true`. A removed scan type is not listed when that value is the shipped one. A map is empty when the customer changed nothing. An older instance has no `deduplication` key. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id. They are `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A test type is `{id, name, static_tool, dynamic_tool, active, dynamically_generated}`, and `dynamically_generated` is true for a test type that an import created. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
+| `reference` | The lookup tables that the product export refers to by id. They are `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. `questionnaires`, `general_surveys`, `open_survey_responses` and `benchmark_types` hold the questionnaires and the benchmark catalog. See [Questionnaires and benchmarks](#questionnaires-and-benchmarks) for their fields. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A test type is `{id, name, static_tool, dynamic_tool, active, dynamically_generated}`, and `dynamically_generated` is true for a test type that an import created. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. It holds `description`, `tags` (a list of names), `business_criticality`, `sla_configuration` (an SLA id) and three user ids: `product_manager`, `technical_contact`, `team_manager`. Each value is the one `/api/v2/products/` returns, and it is `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
@@ -71,10 +71,11 @@ The manifest takes these parameters:
 | `file_counts` | boolean | `true` | With `false`, the server does not read the size of each file in storage, and `files_over_cap` is `null`. |
 | `import_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `test_imports` and `test_import_actions`. See [Counts](#counts). |
 | `audit_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `audit_events` and `legacy_audit_entries`. See [Counts](#counts). |
+| `product_extras` | boolean | `false` | With `true`, `counts` and `totals` also hold `tracking_files`, `benchmarks` and `answered_surveys`. See [Counts](#counts). |
 
 An empty value, as in `?max_file_bytes=` or `?file_counts=`, uses the default.
 A `max_file_bytes` value that is not a whole number from 0 to 104857600 gets a 400.
-A `file_counts`, `import_history` or `audit_history` value that is not a boolean gets a 400.
+A `file_counts`, `import_history`, `audit_history` or `product_extras` value that is not a boolean gets a 400.
 To count `files_over_cap`, the server reads the size of every file in storage, with one call for each file. On an instance with many files, or with files on remote storage, the manifest can take some time.
 Pass `file_counts=false` to skip these reads. The `files` count does not need them, so it stays. `files_over_cap` is `null` on every product, product type and in `totals`.
 
@@ -84,6 +85,28 @@ Each entry of `reference.tool_configurations` has `id`, `name`, `description`, `
 `tool_type` is the id of an entry in `reference.tool_types`.
 An entry never has `password`, `ssh`, `api_key` or `extras`. The instance does not send these fields, even to a superuser.
 The importing side must ask for these values again.
+
+### Questionnaires and benchmarks
+
+Each entry of `reference.questionnaires` is `{id, name, description, active, questions}`.
+`questions` is sorted by `order`, then by `id`.
+A question is `{id, type, order, optional, text}`. `type` is `text` or `choice`.
+A choice question also has `multichoice` and `choices`. `choices` is a list of `{id, order, label}`, sorted by `order`, then by `id`.
+Two questionnaires can hold the same question. Each of them lists it with the same `id`.
+
+`reference.general_surveys` lists the open questionnaire links, as `{id, survey, num_responses, generated, expiration}`.
+`survey` is the id of an entry in `reference.questionnaires`.
+
+`reference.open_survey_responses` lists the answered questionnaires that have no engagement.
+An answered questionnaire is `{id, engagement, survey, assignee, responder, completed, answered_on, answers}`.
+`engagement` is `null` in this list. `assignee` and `responder` are user ids, or `null`.
+`answers` is sorted by the id of the question.
+A text answer is `{question, type, text}`. A choice answer is `{question, type, choices}`, and `choices` is a list of choice ids.
+
+`reference.benchmark_types` is the benchmark catalog, as `{id, name, version, benchmark_source, enabled, categories}`.
+A category is `{id, name, objective, references, enabled, requirements}`.
+A requirement is `{id, objective_number, objective, references, level_1, level_2, level_3, enabled}`.
+Each list is sorted by `id`.
 
 ## The product stream: `GET /api/v2/export/products/{id}/`
 
@@ -95,8 +118,8 @@ curl -H "Authorization: Token <your API key>" \
 
 The response has the content type `application/x-ndjson`: one JSON object on each line.
 The `Content-Disposition` header names the file `defectdojo-product-2-export.ndjson`.
-The endpoint takes the same `max_file_bytes`, `import_history` and `audit_history` parameters as the manifest. It ignores `file_counts`.
-Without `import_history=true` and `audit_history=true` the stream is the same as it was before these parameters existed.
+The endpoint takes the same `max_file_bytes`, `import_history`, `audit_history` and `product_extras` parameters as the manifest. It ignores `file_counts`.
+Without `import_history=true`, `audit_history=true` and `product_extras=true` the stream is the same as it was before these parameters existed.
 
 The lines come in this order:
 
@@ -105,10 +128,13 @@ The lines come in this order:
 3. Every `test`, by id.
 4. Every `finding`, by test and then by id within the test. You can group a test's findings as they arrive.
 5. Every `risk_acceptance`, by id.
-6. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
-7. With `audit_history=true`, every `audit_event`, by model, then by object id, and then by event id. See [Audit history lines](#audit-history-lines).
-8. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
-9. One `end` line.
+6. With `product_extras=true`, every `tracking_file`, by id. See [Product extras lines](#product-extras-lines).
+7. With `product_extras=true`, every `benchmark`, by benchmark type id.
+8. With `product_extras=true`, every `answered_survey`, by id.
+9. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
+10. With `audit_history=true`, every `audit_event`, by model, then by object id, and then by event id. See [Audit history lines](#audit-history-lines).
+11. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
+12. One `end` line.
 
 Each object has its own line and names its parent by id.
 Notes, files, endpoint entries and finding groups nest in their line.
@@ -123,9 +149,12 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 |--------|---------------------|
 | `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest), `product`, `engagement_presets` and `api_scan_configurations`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. See [Presets and API scan configurations](#presets-and-api-scan-configurations) for the other two. |
 | `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it, with the changes in [Engagement lines](#engagement-lines). `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
-| `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. |
+| `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. `finding_groups` holds every finding group of the test, a group with no findings included. |
 | `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
+| `tracking_file` | `data`: one tracking file of the product. Only with `product_extras=true`. See [Product extras lines](#product-extras-lines). |
+| `benchmark` | `data`: the summary and the results of one benchmark type for the product. Only with `product_extras=true`. See [Product extras lines](#product-extras-lines). |
+| `answered_survey` | `data`: one answered questionnaire of an engagement of the product. Only with `product_extras=true`. See [Product extras lines](#product-extras-lines). |
 | `test_import` | `data`: one import or reimport of a test. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
 | `test_import_actions` | `data`: some of the actions of one import. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
 | `audit_event` | `data`: one change of the product or of one of its objects, with the values after the change. Only with `audit_history=true`. See [Audit history lines](#audit-history-lines). |
@@ -228,6 +257,53 @@ A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
 - `engagement` is the id of one engagement that holds the risk acceptance, or `null` when no engagement holds it. A risk acceptance can be linked to more than one engagement. The engagement lines carry every link in their `risk_acceptance` ids.
 - `notes` are nested, not ids.
 - `proof` replaces `path`. It holds `filename`, `size`, `content_type` and `data_base64`, or it is `null` when there is no proof. The proof follows the same caps and the same missing-file rule as a file entry. It is the only file on its line.
+
+### Product extras lines
+
+With `product_extras=true`, the stream sends the tracking files, the benchmark results and the answered questionnaires of the product.
+These lines come after the risk acceptances and before the import history.
+A product that has none of them has no such line.
+
+A `tracking_file` line has `data` with these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The tracking file id. |
+| `name`, `path`, `folder`, `artifact` | The values of the tracking file. Each one can be `null`. |
+| `review_status` | The name of the review status. It is `null` when the review status has no name. |
+| `tags` | A list of tag names. |
+| `created` | The time of creation, in ISO 8601. |
+
+A `benchmark` line holds the data of one benchmark type for the product.
+The stream sends one line for each benchmark type that has a summary or a result for the product.
+The lines are in the order of the type id.
+A `benchmark` line has `data` with these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `benchmark_type` | The id of an entry in `reference.benchmark_types`. |
+| `desired_level` | The desired level of the summary, for example `Level 2`. It is `null` when the product has no summary for the type. |
+| `publish` | Whether the product publishes the score of the type. It is `null` when the product has no summary for the type. |
+| `controls` | The results of the product for the type, sorted by `control`. The list is empty when the product has a summary and no result. |
+
+A control is `{control, pass_fail, enabled, notes}`.
+`control` is the id of a requirement in `reference.benchmark_types`.
+`pass_fail` says whether the product meets the requirement. `enabled` says whether the requirement applies to the product.
+`notes` are nested, as on the engagement lines.
+The line does not carry the scores or the current level of the summary.
+
+An `answered_survey` line has `data` with the keys of an entry in `reference.open_survey_responses`.
+See [Questionnaires and benchmarks](#questionnaires-and-benchmarks).
+`engagement` is the id of an engagement of the product. The stream sends no answered questionnaire that has no engagement.
+Those are in `reference.open_survey_responses`.
+
+An example of each line, shortened:
+
+```text
+{"type": "tracking_file", "data": {"id": 4, "name": "app.war", "path": "/srv/app.war", "folder": "/srv", "artifact": null, "review_status": "Reviewed", "tags": ["alpha"], "created": "2025-03-04T05:06:07.123456Z"}}
+{"type": "benchmark", "data": {"benchmark_type": 1, "desired_level": "Level 2", "publish": true, "controls": [{"control": 17, "pass_fail": true, "enabled": true, "notes": []}]}}
+{"type": "answered_survey", "data": {"id": 9, "engagement": 3, "survey": 2, "assignee": 1, "responder": null, "completed": true, "answered_on": "2026-11-03", "answers": [{"question": 5, "type": "text", "text": "A web shop"}]}}
+```
 
 ### Import history lines
 
@@ -352,12 +428,17 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `files_over_cap` | File entries over `max_file_bytes`. A missing file and a file with `"error": "line_cap"` are not counted. It is `null` with `file_counts=false`. | The same, on the lines. |
 | `risk_acceptances` | Risk acceptances that an engagement of the product holds, or that accept a finding of the product. | Risk acceptance lines. |
 | `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
+| `tracking_files` | Tracking files of the product. Only with `product_extras=true`. | `tracking_file` lines. Only with `product_extras=true`. |
+| `benchmarks` | Benchmark types that have a summary or a result for the product. Only with `product_extras=true`. | `benchmark` lines. Only with `product_extras=true`. |
+| `answered_surveys` | Answered questionnaires of the engagements in the product. Only with `product_extras=true`. | `answered_survey` lines. Only with `product_extras=true`. |
 | `test_imports` | Imports and reimports of the tests in the product. Only with `import_history=true`. | `test_import` lines. Only with `import_history=true`. |
 | `test_import_actions` | Actions of those imports. Only with `import_history=true`. | The actions on `test_import_actions` lines. Only with `import_history=true`. |
 | `audit_events` | Events of the objects that the audit history covers. Only with `audit_history=true`. | `audit_event` lines. Only with `audit_history=true`. |
 | `legacy_audit_entries` | Entries of the older audit log for those objects. Only with `audit_history=true`. | `legacy_audit_entry` lines. Only with `audit_history=true`. |
 
 The two sides agree on every key except `endpoints` and `finding_groups`.
+A finding group with no findings counts in the manifest and not in the stream.
+The `notes` count does not hold the notes on benchmark results.
 
 An example `end` line:
 
@@ -367,7 +448,6 @@ An example `end` line:
 
 ## What does not cross
 
-- A finding group with no findings. Finding groups cross on the finding lines, so an empty group has no line.
 - Endpoints and locations that have no finding. The manifest counts them in `endpoints`.
 - The product-level status of a location.
 - Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
@@ -375,7 +455,7 @@ An example `end` line:
 - Product members and product groups.
 - CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
 - The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
-- Languages, technologies and benchmarks.
+- Languages and technologies.
 - The audit history of every model that the [audit history lines](#audit-history-lines) do not name, and of any object that is no longer in the product.
 - User passwords and password hashes. A user entry has no `password` field.
 - Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement, the login banner and the deduplication rules are in the manifest.

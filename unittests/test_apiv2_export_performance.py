@@ -15,21 +15,36 @@ from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.finding.helper import save_vulnerability_ids
 from dojo.location.feature import locations_enabled
 from dojo.models import (
+    Answered_Survey,
+    Benchmark_Category,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Benchmark_Type,
     BurpRawRequestResponse,
     Check_List,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
     Dojo_User,
     DojoMeta,
     Engagement,
+    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Group,
+    General_Survey,
     Notes,
+    Objects_Product,
+    Objects_Review,
     Product,
     Risk_Acceptance,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
+    TextAnswer,
+    TextQuestion,
 )
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
@@ -127,6 +142,48 @@ class TestProductExportQueryCount(DojoAPITestCase):
             risk_acceptance = Risk_Acceptance.objects.create(name=f"{prefix}-{i}", owner=self.admin)
             risk_acceptance.accepted_findings.add(finding)
 
+    def add_surveys_and_benchmarks(self, count: int, prefix: str) -> None:
+        for i in range(count):
+            survey = Engagement_Survey.objects.create(name=f"{prefix}-{i}")
+            text = TextQuestion.objects.create(text=f"{prefix}-{i} text")
+            pick = ChoiceQuestion.objects.create(text=f"{prefix}-{i} pick", multichoice=True)
+            choices = [Choice.objects.create(order=n, label=f"{prefix}-{i}-{n}") for n in range(2)]
+            pick.choices.add(*choices)
+            survey.questions.add(text, pick)
+            General_Survey.objects.create(survey=survey)
+            response = Answered_Survey.objects.create(survey=survey, assignee=self.admin, responder=self.admin)
+            TextAnswer.objects.create(question=text, answered_survey=response, answer="a")
+            ChoiceAnswer.objects.create(question=pick, answered_survey=response).answer.add(*choices)
+            benchmark = Benchmark_Type.objects.create(name=f"{prefix}-{i}", version="1")
+            for n in range(2):
+                category = Benchmark_Category.objects.create(type=benchmark, name=f"{prefix}-{i}-{n}", objective="o")
+                Benchmark_Requirement.objects.create(category=category, objective="o")
+
+    def add_product_extras(self, product: Product, count: int, prefix: str) -> None:
+        engagement = Engagement.objects.filter(product=product).order_by("id").first()
+        for i in range(count):
+            tracking_file = Objects_Product.objects.create(
+                product=product, name=f"{prefix}-{i}", review_status=Objects_Review.objects.create(name=f"{prefix}-{i}"),
+            )
+            tracking_file.tags.add("perf_a", "perf_b")
+            benchmark = Benchmark_Type.objects.create(name=f"{prefix}-{i}", version="1")
+            category = Benchmark_Category.objects.create(type=benchmark, name=f"{prefix}-{i}", objective="o")
+            for n in range(2):
+                result = Benchmark_Product.objects.create(
+                    product=product, control=Benchmark_Requirement.objects.create(category=category, objective="o"),
+                )
+                result.notes.add(Notes.objects.create(entry=f"{prefix}-{i}-{n}", author=self.admin))
+            Benchmark_Product_Summary.objects.create(product=product, benchmark_type=benchmark)
+            survey = Engagement_Survey.objects.create(name=f"{prefix}-{i}")
+            text = TextQuestion.objects.create(text=f"{prefix}-{i} text")
+            pick = ChoiceQuestion.objects.create(text=f"{prefix}-{i} pick", multichoice=True)
+            choices = [Choice.objects.create(order=n, label=f"{prefix}-{i}-{n}") for n in range(2)]
+            pick.choices.add(*choices)
+            survey.questions.add(text, pick)
+            response = Answered_Survey.objects.create(survey=survey, engagement=engagement, assignee=self.admin, responder=self.admin)
+            TextAnswer.objects.create(question=text, answered_survey=response, answer="a")
+            ChoiceAnswer.objects.create(question=pick, answered_survey=response).answer.add(*choices)
+
     def measure(self, url) -> int:
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(url)
@@ -165,6 +222,15 @@ class TestProductExportQueryCount(DojoAPITestCase):
         after = self.measure(url)
         self.assertEqual(before, after, f"The manifest issues {before} queries before the added data and {after} after.")
 
+    def test_manifest_queries_do_not_grow_with_questionnaires_or_benchmarks(self):
+        url = reverse("export-manifest")
+        self.add_surveys_and_benchmarks(1, "n")
+        self.measure(url)
+        one = self.measure(url)
+        self.add_surveys_and_benchmarks(9, "o")
+        ten = self.measure(url)
+        self.assertEqual(one, ten, f"The manifest issues {one} queries with one questionnaire and type and {ten} with ten.")
+
     def test_manifest_query_count_is_constant_with_import_history(self):
         url = reverse("export-manifest") + "?import_history=true"
         before = self.measure(url)
@@ -196,3 +262,21 @@ class TestProductExportQueryCount(DojoAPITestCase):
         self.add_audit_history(self.product, 4, "m")
         q_b = self.measure(url)
         self.assertEqual(q_a, q_b, f"The export stream issues {q_a} queries with 4 added findings of history and {q_b} with 8.")
+
+    def test_stream_query_count_is_constant_across_product_extras(self):
+        url = self.url + "?product_extras=true"
+        self.add_product_extras(self.product, 1, "p")
+        self.measure(url)
+        one = self.measure(url)
+        self.add_product_extras(self.product, 9, "q")
+        ten = self.measure(url)
+        self.assertEqual(one, ten, f"The export stream issues {one} queries with one row of each extra line and {ten} with ten.")
+
+    def test_manifest_query_count_is_constant_with_product_extras(self):
+        url = reverse("export-manifest") + "?product_extras=true"
+        self.add_product_extras(self.product, 1, "r")
+        self.measure(url)
+        before = self.measure(url)
+        self.add_product_extras(self.product, 4, "s")
+        after = self.measure(url)
+        self.assertEqual(before, after, f"The manifest issues {before} queries with one row of each extra and {after} with five.")

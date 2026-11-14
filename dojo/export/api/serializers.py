@@ -1,10 +1,12 @@
 import base64
 import mimetypes
 from datetime import datetime
+from operator import attrgetter
 from pathlib import Path
 
 from auditlog.models import LogEntry
 from django.apps import apps
+from django.db.models import Prefetch, prefetch_related_objects
 from django.db.models.fields.files import FieldFile
 from rest_framework import serializers
 
@@ -15,13 +17,26 @@ from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
 from dojo.models import (
     Announcement,
+    Answer,
+    Answered_Survey,
     BannerConf,
+    Benchmark_Category,
+    Benchmark_Product,
+    Benchmark_Requirement,
+    Benchmark_Type,
     Check_List,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
     Contact,
     Engagement_Presets,
+    Engagement_Survey,
     FileUpload,
     Finding,
+    General_Survey,
+    Objects_Product,
     Product_API_Scan_Configuration,
+    Question,
     Report_Type,
     Risk_Acceptance,
     Test_Import,
@@ -72,6 +87,14 @@ class ExportParamsSerializer(serializers.Serializer):
         help_text=(
             "Add the audit history of the product to the stream, and its counts to the manifest. The stream "
             "sends audit_event lines, then legacy_audit_entry lines, after the import history."
+        ),
+    )
+    product_extras = serializers.BooleanField(
+        default=False,
+        help_text=(
+            "Add the tracking files, benchmark results and answered questionnaires of the product to the stream, "
+            "and their counts to the manifest. The stream sends tracking_file, benchmark and answered_survey lines "
+            "after the risk acceptances."
         ),
     )
 
@@ -360,3 +383,145 @@ class ExportUserSerializer(UserSerializer):
     def to_representation(self, instance):
         # Skip UserSerializer.to_representation: it reads the configuration_permissions key this class drops.
         return serializers.ModelSerializer.to_representation(self, instance)
+
+
+class ExportChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Choice
+        fields = ("id", "order", "label")
+        read_only_fields = fields
+
+
+class ExportQuestionSerializer(serializers.BaseSerializer):
+    def to_representation(self, question):
+        data = {
+            "id": question.id,
+            "type": "text",
+            "order": question.order,
+            "optional": question.optional,
+            "text": question.text,
+        }
+        if isinstance(question, ChoiceQuestion):
+            choices = sorted(question.choices.all(), key=attrgetter("order", "id"))
+            data |= {
+                "type": "choice",
+                "multichoice": question.multichoice,
+                "choices": ExportChoiceSerializer(choices, many=True).data,
+            }
+        return data
+
+
+class ExportQuestionnaireSerializer(serializers.ModelSerializer):
+    questions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Engagement_Survey
+        fields = ("id", "name", "description", "active", "questions")
+        read_only_fields = fields
+
+    def get_questions(self, obj) -> list[dict]:
+        return ExportQuestionSerializer(sorted(obj.questions.all(), key=attrgetter("order", "id")), many=True).data
+
+
+def prefetch_questions(questionnaires: list[Engagement_Survey]) -> None:
+    prefetch_related_objects(questionnaires, Prefetch("questions", queryset=Question.polymorphic.all()))
+    prefetch_related_objects(
+        [
+            question
+            for questionnaire in questionnaires
+            for question in questionnaire.questions.all()
+            if isinstance(question, ChoiceQuestion)
+        ],
+        "choices",
+    )
+
+
+class ExportGeneralSurveySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = General_Survey
+        fields = ("id", "survey", "num_responses", "generated", "expiration")
+        read_only_fields = fields
+
+
+class ExportAnswerSerializer(serializers.BaseSerializer):
+    def to_representation(self, answer):
+        if isinstance(answer, ChoiceAnswer):
+            return {
+                "question": answer.question_id,
+                "type": "choice",
+                "choices": sorted(choice.id for choice in answer.answer.all()),
+            }
+        return {"question": answer.question_id, "type": "text", "text": answer.answer}
+
+
+class ExportAnsweredSurveySerializer(serializers.ModelSerializer):
+    answers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Answered_Survey
+        fields = ("id", "engagement", "survey", "assignee", "responder", "completed", "answered_on", "answers")
+        read_only_fields = fields
+
+    def get_answers(self, obj) -> list[dict]:
+        return ExportAnswerSerializer(sorted(obj.answer_set.all(), key=attrgetter("question_id", "id")), many=True).data
+
+
+def prefetch_answers(answered_surveys: list[Answered_Survey]) -> None:
+    """A caller must run this first: without it ExportAnsweredSurveySerializer raises AttributeError."""
+    prefetch_related_objects(answered_surveys, Prefetch("answer_set", queryset=Answer.polymorphic.all()))
+    prefetch_related_objects(
+        [
+            answer
+            for answered_survey in answered_surveys
+            for answer in answered_survey.answer_set.all()
+            if isinstance(answer, ChoiceAnswer)
+        ],
+        "answer",
+    )
+
+
+class ExportBenchmarkRequirementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Benchmark_Requirement
+        fields = ("id", "objective_number", "objective", "references", "level_1", "level_2", "level_3", "enabled")
+        read_only_fields = fields
+
+
+class ExportBenchmarkCategorySerializer(serializers.ModelSerializer):
+    requirements = ExportBenchmarkRequirementSerializer(source="benchmark_requirement_set", many=True, read_only=True)
+
+    class Meta:
+        model = Benchmark_Category
+        fields = ("id", "name", "objective", "references", "enabled", "requirements")
+        read_only_fields = fields
+
+
+class ExportBenchmarkTypeSerializer(serializers.ModelSerializer):
+    categories = ExportBenchmarkCategorySerializer(source="benchmark_category_set", many=True, read_only=True)
+
+    class Meta:
+        model = Benchmark_Type
+        fields = ("id", "name", "version", "benchmark_source", "enabled", "categories")
+        read_only_fields = fields
+
+
+class ExportTrackingFileSerializer(serializers.ModelSerializer):
+    review_status = serializers.SlugRelatedField(slug_field="name", read_only=True)
+    tags = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Objects_Product
+        fields = ("id", "name", "path", "folder", "artifact", "review_status", "tags", "created")
+        read_only_fields = fields
+
+    def get_tags(self, obj) -> list[str]:
+        return [tag.name for tag in obj.tags.all()]
+
+
+class ExportBenchmarkResultSerializer(serializers.ModelSerializer):
+    notes = NoteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Benchmark_Product
+        fields = ("control", "pass_fail", "enabled", "notes")
+        read_only_fields = fields

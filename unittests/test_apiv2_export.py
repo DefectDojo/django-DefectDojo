@@ -34,7 +34,7 @@ from dojo.export.api.serializers import (
     export_proof,
     render_datetime,
 )
-from dojo.export.api.views import ACTIONS_PER_LINE, AUDIT_MODELS, COUNT_KEYS
+from dojo.export.api.views import ACTIONS_PER_LINE, AUDIT_MODELS, COUNT_KEYS, PRODUCT_EXTRAS_COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
@@ -42,20 +42,33 @@ from dojo.location.models import LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Announcement,
+    Answered_Survey,
     BannerConf,
+    Benchmark_Category,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Benchmark_Type,
     BurpRawRequestResponse,
     Check_List,
+    Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
     Contact,
     Dojo_User,
     DojoMeta,
     Engagement,
     Engagement_Presets,
+    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
+    General_Survey,
     Network_Locations,
     Notes,
+    Objects_Product,
+    Objects_Review,
     Product,
     Product_API_Scan_Configuration,
     Product_Platform,
@@ -66,6 +79,8 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
+    TextAnswer,
+    TextQuestion,
     UserContactInfo,
 )
 from dojo.system_settings.ui.forms import SystemSettingsForm
@@ -542,6 +557,16 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual("grp", data["finding_groups"][0]["name"])
         self.assertEqual("test note", data["notes"][0]["entry"])
         self.assertEqual(Path(self.owner_files["test"].file.name).name, data["files"][0]["filename"])
+
+    def test_a_finding_group_with_no_findings_is_on_its_test_line(self):
+        empty = Finding_Group.objects.create(name="empty grp", test=self.finding.test, creator=self.admin)
+        lines = ndjson_lines(self.client.get(self.url))
+        groups = self.line_data("test", self.finding.test_id, lines)["finding_groups"]
+        self.assertEqual({"grp", "empty grp"}, {group["name"] for group in groups})
+        self.assertIn(empty.id, [group["id"] for group in groups])
+        self.assertEqual(1, lines[-1]["counts"]["finding_groups"])
+        manifest = self.client.get(reverse("export-manifest")).json()
+        self.assertEqual(2, self.get_results_by_id(manifest["products"], 2)["counts"]["finding_groups"])
 
     def test_engagement_line(self):
         data = self.line_data("engagement", self.finding.test.engagement_id)
@@ -1092,6 +1117,254 @@ class TestExportAuditHistory(DojoAPITestCase):
 
 
 @versioned_fixtures
+class TestExportProductExtras(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+    EXTRA_LINES = {"tracking_file", "benchmark", "answered_survey"}
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = Dojo_User.objects.get(username="admin")
+        cls.user1 = Dojo_User.objects.get(username="user1")
+        cls.engagement_note = Notes.objects.create(entry="engagement note", author=cls.admin)
+        Engagement.objects.get(id=1).notes.add(cls.engagement_note)
+        cls.seed_tracking_files()
+        cls.seed_benchmarks()
+        cls.seed_answered_surveys()
+        Risk_Acceptance.objects.create(name="ra", owner=cls.admin).engagement_set.add(Engagement.objects.get(id=1))
+
+    @classmethod
+    def seed_tracking_files(cls):
+        unnamed = Objects_Review.objects.create(name=None)
+        reviewed = Objects_Review.objects.create(name="Reviewed")
+        cls.file_a = Objects_Product.objects.create(product_id=2, name="a.txt", review_status=unnamed)
+        cls.file_b = Objects_Product.objects.create(
+            product_id=2, name="b.txt", path="/src/b.txt", folder="/src", artifact="b-1.0", review_status=reviewed,
+        )
+        cls.file_b.tags.add("beta", "alpha")
+        cls.file_c = Objects_Product.objects.create(product_id=2, name="c.txt", review_status=reviewed)
+        Objects_Product.objects.create(product_id=1, name="elsewhere", review_status=reviewed)
+
+    @classmethod
+    def requirement(cls, benchmark_type, number):
+        category = Benchmark_Category.objects.create(type=benchmark_type, name=f"{benchmark_type.name} {number}", objective="o")
+        return Benchmark_Requirement.objects.create(category=category, objective_number=number, objective="o")
+
+    @classmethod
+    def seed_benchmarks(cls):
+        cls.asvs = Benchmark_Type.objects.create(name="OWASP ASVS", version="4.0")
+        cls.pci = Benchmark_Type.objects.create(name="PCI", version="3.2")
+        cls.summary_only = Benchmark_Type.objects.create(name="Summary only", version="1")
+        unused = Benchmark_Type.objects.create(name="Unused", version="1")
+        elsewhere = Benchmark_Type.objects.create(name="Elsewhere", version="1")
+        cls.first, cls.second = cls.requirement(cls.asvs, "1.1"), cls.requirement(cls.asvs, "1.2")
+        cls.third = cls.requirement(cls.pci, "2.1")
+        cls.requirement(unused, "3.1")
+        # The results are created out of control order and out of type order.
+        cls.pci_result = Benchmark_Product.objects.create(product_id=2, control=cls.third, pass_fail=True)
+        cls.second_result = Benchmark_Product.objects.create(product_id=2, control=cls.second, pass_fail=True, enabled=False)
+        cls.second_note = Notes.objects.create(entry="benchmark note", author=cls.user1, private=True)
+        cls.second_result.notes.add(cls.second_note)
+        cls.first_result = Benchmark_Product.objects.create(product_id=2, control=cls.first)
+        Benchmark_Product_Summary.objects.create(product_id=2, benchmark_type=cls.asvs, desired_level="Level 2", publish=True)
+        Benchmark_Product_Summary.objects.create(product_id=2, benchmark_type=cls.summary_only, desired_level="Level 3")
+        Benchmark_Product_Summary.objects.create(product_id=1, benchmark_type=cls.asvs)
+        Benchmark_Product.objects.create(product_id=1, control=cls.requirement(elsewhere, "4.1"))
+
+    @classmethod
+    def seed_answered_surveys(cls):
+        cls.survey = Engagement_Survey.objects.create(name="Intake")
+        cls.text = TextQuestion.objects.create(text="Describe the app")
+        cls.pick = ChoiceQuestion.objects.create(text="Which stack", multichoice=True)
+        cls.go, cls.python = Choice.objects.create(order=2, label="Go"), Choice.objects.create(order=1, label="Python")
+        cls.pick.choices.add(cls.go, cls.python)
+        cls.survey.questions.add(cls.text, cls.pick)
+        # The engagement ids run against the survey ids.
+        cls.late_engagement = Answered_Survey.objects.create(
+            survey=cls.survey, engagement_id=3, assignee=cls.admin, responder=cls.user1, completed=True,
+            answered_on=datetime(2026, 11, 3, tzinfo=UTC).date(),
+        )
+        choice_answer = ChoiceAnswer.objects.create(question=cls.pick, answered_survey=cls.late_engagement)
+        choice_answer.answer.add(cls.go, cls.python)
+        TextAnswer.objects.create(question=cls.text, answered_survey=cls.late_engagement, answer="A web shop")
+        cls.early_engagement = Answered_Survey.objects.create(survey=cls.survey, engagement_id=1)
+        cls.other_product = Answered_Survey.objects.create(survey=cls.survey, engagement_id=2)
+        Answered_Survey.objects.create(survey=cls.survey)
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+
+    def export(self, product_id=2, **params):
+        return ndjson_lines(self.client.get(reverse("export-product", args=[product_id]), params))
+
+    def data_of(self, line_type, **params):
+        return [line["data"] for line in self.export(**params) if line["type"] == line_type]
+
+    def test_stream_without_product_extras_sends_no_extra_lines(self):
+        for params in ({}, {"product_extras": "false"}):
+            with self.subTest(params=params):
+                lines = self.export(**params)
+                self.assertEqual(set(), self.EXTRA_LINES & {line["type"] for line in lines})
+                self.assertEqual(set(COUNT_KEYS), set(lines[-1]["counts"]))
+
+    def test_stream_sends_tracking_files(self):
+        files = self.data_of("tracking_file", product_extras="true")
+        self.assertEqual([self.file_a.id, self.file_b.id, self.file_c.id], [data["id"] for data in files])
+        self.assertEqual(
+            {
+                "id": self.file_b.id,
+                "name": "b.txt",
+                "path": "/src/b.txt",
+                "folder": "/src",
+                "artifact": "b-1.0",
+                "review_status": "Reviewed",
+                "tags": ["alpha", "beta"],
+                "created": render_datetime(self.file_b.created),
+            },
+            files[1],
+        )
+        self.assertEqual(
+            (None, None, None, None, []),
+            (files[0]["review_status"], files[0]["path"], files[0]["folder"], files[0]["artifact"], files[0]["tags"]),
+        )
+
+    def test_stream_sends_one_benchmark_line_per_type_with_controls_and_notes(self):
+        lines = self.data_of("benchmark", product_extras="true")
+        self.assertEqual([self.asvs.id, self.pci.id, self.summary_only.id], [data["benchmark_type"] for data in lines])
+        asvs, pci, summary_only = lines
+        self.assertEqual({"benchmark_type", "desired_level", "publish", "controls"}, set(asvs))
+        self.assertEqual(("Level 2", True), (asvs["desired_level"], asvs["publish"]))
+        self.assertEqual([self.first.id, self.second.id], [control["control"] for control in asvs["controls"]])
+        first, second = asvs["controls"]
+        self.assertEqual({"control", "pass_fail", "enabled", "notes"}, set(second))
+        self.assertEqual((False, True, []), (first["pass_fail"], first["enabled"], first["notes"]))
+        self.assertEqual((True, False), (second["pass_fail"], second["enabled"]))
+        (note,) = second["notes"]
+        self.assertEqual(("benchmark note", True, "user1"), (note["entry"], note["private"], note["author"]["username"]))
+        engagement_note = self.data_of("engagement", product_extras="true")[0]["notes"][0]
+        self.assertEqual(set(engagement_note), set(note))
+        self.assertEqual((None, None), (pci["desired_level"], pci["publish"]))
+        self.assertEqual([{"control": self.third.id, "pass_fail": True, "enabled": True, "notes": []}], pci["controls"])
+        self.assertEqual(("Level 3", False, []), (summary_only["desired_level"], summary_only["publish"], summary_only["controls"]))
+
+    def test_a_summary_only_type_keeps_its_place_between_result_types(self):
+        types = {name: Benchmark_Type.objects.create(name=name, version="1") for name in ("m0", "a", "m1", "b", "m2")}
+        for name in ("a", "b"):
+            Benchmark_Product.objects.create(product_id=3, control=self.requirement(types[name], "1.1"))
+        for name in ("m0", "m1", "b", "m2"):
+            Benchmark_Product_Summary.objects.create(product_id=3, benchmark_type=types[name], desired_level="Level 2")
+        expected = [types[name].id for name in ("m0", "a", "m1", "b", "m2")]
+        for chunk_size in (500, 1):
+            with self.subTest(chunk_size=chunk_size), mock.patch("dojo.export.api.views.EXPORT_CHUNK_SIZE", chunk_size):
+                lines = self.export(3, product_extras="true")
+                benchmarks = [line["data"] for line in lines if line["type"] == "benchmark"]
+                self.assertEqual(expected, [data["benchmark_type"] for data in benchmarks])
+                self.assertEqual([0, 1, 0, 1, 0], [len(data["controls"]) for data in benchmarks])
+                self.assertEqual(
+                    ["Level 2", None, "Level 2", "Level 2", "Level 2"], [data["desired_level"] for data in benchmarks],
+                )
+                self.assertEqual(5, lines[-1]["counts"]["benchmarks"])
+
+    def test_stream_sends_the_answered_surveys_of_the_products_engagements(self):
+        surveys = self.data_of("answered_survey", product_extras="true")
+        self.assertEqual([self.late_engagement.id, self.early_engagement.id], [data["id"] for data in surveys])
+        self.assertEqual(
+            {
+                "id": self.late_engagement.id,
+                "engagement": 3,
+                "survey": self.survey.id,
+                "assignee": self.admin.id,
+                "responder": self.user1.id,
+                "completed": True,
+                "answered_on": "2026-11-03",
+                "answers": [
+                    {"question": self.text.id, "type": "text", "text": "A web shop"},
+                    {"question": self.pick.id, "type": "choice", "choices": sorted([self.go.id, self.python.id])},
+                ],
+            },
+            surveys[0],
+        )
+        self.assertEqual(([], None, None), (surveys[1]["answers"], surveys[1]["assignee"], surveys[1]["answered_on"]))
+
+    def test_extra_lines_come_after_the_risk_acceptances(self):
+        kinds = [line["type"] for line in self.export(product_extras="true", import_history="true", audit_history="true")]
+        positions = {kind: [i for i, other in enumerate(kinds) if other == kind] for kind in set(kinds)}
+        extras = [i for kind in self.EXTRA_LINES for i in positions[kind]]
+        self.assertTrue(positions["risk_acceptance"])
+        self.assertLess(max(positions["risk_acceptance"]), min(extras))
+        self.assertLess(max(extras), min(positions["test_import"] + positions["audit_event"]))
+        order = [kind for kind in kinds if kind in self.EXTRA_LINES]
+        self.assertEqual(sorted(order, key=["tracking_file", "benchmark", "answered_survey"].index), order)
+        self.assertEqual("end", kinds[-1])
+
+    def test_end_line_counts_the_extras(self):
+        lines = self.export(product_extras="true")
+        counts = lines[-1]["counts"]
+        self.assertEqual(set(COUNT_KEYS) | set(PRODUCT_EXTRAS_COUNT_KEYS), set(counts))
+        self.assertEqual({"tracking_files": 3, "benchmarks": 3, "answered_surveys": 2}, {key: counts[key] for key in PRODUCT_EXTRAS_COUNT_KEYS})
+        for key, line_type in (("tracking_files", "tracking_file"), ("benchmarks", "benchmark"), ("answered_surveys", "answered_survey")):
+            self.assertEqual(sum(line["type"] == line_type for line in lines), counts[key], key)
+
+    def test_the_extras_count_keys_follow_the_other_counts_in_line_order(self):
+        keys = list(self.export(product_extras="true", import_history="true", audit_history="true")[-1]["counts"])
+        self.assertEqual(
+            [*COUNT_KEYS, *PRODUCT_EXTRAS_COUNT_KEYS, "test_imports", "test_import_actions", "audit_events", "legacy_audit_entries"],
+            keys,
+        )
+
+    def test_a_product_with_no_extras_has_no_extra_lines(self):
+        lines = self.export(3, product_extras="true")
+        self.assertEqual(["header", "end"], [line["type"] for line in lines])
+        self.assertEqual(dict.fromkeys(PRODUCT_EXTRAS_COUNT_KEYS, 0), {key: lines[-1]["counts"][key] for key in PRODUCT_EXTRAS_COUNT_KEYS})
+
+    def test_every_row_is_sent_when_the_pages_hold_one_row(self):
+        whole = self.export(product_extras="true")
+        with mock.patch("dojo.export.api.views.EXPORT_CHUNK_SIZE", 1):
+            paged = self.export(product_extras="true")
+
+        def extras(lines):
+            return [line for line in lines if line["type"] in self.EXTRA_LINES]
+
+        self.assertEqual(extras(whole), extras(paged))
+        self.assertEqual(8, len(extras(paged)))
+
+    def test_features_name_product_extras(self):
+        self.assertIn("product_extras", self.client.get(reverse("export-manifest")).json()["features"])
+
+    def test_manifest_counts_extras_only_when_asked(self):
+        manifest = self.client.get(reverse("export-manifest"), {"product_extras": "true"}).json()
+        expected = {
+            2: {"tracking_files": 3, "benchmarks": 3, "answered_surveys": 2},
+            # One type with a summary only, one with a result only.
+            1: {"tracking_files": 1, "benchmarks": 2, "answered_surveys": 1},
+        }
+        for product_id, counts in expected.items():
+            entry = self.get_results_by_id(manifest["products"], product_id)["counts"]
+            self.assertEqual(counts, {key: entry[key] for key in PRODUCT_EXTRAS_COUNT_KEYS})
+        end = self.export(product_extras="true")[-1]["counts"]
+        self.assertEqual(
+            {key: end[key] for key in PRODUCT_EXTRAS_COUNT_KEYS},
+            {key: self.get_results_by_id(manifest["products"], 2)["counts"][key] for key in PRODUCT_EXTRAS_COUNT_KEYS},
+        )
+        for key in PRODUCT_EXTRAS_COUNT_KEYS:
+            self.assertEqual(sum(product["counts"][key] for product in manifest["products"]), manifest["totals"][key], key)
+            for product_type in manifest["product_types"]:
+                members = [product for product in manifest["products"] if product["prod_type"] == product_type["id"]]
+                self.assertEqual(sum(product["counts"][key] for product in members), product_type["counts"][key], key)
+        plain = self.client.get(reverse("export-manifest")).json()
+        for key in PRODUCT_EXTRAS_COUNT_KEYS:
+            self.assertNotIn(key, plain["totals"])
+            self.assertNotIn(key, self.get_results_by_id(plain["products"], 2)["counts"])
+
+    def test_a_non_boolean_product_extras_is_a_400(self):
+        for url in (reverse("export-product", args=[2]), reverse("export-manifest")):
+            with self.subTest(url=url):
+                response = self.client.get(url, {"product_extras": "maybe"})
+                self.assertEqual(400, response.status_code)
+                self.assertIn("product_extras", response.json())
+
+
+@versioned_fixtures
 class TestExportManifest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1268,7 +1541,8 @@ class TestExportManifest(DojoAPITestCase):
             {
                 "sla_configurations", "development_environments", "regulations", "test_types", "note_types",
                 "product_platforms", "product_lifecycles", "product_origins", "finding_templates", "tool_types",
-                "tool_configurations", "users", "contacts", "report_types",
+                "tool_configurations", "users", "contacts", "report_types", "questionnaires", "general_surveys",
+                "open_survey_responses", "benchmark_types",
             },
             set(reference),
         )
@@ -1335,8 +1609,8 @@ class TestExportManifest(DojoAPITestCase):
         for value in secrets.values():
             self.assertNotIn(value, body)
 
-    def test_features_list_check_lists_and_the_history_parts(self):
-        self.assertEqual(["check_lists", "import_history", "audit_history"], self.manifest["features"])
+    def test_features_list_check_lists_the_history_parts_and_product_extras(self):
+        self.assertEqual(["check_lists", "import_history", "audit_history", "product_extras"], self.manifest["features"])
 
     def test_the_manifest_counts_import_history_only_when_asked(self):
         self.assertNotIn("test_imports", self.manifest["totals"])
@@ -1392,6 +1666,188 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(
             [{"id": row.id, "name": row.name} for row in Report_Type.objects.order_by("id")], report_types,
         )
+
+    def reference(self, key):
+        return self.client.get(self.url).json()["reference"][key]
+
+    def test_manifest_lists_questionnaires_with_questions_and_choices(self):
+        survey = Engagement_Survey.objects.create(name="Intake", description="Basic intake", active=False)
+        text = TextQuestion.objects.create(order=2, optional=True, text="Describe the app")
+        pick = ChoiceQuestion.objects.create(order=1, text="Which stack", multichoice=True)
+        late = Choice.objects.create(order=2, label="Go")
+        early = Choice.objects.create(order=1, label="Python")
+        pick.choices.add(late, early)
+        survey.questions.add(text, pick)
+        self.assertEqual(
+            {
+                "id": survey.id,
+                "name": "Intake",
+                "description": "Basic intake",
+                "active": False,
+                "questions": [
+                    {
+                        "id": pick.id, "type": "choice", "order": 1, "optional": False, "text": "Which stack",
+                        "multichoice": True,
+                        "choices": [{"id": early.id, "order": 1, "label": "Python"}, {"id": late.id, "order": 2, "label": "Go"}],
+                    },
+                    {"id": text.id, "type": "text", "order": 2, "optional": True, "text": "Describe the app"},
+                ],
+            },
+            self.get_results_by_id(self.reference("questionnaires"), survey.id),
+        )
+
+    def test_manifest_shares_a_question_between_questionnaires(self):
+        first = Engagement_Survey.objects.create(name="First")
+        second = Engagement_Survey.objects.create(name="Second")
+        shared = ChoiceQuestion.objects.create(text="Shared", multichoice=False)
+        shared.choices.add(Choice.objects.create(label="Yes"), Choice.objects.create(label="No"))
+        only_second = TextQuestion.objects.create(order=5, text="Only second")
+        first.questions.add(shared)
+        second.questions.add(shared, only_second)
+        questionnaires = self.reference("questionnaires")
+        first_questions = self.get_results_by_id(questionnaires, first.id)["questions"]
+        second_questions = self.get_results_by_id(questionnaires, second.id)["questions"]
+        self.assertEqual([shared.id], [question["id"] for question in first_questions])
+        self.assertEqual([shared.id, only_second.id], [question["id"] for question in second_questions])
+        self.assertEqual(first_questions[0], second_questions[0])
+        self.assertEqual(["Yes", "No"], [choice["label"] for choice in first_questions[0]["choices"]])
+
+    def test_manifest_lists_general_surveys(self):
+        survey = Engagement_Survey.objects.create(name="Open link")
+        link = General_Survey.objects.create(survey=survey, num_responses=3)
+        self.assertEqual(
+            {
+                "id": link.id,
+                "survey": survey.id,
+                "num_responses": 3,
+                "generated": render_datetime(link.generated),
+                "expiration": render_datetime(link.expiration),
+            },
+            self.get_results_by_id(self.reference("general_surveys"), link.id),
+        )
+
+    def test_manifest_lists_only_open_survey_responses(self):
+        survey = Engagement_Survey.objects.create(name="Intake")
+        text = TextQuestion.objects.create(text="Describe the app")
+        pick = ChoiceQuestion.objects.create(text="Which stack", multichoice=True)
+        go, python = Choice.objects.create(order=2, label="Go"), Choice.objects.create(order=1, label="Python")
+        pick.choices.add(go, python)
+        survey.questions.add(text, pick)
+        open_response = Answered_Survey.objects.create(
+            survey=survey, assignee=self.admin, responder=Dojo_User.objects.get(username="user1"),
+            completed=True, answered_on=datetime(2026, 11, 3, tzinfo=UTC).date(),
+        )
+        choice_answer = ChoiceAnswer.objects.create(question=pick, answered_survey=open_response)
+        choice_answer.answer.add(go, python)
+        TextAnswer.objects.create(question=text, answered_survey=open_response, answer="A web shop")
+        Answered_Survey.objects.create(survey=survey, engagement=Engagement.objects.first())
+        responses = self.reference("open_survey_responses")
+        self.assertEqual([open_response.id], [response["id"] for response in responses])
+        self.assertEqual(
+            {
+                "id": open_response.id,
+                "engagement": None,
+                "survey": survey.id,
+                "assignee": self.admin.id,
+                "responder": Dojo_User.objects.get(username="user1").id,
+                "completed": True,
+                "answered_on": "2026-11-03",
+                "answers": [
+                    {"question": text.id, "type": "text", "text": "A web shop"},
+                    {"question": pick.id, "type": "choice", "choices": sorted([go.id, python.id])},
+                ],
+            },
+            responses[0],
+        )
+
+    def test_manifest_lists_the_benchmark_catalog_nested(self):
+        benchmark = Benchmark_Type.objects.create(name="OWASP ASVS", version="4.0", benchmark_source="OWASP ASVS", enabled=False)
+        other = Benchmark_Type.objects.create(name="PCI", version="3.2", benchmark_source="PCI")
+        zeta = Benchmark_Category.objects.create(type=benchmark, name="Zeta", objective="Last by name", references="r1")
+        alpha = Benchmark_Category.objects.create(type=benchmark, name="Alpha", objective="First by name", enabled=False)
+        second = Benchmark_Requirement.objects.create(category=zeta, objective_number="1.2", objective="Second", level_2=True)
+        first = Benchmark_Requirement.objects.create(
+            category=zeta, objective_number="1.1", objective="First", references="See 1.1.4",
+            level_1=True, level_2=True, level_3=True,
+        )
+        catalog = self.reference("benchmark_types")
+        self.assertEqual(
+            {
+                "id": benchmark.id,
+                "name": "OWASP ASVS",
+                "version": "4.0",
+                "benchmark_source": "OWASP ASVS",
+                "enabled": False,
+                "categories": [
+                    {
+                        "id": zeta.id, "name": "Zeta", "objective": "Last by name", "references": "r1", "enabled": True,
+                        "requirements": [
+                            {
+                                "id": second.id, "objective_number": "1.2", "objective": "Second", "references": None,
+                                "level_1": False, "level_2": True, "level_3": False, "enabled": True,
+                            },
+                            {
+                                "id": first.id, "objective_number": "1.1", "objective": "First", "references": "See 1.1.4",
+                                "level_1": True, "level_2": True, "level_3": True, "enabled": True,
+                            },
+                        ],
+                    },
+                    {
+                        "id": alpha.id, "name": "Alpha", "objective": "First by name", "references": None, "enabled": False,
+                        "requirements": [],
+                    },
+                ],
+            },
+            self.get_results_by_id(catalog, benchmark.id),
+        )
+        self.assertEqual([], self.get_results_by_id(catalog, other.id)["categories"])
+
+    def test_manifest_lists_a_choice_question_with_no_choices(self):
+        survey = Engagement_Survey.objects.create(name="Empty choices")
+        pick = ChoiceQuestion.objects.create(text="Pick one")
+        survey.questions.add(pick)
+        self.assertEqual(
+            [
+                {
+                    "id": pick.id, "type": "choice", "order": 1, "optional": False, "text": "Pick one",
+                    "multichoice": False, "choices": [],
+                },
+            ],
+            self.get_results_by_id(self.reference("questionnaires"), survey.id)["questions"],
+        )
+
+    def test_manifest_lists_an_open_survey_response_with_null_people_and_date(self):
+        survey = Engagement_Survey.objects.create(name="Anonymous")
+        text = TextQuestion.objects.create(text="Describe the app")
+        response = Answered_Survey.objects.create(survey=survey)
+        TextAnswer.objects.create(question=text, answered_survey=response, answer="A web shop")
+        self.assertEqual(
+            {
+                "id": response.id, "engagement": None, "survey": survey.id, "assignee": None, "responder": None,
+                "completed": False, "answered_on": None,
+                "answers": [{"question": text.id, "type": "text", "text": "A web shop"}],
+            },
+            self.get_results_by_id(self.reference("open_survey_responses"), response.id),
+        )
+
+    def test_manifest_lists_an_open_survey_response_with_no_answers(self):
+        survey = Engagement_Survey.objects.create(name="Unanswered")
+        response = Answered_Survey.objects.create(survey=survey, assignee=self.admin)
+        self.assertEqual(
+            {
+                "id": response.id, "engagement": None, "survey": survey.id, "assignee": self.admin.id, "responder": None,
+                "completed": False, "answered_on": None, "answers": [],
+            },
+            self.get_results_by_id(self.reference("open_survey_responses"), response.id),
+        )
+
+    def test_manifest_lists_empty_questionnaire_and_benchmark_lists_without_rows(self):
+        Engagement_Survey.objects.all().delete()
+        Answered_Survey.objects.all().delete()
+        Benchmark_Type.objects.all().delete()
+        reference = self.client.get(self.url).json()["reference"]
+        for key in ("questionnaires", "general_surveys", "open_survey_responses", "benchmark_types"):
+            self.assertEqual([], reference[key], key)
 
     def test_new_keys_carry_no_archive_fields(self):
         BannerConf.objects.all().delete()
