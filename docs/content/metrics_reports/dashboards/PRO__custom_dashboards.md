@@ -57,7 +57,7 @@ The **catalog** is the fixed menu of widget types the platform supports, grouped
 
 ### The grid
 
-Widgets are placed on a **12-column grid**. In edit mode you drag widgets to move them and drag the bottom-right corner to resize them; the grid compacts upward to fill gaps. Each widget type has sensible minimum and maximum sizes so charts and tables stay legible. A newly added list widget (SLA Burndown, Recent Activity, Top N and the like) is sized to show every row it is set to show; a taller tile can show more rows by raising the widget's row limit.
+Widgets are placed on a **12-column grid**. In edit mode you drag widgets to move them and drag the bottom-right corner to resize them; the grid compacts upward to fill gaps. Each widget type has sensible minimum and maximum sizes so charts and tables stay legible. A newly added list widget (SLA Burndown, Recent Activity, Top N and the like) is sized to show every row it is set to show; a taller tile can show more rows by raising the widget's row limit. Lists such as Top-N, Recent Activity and Saved Reports show the rows that fit their tile and how many more there are, and table widgets such as Team Scorecard and Root Causes drop their least important columns as the tile narrows rather than scrolling sideways.
 
 ### Sharing, cloning, and defaults
 
@@ -257,9 +257,9 @@ Ranked lists, feeds, and embedded tables.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Top-N Leaderboard** | A ranked list in one of two modes: *aggregate* (top dimension buckets by count, e.g. Top 10 CWEs) or *records* (top individual records by a metric, e.g. Top 10 Assets by Grade). |
+| **Top-N Leaderboard** | A ranked list in one of two modes: *aggregate* (top dimension buckets by count, e.g. Top 10 CWEs, each named with its CWE number and title, such as CWE-79 Cross-site Scripting) or *records* (top individual records by a metric, e.g. Top 10 Assets by Grade). |
 | **Embedded Table** | A list (Findings, Assets, Engagements, Tests, Risk Acceptances, Organizations, or Test Types) with preset filters and ordering, as compact rows that fit the widget. The **Full Table** switch shows the whole list view, with column filters, sorting, paging and CSV export. |
-| **Recent Activity** | A scrolling feed of the most-recently updated records, clickable through to detail pages. |
+| **Recent Activity** | A feed of the most-recently updated records, clickable through to detail pages. |
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
 | **My Work** | Everything waiting on the viewer in one queue, soonest deadline first: findings assigned to the viewer or their team, reviews waiting on them, and their risk acceptances. Always scoped to the viewer. |
 | **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature and permission to view generated reports, from a global role or an Organization role (a role on an Asset alone does not grant it).* |
