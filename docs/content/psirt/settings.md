@@ -1,6 +1,6 @@
 ---
 title: "PSIRT Settings"
-description: "Case-worthiness calibration, the \"new\" item window, and what counts as a material change"
+description: "Case-worthiness calibration, the \"new\" item window, what counts as a material change, and the Advisory Site publisher profile"
 draft: false
 weight: 12
 pro-feature: true
@@ -8,6 +8,10 @@ pro-feature: true
 
 Three settings that shape how PSIRT scores and re-surfaces work. Each section
 saves on its own, and each says who changed it last.
+
+A fourth card, **Advisory Site**, appears when publishing to the advisory site is
+turned on for your instance. It holds the publisher profile that readers of your
+public advisories see.
 
 ## Case worthiness
 
@@ -79,3 +83,61 @@ are not material; nothing needs re-triage because it got less serious.
 Turning things **off** here is how a noisy revision stream gets quieter — but
 every switch you turn off is a class of upstream change you will no longer be told
 about, on advisories you have already decided about.
+
+## Advisory Site
+
+The **Advisory Site** card holds your publisher profile: the name, web address and
+contact that readers see on every advisory you publish to the
+[advisory site](../advisories/#publishing-to-the-advisory-site). Fill it in once,
+before the first advisory can go public.
+
+Publishing to the advisory site needs two things beyond PSIRT itself. The
+**PSIRT: Advisory Site** feature flag (`psirt_advisory_site`) must be on. DefectDojo
+turns it on for your instance, so it is not a switch on the Feature Flags page.
+Your license must also include advisory publishing, and the flag does nothing
+without it. With the flag on and no such license, the card says so and nothing
+can be saved. Contact [DefectDojo Support](mailto:support@defectdojo.com) for
+either one.
+
+The profile has five fields.
+
+| Field | What it is |
+|---|---|
+| Display name | The publisher name shown on the advisory site and written into every public document. |
+| Namespace | An `https` web address that identifies your organization as a publisher, for example `https://www.example.com`. |
+| Contact | How a reader reaches your security team, for example `psirt@example.com`. |
+| Requested slug | Optional. The short name you would like in your address on the advisory site, for example `acme-corp`. |
+| List on CSAF Aggregators | Whether CSAF aggregators, the public directories that collect advisories from many publishers, may list yours. |
+
+Saving needs the **Change PSIRT** permission, and it sends the profile to
+DefectDojo. DefectDojo staff review every new publisher and activate it by hand.
+Nothing goes public until they have.
+
+The card shows where the publisher stands.
+
+| Status | What it means for publishing |
+|---|---|
+| Not Sent | DefectDojo has no profile from this instance yet. Nothing can be published to the site. |
+| Pending | The profile was sent and is waiting for review. Nothing can be published to the site yet. |
+| Active | DefectDojo activated the publisher. The card shows your public address on the advisory site, and approved TLP:WHITE advisories can be published there. |
+| Suspended | DefectDojo suspended the publisher. All of its pages and files are removed from the site, and nothing new can be published. They come back when DefectDojo lifts the suspension. |
+
+If DefectDojo refuses a profile, the card shows the reason. Correct the profile
+and save again.
+
+Once the publisher is active, the display name, the namespace and the slug are
+fixed. The card shows them as DefectDojo activated them, and every public document
+carries those values. A later save that changes one of them leaves it as it was,
+and the card names the fields that were ignored. Only DefectDojo Support can
+change them. The contact and the aggregator choice stay yours to edit.
+
+If your subscription stops including advisory publishing, publishing stops at
+once. Pages already on the site stay up for 90 days and then come down, and each
+address keeps a notice saying the advisory was withdrawn. The subscription's
+contacts get an email on the day it lapses and another 14 days before the pages
+come down. If the subscription includes advisory publishing again within the 90
+days, nothing comes down.
+
+An [airgapped instance](/get_started/pro/onprem/airgapped/) cannot use the
+advisory site. The card says that publishing is unavailable, saving is refused,
+and nothing is sent to DefectDojo.
