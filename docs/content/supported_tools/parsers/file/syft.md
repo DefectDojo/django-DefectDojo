@@ -23,6 +23,11 @@ imports as **Info** inventory.
 To find vulnerabilities in the same material, feed the SBOM to a scanner such as Grype or
 bomber, both of which DefectDojo also parses.
 
+### Package URL and CPE
+With Locations enabled, each catalogued package that has a Package URL is also recorded as a
+dependency location, with the CPE identifiers Syft lists for it (`cpes`) and the first path Syft
+found it at. A later import adds any CPE the dependency does not have yet and never removes one.
+
 ### Sample Scan Data
 Sample Syft SBOMs can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/syft).
 

@@ -7,7 +7,7 @@ from cvss.cvss3 import CVSS3
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
-from dojo.tools.locations import LocationData, split_image_reference
+from dojo.tools.locations import LocationData, cpe_strings, split_image_reference
 
 logger = logging.getLogger(__name__)
 
@@ -220,7 +220,9 @@ class AnchoreGrypeParser:
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
                 if locations_enabled() and artifact_purl:
                     dupes[dupe_key].unsaved_locations.append(
-                        LocationData.dependency(purl=artifact_purl, file_path=file_path),
+                        LocationData.dependency(
+                            purl=artifact_purl, file_path=file_path, cpes=cpe_strings(artifact.get("cpes")),
+                        ),
                     )
 
         # Only touch unsaved_locations when there is an image to attach: with locations off a
