@@ -136,11 +136,11 @@ Isso ocorre automaticamente — a prioridade é recalculada exatamente para os A
 
 Depois que os Achados são enriquecidos, os valores de EPSS e KEV ficam disponíveis em toda a interface do Pro:
 
-- **No Achado** — EPSS score, EPSS percentile, Known Exploited, Ransomware Used e KEV Date aparecem todos no detalhe do Achado.
+- **No Achado**: EPSS score, EPSS percentile, **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** e KEV Date aparecem todos no detalhe do Achado. Os valores de KEV vêm apenas do catálogo CISA KEV e não podem ser definidos manualmente. Para registrar que um scanner ou uma pessoa reporta uma vulnerabilidade como explorada, use **Vendor Reported Exploited** e **Vendor Reported Ransomware**, que os formulários Add e Edit Finding podem definir e limpar; veja [Achados](/asset_modelling/engagements_tests/pro__findings/#metadata). Os valores de EPSS ainda podem ser definidos manualmente no painel **Threat Intelligence**, o que importa para um Achado que não tem CVE e, portanto, nunca é enriquecido. Em um Achado que referencia um CVE, a próxima sincronização sobrescreve os valores de EPSS informados manualmente; veja [Editando Achados](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
 - **Ordenação** — as tabelas de Achados podem ser ordenadas por EPSS score / percentile para trazer primeiro os Achados com maior probabilidade de exploração.
-- **Filtragem** — a lista de Achados oferece filtros de **Known Exploited** e **Ransomware Used**, permitindo montar visualizações ou relatórios com foco em vulnerabilidades com exploração real confirmada.
+- **Filtragem**: a lista de Achados oferece filtros de **Known Exploited (CISA KEV)** e **Ransomware Used (CISA KEV)**, permitindo montar visualizações ou relatórios com foco em vulnerabilidades com exploração real confirmada. Os filtros **Vendor Reported Exploited** e **Vendor Reported Ransomware** encontram, em vez disso, o que um scanner, um conector ou uma pessoa reportou, o que pode diferir do catálogo da CISA.
 
-Um fluxo de trabalho comum é filtrar por **Known Exploited = true** e depois ordenar por prioridade, produzindo uma fila de "corrigir isso primeiro" respaldada por exploração confirmada.
+Um fluxo de trabalho comum é filtrar por **Known Exploited (CISA KEV) = true** e depois ordenar por prioridade, produzindo uma fila de "corrigir isso primeiro" respaldada por exploração confirmada.
 
 ## Configuração
 
@@ -149,3 +149,5 @@ No **DefectDojo Cloud**, o enriquecimento de EPSS e KEV já vem habilitado e é 
 Se os dados de EPSS ou KEV não estiverem aparecendo em Achados nos quais você esperava vê-los (e esses Achados de fato carregam CVEs), comece verificando a linha de status no Vulnerability Explorer — ela relata o resultado da sincronização mais recente, inclusive quando nenhuma fonte está configurada. Se isso parecer normal e os dados ainda estiverem ausentes, entre em contato com o suporte do DefectDojo, que pode confirmar se a sincronização diária está entregando dados para sua instância.
 
 > *Instalações on-premise* configuram o enriquecimento de forma diferente — cada fonte pode ser habilitada ou desabilitada e apontada para uma URL de feed personalizada nas configurações de enriquecimento de achados do Tuner. Essa configuração não se aplica ao Cloud, onde os dados são entregues pelo DefectDojo.
+
+Em uma instalação self-hosted com a inteligência de ameaças habilitada, você não precisa habilitar essas consultas para obter dados de KEV e EPSS. Quando uma consulta está desabilitada, o pacote de inteligência de ameaças que a instância já carrega fornece os valores dessa fonte, inclusive em uma instalação air-gapped que carrega o pacote a partir de um arquivo. Uma consulta habilitada sempre tem precedência. Veja [KEV e EPSS a partir do pacote](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).

@@ -13,6 +13,8 @@ Tutti questi controlli si trovano nella barra degli strumenti della tabella, sop
 
 Selezionare il pulsante **Columns** nella barra degli strumenti per aprire il selettore delle colonne, quindi selezionare o deselezionare una colonna per mostrarla o nasconderla. Utilizzare la casella di ricerca nella parte superiore del selettore per trovare una colonna in base alla sua intestazione. Alcune colonne strutturali (la casella di selezione e il menu delle azioni riga) sono sempre presenti e non compaiono nel selettore.
 
+Su Findings, l'intestazione Threat Intel raggruppa due coppie di colonne sullo sfruttamento. **Known Exploited (CISA KEV)** e **Ransomware Used (CISA KEV)** indicano se il catalogo CISA KEV elenca la vulnerabilità. **Vendor Reported Exploited** e **Vendor Reported Ransomware** indicano quanto segnalato da uno scanner, da un connettore o da una persona, che può differire dal catalogo CISA. **Add Filter** offre gli stessi quattro campi sotto Threat Intel. Vedere [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
 ## Riordinare le colonne
 
 Trascinare un'intestazione di colonna a sinistra o a destra per spostare quella colonna. Il nuovo ordine ha effetto immediatamente per la sessione corrente.

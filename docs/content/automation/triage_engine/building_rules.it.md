@@ -109,6 +109,7 @@ Ogni elemento porta con sé un insieme fisso di campi del Riscontro. Questo elen
 |-------|--------|
 | Identità | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Gravità e punteggio | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Evidenza di exploit | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Testo | `description`, `mitigation`, `impact` |
 | Stato | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Date | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -120,6 +121,8 @@ Oltre a `finding`, ogni elemento porta con sé `test` (`id`, `title`, `scan_type
 Le date sono stringhe ISO-8601. Ciò è deliberato: significa che `gt` e `lt` le ordinano correttamente come testo, quindi `2026-07-28` è correttamente maggiore di `2026-01-01`.
 
 `priority`, `risk` e `risk_score` provengono dalla prioritizzazione di Pro. Un Riscontro non ancora valutato non porta alcun valore per essi.
+
+`vendor_exploited` e `vendor_ransomware_used` contengono quanto segnalato da uno scanner, un connettore o una persona, separatamente dal catalogo CISA, e `vendor_exploited_source` indica chi lo ha segnalato (il nome del Test Type dello scanner, il nome del connettore, `manual` oppure `pre-upgrade`). Una regola che deve agire su entrambe le origini legge entrambi i campi. Nel builder delle condizioni i campi KEV compaiono come **KEV: Known Exploited**, **KEV: Ransomware Used**, **KEV: Date Added** e **KEV: Remediation Due**, e i campi vendor come **Vendor Reported Exploited**, **Vendor Reported Ransomware** e **Vendor Reported Source**. Vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata).
 
 ### Condizioni
 

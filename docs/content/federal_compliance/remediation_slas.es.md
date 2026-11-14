@@ -18,6 +18,8 @@ La función incluye dos configuraciones de SLA predefinidas. Asigne cualquiera d
 
 Los plazos se aplican de forma obligatoria, y un hallazgo incluido en el catálogo CISA KEV nunca se programa más allá de su fecha límite de CISA.
 
+En una instancia autoalojada cuya consulta de KEV está desactivada, la fecha límite de CISA proviene del paquete de inteligencia de amenazas que la instancia ya carga, por lo que este límite se aplica sin activar la consulta. Consulte [KEV y EPSS desde el paquete](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Las mismas ventanas base, ajustadas de forma más estricta según la explotabilidad y la exposición:
@@ -29,7 +31,7 @@ Las mismas ventanas base, ajustadas de forma más estricta según la explotabili
 | Solo accesible desde internet | 30 días |
 | Ninguna de las anteriores | Las ventanas de FedRAMP Rev 5 indicadas arriba |
 
-**Explotable de forma creíble** significa que el hallazgo está incluido en KEV, o que su puntuación EPSS es igual o superior a su umbral. **Accesible desde internet** se indica mediante una etiqueta del hallazgo — `internet-reachable` de forma predeterminada.
+**Explotable de forma creíble** significa que el hallazgo está incluido en KEV, o que su puntuación EPSS es igual o superior a su umbral. Incluido en KEV significa incluido en el catálogo CISA KEV. Una declaración **Vendor Reported Exploited** de un escáner, un conector o una persona no hace que un hallazgo sea explotable de forma creíble aquí, ni modifica su plazo. Solo una política de respuesta a vulnerabilidades puede tener en cuenta una declaración así, mediante una regla que establezca la explotabilidad creíble a partir de ella; consulte [Políticas de respuesta a vulnerabilidades](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Accesible desde internet** se indica mediante una etiqueta del hallazgo (`internet-reachable` de forma predeterminada).
 
 Todos los umbrales, nombres de etiquetas y cantidades de días se pueden editar en la configuración de SLA.
 

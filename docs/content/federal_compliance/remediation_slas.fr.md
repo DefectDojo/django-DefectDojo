@@ -18,6 +18,8 @@ Deux configurations de SLA prêtes à l'emploi sont fournies avec la fonctionnal
 
 Les échéances sont appliquées de manière stricte, et une constatation figurant dans le catalogue CISA KEV n'est jamais planifiée au-delà de sa date d'échéance CISA.
 
+Sur une instance auto-hébergée dont la recherche KEV est désactivée, la date d'échéance CISA provient du lot de renseignement sur les menaces que l'instance charge déjà : ce plafond s'applique donc sans activer la recherche. Voir [KEV et EPSS depuis le lot](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Les mêmes fenêtres de base, encore resserrées en fonction de l'exploitabilité et de l'exposition :
@@ -29,7 +31,7 @@ Les mêmes fenêtres de base, encore resserrées en fonction de l'exploitabilit�
 | Accessible depuis Internet uniquement | 30 jours |
 | Ni l'un ni l'autre | Les fenêtres FedRAMP Rev 5 ci-dessus |
 
-**Exploitabilité crédible** signifie que la constatation figure dans la liste KEV, ou que son score EPSS est égal ou supérieur à votre seuil. **Accessible depuis Internet** est signalé par une étiquette de constatation — `internet-reachable` par défaut.
+**Exploitabilité crédible** signifie que la constatation figure dans la liste KEV, ou que son score EPSS est égal ou supérieur à votre seuil. Figurer dans la liste KEV signifie figurer dans le catalogue CISA KEV. Une déclaration **Vendor Reported Exploited** provenant d'un scanner, d'un connecteur ou d'une personne ne confère pas ici à une constatation une exploitabilité crédible, et ne modifie pas son échéance. Seule une politique de réponse aux vulnérabilités peut tenir compte d'une telle déclaration, au moyen d'une règle qui définit l'exploitabilité crédible à partir de celle-ci ; voir [Politiques de réponse aux vulnérabilités](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Accessible depuis Internet** est signalé par une étiquette de constatation (`internet-reachable` par défaut).
 
 Tous les seuils, noms d'étiquettes et nombres de jours sont modifiables dans la configuration du SLA.
 

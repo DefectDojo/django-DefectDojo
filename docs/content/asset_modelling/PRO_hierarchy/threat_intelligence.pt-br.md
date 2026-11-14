@@ -30,6 +30,19 @@ Além do card, essa inteligência é uma camada funcional em todo o aplicativo:
   evidência de exploração, como entrar no CISA KEV ou ganhar um módulo do Metasploit. Apenas atualizações
   para cima — evidências que silenciosamente perdem validade nunca geram notificação.
 
+## Achados reportados por um ID de advisory do GitHub {#findings-reported-by-a-github-advisory-id}
+
+Alguns scanners reportam uma vulnerabilidade apenas pelo seu ID de advisory do GitHub (GHSA), e não pelo
+CVE que ela representa. Quando o DefectDojo sabe que o advisory e um CVE descrevem a mesma
+vulnerabilidade, seja pelo pacote de inteligência, seja por um vínculo registrado na sua instância, o
+achado recebe a maturidade de exploração, as evidências e a pontuação de ameaça desse CVE, da mesma forma
+que um achado que cita o CVE. O achado mantém seu próprio ID de vulnerabilidade.
+
+Quando um advisory passa a ser vinculado a um CVE, ou quando um vínculo é rejeitado, o DefectDojo
+recalcula a pontuação dos achados afetados. Os achados que já estavam na sua instância antes da inclusão
+desse comportamento têm a pontuação recalculada uma única vez, em segundo plano, após o primeiro
+carregamento de pacote posterior à atualização.
+
 ## Como isso muda a pontuação
 
 O mecanismo de Prioridade já combinava severidade, contexto de negócio e uma "pontuação externa"
@@ -99,6 +112,20 @@ os achados sem CVE caem em classificação *relativa*, mesmo que sua pontuação
 * **Suporte a air-gapped.** O pacote diário (incluindo dados de EPSS) pode ser transferido e importado
   offline, para que instâncias isoladas recebam o mesmo enriquecimento.
 
+## O card Intelligence Sources {#intelligence-sources-card}
+
+Superusuários podem verificar qual inteligência a instância está usando no card somente leitura
+**Intelligence Sources**, em **Settings > System Settings**. O card mostra:
+
+* a versão do pacote carregado
+* a idade do pacote, com um aviso quando ele tem 14 dias ou mais
+* quando o pacote expira
+* cada fonte do pacote, com sua licença e o quão atualizados estão seus dados
+* a última falha de carregamento, se houver, e o motivo da falha
+* as atribuições das fontes do pacote
+
+Um pacote carregado a partir de um arquivo em uma instância air-gapped aparece no mesmo card.
+
 ## Implantações self-hosted
 
 Instâncias do DefectDojo Cloud não precisam de nenhuma configuração. Instâncias self-hosted têm três
@@ -118,6 +145,48 @@ opções:
 Se a instância não conseguir acessar o feed, o recurso falha de forma segura (fail closed): a execução é
 registrada como falha, e suas pontuações e evidências existentes permanecem exatamente como estavam. Nada
 se degrada, exceto a atualidade da inteligência.
+
+### KEV e EPSS a partir do pacote {#kev-and-epss-from-the-bundle}
+
+O pacote que uma instância self-hosted já baixa também traz dados do CISA KEV e do EPSS. Após cada
+carregamento do pacote, o DefectDojo usa esses dados para preencher **Known Exploited (CISA KEV)**,
+**Ransomware Used (CISA KEV)**, a data do KEV, a data de vencimento do CISA KEV e as pontuações EPSS nas
+suas vulnerabilidades e achados, para que você os obtenha sem ativar consultas separadas de KEV e EPSS. KEV
+e EPSS são tratados separadamente, e cada um só é preenchido a partir do pacote quando todas estas
+condições são atendidas:
+
+* A inteligência de ameaças está ativada.
+* A consulta dessa fonte, em Finding Enrichment no Tuner, está desativada. Uma consulta ativada sempre
+  prevalece, então, com uma consulta ativada, o pacote fornece apenas a outra fonte.
+* O pacote traz dados atualizados dessa fonte.
+
+O botão **Sync KEV/EPSS Data** no Vulnerability Explorer, a tarefa diária de enriquecimento e o
+enriquecimento de novos CVEs no momento da importação usam os mesmos dados do pacote, nas mesmas condições.
+
+Known Exploited e Ransomware Used significam que o CVE está listado no catálogo CISA KEV. Quando um
+scanner, um conector ou uma pessoa reporta uma vulnerabilidade como explorada, esse relato é mantido como
+um valor separado, **Vendor Reported Exploited**, para que não se perca quando a CISA não lista o CVE.
+Veja [Achados](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
+#### O primeiro carregamento após a atualização {#the-first-load-after-upgrading}
+
+Em uma instância self-hosted com as consultas de KEV e EPSS desativadas, esses valores ficavam vazios até
+agora, ou continham o que um scanner ou uma pessoa tivesse definido. A própria atualização, antes de
+qualquer carregamento do pacote, transfere toda sinalização desse tipo que nenhuma listagem do CISA KEV
+sustenta para **Vendor Reported Exploited** ou **Vendor Reported Ransomware**, então as contagens de
+CISA KEV já podem cair nesse momento (veja
+[Achados](/asset_modelling/engagements_tests/pro__findings/#metadata)). Depois, o primeiro
+carregamento do pacote após a atualização preenche os valores da CISA para todo CVE que a instância
+conhece, então espere que:
+
+* **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** e a data do KEV mudem em muitos
+  achados, tanto sendo definidos (a CISA lista o CVE) quanto sendo limpos (ela não lista), e que a
+  Prioridade mude junto com eles. Um achado que um scanner ou uma pessoa reportou como explorado mantém
+  sua Prioridade, porque a Prioridade também considera **Vendor Reported Exploited**.
+* Se uma configuração de SLA tiver **Cap SLA by CISA KEV Due Date** ativado, os achados listados no KEV
+  tenham o prazo do SLA antecipado para a data de vencimento da CISA. A maioria das datas de vencimento
+  da CISA já passou, então muitos desses achados aparecerão em violação de SLA logo após o primeiro
+  carregamento.
 
 ## Habilitando o recurso
 

@@ -20,6 +20,11 @@ nas configurações de SLA, ou copie uma delas e a ajuste.
 Os prazos são aplicados, e um achado listado no catálogo CISA KEV nunca é agendado além da sua data de
 vencimento da CISA.
 
+Em uma instância self-hosted cuja consulta de KEV está desativada, a data de vencimento da CISA vem do
+pacote de inteligência de ameaças que a instância já carrega, então esse limite se aplica sem que seja
+preciso ativar a consulta.
+Veja [KEV e EPSS a partir do pacote](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 As mesmas janelas básicas, ainda mais reduzidas conforme a explorabilidade e a exposição:
@@ -32,8 +37,12 @@ As mesmas janelas básicas, ainda mais reduzidas conforme a explorabilidade e a 
 | Nenhum dos dois | As janelas do FedRAMP Rev 5 acima |
 
 **Exploração crível** significa que o achado está listado no KEV, ou que sua pontuação EPSS está no seu
-limite ou acima dele. **Acessível pela internet** é sinalizado por uma tag de achado — `internet-reachable`
-por padrão.
+limite ou acima dele. Listado no KEV significa listado no catálogo CISA KEV. Uma alegação
+**Vendor Reported Exploited** de um scanner, de um conector ou de uma pessoa não faz com que um achado
+tenha exploração crível aqui, nem altera o seu prazo. Apenas uma política de resposta a vulnerabilidades
+pode levar essa alegação em conta, por meio de uma regra que define a exploração crível a partir dela; veja
+[Políticas de resposta a vulnerabilidades](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Acessível pela internet** é sinalizado por uma tag de achado (`internet-reachable`
+por padrão).
 
 Todos os limites, nomes de tags e contagens de dias são editáveis na configuração de SLA.
 

@@ -21,6 +21,10 @@ DefectDojo picks the format from the file name: a name ending in `.csv` is read 
 
 Use JSON when you can. A JSON report can also set its own Test Type, which matters for deduplication (see below).
 
+## Exploitation fields
+
+Both formats accept `known_exploited` and `ransomware_used`. In DefectDojo Pro, these values are recorded as the tool's own claim: the finding shows them as **Vendor Reported Exploited** and **Vendor Reported Ransomware**, with the Test Type name as the **Vendor Reported Source**. In Pro the report cannot set **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** or the KEV date, which come only from the CISA KEV catalog, and enrichment never changes the tool's claim. On reimport, a claim the report no longer makes is withdrawn; a claim someone set by hand stays. See [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
 ## Importing a report
 
 Choose the scan type **Generic Findings Import**, then upload the file:

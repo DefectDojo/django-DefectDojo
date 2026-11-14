@@ -79,9 +79,20 @@ weight: 5
     - 与漏洞 ID 不同,这些标识符特定于报告工具,并未公开标准化。
         - 示例:`semgrep.rule.lang.security.sql-injection`
 - **EPSS 分数/百分位**:该 CVE 的 EPSS 分数和百分位。
-- **已知被利用**:是否已确认该漏洞已被利用。 
-- **涉及勒索软件**:该漏洞的利用是否涉及勒索软件。 
+- **Known Exploited (CISA KEV)**:该漏洞是否已列入 CISA 已知被利用漏洞(KEV)目录。 
+- **Ransomware Used (CISA KEV)**:CISA KEV 目录是否记录该漏洞被用于勒索软件攻击活动。 
 - **KEV 日期**:该发现项被添加到 KEV 目录的日期。
+    - EPSS 和 KEV 值由 [EPSS / KEV 同步](/triage_findings/finding_scoring/epss_kev/)维护。在 KEV 和 EPSS 查询处于关闭状态的自托管实例上,这些值改为来自[威胁情报数据包](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)。
+    - 只有 KEV 同步会设置 Known Exploited (CISA KEV)、Ransomware Used (CISA KEV) 和 KEV 日期。导入、连接器同步或某个人都无法设置它们。添加和编辑发现项表单以只读方式显示 CISA KEV 状态,而 API v2 会拒绝任何会更改这些字段的写入,并返回 `400` 响应,在其中指明应改用 `vendor_exploited` 或 `vendor_ransomware_used`。重新发送字段已有的值会被接受。如需在 CISA 未列出某个漏洞时记录该漏洞已被利用,请使用下方的 Vendor Reported 字段。
+    - EPSS 值仍可在添加和编辑发现项表单的 **Threat Intelligence** 面板中手动设置;对于引用了 CVE 的发现项,下一次同步会覆盖所输入的内容。
+- **Vendor Reported Exploited**:扫描器、连接器或某个人是否报告该漏洞已在野外被利用。该值与 Known Exploited (CISA KEV) 分开保存,因此 KEV 值和计数只反映 CISA 目录,而该报告仍会显示,并仍会计入优先级。如果没有任何一方做出报告(无论是肯定还是否定),该值为空。
+- **Vendor Reported Ransomware**:扫描器、连接器或某个人是否报告该漏洞被用于勒索软件。
+- **Vendor Reported Source**:报告的来源。它是扫描器的测试类型名称或连接器自身的名称;当由某个人或 API 客户端设置时为 `manual`;对于在升级过程中迁移过来的标记,则为 `pre-upgrade`(见下文)。
+    - 在添加和编辑发现项表单中,勾选 **Vendor Reported Exploited** 或 **Vendor Reported Ransomware** 会以来源 `manual` 记录一条报告,取消勾选则会清除该报告。在 API v2 中,这两个字段为 `vendor_exploited` 和 `vendor_ransomware_used`:写入不同的值会记录一条 `manual` 报告,发送字段已有的值不会记录任何内容,发送 `null` 则会清除该报告。`vendor_exploited_source` 为只读。
+    - `manual` 报告永远不会被扫描器、连接器或信息增强覆盖。重新导入扫描时,扫描器可以撤回它之前做出的报告,但不能撤回任何其他来源的报告。当导入将某个新发现项标记为重复项时,该发现项所带的报告会记录到原始发现项上。
+    - Mend 扫描的可利用标记和恶意标记完全不会被记录为报告。
+    - 升级时,没有 CISA KEV 列表支持的 Known Exploited 或 Ransomware Used 标记(没有 CVE 的发现项、CISA 未列出的 CVE,或没有 KEV 数据的实例)会迁移到 Vendor Reported 字段,来源为 `pre-upgrade`,其 KEV 日期也会被清除。因此,升级一经运行,CISA KEV 下的计数就可能会下降,但不会丢失任何标记:优先级仍会读取它,某个人也可以在发现项表单中清除它。重新导入不会撤回 `pre-upgrade` 报告。
+    - 优先级同时读取这两类字段:只要 Known Exploited (CISA KEV) 或 Vendor Reported Exploited 中任意一项被设置,优先级计算就会将该发现项视为已被利用,因此即使 CISA 未列出该 CVE,扫描器的警告仍会提高优先级。已知被利用发现项的计数(例如 **CISA KEV** 记分卡列和 **CISA KEV Open** KPI)只使用 CISA KEV 值。监管截止日期(FedRAMP VDR 分级、PAIN 截止日期、漏洞响应策略截止日期以及 CISA KEV 截止日期上限)不会读取 Vendor Reported 报告。在漏洞响应策略下,依据该报告设置是否可可信利用的规则可以将其纳入考量;参见[漏洞响应策略](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies)。
 - **发现工具**:识别该漏洞的工具类型。
 - **CVSSv3 和 CVSSv4 向量与分数**:所选发现项的 CVSS3 和 CVSS4 向量与分数。
 - **集成器工单**:与发现项关联的第三方问题跟踪系统工单编号。 

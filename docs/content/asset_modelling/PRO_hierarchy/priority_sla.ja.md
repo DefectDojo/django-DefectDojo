@@ -63,7 +63,8 @@ Priorityは「相対的な」計算であり、DefectDojoインスタンス内�
 * 検出事項が**EPSSスコア**を持っているかどうか。これはPro利用者向けに検出事項へ自動的に追加され、常に最新の状態に保たれます。Priorityスコアに寄与するフィールドは**EPSSスコア**であり、**EPSSパーセンタイル**は参考として検出事項上に記録されますが、計算に直接反映されるわけではありません。
 * その検出事項の影響を受けるエンドポイントが製品内にいくつあるか
 * 検出事項がUnder Review(レビュー中)かどうか
-* 検出事項がKEV(Known Exploited Vulnerabilities)データベースに含まれているかどうか。これはDefectDojoが定期的にチェックしています
+* 検出事項がKEV(Known Exploited Vulnerabilities)データベースに含まれているかどうか。これはDefectDojoが定期的にチェックしています。KEVのルックアップが無効になっているセルフホストのインスタンスでは、この情報は[脅威インテリジェンスバンドル](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)から取得されます。
+* スキャナー、コネクター、または人が、その検出事項を実際に悪用されている(**Vendor Reported Exploited**)、またはランサムウェアで使用された(**Vendor Reported Ransomware**)と報告したかどうか。PriorityはCISA KEVとベンダー報告のいずれかが悪用を示していれば、その検出事項を悪用済みとして扱います。そのため、CISAがそのCVEを掲載していない場合でも、スキャナーの警告によってPriorityは引き上げられます。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照してください。
 * ツールが報告した検出事項の深刻度(情報、低、中、高、重大)
 
 #### EPSSスコア対EPSSパーセンタイル
@@ -212,6 +213,8 @@ SLA構成には、DefectDojoの各**Severity(深刻度)**または**Risk**値に
 各Service Level Agreementには、一意の名前と、任意の説明を設定できます。
 
 **Restart SLA on Finding Reactivation**:このオプションを有効にすると、検出事項がReopened(再オープン)された際にSLAが最初からやり直されます。無効の場合、SLAは検出事項が作成された時点を基準にします。
+
+**Cap SLA by CISA KEV Due Date**:このオプションを有効にすると、KEVに掲載されている検出事項のSLA期限が、そのCVEに対するCISAの期限日まで前倒しされます。KEVのルックアップが無効になっているセルフホストのインスタンスでは、期限日は[脅威インテリジェンスバンドル](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)から取得されるため、ルックアップを有効にしなくてもこの上限が適用されます。この上限はCISA KEVへの掲載のみを参照するため、**Vendor Reported Exploited**の報告によって期限が前倒しされることはありません。CISAの期限日の多くはすでに過ぎているため、このオプションを有効にしていると、アップグレード後の最初のバンドル読み込みの直後に、KEVに掲載されている多くの検出事項がSLA違反として表示されることがあります。
 
 SLAを編集する際、Days To Remediate(修復までの日数)を割り当てる基準として、そのSLAが**Severity(深刻度)**と**Risk**のどちらを使用するかを選択できます。これはフォームの**Service Level configuration Type**セクションから該当のオプションを選択することで設定します。
 

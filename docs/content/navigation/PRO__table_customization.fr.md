@@ -13,6 +13,8 @@ Tous ces contrôles se trouvent dans la barre d'outils du tableau, au-dessus de 
 
 Sélectionnez le bouton **Columns** dans la barre d'outils pour ouvrir le sélecteur de colonnes, puis cochez ou décochez une colonne pour l'afficher ou la masquer. Utilisez la zone de recherche en haut du sélecteur pour trouver une colonne par son en-tête. Quelques colonnes structurelles (la case de sélection et le menu d'actions de ligne) sont toujours présentes et ne figurent pas dans le sélecteur.
 
+Pour les Constatations, l'en-tête Threat Intel regroupe deux paires de colonnes d'exploitation. **Known Exploited (CISA KEV)** et **Ransomware Used (CISA KEV)** indiquent si le catalogue CISA KEV répertorie la vulnérabilité. **Vendor Reported Exploited** et **Vendor Reported Ransomware** indiquent ce qu'un scanner, un connecteur ou une personne a signalé, ce qui peut différer du catalogue CISA. **Add Filter** propose les quatre mêmes champs sous Threat Intel. Voir [Constatations](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
 ## Réorganiser les colonnes
 
 Faites glisser un en-tête de colonne vers la gauche ou la droite pour déplacer cette colonne. Le nouvel ordre prend effet immédiatement pour la session en cours.

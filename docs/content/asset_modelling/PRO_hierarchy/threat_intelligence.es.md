@@ -30,6 +30,19 @@ Más allá de la tarjeta, esta inteligencia es una superficie funcional en toda 
   nueva evidencia de exploit, como su inclusión en CISA KEV o la aparición de un módulo de Metasploit.
   Solo se notifican mejoras — que la evidencia caduque silenciosamente nunca genera una notificación.
 
+## Hallazgos reportados mediante un ID de asesoría de GitHub {#findings-reported-by-a-github-advisory-id}
+
+Algunos escáneres reportan una vulnerabilidad solo mediante su ID de asesoría de GitHub (GHSA), no
+mediante el CVE al que corresponde. Cuando DefectDojo sabe que la asesoría y un CVE describen la misma
+vulnerabilidad, ya sea por el paquete de inteligencia o por un vínculo registrado en su instancia, el
+hallazgo recibe la madurez del exploit, la evidencia y la puntuación de amenaza de ese CVE, igual que
+un hallazgo que menciona el CVE. El hallazgo conserva su propio ID de vulnerabilidad.
+
+Cuando una asesoría se vincula por primera vez a un CVE, o se rechaza un vínculo, DefectDojo vuelve a
+puntuar los hallazgos afectados. Los hallazgos que ya estaban en su instancia antes de que se añadiera
+este comportamiento se vuelven a puntuar una sola vez, en segundo plano, después de la primera carga
+del paquete posterior a la actualización.
+
 ## Cómo cambia la puntuación
 
 El motor de Prioridad ya combinaba la severidad, el contexto de negocio y una "puntuación externa"
@@ -103,6 +116,21 @@ de exploit, los hallazgos sin CVE bajan en la clasificación *relativa*, aunque 
   transferirse e importarse fuera de línea, de modo que las instancias aisladas obtienen el mismo
   enriquecimiento.
 
+## Tarjeta Intelligence Sources {#intelligence-sources-card}
+
+Los superusuarios pueden comprobar qué inteligencia usa la instancia en la tarjeta de solo lectura
+**Intelligence Sources**, en **Settings > System Settings**. La tarjeta muestra:
+
+* la versión del paquete cargado
+* la antigüedad del paquete, con una advertencia cuando tiene 14 días o más
+* cuándo caduca el paquete
+* cada fuente del paquete, con su licencia y lo actualizados que están sus datos
+* la última carga fallida, si la hubo, y el motivo del fallo
+* las atribuciones de las fuentes del paquete
+
+Un paquete cargado desde un archivo en una instancia aislada (air-gapped) se muestra en la misma
+tarjeta.
+
 ## Implementaciones autoalojadas
 
 Las instancias de DefectDojo Cloud no necesitan ninguna configuración. Las instancias autoalojadas
@@ -123,6 +151,49 @@ tienen tres opciones:
 Si la instancia no puede acceder al feed, la función falla de forma segura: la ejecución se registra
 como fallida y sus puntuaciones y evidencias existentes se dejan exactamente como estaban. Nada se
 degrada salvo la actualidad de la inteligencia.
+
+### KEV y EPSS desde el paquete {#kev-and-epss-from-the-bundle}
+
+El paquete que una instancia autoalojada ya descarga también incluye datos de CISA KEV y EPSS.
+Después de cada carga del paquete, DefectDojo los usa para completar **Known Exploited (CISA KEV)**,
+**Ransomware Used (CISA KEV)**, la fecha de KEV, la fecha límite de CISA KEV y las puntuaciones EPSS
+en sus vulnerabilidades y hallazgos, de modo que los obtiene sin activar consultas independientes de
+KEV y EPSS. KEV y EPSS se gestionan por separado, y cada uno se completa a partir del paquete solo
+cuando se cumplen todas estas condiciones:
+
+* La inteligencia de amenazas está activada.
+* La consulta de esa fuente, en Finding Enrichment dentro del Tuner, está desactivada. Una consulta
+  activada siempre prevalece, así que con una consulta activada, el paquete solo aporta la otra fuente.
+* El paquete incluye datos actualizados de esa fuente.
+
+El botón **Sync KEV/EPSS Data** del Vulnerability Explorer, la tarea diaria de enriquecimiento y el
+enriquecimiento de los CVE nuevos durante la importación usan los mismos datos del paquete en las
+mismas condiciones.
+
+Known Exploited y Ransomware Used indican que el CVE figura en el catálogo CISA KEV. Cuando un
+escáner, un conector o una persona reporta una vulnerabilidad como explotada, ese reporte se guarda
+como un valor independiente, **Vendor Reported Exploited**, para que no se pierda cuando CISA no
+incluye el CVE. Consulte [Hallazgos](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
+#### La primera carga después de actualizar {#the-first-load-after-upgrading}
+
+En una instancia autoalojada con las consultas de KEV y EPSS desactivadas, estos valores estaban
+vacíos hasta ahora, o contenían lo que hubiera establecido un escáner o una persona. La propia
+actualización, antes de cualquier carga del paquete, traslada cada uno de esos indicadores que
+ninguna inclusión en CISA KEV respalda a **Vendor Reported Exploited** o **Vendor Reported
+Ransomware**, por lo que los recuentos de CISA KEV ya pueden disminuir en ese momento (consulte
+[Hallazgos](/asset_modelling/engagements_tests/pro__findings/#metadata)). La primera carga del
+paquete después de actualizar completa luego los valores de CISA para cada CVE que conoce la
+instancia, así que puede esperar lo siguiente:
+
+* Que **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** y la fecha de KEV cambien en
+  muchos hallazgos, tanto activándose (CISA incluye el CVE) como desactivándose (no lo incluye), y que
+  la Prioridad cambie con ellos. Un hallazgo que un escáner o una persona reportó como explotado
+  conserva su Prioridad, porque la Prioridad también tiene en cuenta **Vendor Reported Exploited**.
+* Si una configuración de SLA tiene activado **Cap SLA by CISA KEV Due Date**, que el plazo de SLA de
+  los hallazgos incluidos en KEV se adelante a la fecha límite de CISA. La mayoría de las fechas
+  límite de CISA ya han pasado, así que muchos de esos hallazgos aparecerán en incumplimiento de SLA
+  justo después de la primera carga.
 
 ## Activarla
 

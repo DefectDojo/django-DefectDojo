@@ -34,6 +34,19 @@ Oltre alla scheda, l’intelligence è una superficie di lavoro in tutta l’app
   evidenza di exploit, ad esempio entrando nel CISA KEV o ottenendo un modulo Metasploit. Solo
   aggiornamenti al rialzo — un’evidenza che invecchia silenziosamente non genera mai una notifica.
 
+## Riscontri segnalati con un ID di advisory GitHub {#findings-reported-by-a-github-advisory-id}
+
+Alcuni scanner segnalano una vulnerabilità solo con il suo ID di advisory GitHub (GHSA), non con il
+CVE a cui corrisponde. Quando DefectDojo sa che l’advisory e un CVE descrivono la stessa vulnerabilità,
+in base al bundle di intelligence o a un collegamento registrato sulla tua istanza, il riscontro riceve
+la maturità dell’exploit, l’evidenza e il punteggio di minaccia di quel CVE, come un riscontro che
+indica direttamente il CVE. Il riscontro mantiene il proprio ID di vulnerabilità.
+
+Quando un advisory viene collegato per la prima volta a un CVE, o un collegamento viene rifiutato,
+DefectDojo ricalcola il punteggio dei riscontri interessati. I riscontri che erano già sulla tua istanza
+prima dell’introduzione di questo comportamento vengono ricalcolati una sola volta, in background, dopo
+il primo caricamento del bundle successivo all’aggiornamento.
+
 ## Come cambia il punteggio
 
 Il motore di Priorità combinava già gravità, contesto di business e un “punteggio esterno”
@@ -105,6 +118,20 @@ i riscontri senza CVE scendono in classifica *relativa* anche se il loro puntegg
 * **Supporto air-gapped.** Il bundle giornaliero (inclusi i dati EPSS) può essere trasferito e
   importato offline, in modo che le istanze isolate ricevano lo stesso arricchimento.
 
+## Scheda Intelligence Sources {#intelligence-sources-card}
+
+I superuser possono verificare quale intelligence sta usando l’istanza nella scheda in sola lettura
+**Intelligence Sources**, in **Settings > System Settings**. La scheda mostra:
+
+* la versione del bundle caricato
+* l’età del bundle, con un avviso quando ha 14 giorni o più
+* la data di scadenza del bundle
+* ogni fonte contenuta nel bundle, con la sua licenza e quanto sono aggiornati i suoi dati
+* l’ultimo caricamento non riuscito, se c’è stato, e il motivo dell’errore
+* le attribuzioni delle fonti contenute nel bundle
+
+Un bundle caricato da file su un’istanza air-gapped compare nella stessa scheda.
+
 ## Distribuzioni self-hosted
 
 Le istanze DefectDojo Cloud non richiedono alcuna configurazione. Le istanze self-hosted hanno tre opzioni:
@@ -123,6 +150,46 @@ Le istanze DefectDojo Cloud non richiedono alcuna configurazione. Le istanze sel
 Se l’istanza non riesce a raggiungere il feed, la funzionalità fallisce in modo controllato: l’esecuzione
 viene registrata come fallita e i tuoi punteggi ed evidenze esistenti restano esattamente come erano. Nulla si
 degrada tranne la freschezza dell’intelligence.
+
+### KEV ed EPSS dal bundle {#kev-and-epss-from-the-bundle}
+
+Il bundle che un’istanza self-hosted già scarica contiene anche i dati CISA KEV ed EPSS. Dopo ogni
+caricamento del bundle, DefectDojo li usa per compilare **Known Exploited (CISA KEV)**, **Ransomware Used
+(CISA KEV)**, la data KEV, la data di scadenza CISA KEV e i punteggi EPSS sulle tue vulnerabilità e sui
+tuoi riscontri, così li ottieni senza attivare lookup KEV ed EPSS separati. KEV ed EPSS sono gestiti
+separatamente, e ciascuno viene compilato dal bundle solo se valgono tutte queste condizioni:
+
+* La Threat Intelligence è attiva.
+* Il lookup di quella fonte, in Finding Enrichment nel Tuner, è disattivato. Un lookup attivo ha
+  sempre la precedenza, quindi con un solo lookup attivo il bundle fornisce solo l’altra fonte.
+* Il bundle contiene dati aggiornati per quella fonte.
+
+Il pulsante **Sync KEV/EPSS Data** nel Vulnerability Explorer, il job giornaliero di arricchimento e
+l’arricchimento dei nuovi CVE al momento dell’importazione usano gli stessi dati del bundle, alle stesse
+condizioni.
+
+Known Exploited e Ransomware Used indicano che il CVE è presente nel catalogo CISA KEV. Quando uno
+scanner, un connettore o una persona segnala una vulnerabilità come sfruttata, la segnalazione viene
+conservata come valore separato, **Vendor Reported Exploited**, così non va persa quando CISA non elenca
+il CVE. Vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
+#### Il primo caricamento dopo l’aggiornamento {#the-first-load-after-upgrading}
+
+Su un’istanza self-hosted con i lookup KEV ed EPSS disattivati, finora questi valori erano vuoti,
+oppure contenevano quanto impostato da uno scanner o da una persona. L’aggiornamento stesso, prima di qualsiasi
+caricamento del bundle, sposta ogni flag di questo tipo che nessuna presenza nell’elenco CISA KEV conferma in
+**Vendor Reported Exploited** o **Vendor Reported Ransomware**, quindi i conteggi CISA KEV possono già
+diminuire in quel momento (vedi [Riscontri](/asset_modelling/engagements_tests/pro__findings/#metadata)). Il primo
+caricamento del bundle dopo l’aggiornamento compila poi i valori CISA per ogni CVE noto all’istanza, quindi aspettati che:
+
+* **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** e la data KEV cambino su molti
+  riscontri, sia impostati (CISA elenca il CVE) sia azzerati (CISA non lo elenca), e che la Priorità
+  si sposti di conseguenza. Un riscontro che uno scanner o una persona ha segnalato come sfruttato
+  mantiene la sua Priorità, perché la Priorità legge anche **Vendor Reported Exploited**.
+* se una configurazione SLA ha **Cap SLA by CISA KEV Due Date** attivato, i riscontri presenti nel KEV
+  abbiano la scadenza SLA anticipata alla data di scadenza CISA. La maggior parte delle date di scadenza
+  CISA è già passata, quindi molti di quei riscontri risulteranno in violazione del proprio SLA subito
+  dopo il primo caricamento.
 
 ## Abilitarla
 

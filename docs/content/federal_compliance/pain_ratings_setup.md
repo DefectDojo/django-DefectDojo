@@ -49,31 +49,46 @@ two.
 Which column of the matrix a finding lands in depends on whether DefectDojo considers it **likely
 exploitable**, which is read from two fields:
 
-* `known_exploited` — is it in the CISA KEV catalog?
+* `known_exploited`: is it in the CISA KEV catalog? On a finding this is **Known Exploited (CISA KEV)**.
 * `epss_score` — is EPSS at or above the configuration's threshold, `0.1` by default?
 
-For the clearest demonstration, pick a finding in the tightest column: **Critical severity,
-KEV-listed, and tagged `internet-reachable`**. A Log4Shell finding (CVE-2021-44228) from any scan
-import is the canonical example.
+A **Vendor Reported Exploited** claim from a scanner, a connector or a person is not one of these
+fields. It does not make a finding likely exploitable, so it does not change the PAIN or VDR result.
 
-In normal operation both fields arrive from your scanners or from Finding Enrichment rather than
-being entered by hand. If your imported findings have both empty, turn enrichment on at **Settings >
-Finding Enrichment Settings** and enable **KEV Lookup** and **EPSS Lookup** — on DefectDojo Cloud
-these are already on. With no lookup source configured, enrichment silently enriches nothing.
+For the clearest demonstration, pick a finding in the tightest column: **Critical severity, likely
+exploitable through its EPSS score, and tagged `internet-reachable`**.
 
-Confirm the finding you picked actually carries them before predicting a deadline from it. A finding
-with neither is **not likely exploitable**, so it lands in the widest column of the matrix: the
-mechanism still works, but the only movement you will see is 30 days to 16 at N5, which is a much
-weaker check. On a test instance an administrator can set them directly:
+Avoid a KEV-listed CVE such as Log4Shell (CVE-2021-44228) for this walkthrough. The FedRAMP VDR
+preset caps every deadline at CISA's due date for a KEV-listed CVE, and for older listings that date
+is already in the past, so the finding reads as due immediately and none of the PAIN changes below
+become visible.
+
+In normal operation `known_exploited` arrives only from the CISA KEV catalog, through Finding
+Enrichment; nobody can set it by hand or through the API. `epss_score` arrives from Finding
+Enrichment or from your scanner. If your imported findings have both empty, turn enrichment on at
+**Settings > Finding Enrichment Settings** and enable **KEV Lookup** and **EPSS Lookup**. On
+DefectDojo Cloud these are already on. On a self-hosted install with threat intelligence on, the
+[threat intelligence bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)
+supplies both while the lookups are off. With no source at all, enrichment silently enriches nothing.
+
+Confirm the finding you picked actually carries an EPSS score at or above the threshold before
+predicting a deadline from it. A finding that is neither KEV-listed nor above the threshold is **not
+likely exploitable**, so it lands in the widest column of the matrix: the mechanism still works, but
+the only movement you will see is 30 days to 16 at N5, which is a much weaker check.
+
+On a test instance, the most predictable choice is a Critical finding with no CVE, created by hand
+and tagged `internet-reachable`, with its EPSS score set by an administrator. A finding without a CVE
+is never enriched, so the value stays put:
 
 ```bash
 curl -X PATCH "$DD_URL/api/v2/findings/<FINDING_ID>/" \
   -H "Authorization: Token $DD_TOKEN" -H "Content-Type: application/json" \
-  -d '{"known_exploited": true, "epss_score": 0.9744, "epss_percentile": 0.9997}'
+  -d '{"epss_score": 0.9744, "epss_percentile": 0.9997}'
 ```
 
-The deadline recalculates on save. Note the finding's **Finding ID** from its URL and its **Date
-Discovered** — that date is **D**.
+The deadline recalculates on save. On a finding that does reference a CVE, the next enrichment run
+replaces a hand-set EPSS score with the feed's value for that CVE. Note the finding's **Finding ID**
+from its URL and its **Date Discovered**. That date is **D**.
 
 ## Step 1 — Put the Asset on FedRAMP VDR
 
@@ -125,7 +140,8 @@ the window itself.
 
 | If you see | Cause |
 | --- | --- |
-| **D + 30** | The finding is not seen as exploitable or reachable. Check that Known Exploited is ticked, or EPSS is above the threshold, and that the tag reads exactly `internet-reachable` |
+| **D + 30** | The finding is not seen as exploitable or reachable. Check that **Known Exploited (CISA KEV)** is set, or EPSS is above the threshold, and that the tag reads exactly `internet-reachable`. A **Vendor Reported Exploited** claim does not count |
+| **D** itself (due immediately) | The finding's CVE is KEV-listed and CISA's due date for it has passed, so **Cap SLA by CISA KEV Due Date** applies. Pick a finding that is not KEV-listed, as described under [Choose a finding to watch](#choose-a-finding-to-watch) |
 | Some other number | The Asset is still on a different SLA configuration. Repeat Step 1 |
 
 ## Step 3 — Turn on PAIN tiering
@@ -318,8 +334,8 @@ Asset's **Compliance** tab. See [The POA&M Ledger](../poam_ledger).
 | No deadline moves after submitting | Background task processing is not running | Check with your administrator |
 | A matrix cell snaps back after editing | The recalculation sweep is still running and the configuration is locked | Wait for it to finish, then edit again |
 | The deadline got *longer* after enabling PAIN | Expected — the finding is unrated | Assign a rating (Step 4) |
-| Baseline is D + 30 instead of D + 4 | The finding is not KEV-listed, EPSS is below threshold, or the tag is missing or misspelled | Check Known Exploited, EPSS, and that the tag matches the configuration's reachability tag exactly |
-| Known Exploited and EPSS empty on imported findings | No enrichment lookup sources configured | Settings > Finding Enrichment Settings |
+| Baseline is D + 30 instead of D + 4 | The finding is not KEV-listed, EPSS is below threshold, or the tag is missing or misspelled | Check **Known Exploited (CISA KEV)**, EPSS, and that the tag matches the configuration's reachability tag exactly |
+| **Known Exploited (CISA KEV)** and EPSS empty on imported findings | No enrichment lookup sources configured | Settings > Finding Enrichment Settings |
 | An adopted template matches nothing | `exploit_maturity` has not been backfilled onto those findings | Expected on recent imports — give the backfill time |
 | An adopted template never runs at all | It has no schedule, or it is disabled | Both are required |
 | A rule reports nothing affected | The finding already holds that rating | Expected — choose a different rating |

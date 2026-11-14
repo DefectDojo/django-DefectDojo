@@ -105,6 +105,8 @@ DefectDojoの検出事項は、以下によってフィルタリングできま�
 * Vulnerability ID（通常はCVE）
 * EPSS Score
 * EPSS Percentile
+* Known Exploited (CISA KEV)とRansomware Used (CISA KEV)（CISA Known Exploited Vulnerabilitiesカタログがその脆弱性を掲載しているかどうか、およびランサムウェアで使用されたと記録しているかどうか）
+* Vendor Reported ExploitedとVendor Reported Ransomware（スキャナー、コネクター、または人が、その脆弱性を実際に悪用されている、またはランサムウェアで使用されたと報告したかどうか。これらはCISA KEVの値とは別に保持されます。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照）
 * Service
 * Planned Remediation Date
 * Planned Remediation Version

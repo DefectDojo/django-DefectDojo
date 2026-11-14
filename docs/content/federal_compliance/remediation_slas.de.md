@@ -20,6 +20,10 @@ Mit der Funktion werden zwei fertige SLA-Konfigurationen ausgeliefert. Weisen Si
 Fristen werden durchgesetzt, und ein Befund, der im CISA-KEV-Katalog aufgeführt ist, wird nie über sein
 CISA-Fälligkeitsdatum hinaus terminiert.
 
+Auf einer selbst gehosteten Instanz mit deaktiviertem KEV-Lookup stammt das CISA-Fälligkeitsdatum aus dem
+Threat-Intelligence-Bundle, das die Instanz ohnehin lädt, sodass diese Begrenzung greift, ohne dass der Lookup
+aktiviert werden muss. Siehe [KEV und EPSS aus dem Bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Dieselben Basisfristen, weiter verschärft durch Ausnutzbarkeit und Exposition:
@@ -32,7 +36,12 @@ Dieselben Basisfristen, weiter verschärft durch Ausnutzbarkeit und Exposition:
 | Keines von beidem | Die oben genannten FedRAMP-Rev-5-Fristen |
 
 **Glaubhaft ausnutzbar** bedeutet, dass der Befund im KEV gelistet ist oder sein EPSS-Score Ihren
-Schwellenwert erreicht oder überschreitet. **Über das Internet erreichbar** wird durch einen Befund-Tag
+Schwellenwert erreicht oder überschreitet. Im KEV gelistet heißt, dass er im CISA-KEV-Katalog aufgeführt ist. Eine
+**Vendor Reported Exploited**-Meldung eines Scanners, eines Connectors oder einer Person macht einen Befund
+hier nicht glaubhaft ausnutzbar und ändert seine Frist nicht. Nur eine Vulnerability Response Policy kann
+eine solche Meldung berücksichtigen, über eine Regel, die aus ihr die glaubhafte Ausnutzbarkeit setzt; siehe
+[Vulnerability Response Policies](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies).
+**Über das Internet erreichbar** wird durch einen Befund-Tag
 signalisiert — standardmäßig `internet-reachable`.
 
 Alle Schwellenwerte, Tag-Namen und Tagesangaben sind in der SLA-Konfiguration bearbeitbar.
