@@ -131,10 +131,11 @@ The lines come in this order:
 6. With `product_extras=true`, every `tracking_file`, by id. See [Product extras lines](#product-extras-lines).
 7. With `product_extras=true`, every `benchmark`, by benchmark type id.
 8. With `product_extras=true`, every `answered_survey`, by id.
-9. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
-10. With `audit_history=true`, every `audit_event`, by model, then by object id, and then by event id. See [Audit history lines](#audit-history-lines).
-11. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
-12. One `end` line.
+9. With `product_extras=true`, every `product_endpoint`, by id. See [Product endpoint lines](#product-endpoint-lines).
+10. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
+11. With `audit_history=true`, every `audit_event`, by model, then by object id, and then by event id. See [Audit history lines](#audit-history-lines).
+12. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
+13. One `end` line.
 
 Each object has its own line and names its parent by id.
 Notes, files, endpoint entries and finding groups nest in their line.
@@ -147,14 +148,15 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 
 | `type` | What the line holds |
 |--------|---------------------|
-| `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest), `product`, `engagement_presets` and `api_scan_configurations`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. See [Presets and API scan configurations](#presets-and-api-scan-configurations) for the other two. |
+| `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest), `product`, `engagement_presets` and `api_scan_configurations`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. The `product_meta` key inside `product` holds the metadata of the product. See [Presets and API scan configurations](#presets-and-api-scan-configurations) for the other two. |
 | `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it, with the changes in [Engagement lines](#engagement-lines). `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
 | `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. `finding_groups` holds every finding group of the test, a group with no findings included. |
-| `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
+| `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. `finding_meta` holds the metadata of the finding. |
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
 | `tracking_file` | `data`: one tracking file of the product. Only with `product_extras=true`. See [Product extras lines](#product-extras-lines). |
 | `benchmark` | `data`: the summary and the results of one benchmark type for the product. Only with `product_extras=true`. See [Product extras lines](#product-extras-lines). |
 | `answered_survey` | `data`: one answered questionnaire of an engagement of the product. Only with `product_extras=true`. See [Product extras lines](#product-extras-lines). |
+| `product_endpoint` | `data`: one endpoint of the product, or with Locations on, one location of the product. Only with `product_extras=true`. See [Product endpoint lines](#product-endpoint-lines). |
 | `test_import` | `data`: one import or reimport of a test. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
 | `test_import_actions` | `data`: some of the actions of one import. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
 | `audit_event` | `data`: one change of the product or of one of its objects, with the values after the change. Only with `audit_history=true`. See [Audit history lines](#audit-history-lines). |
@@ -261,6 +263,7 @@ A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
 ### Product extras lines
 
 With `product_extras=true`, the stream sends the tracking files, the benchmark results and the answered questionnaires of the product.
+It also sends the endpoints of the product. See [Product endpoint lines](#product-endpoint-lines).
 These lines come after the risk acceptances and before the import history.
 A product that has none of them has no such line.
 
@@ -303,6 +306,48 @@ An example of each line, shortened:
 {"type": "tracking_file", "data": {"id": 4, "name": "app.war", "path": "/srv/app.war", "folder": "/srv", "artifact": null, "review_status": "Reviewed", "tags": ["alpha"], "created": "2025-03-04T05:06:07.123456Z"}}
 {"type": "benchmark", "data": {"benchmark_type": 1, "desired_level": "Level 2", "publish": true, "controls": [{"control": 17, "pass_fail": true, "enabled": true, "notes": []}]}}
 {"type": "answered_survey", "data": {"id": 9, "engagement": 3, "survey": 2, "assignee": 1, "responder": null, "completed": true, "answered_on": "2026-11-03", "answers": [{"question": 5, "type": "text", "text": "A web shop"}]}}
+```
+
+### Product endpoint lines
+
+With `product_extras=true`, the stream sends one `product_endpoint` line for each endpoint of the product.
+With Locations on, it sends one line for each location that the product references.
+These lines come after the `answered_survey` lines, in id order.
+A product that has no endpoint has no such line.
+
+A finding line carries only the endpoints of its finding.
+A `product_endpoint` line also covers an endpoint that no finding has.
+A line has the same `uri` as the matching endpoint entry on a finding line. Use it to match the two.
+
+A `product_endpoint` line has `data` with these keys:
+
+| Key | Locations off | Locations on |
+|-----|---------------|--------------|
+| `id` | The endpoint id. | The location id. |
+| `uri` | The endpoint as a URI. | The location value. |
+| `location_type` | `null` | The location type, for example `url`. |
+| `tags` | The endpoint tags. | The location tags. |
+| `status` | `null` | The status of the location in this product: `Active` or `Mitigated`. |
+| `relationship` | `null` | The relationship of the location to this product: `owned_by`, `used_by` or an empty string. |
+| `relationship_data` | `null` | The extra data of that relationship, as an object. |
+| `meta` | The metadata of the endpoint. | The metadata of the location for this product. |
+| `location_meta` | An empty list. | The metadata of the location that no product owns. |
+
+Each item in `meta` and `location_meta` is `{name, value}`. The items are in id order.
+A location that more than one product references has one line in each product export.
+Each line carries its own `status`, `relationship`, `relationship_data` and `meta`.
+The `location_meta` of the two lines is the same.
+
+An example line with Locations off:
+
+```json
+{"type": "product_endpoint", "data": {"id": 2, "uri": "ftp://localhost", "location_type": null, "tags": [], "status": null, "relationship": null, "relationship_data": null, "meta": [{"name": "owner", "value": "team-a"}], "location_meta": []}}
+```
+
+An example line with Locations on:
+
+```json
+{"type": "product_endpoint", "data": {"id": 2, "uri": "ftp://localhost", "location_type": "url", "tags": [], "status": "Active", "relationship": "owned_by", "relationship_data": {}, "meta": [{"name": "owner", "value": "team-a"}], "location_meta": [{"name": "zone", "value": "dmz"}]}}
 ```
 
 ### Import history lines
@@ -431,6 +476,7 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `tracking_files` | Tracking files of the product. Only with `product_extras=true`. | `tracking_file` lines. Only with `product_extras=true`. |
 | `benchmarks` | Benchmark types that have a summary or a result for the product. Only with `product_extras=true`. | `benchmark` lines. Only with `product_extras=true`. |
 | `answered_surveys` | Answered questionnaires of the engagements in the product. Only with `product_extras=true`. | `answered_survey` lines. Only with `product_extras=true`. |
+| `product_endpoints` | No key. `endpoints` holds the same number. | `product_endpoint` lines. Only with `product_extras=true`. |
 | `test_imports` | Imports and reimports of the tests in the product. Only with `import_history=true`. | `test_import` lines. Only with `import_history=true`. |
 | `test_import_actions` | Actions of those imports. Only with `import_history=true`. | The actions on `test_import_actions` lines. Only with `import_history=true`. |
 | `audit_events` | Events of the objects that the audit history covers. Only with `audit_history=true`. | `audit_event` lines. Only with `audit_history=true`. |
@@ -448,9 +494,6 @@ An example `end` line:
 
 ## What does not cross
 
-- Endpoints and locations that have no finding. The manifest counts them in `endpoints`.
-- The product-level status of a location.
-- Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
 - JIRA issue keys and JIRA project settings.
 - Product members and product groups.
 - CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.

@@ -14,6 +14,8 @@ from dojo.endpoint.models import Endpoint_Status
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.finding.helper import save_vulnerability_ids
 from dojo.location.feature import locations_enabled
+from dojo.location.models import Location, LocationProductReference
+from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     Answered_Survey,
     Benchmark_Category,
@@ -28,6 +30,7 @@ from dojo.models import (
     ChoiceQuestion,
     Dojo_User,
     DojoMeta,
+    Endpoint,
     Engagement,
     Engagement_Survey,
     FileUpload,
@@ -60,6 +63,10 @@ QUERIES_PER_FINDING_BATCH = {
     # Endpoints mode adds status_finding (with its endpoint joined) and endpoint__tags.
     False: 16,
 }
+
+# One page of product_endpoint lines is the page query, a prefetch of the tags and a prefetch of the metadata, in both
+# modes. A page with no row runs the page query only.
+PRODUCT_ENDPOINT_QUERIES_PER_PAGE = 3
 
 
 @versioned_fixtures
@@ -184,6 +191,34 @@ class TestProductExportQueryCount(DojoAPITestCase):
             TextAnswer.objects.create(question=text, answered_survey=response, answer="a")
             ChoiceAnswer.objects.create(question=pick, answered_survey=response).answer.add(*choices)
 
+    def grow_product_endpoints(self, product: Product, total: int) -> None:
+        count = total - (LocationProductReference if locations_enabled() else Endpoint).objects.filter(product=product).count()
+        prefix = f"g{total}"
+        if locations_enabled():
+            owners = Location.objects.bulk_create(
+                Location(location_type="url", location_value=f"https://{prefix}-{i}.example") for i in range(count)
+            )
+            LocationProductReference.objects.bulk_create(
+                LocationProductReference(location=owner, product=product, status=ProductLocationStatus.Active) for owner in owners
+            )
+            DojoMeta.objects.bulk_create(
+                [DojoMeta(location=owner, location_product=product, name="k", value="v") for owner in owners]
+                + [DojoMeta(location=owner, name="z", value="v") for owner in owners],
+            )
+            model = Location
+        else:
+            owners = Endpoint.objects.bulk_create(
+                Endpoint(product=product, protocol="https", host=f"{prefix}-{i}.example") for i in range(count)
+            )
+            DojoMeta.objects.bulk_create(DojoMeta(endpoint=owner, name="k", value="v") for owner in owners)
+            model = Endpoint
+        field = model._meta.get_field("tags")
+        owner_column, tag_column = (column.name for column in field.remote_field.through._meta.fields if column.name != "id")
+        tags = [field.related_model.objects.get_or_create(name=name)[0] for name in ("perf_a", "perf_b")]
+        field.remote_field.through.objects.bulk_create(
+            field.remote_field.through(**{owner_column: owner, tag_column: tag}) for owner in owners for tag in tags
+        )
+
     def measure(self, url) -> int:
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(url)
@@ -280,3 +315,15 @@ class TestProductExportQueryCount(DojoAPITestCase):
         self.add_product_extras(self.product, 4, "s")
         after = self.measure(url)
         self.assertEqual(before, after, f"The manifest issues {before} queries with one row of each extra and {after} with five.")
+
+    def test_stream_query_count_is_constant_per_page_of_product_endpoints(self):
+        url = self.url + "?product_extras=true"
+        self.measure(url)
+        queries = {}
+        for total in (100, 499, 500, 2500, 3000):
+            self.grow_product_endpoints(self.product, total)
+            queries[total] = self.measure(url)
+        self.assertEqual(queries[100], queries[499], f"One page costs {queries[100]} queries with 100 rows and {queries[499]} with 499.")
+        per_page = queries[3000] - queries[2500]
+        self.assertEqual(PRODUCT_ENDPOINT_QUERIES_PER_PAGE, per_page, f"The queries by row count: {queries}.")
+        self.assertEqual(4 * per_page, queries[2500] - queries[500], f"The queries by row count: {queries}.")

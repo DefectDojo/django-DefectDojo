@@ -23,7 +23,7 @@ from rest_framework.test import APIClient
 
 import dojo
 from dojo.endpoint.api.serializer import EndpointStatusSerializer
-from dojo.endpoint.models import Endpoint_Status
+from dojo.endpoint.models import Endpoint, Endpoint_Status
 from dojo.export.api.serializers import (
     MAX_FILE_BYTES_DEFAULT,
     ExportEngagementSerializer,
@@ -38,8 +38,8 @@ from dojo.export.api.views import ACTIONS_PER_LINE, AUDIT_MODELS, COUNT_KEYS, PR
 from dojo.finding.api.serializer import FindingSerializer
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
-from dojo.location.models import LocationFindingReference
-from dojo.location.status import FindingLocationStatus
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     Announcement,
     Answered_Survey,
@@ -86,7 +86,7 @@ from dojo.models import (
 from dojo.system_settings.ui.forms import SystemSettingsForm
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_type.models import Tool_Type
-from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
+from unittests.dojo_test_case import DojoAPITestCase, skip_unless_v2, skip_unless_v3, versioned_fixtures
 
 FindingEvent = apps.get_model("dojo", "FindingEvent")
 RAW_REQUEST = b"GET / HTTP/1.1\r\nX: \xff\xfe\r\n"
@@ -152,6 +152,27 @@ def seed_check_lists(case):
     case.check_list.other_issues.add(second)
     case.check_list.data_issues.add(case.foreign_finding)
     Check_List.objects.create(engagement=case.checked_engagement, session_management="Fail").session_issues.add(first)
+
+
+def product_endpoint_rows(product_id):
+    model = LocationProductReference if locations_enabled() else Endpoint
+    return model.objects.filter(product_id=product_id)
+
+
+def seed_location_product_references(product):
+    # The locations fixture gives a location a finding reference and no product reference. A scan makes both.
+    if locations_enabled():
+        for location in Location.objects.filter(findings__finding__test__engagement__product=product).distinct():
+            location.associate_with_product(product)
+
+
+def make_endpoint(product, host):
+    """An Endpoint in endpoints mode. In locations mode a Location that the product references."""
+    if locations_enabled():
+        row = Location.objects.create(location_type="url", location_value=f"https://{host}")
+        row.associate_with_product(product)
+        return row
+    return Endpoint.objects.create(product=product, protocol="https", host=host)
 
 
 SHIPPED_DEDUPLICATION_MAPS = {
@@ -1119,7 +1140,7 @@ class TestExportAuditHistory(DojoAPITestCase):
 @versioned_fixtures
 class TestExportProductExtras(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
-    EXTRA_LINES = {"tracking_file", "benchmark", "answered_survey"}
+    EXTRA_LINES = {"tracking_file", "benchmark", "answered_survey", "product_endpoint"}
 
     @classmethod
     def setUpTestData(cls):
@@ -1130,6 +1151,7 @@ class TestExportProductExtras(DojoAPITestCase):
         cls.seed_tracking_files()
         cls.seed_benchmarks()
         cls.seed_answered_surveys()
+        seed_location_product_references(Product.objects.get(id=2))
         Risk_Acceptance.objects.create(name="ra", owner=cls.admin).engagement_set.add(Engagement.objects.get(id=1))
 
     @classmethod
@@ -1294,13 +1316,13 @@ class TestExportProductExtras(DojoAPITestCase):
         self.assertLess(max(positions["risk_acceptance"]), min(extras))
         self.assertLess(max(extras), min(positions["test_import"] + positions["audit_event"]))
         order = [kind for kind in kinds if kind in self.EXTRA_LINES]
-        self.assertEqual(sorted(order, key=["tracking_file", "benchmark", "answered_survey"].index), order)
+        self.assertEqual(sorted(order, key=["tracking_file", "benchmark", "answered_survey", "product_endpoint"].index), order)
         self.assertEqual("end", kinds[-1])
 
     def test_end_line_counts_the_extras(self):
         lines = self.export(product_extras="true")
         counts = lines[-1]["counts"]
-        self.assertEqual(set(COUNT_KEYS) | set(PRODUCT_EXTRAS_COUNT_KEYS), set(counts))
+        self.assertEqual(set(COUNT_KEYS) | set(PRODUCT_EXTRAS_COUNT_KEYS) | {"product_endpoints"}, set(counts))
         self.assertEqual({"tracking_files": 3, "benchmarks": 3, "answered_surveys": 2}, {key: counts[key] for key in PRODUCT_EXTRAS_COUNT_KEYS})
         for key, line_type in (("tracking_files", "tracking_file"), ("benchmarks", "benchmark"), ("answered_surveys", "answered_survey")):
             self.assertEqual(sum(line["type"] == line_type for line in lines), counts[key], key)
@@ -1308,14 +1330,26 @@ class TestExportProductExtras(DojoAPITestCase):
     def test_the_extras_count_keys_follow_the_other_counts_in_line_order(self):
         keys = list(self.export(product_extras="true", import_history="true", audit_history="true")[-1]["counts"])
         self.assertEqual(
-            [*COUNT_KEYS, *PRODUCT_EXTRAS_COUNT_KEYS, "test_imports", "test_import_actions", "audit_events", "legacy_audit_entries"],
+            [
+                *COUNT_KEYS,
+                *PRODUCT_EXTRAS_COUNT_KEYS,
+                "product_endpoints",
+                "test_imports",
+                "test_import_actions",
+                "audit_events",
+                "legacy_audit_entries",
+            ],
             keys,
         )
 
     def test_a_product_with_no_extras_has_no_extra_lines(self):
-        lines = self.export(3, product_extras="true")
+        bare = self.create_product("no extras", prod_type=Product.objects.get(id=2).prod_type)
+        lines = self.export(bare.id, product_extras="true")
         self.assertEqual(["header", "end"], [line["type"] for line in lines])
-        self.assertEqual(dict.fromkeys(PRODUCT_EXTRAS_COUNT_KEYS, 0), {key: lines[-1]["counts"][key] for key in PRODUCT_EXTRAS_COUNT_KEYS})
+        self.assertEqual(
+            dict.fromkeys([*PRODUCT_EXTRAS_COUNT_KEYS, "product_endpoints"], 0),
+            {key: lines[-1]["counts"][key] for key in [*PRODUCT_EXTRAS_COUNT_KEYS, "product_endpoints"]},
+        )
 
     def test_every_row_is_sent_when_the_pages_hold_one_row(self):
         whole = self.export(product_extras="true")
@@ -1326,7 +1360,7 @@ class TestExportProductExtras(DojoAPITestCase):
             return [line for line in lines if line["type"] in self.EXTRA_LINES]
 
         self.assertEqual(extras(whole), extras(paged))
-        self.assertEqual(8, len(extras(paged)))
+        self.assertEqual(8 + product_endpoint_rows(2).count(), len(extras(paged)))
 
     def test_features_name_product_extras(self):
         self.assertIn("product_extras", self.client.get(reverse("export-manifest")).json()["features"])
@@ -1355,6 +1389,8 @@ class TestExportProductExtras(DojoAPITestCase):
         for key in PRODUCT_EXTRAS_COUNT_KEYS:
             self.assertNotIn(key, plain["totals"])
             self.assertNotIn(key, self.get_results_by_id(plain["products"], 2)["counts"])
+        self.assertNotIn("product_endpoints", manifest["totals"])
+        self.assertNotIn("product_endpoints", self.get_results_by_id(manifest["products"], 2)["counts"])
 
     def test_a_non_boolean_product_extras_is_a_400(self):
         for url in (reverse("export-product", args=[2]), reverse("export-manifest")):
@@ -1362,6 +1398,133 @@ class TestExportProductExtras(DojoAPITestCase):
                 response = self.client.get(url, {"product_extras": "maybe"})
                 self.assertEqual(400, response.status_code)
                 self.assertIn("product_extras", response.json())
+
+
+@versioned_fixtures
+class TestExportProductEndpoints(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.product = Product.objects.get(id=2)
+        cls.other_product = Product.objects.get(id=1)
+        seed_location_product_references(cls.product)
+        cls.orphan = make_endpoint(cls.product, "orphan.example")
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+
+    def export(self, product_id=2, **params):
+        return ndjson_lines(self.client.get(reverse("export-product", args=[product_id]), {"product_extras": "true", **params}))
+
+    def rows(self, product_id=2, **params):
+        return {line["data"]["id"]: line["data"] for line in self.export(product_id, **params) if line["type"] == "product_endpoint"}
+
+    def test_product_endpoint_lines_include_an_endpoint_with_no_finding(self):
+        lines = self.export()
+        rows = {line["data"]["id"]: line["data"] for line in lines if line["type"] == "product_endpoint"}
+        on_findings = {entry["id"] for line in lines if line["type"] == "finding" for entry in line["data"]["endpoints"]}
+        self.assertTrue(on_findings)
+        self.assertNotIn(self.orphan.id, on_findings)
+        self.assertEqual(str(self.orphan), rows[self.orphan.id]["uri"])
+        self.assertLessEqual(on_findings, set(rows))
+        expected = product_endpoint_rows(2).values_list("location_id" if locations_enabled() else "id", flat=True)
+        self.assertEqual(set(expected), set(rows))
+
+    @skip_unless_v2
+    def test_product_endpoint_lines_carry_endpoint_meta(self):
+        tagged = make_endpoint(self.product, "meta.example")
+        tagged.tags.add("beta", "alpha")
+        DojoMeta.objects.create(endpoint=tagged, name="owner", value="team-a")
+        DojoMeta.objects.create(endpoint=tagged, name="env", value="prod")
+        elsewhere = make_endpoint(self.other_product, "elsewhere.example")
+        DojoMeta.objects.create(endpoint=elsewhere, name="leak", value="x")
+        rows = self.rows()
+        self.assertEqual(
+            {
+                "id": tagged.id,
+                "uri": str(tagged),
+                "location_type": None,
+                "tags": ["alpha", "beta"],
+                "status": None,
+                "relationship": None,
+                "relationship_data": None,
+                "meta": [{"name": "owner", "value": "team-a"}, {"name": "env", "value": "prod"}],
+                "location_meta": [],
+            },
+            rows[tagged.id],
+        )
+        self.assertEqual(([], []), (rows[self.orphan.id]["meta"], rows[self.orphan.id]["tags"]))
+        self.assertNotIn(elsewhere.id, rows)
+        self.assertEqual([{"name": "leak", "value": "x"}], self.rows(1)[elsewhere.id]["meta"])
+
+    @skip_unless_v3
+    def test_product_endpoint_lines_carry_location_status_and_scoped_meta(self):
+        shared = Location.objects.create(location_type="url", location_value="https://shared.example")
+        shared.associate_with_product(
+            self.product, status=ProductLocationStatus.Active, relationship="owned_by", relationship_data={"team": "a"},
+        )
+        shared.associate_with_product(self.other_product, status=ProductLocationStatus.Mitigated, relationship="used_by")
+        shared.tags.add("beta", "alpha")
+        for scope, value in ((self.product, "team-a"), (self.other_product, "team-b")):
+            DojoMeta.objects.create(location=shared, location_product=scope, name="owner", value=value)
+        DojoMeta.objects.create(location=shared, name="zone", value="dmz")
+        self.assertEqual(
+            {
+                "id": shared.id,
+                "uri": "https://shared.example",
+                "location_type": "url",
+                "tags": ["alpha", "beta"],
+                "status": "Active",
+                "relationship": "owned_by",
+                "relationship_data": {"team": "a"},
+                "meta": [{"name": "owner", "value": "team-a"}],
+                "location_meta": [{"name": "zone", "value": "dmz"}],
+            },
+            self.rows()[shared.id],
+        )
+        other = self.rows(1)[shared.id]
+        self.assertEqual(("Mitigated", "used_by", {}), (other["status"], other["relationship"], other["relationship_data"]))
+        self.assertEqual(([{"name": "owner", "value": "team-b"}], [{"name": "zone", "value": "dmz"}]), (other["meta"], other["location_meta"]))
+        bare = self.rows()[self.orphan.id]
+        self.assertEqual(([], [], "", {}), (bare["meta"], bare["location_meta"], bare["relationship"], bare["relationship_data"]))
+
+    def test_product_endpoint_uri_matches_the_finding_entry(self):
+        lines = self.export()
+        rows = {line["data"]["id"]: line["data"] for line in lines if line["type"] == "product_endpoint"}
+        entries = [entry for line in lines if line["type"] == "finding" for entry in line["data"]["endpoints"]]
+        self.assertTrue(entries)
+        for entry in entries:
+            with self.subTest(uri=entry["uri"]):
+                self.assertEqual(
+                    {key: entry[key] for key in ("uri", "location_type", "tags")},
+                    {key: rows[entry["id"]][key] for key in ("uri", "location_type", "tags")},
+                )
+
+    def test_product_endpoint_lines_are_in_id_order_whatever_the_page_size(self):
+        # The default order of an endpoint is its host, so a host that sorts first and was added last exposes it.
+        make_endpoint(self.product, "aaa.example")
+        if locations_enabled():
+            low, high = (Location.objects.create(location_type="url", location_value=f"https://{name}.example") for name in ("low", "high"))
+            high.associate_with_product(self.product)
+            low.associate_with_product(self.product)
+        expected = [row["id"] for row in self.rows().values()]
+        self.assertGreater(len(expected), 3)
+        self.assertEqual(sorted(expected), expected)
+        with mock.patch("dojo.export.api.views.EXPORT_CHUNK_SIZE", 1):
+            self.assertEqual(expected, list(self.rows()))
+
+    def test_end_line_counts_product_endpoints(self):
+        lines = self.export()
+        counts = lines[-1]["counts"]
+        sent = sum(line["type"] == "product_endpoint" for line in lines)
+        self.assertEqual(product_endpoint_rows(2).count(), sent)
+        self.assertEqual(sent, counts["product_endpoints"])
+        self.assertNotIn("product_endpoints", PRODUCT_EXTRAS_COUNT_KEYS)
+        manifest = self.client.get(reverse("export-manifest"), {"product_extras": "true"}).json()
+        self.assertEqual(sent, self.get_results_by_id(manifest["products"], 2)["counts"]["endpoints"])
+        self.assertNotIn("product_endpoints", manifest["totals"])
 
 
 @versioned_fixtures

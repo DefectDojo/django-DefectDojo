@@ -92,9 +92,9 @@ class ExportParamsSerializer(serializers.Serializer):
     product_extras = serializers.BooleanField(
         default=False,
         help_text=(
-            "Add the tracking files, benchmark results and answered questionnaires of the product to the stream, "
-            "and their counts to the manifest. The stream sends tracking_file, benchmark and answered_survey lines "
-            "after the risk acceptances."
+            "Add the tracking files, benchmark results, answered questionnaires and endpoints of the product to the "
+            "stream. Add the counts of the first three to the manifest. The stream sends tracking_file, benchmark, "
+            "answered_survey and product_endpoint lines after the risk acceptances."
         ),
     )
 
@@ -160,18 +160,47 @@ def export_proof(risk_acceptance: Risk_Acceptance, max_file_bytes: int) -> dict 
     return {"filename": risk_acceptance.filename(), **_file_payload(risk_acceptance.path, max_file_bytes, InlineBudget())}
 
 
+def export_endpoint_target(target, *, locations: bool) -> dict:
+    return {
+        "id": target.id,
+        "uri": str(target),
+        "location_type": target.location_type if locations else None,
+        "tags": [tag.name for tag in target.tags.all()],
+    }
+
+
 def export_endpoint_entries(finding: Finding, status: serializers.Serializer, *, locations: bool) -> list[dict]:
     entries = []
     for row in finding.locations.all() if locations else finding.status_finding.all():
         target = row.location if locations else row.endpoint
-        entries.append({
-            "id": target.id,
-            "uri": str(target),
-            "location_type": target.location_type if locations else None,
-            "tags": [tag.name for tag in target.tags.all()],
-            "status": status.to_representation(row),
-        })
+        entries.append({**export_endpoint_target(target, locations=locations), "status": status.to_representation(row)})
     return entries
+
+
+def export_meta(rows) -> list[dict]:
+    return [{"name": meta.name, "value": meta.value} for meta in rows]
+
+
+def export_product_endpoint(row, product_id: int, *, locations: bool) -> dict:
+    """An Endpoint, or a LocationProductReference with its location and the location's metadata prefetched."""
+    if not locations:
+        return {
+            **export_endpoint_target(row, locations=False),
+            "status": None,
+            "relationship": None,
+            "relationship_data": None,
+            "meta": export_meta(row.endpoint_meta.all()),
+            "location_meta": [],
+        }
+    metadata = row.location.location_meta.all()
+    return {
+        **export_endpoint_target(row.location, locations=True),
+        "status": row.status,
+        "relationship": row.relationship,
+        "relationship_data": row.relationship_data,
+        "meta": export_meta(meta for meta in metadata if meta.location_product_id == product_id),
+        "location_meta": export_meta(meta for meta in metadata if meta.location_product_id is None),
+    }
 
 
 class ExportFilesMixin(serializers.Serializer):

@@ -53,6 +53,7 @@ from dojo.export.api.serializers import (
     ExportUserSerializer,
     ManifestParamsSerializer,
     audit_event_model,
+    export_product_endpoint,
     file_size,
     prefetch_answers,
     prefetch_questions,
@@ -71,6 +72,7 @@ from dojo.models import (
     BurpRawRequestResponse,
     Check_List,
     Dojo_User,
+    DojoMeta,
     Endpoint,
     Engagement,
     Engagement_Presets,
@@ -328,10 +330,39 @@ def answered_survey_lines(product: Product, counts: dict, render) -> Iterator[by
             yield render({"type": "answered_survey", "data": serializer.to_representation(row)})
 
 
+def product_endpoint_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
+    locations = locations_enabled()
+    if locations:
+        # A location is on a product once, so location_id also works as the paging key.
+        rows = pages(
+            LocationProductReference.objects.filter(product=product).select_related("location").prefetch_related(
+                "location__tags",
+                Prefetch(
+                    "location__location_meta",
+                    queryset=DojoMeta.objects.filter(Q(location_product=product) | Q(location_product=None)).order_by("id"),
+                ),
+            ),
+            ("location_id",),
+            lambda row: Q(location_id__gt=row.location_id),
+        )
+    else:
+        rows = pages(
+            Endpoint.objects.filter(product=product).prefetch_related(
+                "tags", Prefetch("endpoint_meta", queryset=DojoMeta.objects.order_by("id")),
+            ),
+            ("id",),
+            lambda row: Q(id__gt=row.id),
+        )
+    for row in rows:
+        counts["product_endpoints"] += 1
+        yield render({"type": "product_endpoint", "data": export_product_endpoint(row, product.id, locations=locations)})
+
+
 def product_extras_lines(product: Product, counts: dict, render, context: dict) -> Iterator[bytes]:
     yield from tracking_file_lines(product, counts, render)
     yield from benchmark_lines(product, counts, render, context)
     yield from answered_survey_lines(product, counts, render)
+    yield from product_endpoint_lines(product, counts, render)
 
 
 def audit_history_lines(product: Product, counts: dict, render) -> Iterator[bytes]:
@@ -439,6 +470,7 @@ def product_lines(
     counts["finding_groups"] = len(finding_groups)
     if product_extras:
         counts.update(dict.fromkeys(PRODUCT_EXTRAS_COUNT_KEYS, 0))
+        counts["product_endpoints"] = 0
         yield from product_extras_lines(product, counts, render, context)
     if import_history:
         counts.update(dict.fromkeys(IMPORT_HISTORY_COUNT_KEYS, 0))
