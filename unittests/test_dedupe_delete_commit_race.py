@@ -69,6 +69,7 @@ from dojo.models import (
 )
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tasks import _async_dupe_delete_impl  # noqa: PLC2701
+from dojo.utils import _async_delete_object  # noqa: PLC2701
 from dojo.vulnerability.models import Vulnerability
 
 logger = logging.getLogger(__name__)
@@ -1871,3 +1872,50 @@ class TestDupeDeleteRacesSingleFindingDelete(_CommittedFindingsMixin, SimpleTest
         self.assertIsNone(single_delete_error, msg=f"the single-finding delete failed: {single_delete_error!r}")
         remaining = list(Finding.objects.filter(id__in=[duplicate.id, unrelated.id]).values_list("id", flat=True))
         self.assertEqual(remaining, [], msg=f"both findings must be deleted, still present: {remaining}")
+
+
+# Regression: a background engagement delete failed, on the first run and on every retry, with
+# "update or delete on table dojo_finding violates foreign key constraint
+# dojo_finding_duplicate_finding_id_... Key (id)=(N) is still referenced from table
+# dojo_finding". A finding of the engagement held a duplicate_finding link to another finding
+# of the same engagement while its own duplicate flag was False. The reset that runs before the
+# delete only cleared the links of rows flagged as duplicates, and the per-chunk resolve leaves
+# the rows of the delete alone, so the link was still there when the chunk that holds its
+# target committed. No concurrency is involved; it needs real commits because each chunk
+# commits on its own and the foreign key is only checked there.
+@override_settings(ASYNC_OBEJECT_DELETE_CHUNK_SIZE=1, DUPLICATE_CLUSTER_CASCADE_DELETE=False)
+class TestCascadeDeleteWithUnflaggedDuplicateLink(_CommittedFindingsMixin, SimpleTestCase):
+
+    """A cascade delete clears every duplicate link inside its scope, whatever the duplicate flag says."""
+
+    def _linked_findings_a_chunk_apart(self, *, flagged):
+        """Two findings of one engagement, the later one linked to the earlier one."""
+        target, holder = self._create_findings("Cascade link target", "Cascade link holder")
+        # Chunks go lowest id first and hold one finding each, so the target's chunk commits
+        # while the holder is still there.
+        self.assertLess(target.id, holder.id)
+        Finding.objects.filter(id=holder.id).update(duplicate=flagged, duplicate_finding=target)
+        return target, holder
+
+    def _assert_engagement_delete_succeeds(self, target, holder):
+        with impersonate(self.user):
+            _async_delete_object("dojo.engagement", self.engagement.id)
+
+        self.assertFalse(
+            Engagement.objects.filter(id=self.engagement.id).exists(),
+            msg="the engagement must be deleted",
+        )
+        remaining = list(Finding.objects.filter(id__in=[target.id, holder.id]).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"both findings must be deleted, still present: {remaining}")
+        self.assertNoDanglingDuplicateLinks()
+
+    def test_engagement_delete_with_unflagged_link_into_an_earlier_chunk(self):
+        target, holder = self._linked_findings_a_chunk_apart(flagged=False)
+
+        self._assert_engagement_delete_succeeds(target, holder)
+
+    def test_engagement_delete_with_flagged_link_into_an_earlier_chunk(self):
+        """Control: the same shape with the flag set, which the reset always covered."""
+        target, holder = self._linked_findings_a_chunk_apart(flagged=True)
+
+        self._assert_engagement_delete_succeeds(target, holder)

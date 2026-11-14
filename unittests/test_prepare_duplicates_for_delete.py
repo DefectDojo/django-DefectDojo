@@ -138,6 +138,27 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertIsNone(dupe.duplicate_finding)
         self.assertFalse(dupe.duplicate)
 
+    def test_inside_scope_link_without_duplicate_flag_reset(self):
+        """
+        A link inside the deletion scope is cleared whatever the duplicate flag says.
+
+        The foreign key is what the delete trips over, not the flag: a row that holds a
+        link while its flag is False blocks the delete of its target just the same.
+        """
+        original = self._create_finding(self.test1, "Original")
+        holder = self._create_finding(self.test1, "Link holder")
+        Finding.objects.filter(id=holder.id).update(duplicate=False, duplicate_finding=original)
+
+        with impersonate(self.testuser):
+            prepare_duplicates_for_delete(self.test1)
+
+        holder.refresh_from_db()
+        self.assertIsNone(
+            holder.duplicate_finding_id,
+            msg=f"the link should have been cleared, persisted duplicate_finding_id={holder.duplicate_finding_id}",
+        )
+        self.assertFalse(holder.duplicate)
+
     def test_outside_scope_duplicates_get_new_original(self):
         """Duplicates outside the deletion scope get a new original."""
         original = self._create_finding(self.test1, "Original")
