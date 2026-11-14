@@ -309,6 +309,8 @@ The full set of `widget_data` actions:
 `series_by` splits every group by a second dimension from the same `dimensions/` list (not a `time` one, and not the `group_by`). The response then carries one entry per value in `series`, each `{"key", "name", "data"}` with a number for every label (0 where the group has none of that value), plus `series_by` and `series_by_label`. At most 10 series are returned: for `count` the rest are combined into one series with the key `__other__`, and for a distinct `aggregation` more than 10 values is a `400`. A `time` `group_by` returns every bucket from the first to the last (or across the request's own date filter on the same field), with 0 for an empty one, and leaves out records with no date.
 
 `aggregation` is `count` (rows, the default) for every model. For `finding` it can also be `distinct_cwe`, the number of unique CWEs (a CWE of 0 or none is not counted), or `distinct_vulnerability_id`, the number of unique vulnerability IDs. A finding with both a CWE and a CVE counts in both. With a `group_by`, a CWE that appears at two severities counts under each, so the per-group numbers can add up to more than the total.
+
+Grouped by `cwe`, the response also carries `label_names`, one entry per label: the CWE with its name, such as `CWE-79 Cross-site Scripting`, or `CWE-<id>` for a CWE the built-in CWE list does not name. `labels` itself stays the CWE number, the value to filter on.
 | `dimensions` | GET | `?model=` | valid group-by dimensions |
 | `top_records` | POST | `model`, `filters`, `metric`, `limit?`, `sort?` | `{labels, series, ...}` |
 | `record_metrics` | GET | `?model=` | valid records-mode metrics |
