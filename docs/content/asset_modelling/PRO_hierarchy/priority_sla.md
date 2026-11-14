@@ -125,6 +125,22 @@ A Finding's EPSS / exploitability is much more emphasized in the Risk calculatio
 
 The Risk calculation itself cannot currently be adjusted directly. However, if [Threat Intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/) is enabled, the **Actively-Exploited Risk Floor** does let you control the outcome for the case that matters most: a Finding confirmed to be exploited in the wild is lifted to at least a Risk band you choose, rather than being left in a low band because its base severity is Low. It ships set to **Needs Action**, and each Prioritization Engine can raise it, lower it, or clear it to switch the floor off. See [the Actively-Exploited Risk Floor](/asset_modelling/pro_hierarchy/threat_intelligence/#the-actively-exploited-risk-floor).
 
+## Asset Risk
+
+Each Asset also carries a Risk, shown as the same meter a Finding's Risk uses. An Asset's Risk is the **highest Risk band among its open Findings**, and the meter fills to the **highest Risk score within that band**. A Finding counts while it is active and is not mitigated, a false positive, a duplicate, out of scope or risk accepted. Hover over or focus the meter to read the band and the score.
+
+* The meter is divided at the band edges of the Asset's own Prioritization Engine, so an Asset on a customized engine shows that engine's bands.
+* A Finding whose Risk was overridden counts at the band it was set to.
+* An Asset with no open, scored Finding shows no meter.
+* Risk is calculated from the Findings you can view, so two users with different permissions can see a different Risk on the same Asset.
+
+The Asset Risk appears in these places:
+
+* **The Assets list.** Risk is a column there. Sort by it to put the riskiest Assets first, or filter it by one or more Risk bands.
+* **The Asset page.** The meter appears in the header.
+* **Asset cards.** In the Assets grid view, cards show the meter while the Risk column is turned on.
+* **Dashboards.** A Top-N widget can rank Assets by **Highest Risk**: Assets are ordered by their Risk band, then by their highest score, and each row shows that score.
+
 ## Priority Insights Dashboard
 
 Users can take an executive-level view of Priority and Risk in their environment using
