@@ -9,7 +9,7 @@ weight: 5
 
 DefectDojo has two API endpoints that export data:
 
-- `GET /api/v2/export/manifest/` describes the instance: its product types and products with their counts, the reference data, and the users.
+- `GET /api/v2/export/manifest/` describes the instance. It lists the product types and products with their counts, the reference data and the users. It also holds the announcement, the login banner and the deduplication rules.
 - `GET /api/v2/export/products/{id}/` streams one product with its engagements, tests, findings, notes, files and risk acceptances.
 
 Use them to back up a product, move it to another instance, or keep a mirror.
@@ -42,8 +42,12 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history` and `audit_history` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines) and [Audit history lines](#audit-history-lines). An older instance has no `features` key. |
+| `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
+| `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
+| `deduplication` | The deduplication rules that the customer set on the instance, as `{algorithm_per_parser, hashcode_fields_per_scanner, hashcode_allows_null_cwe}`. Each one is a map from a scan type to a value. The value is an algorithm or a list of hash fields. In `hashcode_allows_null_cwe` it is `true` or `false`, and says whether the hash accepts a missing CWE. A map holds the scan types whose value differs from the shipped settings. It also holds the scan types that DefectDojo does not ship. A scan type that the customer removed is listed with the value that DefectDojo then uses. That value is the `legacy` algorithm, an empty list of hash fields, or `true`. A removed scan type is not listed when that value is the shipped one. A map is empty when the customer changed nothing. An older instance has no `deduplication` key. |
 | `scan_types` | The scan types of every test on the instance, sorted. |
-| `reference` | The lookup tables that the product export refers to by id: `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in these tables. |
+| `reference` | The lookup tables that the product export refers to by id. They are `sla_configurations`, `development_environments`, `regulations`, `test_types`, `note_types`, `product_platforms`, `product_lifecycles`, `product_origins`, `tool_types`, `tool_configurations`, `contacts`, `report_types` and `users`. Each user carries its `contact_info`. The product carries its platform, lifecycle and origin as the `value` of an entry in `product_platforms`, `product_lifecycles` and `product_origins`. `finding_templates` holds the finding templates of the instance. See [Tool configurations](#tool-configurations) for the fields of a tool configuration. A test type is `{id, name, static_tool, dynamic_tool, active, dynamically_generated}`, and `dynamically_generated` is true for a test type that an import created. A contact is `{id, name, email, team, is_admin, is_globally_read_only}`. A report type is `{id, name}`. An engagement names them in `requester` and `report_type`. |
 | `product_types` | One entry per product type, with `id`, `name` and `counts`. Its `counts` also hold `products`. |
 | `products` | One entry per product, with `id`, `name`, `prod_type` (the product type id) and `counts`. It holds `description`, `tags` (a list of names), `business_criticality`, `sla_configuration` (an SLA id) and three user ids: `product_manager`, `technical_contact`, `team_manager`. Each value is the one `/api/v2/products/` returns, and it is `null` where that endpoint returns `null`. |
 | `totals` | The counts of all products added together, plus `product_types` and `products`. |
@@ -59,15 +63,27 @@ The keys of `counts` are in [Counts](#counts). An example product entry, with Lo
 {"id": 1, "name": "Security How-to", "prod_type": 2, "counts": {"engagements": 1, "tests": 1, "findings": 4, "endpoints": 2, "notes": 2, "files": 2, "files_over_cap": 0, "risk_acceptances": 1, "finding_groups": 0}, "description": "Security How-to", "tags": [], "business_criticality": null, "sla_configuration": 1, "product_manager": null, "technical_contact": null, "team_manager": null}
 ```
 
-The manifest takes one parameter:
+The manifest takes these parameters:
 
 | Parameter | Type | Default | What it does |
 |-----------|------|---------|--------------|
-| `max_file_bytes` | integer, 0 or more | `10485760` (10 MiB) | The file cap. A file larger than this counts in `files_over_cap`. |
+| `max_file_bytes` | integer, 0 to 104857600 (100 MiB) | `10485760` (10 MiB) | The file cap. A file larger than this counts in `files_over_cap`. See [Files](#files). |
+| `file_counts` | boolean | `true` | With `false`, the server does not read the size of each file in storage, and `files_over_cap` is `null`. |
+| `import_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `test_imports` and `test_import_actions`. See [Counts](#counts). |
+| `audit_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `audit_events` and `legacy_audit_entries`. See [Counts](#counts). |
 
-An empty value, as in `?max_file_bytes=`, uses the default.
-Any other value that is not a whole number of 0 or more gets a 400.
-To count `files_over_cap`, the server reads the size of every file in storage. On an instance with many files, the manifest can take some time.
+An empty value, as in `?max_file_bytes=` or `?file_counts=`, uses the default.
+A `max_file_bytes` value that is not a whole number from 0 to 104857600 gets a 400.
+A `file_counts`, `import_history` or `audit_history` value that is not a boolean gets a 400.
+To count `files_over_cap`, the server reads the size of every file in storage, with one call for each file. On an instance with many files, or with files on remote storage, the manifest can take some time.
+Pass `file_counts=false` to skip these reads. The `files` count does not need them, so it stays. `files_over_cap` is `null` on every product, product type and in `totals`.
+
+### Tool configurations
+
+Each entry of `reference.tool_configurations` has `id`, `name`, `description`, `url`, `authentication_type`, `username`, `auth_title` and `tool_type`.
+`tool_type` is the id of an entry in `reference.tool_types`.
+An entry never has `password`, `ssh`, `api_key` or `extras`. The instance does not send these fields, even to a superuser.
+The importing side must ask for these values again.
 
 ## The product stream: `GET /api/v2/export/products/{id}/`
 
@@ -79,7 +95,8 @@ curl -H "Authorization: Token <your API key>" \
 
 The response has the content type `application/x-ndjson`: one JSON object on each line.
 The `Content-Disposition` header names the file `defectdojo-product-2-export.ndjson`.
-The endpoint takes the same `max_file_bytes` parameter as the manifest.
+The endpoint takes the same `max_file_bytes`, `import_history` and `audit_history` parameters as the manifest. It ignores `file_counts`.
+Without `import_history=true` and `audit_history=true` the stream is the same as it was before these parameters existed.
 
 The lines come in this order:
 
@@ -88,7 +105,10 @@ The lines come in this order:
 3. Every `test`, by id.
 4. Every `finding`, by test and then by id within the test. You can group a test's findings as they arrive.
 5. Every `risk_acceptance`, by id.
-6. One `end` line.
+6. With `import_history=true`, every `test_import`, by test and then by id within the test. Each one is followed by its `test_import_actions` lines.
+7. With `audit_history=true`, every `audit_event`, by model, then by object id, and then by event id. See [Audit history lines](#audit-history-lines).
+8. With `audit_history=true`, every `legacy_audit_entry`, by entry id.
+9. One `end` line.
 
 Each object has its own line and names its parent by id.
 Notes, files, endpoint entries and finding groups nest in their line.
@@ -101,22 +121,54 @@ A reader with a line limit must raise it. For example, Go's `bufio.Scanner` stop
 
 | `type` | What the line holds |
 |--------|---------------------|
-| `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest) and `product`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. |
-| `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it. `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
+| `header` | `schema` (`1`), `generated_at`, `max_file_bytes`, `source` (as in the manifest), `product`, `engagement_presets` and `api_scan_configurations`. `product` is the product as `/api/v2/products/` returns it, with its `prod_type` as a nested object and without `findings_count` and `findings_list`. See [Presets and API scan configurations](#presets-and-api-scan-configurations) for the other two. |
+| `engagement` | `data`: the engagement as `/api/v2/engagements/` returns it, with the changes in [Engagement lines](#engagement-lines). `files` holds file entries. `risk_acceptance` holds the ids of every risk acceptance linked to the engagement. |
 | `test` | `data`: the test as `/api/v2/tests/` returns it. `files` holds file entries. |
 | `finding` | `data`: the finding as `/api/v2/findings/` returns it, with the changes below. |
 | `risk_acceptance` | `data`: the risk acceptance as `/api/v2/risk_acceptance/` returns it, with the changes below. |
+| `test_import` | `data`: one import or reimport of a test. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
+| `test_import_actions` | `data`: some of the actions of one import. Only with `import_history=true`. See [Import history lines](#import-history-lines). |
+| `audit_event` | `data`: one change of the product or of one of its objects, with the values after the change. Only with `audit_history=true`. See [Audit history lines](#audit-history-lines). |
+| `legacy_audit_entry` | `data`: one entry of the older audit log, for the product or for one of its objects. Only with `audit_history=true`. See [Audit history lines](#audit-history-lines). |
 | `end` | `counts`: what the stream wrote. See [Counts](#counts). |
 
 An example `header` line, shortened:
 
 ```text
-{"type": "header", "schema": 1, "generated_at": "...", "max_file_bytes": 10485760, "source": {"version": "...", "install_id": "...", "url": "...", "locations_enabled": true}, "product": {"id": 2, "name": "Security How-to", "prod_type": {"id": 2, "name": "ebooks", ...}, ...}}
+{"type": "header", "schema": 1, "generated_at": "...", "max_file_bytes": 10485760, "source": {"version": "...", "install_id": "...", "url": "...", "locations_enabled": true}, "product": {"id": 2, "name": "Security How-to", "prod_type": {"id": 2, "name": "ebooks", ...}, ...}, "engagement_presets": [...], "api_scan_configurations": [...]}
 ```
 
 User fields, for example `lead`, `reporter` and `mitigated_by`, stay user ids.
 Look them up in the manifest's `reference.users`.
 Notes are nested on each line, with their author.
+
+### Presets and API scan configurations
+
+The `header` line carries the engagement presets and the API scan configurations of the product.
+Each key is a list, sorted by id. The list is empty when the product has none.
+The stream has no separate line type for them.
+
+Each entry of `engagement_presets` has these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The preset id. The `preset` field of an engagement line holds this id. |
+| `title` | The preset title. |
+| `notes` | The preset notes. |
+| `scope` | The scope of the preset. |
+| `created` | The time the preset was created. |
+| `test_type` | A list of test type names, not ids. |
+| `network_locations` | A list of network locations, as strings. |
+
+Each entry of `api_scan_configurations` has these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The configuration id. The `api_scan_configuration` field of a test line holds this id. |
+| `tool_configuration` | The id of an entry in the manifest's `reference.tool_configurations`. |
+| `service_key_1`, `service_key_2`, `service_key_3` | The service keys. Each one is `null` when it is not set. |
+
+An entry has no `product` key. The header already names the product.
 
 ### Finding lines
 
@@ -145,13 +197,120 @@ An example entry with Locations on:
 {"id": 2, "uri": "ftp://localhost", "location_type": "url", "tags": [], "status": {"id": 1, "location_type": "url", "location_value": "ftp://localhost", "created": null, "updated": null, "relationship": "", "relationship_data": {}, "audit_time": null, "status": "Active", "location": 2, "finding": 2, "auditor": null}}
 ```
 
+### Engagement lines
+
+An engagement line differs from `/api/v2/engagements/` in these fields:
+
+- `files` is a list of file entries, not ids.
+- `check_list_detail` is the check list of the engagement, or `null` when the engagement has none. It is not on `/api/v2/engagements/`.
+
+`check_list` stays as `/api/v2/engagements/` returns it. It is a true or false flag that says whether the engagement uses a check list. A `check_list` of `true` does not mean that a check list exists. A `check_list_detail` can be set when the flag is `false`.
+
+An engagement that has more than one check list carries the one with the lowest id.
+A check list has these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The check list id. |
+| `session_management`, `encryption_crypto`, `configuration_management`, `authentication`, `authorization_and_access_control`, `data_input_sanitization_validation`, `sensitive_data`, `other` | The text of each check, for example `Pass`, `Fail` or `N/A`. |
+| `session_issues`, `crypto_issues`, `config_issues`, `auth_issues`, `author_issues`, `data_issues`, `sensitive_issues`, `other_issues` | For each check, the ids of its findings, in id order. A finding id can name a finding in another product. |
+
+An example `check_list_detail`:
+
+```json
+{"id": 1, "session_management": "Pass", "encryption_crypto": "Fail", "configuration_management": "N/A", "authentication": "Pass", "authorization_and_access_control": "Fail", "data_input_sanitization_validation": "N/A", "sensitive_data": "Pass", "other": "Fail", "session_issues": [2, 3], "crypto_issues": [], "config_issues": [], "auth_issues": [], "author_issues": [], "data_issues": [], "sensitive_issues": [], "other_issues": [3]}
+```
+
 ### Risk acceptance lines
 
 A risk acceptance line differs from `/api/v2/risk_acceptance/` in these fields:
 
 - `engagement` is the id of one engagement that holds the risk acceptance, or `null` when no engagement holds it. A risk acceptance can be linked to more than one engagement. The engagement lines carry every link in their `risk_acceptance` ids.
 - `notes` are nested, not ids.
-- `proof` replaces `path`. It holds `filename`, `size`, `content_type` and `data_base64`, or it is `null` when there is no proof. The proof follows the same cap and the same missing-file rule as a file entry.
+- `proof` replaces `path`. It holds `filename`, `size`, `content_type` and `data_base64`, or it is `null` when there is no proof. The proof follows the same caps and the same missing-file rule as a file entry. It is the only file on its line.
+
+### Import history lines
+
+With `import_history=true`, the stream sends the import history of the product after the risk acceptances.
+An import is one run of an import or a reimport on a test.
+Each import has a `test_import` line. Its `test_import_actions` lines follow it, and the next import comes after them.
+An import with no actions has no `test_import_actions` line.
+
+A `test_import` line has `data` with these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The import id. |
+| `test` | The id of the test. |
+| `type` | `import` or `reimport`. |
+| `version`, `build_id`, `commit_hash`, `branch_tag` | The values that the import set. Each one can be `null` or empty. |
+| `import_settings` | The settings of the import, as the instance stored them. It can be `null`. |
+| `created`, `modified` | The times of the import, in ISO 8601. |
+
+A `test_import_actions` line has `data` with the keys `test_import` (the import id) and `actions`.
+`actions` is a list of `[finding, action, created, modified]`, in the order of the action id.
+`finding` is a finding id.
+`action` is one letter: `N` for a finding the import created, `C` for a finding it closed, `R` for a finding it reactivated, and `U` for a finding it left as it was.
+It can be `null`. `created` and `modified` are the times of the action.
+A line holds at most 10000 actions. An import with more actions has more than one line.
+
+An example import, with its actions on one line:
+
+```text
+{"type": "test_import", "data": {"id": 6829, "test": 90, "type": "reimport", "version": "1.2", "build_id": "b7", "commit_hash": "abc123", "branch_tag": "main", "import_settings": {"close_old_findings": true}, "created": "2025-03-04T05:06:07.123456Z", "modified": "2025-03-05T06:07:08.654321Z"}}
+{"type": "test_import_actions", "data": {"test_import": 6829, "actions": [[232, "N", "2025-03-04T05:06:07.130000Z", "2025-03-04T05:06:07.130000Z"], [233, "C", "2025-03-04T05:06:07.140000Z", "2025-03-04T05:06:07.140000Z"]]}}
+```
+
+### Audit history lines
+
+With `audit_history=true`, the stream sends the audit history of the product after the import history.
+DefectDojo keeps this history in two places. The `audit_event` lines hold the history that DefectDojo records today.
+The `legacy_audit_entry` lines hold the entries of the older audit log. DefectDojo no longer writes to that log, but the old entries stay.
+
+The history covers the product, its engagements, tests, findings, finding groups and risk acceptances.
+A risk acceptance is in the product when an engagement of the product holds it, or when it accepts a finding of the product.
+The stream does not send the history of an object that was deleted, because the object is not in the product any more.
+It does not send the history of any other model, for example users, endpoints and tags.
+
+An `audit_event` line has `data` with these keys:
+
+| Key | What it holds |
+|-----|---------------|
+| `model` | The model of the object: `dojo.product`, `dojo.engagement`, `dojo.test`, `dojo.finding`, `dojo.finding_group` or `dojo.risk_acceptance`. |
+| `pgh_id` | The id of the event. |
+| `pgh_created_at` | The time of the event, in ISO 8601. |
+| `pgh_label` | What happened: `insert`, `update`, `delete` or `initial_backfill`. |
+| `pgh_obj_id` | The id of the object. |
+| `data` | The object as it was after the event. It has every column of the object, by column name. A column that points to another object holds its id, and its name ends in `_id`, for example `test_id`. A date column is in ISO 8601, and a file column holds the file name. It never has a `pgh_` key. |
+| `context` | What DefectDojo recorded about the request or task that made the change: `id`, `created_at`, `updated_at` and `metadata`. `metadata` is an object, for example with `user`, `url` and `remote_addr`. It is `null` when the change has no context. |
+
+The events come by model, in the order of the `model` list above. Inside a model they come by object, in the order of `pgh_obj_id`.
+The events of one object come in the order of `pgh_id`.
+
+A `legacy_audit_entry` line has `data` with every field of the entry, by field name. These are the fields:
+
+| Key | What it holds |
+|-----|---------------|
+| `id` | The id of the entry. |
+| `content_type` | The model of the object, as `app_label.model`, for example `dojo.finding`. It has the same values as `model` in an `audit_event` line. |
+| `object_pk`, `object_id` | The id of the object. `object_pk` is text and `object_id` is a number. |
+| `object_repr` | The text that named the object when the entry was written. |
+| `action` | `0` for a create, `1` for an update, `2` for a delete and `3` for an access. |
+| `changes`, `changes_text` | The changes, as the older log stored them. |
+| `serialized_data` | A copy of the object. It can be `null`. |
+| `actor_id`, `actor_email` | The user who made the change. They can be `null`. |
+| `cid`, `remote_addr`, `remote_port` | The correlation id and the address of the request. They can be `null`. |
+| `timestamp` | The time of the entry, in ISO 8601. |
+| `additional_data` | Extra data of the entry. It can be `null`. |
+
+The stream sends the entries of the six models above whose `object_id` is the id of an object of the product, by entry id.
+The ids inside `changes` stay as the older log wrote them.
+
+An example `audit_event` line, with the `data` of the finding shortened:
+
+```text
+{"type": "audit_event", "data": {"model": "dojo.finding", "pgh_id": 4120, "pgh_created_at": "2025-03-04T05:06:07.123456Z", "pgh_label": "update", "pgh_obj_id": 232, "data": {"id": 232, "title": "Edited", "test_id": 90, ...}, "context": {"id": "5f0d8d6e-8f0e-4a6f-8a53-0c1b6a5b7d11", "created_at": "2025-03-04T05:06:07.100000Z", "updated_at": "2025-03-04T05:06:07.100000Z", "metadata": {"user": 1, "url": "/finding/232/edit", "remote_addr": "192.0.2.10"}}}}
+```
 
 ### Files
 
@@ -165,12 +324,18 @@ Engagement, test and finding lines carry their files in `files`. Each file entry
 | `size` | The size in bytes. |
 | `content_type` | The content type, from the file name. It is `null` when the file name has no known extension. |
 | `data_base64` | The file contents in base64. |
+| `error` | Present only when the entry has no contents for a reason on the server side: `missing` or `line_cap`. |
 
-A file of `max_file_bytes` or less carries its contents.
-A larger file keeps its `size`, and `data_base64` is `null`. The export has no download link for it.
-To carry larger files, raise `max_file_bytes`. For example, `?max_file_bytes=52428800` carries files up to 50 MiB.
-While the server writes a line, its memory use peaks at about 4.7 times the size of the files on that line.
-A file that is gone from storage has `size` and `data_base64` set to `null`, and `"error": "missing"`.
+Two caps decide which files carry their contents:
+
+- **The file cap, `max_file_bytes`.** A file of this size or less carries its contents. A larger file keeps its `size`, and `data_base64` is `null`. The entry has no `error`. The export has no download link for it. The default is 10 MiB. The highest value is 104857600 (100 MiB), and a larger value gets a 400.
+- **The line cap.** The files of one line carry at most 48 MiB (50331648 bytes) of base64 text in all. The server adds the files in id order. A file that passes the cap keeps its `size` and `content_type`. Its `data_base64` is `null`, and the entry has `"error": "line_cap"`. A smaller file after it still carries its contents if it fits. A file over `max_file_bytes` has no contents, so it does not use the line cap.
+
+Base64 text is a third larger than the file, so the line cap holds about 36 MiB of files. A larger file never carries its contents, whatever `max_file_bytes` is.
+To carry larger files, raise `max_file_bytes`. For example, `?max_file_bytes=33554432` carries files up to 32 MiB, as far as the line cap allows.
+A line needs about 170 MiB of server memory at most.
+While the server writes a line, its memory use peaks at about 4.7 times the size of its files.
+A file that is gone from storage, or whose name the server cannot read, has `size` and `data_base64` set to `null`, and `"error": "missing"`.
 
 ## Counts
 
@@ -184,9 +349,13 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `endpoints` | Endpoints in the product. With Locations on, locations in the product. | Endpoint entries on finding lines. One endpoint on three findings counts three times. |
 | `notes` | Notes on engagements, tests, findings and risk acceptances, once per owner. A note on two findings counts twice. | The same, on the lines. |
 | `files` | File entries on engagements, tests and findings. A risk acceptance proof is not counted. | The same, on the lines. |
-| `files_over_cap` | File entries over the cap. A missing file is not counted. | The same, on the lines. |
+| `files_over_cap` | File entries over `max_file_bytes`. A missing file and a file with `"error": "line_cap"` are not counted. It is `null` with `file_counts=false`. | The same, on the lines. |
 | `risk_acceptances` | Risk acceptances that an engagement of the product holds, or that accept a finding of the product. | Risk acceptance lines. |
 | `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
+| `test_imports` | Imports and reimports of the tests in the product. Only with `import_history=true`. | `test_import` lines. Only with `import_history=true`. |
+| `test_import_actions` | Actions of those imports. Only with `import_history=true`. | The actions on `test_import_actions` lines. Only with `import_history=true`. |
+| `audit_events` | Events of the objects that the audit history covers. Only with `audit_history=true`. | `audit_event` lines. Only with `audit_history=true`. |
+| `legacy_audit_entries` | Entries of the older audit log for those objects. Only with `audit_history=true`. | `legacy_audit_entry` lines. Only with `audit_history=true`. |
 
 The two sides agree on every key except `endpoints` and `finding_groups`.
 
@@ -204,11 +373,12 @@ An example `end` line:
 - Endpoint metadata. Product metadata (`product_meta` on the header) and finding metadata (`finding_meta`) do cross.
 - JIRA issue keys and JIRA project settings.
 - Product members and product groups.
-- Engagement presets, report types and CI/CD infrastructure. Their ids stay on the engagement line: `preset`, `report_type`, `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
-- API scan configurations and the tool configurations they use. The `api_scan_configuration` id stays on the test line.
-- Contacts, for example an engagement's `requester`. The id stays on the engagement line.
-- Test import history, check lists, languages, technologies and benchmarks.
-- Secrets and instance settings: SSO, JIRA and tool credentials, notifications, API keys and passwords.
+- CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
+- The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
+- Languages, technologies and benchmarks.
+- The audit history of every model that the [audit history lines](#audit-history-lines) do not name, and of any object that is no longer in the product.
+- User passwords and password hashes. A user entry has no `password` field.
+- Other secrets and instance settings: SSO and JIRA credentials, notifications and API keys. The announcement, the login banner and the deduplication rules are in the manifest.
 
 A `duplicate_finding` id can point to a finding in another product. That id dangles in the export of this product.
 An `accepted_findings` id on a risk acceptance line can point to a finding in another product in the same way.
