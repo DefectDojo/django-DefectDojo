@@ -49,7 +49,7 @@ The shipped layouts are read only, so the first time you customize a page Defect
 In edit mode:
 
 - **Move a widget** by dragging it.
-- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them. A Simple Table with chosen fields cannot be made shorter than the height those fields need on one line each, and one saved shorter than that is shown at that height, together with the widgets of the same height in its row so the row stays level. A long value or label that wraps in a narrow tile can still need more room. A Field widget is at least two rows tall, so its value shows under its title, and one saved shorter is shown at two rows in the same way. Other widgets keep the height you give them.
+- **Resize a widget** by dragging its edge. The grid has twelve columns, and widgets snap to them. A Simple Table with a flat list of chosen fields cannot be made shorter than the height those fields need on one line each (rows that hide when they are empty aside), and one saved shorter than that is shown at that height, together with the widgets of the same height in its row so the row stays level. A Simple Table with groups has no such floor: its groups fold, and its list scrolls inside the tile. A Field widget is at least two rows tall, so its value shows under its title, and one saved shorter is shown at two rows in the same way. Other widgets keep the height you give them.
 - **Configure Widget** opens the widget's own settings. What is on offer depends on the widget: which columns a table shows, which fields a panel lists, what a chart plots, and so on. You can also retitle a widget here.
 - **Remove Widget** takes it off the layout. You can add it back later.
 - **Add Widget** opens the catalog of widgets available for that page.
@@ -91,6 +91,25 @@ When you open one of the six pages, DefectDojo picks the first of these that app
 
 On the Finding, Engagement and Asset pages, a field tile or a row of the details table can be changed where it sits when the field supports it and you can edit the record: the value is highlighted on hover, and a click opens its editor. On a Finding that is Severity, Assignees, Planned Remediation Date and Description; on an Engagement, Status, Lead, Start Date, End Date and Description; on an Asset, Business Criticality, Platform, Lifecycle and Description. Moving or resizing the widget does not change this. See [Change a Field in Place](/triage_findings/findings_workflows/editing_findings/#change-a-field-in-place).
 
+## Grouping the fields of a Simple Table
+
+A Simple Table (the **Details** table on each View page) lists the record's fields one per line, with the label on the left and the value on the right. A value too long for its line ends in an ellipsis: hover over it, or move to it with the keyboard, to read all of it.
+
+The fields can sit under named headers, and each header folds its group away. To set them up:
+
+1. In edit mode, open **Configure Widget** on the table.
+2. Under **Fields**, choose the fields the table shows and drag them into order.
+3. Under **Groups**, click **Add Group** and type its name. Add as many groups as you need, and use the arrows to put them in order, or the delete button to remove one (its fields stay in the table, ungrouped).
+4. Under **Field Groups**, pick each field's group. A field in no group shows at the top of the table, with no header. Inside a group, fields keep the order they have under **Fields**.
+5. To keep custom fields showing that no group names, including ones added later, tick **Show Other Custom Fields**: they show under a **Custom Fields** header at the end.
+6. Click **Submit**.
+
+The field list offers every field the page has, whatever record you edit the layout from: the Jira and connector fields, for example, are on offer whenever Jira or connectors are turned on, even when the record open at the time has no ticket. On a record without a value for one of them, its row is left out.
+
+On the page, each group's header shows its name and counts the fields it shows for that record, so a field left out because it is empty or does not apply is not counted. Select it, or press Enter or Space on it, to fold the group to its header or to open it again. Which groups you fold is remembered for you and for that table only: it does not change the layout, the record or what anyone else sees. In a wide table the groups flow into columns; in a narrow one the label sits above its value.
+
+The default layouts already group the larger tables, for example the Finding's **Details** table into **Triage**, **Ownership and Plan**, **Where Found**, **Scores and Intel** and **Tracking**.
+
 ## Widgets with nothing to show
 
 A widget is left out of the page when it has nothing to display, for example a tab for a feature that is turned off, or a table for a record that has no rows. The remaining widgets close the gap, so you do not get holes in the page.
@@ -101,7 +120,7 @@ In edit mode those widgets are shown as labelled placeholders that say why they 
 
 ### Hiding empty tabs
 
-A tab that holds a list, such as a table, Notes or Files, shows how many items it has beside its label, and a tab with none is dimmed, so an empty tab reads as empty before you open it.
+A tab that holds a list, such as a table, Notes or Files, shows how many items it has beside its label, and a tab with none is dimmed, so an empty tab reads as empty before you open it. A Notes or Files tab shows its count on the tab only, not again at the end of the tab strip.
 
 Some tabs in a tab group always show, even when they are empty, such as a table with no rows or a Notes feed with no notes. You can choose to hide them on records where they have nothing to show, one tab at a time:
 
@@ -136,15 +155,20 @@ For the administrator's side of this, see [The Sidebar Menu](/navigation/pro__si
 
 Which widgets a page offers depends on the page, and **Add Widget** shows what is available with a short description of each. Widgets come in four shapes:
 
-- **Panels** present the record's own fields as a list of labelled values.
+- **Panels** present the record's own fields as a list of labelled values, optionally under named groups (see [Grouping the fields of a Simple Table](#grouping-the-fields-of-a-simple-table)).
 - **Tables** list related records, such as the Engagements on an Asset or the Findings on a Test. Most behave like the product's other data tables, so you can pick columns and sort them.
   The **Finding Groups** table on a Test is built to fit its tile. It keeps search, filters, sorting and your saved preferences (the filters and sort open from its **Filters** button), and shows a fixed set of columns: each group's severity, name, findings, SLA, status, tickets (its Jira issue and connector tickets) and creator. The creator gives way as the tile narrows, then the status (when it is not Active) and the tickets move under the group's name, and a narrow tile shows each group on two lines with its SLA under the name. The tile's header counts the groups past their SLA; a mitigated group never counts.
   The **Engagements** table on an Asset is built to fit its tile instead. It keeps search, filters, sorting, export and your saved preferences (the filters and sort open from its **Filters** button), and shows a fixed set of columns: the engagement with its type, status, dates, lead and active findings. Lead and then dates give way as the tile narrows, and a narrow tile shows each engagement on two lines. The tile's header counts the open engagements past their end date, or the ones in progress when none is overdue.
   The **Tests** table on an Engagement is built the same way. It keeps search, filters, sorting and your saved preferences, and shows each test with its notes count, its test type, its import status in words (an import that failed shows in red), when it was last updated with its reimports, and its active and total findings. Updated and total findings give way as the tile narrows, then the test type moves under the test's name, and a narrow tile shows each test on two lines. The tile's header counts the tests whose import failed, or the ones still processing when none failed.
   The **Findings** table on a Test is built the same way. Its fixed columns are the finding's severity, its risk (when risk scoring is turned on), the finding with its notes count, status, SLA and age. Risk and then age give way as the tile narrows, and a narrow tile shows each finding on two lines, with its severity, status and SLA under the title. The tile's header counts the open findings past their SLA.
-  The Engagements, Tests and Findings tables show as many rows as their tile holds, so resizing the tile changes how many rows a page shows without changing your saved page size. In a tab group, and in the single column a narrow screen shows, a tile has no height of its own, so these tables show your saved page size there instead. The **Full Table** button in the toolbar shows the complete table inside the tile, with every column, the column picker and the page size; select it again to go back. Your choice is remembered for you and for that widget only: it does not change the Engagements, Tests or Findings pages, the layout, or what anyone else sees.
+  The **Accepted Findings** table on a Risk Acceptance is built the same way, with Status and SLA left out at first: every accepted finding is inactive, and none has an SLA clock. To show either, select **Full Table**, turn it on in the column picker, save the view with **Save as New Preference** and make it yours with **Set Preference as My Default**, so it is the view the tile opens with after a reload; the tile shows the columns that view shows. Its saved views are its own, so they do not change the Findings page.
+  The **Locations** table on a Finding (shown when Locations is turned on) is built the same way. It keeps New Location, Add Existing, search, filters, sorting, row selection with its bulk actions, and your saved preferences, and shows each location's type, the location with up to two of its tags, this finding's status there, its relationship, and its active and total findings in the finding's Asset. The findings and tags give way as the tile narrows, and a narrow tile shows each location on two lines: the location with this finding's status beside it, then its type and relationship. The tile's header counts the locations the finding is still active on.
+  The **Assets** table on an Organization is built the same way. It keeps search, filters, sorting and your saved preferences, lists the Assets with the most active findings first, and shows each Asset with its business criticality, its active findings and when it was last scanned. A scan more than a week old reads in amber, and an Asset that has never been scanned reads **Never** in red. With [shared membership](/asset_modelling/engagements_tests/pro__organizations/#non-exclusive-membership) switched on, the table lists every member Asset, and one whose primary Organization is another one carries that Organization's name beside its own. A narrow tile shows each Asset on two lines, with its criticality and last scan under the name. The tile's header counts the Assets that have never been scanned.
+  The Engagements, Tests, Findings, Accepted Findings, Locations and Assets tables show as many rows as their tile holds, so resizing the tile changes how many rows a page shows without changing your saved page size. In a tab group, and in the single column a narrow screen shows, a tile has no height of its own, so these tables show your saved page size there instead. The **Full Table** button in the toolbar shows the complete table inside the tile, with every column, the column picker and the page size; select it again to go back. Your choice is remembered for you and for that widget only: it does not change the Engagements, Tests, Findings, Locations or Assets pages, the layout, or what anyone else sees.
 - **Feeds** present a running history in date order, such as notes on a record.
 - **Charts** plot the record's data, such as severity breakdowns and counts over time.
+
+A **tab group** holds several of these behind one tab strip. One you have not given a title is headed by what it holds: the strips a page has always had keep their heading, such as **Asset Overview** or **Additional Details**, and any other strip names the tabs it shows, such as **Notes, Acceptance History, and Accepted Findings** (past three tabs, the first two and how many more). A tab that is switched off or hidden because it is empty is not named.
 
 Some widgets appear only when the feature behind them is available to you. For example, the **Automation History** widget on the Asset and Finding pages shows what the rules engine did to that record and why, so it is offered only when Triage Engine is turned on and you hold Rule View.
 
