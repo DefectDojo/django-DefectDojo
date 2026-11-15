@@ -58,6 +58,7 @@ These are reported as warnings on the migration run — they do not stop it. Loo
 * Custom fields named `summary`, `description`, `project`, `issuetype` or `status` — these are reserved by the connector, and a field mapping using one is skipped.
 * Custom field values longer than 512 characters — skipped rather than truncated.
 * A Jira Project attached to neither an Asset nor an Engagement produces no assignment.
+* A Jira instance whose URL is longer than 255 characters is skipped, together with its projects, because a connection cannot store a longer URL and cutting it would point the connection somewhere else. The preview names the instance (by its URL when it has no name) before you run anything. Shorten the URL in the classic Jira configuration and run the migration again: the other instances migrate either way.
 
 ### What happens to the classic integration afterward
 
