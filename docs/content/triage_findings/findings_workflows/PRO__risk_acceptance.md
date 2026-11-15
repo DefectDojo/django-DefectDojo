@@ -536,10 +536,12 @@ the Risk Acceptance to an Engagement first.
 A scope reaches only where its author may accept risk. Every id it names needs the permission to add
 a Risk Acceptance (when creating one) or to edit one (when changing one) on that Engagement, Asset or
 Organization, and a `global` scope needs a superuser or a global role that holds that permission.
-Anything else is refused with `400`, naming the ids. Ids the criteria already held, and a `global`
-scope already set, can be saved again or narrowed by anyone who may edit the Risk Acceptance, so
-editing an acceptance somebody else scoped does not fail on their scope. Ids filled in from the
-Findings the acceptance covers are checked the same way.
+Anything else is refused with `400`, naming the ids. Criteria somebody else scoped can be saved again
+unchanged, or with fewer ids, by anyone who may edit the Risk Acceptance, so editing an acceptance does
+not fail on a scope its editor did not set. Changing what they match (a severity, a CWE, **Every New
+Finding in Scope**) checks the whole scope again, as if it were new. Ids filled in from the Findings
+the acceptance covers (or, when creating one, from the Findings the request names) are checked the
+same way.
 
 **From the UI:** *Edit Standing Criteria* on the Risk Acceptance menu. It asks how far the acceptance
 should reach — this engagement, this asset, this asset's type, or everywhere — rather than asking you
