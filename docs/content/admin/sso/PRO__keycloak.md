@@ -55,14 +55,14 @@ In DefectDojo, go to **Connect > Authorization > Providers**, select **Keycloak*
 
 - **KeyCloak OAuth Key** — enter your client ID (from step 1).
 - **KeyCloak OAuth Secret** — enter the client secret (from step 5). After you save it, the secret is never shown again. Leave the field blank to keep it, and enter it again only if you change the client ID, the authorization URL or the access token URL.
-- **KeyCloak Public Key** — enter the realm signing key (from step 6). DefectDojo validates the ID-token signature with this key; without it, every login fails.
+- **KeyCloak Public Key** — enter the realm signing key (from step 6). DefectDojo validates the ID-token signature with this key; without it, every login fails. Paste only the base64 text the **Public Key** button shows, without `-----BEGIN PUBLIC KEY-----` and `-----END PUBLIC KEY-----` lines.
 - **KeyCloak Authorization URL** — enter the `authorization_endpoint` (from step 7).
 - **KeyCloak Access Token URL** — enter the `token_endpoint` (from step 7).
 - **KeyCloak OAuth Login Button Text** — choose the text for the DefectDojo login button.
 
 Check **Enable KeyCloak OAuth** and submit the form. A login button with your configured text will appear on the login page.
 
-Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, checks that the authorization and token endpoints are reachable, verifies a realm public key is present, and echoes the exact **redirect URI** to register at KeyCloak.
+Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, checks that the authorization and token endpoints are reachable, checks that the realm public key can be read as an RSA public key (the same check a login makes), and echoes the exact **redirect URI** to register at KeyCloak.
 
 ## First login and default access
 
@@ -73,6 +73,8 @@ KeyCloak over OAuth does not synchronize realm groups into DefectDojo groups. If
 ## Troubleshooting
 
 **Every login fails with a signature or token error.** The **KeyCloak Public Key** is missing or is not the realm's RS256 signing key. Recopy it from **Realm Settings > Keys** and confirm the client's signature algorithms are set to `RS256` (step 2).
+
+**Realm public key cannot be parsed in Validate Config.** The value in **KeyCloak Public Key** is not a key a login can use, so every Keycloak login fails until it is fixed. The hint names the likely cause: the `-----BEGIN PUBLIC KEY-----` and `-----END PUBLIC KEY-----` lines were pasted with the key, the client secret was pasted instead of the key, the key was cut short when copied, or the realm key is not an RSA key. Recopy the **Public Key** of the RS256 key from **Realm Settings > Keys** (step 6).
 
 **Login fails immediately after the KeyCloak prompt.** A redirect-URI mismatch. Confirm the client's **Valid Redirect URIs** include the exact [Callback URL](#callback-url).
 
