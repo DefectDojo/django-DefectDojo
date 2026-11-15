@@ -402,6 +402,61 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertEqual(members, sorted(expired.accepted_findings.values_list("id", flat=True)))
         self.assert_all_inactive_risk_accepted(expired.accepted_findings.all())
 
+    # Regression: reinstating kept a member closed since the expiry, so the next expiry reopened it.
+    def _close_a_member_reinstate_and_expire_again(self, closed_fields, *, reinstate_through_view=False):
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        closed, *still_open = list(expired.accepted_findings.order_by("id"))
+        self.assertTrue(still_open, "the control needs a member that stays open")
+        for field, value in closed_fields.items():
+            setattr(closed, field, value)
+        closed.active = False
+        closed.save(dedupe_option=False)
+
+        if reinstate_through_view:
+            self.client.post(reverse("reinstate_risk_acceptance", args=(1, expired.id)), {"id": expired.id})
+        else:
+            ra_helper.reinstate(expired, expired.expiration_date)
+
+        expired.refresh_from_db()
+        closed.refresh_from_db()
+        members = set(expired.accepted_findings.values_list("id", flat=True))
+        self.assertNotIn(closed.id, members, f"the closed member stays out of the reinstated acceptance, members={members}")
+        self.assertEqual({f.id for f in still_open}, members, "the open members are reinstated")
+        for finding in Finding.objects.filter(id__in=members):
+            self.assertFalse(finding.active, msg=f"finding {finding.id} active={finding.active}")
+            self.assertTrue(finding.risk_accepted, msg=f"finding {finding.id} risk_accepted={finding.risk_accepted}")
+        self.assertFalse(closed.active, msg=f"reinstating leaves the closed finding closed, active={closed.active}")
+        self.assertFalse(closed.risk_accepted, msg=f"risk_accepted={closed.risk_accepted}")
+
+        ra_helper.expire_now(expired)
+
+        closed.refresh_from_db()
+        self.assertFalse(closed.active, msg=f"the next expiry must not reopen it, active={closed.active}")
+        for field, value in closed_fields.items():
+            self.assertEqual(getattr(closed, field), value, msg=f"{field}={getattr(closed, field)} after the next expiry")
+        return closed
+
+    def test_reinstate_leaves_out_a_member_mitigated_since_the_expiry(self):
+        closed = self._close_a_member_reinstate_and_expire_again(
+            {"is_mitigated": True, "mitigated": timezone.now()},
+        )
+        self.assertIsNotNone(closed.mitigated, "the next expiry must not clear the mitigation")
+
+    def test_reinstate_leaves_out_a_member_marked_false_positive_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"false_p": True})
+
+    def test_reinstate_leaves_out_a_member_marked_out_of_scope_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"out_of_scope": True})
+
+    def test_reinstate_leaves_out_a_member_marked_duplicate_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"duplicate": True})
+
+    def test_reinstate_action_leaves_out_a_member_closed_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again(
+            {"is_mitigated": True, "mitigated": timezone.now()}, reinstate_through_view=True,
+        )
+
     def test_reinstate_locks_the_members_before_deciding_which_to_leave_out(self):
         """
         Reinstate reads its members under a lock, in its own transaction.
