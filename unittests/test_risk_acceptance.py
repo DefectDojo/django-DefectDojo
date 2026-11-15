@@ -449,6 +449,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def test_reinstate_leaves_out_a_member_marked_out_of_scope_since_the_expiry(self):
         self._close_a_member_reinstate_and_expire_again({"out_of_scope": True})
 
+    def test_reinstate_leaves_out_a_member_marked_duplicate_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"duplicate": True})
+
     def test_reinstate_action_leaves_out_a_member_closed_since_the_expiry(self):
         self._close_a_member_reinstate_and_expire_again(
             {"is_mitigated": True, "mitigated": timezone.now()}, reinstate_through_view=True,

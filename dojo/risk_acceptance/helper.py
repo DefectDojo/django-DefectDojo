@@ -183,11 +183,15 @@ def findings_closed_since_expiry(risk_acceptance):
     The members of an expired risk acceptance that have been closed since it expired.
 
     An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
-    members. Closing one of them afterwards (mitigated, false positive or out of scope) leaves it listed, and
-    reinstating does not accept it again because it is not active. Kept as a member, the next expiry would set it
-    active again and its save would clear the mitigation.
+    members. Closing one of them afterwards (mitigated, false positive, out of scope, or marked as an inactive
+    duplicate) leaves it listed, and reinstating does not accept it again because it is not active. Kept as a
+    member, the next expiry would set it active again: its save would clear a mitigation, and a duplicate would
+    read active while still a duplicate. Without reactivation the expiry reopens nothing and the members keep
+    their flag, so none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
     """
-    closed = Q(is_mitigated=True) | Q(false_p=True) | Q(out_of_scope=True)
+    if not risk_acceptance.reactivate_expired:
+        return risk_acceptance.accepted_findings.none()
+    closed = Q(is_mitigated=True) | Q(false_p=True) | Q(out_of_scope=True) | Q(duplicate=True, active=False)
     return risk_acceptance.accepted_findings.filter(closed, risk_accepted=False)
 
 
