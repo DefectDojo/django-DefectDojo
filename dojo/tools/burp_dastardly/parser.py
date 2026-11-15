@@ -20,8 +20,24 @@ class BurpDastardlyParser:
             "Import Burp Dastardly XML files."
         )
 
+    # Report roots produced by Dastardly (pytest-style JUnit, un-namespaced).
+    # The documented format wraps results in <testsuites>; a bare <testsuite>
+    # root is also accepted for compatibility with historical exports.
+    # Namespaced documents are rejected: get_items searches un-namespaced
+    # children only, so accepting them would silently report zero findings.
+    ALLOWED_ROOTS = {"testsuites", "testsuite"}
+
     def get_findings(self, xml_output, test):
         tree = ElementTree.parse(xml_output, ElementTree.XMLParser())
+        root = tree.getroot()
+        if root.tag not in self.ALLOWED_ROOTS:
+            msg = (
+                f"Unexpected root element '{root.tag}' in Burp Dastardly "
+                f"report; expected 'testsuites'. Refusing to treat an "
+                f"out-of-contract document as an empty scan."
+            )
+            logger.warning(msg)
+            raise ValueError(msg)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
