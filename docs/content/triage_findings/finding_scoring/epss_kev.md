@@ -54,6 +54,7 @@ Because the second stage is driven by what changed, a quiet day is cheap: if nei
 A few consequences worth understanding:
 
 - **Findings are usually enriched as they are imported.** Since **v3.2.0**, EPSS/KEV enrichment is applied at import time, so a newly imported CVE Finding does not normally have to wait for the next daily cycle to show values. How immediate that is depends on whether DefectDojo has already looked the CVE up — see [What "enriched at import time" covers](#what-enriched-at-import-time-covers) below. The daily run still runs on top of this, keeping those values current as EPSS scores move and the KEV catalog changes. If a Finding you expect to be enriched is not, you can [run a sync on demand](#running-a-sync-on-demand).
+- **Findings created or edited by hand are enriched on save.** A Finding added through the UI or with `POST /api/v2/findings/`, and a Finding whose vulnerability IDs you change (in the UI or with `PATCH`/`PUT /api/v2/findings/{id}/`), are enriched as soon as the save completes, following the same rules as an import (see the table below): a CVE DefectDojo already knows shows its values on the next read, and a new CVE is looked up in the background. The Finding's priority and risk are recalculated with the new values. An edit that leaves the vulnerability IDs unchanged does not trigger enrichment.
 - **Values are kept current, not frozen.** A CVE that gets added to the KEV catalog will flip an existing Finding to **Known Exploited** on the next run — no re-import required.
 - **KEV removals are respected.** If a Finding's CVEs are no longer KEV-listed, the run clears the stale **Known Exploited** / **Ransomware Used** / **KEV Date** values rather than leaving them set.
 
@@ -68,6 +69,8 @@ Because enrichment data is stored once per vulnerability, an import can only app
 | **New to DefectDojo**, and the import brings in a very large number of new CVEs — a first import, or a bulk backfill | **On the next daily run**, or on the next [on-demand sync](#running-a-sync-on-demand). Looking up thousands of brand-new CVEs while the import is still running would duplicate the daily run's work, so it is deliberately left to that run. |
 
 In every case the values arrive without a re-import, and the daily run remains the backstop — nothing is skipped permanently.
+
+The same three cases apply to a Finding created by hand or through the API, and to a Finding whose vulnerability IDs are edited, with that one Finding's CVEs in place of the import's.
 
 > **Connector syncs are enriched the same way**, with one exception: a **very large connector sync is imported in chunks**, and chunked syncs do not enrich at import time. Those Findings get their EPSS/KEV values from the next daily run, or from an on-demand sync.
 
