@@ -179,6 +179,12 @@ A user with this role can open the Risk Acceptances list, a Risk Acceptance's de
 
 A Risk Acceptance that has expired is labelled **Expired** next to its expiration date in the Risk Acceptances table, so you can tell at a glance which ones are no longer suppressing their Findings.
 
+To see what is about to expire, choose **Expiring Soon** in the picker at the top of the Risk Acceptances table. It lists the Risk Acceptances that have not expired and whose expiration date falls within the **Default Risk Acceptance Expiration Days** setting on the System Settings page (the days ahead that the expiration warning is sent), plus any whose date has passed and that the expiration job has not expired yet. **All Risk Acceptances** shows the whole list again. The same list is available through the API as `GET /api/v2/risk_acceptance/?expiring_soon=true`, and `approved_by=<user id>` narrows it to the Risk Acceptances a user approved (the latest approval or reinstatement). Each person's [My Work](/metrics_reports/dashboards/pro__my_work/) page lists the ones they own, are assigned to or approved.
+
+### Expiration warnings and notices
+
+The expiration job runs every three hours. Each run sends one notification per Asset for the Risk Acceptances that expired in that run, and one for those it warns about: the usual message when it is one Risk Acceptance, or a single message that lists all of them when there are several. A Jira issue gets at most one comment per run for each of the two events, even when several Risk Acceptances hold its Finding (or the Findings of its Finding Group); that comment names every one of them.
+
 The gear menu on a Risk Acceptance — in the table or on its detail page — offers whichever of these applies:
 
 - **Expire Risk Acceptance**, on one that is still live.  It expires immediately rather than waiting for its expiration date, and its Findings are reactivated according to its **Reactivate Expired Findings** and **Restart SLA Expired** settings.

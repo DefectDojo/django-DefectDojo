@@ -1,9 +1,11 @@
 {% load i18n %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% if not risk_acceptances %}
 {% url 'view_risk_acceptance' risk_acceptance.engagement.id risk_acceptance.id as risk_acceptance_url %}
 {% url 'view_product' risk_acceptance.engagement.product.id as product_url %}
 {% url 'view_engagement' risk_acceptance.engagement.id as engagement_url %}
+{% endif %}
 <html>
     <body>
         {% autoescape on %}
@@ -13,7 +15,21 @@
             <p>
                 {{ description }}
                 <br/><br/>
-            
+            {% if risk_acceptances %}
+                <p>{{ title }}:</p>
+                <ul>
+                    {% for each in risk_acceptances %}
+                        {% url 'view_risk_acceptance' each.engagement.id each.id as each_url %}
+                        <li>
+                            {% if expired %}
+                                {% blocktranslate with risk_url=each_url|full_url risk_name=each risk_findings=each.accepted_findings.all|length risk_date=each.expiration_date_handled|date %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} findings has expired {{ risk_date }}{% endblocktranslate %}
+                            {% else %}
+                                {% blocktranslate with risk_url=each_url|full_url risk_name=each risk_findings=each.accepted_findings.all|length risk_date=each.expiration_date|date %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} findings will expire {{ risk_date }}{% endblocktranslate %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
                 {% if risk_acceptance.is_expired %}
                     {% blocktranslate with risk_url=risk_acceptance_url|full_url risk_findings=risk_acceptance.accepted_findings.all|length risk_date=risk_acceptance.expiration_date_handled|date %}<a href="{{risk_url}}">Risk acceptance {{ risk_acceptance }}</a> with {{ risk_findings }} has expired {{ risk_date }}{% endblocktranslate %}
                 {% else %}
@@ -38,6 +54,7 @@
                         {% trans "None" %}<br/>
                     {% endfor %}
                 </p>
+            {% endif %}
                 <br/><br/>
                 {% trans "Kind regards" %},
                 <br/><br/>

@@ -1,4 +1,5 @@
 import datetime
+import json
 from operator import itemgetter
 from unittest.mock import Mock, patch
 
@@ -10,7 +11,7 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira.models import JIRA_Issue
 from dojo.models import Engagement, Finding, Risk_Acceptance, System_Settings
 from dojo.notifications import ticket_comments
-from dojo.notifications.helper import sla_compute_and_notify
+from dojo.notifications.helper import NotificationManagerHelpers, sla_compute_and_notify
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 from unittests.test_notifications_sla import SlaNotifyTestBase
 
@@ -332,10 +333,14 @@ class TestRiskAcceptanceTicketComments(_IsolatedRegistry, DojoTestCase):
         ra_helper.expiration_handler()
 
         text = ra_helper.expiration_warning_message_creator(risk_acceptance, 10)
-        self.assertEqual(
-            [(event, sorted(ids), texts) for event, ids, texts, _ in self._about(recorder, risk_acceptance)],
-            [(ticket_comments.RISK_ACCEPTANCE_EXPIRATION_WARNING, member_ids, dict.fromkeys(member_ids, text))],
-        )
+        # One batch for the whole run (see TestExpirationRunIsBounded): it can cover several acceptances, so it
+        # names none, and each finding carries the text of the acceptances that hold it.
+        warnings = [call for call in recorder.calls if call[0] == ticket_comments.RISK_ACCEPTANCE_EXPIRATION_WARNING]
+        self.assertEqual(len(warnings), 1, msg=f"one warning batch per run, got {warnings}")
+        _, ids, texts, batch_acceptance = warnings[0]
+        self.assertIsNone(batch_acceptance)
+        self.assertLessEqual(set(member_ids), set(ids))
+        self.assertEqual({finding_id: texts[finding_id] for finding_id in member_ids}, dict.fromkeys(member_ids, text))
 
     def test_a_single_finding_comment_has_no_risk_acceptance(self):
         recorder = self.record()
@@ -396,3 +401,166 @@ class TestRiskAcceptanceTicketComments(_IsolatedRegistry, DojoTestCase):
         ra_helper.post_jira_comment(self.findings[0], creator)
 
         creator.assert_not_called()
+
+
+@versioned_fixtures
+class TestExpirationRunIsBounded(_IsolatedRegistry, DojoTestCase):
+
+    """
+    One scheduled run that expires (or warns about) many risk acceptances sends a bounded number of messages.
+
+    Without a bound, a run sent one notification per risk acceptance and one Jira comment per accepted finding per
+    risk acceptance, so a finding in several acceptances, or the findings of one finding group, got the same issue
+    commented once per acceptance. The run now sends one notification per product, at most one Jira comment per Jira
+    issue, and one connector comment batch per event.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    ACCEPTANCES = 5
+
+    def setUp(self):
+        self.isolate_registry()
+        self.engagement = Engagement.objects.get(id=1)
+        self.findings = list(
+            Finding.objects.filter(test__engagement=self.engagement, risk_acceptance__isnull=True).order_by("id")[:3],
+        )
+        self.assertEqual(len(self.findings), 3, msg="setup: the fixture has too few free findings on engagement 1")
+        # two Jira issues: the first two findings have one each, the third has none
+        self.issues = [
+            JIRA_Issue.objects.create(finding=finding, jira_id=f"{finding.id}", jira_key=f"RA-{finding.id}")
+            for finding in self.findings[:2]
+        ]
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.risk_acceptance_notify_before_expiration = 10
+        system_settings.save()
+        # the fixture's own acceptances are handled already, so the run sees only the ones each test makes
+        Risk_Acceptance.objects.update(expiration_date_handled=timezone.now(), expiration_date_warned=timezone.now())
+
+    def _acceptances(self, expires_in_days):
+        acceptances = []
+        for number in range(self.ACCEPTANCES):
+            risk_acceptance = Risk_Acceptance.objects.create(
+                name=f"Bulk acceptance {number}",
+                owner=self.get_test_admin(),
+                expiration_date=timezone.now() + datetime.timedelta(days=30),
+            )
+            # every acceptance holds every finding, so each issue is due one comment per acceptance unbounded
+            risk_acceptance.accepted_findings.set(self.findings)
+            self.engagement.risk_acceptance.add(risk_acceptance)
+            acceptances.append(risk_acceptance)
+        Finding.objects.filter(id__in=[f.id for f in self.findings]).update(active=False, risk_accepted=True)
+        Risk_Acceptance.objects.filter(id__in=[ra.id for ra in acceptances]).update(
+            expiration_date=timezone.now() + datetime.timedelta(days=expires_in_days),
+        )
+        return acceptances
+
+    def _run(self):
+        recorder = self.record()
+        with (
+            patch("dojo.risk_acceptance.helper.jira_services") as jira,
+            patch("dojo.risk_acceptance.helper.create_notification") as notify,
+        ):
+            jira.get_project.return_value = Mock(risk_acceptance_expiration_notification=True)
+            jira.get_instance.return_value = Mock(name="jira instance")
+            jira.is_push_all_issues.return_value = False
+            jira.is_keep_in_sync.return_value = False
+            jira.escape_text.side_effect = str
+            ra_helper.expiration_handler()
+        return jira, notify, recorder
+
+    def _assert_bounded(self, jira, notify, recorder, event, acceptances):
+        self.assertEqual(notify.call_count, 1, msg=f"one product, so one notification; got {notify.call_count}")
+        digest = notify.call_args.kwargs
+        self.assertEqual(digest["product"], self.engagement.product)
+        self.assertEqual(sorted(ra.id for ra in digest["risk_acceptances"]), sorted(ra.id for ra in acceptances))
+        self.assertNotIn("risk_acceptance", digest)
+
+        commented = sorted(call.args[1].id for call in jira.add_simple_comment.call_args_list)
+        self.assertEqual(commented, sorted(issue.id for issue in self.issues), msg="one comment per Jira issue")
+        # the one comment names every acceptance, so nothing the unbounded run said is lost
+        for call in jira.add_simple_comment.call_args_list:
+            for risk_acceptance in acceptances:
+                self.assertIn(risk_acceptance.name, call.args[2])
+
+        self.assertEqual([call[0] for call in recorder.calls], [event], msg="one connector comment batch per event")
+        _, finding_ids, texts, _ = recorder.calls[0]
+        self.assertEqual(sorted(finding_ids), [f.id for f in self.findings])
+        for text in texts.values():
+            for risk_acceptance in acceptances:
+                self.assertIn(risk_acceptance.name, text)
+
+    def test_expiring_many_acceptances_sends_one_notification_and_one_comment_per_issue(self):
+        acceptances = self._acceptances(expires_in_days=-1)
+
+        jira, notify, recorder = self._run()
+
+        for risk_acceptance in acceptances:
+            risk_acceptance.refresh_from_db()
+            self.assertIsNotNone(risk_acceptance.expiration_date_handled, msg="every acceptance still expires")
+        self._assert_bounded(jira, notify, recorder, ticket_comments.RISK_ACCEPTANCE_EXPIRED, acceptances)
+
+    def test_warning_about_many_acceptances_sends_one_notification_and_one_comment_per_issue(self):
+        acceptances = self._acceptances(expires_in_days=5)
+
+        jira, notify, recorder = self._run()
+
+        for risk_acceptance in acceptances:
+            risk_acceptance.refresh_from_db()
+            self.assertIsNotNone(risk_acceptance.expiration_date_warned, msg="every acceptance is still marked warned")
+        self._assert_bounded(jira, notify, recorder, ticket_comments.RISK_ACCEPTANCE_EXPIRATION_WARNING, acceptances)
+
+    def test_a_product_with_one_acceptance_keeps_the_single_notification(self):
+        risk_acceptance = self._acceptances(expires_in_days=-1)[0]
+        Risk_Acceptance.objects.exclude(id=risk_acceptance.id).filter(name__startswith="Bulk acceptance").delete()
+
+        _, notify, _ = self._run()
+
+        self.assertEqual(notify.call_count, 1)
+        self.assertEqual(notify.call_args.kwargs["risk_acceptance"], risk_acceptance)
+        self.assertNotIn("risk_acceptances", notify.call_args.kwargs)
+
+    def _render_digest(self, channel, *, expired):
+        acceptances = self._acceptances(expires_in_days=-1 if expired else 5)
+        if expired:
+            Risk_Acceptance.objects.filter(id__in=[ra.id for ra in acceptances]).update(expiration_date_handled=timezone.now())
+        run = ra_helper.ExpirationRun(ra_helper.expiration_message_creator if expired else ra_helper.expiration_warning_message_creator, 10)
+        for risk_acceptance in Risk_Acceptance.objects.filter(id__in=[ra.id for ra in acceptances]).order_by("id"):
+            run.notify({"product": self.engagement.product, "risk_acceptance": risk_acceptance})
+        notification = run._digest(next(iter(run._notifications.values())))
+        rendered = NotificationManagerHelpers()._create_notification_message(
+            event=notification.pop("event"), user=self.get_test_admin(), notification_type=channel, kwargs=notification,
+        )
+        return rendered, acceptances
+
+    def test_the_digest_renders_every_acceptance_on_each_channel(self):
+        for channel in ("mail", "slack", "msteams"):
+            for expired in (True, False):
+                with self.subTest(channel=channel, expired=expired):
+                    rendered, acceptances = self._render_digest(channel, expired=expired)
+                    for risk_acceptance in acceptances:
+                        self.assertIn(risk_acceptance.name, rendered)
+                    if channel == "msteams":
+                        card = json.loads(rendered)["attachments"][0]["content"]
+                        facts = next(block for block in card["body"] if block["type"] == "FactSet")["facts"]
+                        self.assertEqual(len(facts), self.ACCEPTANCES)
+                    Risk_Acceptance.objects.filter(name__startswith="Bulk acceptance").delete()
+
+    def test_a_blank_warning_setting_still_expires_and_warns_nobody(self):
+        """Blank switches the warning off; the run used to raise on comparing None with 0, after the expiries."""
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.risk_acceptance_notify_before_expiration = None
+        system_settings.save()
+        expired = self._acceptances(expires_in_days=-1)[0]
+        warned = Risk_Acceptance.objects.create(
+            name="Bulk acceptance due a warning", owner=self.get_test_admin(),
+            expiration_date=timezone.now() + datetime.timedelta(days=2),
+        )
+
+        _, notify, _ = self._run()
+
+        expired.refresh_from_db()
+        warned.refresh_from_db()
+        self.assertIsNotNone(expired.expiration_date_handled)
+        self.assertIsNone(warned.expiration_date_warned)
+        self.assertEqual(notify.call_count, 1, msg="the expiry digest only")
