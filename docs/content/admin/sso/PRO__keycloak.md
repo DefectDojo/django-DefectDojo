@@ -62,7 +62,7 @@ In DefectDojo, go to **Connect > Authorization > Providers**, select **Keycloak*
 
 Check **Enable KeyCloak OAuth** and submit the form. A login button with your configured text will appear on the login page.
 
-Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, checks that the authorization and token endpoints are reachable, checks that the realm public key can be read as an RSA public key (the same check a login makes), and echoes the exact **redirect URI** to register at KeyCloak.
+Use **Validate Config** at any point to check the settings without saving them. It confirms the settings are complete, checks that the authorization and token endpoints are reachable, checks that the realm public key can be read as an RSA public key (the same check a login makes), and echoes the exact **redirect URI** to register at KeyCloak. A passing key check confirms the key's format only: the realm's RSA-OAEP encryption key, or another realm's key, also passes it and still fails every login, so make sure you copied the key whose algorithm is RS256.
 
 ## First login and default access
 
@@ -74,7 +74,7 @@ KeyCloak over OAuth does not synchronize realm groups into DefectDojo groups. If
 
 **Every login fails with a signature or token error.** The **KeyCloak Public Key** is missing or is not the realm's RS256 signing key. Recopy it from **Realm Settings > Keys** and confirm the client's signature algorithms are set to `RS256` (step 2).
 
-**Realm public key cannot be parsed in Validate Config.** The value in **KeyCloak Public Key** is not a key a login can use, so every Keycloak login fails until it is fixed. The hint names the likely cause: the `-----BEGIN PUBLIC KEY-----` and `-----END PUBLIC KEY-----` lines were pasted with the key, the client secret was pasted instead of the key, the key was cut short when copied, or the realm key is not an RSA key. Recopy the **Public Key** of the RS256 key from **Realm Settings > Keys** (step 6).
+**Realm public key cannot be parsed in Validate Config.** The value in **KeyCloak Public Key** is not a key a login can use, so every Keycloak login fails until it is fixed. The hint names the likely cause: the `-----BEGIN PUBLIC KEY-----` and `-----END PUBLIC KEY-----` lines were pasted with the key, the client secret was pasted instead of the key, the key's **Certificate** was pasted instead of its **Public Key**, the key was cut short when copied, or the realm key is not an RSA key. Recopy the **Public Key** of the RS256 key from **Realm Settings > Keys** (step 6).
 
 **Login fails immediately after the KeyCloak prompt.** A redirect-URI mismatch. Confirm the client's **Valid Redirect URIs** include the exact [Callback URL](#callback-url).
 
