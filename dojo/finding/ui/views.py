@@ -34,6 +34,8 @@ from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
     do_false_positive_history_batch,
+    finding_mitigated,
+    finding_not_human_set_status,
     manual_duplicate_hides_open_finding,
     match_finding_to_existing_findings,
 )
@@ -3150,6 +3152,27 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
             request, reverse("view_finding", args=(duplicate.id,)),
         )
 
+    # The duplicate's own duplicates move onto the root with it (below). The root stays out of that set even
+    # if older data points it at the duplicate. Under a mitigated root, the same rule applies to each of
+    # them: one that is still active would be hidden, so the mark is refused. Only queried in that case.
+    members = Finding.objects.filter(duplicate_finding=duplicate).exclude(pk=root.pk)
+    if finding_mitigated(root) and finding_not_human_set_status(root):
+        open_member_id = members.filter(active=True).values_list("id", flat=True).first()
+        if open_member_id is not None:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                _(
+                    "Finding %(original)s is mitigated, and finding %(member)s, a duplicate of finding "
+                    "%(duplicate)s, is still open. Marking finding %(duplicate)s as its duplicate would hide it. "
+                    "Reopen finding %(original)s first, or close finding %(member)s.",
+                ) % {"original": root.id, "member": open_member_id, "duplicate": duplicate.id},
+                extra_tags="alert-danger",
+            )
+            return redirect_to_return_url_or_else(
+                request, reverse("view_finding", args=(duplicate.id,)),
+            )
+
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False
@@ -3162,13 +3185,13 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.last_reviewed_by = request.user
     with transaction.atomic():
         duplicate.save(dedupe_option=False)
-        # The duplicate's own duplicates move onto the root with it, as set_duplicate does: they stay
-        # inactive duplicates, the cluster stays one level deep, and their test types join the root's
-        # found_by. The root stays out of this set even if older data points it here. Read the types first.
-        members = Finding.objects.filter(duplicate_finding=duplicate).exclude(pk=root.pk)
+        # The members move as set_duplicate moves them: they stay inactive duplicates, the cluster stays one
+        # level deep, and their test types join the root's found_by. Read the types before the move.
         found_by = {duplicate.test.test_type, *Test_Type.objects.filter(test__finding__in=members).distinct()}
         members.update(duplicate_finding=root, duplicate=True, active=False, verified=False)
         root.found_by.add(*found_by)
+        # Read the root's duplicate fields back first, so its save cannot write a stale copy over the move.
+        root.refresh_from_db(fields=["duplicate", "duplicate_finding", "active", "verified"])
         root.save(dedupe_option=False)
 
     return redirect_to_return_url_or_else(

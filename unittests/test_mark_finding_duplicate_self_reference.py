@@ -89,3 +89,29 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
     def test_marking_from_a_member_page_lands_under_the_root(self):
         self._mark(OTHER, MEMBERS[0])
         self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})
+
+    def test_refuses_moving_an_open_member_under_a_mitigated_original(self):
+        # The marked root is itself mitigated, so it may go under a mitigated original, but one of its
+        # duplicates was left active by older data: moving it would hide a finding that is still open.
+        now = timezone.now()
+        Finding.objects.filter(pk__in=(ROOT, OTHER)).update(active=False, is_mitigated=True, mitigated=now)
+        Finding.objects.filter(pk=MEMBERS[0]).update(active=True)
+        self._assert_refused(ROOT, OTHER, f"finding {MEMBERS[0]}, a duplicate of finding {ROOT}, is still open")
+
+    def test_moves_inactive_members_under_a_mitigated_original(self):
+        # Members that are already inactive are not hidden by the move, so the mark goes ahead.
+        now = timezone.now()
+        Finding.objects.filter(pk__in=(ROOT, OTHER)).update(active=False, is_mitigated=True, mitigated=now)
+        self._mark(ROOT, OTHER)
+        self.assertEqual(
+            set(Finding.objects.filter(pk__in=(ROOT, *MEMBERS)).values_list("duplicate_finding_id", flat=True)),
+            {OTHER},
+        )
+
+    def test_an_original_pointing_at_the_marked_finding_is_not_moved(self):
+        # Older data can leave a non-duplicate original whose duplicate_finding still names the marked
+        # finding. It is the root of the mark, so it must not be swept up with the marked finding's members.
+        Finding.objects.filter(pk=OTHER).update(duplicate_finding=ROOT, active=True)
+        self._mark(ROOT, OTHER)
+        self.assertEqual(self._state(OTHER), {OTHER: (False, ROOT, True)})
+        self.assertEqual(self._state(ROOT), {ROOT: (True, OTHER, False)})
