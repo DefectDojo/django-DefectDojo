@@ -278,7 +278,6 @@ class WhiteHatSentinelParser:
                 )
 
                 if locations_enabled():
-                    # TODO: Delete this after the move to Locations
                     # Get Locations from Attack Vectors
                     locations = self._convert_attack_vectors_to_locations(
                         whitehat_vuln["attack_vectors"],
