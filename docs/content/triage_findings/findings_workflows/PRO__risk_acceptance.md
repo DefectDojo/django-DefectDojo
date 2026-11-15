@@ -527,8 +527,11 @@ accepting. `type` is `engagement`, `product`, `product_type` or `global`.
 
 You can leave `ids` empty and DefectDojo fills them in from the Findings the Risk Acceptance already
 covers — so a client can say "this asset" without hunting for an id. That cannot widen anything: the
-ids come from where the acceptance is already accepting. If there is nothing to derive from, the
-criteria are refused rather than quietly broadened.
+ids come from where the acceptance is already accepting. A Risk Acceptance with no Findings yet takes
+them from the Engagements it is attached to instead, so an acceptance created to cover an Asset for a
+window can be scoped before its first Finding arrives. If there is nothing to derive from either, the
+criteria are refused rather than quietly broadened, and the message says to add a Finding or attach
+the Risk Acceptance to an Engagement first.
 
 A scope reaches only where its author may accept risk. Every id it names needs the permission to add
 a Risk Acceptance (when creating one) or to edit one (when changing one) on that Engagement, Asset or
