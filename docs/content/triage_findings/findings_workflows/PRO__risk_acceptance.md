@@ -180,7 +180,7 @@ A Risk Acceptance that has expired is labelled **Expired** next to its expiratio
 The gear menu on a Risk Acceptance — in the table or on its detail page — offers whichever of these applies:
 
 - **Expire Risk Acceptance**, on one that is still live.  It expires immediately rather than waiting for its expiration date, and its Findings are reactivated according to its **Reactivate Expired Findings** and **Restart SLA Expired** settings.
-- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.
+- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.  A Finding closed since the expiry (Mitigated, False Positive or Out of Scope), or Risk Accepted again somewhere else, is removed from it instead.
 
 Both require the same permission as editing the Risk Acceptance, and both ask for confirmation first.  To reinstate for a specific length of time instead of the default window, edit the expiration date rather than using the Reinstate action — see below.
 
@@ -203,6 +203,7 @@ If the Risk Acceptance has **already expired** — meaning the periodic job has 
 - The Risk Acceptance is reinstated and is no longer in the expired state.
 - Every Finding that was linked to the Risk Acceptance and is currently Active is re-accepted (set back to Risk Accepted / Inactive).
 - A Finding that has been Risk Accepted again since the expiry, through another Risk Acceptance or a Simple Risk Acceptance, stays where it is: it is removed from the reinstated Risk Acceptance, so it is never held by two at once.
+- A Finding that has been closed since the expiry (Mitigated, False Positive or Out of Scope) stays closed: it is removed from the reinstated Risk Acceptance, so a later expiry cannot reopen it.
 - Endpoint statuses on those Findings are updated to reflect the re-acceptance.
 - A comment is posted to any linked Jira issues recording the reinstate.
 

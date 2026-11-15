@@ -178,6 +178,19 @@ def findings_accepted_elsewhere(risk_acceptance):
     return risk_acceptance.accepted_findings.filter(risk_accepted=True).filter(held)
 
 
+def findings_closed_since_expiry(risk_acceptance):
+    """
+    The members of an expired risk acceptance that have been closed since it expired.
+
+    An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
+    members. Closing one of them afterwards (mitigated, false positive or out of scope) leaves it listed, and
+    reinstating does not accept it again because it is not active. Kept as a member, the next expiry would set it
+    active again and its save would clear the mitigation.
+    """
+    closed = Q(is_mitigated=True) | Q(false_p=True) | Q(out_of_scope=True)
+    return risk_acceptance.accepted_findings.filter(closed, risk_accepted=False)
+
+
 def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     # One transaction, so the members' lock below holds until the reinstate is written.
     with transaction.atomic():
@@ -201,6 +214,15 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
                 len(accepted_elsewhere),
             )
             risk_acceptance.accepted_findings.remove(*accepted_elsewhere)
+        # A member closed since the expiry stays closed and leaves too: the next expiry would otherwise reopen it.
+        if closed_since := list(findings_closed_since_expiry(risk_acceptance)):
+            logger.info(
+                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired",
+                risk_acceptance.id,
+                risk_acceptance,
+                len(closed_since),
+            )
+            risk_acceptance.accepted_findings.remove(*closed_since)
         logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
         # The "Reinstate" button has no date to offer and passes the expiration date
