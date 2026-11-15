@@ -1,8 +1,15 @@
 import json
+from typing import NoReturn
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
+
+
+def _invalid_report(message: str) -> NoReturn:
+    # The importer converts ValueError into a validation error; TypeError would become a 500.
+    raise ValueError(message)
+
 
 OSV_ECOSYSTEM_TO_PURL = {
     "npm": "npm", "pypi": "pypi", "go": "golang", "maven": "maven",
@@ -72,18 +79,48 @@ class OSVScannerParser:
     def get_findings(self, file, test):
         try:
             data = json.load(file)
-        except json.decoder.JSONDecodeError:
-            return []
+        except json.decoder.JSONDecodeError as exc:
+            msg = f"Invalid JSON in OSV scan report: {exc}"
+            raise ValueError(msg) from exc
+        if not isinstance(data, dict):
+            msg = "Invalid OSV scan report: expected a JSON object"
+            _invalid_report(msg)
+        results = data.get("results")
+        if not isinstance(results, list):
+            msg = "Invalid OSV scan report: expected a 'results' array"
+            _invalid_report(msg)
         findings = []
-        for result in data.get("results", []):
+        for result in results:
+            if not isinstance(result, dict):
+                msg = "Invalid OSV scan report: each result must be a JSON object"
+                _invalid_report(msg)
+            packages = result.get("packages")
+            if not isinstance(packages, list):
+                msg = "Invalid OSV scan report: each result must contain a 'packages' array"
+                _invalid_report(msg)
             # Extract source locations if present
             source_path = result.get("source", {}).get("path", "")
             source_type = result.get("source", {}).get("type", "")
-            for package in result.get("packages", []):
-                package_name = package.get("package", {}).get("name")
-                package_version = package.get("package", {}).get("version")
-                package_ecosystem = package.get("package", {}).get("ecosystem", "")
-                for vulnerability in package.get("vulnerabilities", []):
+            for package in packages:
+                if not isinstance(package, dict):
+                    msg = "Invalid OSV scan report: each package must be a JSON object"
+                    _invalid_report(msg)
+                package_info = package.get("package")
+                if (
+                    not isinstance(package_info, dict)
+                    or not isinstance(package_info.get("name"), str)
+                    or not package_info["name"]
+                ):
+                    msg = "Invalid OSV scan report: each package must contain a package 'name'"
+                    _invalid_report(msg)
+                package_name = package_info.get("name")
+                package_version = package_info.get("version")
+                package_ecosystem = package_info.get("ecosystem", "")
+                vulnerabilities = package.get("vulnerabilities", [])
+                if not isinstance(vulnerabilities, list):
+                    msg = "Invalid OSV scan report: 'vulnerabilities' must be an array"
+                    _invalid_report(msg)
+                for vulnerability in vulnerabilities:
                     vulnerabilityid = vulnerability.get("id", "")
                     vulnerabilitysummary = vulnerability.get("summary", "")
                     vulnerabilitydetails = vulnerability.get("details", "")

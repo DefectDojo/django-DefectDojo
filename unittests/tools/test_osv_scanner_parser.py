@@ -8,10 +8,61 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 class TestOSVScannerParser(DojoTestCase):
     def test_no_findings(self):
+        # A valid OSV report with an empty results array is a successful empty scan.
         with (get_unit_tests_scans_path("osv_scanner") / "no_findings.json").open(encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(0, len(findings))
+            self.assertEqual([], findings)
+
+    def test_invalid_report_structure_is_rejected(self):
+        cases = {
+            "missing results": {},
+            "unexpected top-level object": {"unexpected": True},
+            "top-level array": [],
+            "null results": {"results": None},
+            "results object": {"results": {}},
+            "empty result": {"results": [{}]},
+            "result without packages": {"results": [{"source": {"path": "x"}}]},
+            "null packages": {"results": [{"packages": None}]},
+            "empty package": {"results": [{"packages": [{}]}]},
+            "null package": {"results": [{"packages": [{"package": None}]}]},
+            "package without name": {"results": [{"packages": [{"package": {}}]}]},
+            "null vulnerabilities": {"results": [{"packages": [{"package": {"name": "pkg"}, "vulnerabilities": None}]}]},
+        }
+        for name, payload in cases.items():
+            with (
+                self.subTest(name=name),
+                self.assertRaisesMessage(ValueError, "Invalid OSV scan report"),
+            ):
+                OSVScannerParser().get_findings(io.StringIO(json.dumps(payload)), Test())
+
+    def test_empty_report_containers_are_accepted(self):
+        cases = {
+            "empty results": {"results": []},
+            "empty packages": {"results": [{"packages": []}]},
+            "package without vulnerabilities": {"results": [{"packages": [{"package": {"name": "pkg"}}]}]},
+            "package with empty vulnerabilities": {"results": [{"packages": [{"package": {"name": "pkg", "version": "1.0.0", "ecosystem": "npm"}, "vulnerabilities": []}]}]},
+        }
+        for name, payload in cases.items():
+            with self.subTest(name=name):
+                findings = OSVScannerParser().get_findings(io.StringIO(json.dumps(payload)), Test())
+                self.assertEqual([], findings)
+
+    def test_malformed_json_is_rejected(self):
+        fixtures = (
+            "truncated.json",
+            "malformed.json",
+            "zero_byte.json",
+            "trailing_garbage.json",
+        )
+        for fixture in fixtures:
+            with self.subTest(fixture=fixture):
+                with (
+                    (get_unit_tests_scans_path("osv_scanner") / fixture).open(encoding="utf-8") as testfile,
+                    self.assertRaisesMessage(ValueError, "Invalid JSON in OSV scan report") as raised,
+                ):
+                    OSVScannerParser().get_findings(testfile, Test())
+                self.assertIsInstance(raised.exception.__cause__, json.JSONDecodeError)
 
     def test_some_findings(self):
         with (get_unit_tests_scans_path("osv_scanner") / "some_findings.json").open(encoding="utf-8") as testfile:
