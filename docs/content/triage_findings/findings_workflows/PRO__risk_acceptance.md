@@ -126,6 +126,8 @@ Once a Full Risk Acceptance object has been created, you can edit the details of
 
 Findings can also be added and removed from the object using the same menu. Alternatively, remove a single Finding with **Remove Risk Acceptance** in that Finding's gear menu. Selecting Findings in a table, clicking **Bulk Edit**, and choosing **Unaccept Risk** from the **Simple Risk Acceptance Status** dropdown also removes them from their Full Risk Acceptance, but only for Findings whose Asset has Simple Risk Acceptance enabled. Findings on other Assets are skipped, and a warning says how many.
 
+Closing a risk-accepted Finding for another reason also takes it out of its Risk Acceptance, on any Asset: **Close Finding**, a **Bulk Edit** **Status** of False Positive, Out of Scope or Mitigated, a Triage Engine rule that sets one of those, and an API update (`PATCH /api/v2/findings/{id}/`) that sets `false_p`, `out_of_scope` or `is_mitigated` to `true`. The Finding stays closed, its Endpoint statuses stay mitigated, and a note on it records the removal. A later expiration of that Risk Acceptance does not reopen it.
+
 Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.”
 
 ### Simple Risk Acceptances
