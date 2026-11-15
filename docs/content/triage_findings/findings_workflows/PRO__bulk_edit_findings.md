@@ -26,7 +26,7 @@ A control is disabled when the action can't apply to your current selection — 
 The **Bulk Edit** button opens one form containing all of the field-level bulk actions. Set only the fields you want to change and leave the rest untouched, then click **Submit** to apply. The available actions are:
 
 * **Severity** — set the severity (Critical, High, Medium, Low, or Info).
-* **Status** — apply one of Active, Verified, False Positive, Out of Scope, Mitigated, or Under Defect Review. False Positive, Out of Scope and Mitigated take a risk-accepted Finding out of its Risk Acceptance first, as closing it does (see [Risk Acceptances](/triage_findings/findings_workflows/pro__risk_acceptance/)).
+* **Status** — apply one of Active, Verified, False Positive, Out of Scope, Mitigated, or Under Defect Review. False Positive, Out of Scope and Mitigated take a risk-accepted Finding out of its Risk Acceptance first, as closing it does (see [Risk Acceptances](/triage_findings/findings_workflows/pro__risk_acceptance/)). Picking one of them clears **Accept Risk** in **Simple Risk Acceptance**, and a Bulk Edit that sends both is refused.
 * **Date** — set the discovery date.
 * **Planned Remediation Date** and **Planned Remediation Version**.
 * **Simple Risk Acceptance** — Accept Risk or Unaccept Risk. Applied only to Findings whose Asset has Simple Risk Acceptance enabled; others are skipped.
