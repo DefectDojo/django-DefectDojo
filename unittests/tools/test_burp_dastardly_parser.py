@@ -1,4 +1,5 @@
 
+import io
 from unittest.mock import Mock
 
 from defusedxml import ElementTree
@@ -25,20 +26,39 @@ class TestBurpParser(DojoTestCase):
             self.assertEqual(0, len(findings))
 
     def test_burp_dastardly_unexpected_root_rejected(self):
-        """A well-formed document with an unsupported root must not be
-        treated as an empty scan (which would mitigate findings on reimport)."""
+        """
+        A well-formed document with an unsupported root must not be treated as
+        an empty scan (which would mitigate findings on reimport).
+        """
         with (get_unit_tests_scans_path("burp_dastardly") / "unexpected_root.xml").open(encoding="utf-8") as test_file:
             parser = BurpDastardlyParser()
             with self.assertRaises(ValueError):
                 parser.get_findings(test_file, Test())
 
     def test_burp_dastardly_namespaced_root_rejected(self):
-        """get_items searches un-namespaced children only, so a namespaced
-        document would silently produce zero findings; reject it instead."""
+        """
+        get_items searches un-namespaced children only, so a namespaced
+        document would silently produce zero findings; reject it instead.
+        """
         with (get_unit_tests_scans_path("burp_dastardly") / "namespaced_root.xml").open(encoding="utf-8") as test_file:
             parser = BurpDastardlyParser()
             with self.assertRaises(ValueError):
                 parser.get_findings(test_file, Test())
+
+    def test_burp_dastardly_standalone_testsuite_root_rejected(self):
+        """
+        A bare <testsuite> root is outside the contract: get_items reads the
+        testsuite children of the root, so a standalone root would be reported
+        as zero findings even when it carries failing test cases.
+        """
+        report = io.BytesIO(
+            b'<testsuite failures="1" name="https://example.test/">'
+            b'<testcase name="case"><failure message="Reflected XSS" type="High">detail</failure></testcase>'
+            b"</testsuite>",
+        )
+        parser = BurpDastardlyParser()
+        with self.assertRaises(ValueError):
+            parser.get_findings(report, Test())
 
     def test_burp_dastardly_malformed_report_keeps_parse_error(self):
         """Malformed XML must keep raising ParseError (not ValueError)."""

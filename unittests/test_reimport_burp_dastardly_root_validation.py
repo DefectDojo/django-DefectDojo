@@ -12,6 +12,7 @@ import io
 from datetime import datetime
 
 from crum import impersonate
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from dojo.importers.default_reimporter import DefaultReImporter
@@ -70,7 +71,6 @@ class BurpDastardlyUnexpectedRootReimportTest(DojoTestCase):
                 test=self.test,
                 description=f"Pre-existing finding {i}",
                 severity="High",
-                numerical_severity=4,
                 active=True,
                 false_p=False,
                 duplicate=False,
@@ -96,7 +96,7 @@ class BurpDastardlyUnexpectedRootReimportTest(DojoTestCase):
         active_before = list(self.test.finding_set.filter(active=True).order_by("id"))
         self.assertEqual(3, len(active_before))
 
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(ValidationError) as ctx:
             self._reimport(UNEXPECTED_ROOT, close_old_findings=True)
 
         self.assertIn("Unexpected root element", str(ctx.exception))
