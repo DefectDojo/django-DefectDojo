@@ -11,6 +11,7 @@ nothing), or mark a cluster's root under another original while its members kept
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.test import override_settings
+from django.utils import timezone
 
 from dojo.models import Finding, Test, Test_Type
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
@@ -69,10 +70,8 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         # One member sits in its own test type and was left active by older data.
         engagement = Finding.objects.get(pk=ROOT).test.engagement
         other_type = Test_Type.objects.create(name="Mark Duplicate Other Type")
-        other_test = Test.objects.create(
-            engagement=engagement, test_type=other_type,
-            target_start=engagement.target_start, target_end=engagement.target_end,
-        )
+        now = timezone.now()
+        other_test = Test.objects.create(engagement=engagement, test_type=other_type, target_start=now, target_end=now)
         Finding.objects.filter(pk=MEMBERS[0]).update(test=other_test, active=True, verified=True)
 
         self._mark(ROOT, OTHER)
