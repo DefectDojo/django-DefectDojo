@@ -13,6 +13,8 @@ Todos estos controles se encuentran en la barra de herramientas de la tabla, enc
 
 Seleccione el botón **Columns** en la barra de herramientas para abrir el selector de columnas, y luego marque o desmarque una columna para mostrarla u ocultarla. Use el cuadro de búsqueda en la parte superior del selector para encontrar una columna por su encabezado. Algunas columnas estructurales (la casilla de selección y el menú de acciones de fila) siempre están presentes y no aparecen en el selector.
 
+En Findings, el encabezado Threat Intel contiene dos pares de columnas de explotación. **Known Exploited (CISA KEV)** y **Ransomware Used (CISA KEV)** muestran si el catálogo CISA KEV incluye la vulnerabilidad. **Vendor Reported Exploited** y **Vendor Reported Ransomware** muestran lo que reportó un escáner, un conector o una persona, lo cual puede diferir del catálogo de CISA. **Add Filter** ofrece los mismos cuatro campos bajo Threat Intel. Consulte [Hallazgos](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
 ## Reordenar columnas
 
 Arrastre el encabezado de una columna hacia la izquierda o la derecha para moverla. El nuevo orden se aplica de inmediato para la sesión actual.

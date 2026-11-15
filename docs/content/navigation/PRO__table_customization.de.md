@@ -13,6 +13,8 @@ Alle diese Steuerelemente befinden sich in der Tabellen-Symbolleiste oberhalb de
 
 Klicken Sie auf die Schaltfläche **Columns** in der Symbolleiste, um die Spaltenauswahl zu öffnen, und aktivieren oder deaktivieren Sie dann eine Spalte, um sie ein- oder auszublenden. Verwenden Sie das Suchfeld oben in der Auswahl, um eine Spalte anhand ihrer Überschrift zu finden. Einige strukturelle Spalten (das Auswahlkästchen und das Zeilenaktionsmenü) sind immer vorhanden und werden nicht in der Auswahl aufgeführt.
 
+In der Befundliste enthält die Überschrift Threat Intel zwei Paare von Ausnutzungsspalten. **Known Exploited (CISA KEV)** und **Ransomware Used (CISA KEV)** zeigen, ob der CISA-KEV-Katalog die Schwachstelle aufführt. **Vendor Reported Exploited** und **Vendor Reported Ransomware** zeigen, was ein Scanner, ein Connector oder eine Person gemeldet hat; das kann vom CISA-Katalog abweichen. **Add Filter** bietet dieselben vier Felder unter Threat Intel an. Siehe [Befunde](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
 ## Spalten neu anordnen
 
 Ziehen Sie eine Spaltenüberschrift nach links oder rechts, um diese Spalte zu verschieben. Die neue Reihenfolge wird sofort für die aktuelle Sitzung übernommen.

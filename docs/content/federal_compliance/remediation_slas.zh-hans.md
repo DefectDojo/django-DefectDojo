@@ -18,6 +18,8 @@ audience: pro
 
 截止日期是强制执行的,列入 CISA KEV 目录的发现项,其排期永远不会晚于其 CISA 截止日期。
 
+在 KEV 查询处于关闭状态的自托管实例上,CISA 截止日期来自该实例本来就会加载的威胁情报数据包,因此无需开启该查询,这一上限也会生效。参见[从数据包获取 KEV 和 EPSS](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)。
+
 ## FedRAMP VDR
 
 基础时限相同,但会根据可利用性和暴露程度进一步收紧:
@@ -29,7 +31,7 @@ audience: pro
 | 仅可通过互联网访问 | 30 天 |
 | 两者均非 | 上述 FedRAMP Rev 5 的时限 |
 
-**可可信利用**指该发现项已列入 KEV,或其 EPSS 分数达到或超过您设定的阈值。**可通过互联网访问**由发现项标签标示——默认标签为 `internet-reachable`。
+**可可信利用**指该发现项已列入 KEV,或其 EPSS 分数达到或超过您设定的阈值。列入 KEV 指列入 CISA KEV 目录。来自扫描器、连接器或某个人的 **Vendor Reported Exploited** 报告在此不会使发现项成为可可信利用,也不会改变其截止日期。只有漏洞响应策略才能通过依据此类报告设置是否可可信利用的规则将其纳入考量;参见[漏洞响应策略](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies)。**可通过互联网访问**由发现项标签标示(默认标签为 `internet-reachable`)。
 
 所有阈值、标签名称和天数均可在 SLA 配置中编辑。
 

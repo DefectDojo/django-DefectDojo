@@ -350,6 +350,8 @@ L'enrichissement EPSS et KEV est une exception qui mérite d'être mise en place
 
 Le miroir doit servir les mêmes fichiers, dans le même format, que les sources publiques. Les recherches récupèrent un fichier précis à l'URL indiquée, plutôt que de découvrir ce qui s'y trouve : un miroir qui reconditionne ou réorganise les données ne fonctionnera donc pas. Actualisez vos copies selon le calendrier qui vous convient, car le déploiement ne lit que ce que votre miroir sert.
 
+Il est possible que vous n'ayez besoin d'aucun miroir. Lorsque le renseignement sur les menaces est activé et que les recherches EPSS et KEV sont désactivées, ce qui est le cas par défaut, chaque lot de renseignement sur les menaces que vous chargez renseigne aussi les valeurs CISA KEV et EPSS de vos constatations. Chargez le lot comme décrit dans [Charger le renseignement sur les menaces hors ligne](/get_started/pro/onprem/airgapped/#loading-threat-intelligence-offline), puis consultez la carte **Intelligence Sources** sous **Settings > System Settings** pour vérifier quel lot est chargé et quelle est la fraîcheur de chaque source. Une recherche que vous activez prend le relais du lot pour cette source. Voir [KEV et EPSS depuis le lot](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## Questions ou assistance
 
 Pour toute aide concernant une installation ou une mise à niveau air-gapped, contactez votre représentant commercial ou [support@defectdojo.com](mailto:support@defectdojo.com).

@@ -20,6 +20,10 @@ configurazione SLA, oppure copiane una e personalizzala.
 Le scadenze sono vincolanti e un riscontro presente nel catalogo CISA KEV non viene mai pianificato oltre la sua
 data di scadenza CISA.
 
+Su un'istanza self-hosted con il lookup KEV disattivato, la data di scadenza CISA proviene dal bundle di
+threat intelligence che l'istanza già carica, quindi questo limite si applica senza attivare il lookup.
+Vedi [KEV ed EPSS dal bundle](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## FedRAMP VDR
 
 Le stesse finestre di base, ulteriormente ridotte in base a sfruttabilità ed esposizione:
@@ -32,8 +36,13 @@ Le stesse finestre di base, ulteriormente ridotte in base a sfruttabilità ed es
 | Nessuna delle due | Le finestre FedRAMP Rev 5 indicate sopra |
 
 **Sfruttabile in modo credibile** significa che il riscontro è presente nell'elenco KEV, oppure che il suo punteggio
-EPSS è pari o superiore alla soglia impostata. **Raggiungibile da internet** è segnalato da un tag del riscontro —
-`internet-reachable` per impostazione predefinita.
+EPSS è pari o superiore alla soglia impostata. Presente nell'elenco KEV significa presente nel catalogo CISA KEV.
+Una segnalazione **Vendor Reported Exploited** proveniente da uno scanner, da un connettore o da una persona non rende
+qui un riscontro sfruttabile in modo credibile, e non ne modifica la scadenza. Solo una policy di risposta alle
+vulnerabilità può tenere conto di una segnalazione di questo tipo, tramite una regola che imposta la sfruttabilità
+credibile a partire da essa; vedi
+[Policy di risposta alle vulnerabilità](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies). **Raggiungibile da internet** è segnalato da un tag del riscontro
+(`internet-reachable` per impostazione predefinita).
 
 Tutte le soglie, i nomi dei tag e i conteggi dei giorni sono modificabili nella configurazione SLA.
 

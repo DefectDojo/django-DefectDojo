@@ -50,6 +50,18 @@ Beyond the card, the intelligence is a working surface across the app:
   exploit evidence, such as landing in CISA KEV or gaining a Metasploit module. Upgrades
   only — evidence quietly aging out never notifies.
 
+## Findings reported by a GitHub advisory ID
+
+Some scanners report a vulnerability only by its GitHub advisory ID (GHSA), not by the CVE it
+stands for. When DefectDojo knows that the advisory and a CVE describe the same vulnerability,
+either from the intelligence bundle or from a link recorded on your instance, the finding gets
+that CVE's exploit maturity, evidence and threat score, the same as a finding that names the CVE.
+The finding keeps its own vulnerability ID.
+
+When an advisory is newly linked to a CVE, or a link is rejected, DefectDojo re-scores the
+findings it affects. Findings that were already on your instance before this behavior was added
+are re-scored once, in the background, after the first bundle load that follows the upgrade.
+
 ## Source ratings
 
 Each piece of evidence behind a CVE is rated, so you can judge how far to trust it. The
@@ -157,6 +169,20 @@ no-CVE findings drop in *relative* rank even though their score is unchanged.
 * **Air-gapped support.** The daily bundle (including EPSS data) can be transferred and
   imported offline, so isolated instances get the same enrichment.
 
+## Intelligence Sources card
+
+Superusers can check which intelligence the instance is using on the read-only
+**Intelligence Sources** card under **Settings > System Settings**. The card shows:
+
+* the version of the loaded bundle
+* the bundle's age, with a warning when it is 14 days old or more
+* when the bundle expires
+* each source in the bundle, with its license and how fresh its data is
+* the last failed load, if there was one, and why it failed
+* the attributions for the sources in the bundle
+
+A bundle loaded from a file on an air-gapped instance shows on the same card.
+
 ## Self-hosted deployments
 
 DefectDojo Cloud instances need no configuration. Self-hosted instances have three options:
@@ -175,6 +201,44 @@ DefectDojo Cloud instances need no configuration. Self-hosted instances have thr
 If the instance cannot reach the feed, the feature fails closed: the run is recorded as
 failed and your existing scores and evidence are left exactly as they were. Nothing degrades
 except intelligence freshness.
+
+### KEV and EPSS from the bundle
+
+The bundle a self-hosted instance already downloads also carries CISA KEV and EPSS data. After
+each bundle load, DefectDojo uses it to fill in **Known Exploited (CISA KEV)**, **Ransomware Used
+(CISA KEV)**, the KEV date, the CISA KEV due date and EPSS scores on your vulnerabilities and
+findings, so you get them without turning on separate KEV and EPSS lookups. KEV and EPSS are
+handled separately, and each one is filled in from the bundle only when all of these hold:
+
+* Threat intelligence is on.
+* The lookup for that source, under Finding Enrichment in the Tuner, is off. A lookup that is on
+  always wins, so with one lookup on, the bundle supplies only the other source.
+* The bundle carries fresh data for that source.
+
+The **Sync KEV/EPSS Data** button in the Vulnerability Explorer, the daily enrichment job and the
+enrichment of new CVEs at import time use the same bundle data under the same conditions.
+
+Known Exploited and Ransomware Used mean that the CVE is listed in the CISA KEV catalog. When a
+scanner, a connector or a person reports a vulnerability as exploited, that report is kept as a
+separate value, **Vendor Reported Exploited**, so it is not lost when CISA does not list the CVE.
+See [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
+#### The first load after upgrading
+
+On a self-hosted instance with the KEV and EPSS lookups off, these values were empty until now,
+or held whatever a scanner or a person had set. The upgrade itself, before any bundle load, moves
+every such flag that no CISA KEV listing backs to **Vendor Reported Exploited** or **Vendor
+Reported Ransomware**, so counts under CISA KEV can already drop at that point (see
+[Findings](/asset_modelling/engagements_tests/pro__findings/#metadata)). The first bundle load
+after upgrading then fills the CISA values in for every CVE the instance knows, so expect:
+
+* **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** and the KEV date to change on
+  many findings, both set (CISA lists the CVE) and cleared (it does not), and priority to move
+  with them. A finding that a scanner or a person reported as exploited keeps its priority,
+  because priority also reads **Vendor Reported Exploited**.
+* If an SLA configuration has **Cap SLA by CISA KEV Due Date** turned on, KEV-listed findings to
+  have their SLA deadline pulled in to CISA's due date. Most CISA due dates are already in the
+  past, so many of those findings will show as breaching their SLA right after the first load.
 
 ## Enabling it
 

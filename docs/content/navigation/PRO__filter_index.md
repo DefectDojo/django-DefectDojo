@@ -170,6 +170,8 @@ These fields have no direct impact on the functionality of DefectDojo, but provi
 * Vulnerability ID (usually a CVE)
 * EPSS Score
 * EPSS Percentile
+* Known Exploited (CISA KEV) and Ransomware Used (CISA KEV): whether the CISA Known Exploited Vulnerabilities catalog lists the vulnerability, and records it as used in ransomware
+* Vendor Reported Exploited and Vendor Reported Ransomware: whether a scanner, a connector or a person reported the vulnerability as exploited in the wild, or as used in ransomware. These are kept apart from the CISA KEV values; see [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata)
 * Service
 * Planned Remediation Date
 * Planned Remediation Version

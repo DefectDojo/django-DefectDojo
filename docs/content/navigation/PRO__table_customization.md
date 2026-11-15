@@ -54,6 +54,8 @@ Select the **Columns** button in the toolbar to open the column picker, then che
 
 On the Findings, Assets, Organizations, Engagements and Tests lists, the picker lists the columns under the same headings as **Add Filter**, in the same order: on Findings, for example, Finding, Threat Intel, Asset, Engagement and Test, Dates, People, Integrations and Custom Fields. A search shows only the headings that still hold a matching column. The headings only arrange the list: checking every column still shows them in the table's own column order.
 
+On Findings, the Threat Intel heading holds two pairs of exploitation columns. **Known Exploited (CISA KEV)** and **Ransomware Used (CISA KEV)** show whether the CISA KEV catalog lists the vulnerability. **Vendor Reported Exploited** and **Vendor Reported Ransomware** show what a scanner, a connector or a person reported, which can differ from the CISA catalog. **Add Filter** offers the same four fields under Threat Intel. See [Findings](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
 The checkbox beside the search box selects or clears every listed column in one click. It works the same way as the select-all checkbox in a column filter, and it is checked when every listed column is shown. To build a narrow view, clear the checkbox so no columns are shown, then check only the columns you want. If only some columns are shown, the first click selects them all and the second clears them. When the search box holds text, the checkbox applies only to the columns that match the search: search for "date" and check it to add every date column. Columns hidden by the search keep their current state.
 
 ## Sorting columns

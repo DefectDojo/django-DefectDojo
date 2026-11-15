@@ -109,6 +109,7 @@ Cada elemento lleva un conjunto fijo de campos de Hallazgo. Esta lista es un con
 |-------|--------|
 | Identidad | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Severidad y puntuación | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Evidencia de explotación | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Texto | `description`, `mitigation`, `impact` |
 | Estado | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Fechas | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -120,6 +121,8 @@ Además de `finding`, cada elemento lleva `test` (`id`, `title`, `scan_type`), `
 Las fechas son cadenas ISO-8601. Eso es deliberado: significa que `gt` y `lt` las ordenan correctamente como texto, de modo que `2026-07-28` es correctamente mayor que `2026-01-01`.
 
 `priority`, `risk` y `risk_score` provienen de la priorización de Pro. Un Hallazgo que aún no se ha puntuado no lleva ningún valor para ellos.
+
+`vendor_exploited` y `vendor_ransomware_used` contienen lo que reportó un escáner, un conector o una persona, al margen del catálogo de CISA, y `vendor_exploited_source` indica quién lo reportó (el nombre del Test Type del escáner, el nombre del conector, `manual` o `pre-upgrade`). Una regla que deba actuar sobre cualquiera de los dos orígenes lee ambos campos. En el generador de condiciones, los campos de KEV aparecen como **KEV: Known Exploited**, **KEV: Ransomware Used**, **KEV: Date Added** y **KEV: Remediation Due**, y los campos del proveedor como **Vendor Reported Exploited**, **Vendor Reported Ransomware** y **Vendor Reported Source**. Consulte [Hallazgos](/asset_modelling/engagements_tests/pro__findings/#metadata).
 
 ### Condiciones
 

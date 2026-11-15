@@ -34,6 +34,19 @@ Au-delà de la carte, ce renseignement est exploité dans toute l'application :
   preuve d'exploit, par exemple en entrant dans CISA KEV ou en obtenant un module Metasploit. Seules les montées
   en niveau notifient — une preuve qui s'estompe discrètement ne déclenche jamais de notification.
 
+## Constatations signalées par un identifiant d'avis GitHub {#findings-reported-by-a-github-advisory-id}
+
+Certains scanners signalent une vulnérabilité uniquement par son identifiant d'avis GitHub (GHSA), et non
+par le CVE qu'il représente. Lorsque DefectDojo sait que l'avis et un CVE décrivent la même vulnérabilité,
+grâce au lot de renseignement ou à un lien enregistré sur votre instance, la constatation reçoit la maturité
+d'exploit, les preuves et le score de menace de ce CVE, comme une constatation qui nomme le CVE. La
+constatation conserve son propre identifiant de vulnérabilité.
+
+Lorsqu'un avis est nouvellement lié à un CVE, ou qu'un lien est rejeté, DefectDojo recalcule le score des
+constatations concernées. Les constatations qui se trouvaient déjà sur votre instance avant l'ajout de ce
+comportement voient leur score recalculé une seule fois, en arrière-plan, après le premier chargement du lot
+qui suit la mise à niveau.
+
 ## Comment cela modifie le calcul du score
 
 Le moteur de Priorité combinait déjà la sévérité, le contexte métier et un « score externe »
@@ -104,6 +117,20 @@ les constatations sans CVE reculent en rang *relatif*, même si leur score reste
 * **Prise en charge air-gap.** Le lot quotidien (y compris les données EPSS) peut être transféré et
   importé hors ligne, afin que les instances isolées bénéficient du même enrichissement.
 
+## Carte Intelligence Sources {#intelligence-sources-card}
+
+Les superutilisateurs peuvent vérifier quel renseignement l'instance utilise sur la carte en lecture seule
+**Intelligence Sources**, sous **Settings > System Settings**. La carte affiche :
+
+* la version du lot chargé
+* l'ancienneté du lot, avec un avertissement lorsqu'il a 14 jours ou plus
+* la date d'expiration du lot
+* chaque source du lot, avec sa licence et la fraîcheur de ses données
+* le dernier chargement en échec, s'il y en a eu un, et la raison de cet échec
+* les mentions d'attribution des sources du lot
+
+Un lot chargé depuis un fichier sur une instance air-gap s'affiche sur la même carte.
+
 ## Déploiements auto-hébergés
 
 Les instances DefectDojo Cloud ne nécessitent aucune configuration. Les instances auto-hébergées disposent de trois options :
@@ -122,6 +149,47 @@ Les instances DefectDojo Cloud ne nécessitent aucune configuration. Les instanc
 Si l'instance ne peut pas atteindre le flux, la fonctionnalité échoue de façon sécurisée (fail closed) : l'exécution est enregistrée comme
 échouée et vos scores et preuves existants restent exactement tels quels. Rien ne se dégrade
 sinon la fraîcheur du renseignement.
+
+### KEV et EPSS depuis le lot {#kev-and-epss-from-the-bundle}
+
+Le lot qu'une instance auto-hébergée télécharge déjà contient aussi des données CISA KEV et EPSS. Après
+chaque chargement du lot, DefectDojo s'en sert pour renseigner **Known Exploited (CISA KEV)**, **Ransomware
+Used (CISA KEV)**, la date KEV, la date d'échéance CISA KEV et les scores EPSS sur vos vulnérabilités et vos
+constatations : vous les obtenez ainsi sans activer de recherches KEV et EPSS distinctes. KEV et EPSS sont
+traités séparément, et chacun n'est renseigné depuis le lot que si toutes ces conditions sont réunies :
+
+* Le renseignement sur les menaces est activé.
+* La recherche pour cette source, sous Finding Enrichment dans le Tuner, est désactivée. Une recherche
+  activée l'emporte toujours : si une seule recherche est activée, le lot ne fournit que l'autre source.
+* Le lot contient des données fraîches pour cette source.
+
+Le bouton **Sync KEV/EPSS Data** de l'Explorateur de vulnérabilités, la tâche d'enrichissement quotidienne
+et l'enrichissement des nouveaux CVE à l'importation utilisent les mêmes données du lot, dans les mêmes
+conditions.
+
+Known Exploited et Ransomware Used signifient que le CVE figure dans le catalogue CISA KEV. Lorsqu'un
+scanner, un connecteur ou une personne signale une vulnérabilité comme exploitée, ce signalement est conservé
+dans une valeur distincte, **Vendor Reported Exploited**, afin de ne pas être perdu lorsque CISA ne répertorie
+pas le CVE. Voir [Constatations](/asset_modelling/engagements_tests/pro__findings/#metadata).
+
+#### Le premier chargement après une mise à niveau {#the-first-load-after-upgrading}
+
+Sur une instance auto-hébergée dont les recherches KEV et EPSS sont désactivées, ces valeurs étaient jusqu'ici
+vides, ou contenaient ce qu'un scanner ou une personne avait défini. La mise à niveau elle-même, avant tout
+chargement du lot, transfère chacun de ces indicateurs qu'aucune inscription au catalogue CISA KEV ne justifie
+vers **Vendor Reported Exploited** ou **Vendor Reported Ransomware** : les décomptes CISA KEV peuvent donc
+diminuer dès ce moment (voir [Constatations](/asset_modelling/engagements_tests/pro__findings/#metadata)).
+Le premier chargement du lot après la mise à niveau renseigne ensuite les valeurs CISA pour chaque CVE connu de
+l'instance. Attendez-vous donc aux changements suivants :
+
+* **Known Exploited (CISA KEV)**, **Ransomware Used (CISA KEV)** et la date KEV changent sur de nombreuses
+  constatations, dans les deux sens : activés (CISA répertorie le CVE) ou effacés (CISA ne le répertorie
+  pas), et la Priorité évolue avec eux. Une constatation qu'un scanner ou une personne a signalée comme
+  exploitée conserve sa Priorité, car la Priorité tient aussi compte de **Vendor Reported Exploited**.
+* Si une configuration de SLA a l'option **Cap SLA by CISA KEV Due Date** activée, l'échéance SLA des
+  constatations répertoriées dans KEV est avancée à la date d'échéance CISA. La plupart des dates
+  d'échéance CISA sont déjà passées : nombre de ces constatations apparaîtront donc en violation de leur SLA
+  juste après le premier chargement.
 
 ## Activation
 

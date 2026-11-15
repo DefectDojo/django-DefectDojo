@@ -350,6 +350,8 @@ El enriquecimiento de EPSS y KEV es una excepción que vale la pena configurar, 
 
 La réplica debe servir los mismos archivos en el mismo formato que las fuentes públicas. Las consultas obtienen un archivo específico de la URL que les indique, en lugar de descubrir lo que haya allí, así que una réplica que reempaqueta o reorganiza los datos no funcionará. Actualice sus copias según la programación que le convenga, ya que la implementación solo lee lo que sirve su réplica.
 
+Es posible que no necesite ninguna réplica. Con la inteligencia de amenazas activada y las consultas de EPSS y KEV desactivadas, que es la configuración predeterminada, cada paquete de inteligencia de amenazas que cargue también completa los valores de CISA KEV y EPSS en sus hallazgos. Cargue el paquete como se describe en [Cargar la inteligencia de amenazas sin conexión](/get_started/pro/onprem/airgapped/#loading-threat-intelligence-offline) y luego revise la tarjeta **Intelligence Sources** en **Settings > System Settings** para confirmar qué paquete está cargado y lo actualizada que está cada fuente. Una consulta que usted active reemplaza al paquete para esa fuente. Consulte [KEV y EPSS desde el paquete](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## Preguntas o soporte
 
 Si necesita ayuda con una instalación o actualización air-gapped, comuníquese con su representante de cuenta o con [support@defectdojo.com](mailto:support@defectdojo.com).

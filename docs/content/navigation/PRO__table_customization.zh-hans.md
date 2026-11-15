@@ -12,6 +12,8 @@ DefectDojo Pro UI 中的大多数数据表格(发现项、资产、测试活动�
 
 点击工具栏中的 **Columns** 按钮打开列选择器,然后勾选或取消勾选某列以显示或隐藏它。使用选择器顶部的搜索框可按列标题查找列。少数结构性列(选择复选框和行操作菜单)始终存在,不会出现在选择器中。
 
+在发现项列表中,Threat Intel 标题下包含两组与利用相关的列。**Known Exploited (CISA KEV)** 和 **Ransomware Used (CISA KEV)** 显示 CISA KEV 目录是否列出了该漏洞。**Vendor Reported Exploited** 和 **Vendor Reported Ransomware** 显示扫描器、连接器或某个人所报告的内容,这可能与 CISA 目录不同。**Add Filter** 在 Threat Intel 下提供相同的四个字段。参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。
+
 ## 重新排列列顺序
 
 向左或向右拖动列标题即可移动该列。新的顺序会立即在当前会话中生效。

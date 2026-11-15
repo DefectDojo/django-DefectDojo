@@ -63,7 +63,8 @@ DefectDojo 中无法设置货币类型,因此请确保您所有的营收估算�
 * 该发现项是否具有**EPSS 评分**——对于 Pro 用户,该评分会自动添加到发现项中并保持最新。**EPSS 评分**是参与优先级评分计算的字段——**EPSS 百分位**会记录在发现项上供参考,但不会直接参与计算。
 * 该产品中受此发现项影响的端点数量
 * 该发现项是否处于审核中
-* 该发现项是否位于 KEV(已知被利用漏洞)数据库中,DefectDojo 会定期检查这一点
+* 该发现项是否位于 KEV(已知被利用漏洞)数据库中,DefectDojo 会定期检查这一点。在 KEV 查询处于关闭状态的自托管实例上,这一信息来自[威胁情报数据包](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle)。
+* 扫描器、连接器或某个人是否报告该发现项已在野外被利用(**Vendor Reported Exploited**)或被用于勒索软件(**Vendor Reported Ransomware**)。只要 CISA KEV 或供应商报告中任意一方认定该发现项已被利用,优先级计算就会将其视为已被利用,因此即使 CISA 未列出该 CVE,扫描器的警告仍会提高优先级。参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。
 * 工具报告的该发现项严重程度(信息、低、中、高、严重)
 
 #### EPSS 评分与 EPSS 百分位
@@ -212,6 +213,8 @@ SLA 配置包含分配给 DefectDojo 每个**严重程度**或**风险**值的�
 每个服务级别协议都可以拥有一个唯一的名称,以及一个可选的描述。
 
 **发现项重新激活时重启 SLA**:如果启用此选项,当发现项被重新打开时,SLA 将重新开始计时。否则,SLA 将基于发现项的创建时间计算。
+
+**Cap SLA by CISA KEV Due Date**:如果启用此选项,列入 KEV 的发现项的 SLA 截止日期会被提前到 CISA 为该 CVE 规定的截止日期。在 KEV 查询处于关闭状态的自托管实例上,该截止日期来自[威胁情报数据包](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle),因此无需开启该查询,这一上限也会生效。该上限只依据 CISA KEV 列表:**Vendor Reported Exploited** 报告不会使截止日期提前。大多数 CISA 截止日期都已过去,因此开启此选项后,在升级后的首次数据包加载之后,许多列入 KEV 的发现项可能会立即显示为违反 SLA。
 
 在编辑 SLA 时,您可以选择该 SLA 使用**严重程度**还是**风险**作为分配修复天数的基准。这可以通过在表单的**服务级别配置类型**部分中选择相应选项来完成。
 

@@ -12,6 +12,8 @@ DefectDojo Pro UIのほとんどのデータテーブル（Findings、Assets、E
 
 ツールバーの**Columns**ボタンを選択すると、列ピッカーが開きます。列のチェックボックスをオン/オフすることで、表示・非表示を切り替えられます。ピッカー上部の検索ボックスを使うと、ヘッダー名で列を検索できます。いくつかの構造的な列（選択用チェックボックスと行アクションメニュー）は常に表示され、ピッカーには一覧表示されません。
 
+Findingsでは、Threat Intel見出しの下に、悪用に関する列が2組あります。**Known Exploited (CISA KEV)**と**Ransomware Used (CISA KEV)**は、CISA KEVカタログがその脆弱性を掲載しているかどうかを示します。**Vendor Reported Exploited**と**Vendor Reported Ransomware**は、スキャナー、コネクター、または人が報告した内容を示し、CISAカタログとは異なる場合があります。**Add Filter**でも、同じ4つのフィールドがThreat Intelの下に用意されています。[検出事項](/asset_modelling/engagements_tests/pro__findings/#metadata)を参照してください。
+
 ## 列を並べ替える
 
 列ヘッダーを左右にドラッグすると、その列を移動できます。新しい順序は、現在のセッションに対して即座に反映されます。
