@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>资产层级结构 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/</link><description>Recent content in 资产层级结构 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Thu, 20 Aug 2026 03:39:13 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>分配优先级、风险和 SLA</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>资产层级结构 on DefectDojo Documentation</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/</link><description>Recent content in 资产层级结构 on DefectDojo Documentation</description><generator>Hugo</generator><language>zh-hans</language><copyright>Copyright (c) 2020-2025 DefectDojo, Inc.</copyright><lastBuildDate>Sun, 15 Nov 2026 23:23:43 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>分配优先级、风险和 SLA</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
 
 &lt;img
  src="https://docs.defectdojo.com/images/pro_finding_priority.png"
@@ -45,7 +45,8 @@
 &lt;ul&gt;
 &lt;li&gt;一个&lt;strong&gt;利用成熟度&lt;/strong&gt;徽章——&lt;em&gt;无 → PoC → 武器化 → 野外活跃利用&lt;/em&gt;&lt;/li&gt;
 &lt;li&gt;一个&lt;strong&gt;威胁评分&lt;/strong&gt;(0-100)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;可链接到原始凭证的证据标签&lt;/strong&gt;——KEV 条目(附带其登记日期)、用于勒索软件、Metasploit 模块、Exploit-DB 条目、Nuclei 模板,以及公开的概念验证代码仓库&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;威胁最高的漏洞 ID&lt;/strong&gt;,可打开该漏洞的页面&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;可链接到原始凭证的证据标签&lt;/strong&gt;——KEV 条目(附带其登记日期,可打开该漏洞的页面)、用于勒索软件、Metasploit 模块、Exploit-DB 条目、Nuclei 模板,以及公开的概念验证代码仓库&lt;/li&gt;
 &lt;li&gt;一行通俗易懂的说明,解释该发现项的优先级为&lt;strong&gt;何&lt;/strong&gt;上升&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;除了该卡片之外,这些情报还会作用于整个应用程序的多个界面:&lt;/p&gt;</description></item><item><title>产品健康评级</title><link>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/product_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/zh-hans/asset_modelling/pro_hierarchy/product_health_grade/</guid><description>&lt;p&gt;DefectDojo 可以根据产品中包含的发现项数量为您的产品计算评级。评级从 A 到 F 排列。&lt;/p&gt;
