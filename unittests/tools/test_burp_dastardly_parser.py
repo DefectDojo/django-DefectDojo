@@ -45,6 +45,23 @@ class TestBurpParser(DojoTestCase):
             with self.assertRaises(ValueError):
                 parser.get_findings(test_file, Test())
 
+    def test_burp_dastardly_namespaced_suite_child_rejected(self):
+        """
+        An un-namespaced <testsuites> root with namespaced <testsuite> children
+        is outside the contract: the child lookup is un-namespaced, so a failing
+        case inside it would be reported as zero findings.
+        """
+        report = io.BytesIO(
+            b'<testsuites><j:testsuite xmlns:j="https://www.dastardly.invalid/junit" '
+            b'failures="1" name="https://example.test/">'
+            b'<j:testcase name="case">'
+            b'<j:failure message="Reflected XSS" type="High">detail</j:failure>'
+            b"</j:testcase></j:testsuite></testsuites>",
+        )
+        parser = BurpDastardlyParser()
+        with self.assertRaises(ValueError):
+            parser.get_findings(report, Test())
+
     def test_burp_dastardly_standalone_testsuite_root_rejected(self):
         """
         A bare <testsuite> root is outside the contract: get_items reads the

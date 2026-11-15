@@ -27,6 +27,7 @@ class BurpDastardlyParser:
     # as findings because it only looks below the root, and namespaced roots,
     # because the child lookup is un-namespaced.
     ALLOWED_ROOTS = {"testsuites"}
+    READ_ELEMENTS = {"testsuite", "testcase", "failure"}
 
     def get_findings(self, xml_output, test):
         tree = ElementTree.parse(xml_output, ElementTree.XMLParser())
@@ -40,6 +41,16 @@ class BurpDastardlyParser:
             )
             logger.warning(msg)
             raise ValueError(msg)
+        for node in root.iter():
+            if node.tag.startswith("{") and node.tag.split("}", 1)[-1] in self.READ_ELEMENTS:
+                msg = (
+                    f"Namespaced element '{node.tag}' in Burp Dastardly "
+                    f"report; the parser only reads un-namespaced testsuite, "
+                    f"testcase and failure elements. Refusing to import a "
+                    f"report that would produce no findings."
+                )
+                logger.warning(msg)
+                raise ValueError(msg)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
