@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, F, QuerySet, Value, When
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
@@ -94,6 +94,7 @@ from dojo.models import (
     Test,
     Test_Import,
     Test_Import_Finding_Action,
+    Test_Type,
 )
 from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
@@ -3115,8 +3116,30 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
                 request, reverse("view_finding", args=(duplicate.id,)),
             )
 
+    # The mark points the duplicate at the original's cluster root, so the duplicate must be neither the
+    # original nor that root, and the root must not itself be a duplicate (an orphan whose original is
+    # gone heads a cluster with no active finding).
+    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+    refusal = None
+    if duplicate.id == original.id:
+        refusal = _("A finding cannot be marked as a duplicate of itself.")
+    elif duplicate.id == root.id:
+        refusal = _(
+            "Finding %(page)s is a duplicate of finding %(original)s, so finding %(original)s cannot be "
+            "marked as its duplicate.",
+        ) % {"page": original.id, "original": duplicate.id}
+    elif root.duplicate:
+        refusal = _(
+            "Finding %(root)s is itself a duplicate, so finding %(duplicate)s cannot be marked as its duplicate. "
+            "Use Reset Duplicate Status on finding %(root)s first.",
+        ) % {"root": root.id, "duplicate": duplicate.id}
+    if refusal:
+        messages.add_message(request, messages.ERROR, refusal, extra_tags="alert-danger")
+        return redirect_to_return_url_or_else(
+            request, reverse("view_finding", args=(duplicate.id,)),
+        )
+
     if manual_duplicate_hides_open_finding(duplicate, original):
-        root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
         messages.add_message(
             request,
             messages.ERROR,
@@ -3130,23 +3153,23 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False
-    # make sure we don't create circular or transitive duplicates
-    if original.duplicate:
-        duplicate.duplicate_finding = original.duplicate_finding
-    else:
-        duplicate.duplicate_finding = original
+    # The root resolved above, which is never itself a duplicate, so no chain or cycle forms.
+    duplicate.duplicate_finding = root
 
-    logger.debug(
-        "marking finding %i as duplicate of %i",
-        duplicate.id,
-        duplicate.duplicate_finding.id,
-    )
+    logger.debug("marking finding %i as duplicate of %i", duplicate.id, root.id)
 
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
-    duplicate.save(dedupe_option=False)
-    original.found_by.add(duplicate.test.test_type)
-    original.save(dedupe_option=False)
+    with transaction.atomic():
+        duplicate.save(dedupe_option=False)
+        # The duplicate's own duplicates move onto the root with it, as set_duplicate does: they stay
+        # inactive duplicates, the cluster stays one level deep, and their test types join the root's
+        # found_by. The root stays out of this set even if older data points it here. Read the types first.
+        members = Finding.objects.filter(duplicate_finding=duplicate).exclude(pk=root.pk)
+        found_by = {duplicate.test.test_type, *Test_Type.objects.filter(test__finding__in=members).distinct()}
+        members.update(duplicate_finding=root, duplicate=True, active=False, verified=False)
+        root.found_by.add(*found_by)
+        root.save(dedupe_option=False)
 
     return redirect_to_return_url_or_else(
         request, reverse("view_finding", args=(duplicate.id,)),
