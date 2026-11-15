@@ -530,6 +530,14 @@ covers — so a client can say "this asset" without hunting for an id. That cann
 ids come from where the acceptance is already accepting. If there is nothing to derive from, the
 criteria are refused rather than quietly broadened.
 
+A scope reaches only where its author may accept risk. Every id it names needs the permission to add
+a Risk Acceptance (when creating one) or to edit one (when changing one) on that Engagement, Asset or
+Organization, and a `global` scope needs a superuser or a global role that holds that permission.
+Anything else is refused with `400`, naming the ids. Ids the criteria already held, and a `global`
+scope already set, can be saved again or narrowed by anyone who may edit the Risk Acceptance, so
+editing an acceptance somebody else scoped does not fail on their scope. Ids filled in from the
+Findings the acceptance covers are checked the same way.
+
 **From the UI:** *Edit Standing Criteria* on the Risk Acceptance menu. It asks how far the acceptance
 should reach — this engagement, this asset, this asset's type, or everywhere — rather than asking you
 to pick ids, and refuses to save until a scope is set along with at least one matchable attribute
