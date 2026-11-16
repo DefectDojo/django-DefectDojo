@@ -74,7 +74,7 @@ From the **Action** dropdown, select the Action that you want to apply to a Find
 
 You can set an additional Conditional Values which allow you to take additional actions, if certain criteria are met.  
 
-The field pickers on each Action, including the comparison field of a Conditional Action, list their fields under the same headings as the Findings list's **Add Filter**: Finding, Threat Intel, Dates and People.
+The comparison field of a Conditional Action lists its fields under the same headings as the Findings list's **Add Filter**: Finding, Threat Intel and Dates. The field pickers on the Actions offer fewer than twelve fields each, so they are one flat list. A picker shows headings only when it offers at least twelve fields under two or more headings; a shorter list is one flat list.
 
 ![image](images/rules_engine_4.png)
 
