@@ -562,6 +562,30 @@ should reach â€” this engagement, this asset, this asset's type, or everywhere â
 to pick ids, and refuses to save until a scope is set along with at least one matchable attribute
 or **Every New Finding in Scope**.
 
+The same fields are in the **Standing Criteria** section of the New Risk Acceptance form and the
+*Edit Risk Acceptance* form, so an acceptance can be created with its criteria in one step. Leave the
+scope empty and the acceptance covers only the Findings added to it. A new Risk Acceptance takes its
+scope from the Findings it is created with. **Everywhere** is offered only to a superuser or a user
+whose global role may accept risk, the same rule the API applies, and an acceptance already scoped
+Everywhere keeps showing it.
+
+While the criteria are filled in, the form shows how many existing Findings they describe, and how
+many of those are active, counting only the Findings you can see. That number is how broad the
+criteria are, not what saving them does: standing criteria apply to Findings as they are imported,
+so the Findings already there are added with **Add Findings to Risk Acceptance**. The count comes
+from `POST /api/v2/risk_acceptance/criteria_preview/`, which takes the `acceptance_criteria` to
+preview and either `risk_acceptance` (the acceptance being edited) or `accepted_findings` (the
+Findings a new one is created with) to fill in a scope sent without ids, and answers
+`{"count": ..., "active_count": ..., "timed_out": false}`. It writes nothing. Criteria a save would
+refuse are refused with the same `400`, including a scope you may not accept risk in and
+**Everywhere** without the permission it needs. Counting stops after a few seconds: very broad
+criteria on a large instance answer `"timed_out": true` with no count, and the form says the criteria
+match too many Findings to count quickly.
+
+The Risk Acceptance page lists the **Affected Engagements**: the Engagements its Findings sit in,
+kept current as Findings are added (by hand or by standing criteria) and removed. An Engagement you
+cannot view is left out.
+
 #### Every New Finding in an Asset
 
 To accept every Finding that later scans bring into an Asset (or an Engagement, or an Organization)
