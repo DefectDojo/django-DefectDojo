@@ -123,6 +123,12 @@ The four assignable Risk levels are:
 
 A Finding's EPSS / exploitability is much more emphasized in the Risk calculation.  As a result, a Finding can have both a high priority and a low risk value.
 
+### An Asset's Risk
+
+The **All Assets** table has a Risk column too, and so does the **Assets** tile on an Organization's page. It shows the highest Risk among the Asset's active Findings, drawn the same way as on a Findings table, with its Risk Score beside it on the Organization tile. The highest band decides, and the highest Risk Score within that band breaks the tie, so a Finding whose band was overridden counts at its overridden band. Only the Findings you are allowed to see count, so two people can see a different Risk on the same Asset. An Asset with no active Finding that has a Risk reads **None**.
+
+Sort the All Assets table by Risk to list the riskiest Assets first; Assets with no Risk sort last either way. The column is shown by default, and you can hide it from the column picker like any other column.
+
 The Risk calculation itself cannot currently be adjusted directly. However, if [Threat Intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/) is enabled, the **Actively-Exploited Risk Floor** does let you control the outcome for the case that matters most: a Finding confirmed to be exploited in the wild is lifted to at least a Risk band you choose, rather than being left in a low band because its base severity is Low. It ships set to **Needs Action**, and each Prioritization Engine can raise it, lower it, or clear it to switch the floor off. See [the Actively-Exploited Risk Floor](/asset_modelling/pro_hierarchy/threat_intelligence/#the-actively-exploited-risk-floor).
 
 ## Priority Insights Dashboard
