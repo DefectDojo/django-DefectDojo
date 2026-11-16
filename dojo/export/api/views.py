@@ -38,6 +38,8 @@ from dojo.export.api.serializers import (
     ExportEngagementSerializer,
     ExportFindingSerializer,
     ExportGeneralSurveySerializer,
+    ExportJiraInstanceSerializer,
+    ExportJiraProjectSerializer,
     ExportLegacyAuditEntrySerializer,
     ExportLoginBannerSerializer,
     ExportParamsSerializer,
@@ -80,6 +82,9 @@ from dojo.models import (
     FileUpload,
     Finding,
     Finding_Group,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
     Objects_Product,
     Product,
     Product_API_Scan_Configuration,
@@ -112,6 +117,7 @@ COUNT_KEYS = (
 IMPORT_HISTORY_COUNT_KEYS = ("test_imports", "test_import_actions")
 AUDIT_HISTORY_COUNT_KEYS = ("audit_events", "legacy_audit_entries")
 PRODUCT_EXTRAS_COUNT_KEYS = ("tracking_files", "benchmarks", "answered_surveys")
+JIRA_COUNT_KEYS = ("jira_projects", "jira_issues")
 HISTORY_FEATURES = ("import_history", "audit_history")
 AUDIT_MODELS = (Product, Engagement, Test, Finding, Finding_Group, Risk_Acceptance)
 # From an audited object to its product id. A risk acceptance has two paths: see risk_acceptance_in.
@@ -407,9 +413,14 @@ def product_lines(
     import_history: bool = False,
     audit_history: bool = False,
     product_extras: bool = False,
+    jira: bool = False,
 ) -> Iterator[bytes]:
-    context = {"request": request, "max_file_bytes": max_file_bytes}
+    context = {"request": request, "max_file_bytes": max_file_bytes, "jira": jira}
     render = NDJSONRenderer().render
+    header_jira = {}
+    if jira:
+        projects = JIRA_Project.objects.filter(product=product, engagement=None).order_by("id")
+        header_jira = {"jira_projects": ExportJiraProjectSerializer(projects, many=True).data}
     yield render({
         "type": "header",
         "schema": SCHEMA_VERSION,
@@ -417,6 +428,7 @@ def product_lines(
         "max_file_bytes": max_file_bytes,
         "source": source_block(),
         "product": ExportProductSerializer(product, context=context).data,
+        **header_jira,
         "engagement_presets": ExportEngagementPresetSerializer(
             Engagement_Presets.objects.filter(product=product).order_by("id").prefetch_related("test_type", "network_locations"),
             many=True,
@@ -433,6 +445,7 @@ def product_lines(
             ExportEngagementSerializer,
             Engagement.objects.filter(product=product).prefetch_related(
                 notes_prefetch(), "risk_acceptance", "files", "tags", check_list_prefetch(),
+                *(("jira_project", "jira_issue") if jira else ()),
             ),
         ),
         (
@@ -468,6 +481,8 @@ def product_lines(
                 finding_groups.update(group["id"] for group in data["finding_groups"])
             yield render({"type": line_type, "data": data})
     counts["finding_groups"] = len(finding_groups)
+    if jira:
+        counts.update(jira_stream_counts(product))
     if product_extras:
         counts.update(dict.fromkeys(PRODUCT_EXTRAS_COUNT_KEYS, 0))
         counts["product_endpoints"] = 0
@@ -481,9 +496,23 @@ def product_lines(
     yield render({"type": "end", "counts": counts})
 
 
-def count_keys(*, import_history: bool, audit_history: bool, product_extras: bool) -> tuple[str, ...]:
+def jira_issue_in(product: Product) -> Q:
+    return (
+        Q(finding__test__engagement__product=product)
+        | Q(finding_group__test__engagement__product=product)
+        | Q(engagement__product=product)
+    )
+
+
+def jira_stream_counts(product: Product) -> dict[str, int]:
+    projects = JIRA_Project.objects.filter(Q(product=product, engagement=None) | Q(engagement__product=product))
+    return {"jira_projects": projects.count(), "jira_issues": JIRA_Issue.objects.filter(jira_issue_in(product)).count()}
+
+
+def count_keys(*, import_history: bool, audit_history: bool, product_extras: bool, jira: bool = False) -> tuple[str, ...]:
     return (
         *COUNT_KEYS,
+        *(JIRA_COUNT_KEYS if jira else ()),
         *(PRODUCT_EXTRAS_COUNT_KEYS if product_extras else ()),
         *(IMPORT_HISTORY_COUNT_KEYS if import_history else ()),
         *(AUDIT_HISTORY_COUNT_KEYS if audit_history else ()),
@@ -537,8 +566,9 @@ def add_benchmark_counts(counts: dict) -> None:
 
 def product_counts(
     max_file_bytes: int, *, file_counts: bool, import_history: bool, audit_history: bool, product_extras: bool,
+    jira: bool = False,
 ) -> dict[int, dict[str, int | None]]:
-    keys = count_keys(import_history=import_history, audit_history=audit_history, product_extras=product_extras)
+    keys = count_keys(import_history=import_history, audit_history=audit_history, product_extras=product_extras, jira=jira)
     counts = defaultdict(lambda: {**dict.fromkeys(keys, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
@@ -556,6 +586,14 @@ def product_counts(
             ("tracking_files", Objects_Product, "product_id"),
             ("answered_surveys", Answered_Survey, "engagement__product_id"),
         )
+    if jira:
+        sources += (
+            ("jira_projects", JIRA_Project.objects.filter(engagement=None), "product_id"),
+            ("jira_projects", JIRA_Project, "engagement__product_id"),
+            ("jira_issues", JIRA_Issue, "finding__test__engagement__product_id"),
+            ("jira_issues", JIRA_Issue, "finding_group__test__engagement__product_id"),
+            ("jira_issues", JIRA_Issue, "engagement__product_id"),
+        )
     if import_history:
         sources += (
             ("test_imports", Test_Import, "test__engagement__product_id"),
@@ -563,7 +601,8 @@ def product_counts(
         )
     for key, model, product_path in sources:
         # order_by() drops default orderings, which would otherwise split the GROUP BY per row.
-        rows = model.objects.order_by().values_list(product_path).annotate(n=Count("id", distinct=True))
+        manager = model if isinstance(model, QuerySet) else model.objects
+        rows = manager.order_by().values_list(product_path).annotate(n=Count("id", distinct=True))
         for product_id, n in rows:
             if product_id is not None:
                 counts[product_id][key] += n
@@ -597,10 +636,11 @@ def product_counts(
 
 def _summed(
     products: list[dict], *, file_counts: bool, import_history: bool, audit_history: bool, product_extras: bool,
+    jira: bool = False,
 ) -> dict[str, int | None]:
     return {
         key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
-        for key in count_keys(import_history=import_history, audit_history=audit_history, product_extras=product_extras)
+        for key in count_keys(import_history=import_history, audit_history=audit_history, product_extras=product_extras, jira=jira)
     }
 
 
@@ -663,6 +703,7 @@ def build_manifest(
     import_history: bool = False,
     audit_history: bool = False,
     product_extras: bool = False,
+    jira: bool = False,
 ) -> dict:
     counts = product_counts(
         max_file_bytes,
@@ -670,6 +711,7 @@ def build_manifest(
         import_history=import_history,
         audit_history=audit_history,
         product_extras=product_extras,
+        jira=jira,
     )
     products = [
         {
@@ -705,6 +747,7 @@ def build_manifest(
                     import_history=import_history,
                     audit_history=audit_history,
                     product_extras=product_extras,
+                    jira=jira,
                 ),
             },
         }
@@ -721,7 +764,7 @@ def build_manifest(
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
-        "features": ["check_lists", *HISTORY_FEATURES, "product_extras"],
+        "features": ["check_lists", *HISTORY_FEATURES, "product_extras", "jira"],
         "deduplication": deduplication_rules(),
         "announcement": single_row(ExportAnnouncementSerializer),
         "login_banner": single_row(ExportLoginBannerSerializer),
@@ -737,6 +780,10 @@ def build_manifest(
             "questionnaires": questionnaires(),
             "open_survey_responses": open_survey_responses(),
             "benchmark_types": benchmark_types(),
+            **(
+                {"jira_instances": ExportJiraInstanceSerializer(JIRA_Instance.objects.order_by("id"), many=True).data}
+                if jira else {}
+            ),
         },
         "product_types": product_types,
         "products": products,
@@ -749,6 +796,7 @@ def build_manifest(
                 import_history=import_history,
                 audit_history=audit_history,
                 product_extras=product_extras,
+                jira=jira,
             ),
         },
     }
@@ -777,6 +825,7 @@ class ProductExportView(APIView):
                 import_history=params["import_history"],
                 audit_history=params["audit_history"],
                 product_extras=params["product_extras"],
+                jira=params["jira"],
             ),
             content_type="application/x-ndjson",
             headers={
@@ -808,5 +857,6 @@ class ExportManifestView(APIView):
                 import_history=params["import_history"],
                 audit_history=params["audit_history"],
                 product_extras=params["product_extras"],
+                jira=params["jira"],
             ),
         )

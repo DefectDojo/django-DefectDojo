@@ -37,6 +37,9 @@ from dojo.models import (
     Finding,
     Finding_Group,
     General_Survey,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
     Notes,
     Objects_Product,
     Objects_Review,
@@ -165,6 +168,26 @@ class TestProductExportQueryCount(DojoAPITestCase):
             for n in range(2):
                 category = Benchmark_Category.objects.create(type=benchmark, name=f"{prefix}-{i}-{n}", objective="o")
                 Benchmark_Requirement.objects.create(category=category, objective="o")
+
+    def add_jira(self, product: Product, count: int, prefix: str) -> None:
+        instance = JIRA_Instance.objects.create(
+            configuration_name="Main", url="https://jira.example.com", username="bot", password="x", epic_name_id=1,  # noqa: S106
+            open_status_key=1, close_status_key=2, info_mapping_severity="a", low_mapping_severity="a",
+            medium_mapping_severity="a", high_mapping_severity="a", critical_mapping_severity="a",
+        )
+        now = timezone.now()
+        for i in range(count):
+            engagement = Engagement.objects.create(
+                name=f"{prefix}-{i}", product=product, target_start=now.date(), target_end=now.date(), lead=self.admin,
+            )
+            project = JIRA_Project.objects.create(jira_instance=instance, engagement=engagement, project_key=f"{prefix}{i}")
+            JIRA_Issue.objects.create(jira_project=project, engagement=engagement, jira_id=f"{prefix}-e{i}", jira_key=f"E-{i}")
+            JIRA_Project.objects.create(jira_instance=instance, product=product, project_key=f"{prefix}p{i}")
+            test = Test.objects.create(
+                title=f"{prefix}-{i}", engagement=engagement, test_type=Test_Type.objects.first(), target_start=now, target_end=now,
+            )
+            finding = Finding.objects.create(title=f"{prefix}-{i}", test=test, reporter=self.admin, severity="Low")
+            JIRA_Issue.objects.create(jira_project=project, finding=finding, jira_id=f"{prefix}-f{i}", jira_key=f"F-{i}")
 
     def add_product_extras(self, product: Product, count: int, prefix: str) -> None:
         engagement = Engagement.objects.filter(product=product).order_by("id").first()
@@ -315,6 +338,24 @@ class TestProductExportQueryCount(DojoAPITestCase):
         self.add_product_extras(self.product, 4, "s")
         after = self.measure(url)
         self.assertEqual(before, after, f"The manifest issues {before} queries with one row of each extra and {after} with five.")
+
+    def test_stream_query_count_is_constant_across_jira(self):
+        url = self.url + "?jira=true"
+        self.add_jira(self.product, 1, "j")
+        self.measure(url)
+        one = self.measure(url)
+        self.add_jira(self.product, 9, "k")
+        ten = self.measure(url)
+        self.assertEqual(one, ten, f"The export stream issues {one} queries with one row of Jira data and {ten} with ten.")
+
+    def test_manifest_query_count_is_constant_with_jira(self):
+        url = reverse("export-manifest") + "?jira=true"
+        self.add_jira(self.product, 1, "l")
+        self.measure(url)
+        before = self.measure(url)
+        self.add_jira(self.product, 4, "m")
+        after = self.measure(url)
+        self.assertEqual(before, after, f"The manifest issues {before} queries with one row of Jira data and {after} with five.")
 
     def test_stream_query_count_is_constant_per_page_of_product_endpoints(self):
         url = self.url + "?product_extras=true"

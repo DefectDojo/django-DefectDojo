@@ -65,6 +65,9 @@ from dojo.models import (
     Finding_Group,
     Finding_Template,
     General_Survey,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
     Network_Locations,
     Notes,
     Objects_Product,
@@ -1401,6 +1404,138 @@ class TestExportProductExtras(DojoAPITestCase):
 
 
 @versioned_fixtures
+class TestExportJira(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+    JIRA_KEYS = {"jira_projects", "jira_project", "jira_issue"}
+
+    @classmethod
+    def setUpTestData(cls):
+        # The fixture has Jira rows of its own.
+        for model in (JIRA_Issue, JIRA_Project, JIRA_Instance):
+            model.objects.all().delete()
+        cls.product = Product.objects.get(id=2)
+        cls.engagement = Engagement.objects.filter(product=cls.product).order_by("id").first()
+        cls.second_engagement = Engagement.objects.filter(product=cls.product).order_by("id").last()
+        cls.findings = list(Finding.objects.filter(test__engagement__product=cls.product).order_by("id")[:2])
+        cls.instance = JIRA_Instance.objects.create(
+            configuration_name="Main", url="https://jira.example.com", username="bot", password="s3cret",  # noqa: S106
+            epic_name_id=1, open_status_key=2, close_status_key=3, info_mapping_severity="Lowest",
+            low_mapping_severity="Low", medium_mapping_severity="Medium", high_mapping_severity="High",
+            critical_mapping_severity="Highest",
+        )
+        cls.product_project = JIRA_Project.objects.create(jira_instance=cls.instance, product=cls.product, project_key="PRD")
+        cls.engagement_project = JIRA_Project.objects.create(
+            jira_instance=cls.instance, engagement=cls.engagement, project_key="ENG",
+        )
+        cls.epic = JIRA_Issue.objects.create(
+            jira_project=cls.engagement_project, engagement=cls.engagement, jira_id="1", jira_key="ENG-1",
+        )
+        cls.finding_issue = JIRA_Issue.objects.create(
+            jira_project=cls.product_project, finding=cls.findings[0], jira_id="2", jira_key="PRD-2",
+            jira_creation=datetime(2026, 11, 1, tzinfo=UTC),
+        )
+        group = Finding_Group.objects.create(name="g", test=cls.findings[0].test, creator=Dojo_User.objects.get(username="admin"))
+        cls.group_issue = JIRA_Issue.objects.create(
+            jira_project=cls.product_project, finding_group=group, jira_id="3", jira_key="PRD-3",
+        )
+        # A project and an issue on another product never cross.
+        other = Product.objects.get(id=1)
+        other_project = JIRA_Project.objects.create(jira_instance=cls.instance, product=other, project_key="OTH")
+        JIRA_Issue.objects.create(
+            jira_project=other_project, finding=Finding.objects.filter(test__engagement__product=other).first(),
+            jira_id="4", jira_key="OTH-4",
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+
+    def export(self, **params):
+        return ndjson_lines(self.client.get(reverse("export-product", args=[2]), params))
+
+    def manifest(self, **params):
+        return self.client.get(reverse("export-manifest"), params).json()
+
+    def test_jira_absent_without_the_parameter(self):
+        for params in ({}, {"jira": "false"}):
+            with self.subTest(params=params):
+                lines = self.export(**params)
+                for line in lines:
+                    self.assertEqual(set(), self.JIRA_KEYS & set(line.get("data", line)), line["type"])
+                self.assertNotIn("jira_issues", lines[-1]["counts"])
+                self.assertNotIn("jira_projects", lines[-1]["counts"])
+                manifest = self.manifest(**params)
+                self.assertNotIn("jira_instances", manifest["reference"])
+                self.assertNotIn("jira_issues", manifest["totals"])
+                self.assertNotIn("jira_projects", manifest["totals"])
+        group = next(line for line in self.export() if line["type"] == "finding")["data"]["finding_groups"]
+        self.assertTrue(all("jira_issue" in entry for entry in group))
+
+    def test_manifest_lists_jira_instances_without_password(self):
+        manifest = self.manifest(jira="true")
+        self.assertIn("jira", manifest["features"])
+        row = manifest["reference"]["jira_instances"][0]
+        self.assertEqual("https://jira.example.com", row["url"])
+        self.assertEqual("bot", row["username"])
+        self.assertNotIn("password", row)
+        self.assertNotIn("s3cret", json.dumps(manifest))
+
+    def test_jira_lines(self):
+        lines = self.export(jira="true")
+        projects = lines[0]["jira_projects"]
+        self.assertEqual([self.product_project.id], [row["id"] for row in projects])
+        self.assertEqual("PRD", projects[0]["project_key"])
+        self.assertEqual(self.instance.id, projects[0]["jira_instance"])
+        self.assertEqual(self.product.id, projects[0]["product"])
+        self.assertNotIn("archived_at", projects[0])
+        self.assertNotIn("archive_batch", projects[0])
+        engagements = {line["data"]["id"]: line["data"] for line in lines if line["type"] == "engagement"}
+        with_project = engagements[self.engagement.id]
+        self.assertEqual(self.engagement_project.id, with_project["jira_project"]["id"])
+        self.assertEqual("ENG-1", with_project["jira_issue"]["jira_key"])
+        self.assertEqual(
+            {"id", "jira_id", "jira_key", "jira_creation", "jira_change", "jira_project", "finding", "engagement", "finding_group"},
+            set(with_project["jira_issue"]),
+        )
+        self.assertEqual(self.engagement.id, with_project["jira_issue"]["engagement"])
+        self.assertEqual(self.engagement_project.id, with_project["jira_issue"]["jira_project"])
+        without = engagements[self.second_engagement.id]
+        self.assertIsNone(without["jira_project"])
+        self.assertIsNone(without["jira_issue"])
+        findings = {line["data"]["id"]: line["data"] for line in lines if line["type"] == "finding"}
+        self.assertEqual("PRD-2", findings[self.findings[0].id]["jira_issue"]["jira_key"])
+        self.assertEqual(self.findings[0].id, findings[self.findings[0].id]["jira_issue"]["finding"])
+        self.assertIsNone(findings[self.findings[1].id]["jira_issue"])
+
+    def test_a_product_without_jira_has_an_empty_project_list(self):
+        JIRA_Project.objects.filter(product=self.product).delete()
+        self.assertEqual([], self.export(jira="true")[0]["jira_projects"])
+
+    def test_jira_issue_count(self):
+        manifest = self.manifest(jira="true")
+        counts = self.get_results_by_id(manifest["products"], 2)["counts"]
+        self.assertEqual(3, counts["jira_issues"])
+        self.assertEqual(4, manifest["totals"]["jira_issues"])
+        self.assertEqual(3, self.export(jira="true")[-1]["counts"]["jira_issues"])
+        self.assertNotIn("jira_issues", self.get_results_by_id(self.manifest()["products"], 2)["counts"])
+
+    def test_jira_project_count(self):
+        manifest = self.manifest(jira="true")
+        counts = self.get_results_by_id(manifest["products"], 2)["counts"]
+        self.assertEqual(2, counts["jira_projects"])
+        self.assertEqual(3, manifest["totals"]["jira_projects"])
+        self.assertEqual(2, self.export(jira="true")[-1]["counts"]["jira_projects"])
+        self.assertNotIn("jira_projects", self.get_results_by_id(self.manifest()["products"], 2)["counts"])
+
+    def test_a_non_boolean_jira_is_a_400(self):
+        for url in (reverse("export-product", args=[2]), reverse("export-manifest")):
+            with self.subTest(url=url):
+                response = self.client.get(url, {"jira": "maybe"})
+                self.assertEqual(400, response.status_code)
+                self.assertIn("jira", response.json())
+
+
+@versioned_fixtures
 class TestExportProductEndpoints(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1773,7 +1908,7 @@ class TestExportManifest(DojoAPITestCase):
             self.assertNotIn(value, body)
 
     def test_features_list_check_lists_the_history_parts_and_product_extras(self):
-        self.assertEqual(["check_lists", "import_history", "audit_history", "product_extras"], self.manifest["features"])
+        self.assertEqual(["check_lists", "import_history", "audit_history", "product_extras", "jira"], self.manifest["features"])
 
     def test_the_manifest_counts_import_history_only_when_asked(self):
         self.assertNotIn("test_imports", self.manifest["totals"])

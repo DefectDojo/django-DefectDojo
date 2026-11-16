@@ -34,6 +34,9 @@ from dojo.models import (
     FileUpload,
     Finding,
     General_Survey,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
     Objects_Product,
     Product_API_Scan_Configuration,
     Question,
@@ -95,6 +98,14 @@ class ExportParamsSerializer(serializers.Serializer):
             "Add the tracking files, benchmark results, answered questionnaires and endpoints of the product to the "
             "stream. Add the counts of the first three to the manifest. The stream sends tracking_file, benchmark, "
             "answered_survey and product_endpoint lines after the risk acceptances."
+        ),
+    )
+    jira = serializers.BooleanField(
+        default=False,
+        help_text=(
+            "Add the Jira projects and issue links of the product to the stream, and the Jira instances and the "
+            "counts of projects and issues to the manifest. The header holds the product projects. Engagement lines "
+            "hold their project and issue. Finding lines hold their issue. No password crosses."
         ),
     )
 
@@ -231,8 +242,45 @@ class ExportCheckListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class ExportJiraInstanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JIRA_Instance
+        exclude = ("password",)
+        read_only_fields = ("id",)
+
+
+class ExportJiraProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JIRA_Project
+        exclude = ("archived_at", "archive_batch")
+        read_only_fields = ("id",)
+
+
+class ExportJiraIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JIRA_Issue
+        fields = (
+            "id", "jira_id", "jira_key", "jira_creation", "jira_change", "jira_project", "finding", "engagement",
+            "finding_group",
+        )
+        read_only_fields = fields
+
+
+def export_jira_row(serializer_class, obj, attribute: str) -> dict | None:
+    # A reverse one-to-one with no row raises an AttributeError subclass.
+    row = getattr(obj, attribute, None)
+    return serializer_class(row).data if row else None
+
+
 class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
     check_list_detail = serializers.SerializerMethodField()
+
+    def to_representation(self, obj):
+        data = super().to_representation(obj)
+        if self.context.get("jira"):
+            data["jira_project"] = export_jira_row(ExportJiraProjectSerializer, obj, "jira_project")
+            data["jira_issue"] = export_jira_row(ExportJiraIssueSerializer, obj, "jira_issue")
+        return data
 
     def get_check_list_detail(self, obj) -> dict | None:
         # check_list_prefetch() orders by id, so the first row is the lowest id.
@@ -262,6 +310,12 @@ class ExportFindingSerializer(ExportFilesMixin, FindingSerializer):
 
     def get_endpoints(self, obj) -> list[dict]:
         return export_endpoint_entries(obj, self._endpoint_status, locations=self._locations)
+
+    def to_representation(self, obj):
+        data = super().to_representation(obj)
+        if self.context.get("jira"):
+            data["jira_issue"] = export_jira_row(ExportJiraIssueSerializer, obj, "jira_issue")
+        return data
 
 
 class ExportRiskAcceptanceSerializer(RiskAcceptanceSerializer):

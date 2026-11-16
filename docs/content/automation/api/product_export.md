@@ -42,7 +42,7 @@ The response is one JSON object with these keys:
 | `source` | The instance: `version`, `install_id`, `url` and `locations_enabled`. `install_id` is a random id for the instance. |
 | `max_file_bytes` | The file cap that the `files_over_cap` counts use. |
 | `token` | The caller: `username`, `is_superuser` and `expires_at`. `expires_at` is `null` when the API key does not expire, and always `null` under session or basic authentication. |
-| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history`, `audit_history` and `product_extras` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines), [Audit history lines](#audit-history-lines) and [Product extras lines](#product-extras-lines). An older instance has no `features` key. |
+| `features` | A list of the optional parts of the export. `check_lists` means that engagement lines carry the engagement's check list in `check_list_detail`. `import_history`, `audit_history`, `product_extras` and `jira` mean that the instance accepts the parameter of the same name. See [Import history lines](#import-history-lines), [Audit history lines](#audit-history-lines), [Product extras lines](#product-extras-lines) and [Jira lines](#jira-lines). An older instance has no `features` key. |
 | `announcement` | The announcement of the instance, as `{message, style, dismissable}`. It is `null` when the instance has no announcement. |
 | `login_banner` | The login banner, as `{banner_enable, banner_message}`. `banner_enable` can be `null`. The whole value is `null` when the instance has no login banner row. |
 | `deduplication` | The deduplication rules that the customer set on the instance, as `{algorithm_per_parser, hashcode_fields_per_scanner, hashcode_allows_null_cwe}`. Each one is a map from a scan type to a value. The value is an algorithm or a list of hash fields. In `hashcode_allows_null_cwe` it is `true` or `false`, and says whether the hash accepts a missing CWE. A map holds the scan types whose value differs from the shipped settings. It also holds the scan types that DefectDojo does not ship. A scan type that the customer removed is listed with the value that DefectDojo then uses. That value is the `legacy` algorithm, an empty list of hash fields, or `true`. A removed scan type is not listed when that value is the shipped one. A map is empty when the customer changed nothing. An older instance has no `deduplication` key. |
@@ -72,10 +72,11 @@ The manifest takes these parameters:
 | `import_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `test_imports` and `test_import_actions`. See [Counts](#counts). |
 | `audit_history` | boolean | `false` | With `true`, `counts` and `totals` also hold `audit_events` and `legacy_audit_entries`. See [Counts](#counts). |
 | `product_extras` | boolean | `false` | With `true`, `counts` and `totals` also hold `tracking_files`, `benchmarks` and `answered_surveys`. See [Counts](#counts). |
+| `jira` | boolean | `false` | With `true`, `counts` and `totals` also hold `jira_projects` and `jira_issues`, and `reference` holds `jira_instances`. See [Jira lines](#jira-lines). |
 
 An empty value, as in `?max_file_bytes=` or `?file_counts=`, uses the default.
 A `max_file_bytes` value that is not a whole number from 0 to 104857600 gets a 400.
-A `file_counts`, `import_history`, `audit_history` or `product_extras` value that is not a boolean gets a 400.
+A `file_counts`, `import_history`, `audit_history`, `product_extras` or `jira` value that is not a boolean gets a 400.
 To count `files_over_cap`, the server reads the size of every file in storage, with one call for each file. On an instance with many files, or with files on remote storage, the manifest can take some time.
 Pass `file_counts=false` to skip these reads. The `files` count does not need them, so it stays. `files_over_cap` is `null` on every product, product type and in `totals`.
 
@@ -118,8 +119,8 @@ curl -H "Authorization: Token <your API key>" \
 
 The response has the content type `application/x-ndjson`: one JSON object on each line.
 The `Content-Disposition` header names the file `defectdojo-product-2-export.ndjson`.
-The endpoint takes the same `max_file_bytes`, `import_history`, `audit_history` and `product_extras` parameters as the manifest. It ignores `file_counts`.
-Without `import_history=true`, `audit_history=true` and `product_extras=true` the stream is the same as it was before these parameters existed.
+The endpoint takes the same `max_file_bytes`, `import_history`, `audit_history`, `product_extras` and `jira` parameters as the manifest. It ignores `file_counts`.
+Without `import_history=true`, `audit_history=true`, `product_extras=true` and `jira=true` the stream is the same as it was before these parameters existed.
 
 The lines come in this order:
 
@@ -250,6 +251,26 @@ An example `check_list_detail`:
 
 ```json
 {"id": 1, "session_management": "Pass", "encryption_crypto": "Fail", "configuration_management": "N/A", "authentication": "Pass", "authorization_and_access_control": "Fail", "data_input_sanitization_validation": "N/A", "sensitive_data": "Pass", "other": "Fail", "session_issues": [2, 3], "crypto_issues": [], "config_issues": [], "auth_issues": [], "author_issues": [], "data_issues": [], "sensitive_issues": [], "other_issues": [3]}
+```
+
+### Jira lines
+
+With `jira=true`, the export carries the Jira projects and the Jira issue links of the product. Nothing calls Jira: the export reads the rows that DefectDojo holds.
+
+- The `header` line holds `jira_projects`: a list of the projects of the product, by id. It is an empty list when the product has none. A project of an engagement is not in this list. It is on its engagement line.
+- An `engagement` line holds `jira_project`, the project of the engagement, and `jira_issue`, the epic issue of the engagement. Each is `null` when the engagement has none.
+- A `finding` line holds `jira_issue`, the issue of the finding, or `null`.
+- The `finding_groups` entries on a finding line always hold their `jira_issue`, with or without the parameter.
+- The manifest `reference` holds `jira_instances`: a list of the Jira instances, by id.
+
+A Jira instance has every field of the instance except `password`. The password never crosses.
+A Jira project has every field of the project except `archived_at` and `archive_batch`. `jira_instance`, `product` and `engagement` are ids.
+A Jira issue has `id`, `jira_id`, `jira_key`, `jira_creation`, `jira_change`, `jira_project`, `finding`, `engagement` and `finding_group`. The last four are ids, and only one of `finding`, `engagement` and `finding_group` is set.
+
+An example `jira_issue` on a finding line:
+
+```json
+{"id": 7, "jira_id": "10042", "jira_key": "SEC-12", "jira_creation": "2026-11-01T09:00:00Z", "jira_change": null, "jira_project": 3, "finding": 120, "engagement": null, "finding_group": null}
 ```
 
 ### Risk acceptance lines
@@ -473,6 +494,8 @@ The manifest gives `counts` for each product. The stream gives `counts` on its `
 | `files_over_cap` | File entries over `max_file_bytes`. A missing file and a file with `"error": "line_cap"` are not counted. It is `null` with `file_counts=false`. | The same, on the lines. |
 | `risk_acceptances` | Risk acceptances that an engagement of the product holds, or that accept a finding of the product. | Risk acceptance lines. |
 | `finding_groups` | Finding groups in the product. | Distinct finding groups on finding lines. |
+| `jira_projects` | Jira projects of the product and of its engagements. Only with `jira=true`. | Projects in the header and on engagement lines. Only with `jira=true`. |
+| `jira_issues` | Jira issues of the findings, finding groups and engagements of the product. Only with `jira=true`. | Issues on finding lines and engagement lines, and the issues of the finding groups of the product. Only with `jira=true`. |
 | `tracking_files` | Tracking files of the product. Only with `product_extras=true`. | `tracking_file` lines. Only with `product_extras=true`. |
 | `benchmarks` | Benchmark types that have a summary or a result for the product. Only with `product_extras=true`. | `benchmark` lines. Only with `product_extras=true`. |
 | `answered_surveys` | Answered questionnaires of the engagements in the product. Only with `product_extras=true`. | `answered_survey` lines. Only with `product_extras=true`. |
@@ -494,7 +517,7 @@ An example `end` line:
 
 ## What does not cross
 
-- JIRA issue keys and JIRA project settings.
+- JIRA credentials. With `jira=true`, the instances, projects and issue links cross, and the instance password does not. Without it, nothing crosses except the `jira_issue` of a finding group entry.
 - Product members and product groups.
 - CI/CD infrastructure. Its ids stay on the engagement line: `cicd_scm_server`, `cicd_build_server` and `cicd_orchestration_engine`.
 - The `password`, `ssh`, `api_key` and `extras` fields of a tool configuration. The other fields cross in the manifest. `extras` can hold a token for the tool.
