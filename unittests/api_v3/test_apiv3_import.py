@@ -279,11 +279,11 @@ class TestApiV3ImportReportTool(ApiV3TestCase):
 
     _GITLAB_SAST = "GitLab SAST Report"
 
-    def _reimport_by_title(self, report: str) -> dict:
+    def _reimport_by_title(self, report: str, *, client=None, expected: int = 200) -> dict:
         from unittests.dojo_test_case import get_unit_tests_scans_path  # noqa: PLC0415
 
         with (get_unit_tests_scans_path("gitlab_sast") / report).open(encoding="utf-8") as scan:
-            response = self.client.post(self.v3_url("import"), {
+            response = (client or self.client).post(self.v3_url("import"), {
                 "scan_type": self._GITLAB_SAST,
                 "mode": "reimport",
                 "file": scan,
@@ -293,7 +293,7 @@ class TestApiV3ImportReportTool(ApiV3TestCase):
                 "test_title": "pipeline sast",
                 "auto_create_context": "true",
             }, format="multipart")
-        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(expected, response.status_code, response.content[:1000])
         return response.json()
 
     def test_second_tool_gets_its_own_test_and_its_report_is_read_once(self):
@@ -312,3 +312,20 @@ class TestApiV3ImportReportTool(ApiV3TestCase):
             1, spy.call_count,
             f"the report was read for its tool {spy.call_count} times in one request: {spy.call_args_list}",
         )
+
+    def test_user_who_cannot_import_is_refused_before_the_report_is_read(self):
+        njsscan_test = self._reimport_by_title("gl-sast-report-confidence_v15.json")["test"]["id"]
+        engagement = Test.objects.get(pk=njsscan_test).engagement
+        # Holds the self-service product-type add permission and no role on the product.
+        outsider = User.objects.create(username="v3 report tool outsider", is_active=True)
+        outsider.user_permissions.add(Permission.objects.get(codename="add_product_type"))
+        client = self.token_client(user=User.objects.get(pk=outsider.pk))
+
+        read = AutoCreateContextManager._read_report_test_type_names
+        for report in ("gl-sast-report-confidence_v15.json", "gl-sast-report-cwe_v15.json"):
+            with self.subTest(report=report), patch.object(
+                AutoCreateContextManager, "_read_report_test_type_names", side_effect=read,
+            ) as spy:
+                self._reimport_by_title(report, client=client, expected=403)
+                self.assertEqual(0, spy.call_count, f"the report was read for a refused request: {spy.call_args_list}")
+        self.assertEqual([njsscan_test], list(Test.objects.filter(engagement=engagement).values_list("id", flat=True)))

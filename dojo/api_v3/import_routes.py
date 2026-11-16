@@ -163,6 +163,11 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm, scan_file:
     context["product_type"] = auto.get_target_product_type_if_exists(**context)
     context["product"] = auto.get_target_product_if_exists(**context)
     context["engagement"] = auto.get_target_engagement_if_exists(**context)
+    # The title lookup reads the report for its tool. Refuse a user who may not import into the
+    # engagement before it does: every test it can match is in this engagement and takes its
+    # product's permission, so the test check below would refuse them all the same.
+    if context["engagement"] is not None and context.get("test_title"):
+        _require_permission(allowed=user_has_permission(request.user, context["engagement"], "import"))
     target_test = auto.get_target_test_if_exists(**context)
     if target_test is not None:
         _require_permission(allowed=user_has_permission(request.user, target_test, "import"))

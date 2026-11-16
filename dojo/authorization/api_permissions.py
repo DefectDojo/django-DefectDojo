@@ -772,6 +772,16 @@ class UserHasReimportPermission(permissions.BasePermission):
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
             converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
+            # The title lookup reads the report for its tool. Refuse a user who may not import into
+            # the engagement before it does: every test it can match is in this engagement and takes
+            # its product's permission, so the test check below would refuse them all the same.
+            if (
+                (engagement := converted_dict["engagement"]) is not None
+                and converted_dict.get("test_title")
+                and not converted_dict.get("test_id")
+                and not user_has_permission(request.user, engagement, "import")
+            ):
+                return False
             converted_dict["test"] = auto_create.get_target_test_if_exists(**converted_dict)
         except (TooManyFieldsSent, RequestDataTooBig) as e:
             # A very large scan import (too many form fields, or a body over the size limit)
