@@ -945,6 +945,35 @@ class FindingCloseAPITest(DojoAPITestCase):
         self.assertFalse(finding.under_review)
         self.assertEqual(finding.last_reviewed, finding.mitigated)
 
+    def test_close_finding_without_is_mitigated_closes_as_mitigated(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._close_url(finding.id), {}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.is_mitigated)
+        self.assertFalse(finding.active)
+        self.assertIsNotNone(finding.mitigated)
+        self.assertEqual(finding.mitigated_by, self.admin)
+
+    def test_close_finding_without_is_mitigated_form_data_closes_as_mitigated(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._close_url(finding.id), {"note": "Closed by API"}, format="multipart")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.is_mitigated)
+        self.assertFalse(finding.active)
+
+    def test_close_finding_with_is_mitigated_false_is_kept(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._close_url(finding.id), {"is_mitigated": False}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertFalse(finding.is_mitigated)
+        self.assertFalse(finding.active)
+
     def test_close_finding_with_note_and_mitigated_by_admin(self):
         finding = Finding.objects.get(id=7)
         note_type = Note_Type.objects.first()
