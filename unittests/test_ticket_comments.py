@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 
 from django.db.models import Q
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 import dojo.risk_acceptance.helper as ra_helper
@@ -526,7 +527,10 @@ class TestExpirationRunIsBounded(_IsolatedRegistry, DojoTestCase):
             Risk_Acceptance.objects.filter(id__in=[ra.id for ra in acceptances]).update(expiration_date_handled=timezone.now())
         run = ra_helper.ExpirationRun(ra_helper.expiration_message_creator if expired else ra_helper.expiration_warning_message_creator, 10)
         for risk_acceptance in Risk_Acceptance.objects.filter(id__in=[ra.id for ra in acceptances]).order_by("id"):
-            run.notify({"product": self.engagement.product, "risk_acceptance": risk_acceptance})
+            run.notify({
+                "product": self.engagement.product, "risk_acceptance": risk_acceptance,
+                "url": reverse("view_risk_acceptance", args=(self.engagement.id, risk_acceptance.id)),
+            })
         notification = run._digest(next(iter(run._notifications.values())))
         rendered = NotificationManagerHelpers()._create_notification_message(
             event=notification.pop("event"), user=self.get_test_admin(), notification_type=channel, kwargs=notification,
@@ -564,3 +568,83 @@ class TestExpirationRunIsBounded(_IsolatedRegistry, DojoTestCase):
         self.assertIsNotNone(expired.expiration_date_handled)
         self.assertIsNone(warned.expiration_date_warned)
         self.assertEqual(notify.call_count, 1, msg="the expiry digest only")
+
+    def test_an_acceptance_that_fails_does_not_lose_the_others_notices(self):
+        """One acceptance raising mid-run used to drop every notice already collected, and those are never reselected."""
+        acceptances = self._acceptances(expires_in_days=-1)
+        broken = acceptances[2]
+        real_expire_now = ra_helper.expire_now
+
+        def expire_now(risk_acceptance, *args, **kwargs):
+            real_expire_now(risk_acceptance, *args, **kwargs)
+            if risk_acceptance.id == broken.id:
+                msg = "simulated failure after the expiry was written"
+                raise RuntimeError(msg)
+
+        with patch.object(ra_helper, "expire_now", side_effect=expire_now), self.assertLogs("dojo.risk_acceptance.helper", "ERROR"):
+            jira, notify, recorder = self._run()
+
+        handled = {ra.id: Risk_Acceptance.objects.get(id=ra.id).expiration_date_handled for ra in acceptances}
+        self.assertIsNone(handled[broken.id], msg="the failed acceptance is rolled back, so the next run picks it up")
+        self.assertTrue(all(handled[ra.id] for ra in acceptances if ra.id != broken.id))
+        self.assertEqual(notify.call_count, 1)
+        notified = sorted(ra.id for ra in notify.call_args.kwargs["risk_acceptances"])
+        self.assertEqual(notified, sorted(ra.id for ra in acceptances if ra.id != broken.id))
+        self.assertEqual(jira.add_simple_comment.call_count, len(self.issues))
+        for call in jira.add_simple_comment.call_args_list:
+            self.assertNotIn(broken.name, call.args[2], msg="the failed acceptance's comment waits for the run that expires it")
+        self.assertEqual(len(recorder.calls), 1)
+
+    def test_a_warning_that_fails_does_not_lose_the_others_notices(self):
+        acceptances = self._acceptances(expires_in_days=5)
+        broken = acceptances[0]
+        real_engagement = ra_helper.engagement_to_notify_about
+
+        def engagement_to_notify_about(risk_acceptance):
+            if risk_acceptance.id == broken.id:
+                msg = "simulated failure"
+                raise RuntimeError(msg)
+            return real_engagement(risk_acceptance)
+
+        with patch.object(ra_helper, "engagement_to_notify_about", side_effect=engagement_to_notify_about), self.assertLogs("dojo.risk_acceptance.helper", "ERROR"):
+            _, notify, _ = self._run()
+
+        self.assertIsNone(Risk_Acceptance.objects.get(id=broken.id).expiration_date_warned)
+        self.assertEqual(notify.call_count, 1)
+        self.assertEqual(
+            sorted(ra.id for ra in notify.call_args.kwargs["risk_acceptances"]),
+            sorted(ra.id for ra in acceptances if ra.id != broken.id),
+        )
+
+    def test_the_digest_links_an_acceptance_with_no_engagement_to_its_own_page(self):
+        acceptances = self._acceptances(expires_in_days=-1)
+        detached = acceptances[0]
+        self.engagement.risk_acceptance.remove(detached)
+        detached.refresh_from_db()
+        self.assertIsNone(detached.engagement, msg="setup: still attached")
+
+        _, notify, _ = self._run()
+
+        digest = dict(notify.call_args.kwargs)
+        page = reverse("view_risk_acceptance", args=(self.engagement.id, detached.id))
+        rows = {row["risk_acceptance"].id: row["url"] for row in digest["risk_acceptance_rows"]}
+        self.assertEqual(rows[detached.id], page)
+        for channel in ("mail", "slack"):
+            rendered = NotificationManagerHelpers()._create_notification_message(
+                event=digest.pop("event", "risk_acceptance_expiration"), user=self.get_test_admin(), notification_type=channel, kwargs=dict(digest),
+            )
+            self.assertIn(page, rendered, msg=f"{channel}: the detached acceptance links to the site root")
+
+    def test_the_digest_title_and_rows_use_plural_forms(self):
+        risk_acceptance = self._acceptances(expires_in_days=-1)[0]
+        Risk_Acceptance.objects.filter(name__startswith="Bulk acceptance").exclude(id=risk_acceptance.id).delete()
+        risk_acceptance.accepted_findings.set(self.findings[:1])
+        Risk_Acceptance.objects.filter(id=risk_acceptance.id).update(expiration_date_handled=timezone.now())
+        run = ra_helper.ExpirationRun(ra_helper.expiration_message_creator)
+        run.notify({"product": self.engagement.product, "risk_acceptance": risk_acceptance, "url": "/ra/"})
+        digest = run._digest(next(iter(run._notifications.values())))
+        self.assertTrue(digest["title"].startswith("1 risk acceptance has expired for "))
+        rendered = NotificationManagerHelpers()._create_notification_message(
+            event=digest.pop("event"), user=self.get_test_admin(), notification_type="mail", kwargs=digest,
+        )
+        self.assertIn("with 1 finding has expired", rendered)

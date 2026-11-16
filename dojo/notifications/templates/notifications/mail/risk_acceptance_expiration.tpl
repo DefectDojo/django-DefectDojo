@@ -18,13 +18,12 @@
             {% if risk_acceptances %}
                 <p>{{ title }}:</p>
                 <ul>
-                    {% for each in risk_acceptances %}
-                        {% url 'view_risk_acceptance' each.engagement.id each.id as each_url %}
+                    {% for row in risk_acceptance_rows %}
                         <li>
                             {% if expired %}
-                                {% blocktranslate with risk_url=each_url|full_url risk_name=each risk_findings=each.accepted_findings.all|length risk_date=each.expiration_date_handled|date %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} findings has expired {{ risk_date }}{% endblocktranslate %}
+                                {% blocktranslate count risk_findings=row.risk_acceptance.accepted_findings.all|length with risk_url=row.url|full_url risk_name=row.risk_acceptance risk_date=row.risk_acceptance.expiration_date_handled|date %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} finding has expired {{ risk_date }}{% plural %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} findings has expired {{ risk_date }}{% endblocktranslate %}
                             {% else %}
-                                {% blocktranslate with risk_url=each_url|full_url risk_name=each risk_findings=each.accepted_findings.all|length risk_date=each.expiration_date|date %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} findings will expire {{ risk_date }}{% endblocktranslate %}
+                                {% blocktranslate count risk_findings=row.risk_acceptance.accepted_findings.all|length with risk_url=row.url|full_url risk_name=row.risk_acceptance risk_date=row.risk_acceptance.expiration_date|date %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} finding will expire {{ risk_date }}{% plural %}<a href="{{ risk_url }}">{{ risk_name }}</a> with {{ risk_findings }} findings will expire {{ risk_date }}{% endblocktranslate %}
                             {% endif %}
                         </li>
                     {% endfor %}

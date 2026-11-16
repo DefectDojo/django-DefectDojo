@@ -4,8 +4,8 @@
 
 {% if risk_acceptances %}
 {{ title }}
-{% for each in risk_acceptances %}{% url 'view_risk_acceptance' each.engagement.id each.id as each_url %}
-- {{ each }}: {{ each_url|full_url }}{% endfor %}
+{% for row in risk_acceptance_rows %}
+- {{ row.risk_acceptance }}: {{ row.url|full_url }}{% endfor %}
 {% else %}
 {% if risk_acceptance.is_expired %}
     {% trans "Risk Acceptance Expired" %}
