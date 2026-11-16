@@ -46,6 +46,8 @@ Both badges are links, because a tooltip closes the moment your pointer leaves i
 
 Every page that belongs to a `DEPRECATED` feature opens with a warning banner. The banner carries the same red badge, names the release the feature goes away in, and says what to do. It reads the same announcement as the sidebar badge, so the two always agree.
 
+Endpoints go further, because their removal affects every instance that still stores Endpoint data, not only people who open those pages. While an instance still uses Endpoints, every page opens with a banner naming the removal release and date. See [Migrating from Endpoints](/asset_modelling/locations/pro__migrating_from_endpoints/) for when it shows and how to clear it.
+
 ## What currently carries a badge
 
 **`SOON`**

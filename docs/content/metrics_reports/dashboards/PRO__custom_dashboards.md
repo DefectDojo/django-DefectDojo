@@ -57,7 +57,7 @@ The **catalog** is the fixed menu of widget types the platform supports, grouped
 
 ### The grid
 
-Widgets are placed on a **12-column grid**. In edit mode you drag widgets to move them and drag the bottom-right corner to resize them; the grid compacts upward to fill gaps. Each widget type has sensible minimum and maximum sizes so charts and tables stay legible. A newly added list widget (SLA Burndown, Recent Activity, Top N and the like) is sized to show every row it is set to show; a taller tile can show more rows by raising the widget's row limit.
+Widgets are placed on a **12-column grid**. In edit mode you drag widgets to move them and drag the bottom-right corner to resize them; the grid compacts upward to fill gaps. Each widget type has sensible minimum and maximum sizes so charts and tables stay legible. A newly added list widget (SLA Burndown, Recent Activity, Top N and the like) is sized to show every row it is set to show; a taller tile can show more rows by raising the widget's row limit. Lists such as Top-N, Recent Activity and Saved Reports show the rows that fit their tile and how many more there are, and table widgets such as Team Scorecard and Root Causes drop their least important columns as the tile narrows rather than scrolling sideways.
 
 ### Sharing, cloning, and defaults
 
@@ -242,7 +242,7 @@ Time-series and distribution visualizations.
 | **Graph** | A general-purpose chart over any model and group-by dimension: bar, line, area, pie, or doughnut. E.g. Findings by Severity, Findings by Month. For findings, the **Measure** option charts unique CWEs or unique vulnerability IDs per group, such as unique CWEs by severity for one Asset. **Split By** draws one series per value of a second dimension, such as new findings per month by Severity Group (see [Graph options](#graph-options)). For a chart by month, filter its date with **Full Months** (for example Last 6 Full Months) so that every month on the chart is complete; see [date filters](/navigation/pro__filter_index/#how-date-filters-are-evaluated). |
 | **Sankey** | A flow diagram from a source dimension to a target dimension, for example Severity → Status. Severity, status and risk values take their own colors (the severity colors for severities), and each column lists its values in their own order. |
 | **Sunburst** | A one- or two-level radial breakdown, for example Severity, then Test Type within each severity. Severity, status and risk slices take their own colors; a slice of a dimension without colors (a test type) takes a muted shade of the slice it sits in. |
-| **Risk Matrix** | An EPSS-probability × risk heatmap of findings — bottom-left safe, top-right dangerous. |
+| **Risk Matrix** | An EPSS-probability × risk heatmap of findings. The hue marks the zone (bottom-left green is safe, top-right red is dangerous), and each cell's fill deepens in steps with its share of the findings in the matrix, so the cells where findings concentrate stand out. |
 | **Priority Histogram** | The distribution of finding **priority** scores from the prioritization engine, auto-binned. |
 | **Rate by Category** | A per-category ratio (numerator / denominator) — e.g. False-Positive Rate by Tool or Mitigation Rate by Asset. |
 | **Finding Velocity** | Findings created versus closed over time, showing whether the backlog is growing or shrinking. |
@@ -257,17 +257,19 @@ Ranked lists, feeds, and embedded tables.
 
 | Widget | What it shows |
 |--------|---------------|
-| **Top-N Leaderboard** | A ranked list in one of two modes: *aggregate* (top dimension buckets by count, e.g. Top 10 CWEs) or *records* (top individual records by a metric, e.g. Top 10 Assets by Grade). |
-| **Embedded Table** | A full list view (Findings, Assets, Engagements, Tests, Risk Acceptances, Organizations, or Test Types) with preset filters and ordering — pagination, sorting, and CSV export included. |
-| **Recent Activity** | A scrolling feed of the most-recently updated records, clickable through to detail pages. |
+| **Top-N Leaderboard** | A ranked list in one of two modes: *aggregate* (top dimension buckets by count, e.g. Top 10 CWEs, each named with its CWE number and title, such as CWE-79 Cross-site Scripting) or *records* (top individual records by a metric, e.g. Top 10 Assets by Grade). |
+| **Embedded Table** | A list (Findings, Assets, Engagements, Tests, Risk Acceptances, Organizations, or Test Types) with preset filters and ordering, as compact rows that fit the widget. The **Full Table** switch shows the whole list view, with column filters, sorting, paging and CSV export. |
+| **Recent Activity** | A feed of the most-recently updated records, clickable through to detail pages. |
 | **SLA Burndown** | Findings approaching SLA breach, ranked by days remaining, with countdown badges. |
 | **My Work** | Everything waiting on the viewer in one queue, soonest deadline first: findings assigned to the viewer or their team, reviews waiting on them, and their risk acceptances. Always scoped to the viewer. |
-| **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature.* |
+| **Saved Reports** | One-click access to your saved Report Templates. *Requires the Reporting feature and permission to view generated reports, from a global role or an Organization role (a role on an Asset alone does not grant it).* |
 | **Top Root Causes** | The highest-ranked Root Cause clusters, with the number of Findings each groups, the Assets affected, and their priority and risk band. *Requires the Root Cause Correlation feature.* |
 
 **My Work** merges its sources into one list, one row per Finding or Risk Acceptance, ordered by days left before the SLA or expiry date, then by severity. A Finding that several sources hold is listed once. The chips above the list turn each source on or off for the viewer and show its total; **Requested Reviews** (reviews the viewer asked of someone else) starts off and shows as a count. A row's menu, the first control in the row, opens the Finding or Risk Acceptance and offers its next step: **Close Finding**, **Claim Review**, **Clear Review** or **Edit Risk Acceptance**. Each step opens its form, and nothing changes until the form is submitted. A step the viewer has no permission to take is not offered. On a wide tile the next step also shows as a **Next Step** column. In **Edit Widget**, **Sources** picks the sources and their order, and **Rows per Source** sets how many rows each source loads (1 to 50).
 
-An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the table's filter bar or column filters. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
+An **Embedded Table** shows as many rows as fit the widget, with a pager below them, so a taller widget shows more rows. Every list shows compact rows whose columns give way as the widget narrows: each Finding names its Asset under its title, each Organization counts its Assets and tags its active Findings by severity, and each Test Type shows whether it is active and how many Tests use it. The **Full Table** button in the widget's toolbar switches to the whole list view, with its column filters, column picker and paging; its **Page Size** is the one set in **Edit Widget**. Your choice of compact rows or Full Table is remembered for you, per widget. The **Export Button** display option shows the whole Export menu (CSV export and Quick Report), and it is off by default.
+
+An **Embedded Table**'s filters are where the table starts, not a fixed scope. Anyone viewing the dashboard can change them from the **Filters** button, or from the column filters in the Full Table. To keep a change, save it to your own table preference (**Save as New Preference**, then **Save Filters and Sort Order**): the widget opens with your saved filters from then on, for you only. A filter your preference leaves empty keeps the widget's own. To change what every viewer starts from, choose **Edit Widget** and change the filters there.
 
 ### Static & Utility
 
@@ -279,6 +281,26 @@ Notes, shortcuts, and structure.
 | **Section Break** | A labeled divider for grouping related widgets under a heading. |
 | **Markdown / Notes** | An inline rich-text panel for headers, context notes, or reference links. |
 | **Quick Actions** | One-click action buttons that navigate to a chosen page. |
+
+### Widgets that need a feature, license or permission
+
+Some widgets read data that only exists when a feature is turned on, the license includes it, or the viewer holds a permission. **Add Widget** offers such a widget only when everything it needs is in place. A widget already on a dashboard whose requirement goes missing (a feature turned off, a license without it, a viewer without the permission) stays in place but shows a placeholder naming what is missing instead of its data, and loads nothing; remove it in edit mode if it is no longer wanted.
+
+| Widget | Needs |
+|--------|-------|
+| **Scan Cadence** | The Scan Cadence Assurance feature |
+| **License Usage**, **Ingest Health** | The global Maintainer role |
+| **Saved Reports** | The Reporting feature, and permission to view generated reports, from a global role or an Organization role, held directly or through a group (a role on an Asset alone does not grant it) |
+| **Top Root Causes** | The Root Cause Correlation feature |
+| **PCI Quarter Status** | The PCI DSS feature |
+| **Onboarding** | The Onboarding Inbox feature (on for every instance unless an administrator turned it off) |
+| **Sensor Coverage** | The Shogun feature, and a license that includes Shogun |
+| **PSIRT: Am I Affected?**, **PSIRT: Triage SLA**, **PSIRT: Feed Health**, **PSIRT: Our Advisories** | The PSIRT feature, a license that includes the PSIRT Advisory Engine, and the PSIRT View permission |
+| **Ingestion Health Status** | The Ingestion Health feature, and the global Connector View permission |
+| **Shadow AI**, **AI Footprint** | The AI Inventory and Governance feature |
+| **CRA Article 14 Deadlines** | The Regulatory Profile feature |
+
+**Regulatory Scope** needs no feature: its rows are the regulations assigned to your Assets, which every instance can record. Only its support-period column reads the Regulatory Profile, and it counts nothing where no support period was recorded.
 
 ## Charting scans by category
 

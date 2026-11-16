@@ -304,11 +304,7 @@ The full set of `widget_data` actions:
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
 | `count` | POST | `model`, `filters`, `aggregation?` | `{count}` |
-| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `series_by?` | `{labels, series, ...}` |
-
-`series_by` splits every group by a second dimension from the same `dimensions/` list (not a `time` one, and not the `group_by`). The response then carries one entry per value in `series`, each `{"key", "name", "data"}` with a number for every label (0 where the group has none of that value), plus `series_by` and `series_by_label`. At most 10 series are returned: for `count` the rest are combined into one series with the key `__other__`, and for a distinct `aggregation` more than 10 values is a `400`. A `time` `group_by` returns every bucket from the first to the last (or across the request's own date filter on the same field), with 0 for an empty one, and leaves out records with no date.
-
-`aggregation` is `count` (rows, the default) for every model. For `finding` it can also be `distinct_cwe`, the number of unique CWEs (a CWE of 0 or none is not counted), or `distinct_vulnerability_id`, the number of unique vulnerability IDs. A finding with both a CWE and a CVE counts in both. With a `group_by`, a CWE that appears at two severities counts under each, so the per-group numbers can add up to more than the total.
+| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `series_by?` | `{labels, series, ...}` (see [The `aggregate` action](#the-aggregate-action)) |
 | `dimensions` | GET | `?model=` | valid group-by dimensions |
 | `top_records` | POST | `model`, `filters`, `metric`, `limit?`, `sort?` | `{labels, series, ...}` |
 | `record_metrics` | GET | `?model=` | valid records-mode metrics |
@@ -326,9 +322,19 @@ The full set of `widget_data` actions:
 | `my_work` | GET | `?buckets=`, `?limit=` | your assignments / mentions / pending reviews |
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | findings nearing SLA breach |
 | `recent_activity` | GET | `?model=`, `?limit=` | recent records feed |
-| `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting)* |
+| `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting and permission to view generated reports, from a global role or an Organization role; a role on an Asset alone does not grant it)* |
 | `root_causes` | POST | `limit?` | ranked Root Cause clusters *(requires Root Cause Correlation)* |
 | `usage` | GET | — | license-usage breakdown *(requires Maintainer)* |
+
+Some actions need more than the Customizable Dashboards feature: another feature turned on, a license that includes a capability, or a permission. Each widget in `GET /dashboards/widget_catalog/` lists these in its `requires` object, as three lists: `feature_flags` (feature keys, such as `pci_dss`), `licensed_features` (license capabilities, such as `shogun`) and `permissions` (such as `global_maintainer`). An empty object means the widget needs nothing more. While any requirement is missing, the widget's `widget_data` action answers `403` rather than an empty result, so "this widget is not available to you" is never mistaken for "nothing to show". The one exception is Shogun: the catalog lists **Sensor Coverage** only while the Shogun feature is on and licensed, and while the feature is off its action answers `404`, as though it did not exist. Read `requires` before placing a widget for someone, or before rendering it yourself.
+
+### The `aggregate` action
+
+`series_by` splits every group by a second dimension from the same `dimensions/` list (not a `time` one, and not the `group_by`). The response then carries one entry per value in `series`, each `{"key", "name", "data"}` with a number for every label (0 where the group has none of that value), plus `series_by` and `series_by_label`. At most 10 series are returned: for `count` the rest are combined into one series with the key `__other__`, and for a distinct `aggregation` more than 10 values is a `400`. A `time` `group_by` returns every bucket from the first to the last (or across the request's own date filter on the same field), with 0 for an empty one, and leaves out records with no date.
+
+`aggregation` is `count` (rows, the default) for every model. For `finding` it can also be `distinct_cwe`, the number of unique CWEs (a CWE of 0 or none is not counted), or `distinct_vulnerability_id`, the number of unique vulnerability IDs. A finding with both a CWE and a CVE counts in both. With a `group_by`, a CWE that appears at two severities counts under each, so the per-group numbers can add up to more than the total.
+
+Grouped by `cwe`, the `aggregate` response also carries `label_names`, one entry per label: the CWE with its name, such as `CWE-79 Cross-site Scripting`, `CWE-<id>` for a CWE the built-in CWE list does not name, or `No CWE` for a finding with no CWE (stored as 0 or empty). `labels` itself stays the CWE number, the value to filter on.
 
 ## Putting it together: a full lifecycle script
 
