@@ -83,6 +83,14 @@ Every Engagement must have the following fields defined:
 - Asset
 - Status 
 
+### Engagement numbers
+
+An Asset can assign references to new Engagements automatically. In the Asset's **Edit** form, set **Engagement number format** to a value such as `ENG-{number:04d}`. New Engagements for that Asset then receive `ENG-0001`, `ENG-0002`, and so on. The number appears in Engagement lists and the Engagement detail page. It is also available as the read-only `engagement_number` field in the API.
+
+The format must contain exactly one `{number}` placeholder. To pad the number with zeroes, use `{number:0Nd}`, where `N` is between 1 and 16. The remaining characters can be letters, digits, periods, underscores, or hyphens. Leave the setting empty to keep numbering off.
+
+Numbering applies only to newly created Engagements; existing ones are not backfilled. Changing the format does not change numbers already issued. Copying an Engagement gives the copy a new number. Moving one to another Asset gives it a number from that Asset's sequence, or clears the number if numbering is off there. Deleted numbers are not reused. Engagement URLs and database IDs stay the same.
+
 #### Engagement Statuses
 
 Engagements can be tagged with different statuses upon creation. The status can also be changed afterward in the Engagement’s settings. 

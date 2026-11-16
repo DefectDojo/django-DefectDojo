@@ -103,6 +103,7 @@ Optional Asset metadata includes:
 - **Origin** (e.g., Third-Party Library, Purchased, Open Source, etc.)
 - **User records** (i.e., the estimated number of user records in the Asset)
 - **Revenue**
+- **Engagement number format** (optional; see [Engagement numbers](/asset_modelling/engagements_tests/os__engagements/#engagement-numbers))
 
 This metadata improves filtering, reporting, and prioritization across your security program, but most importantly, Assets also contain all of the Engagements, Tests, and Findings related to the testing efforts surrounding that Asset. All Findings from Tests ultimately roll up to the Asset level, enabling long-term tracking, trend analysis, and reporting.
 

@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _
 from django_tagulous.models import TagField
 
 from dojo.base_models.base import BaseManager, BaseModel
+from dojo.product.numbering import validate_engagement_number_format
 from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 
 
@@ -95,6 +96,8 @@ class Product(BaseModel):
                                           default=1,
                                           on_delete=models.RESTRICT)
     tid = models.IntegerField(default=0, editable=False)
+    engagement_number_format = models.CharField(max_length=64, blank=True, default="", validators=[validate_engagement_number_format], help_text=_("Optional engagement number format, for example ENG-{number:04d}."))
+    engagement_number_counter = models.PositiveIntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField("dojo.Dojo_User", related_name="authorized_products", blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
@@ -161,6 +164,20 @@ class Product(BaseModel):
         return self.name
 
     def save(self, *args, **kwargs):
+        if self.engagement_number_format is None:
+            self.engagement_number_format = ""
+        validate_engagement_number_format(self.engagement_number_format)
+        # The allocator updates this column under a row lock. A Product instance
+        # loaded before an engagement was created must not write its stale counter.
+        if not self._state.adding:
+            fields = kwargs.get("update_fields")
+            if fields is None:
+                kwargs["update_fields"] = {
+                    field.name for field in self._meta.concrete_fields
+                    if not field.primary_key and field.name != "engagement_number_counter"
+                }
+            else:
+                kwargs["update_fields"] = set(fields) - {"engagement_number_counter"}
         # get the product's sla config before saving (if this is an existing product)
         initial_sla_config = None
         if self.pk is not None:
