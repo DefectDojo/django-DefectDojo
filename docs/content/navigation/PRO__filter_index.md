@@ -62,6 +62,12 @@ Text filters such as **Title**, **Component Name** and **File Path** offer **In 
 - A list with no values left applies no filter, the same as an empty text box.
 - The list is saved in the table's address and in a saved table preference, so it is still there after a reload or when you return to the table.
 
+### Exact (Case Sensitive) on Component Name
+
+**Component Name** also offers **Exact (Case Sensitive)**, which matches the whole name with its case and spaces as written: `PYPI:DJANGO` matches only `PYPI:DJANGO`, while **Exact** also matches `pypi:django`. The chip reads **is exactly**.
+
+**All Components** and the **Components** widget on an Asset list a name once for each way it is spelled, so `pypi:django` and `PYPI:DJANGO` are two rows with their own counts. Selecting a count opens the Findings list with **Exact (Case Sensitive)** on that name, so the list holds the same Findings the count does.
+
 ### Include and Exclude on multi-select filters
 
 Every multi-select filter has an **Include** / **Exclude** choice at the top. **Include** keeps the rows that match a selected value. **Exclude** keeps every row except those, so "all but these three scanners" is three picks instead of unticking everything else. Rows with no value in that column are kept under **Exclude**. Filters that already offer **Any** / **All**, such as **Status**, do not have this choice.
