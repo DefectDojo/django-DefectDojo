@@ -476,12 +476,14 @@ they simply stay Active.
 ### The record of what was accepted
 
 DefectDojo has always tracked which Findings a Risk Acceptance covers as a live membership list, and
-Findings leave that list for ordinary reasons: a re-import stops seeing the Finding, or a person
-removes it. Both are correct, and both used to remove the only evidence that the Finding was ever
-accepted. An expiry does not remove anything from the list: the Findings stay members of the
-expired acceptance, and reinstating it accepts them again (see
-[Pushing the date forward on an already-expired Risk Acceptance](#pushing-the-date-forward-on-an-already-expired-risk-acceptance)
-for the Findings it leaves out).
+Findings leave that list for ordinary reasons, for example: the Finding is closed (see
+[Editing Full Risk Acceptances](#editing-full-risk-acceptances)), a re-import stops seeing it, or a
+person removes it. Each of those is correct, and each used to remove the only evidence that the
+Finding was ever accepted. An expiry does not remove anything from the list: the Findings stay
+members of the expired acceptance, and putting the acceptance back in force accepts them again,
+apart from the Findings closed or accepted elsewhere since the expiry (see
+[Extending an expired acceptance](#extending-an-expired-acceptance) and
+[Pushing the date forward on an already-expired Risk Acceptance](#pushing-the-date-forward-on-an-already-expired-risk-acceptance)).
 
 With Risk Acceptances 2.0 enabled, DefectDojo Pro keeps a durable record per Finding per Risk
 Acceptance. When a Finding leaves the acceptance, or the acceptance expires, its record is
