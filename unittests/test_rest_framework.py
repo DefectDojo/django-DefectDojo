@@ -3856,8 +3856,11 @@ class ReimportScanTest(DojoAPITestCase):
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
+            # A title lookup reads the report for its tool, so the user is refused on the engagement
+            # (which holds test 4, found via product name, engagement name, scan_type and test_title)
+            # before that lookup runs.
             mock.assert_called_with(User.objects.get(username="admin"),
-                Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type and test_title
+                Test.objects.get(id=4).engagement,
                 permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
