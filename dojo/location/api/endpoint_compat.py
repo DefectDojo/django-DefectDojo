@@ -250,7 +250,8 @@ class V3EndpointStatusCompatibleFilterSet(FilterSet):
     risk_accepted = BooleanFilter(method="filter_risk_accepted")
 
     # A user id, as the legacy Endpoint_Status.mitigated_by foreign-key filter took: an unknown id is a 400.
-    mitigated_by = ModelChoiceFilter(queryset=Dojo_User.objects.all(), method="filter_mitigated_by")
+    # field_name names the model field it reads, so the OpenAPI schema types the parameter as an integer.
+    mitigated_by = ModelChoiceFilter(field_name="auditor", queryset=Dojo_User.objects.all(), method="filter_mitigated_by")
 
     finding = NumberFilter(field_name="finding", lookup_expr="exact")
     endpoint = NumberFilter(method="filter_endpoint")
