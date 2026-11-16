@@ -138,6 +138,22 @@ The remaining bulk-action buttons open their own dialogs:
 * **Merge** — merge multiple selected Findings (all from the same Asset) into one.
 * **Delete** — delete the selected Findings after confirming in a popup.
 
+### Automating a bulk delete
+
+Scripts and integrations delete several Findings at once with `POST /api/v2/findings/bulk_delete/`, with the Finding IDs in `findings`:
+
+```json
+{ "findings": [101, 102, 103] }
+```
+
+The delete runs in the request and is all or nothing. Each Finding is deleted as `DELETE /api/v2/findings/{id}/` deletes it, with its notes, files and tags. When duplicate cluster cascade delete is on, its duplicates go with it. The response (`200`) reports how many Findings were deleted, and why any were skipped:
+
+```json
+{ "deleted": 2, "skipped_messages": ["You are not authorized to delete finding 103."] }
+```
+
+A Finding is deleted only if you have permission to delete it. An ID that does not exist is skipped and listed, like one you may not delete. If you may delete none of the selected Findings, the request is refused with `403` and nothing is deleted. A request takes up to 1,000 Finding IDs, and a longer list is refused with `400`, so split a larger cleanup into batches. Authenticate with an API token, as for the rest of `/api/v2/`.
+
 ## Availability and skipped Findings
 
 Each bulk action is available only when it can apply to your whole selection:
