@@ -138,7 +138,16 @@ Si la restauration signale des erreurs, capturez la sortie et contactez le suppo
 
 Placez le contenu de l'archive multimédia à l'endroit où votre déploiement Pro lit les fichiers téléversés. L'application les recherche dans `/app/media`, que votre déploiement fait reposer sur un bind mount ou un volume persistant. Consultez la documentation d'installation fournie avec votre licence pour connaître le chemin hôte ou le volume utilisé par votre déploiement.
 
-Pour un déploiement Docker Compose reposant sur un volume nommé :
+Pour un déploiement installé avec dojo-compose-cli, extrayez l'archive sur l'hôte Pro dans le répertoire `media` de l'installation, puis attribuez-le à l'uid 1001, l'utilisateur sous lequel s'exécutent les conteneurs de l'application :
+
+```bash
+sudo tar xzf defectdojo-v<VERSION>-media.tar.gz -C /opt/dojo/media
+sudo chown -R 1001:1001 /opt/dojo/media
+```
+
+`/opt/dojo` est le répertoire d'installation par défaut. Si vous avez installé ailleurs, utilisez votre propre répertoire dans les deux commandes.
+
+Pour un déploiement Docker Compose qui utilise plutôt un volume nommé `defectdojo_media` :
 
 ```bash
 docker run --rm \

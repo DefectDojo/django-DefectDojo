@@ -138,7 +138,16 @@ Se il ripristino segnala errori, salva l'output e contatta il supporto prima di 
 
 Colloca il contenuto dell'archivio multimediale nel punto da cui il tuo deployment Pro legge i file caricati. L'applicazione li cerca in `/app/media`, che nel tuo deployment è supportato da un bind mount o da un volume persistente. Consulta la documentazione di installazione fornita con la tua licenza per conoscere il percorso host o il volume utilizzato dal tuo deployment.
 
-Per un deployment Docker Compose supportato da un volume denominato:
+Per un deployment installato con dojo-compose-cli, estrai l'archivio sull'host Pro nella directory `media` dell'installazione, quindi assegnala all'uid 1001, l'utente con cui vengono eseguiti i container dell'applicazione:
+
+```bash
+sudo tar xzf defectdojo-v<VERSION>-media.tar.gz -C /opt/dojo/media
+sudo chown -R 1001:1001 /opt/dojo/media
+```
+
+`/opt/dojo` è la directory di installazione predefinita. Se hai installato altrove, usa la tua directory in entrambi i comandi.
+
+Per un deployment Docker Compose che utilizza invece un volume denominato `defectdojo_media`:
 
 ```bash
 docker run --rm \

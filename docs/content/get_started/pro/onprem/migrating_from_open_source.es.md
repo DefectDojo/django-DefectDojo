@@ -138,7 +138,16 @@ Si la restauración reporta errores, capture la salida y contacte a soporte ante
 
 Coloque el contenido del archivo multimedia en el lugar desde donde su implementación de Pro lee los archivos cargados. La aplicación los busca en `/app/media`, que su implementación respalda mediante un bind mount o un volumen persistente. Consulte la documentación de instalación suministrada con su licencia para conocer la ruta de host o el volumen que usa su implementación.
 
-Para una implementación de Docker Compose respaldada por un volumen con nombre:
+Para una implementación instalada con dojo-compose-cli, extraiga el archivo en el host de Pro dentro del directorio `media` de la instalación y luego asígnelo al uid 1001, el usuario con el que se ejecutan los contenedores de la aplicación:
+
+```bash
+sudo tar xzf defectdojo-v<VERSION>-media.tar.gz -C /opt/dojo/media
+sudo chown -R 1001:1001 /opt/dojo/media
+```
+
+`/opt/dojo` es el directorio de instalación predeterminado. Si instaló en otra ubicación, use su propio directorio en ambos comandos.
+
+Para una implementación de Docker Compose que usa en su lugar un volumen con nombre `defectdojo_media`:
 
 ```bash
 docker run --rm \

@@ -137,7 +137,16 @@ gunzip -c defectdojo-v<VERSION>-backup.sql.gz | \
 
 将媒体归档中的内容放置到 Pro 部署读取上传文件的位置。应用程序会在 `/app/media` 中查找这些文件,而该路径由您部署环境中的绑定挂载或持久卷提供支持。请查阅随许可证提供的安装文档,了解您的部署所使用的主机路径或卷。
 
-对于以命名卷为支撑的 Docker Compose 部署:
+对于使用 dojo-compose-cli 安装的部署,请在 Pro 主机上将归档解压到安装目录下的 `media` 目录,然后将其所有者改为 uid 1001,即应用程序容器运行时使用的用户:
+
+```bash
+sudo tar xzf defectdojo-v<VERSION>-media.tar.gz -C /opt/dojo/media
+sudo chown -R 1001:1001 /opt/dojo/media
+```
+
+`/opt/dojo` 是默认安装目录。如果您安装在其他位置,请在两条命令中都改用您自己的目录。
+
+对于改用名为 `defectdojo_media` 的命名卷的 Docker Compose 部署:
 
 ```bash
 docker run --rm \

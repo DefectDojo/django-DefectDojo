@@ -157,7 +157,16 @@ kubectl cp ./media-extracted/. <namespace>/<django-pod-name>:/app/media/
 ```
 {{< /tab >}}
 {{< tab "Compose" >}}
-For a deployment backed by a named volume:
+For a deployment installed with dojo-compose-cli, extract the archive on the Pro host into the install's `media` directory, then give it to uid 1001, the user the application containers run as:
+
+```bash
+sudo tar xzf defectdojo-v<VERSION>-media.tar.gz -C /opt/dojo/media
+sudo chown -R 1001:1001 /opt/dojo/media
+```
+
+`/opt/dojo` is the default install directory. If you installed somewhere else, use your own directory in both commands.
+
+For a deployment that uses a named `defectdojo_media` volume instead:
 
 ```bash
 docker run --rm \

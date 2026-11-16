@@ -137,7 +137,16 @@ gunzip -c defectdojo-v<VERSION>-backup.sql.gz | \
 
 メディアアーカイブの内容を、Proデプロイメントがアップロード済みファイルを読み込む場所に配置します。アプリケーションは`/app/media`でファイルを探しますが、これはデプロイメントによってバインドマウントまたは永続ボリュームで裏付けられています。デプロイメントが使用するホストパスまたはボリュームについては、ライセンスに付属のインストールドキュメントを確認してください。
 
-名前付きボリュームで構成されたDocker Composeデプロイメントの場合。
+dojo-compose-cliでインストールしたデプロイメントの場合は、Proホスト上でアーカイブをインストール先の`media`ディレクトリに展開し、所有者をアプリケーションコンテナの実行ユーザーであるuid 1001に変更します。
+
+```bash
+sudo tar xzf defectdojo-v<VERSION>-media.tar.gz -C /opt/dojo/media
+sudo chown -R 1001:1001 /opt/dojo/media
+```
+
+`/opt/dojo`はデフォルトのインストール先ディレクトリです。別の場所にインストールした場合は、両方のコマンドでそのディレクトリを指定してください。
+
+代わりに名前付きボリューム`defectdojo_media`を使用するDocker Composeデプロイメントの場合。
 
 ```bash
 docker run --rm \
