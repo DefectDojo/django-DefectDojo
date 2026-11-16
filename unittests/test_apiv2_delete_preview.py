@@ -15,6 +15,7 @@ from dojo.models import (
     Choice,
     ChoiceAnswer,
     ChoiceQuestion,
+    Dojo_User,
     Endpoint,
     Engagement,
     Engagement_Survey,
@@ -68,6 +69,53 @@ class DeletePreviewPermissionTest(DojoTestCase):
         response = self._client(admin).get(reverse("user-delete-preview", args=(self.author.id,)))
         self.assertEqual(200, response.status_code, response.content[:500])
         self.assertIn("Notes", [row["model"] for row in response.json()["results"]])
+
+
+@versioned_fixtures
+class DeletePreviewObjectPermissionTest(DojoTestCase):
+
+    """
+    Viewsets whose permission classes pick the permission from request.method (engagements, tests,
+    findings and the other product-scoped ones) serve the preview only to a user the DELETE would
+    admit, not to every user who may view the object.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _authorized_client(self, product, *, is_staff):
+        user = Dojo_User.objects.create(username=f"delete-preview-member-{is_staff}", is_staff=is_staff)
+        product.authorized_users.add(user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.get_or_create(user=user)[0].key)
+        return client
+
+    def _targets(self):
+        finding = Finding.objects.get(id=2)
+        return finding.test.engagement.product, [
+            ("engagement", finding.test.engagement.id),
+            ("test", finding.test.id),
+            ("finding", finding.id),
+        ]
+
+    def test_member_who_cannot_delete_is_refused_the_preview(self):
+        product, targets = self._targets()
+        client = self._authorized_client(product, is_staff=False)
+        for basename, pk in targets:
+            with self.subTest(basename=basename):
+                response = client.get(reverse(f"{basename}-detail", args=(pk,)))
+                self.assertEqual(200, response.status_code, response.content[:500])
+                response = client.get(reverse(f"{basename}-delete-preview", args=(pk,)))
+                self.assertEqual(403, response.status_code, response.content[:500])
+                self.assertNotIn(b"results", response.content)
+
+    def test_member_who_can_delete_is_served_the_preview(self):
+        product, targets = self._targets()
+        client = self._authorized_client(product, is_staff=True)
+        for basename, pk in targets:
+            with self.subTest(basename=basename):
+                response = client.get(reverse(f"{basename}-delete-preview", args=(pk,)))
+                self.assertEqual(200, response.status_code, response.content[:500])
+                self.assertIn(pk, [row["id"] for row in response.json()["results"]])
 
 
 @versioned_fixtures

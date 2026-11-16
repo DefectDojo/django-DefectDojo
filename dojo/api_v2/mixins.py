@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.request import clone_request
 
 from dojo.api_v2 import serializers
 from dojo.models import Endpoint
@@ -141,13 +141,14 @@ class DeletePreviewModelMixin:
     )
     @action(detail=True, methods=["get"], filter_backends=[], suffix="List")
     def delete_preview(self, request, pk=None):
+        # The preview lists every row a delete would remove, so it is served only to a caller the
+        # DELETE request itself would admit: the viewset's own permission classes run against a
+        # DELETE copy of the request, at the view and at the object level. Permission classes that
+        # pick the permission from request.method would otherwise admit anyone who may view the object.
+        delete_request = clone_request(request, "DELETE")
+        self.check_permissions(delete_request)
         obj = self.get_object()
-        # The preview lists what a delete would remove, so viewsets guarded by model
-        # permissions require the delete permission here as well.
-        for permission in self.get_permissions():
-            if isinstance(permission, DjangoModelPermissions):
-                if not request.user.has_perms(permission.get_required_permissions("DELETE", type(obj))):
-                    self.permission_denied(request)
+        self.check_object_permissions(delete_request, obj)
 
         # Cap the page whatever the configured paginator allows: each row is rendered in Python.
         paginator = self.paginator
