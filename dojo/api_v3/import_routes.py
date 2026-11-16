@@ -135,14 +135,17 @@ def _resolve_test_for_reimport(request: HttpRequest, test_id: int) -> Test:
     return test
 
 
-def _check_auto_permission(request: HttpRequest, payload: ImportForm, scan_file: UploadedFile | None = None) -> object | None:
+def _check_auto_permission(request: HttpRequest, payload: ImportForm, scan_file: UploadedFile | None) -> object | None:
     """
     Mirror UserHasReimportPermission: resolve target and check, else check auto-create.
 
     Returns the resolved JIRA driver (``test or engagement or product``, mirroring the v2 reimport
     viewset) so the caller can OR ``push_to_jira`` with the project's ``push_all_issues``.
+
+    The manager is the request's, which ``auto_import_scan`` then resolves the target on too, so
+    the report is read for its tool once per request.
     """
-    auto = AutoCreateContextManager()
+    auto = AutoCreateContextManager.for_request(request)
     context = {
         "scan_type": payload.scan_type,
         # The auto branch dispatches on this id, so the check has to resolve the target the same

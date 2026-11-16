@@ -41,7 +41,8 @@ class AutoCreateContextManager:
     def __init__(self) -> None:
         self._found: dict[tuple, Any] = {}
         # (report file, the test type names it accepts): the permission check and the serializer
-        # resolve the same upload, so the report is read for its tool once per request.
+        # (v2) or auto_import_scan (v3) resolve the same upload, so the report is read for its tool
+        # once per request.
         self._report_test_types: list[tuple[Any, frozenset[str] | None]] = []
 
     @classmethod
