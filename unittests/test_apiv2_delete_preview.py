@@ -6,10 +6,12 @@ from django.contrib.auth.models import Permission
 from django.db import DEFAULT_DB_ALIAS, connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from rest_framework import mixins, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
-from dojo.api_v2.mixins import DELETE_PREVIEW_MAX_PAGE_SIZE
+from dojo.api_v2.mixins import DELETE_PREVIEW_MAX_PAGE_SIZE, DeletePreviewModelMixin
 from dojo.models import (
     Answered_Survey,
     Choice,
@@ -28,6 +30,7 @@ from dojo.models import (
     TextQuestion,
     User,
 )
+from dojo.user.api.serializer import UserSerializer
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
@@ -69,6 +72,53 @@ class DeletePreviewPermissionTest(DojoTestCase):
         response = self._client(admin).get(reverse("user-delete-preview", args=(self.author.id,)))
         self.assertEqual(200, response.status_code, response.content[:500])
         self.assertIn("Notes", [row["model"] for row in response.json()["results"]])
+
+
+class _DestroyIsAdminOnlyViewSet(DeletePreviewModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+
+    """Picks its permission classes from self.action, the way a viewset that gates only destroy does."""
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+    seen = []
+
+    def get_permissions(self):
+        self.seen.append((self.action, self.request.method))
+        if self.action == "destroy":
+            return [IsAdminUser()]
+        return super().get_permissions()
+
+
+@versioned_fixtures
+class DeletePreviewActionPermissionTest(DojoTestCase):
+
+    """A viewset whose get_permissions() reads self.action holds delete_preview to its destroy permissions."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.target = User.objects.create(username="delete-preview-action-target")
+        _DestroyIsAdminOnlyViewSet.seen = []
+
+    def _preview(self, user):
+        request = APIRequestFactory().get(f"/delete_preview/{self.target.id}/")
+        force_authenticate(request, user=user)
+        view = _DestroyIsAdminOnlyViewSet.as_view({"get": "delete_preview"})
+        return view(request, pk=self.target.id)
+
+    def test_refused_to_a_user_the_destroy_permissions_refuse(self):
+        user = User.objects.create(username="delete-preview-action-plain", is_staff=False, is_superuser=False)
+        response = self._preview(user)
+        self.assertEqual(403, response.status_code)
+        self.assertIn(("destroy", "DELETE"), _DestroyIsAdminOnlyViewSet.seen)
+
+    def test_served_to_a_user_the_destroy_permissions_admit(self):
+        response = self._preview(User.objects.get(username="admin"))
+        self.assertEqual(200, response.status_code)
+        # The action and request are restored after the checks: the response is built for the GET.
+        self.assertEqual(("delete_preview", "GET"), _DestroyIsAdminOnlyViewSet.seen[0])
+        self.assertIn(self.target.id, [row["id"] for row in response.data["results"]])
 
 
 @versioned_fixtures
