@@ -304,7 +304,7 @@ The full set of `widget_data` actions:
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
 | `count` | POST | `model`, `filters`, `aggregation?` | `{count}` |
-| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `series_by?` | `{labels, series, ...}` |
+| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `series_by?` | `{labels, series, ...}` (see [The `aggregate` action](#the-aggregate-action)) |
 | `dimensions` | GET | `?model=` | valid group-by dimensions |
 | `top_records` | POST | `model`, `filters`, `metric`, `limit?`, `sort?` | `{labels, series, ...}` |
 | `record_metrics` | GET | `?model=` | valid records-mode metrics |
