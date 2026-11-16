@@ -570,12 +570,12 @@ one that keeps going.
 
 In `acceptance` mode a rule adds Findings only to a Risk Acceptance that is in force. A rule never
 stands in for the approval: with Risk Acceptances 2.0 enabled, a Risk Acceptance that is proposed,
-under review, rejected or expired takes nothing from the rule. An expired Risk Acceptance is refused
+under review, approved but not yet activated, rejected or expired takes nothing from the rule. An expired Risk Acceptance is refused
 with that feature off too, because nothing would ever expire a Finding added to it after its
 expiration. The rule changes nothing then, and its run says why: the node reports how many Findings
 it did not add because the Risk Acceptance is not active, and the run's trace names the Risk
-Acceptance's state. A preview shows the same. Approve the Risk Acceptance, or
-reinstate an expired one, and the next run that matches the Findings adds them.
+Acceptance's state. A preview shows the same. Activate the Risk Acceptance (approve it, then activate
+it), or reinstate an expired one, and the next run that matches the Findings adds them.
 
 ### Set Mitigation Policy
 
