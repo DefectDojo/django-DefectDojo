@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "package": [
+    {
+      "name": "zstd",
+      "layer": "meta",
+      "version": "1.5.6",
+      "products": [{"product": "zstandard", "cvesInRecord": "No"}],
+      "issue": []
+    },
+    {
+      "name": "openssh",
+      "layer": "meta",
+      "version": "9.6p1",
+      "products": [{"product": "openssh", "cvesInRecord": "Yes"}],
+      "issue": [
+        {
+          "id": "CVE-2023-38408",
+          "summary": "The PKCS#11 feature in ssh-agent in OpenSSH before 9.3p2 has an insufficiently trustworthy search path.",
+          "scorev2": "0.0",
+          "scorev3": "9.8",
+          "scorev4": "0.0",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "status": "Patched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-38408",
+          "detail": "fixed-version",
+          "description": "only CVE-2023-38408 and earlier are affected"
+        }
+      ]
+    }
+  ]
+}
