@@ -565,8 +565,11 @@ so the Findings already there are added with **Add Findings to Risk Acceptance**
 from `POST /api/v2/risk_acceptance/criteria_preview/`, which takes the `acceptance_criteria` to
 preview and either `risk_acceptance` (the acceptance being edited) or `accepted_findings` (the
 Findings a new one is created with) to fill in a scope sent without ids, and answers
-`{"count": ..., "active_count": ...}`. It writes nothing, and criteria a save would refuse are refused
-with the same `400`.
+`{"count": ..., "active_count": ..., "timed_out": false}`. It writes nothing. Criteria a save would
+refuse are refused with the same `400`, including a scope you may not accept risk in and
+**Everywhere** without the permission it needs. Counting stops after a few seconds: very broad
+criteria on a large instance answer `"timed_out": true` with no count, and the form says the criteria
+match too many Findings to count quickly.
 
 The Risk Acceptance page lists the **Affected Engagements**: the Engagements its Findings sit in,
 kept current as Findings are added (by hand or by standing criteria) and removed. An Engagement you
