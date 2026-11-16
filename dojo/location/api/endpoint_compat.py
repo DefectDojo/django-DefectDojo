@@ -8,7 +8,7 @@ import datetime
 
 from django.db.models import OuterRef, Prefetch, Subquery, Value
 from django.db.models.functions import Coalesce
-from django_filters import BooleanFilter, CharFilter, NumberFilter
+from django_filters import BooleanFilter, CharFilter, ModelChoiceFilter, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status, viewsets
@@ -43,6 +43,7 @@ from dojo.location.queries import (
     get_authorized_location_product_reference,
 )
 from dojo.location.status import FindingLocationStatus
+from dojo.models import Dojo_User
 from dojo.query_utils import build_count_subquery
 from dojo.url.models import URL
 
@@ -248,7 +249,8 @@ class V3EndpointStatusCompatibleFilterSet(FilterSet):
     out_of_scope = BooleanFilter(method="filter_out_of_scope")
     risk_accepted = BooleanFilter(method="filter_risk_accepted")
 
-    mitigated_by = CharFilter(method="filter_mitigated_by")
+    # A user id, as the legacy Endpoint_Status.mitigated_by foreign-key filter took: an unknown id is a 400.
+    mitigated_by = ModelChoiceFilter(queryset=Dojo_User.objects.all(), method="filter_mitigated_by")
 
     finding = NumberFilter(field_name="finding", lookup_expr="exact")
     endpoint = NumberFilter(method="filter_endpoint")
@@ -274,7 +276,7 @@ class V3EndpointStatusCompatibleFilterSet(FilterSet):
         return queryset.exclude(status=FindingLocationStatus.RiskAccepted)
 
     def filter_mitigated_by(self, queryset, name, value):
-        return queryset.filter(status=FindingLocationStatus.Mitigated, auditor__iexact=value)
+        return queryset.filter(status=FindingLocationStatus.Mitigated, auditor=value)
 
     def filter_endpoint(self, queryset, name, value):
         # The value is an /api/v2/endpoints/ id: one product's reference to a Location. A Location
@@ -324,7 +326,8 @@ class V3EndpointStatusCompatibleSerializer(ModelSerializer):
         return obj.audit_time if self.get_mitigated(obj) else None
 
     def get_mitigated_by(self, obj) -> int | None:
-        return obj.auditor.id if self.get_mitigated(obj) and obj.auditor else None
+        # The column itself: reading auditor.id would load each mitigated row's user, one query per row.
+        return obj.auditor_id if self.get_mitigated(obj) else None
 
     def get_false_positive(self, obj) -> bool | None:
         return obj.status == FindingLocationStatus.FalsePositive
