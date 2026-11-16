@@ -171,7 +171,7 @@ The migrated Jira projects are off, and the migrated instances have no API token
 * **Classic Jira.** On each migrated Jira instance, add the API token. Turn on Jira in **System Settings**. Then turn on each Jira project.
 * **Downstream Connectors.** The conversion sets up automatic pushes only for a Jira project that is on and pushes all issues. So, after the last Sync:
   1. Keep Jira turned off in **System Settings**. With Jira off, a project that you turn on sends nothing to Jira.
-  2. Turn on each migrated Jira project that pushed all issues on the source. Use the API, because the forms that turn a project on show only while Jira is on. Send `PATCH /api/v2/jira_projects/<id>/` with the body `{"enabled": true}`. To find the ids, send `GET /api/v2/jira_projects/?enabled=false&push_all_issues=true`.
+  2. Through the API, turn on each migrated Jira project that pushed all issues on the source. The forms that turn a project on show only while Jira is on. Send `PATCH /api/v2/jira_projects/<id>/` with the body `{"enabled": true}`. To find the ids, send `GET /api/v2/jira_projects/?enabled=false&push_all_issues=true&jira_instance=<id>`, with the id of the migrated Jira instance. Without it, the list can include a project that was already off in DefectDojo Pro.
   3. Run the classic Jira conversion on the **Downstream Connectors** page, as [Migrating to the Jira Downstream Connector](/connectors/downstream/PRO__jira_guide/#migrating-to-the-jira-downstream-connector) describes. The conversion turns the classic projects off again.
   4. Add the API token on the new connection.
 
