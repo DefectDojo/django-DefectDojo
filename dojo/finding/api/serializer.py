@@ -1036,7 +1036,8 @@ class FindingToFilesSerializer(serializers.Serializer):
 
 
 class FindingCloseSerializer(serializers.ModelSerializer):
-    is_mitigated = serializers.BooleanField(required=False)
+    # Closing without saying how closes the finding as mitigated, for JSON and form bodies alike.
+    is_mitigated = serializers.BooleanField(required=False, default=True)
     mitigated = serializers.DateTimeField(required=False)
     false_p = serializers.BooleanField(required=False)
     out_of_scope = serializers.BooleanField(required=False)
