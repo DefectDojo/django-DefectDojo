@@ -117,11 +117,14 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         self.assertEqual(self._state(OTHER), {OTHER: (False, ROOT, True)})
         self.assertEqual(self._state(ROOT), {ROOT: (True, OTHER, False)})
 
-    def _move_root_to_other_engagement(self, *, dedupe_on_engagement):
-        # Engagement 3 belongs to the same product as finding 2's engagement (1); both have
-        # deduplication_on_engagement on in the fixture.
+    def _move_root_to_other_engagement(self, *, dedupe_on_engagement, root_dedupe_on_engagement=None):
+        # Engagement 3 belongs to the same product as finding 2's engagement (1). Engagement 1 holds
+        # findings 3 and 7; engagement 3 takes the root.
+        if root_dedupe_on_engagement is None:
+            root_dedupe_on_engagement = dedupe_on_engagement
         engagement = Engagement.objects.get(pk=3)
-        Engagement.objects.filter(pk__in=(1, 3)).update(deduplication_on_engagement=dedupe_on_engagement)
+        Engagement.objects.filter(pk=1).update(deduplication_on_engagement=dedupe_on_engagement)
+        Engagement.objects.filter(pk=3).update(deduplication_on_engagement=root_dedupe_on_engagement)
         test = Finding.objects.get(pk=ROOT).test
         now = timezone.now()
         other_test = Test.objects.create(
@@ -133,6 +136,11 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         # Finding 3 shares finding 7's engagement, but the mark would point 7 at 3's root, finding 2,
         # which now sits in another engagement.
         self._move_root_to_other_engagement(dedupe_on_engagement=True)
+        self._assert_refused(OTHER, MEMBERS[0], ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE)
+
+    def test_refuses_a_mark_under_a_root_whose_engagement_alone_has_engagement_deduplication(self):
+        # Neither the marked finding's engagement nor the original's has the setting; only the root's does.
+        self._move_root_to_other_engagement(dedupe_on_engagement=False, root_dedupe_on_engagement=True)
         self._assert_refused(OTHER, MEMBERS[0], ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE)
 
     def test_marks_under_a_root_in_another_engagement_without_engagement_deduplication(self):

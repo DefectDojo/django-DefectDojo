@@ -3105,8 +3105,8 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
         id=duplicate_id,
     )
 
-    # The mark points the duplicate at the original's cluster root, so every check below runs against that
-    # root: the engagement check too, since the root is the finding the duplicate ends up under.
+    # The mark points the duplicate at the original's cluster root, so the engagement check compares against
+    # that root, the finding the duplicate ends up under, not the original it was posted with.
     root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
 
     if root.test.engagement != duplicate.test.engagement:
