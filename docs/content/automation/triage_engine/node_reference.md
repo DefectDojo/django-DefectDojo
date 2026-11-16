@@ -540,7 +540,7 @@ Simple risk accepts the Finding, or adds it to a risk acceptance record.
 |---------|---------|-------|
 | **How** | `simple` | `simple` sets simple risk acceptance on the Finding. `acceptance` adds it to a risk acceptance record. |
 | **Accepted** | on | Shown for `simple`. Turn off to un-accept the risk. |
-| **Risk Acceptance** | none | Shown for `acceptance`. Which risk acceptance to add these Findings to. |
+| **Risk Acceptance** | none | Shown for `acceptance`. Which risk acceptance to add these Findings to. It must be active: see below. |
 | **Accept Without Review Up To** | No limit | The most severe Finding this rule may accept on its own. Anything more severe is **not** accepted. |
 
 #### Limiting what a rule may accept on its own
@@ -548,17 +548,34 @@ Simple risk accepts the Finding, or adds it to a risk acceptance record.
 A rule that can accept risk can accept a Critical, and by default nothing says otherwise. *Accept
 Without Review Up To* draws that line.
 
-Findings over the limit are not dropped — the rule matched them for a reason. With
+Findings over the limit are not dropped: the rule matched them for a reason. With
 [Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled they
 are put into a Risk Acceptance **awaiting review**, named for the rule that asked and carrying why,
-so a person decides. They stay active and counted the whole time. With that feature off there is no
-review state to use, so they are simply left alone — never accepted, which is the point of the
-limit. A rule preview creates nothing, as with every other action.
+so a person decides. They stay active and counted the whole time. A Finding already waiting on a
+decision, or already in another Risk Acceptance, is not asked about again. With that feature off
+there is no review state to use, so they are simply left alone (never accepted, which is the point
+of the limit).
+
+A rule preview creates nothing, as with every other action, but it lists each Finding over the limit
+with `workflow_state` going to `proposed`, so you can see what the rule would send for review before
+it runs. The node reports how many Findings were over the severity limit and, with Risk Acceptances
+2.0 enabled, how many were proposed for review.
 
 Two behaviors worth knowing: a severity the rule cannot recognize counts as *over* the limit (if it
 cannot be ranked it cannot be called safe), while a *limit* that cannot be recognized is ignored
 rather than blocking everything, because a rule that silently stops working is harder to notice than
 one that keeps going.
+
+#### Only an active Risk Acceptance takes Findings from a rule
+
+In `acceptance` mode a rule adds Findings only to a Risk Acceptance that is in force. A rule never
+stands in for the approval: with Risk Acceptances 2.0 enabled, a Risk Acceptance that is proposed,
+under review, approved but not yet activated, rejected or expired takes nothing from the rule. An expired Risk Acceptance is refused
+with that feature off too, because nothing would ever expire a Finding added to it after its
+expiration. The rule changes nothing then, and its run says why: the node reports how many Findings
+it did not add because the Risk Acceptance is not active, and the run's trace names the Risk
+Acceptance's state. A preview shows the same. Activate the Risk Acceptance (approve it, then activate
+it), or reinstate an expired one, and the next run that matches the Findings adds them.
 
 ### Set Mitigation Policy
 
