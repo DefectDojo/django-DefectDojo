@@ -538,8 +538,6 @@ and keep the downloads with your technical documentation. See
 So nobody spends time hunting for these:
 
 * **No screen lists per-release SBOMs.** They are stored per version and exported through the API.
-* **The Article 14 report's audit trail has no screen.** The awareness reason is in each stage's
-  **JSON** download.
 * **No dashboard widget or report reads assessment states or CRA classes.** They are on the EU
   Evidence tab and in the evidence pack.
 * **SP-2, VH-4 and RP-7 are not computed.** SP-1 reads **Support Period End** from the
