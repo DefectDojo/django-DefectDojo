@@ -528,13 +528,17 @@ record says the criteria covered it rather than naming a person.
 
 Matchable attributes — all optional, and **all of the ones present must match**:
 
-| Key | Matches on |
-| --- | --- |
-| `vulnerability_ids` | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
-| `cwes` | the Finding's CWE |
-| `severities` | the Finding's severity, case-insensitive |
-| `component_name`, `component_version` | glob patterns — the same component is named differently by different scanners, and versions come in ranges |
-| `title_pattern` | a glob against the title |
+| Key | Value | Matches on |
+| --- | --- | --- |
+| `vulnerability_ids` | a list of strings | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
+| `cwes` | a list of CWE numbers (`79` or `"79"`) | the Finding's CWE |
+| `severities` | a list of strings | the Finding's severity, case-insensitive |
+| `component_name`, `component_version` | a string | glob patterns (the same component is named differently by different scanners, and versions come in ranges) |
+| `title_pattern` | a string | a glob against the title |
+
+A value of another shape is refused with `400` and nothing is saved: a single string where a list is
+expected (`"severities": "High"` rather than `["High"]`), a CWE that is not a number, or a pattern that
+is not a string. CWE numbers sent as strings are stored as numbers.
 
 `scope` is **required** and is what stops an acceptance reaching Findings its author has no business
 accepting. `type` is `engagement`, `product`, `product_type` or `global`.
