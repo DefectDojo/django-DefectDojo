@@ -2,6 +2,11 @@
 {% load display_tags %}
 {{ description }}
 
+{% if risk_acceptances %}
+{{ title }}
+{% for row in risk_acceptance_rows %}
+- {{ row.risk_acceptance }}: {{ row.url|full_url }}{% endfor %}
+{% else %}
 {% if risk_acceptance.is_expired %}
     {% trans "Risk Acceptance Expired" %}
 {% else %}
@@ -11,6 +16,7 @@
 {% blocktranslate trimmed with risk_url=url|full_url %}
 Risk Acceptance can be viewed here: {{ risk_url }}
 {% endblocktranslate %}
+{% endif %}
 {% if system_settings.disclaimer_notifications and system_settings.disclaimer_notifications.strip %}
     
     {% trans "Disclaimer" %}:

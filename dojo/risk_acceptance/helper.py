@@ -1,4 +1,5 @@
 import logging
+from contextlib import contextmanager
 
 import pghistory
 from dateutil.relativedelta import relativedelta
@@ -7,6 +8,7 @@ from django.db import transaction
 from django.db.models import Exists, OuterRef, Q
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import ngettext
 
 from dojo.celery import app
 from dojo.jira import services as jira_services
@@ -101,7 +103,13 @@ def note_on_risk_acceptance(risk_acceptance: Risk_Acceptance, user: Dojo_User | 
     ))
 
 
-def expire_now(risk_acceptance, user=None, reason=None):
+def expire_now(risk_acceptance, user=None, reason=None, run=None):
+    """
+    Expire a risk acceptance now: reactivate its findings if it says so, comment on their tickets and notify.
+
+    :param run: The scheduled run this expiry is part of (see ExpirationRun), which then sends the comments and
+        the notification once for the whole run. None sends them now, for this acceptance alone.
+    """
     logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
     reactivated_findings = []
@@ -135,7 +143,10 @@ def expire_now(risk_acceptance, user=None, reason=None):
                 logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
         # best effort JIRA integration, no status changes, just a comment
-        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
+        if run is None:
+            post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
+        else:
+            run.comment(risk_acceptance, risk_acceptance.accepted_findings.all())
 
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
@@ -152,10 +163,15 @@ def expire_now(risk_acceptance, user=None, reason=None):
     title = "Risk acceptance with " + str(len(accepted_findings)) + " accepted findings has expired for " + \
             str(engagement.product) + ": " + str(engagement.name)
 
-    create_notification(event="risk_acceptance_expiration", title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=engagement,
-                         product=engagement.product,
-                         url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
+    notification = {
+        "event": "risk_acceptance_expiration", "title": title, "risk_acceptance": risk_acceptance,
+        "accepted_findings": accepted_findings, "reactivated_findings": reactivated_findings, "engagement": engagement,
+        "product": engagement.product, "url": reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
+    }
+    if run is None:
+        create_notification(**notification)
+    else:
+        run.notify(notification)
 
 
 def findings_accepted_elsewhere(risk_acceptance):
@@ -350,11 +366,10 @@ def push_to_jira_after_commit(finding: Finding, action: str) -> None:
 @app.task
 def expiration_handler(*args, **kwargs):
     """
-    Creates a notification upon risk expiration and X days beforehand if configured.
-    This notification is 1 per risk acceptance.
+    Expire the risk acceptances past their date, and warn about those expiring within the heads-up window.
 
-    If configured also sends a JIRA comment in both case to each jira issue.
-    This is per finding.
+    One run sends a bounded number of messages however many acceptances it handles (see ExpirationRun): one
+    notification per product and event, and at most one Jira comment per Jira issue and event.
     """
     # Wrap with pghistory context for audit trail
     with pghistory.context(source="risk_acceptance_expiration"):
@@ -367,35 +382,47 @@ def expiration_handler(*args, **kwargs):
         risk_acceptances = get_expired_risk_acceptances_to_handle()
 
         logger.info("expiring %i risk acceptances that are past expiration date", len(risk_acceptances))
-        for risk_acceptance in risk_acceptances:
-            expire_now(risk_acceptance)
-            # notification created by expire_now code
+        expired = ExpirationRun(expiration_message_creator)
+        try:
+            for risk_acceptance in risk_acceptances:
+                with expired.handling(risk_acceptance):
+                    expire_now(risk_acceptance, run=expired)
+        finally:
+            expired.send()
 
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
-        if heads_up_days > 0:
+        # blank switches the warning off (the setting says so), as 0 does
+        if heads_up_days and heads_up_days > 0:
             risk_acceptances = get_almost_expired_risk_acceptances_to_handle(heads_up_days)
 
             logger.info("notifying for %i risk acceptances that are expiring within %i days", len(risk_acceptances), heads_up_days)
-            for risk_acceptance in risk_acceptances:
-                logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+            warned = ExpirationRun(expiration_warning_message_creator, heads_up_days)
+            try:
+                for risk_acceptance in risk_acceptances:
+                    with warned.handling(risk_acceptance):
+                        logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
-                engagement = engagement_to_notify_about(risk_acceptance)
-                if engagement is not None:
-                    notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
-                        timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
-                        str(engagement.product) + ": " + str(engagement.name)
+                        engagement = engagement_to_notify_about(risk_acceptance)
+                        if engagement is not None:
+                            notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
+                                timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
+                                str(engagement.product) + ": " + str(engagement.name)
 
-                    create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
-                                        accepted_findings=risk_acceptance.accepted_findings.all(), engagement=engagement,
-                                        product=engagement.product,
-                                        url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
+                            warned.notify({
+                                "event": "risk_acceptance_expiration", "title": notification_title, "risk_acceptance": risk_acceptance,
+                                "accepted_findings": risk_acceptance.accepted_findings.all(), "engagement": engagement,
+                                "product": engagement.product,
+                                "url": reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
+                            })
 
-                post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
+                        warned.comment(risk_acceptance, risk_acceptance.accepted_findings.all())
 
-                # marked as warned either way, so a risk acceptance nobody can be notified about
-                # is not re-selected on every subsequent run
-                risk_acceptance.expiration_date_warned = timezone.now()
-                risk_acceptance.save()
+                        # marked as warned either way, so a risk acceptance nobody can be notified about
+                        # is not re-selected on every subsequent run
+                        risk_acceptance.expiration_date_warned = timezone.now()
+                        risk_acceptance.save()
+            finally:
+                warned.send()
 
 
 def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
@@ -528,6 +555,166 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
 
                 if jira_issue:
                     jira_services.add_simple_comment(jira_instance, jira_issue, jira_comment)
+
+
+def _jira_issue_of(finding):
+    """The Jira issue a comment about this finding goes on: its own, or its finding group's."""
+    if finding.has_jira_issue:
+        return finding.jira_issue
+    if finding.has_jira_group_issue:
+        return finding.finding_group.jira_issue
+    return None
+
+
+class ExpirationRun:
+
+    """
+    The comments and notifications one scheduled expiration run owes, sent once at the end of the run.
+
+    Sent as each risk acceptance is handled, a run that expires or warns about many acceptances notifies once per
+    acceptance, and comments on a Jira issue once per acceptance holding one of its findings (a finding can sit in
+    several acceptances, and the findings of a finding group share one issue). Collected here, the run sends:
+
+    - one notification per product: the usual message when the run handles one acceptance of the product, else a
+      digest that lists them all (``risk_acceptances``). Per product rather than one for the whole run, because who
+      receives a notification, and so who may read about an acceptance, is decided per product.
+    - at most one Jira comment per Jira issue, joining the distinct messages of every acceptance that holds one of
+      the issue's findings. Each acceptance's Jira project still decides whether its message is posted.
+    - one batch to the ticket comment handlers, each finding with its own text (every acceptance that holds it).
+    """
+
+    def __init__(self, message_factory, heads_up_days=0):
+        self.message_factory = message_factory
+        self.heads_up_days = heads_up_days
+        # product id -> the notifications of its acceptances, in the order they were handled
+        self._notifications: dict[int, list[dict]] = {}
+        # Jira issue id -> [jira instance, jira issue, distinct messages]
+        self._jira: dict[int, list] = {}
+        # finding id -> [finding, distinct messages], for the ticket comment handlers
+        self._tickets: dict[int, list] = {}
+        # What the acceptance being handled owes, held until it is handled without error (see handling)
+        self._pending: list | None = None
+
+    def _hold(self, apply) -> None:
+        if self._pending is None:
+            apply()
+        else:
+            self._pending.append(apply)
+
+    @contextmanager
+    def handling(self, risk_acceptance):
+        """
+        Handle one acceptance of the run on its own: in a savepoint, its messages kept only if it succeeds.
+
+        An acceptance that fails is rolled back, so the next run picks it up again and sends its messages
+        then, and logged; the run goes on with the rest, and still sends what they owe.
+        """
+        self._pending = []
+        try:
+            with transaction.atomic():
+                yield
+        except Exception:
+            logger.exception("Could not handle risk acceptance %i in this expiration run; the next run tries again", risk_acceptance.id)
+            return
+        else:
+            for apply in self._pending:
+                apply()
+        finally:
+            self._pending = None
+
+    def notify(self, notification: dict) -> None:
+        """Hold one acceptance's notification (create_notification's arguments) until the run sends."""
+        self._hold(lambda: self._notifications.setdefault(notification["product"].id, []).append(notification))
+
+    def _message(self, risk_acceptance):
+        try:
+            return self.message_factory(risk_acceptance, self.heads_up_days)
+        except Exception:
+            logger.exception("Could not build the expiration comment for risk acceptance %i", risk_acceptance.id)
+            return None
+
+    @staticmethod
+    def _add(messages: list, message: str) -> None:
+        if message not in messages:
+            messages.append(message)
+
+    def comment(self, risk_acceptance, findings) -> None:
+        """Hold the comment one acceptance owes its findings' tickets until the run sends."""
+        findings = list(findings)
+        if not findings:
+            return
+        message = None
+        if ticket_comments.has_ticket_comment_handlers() and _ticket_comment_event(self.message_factory) is not None:
+            message = self._message(risk_acceptance)
+            if message is not None:
+                for finding in findings:
+                    self._hold(lambda finding=finding, message=message: self._add(self._tickets.setdefault(finding.id, [finding, []])[1], message))
+
+        jira_project = jira_services.get_project(risk_acceptance.engagement)
+        if not (jira_project and jira_project.risk_acceptance_expiration_notification):
+            return
+        jira_instance = jira_services.get_instance(risk_acceptance.engagement)
+        if not jira_instance:
+            return
+        message = message or self._message(risk_acceptance)
+        if message is None:
+            return
+        for finding in findings:
+            jira_issue = _jira_issue_of(finding)
+            if jira_issue:
+                self._hold(lambda jira_issue=jira_issue, message=message: self._add(self._jira.setdefault(jira_issue.id, [jira_instance, jira_issue, []])[2], message))
+
+    def _digest(self, notifications: list[dict]) -> dict:
+        product = notifications[0]["product"]
+        expired = self.message_factory is expiration_message_creator
+        count = len(notifications)
+        if expired:
+            title = ngettext(
+                "%(count)s risk acceptance has expired for %(product)s",
+                "%(count)s risk acceptances have expired for %(product)s",
+                count,
+            ) % {"count": count, "product": product}
+        else:
+            title = ngettext(
+                "%(count)s risk acceptance will expire within %(days)s days for %(product)s",
+                "%(count)s risk acceptances will expire within %(days)s days for %(product)s",
+                count,
+            ) % {"count": count, "days": self.heads_up_days, "product": product}
+        return {
+            "event": "risk_acceptance_expiration",
+            "title": title,
+            "risk_acceptances": [notification["risk_acceptance"] for notification in notifications],
+            # Each acceptance's own link, as its single notification builds it (engagement_to_notify_about),
+            # so one with no Engagement link still points at its page.
+            "risk_acceptance_rows": [
+                {"risk_acceptance": notification["risk_acceptance"], "url": notification["url"]}
+                for notification in notifications
+            ],
+            "expired": expired,
+            "product": product,
+            "url": reverse("view_product", args=(product.id,)),
+        }
+
+    def send(self) -> None:
+        """Send what the run collected. Best effort: one failed message is logged and the rest still go."""
+        for notifications in self._notifications.values():
+            notification = notifications[0] if len(notifications) == 1 else self._digest(notifications)
+            try:
+                create_notification(**notification)
+            except Exception:
+                logger.exception("Could not send the risk acceptance expiration notification for %s", notification["product"])
+        for jira_instance, jira_issue, messages in self._jira.values():
+            try:
+                jira_services.add_simple_comment(jira_instance, jira_issue, "\n\n".join(messages))
+            except Exception:
+                logger.exception("Could not comment on Jira issue %s about expiring risk acceptances", jira_issue.jira_key)
+        if self._tickets:
+            ticket_comments.dispatch_ticket_comments(
+                _ticket_comment_event(self.message_factory),
+                [finding for finding, _messages in self._tickets.values()],
+                {finding_id: "\n\n".join(messages) for finding_id, (_finding, messages) in self._tickets.items()},
+            )
+        self._notifications, self._jira, self._tickets = {}, {}, {}
 
 
 def get_expired_risk_acceptances_to_handle():
