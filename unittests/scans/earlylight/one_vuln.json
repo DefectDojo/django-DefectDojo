@@ -1,0 +1,129 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "brotli",
+      "title": "Brotli decoder vulnerable to CVE-2026-111497",
+      "cves": [
+        "CVE-2026-111497"
+      ],
+      "advisories": [
+        "https://github.com/advisories/GHSA-9v8h-qqgm-4m35",
+        "https://github.com/google/brotli/releases/tag/v1.2.1",
+        "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+        "https://github.com/dotnet/announcements/issues/494"
+      ],
+      "data": "Brotli decoder error-code tables (google/brotli 1.0.0 to 1.2.1) and the fixed Node.js, .NET and Bun releases"
+    },
+    {
+      "id": "emudhra",
+      "title": "Trust in the compromised eMudhra intermediate CA keys",
+      "cves": [
+        "CVE-2026-111943"
+      ],
+      "advisories": [
+        "https://bugzilla.mozilla.org/show_bug.cgi?id=2083449"
+      ],
+      "data": "eight compromised intermediates and four path roots (Mozilla bug 2083449)"
+    },
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    }
+  ],
+  "targets": [
+    {
+      "target": "php:8.3.0-cli",
+      "type": "image",
+      "digest": "sha256:33b1f2a2edaa92c73b41cbb078e8c1abce9b4ebe41af870415c6361830667da7",
+      "platform": "linux/amd64",
+      "files_scanned": 8854,
+      "files_read": 8854,
+      "findings": [
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-web",
+          "path": "/usr/local/bin/php-cgi",
+          "verdict": "vulnerable",
+          "reason": "PHP 8.3.0 is below the fixed release 8.3.36; no package manager installed this file, so no vendor backport applies",
+          "message": "PHP 8.3.0 (cgi-fcgi)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.0",
+            "sapi": "cgi-fcgi"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "vulnerable",
+              "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "vulnerable",
+              "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+            }
+          ],
+          "fix": "Rebuild on PHP 8.3.36 or later (for the official Docker image, a php:8.3.36 tag), then redeploy.",
+          "severity": "critical",
+          "details": {
+            "path": "/usr/local/bin/php-cgi",
+            "php_version": "8.3.0",
+            "sapi": "cgi-fcgi",
+            "web_facing": true,
+            "status": "vulnerable",
+            "severity": "critical",
+            "reason": "PHP 8.3.0 is below the fixed release 8.3.36; no package manager installed this file, so no vendor backport applies",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "vulnerable",
+                "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "vulnerable",
+                "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "12",
+              "codename": "bookworm",
+              "pretty_name": "Debian GNU/Linux 12 (bookworm)"
+            },
+            "fix": "Rebuild on PHP 8.3.36 or later (for the official Docker image, a php:8.3.36 tag), then redeploy."
+          }
+        }
+      ],
+      "skipped": [
+        {
+          "path": "/usr/src/php.tar.xz!/php-8.3.0/ext/bz2/tests/004_2.txt.bz2",
+          "reason": "bzip2: bzip2 data invalid: block checksum mismatch"
+        },
+        {
+          "path": "/usr/src/php.tar.xz!/php-8.3.0/ext/bz2/tests/72613.bz2",
+          "reason": "bzip2: bzip2 data invalid: block checksum mismatch"
+        }
+      ],
+      "annotations": {
+        "os": {
+          "id": "debian",
+          "version_id": "12",
+          "codename": "bookworm",
+          "pretty_name": "Debian GNU/Linux 12 (bookworm)"
+        }
+      }
+    }
+  ]
+}

@@ -52,13 +52,17 @@ Open **Assets > Needs Attention**.
 
 ## What drives Priority and SLA on an Asset
 
-The **Priority and SLA Drivers** card on the Asset page lists the five fields, whether each is set, and one line on what each does. Revenue and User Records also show this Asset's share of its Organization's total, which is the number Priority actually uses. Fields that are not set link to the Asset form.
+The **Priority and SLA Drivers** card on the Asset page leads with what needs attention: the fields that are not set, named together in red, and a default SLA that applies because no SLA configuration was chosen. Each links to the Asset form for a user who can edit the Asset. The card's title bar says how many fields are not set, or how many are set when none is missing.
 
-The card also names the Asset's Prioritization Engine and its SLA configuration, with where that SLA comes from:
+Below that, the card lists the five fields with their values, unset fields first, each marked **Not Set**. What each field does to Priority shows beside its value on a wide card, and as a full sentence under it on a tall one. Revenue and User Records also show this Asset's share of its Organization's total, which is the number Priority actually uses.
+
+The card also shows the SLA that applies, with the number of days each severity (or, for a risk based SLA configuration, each risk level) has to be fixed, and where that SLA comes from:
 
 * the default SLA configuration, because none was chosen;
 * a criticality to SLA mapping, matched from the Asset's Business Criticality;
 * or a configuration set on the Asset itself.
+
+A level the SLA configuration does not enforce reads **Not Enforced**. The card ends with the Asset's Prioritization Engine.
 
 The card is part of the default Asset page layout. If you use a customized layout, add it from the layout editor.
 
@@ -76,6 +80,6 @@ Automation uses the public `/api/v2/` API with an API token.
 * `GET /api/v2/assets/needs_attention/` lists the Assets that need attention, each with `reasons` (`connector_default_org`, `missing_priority_fields`) and `missing_fields`. Filter with `reason`, `missing_field`, `organization` and `connector`, each accepting comma-separated values.
 * `GET /api/v2/assets/needs_attention/summary/` returns the totals per reason, per missing field, per Organization and per connector.
 * `GET /api/v2/assets/onboarding_status/` returns `onboarding_complete` and the counts behind it.
-* `GET /api/v2/assets/{id}/priority_drivers/` returns what the Asset page card shows.
+* `GET /api/v2/assets/{id}/priority_drivers/` returns what the Asset page card shows, including `sla_configuration.deadlines`: one `tier`, `days` and `enforced` entry per severity or risk level.
 
 The same endpoints answer under `/api/v2/products/`.

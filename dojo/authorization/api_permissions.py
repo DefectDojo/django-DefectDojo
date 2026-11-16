@@ -554,6 +554,9 @@ class UserHasImportPermission(permissions.BasePermission):
         # in this case and wrap them in a DRF exception
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            # engagement_id is read-only on ImportScanSerializer and dropped during validation,
+            # so only the engagement field may name the target here, as it does at execution
+            converted_dict.pop("engagement_id", None)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
@@ -627,6 +630,8 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # in this case and wrap them in a DRF exception
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            # product_id is read-only on EndpointMetaImporterSerializer, so only product may name the target
+            converted_dict.pop("product_id", None)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             product = auto_create.get_target_product_if_exists(**converted_dict)
@@ -755,6 +760,8 @@ class UserHasReimportPermission(permissions.BasePermission):
         # in this case and wrap them in a DRF exception
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            # test_id is read-only on ReImportScanSerializer, so only test may name the target
+            converted_dict.pop("test_id", None)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # engagement is not a declared field on ReImportScanSerializer and will be
             # stripped during validation — don't use it in the permission check either,

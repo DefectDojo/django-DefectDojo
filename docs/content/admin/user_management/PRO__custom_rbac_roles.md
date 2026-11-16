@@ -66,7 +66,7 @@ Role names must be unique, and the check ignores case: if `Triage Lead` exists, 
 
 ![The permission grid in the role form](images/pro_role_permission_grid.png)
 
-Permissions are grouped into three tables plus a checklist.
+Permissions are grouped into five tables plus a checklist.
 
 **Object Permissions** apply to the Organizations and Assets the role is assigned to, and to everything nested under them.
 
@@ -99,13 +99,24 @@ Permissions are grouped into three tables plus a checklist.
 | Organization Group, Asset Group | View, Add, Add Owner, Edit, Delete |
 | Organization Member, Asset Member, Group Member | Manage, Add Owner, Delete |
 
+**Group Content** covers the things a group can own: Triage Engine rules, and Report Builder templates, blocks, themes and report schedules. These permissions mean two things, depending on how the role is held. **Held as a Global Role, they apply to every rule and report template. Held as a group membership role, they apply to that group's rules and report templates.**
+
+| Row | Available actions |
+| --- | --- |
+| Rule | View, Add, Edit, Delete |
+| Webhook Nodes, Messaging Nodes, Ticket Nodes, Report Nodes, Scan Nodes, Sensor Nodes, AI Nodes (nested under Rule) | Granted or not |
+| Report Template | View, Add, Edit, Delete |
+
+While the **Group Ownership** feature flag is off, there is no Group Content table: **Rule** and **Report Template** (with the node family rows) sit under **Global Feature Permissions**, because a group membership role grants nothing on them then.
+
+See [Group Content permissions](#group-content-permissions) for what each one allows and how to give a group its own rules.
+
 **Global Feature Permissions** gate instance-wide Pro features rather than individual Organizations or Assets, so **they only take effect when the role is held as a Global Role**. Granting them on a role that is only used as an Asset membership has no effect.
 
 | Row | Available actions |
 | --- | --- |
-| Report Template | View, Add, Edit, Delete |
 | Generated Report | View, Add, Delete |
-| Connector, Sensei, Asset Hierarchy, Version Manager, Tuner, Universal Parser, Rule, Integration | View, Edit |
+| Connector, Sensei, Asset Hierarchy, Version Manager, Tuner, Universal Parser, Integration | View, Edit |
 | Mitigation Policy | Edit |
 | Audit Log, Metering | View |
 
@@ -146,7 +157,7 @@ A row whose feature is turned off on your instance (Jira, GitHub, questionnaires
 | A green ✔ (read-only view) | Granted. |
 | A red ✘ (read-only view) | Not granted. |
 
-In each row of the Object, Group & Member and Global Feature tables, the leftmost permission (**View**, or **Manage** on member rows) gates the rest of the row. You have to grant it before the other cells in that row become available, because a role cannot meaningfully edit or delete what it cannot see. Clearing the gate clears the rest of the row with it.
+In each row of the Object, Group & Member, Group Content and Global Feature tables, the leftmost permission (**View**, or **Manage** on member rows) gates the rest of the row. You have to grant it before the other cells in that row become available, because a role cannot meaningfully edit or delete what it cannot see. Clearing the gate clears the rest of the row with it. The node family rows nested under **Rule** are gated the same way, by **Rule > View**.
 
 The **Configuration Permissions** table has no gate. Each cell is its own grant, so a role can carry **Add** on Users without **View**, and clearing one cell leaves the rest of the row as it is.
 
@@ -176,6 +187,74 @@ Two constraints are worth knowing:
 
 * **Owner-tier is reserved.** A custom role can never be an owner-tier role. Only the built-in Owner is, so only it carries the implicit power to manage other Owners.
 * **Granting the Owner role to someone else still requires the matching Add Owner permission**, whether you do it on an Organization, an Asset, or a Group.
+
+### Choosing which roles non-superusers may assign
+
+Anyone who can manage the members of an Organization, an Asset or a Group can normally give out any role short of Owner, including a custom role that grants more than they hold themselves. To stop that, turn off **Assignable by Non-superusers** on the role's **Edit Role** form. The setting is on for every new role, so nothing changes until you turn it off.
+
+While it is off:
+
+* **Only a superuser or a Global Owner can give the role** to a user or a group, as a member of an Organization, an Asset or a Group. These are the same people who can edit roles, so the setting binds everyone who cannot change it back.
+* **Adding someone to a Group that holds the role** (on an Organization or an Asset, as a Global Role, or across an Organization type) **counts as giving it**. Only a superuser, or a Global Owner who can manage that Group's members, can add people to it.
+* **Everyone else no longer sees the role** in the role dropdowns of the Permissions dialogs. A member who already holds it keeps it, and member tables still show it.
+* **Someone who manages members can still take the role away**: remove the member, or move them to a role they are allowed to give. They cannot move a membership that holds the role to another user or group. In a Group that holds the role, removing a member and changing an existing member's Group role are always allowed, because neither adds anyone to the Group.
+* **The other rules still apply on top.** Granting an Owner-tier role still needs the matching Add Owner permission, and a role that can reveal recovery keys or wipe devices is still reserved for superusers and Global Owners.
+* **The same rule covers every way in**: the Permissions dialogs, `/api/v2/`, `/api/v3/`, the **Owner Group Role** of a connector that assigns asset ownership, and carrying access over when assets are merged. A refused grant answers `403` with the message "Only a superuser or a global Owner can grant this role." Saving a connector answers `400` with the same message on the **Owner Group Role** field, and a merge plan reports it as an error on the merge. The message does not name the role.
+* **A clone keeps the setting** of the role it was cloned from. A clone of a built-in role starts with the setting on.
+
+Built-in roles cannot be edited, so they are always assignable. To keep a built-in role's permissions away from delegated managers, clone it, turn the setting off on the clone, and assign the clone instead.
+
+Grants the system makes on its own are not affected: single sign-on, SCIM and LDAP group membership, the default group role, and the owner of something a user creates.
+
+The connector ownership sync hands out the **Owner Group Role** chosen when the connector was saved. If that role is kept from non-superusers and no superuser or Global Owner chose it (for example, it was turned off after someone else chose it), the sync skips the ownership grant and logs why. A superuser or a Global Owner can save the connector to confirm the role, or choose another one.
+
+## Group Content permissions
+
+A group can own Triage Engine rules and Report Builder templates, blocks, themes and report schedules (see [Group ownership for rules](/automation/triage_engine/sharing_and_versions/#group-ownership) and [for reports](/metrics_reports/reports/report-builder/#group-ownership)). The **Group Content** table holds the permissions for that content, and where they apply depends on how the role is held:
+
+* **As a Global Role**, they apply to every item of the type: every rule, or every template, block, theme and schedule, whoever owns it.
+* **As a group membership role** (the role a user holds in a group), they apply to that group's items only, the same way an Asset role applies to that Asset only.
+
+Group membership roles count only while the **Group Ownership** feature flag is on (it is off by default). The built-in Writer, Maintainer and Owner roles already carry Report Template Add, Edit and Delete, so turning the flag on lets every member who holds one of them in a Group author that Group's Report Builder content. The built-in roles carry no Rule permissions.
+
+| Permission | Allows |
+| --- | --- |
+| **Rule View** | Seeing rules, their runs and deliveries |
+| **Rule Add** | Creating rules |
+| **Rule Edit** | Changing, enabling, running, sharing and transferring rules |
+| **Rule Delete** | Deleting rules |
+| **Webhook Nodes** | Placing **Call a Webhook** in a rule |
+| **Messaging Nodes** | Placing the Slack, Microsoft Teams, email and SNS nodes in a rule |
+| **Ticket Nodes** | Placing the Jira and Downstream Connector ticket nodes in a rule |
+| **Report Nodes** | Placing **Generate a Report** in a rule |
+| **Scan Nodes** | Placing **Launch DAST Scan** in a rule |
+| **Sensor Nodes** | Placing **Send a Sensor Command** in a rule |
+| **AI Nodes** | Placing AI nodes and **Request Triage** in a rule |
+| **Report Template View, Add, Edit, Delete** | The same, for templates, blocks, themes and report schedules |
+
+Changing what a group's rule or report schedule does also needs membership of the owning group, because it runs with the group's access. A global **Rule Edit** does not let someone outside the group change the group's rules. Deleting one does not need membership. Rules owned by the instance stay owner-only: only the person a rule runs as (or a superuser) can change it.
+
+The node family permissions decide which nodes an author may place in a rule: the palette hides the others, and saving or enabling a rule that contains one is refused. Upgrading gave all seven to every role that already held **Rule Edit**, so existing rules keep working until you remove a family from a role. See [Node family permissions](/automation/triage_engine/building_rules/#node-family-permissions).
+
+### Report templates work out of the box
+
+The built-in **Maintainer** role carries **Report Template View**, **Add**, **Edit** and **Delete**. A user whose role in a group is Maintainer can therefore create and manage that group's templates, blocks, themes and schedules with no further setup.
+
+### Give a group its own rules
+
+No built-in role carries the **Rule** permissions, so a group cannot own rules until an administrator creates a role that does and gives it to the group's members. This is deliberate: every instance knows exactly which of its roles can manage rules, because it made them.
+
+1. Go to **Settings > Users & Permissions > Roles**.
+2. Open the **⋮** menu on **Maintainer** and choose **Clone Role**.
+3. Open the copy's **⋮** menu and choose **Edit Role**. Give it a name such as **Rule Maintainer**.
+4. In the **Group Content** table, grant **Rule View**, **Rule Add**, **Rule Edit** and **Rule Delete**.
+5. Under **Rule**, grant the node families the group's rules may use. Leave out any family the group should not use, such as **Webhook Nodes** if its rules should not send data to arbitrary addresses, or **AI Nodes** if they should not spend model tokens.
+6. Save the role.
+7. Open the group under **Settings > Users & Permissions > Groups**, go to the **Members** tab, and set the new role as the role of each member who should manage the group's rules.
+
+Those members can now create rules owned by the group (from the group page's **Rules** tab, or with **Owned By** on **New Rule**) and change the group's rules. The rules run as the group's automation identity, with the group's access, not with the access of the person who wrote them. Members holding a role without the Rule permissions do not see the group's rules.
+
+Do not assign a role carrying the Rule permissions as a **Global Role** unless you mean it: held globally, it applies to every rule on the instance.
 
 ## What a custom Global Role unlocks
 
@@ -231,7 +310,8 @@ Roles are available at `/api/v2/roles/`. Reads are open to any authenticated use
 | List roles | `GET /api/v2/roles/` |
 | Retrieve one role | `GET /api/v2/roles/{id}/` |
 | List every grantable permission | `GET /api/v2/roles/permissions_catalog/` |
-| Create a role | `POST /api/v2/roles/` with `name`, optional `description`, and a `permissions` list |
+| Create a role | `POST /api/v2/roles/` with `name`, optional `description`, optional `assignable_by_non_superusers` (default `true`), and a `permissions` list |
+| Keep a role from non-superusers | `PATCH /api/v2/roles/{id}/` with `assignable_by_non_superusers: false` |
 | Replace a role's permissions | `PATCH /api/v2/roles/{id}/` with a `permissions` list |
 | Clone a role | `POST /api/v2/roles/{id}/clone/` with an optional `name` and `description` |
 | Delete a role | `DELETE /api/v2/roles/{id}/` |
@@ -244,6 +324,7 @@ Notes:
 * `?reassign_to=` moves every assignment of the deleted role to the role you name, in one transaction. This is the only way to reassign in bulk: the UI does not offer it.
 * Attempting to edit or delete a built-in role returns `403`. Editing an unknown permission value, reusing an existing role name, or deleting an in-use role without `reassign_to` returns `400` with an explanation.
 * `is_owner` cannot be set through the API. Posting it is accepted and ignored.
+* Every role in the list carries `assignable_by_me`: whether the caller may give that role to a member or a group. The list itself is not filtered, so a caller can still read the name of a role someone already holds.
 
 ## Things to know
 

@@ -2687,6 +2687,48 @@ class JiraProjectTest(BaseClass.BaseClassTest):
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    # A payload written before suppress_sla_notification_comments existed keeps working, and both SLA
+    # comment fields stay plain booleans in every response.
+    def test_sla_comment_fields_are_booleans_and_old_payloads_still_work(self):
+        for sent in (False, True):
+            created = self.client.post(self.url, {**self.payload, "product_jira_sla_notification": sent}, format="json")
+            self.assertEqual(201, created.status_code, created.content[:1000])
+            fetched = self.client.get(f"{self.url}{created.data['id']}/", format="json")
+            self.assertEqual(200, fetched.status_code, fetched.content[:1000])
+            persisted = JIRA_Project.objects.get(pk=created.data["id"])
+            self.assertEqual(
+                (
+                    created.data["product_jira_sla_notification"], created.data["suppress_sla_notification_comments"],
+                    fetched.data["product_jira_sla_notification"], fetched.data["suppress_sla_notification_comments"],
+                    persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments,
+                ),
+                (sent, False, sent, False, sent, False),
+                msg=f"sent product_jira_sla_notification={sent!r} without the new field",
+            )
+            self.assertIs(type(fetched.data["product_jira_sla_notification"]), bool)
+            self.assertIs(type(fetched.data["suppress_sla_notification_comments"]), bool)
+
+    def test_sla_comment_setting_cannot_both_send_and_suppress(self):
+        both = {"product_jira_sla_notification": True, "suppress_sla_notification_comments": True}
+        created = self.client.post(self.url, {**self.payload, **both}, format="json")
+        self.assertEqual(400, created.status_code, created.content[:1000])
+        self.assertIn("suppress_sla_notification_comments", created.data)
+
+        # A PATCH is checked against the stored value of the field it leaves out.
+        created = self.client.post(self.url, {**self.payload, "suppress_sla_notification_comments": True}, format="json")
+        self.assertEqual(201, created.status_code, created.content[:1000])
+        relative_url = f"{self.url}{created.data['id']}/"
+        response = self.client.patch(relative_url, {"product_jira_sla_notification": True}, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        persisted = JIRA_Project.objects.get(pk=created.data["id"])
+        self.assertEqual((persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (False, True))
+
+        # Switching from suppress to send in one request is fine.
+        response = self.client.patch(relative_url, {"product_jira_sla_notification": True, "suppress_sla_notification_comments": False}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        persisted.refresh_from_db()
+        self.assertEqual((persisted.product_jira_sla_notification, persisted.suppress_sla_notification_comments), (True, False))
+
 
 @versioned_fixtures
 class SonarqubeIssueTest(BaseClass.BaseClassTest):

@@ -31,7 +31,7 @@ The examples use one product throughout: an **IoT Gateway** Asset whose release 
 | --- | --- | --- |
 | **DefectDojo Pro 3.4.201 or later** | Earlier releases do not check Article 14 deadlines on a standard licence, and do not compute VH-5, VH-6 or the RP requirements | The version in the page footer, or ask DefectDojo Support |
 | A superuser account | Feature flags, SLA configurations and dashboards are instance settings | **Settings > Feature Flags** is in your left menu |
-| Edit permission on each product's Asset | The Regulatory card, SBOM imports, Article 14 reports and assessments are per Asset | The **Regulatory** card on the Asset shows an active **Submit** button |
+| Edit permission on each product's Asset | The Regulatory card, SBOM imports, Article 14 reports and assessments are per Asset | The **Regulatory** card on the Asset shows **Edit Profile** (or **Set Up Profile**) |
 | Each product as an Asset | Everything in this guide is recorded per Asset | **Explore > Assets** in the left menu |
 | Background task processing (self-hosted only) | SBOM import, enrichment, deadline checks and evidence packs run as background tasks | Ask your administrator to confirm the workers are running |
 
@@ -180,8 +180,9 @@ Repeat Steps 6 to 9 for each product. For many products, use the API (see the en
 
 In the left menu, go to **Explore > Assets** and select the product's Asset. The **Regulatory**
 card is on the Asset page below the Details row, after the Open Finding Severity meter, the Asset
-Overview tabs and the Organization Memberships and Asset Identity cards. Fill it in and select
-**Submit**:
+Overview tabs and the Organization Memberships and Asset Identity cards. Select **Set Up Profile**
+(or **Edit Profile** once the profile exists), fill in the **Edit Regulatory Profile** dialog, and
+select **Submit**:
 
 | Field | Example | What it records |
 | --- | --- | --- |
@@ -195,14 +196,14 @@ Overview tabs and the Organization Memberships and Asset Identity cards. Fill it
 The empty **Security Contact** and **Disclosure Policy URL** boxes show grey example text. It is a
 hint, not a value: type your own.
 
-![The Regulatory card, filled in](images/41-cra-regulatory-card.png)
+![The Regulatory card after the profile is saved: the CRA facts, four of four set, and DORA and SLA](images/41-cra-regulatory-card.png)
 
 **Supports a Critical or Important Function** is a DORA field; leave it unless DORA applies to you.
 Every field is described on [Regulatory Profile](../regulatory_profile/#fields).
 
 | Expected | Where |
 | --- | --- |
-| The values are still there after you reload the page | The **Regulatory** card |
+| The values are still there after you reload the page, and the CRA group reads **4 of 4 set** | The **Regulatory** card |
 
 ### Step 7 — Add the CRA regulation
 
@@ -336,15 +337,17 @@ ENISA's Single Reporting Platform.
 ### Step 12 — Start and track an Article 14 report
 
 **When DefectDojo prompts you.** When an Asset whose **CRA Product Class** is not **Not
-Applicable** has an open finding marked **Known Exploited**, the Regulatory card shows **CRA Article
-14 Early Warning Check**, listing each such finding with a **Start CRA Report** button. The finding
-itself shows a **CRA Early Warning Check** tag beside its title until a report names its CVE.
+Applicable** has an open finding marked **Known Exploited**, the Regulatory card is tagged **Early
+Warning Check** and its CRA group opens with an **Article 14 Early Warning** row saying how many
+findings are still to report. Each such finding is listed under it with a **Start CRA Report**
+button, or a link to the report once one names it. The finding itself shows a **CRA Early Warning
+Check** tag beside its title until a report names its CVE.
 
 ![The early-warning prompt on an in-scope Asset: one finding already has a report, the other offers Start CRA Report](images/45-cra-early-warning-due.png)
 
-The prompt appears for any finding on the CISA KEV list, so it says a known exploited
-vulnerability affects the product, and that the early warning is due only if it is actively
-exploited in this product. It is a prompt to decide whether you are aware of active exploitation
+The prompt appears for any finding on the CISA KEV list, so the warning mark on the row explains
+that a known exploited vulnerability affects the product, and that the early warning is due only if
+it is actively exploited in this product. It is a prompt to decide whether you are aware of active exploitation
 affecting this product, not a determination. DefectDojo records when the prompt first appeared, because a regulator may ask.
 
 **Start a report only for a real awareness event.** A report cannot be deleted, its clocks cannot

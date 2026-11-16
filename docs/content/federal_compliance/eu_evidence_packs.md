@@ -53,7 +53,7 @@ The catalog text summarizes assessment topics and does not replace the regulatio
 Assessments live on the Asset's Compliance Profile. Open the Asset, select the **Compliance** tab
 in the Asset Overview, then select **Compliance Profile**.
 
-![The Compliance tab on an Asset, with the Compliance Profile button](images/25-asset-compliance-tab.png)
+![The Compliance tab on an Asset, with the Compliance Profile link](images/25-asset-compliance-tab.png)
 
 The Compliance Profile page has a **Regulatory Assessments** section that lists existing
 assessments, each with a **Review** button, and offers one start button for each regulatory

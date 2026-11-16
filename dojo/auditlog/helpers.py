@@ -1,18 +1,26 @@
 """
-Audit-log helpers: display formatting + Celery-context wrappers.
+Audit-log helpers: display formatting, delete author lookup, Celery-context wrappers.
 
 * Display helpers annotate pghistory event querysets with ``object_str``
   and ``object_url`` for templates.
+* ``get_delete_event_user`` names who deleted an object, for the delete
+  notifications.
 * Celery-context helpers serialize/restore the active pghistory context
   across a task boundary so events dispatched from a worker share the
   ``pgh_context_id`` of the originating request.
 """
+import functools
 import logging
 import uuid
 from collections import defaultdict
 from contextlib import nullcontext
 
 from django.apps import apps
+from django.contrib.auth import get_user_model
+from django.db.models import IntegerField
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Cast
+from pghistory import core as pghistory_core
 from pghistory import runtime as pghistory_runtime
 
 logger = logging.getLogger(__name__)
@@ -154,6 +162,39 @@ def process_events_for_display(events):
             event.object_url = None
 
     return events
+
+
+# ---------------------------------------------------------------------------
+# Delete author lookup
+# ---------------------------------------------------------------------------
+
+
+@functools.cache
+def _event_models_tracking(model):
+    return tuple(pghistory_core.event_models(tracks_model=model))
+
+
+def get_delete_event_user(instance):
+    """
+    Return the user recorded on ``instance``'s latest pghistory delete event, or None.
+
+    The post_delete notification signals use this to name who deleted an object. It reads only the
+    event table that tracks the instance's model, through that table's ``pgh_obj_id`` index.
+    ``DojoEvents`` is a UNION over every event table that exposes ``pgh_obj_id`` as text: a filter on it
+    plans every branch and cannot use that index, so it reads every delete event of the model.
+
+    No LIMIT on the event query: with ``ORDER BY pgh_id DESC LIMIT 1`` the planner walks the primary key
+    backwards instead, through the whole table when the object has no delete event.
+    """
+    for event_model in _event_models_tracking(type(instance)):
+        deleter_ids = list(
+            event_model.objects.filter(pgh_obj_id=instance.pk, pgh_label="delete")
+            .order_by("-pgh_id")
+            .values_list(Cast(KeyTextTransform("user", "pgh_context__metadata"), IntegerField()), flat=True),
+        )
+        if deleter_ids and (user := get_user_model().objects.filter(id=deleter_ids[0]).first()):
+            return user
+    return None
 
 
 # ---------------------------------------------------------------------------

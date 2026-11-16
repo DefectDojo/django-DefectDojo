@@ -1,5 +1,57 @@
 {% load i18n %}{% load display_tags %}
+{% if risk_acceptances %}
 {
+    "type": "message",
+    "attachments": [
+        {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [
+                    {
+                        "type": "TextBlock",
+                        "text": "DefectDojo",
+                        "weight": "Bolder",
+                        "size": "Medium"
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": "{% if expired %}{% trans 'Risk Acceptances Expired' %}{% else %}{% trans 'Risk Acceptances Expiring' %}{% endif %}",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "color": "{% if expired %}Attention{% else %}Warning{% endif %}"
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": "{{ title|escapejs }}",
+                        "wrap": true,
+                        "spacing": "Medium"
+                    },
+                    {
+                        "type": "FactSet",
+                        "facts": [{% for each in risk_acceptances %}
+                            {
+                                "title": "{{ each|escapejs }}:",
+                                "value": "{% if expired %}{{ each.expiration_date_handled|date|escapejs }}{% else %}{{ each.expiration_date|date|escapejs }}{% endif %}"
+                            }{% if not forloop.last %},{% endif %}{% endfor %}
+                        ],
+                        "spacing": "Medium"
+                    }
+                ],
+                "actions": [
+                    {
+                        "type": "Action.OpenUrl",
+                        "title": "{% trans 'View' %}",
+                        "url": "{{ url|full_url }}"
+                    }
+                ]
+            }
+        }
+    ]
+}
+{% else %}{
     "type": "message",
     "attachments": [
         {
@@ -105,3 +157,4 @@
         }
     ]
 }
+{% endif %}

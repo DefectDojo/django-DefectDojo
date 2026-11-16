@@ -60,6 +60,8 @@ To show one status for a Location on a Finding, DefectDojo combines its referenc
 2. Otherwise the Location is `Active` if any Test still reports it.
 3. Otherwise it is `Mitigated`.
 
+Closing a Finding outside an import (an edit, the Close action or a bulk edit) sets its `Active` references to `Mitigated`. Reopening it sets its `Mitigated` references back to `Active`, except one a later scan replaced. `False Positive`, `Risk Accepted` and `Out of Scope` references keep their status. An Asset Reference is `Active` while any Finding on that Asset still has an `Active` reference to the Location, and `Mitigated` otherwise.
+
 When you upgrade, every existing reference is assigned to its Finding's Test. A reference added through the API or the UI belongs to the Finding's own Test.
 
 This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
@@ -69,7 +71,7 @@ This separation is what allows a library to exist on an Asset *without* needing 
 When a parser produces a Finding that references a URL or library, the importer:
 
 1. Looks up an existing Location matching the URL or pURL; if none exists, it creates one.
-2. Creates a Finding Reference linking the Finding to the Location with status `Active`.
+2. Creates a Finding Reference linking the Finding to the Location. The reference is `Mitigated` when the report already marks the Finding mitigated, and `Active` otherwise (including an inactive, duplicate, False Positive, Out of Scope or Risk Accepted Finding).
 3. Creates (or reuses) an Asset Reference so the Location also lives on the parent Asset.
 
 Existing parsers have been updated to emit Location data when the feature flag is on, and to fall back to the legacy Endpoint model when it is off. No reconfiguration is needed when Locations are enabled — the next import will route through the Locations pipeline automatically.

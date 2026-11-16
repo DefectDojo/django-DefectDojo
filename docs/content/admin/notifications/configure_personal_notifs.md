@@ -31,9 +31,19 @@ In addition to standard personal notifications, DefectDojo Users can also receiv
 
 ![image](images/Configure_System_&_Personal_Notifications_3.png)
 
-This configuration can be changed from the **Notifications** section on the **Asset** page: e.g. `your-instance.defectdojo.com/product/{id}`.
+In the Pro UI, open the Asset, then choose **Notifications** from the ⚙️ gear menu in the page header (the same menu appears on each Asset row in the Asset lists). The dialog lists the events that can be followed for one Asset, with a column for each delivery method:
 
-From here, you can set whether you want to receive **🔔 Alert**, **Mail** or **Slack** notifications for actions taken on this particular Asset. These notifications apply in addition to any system\-wide notifications you are already receiving. 
+* **Engagement Added** and **Engagement Closed**
+* **Test Added** and **Scan Added**
+* **SLA Breach** and **SLA Breach (Combined)**
+* **Risk Acceptance Expiring**
+* **Finding Risk Accepted**, **Threat Intel Escalation** and **AI Component Discovered**: the Pro events that are sent about one Asset
+
+Tick a box to receive that event over that method, then **Submit**. The box under a method's name ticks or clears it for every event. Opening the dialog changes nothing: an Asset starts with every event off until settings are submitted for it. Other Pro events (connector health, work assignments, review requests and the like) are sent to named people or are not about one Asset, so they are set on Personal Notifications only.
+
+In the Classic UI, this configuration is changed from the **Notifications** section on the **Asset** page: e.g. `your-instance.defectdojo.com/product/{id}`.
+
+From here, you can set whether you want to receive **🔔 Alert**, **Mail** or **Slack** notifications for actions taken on this particular Asset. These notifications apply in addition to your Personal Notifications and any system\-wide notifications you are already receiving, and they stop if you lose access to the Asset.
 
 Microsoft Teams cannot send personal notifications of any kind, so Teams notifications cannot be chosen from this menu.
 

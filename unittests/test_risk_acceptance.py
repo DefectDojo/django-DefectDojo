@@ -118,6 +118,15 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertFalse(Risk_Acceptance.objects.filter(name=ra_data["name"]).exists())
         self.assertTrue(self.assert_all_active_not_risk_accepted(Finding.objects.filter(id__in=[2, 22])))
 
+    def test_add_risk_acceptance_form_only_suggests_the_engagements_findings(self):
+        own = self.client.get(reverse("add_risk_acceptance", args=(1, 2)))
+        self.assertEqual(200, own.status_code)
+        self.assertEqual(f"Accept: {Finding.objects.get(id=2).title}", own.context["form"].initial["name"])
+
+        other = self.client.get(reverse("add_risk_acceptance", args=(1, 22)))
+        self.assertEqual(404, other.status_code)
+        self.assertNotContains(other, Finding.objects.get(id=22).title, status_code=404)
+
     def test_add_findings_to_risk_acceptance_only_covers_the_engagements_findings(self):
         self.test_add_risk_acceptance_multiple_findings_accepted()
         ra = Risk_Acceptance.objects.last()
@@ -402,6 +411,61 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertEqual(members, sorted(expired.accepted_findings.values_list("id", flat=True)))
         self.assert_all_inactive_risk_accepted(expired.accepted_findings.all())
 
+    # Regression: reinstating kept a member closed since the expiry, so the next expiry reopened it.
+    def _close_a_member_reinstate_and_expire_again(self, closed_fields, *, reinstate_through_view=False):
+        self.test_expire_risk_acceptance_findings_active()
+        expired = Risk_Acceptance.objects.last()
+        closed, *still_open = list(expired.accepted_findings.order_by("id"))
+        self.assertTrue(still_open, "the control needs a member that stays open")
+        for field, value in closed_fields.items():
+            setattr(closed, field, value)
+        closed.active = False
+        closed.save(dedupe_option=False)
+
+        if reinstate_through_view:
+            self.client.post(reverse("reinstate_risk_acceptance", args=(1, expired.id)), {"id": expired.id})
+        else:
+            ra_helper.reinstate(expired, expired.expiration_date)
+
+        expired.refresh_from_db()
+        closed.refresh_from_db()
+        members = set(expired.accepted_findings.values_list("id", flat=True))
+        self.assertNotIn(closed.id, members, f"the closed member stays out of the reinstated acceptance, members={members}")
+        self.assertEqual({f.id for f in still_open}, members, "the open members are reinstated")
+        for finding in Finding.objects.filter(id__in=members):
+            self.assertFalse(finding.active, msg=f"finding {finding.id} active={finding.active}")
+            self.assertTrue(finding.risk_accepted, msg=f"finding {finding.id} risk_accepted={finding.risk_accepted}")
+        self.assertFalse(closed.active, msg=f"reinstating leaves the closed finding closed, active={closed.active}")
+        self.assertFalse(closed.risk_accepted, msg=f"risk_accepted={closed.risk_accepted}")
+
+        ra_helper.expire_now(expired)
+
+        closed.refresh_from_db()
+        self.assertFalse(closed.active, msg=f"the next expiry must not reopen it, active={closed.active}")
+        for field, value in closed_fields.items():
+            self.assertEqual(getattr(closed, field), value, msg=f"{field}={getattr(closed, field)} after the next expiry")
+        return closed
+
+    def test_reinstate_leaves_out_a_member_mitigated_since_the_expiry(self):
+        closed = self._close_a_member_reinstate_and_expire_again(
+            {"is_mitigated": True, "mitigated": timezone.now()},
+        )
+        self.assertIsNotNone(closed.mitigated, "the next expiry must not clear the mitigation")
+
+    def test_reinstate_leaves_out_a_member_marked_false_positive_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"false_p": True})
+
+    def test_reinstate_leaves_out_a_member_marked_out_of_scope_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"out_of_scope": True})
+
+    def test_reinstate_leaves_out_a_member_marked_duplicate_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again({"duplicate": True})
+
+    def test_reinstate_action_leaves_out_a_member_closed_since_the_expiry(self):
+        self._close_a_member_reinstate_and_expire_again(
+            {"is_mitigated": True, "mitigated": timezone.now()}, reinstate_through_view=True,
+        )
+
     def test_reinstate_locks_the_members_before_deciding_which_to_leave_out(self):
         """
         Reinstate reads its members under a lock, in its own transaction.
@@ -616,7 +680,17 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertIsNone(ra.engagement, msg="setup failed: risk acceptance is still attached to an engagement")
 
     def notified_risk_acceptances(self, mock_create_notification):
-        return [call.kwargs.get("risk_acceptance") for call in mock_create_notification.call_args_list]
+        """Every risk acceptance a run notified about, whether alone or in a product's digest (risk_acceptances)."""
+        notified = []
+        for call in mock_create_notification.call_args_list:
+            notified.extend(call.kwargs.get("risk_acceptances") or [call.kwargs.get("risk_acceptance")])
+        return notified
+
+    def notification_about(self, mock_create_notification, ra):
+        return next(
+            call for call in mock_create_notification.call_args_list
+            if call.kwargs.get("risk_acceptance") == ra or ra in (call.kwargs.get("risk_acceptances") or [])
+        )
 
     # Regression: expiration_handler aborted the entire run with
     # "AttributeError: 'NoneType' object has no attribute 'product'" as soon as it reached a
@@ -650,11 +724,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.assertIn(ra1, notified, msg=f"risk acceptance with findings but no engagement was not notified about, got {notified}")
         self.assertIn(ra2, notified, msg=f"expected a notification for the attached risk acceptance, got {notified}")
 
-        ra1_call = next(c for c in mock_create_notification.call_args_list if c.kwargs.get("risk_acceptance") == ra1)
-        self.assertEqual(
-            ra1_call.kwargs.get("engagement"), expected_engagement,
-            msg=f"expected engagement={expected_engagement}, notified with {ra1_call.kwargs.get('engagement')}",
-        )
+        # ra1 and ra2 share a product, so they arrive in one digest, addressed to that product
+        ra1_call = self.notification_about(mock_create_notification, ra1)
+        self.assertEqual(sorted(ra.id for ra in ra1_call.kwargs.get("risk_acceptances")), sorted([ra1.id, ra2.id]))
         self.assertEqual(
             ra1_call.kwargs.get("product"), expected_engagement.product,
             msg=f"expected product={expected_engagement.product}, notified with {ra1_call.kwargs.get('product')}",
@@ -740,7 +812,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         notified = self.notified_risk_acceptances(mock_create_notification)
         self.assertIn(ra3, notified, msg=f"expired risk acceptance with findings was not notified about, got {notified}")
-        ra3_call = next(c for c in mock_create_notification.call_args_list if c.kwargs.get("risk_acceptance") == ra3)
+        ra3_call = self.notification_about(mock_create_notification, ra3)
         self.assertEqual(
             ra3_call.kwargs.get("engagement"), expected_engagement,
             msg=f"expected engagement={expected_engagement}, notified with {ra3_call.kwargs.get('engagement')}",

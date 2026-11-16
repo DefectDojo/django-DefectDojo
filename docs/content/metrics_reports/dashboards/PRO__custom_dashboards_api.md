@@ -161,7 +161,7 @@ The `kind` matters: a `time` dimension (like `date`) requires you to also send a
 
 ### Filters
 
-A widget's `config.filters` use the **same filter shape as the object's list view** — the values the list page emits to its URL, not the raw REST query parameters. For example, on findings: `{"status_any": "Active"}`, `{"severity": "Critical"}`, `{"duplicate": "false"}`, `{"date_past_days": 7}`, `{"sla_days_remaining_less_than_equal_to": 7}`; on assets: `{"grade": "A,B,C"}`, `{"last_scanned_past_days": 90}`. The quickest way to learn the right filter for a need is to apply it on the relevant list page in the UI and read it back from the widget config dialog, or to copy the filters from the seeded shared templates.
+A widget's `config.filters` use the **same filter shape as the object's list view**: the values the list page emits to its URL, not the raw REST query parameters. For example, on findings: `{"status_any": "Active"}`, `{"severity": "Critical"}`, `{"duplicate": "false"}`, `{"date_past_days": 7}`, `{"date_past_full_months": 6}` (the last six complete calendar months, not counting the current one), `{"sla_days_remaining_less_than_equal_to": 7}`; on assets: `{"grade": "A,B,C"}`, `{"last_scanned_past_days": 90}`. The quickest way to learn the right filter for a need is to apply it on the relevant list page in the UI and read it back from the widget config dialog, or to copy the filters from the seeded shared templates.
 
 > **🔑 Important:** Unknown filter **keys are silently ignored** — a misspelled or non-existent filter does not raise an error, it simply does not apply, leaving the widget showing a wider population than you intended. Invalid *values* for a real filter return `400`. Always [verify what you built](#verify-what-you-built) by reading the layout back. (Filters are validated through the same FilterSet the list view uses, so list values may be passed as arrays for "any-of" matching: `{"severity": ["Critical", "High"]}`.)
 
@@ -249,6 +249,18 @@ Publishing a shared layout (`"is_shared": true` on create or update) requires th
 
 A shared layout can also be flagged `"is_collaborative": true` (same Maintainer requirement; only a shared layout can carry the flag, and unsharing clears it). A collaborative layout is one live dashboard for everyone rather than a template to clone: it is included in every user's `for_current_user/` results, any user may make it their default, and any authenticated user may `PATCH` its `widgets`, `layout`, and `settings`. Changing its `name`, `is_shared`, or `is_collaborative`, or deleting it, still requires the Maintainer role; a collaborator attempting that receives `403`. The `clone` action on a collaborative layout produces an ordinary personal copy. Writes are last-write-wins, so clients that edit collaborative layouts should re-read the row before saving.
 
+A collaborative layout can additionally be flagged `"is_read_only": true` (same Maintainer requirement; only a collaborative layout can carry the flag, and setting `is_collaborative` to `false` or unsharing the layout clears it). A read-only layout is still included in every user's `for_current_user/` results and any user may still make it their default or `clone` it, but only a Maintainer or the layout's owner may `PATCH` its `widgets`, `layout`, and `settings`; anyone else receives `403`. The owner keeps that right even without the Maintainer role, but renaming, unsharing, deleting it and changing its flags still require the Maintainer role. Each layout in a response carries `can_edit`, so a client can tell whether the caller may change it before trying.
+
+```bash
+# Mark an existing collaborative layout read-only: everyone keeps using it, only Maintainers and its owner edit it
+curl -s -X PATCH \
+  -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/layouts/[LAYOUT-ID]/" \
+  -d '{"is_read_only": true}'
+```
+
 ## Step 3: Render widget data (optional)
 
 You usually do not need to render data yourself — the dashboard does that when it displays a widget. But the same `widget_data` endpoints are available directly, which is handy for scripts or chat summaries that want to quote a live number. Send the widget's `config` (or the relevant subset) as the payload.
@@ -292,7 +304,9 @@ The full set of `widget_data` actions:
 | Action | Method | Key payload / params | Returns |
 |--------|--------|----------------------|---------|
 | `count` | POST | `model`, `filters`, `aggregation?` | `{count}` |
-| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?` | `{labels, series, ...}` |
+| `aggregate` | POST | `model`, `filters`, `group_by`, `aggregation`, `time_bucket?`, `limit?`, `series_by?` | `{labels, series, ...}` |
+
+`series_by` splits every group by a second dimension from the same `dimensions/` list (not a `time` one, and not the `group_by`). The response then carries one entry per value in `series`, each `{"key", "name", "data"}` with a number for every label (0 where the group has none of that value), plus `series_by` and `series_by_label`. At most 10 series are returned: for `count` the rest are combined into one series with the key `__other__`, and for a distinct `aggregation` more than 10 values is a `400`. A `time` `group_by` returns every bucket from the first to the last (or across the request's own date filter on the same field), with 0 for an empty one, and leaves out records with no date.
 
 `aggregation` is `count` (rows, the default) for every model. For `finding` it can also be `distinct_cwe`, the number of unique CWEs (a CWE of 0 or none is not counted), or `distinct_vulnerability_id`, the number of unique vulnerability IDs. A finding with both a CWE and a CVE counts in both. With a `group_by`, a CWE that appears at two severities counts under each, so the per-group numbers can add up to more than the total.
 | `dimensions` | GET | `?model=` | valid group-by dimensions |
@@ -312,9 +326,13 @@ The full set of `widget_data` actions:
 | `my_work` | GET | `?buckets=`, `?limit=` | your assignments / mentions / pending reviews |
 | `sla_burndown` | GET | `?days_threshold=`, `?severity_filter=`, `?limit=`, `?include_overdue=` | findings nearing SLA breach |
 | `recent_activity` | GET | `?model=`, `?limit=` | recent records feed |
-| `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting)* |
+| `saved_reports` | GET | `?limit=` | saved Report Templates *(requires Reporting and permission to view generated reports, from a global role or an Organization role; a role on an Asset alone does not grant it)* |
 | `root_causes` | POST | `limit?` | ranked Root Cause clusters *(requires Root Cause Correlation)* |
 | `usage` | GET | — | license-usage breakdown *(requires Maintainer)* |
+
+Some actions need more than the Customizable Dashboards feature: another feature turned on, a license that includes a capability, or a permission. Each widget in `GET /dashboards/widget_catalog/` lists these in its `requires` object, as three lists: `feature_flags` (feature keys, such as `pci_dss`), `licensed_features` (license capabilities, such as `shogun`) and `permissions` (such as `global_maintainer`). An empty object means the widget needs nothing more. While any requirement is missing, the widget's `widget_data` action answers `403` rather than an empty result, so "this widget is not available to you" is never mistaken for "nothing to show". The one exception is Shogun: the catalog lists **Sensor Coverage** only while the Shogun feature is on and licensed, and while the feature is off its action answers `404`, as though it did not exist. Read `requires` before placing a widget for someone, or before rendering it yourself.
+
+Grouped by `cwe`, the `aggregate` response also carries `label_names`, one entry per label: the CWE with its name, such as `CWE-79 Cross-site Scripting`, `CWE-<id>` for a CWE the built-in CWE list does not name, or `No CWE` for a finding with no CWE (stored as 0 or empty). `labels` itself stays the CWE number, the value to filter on.
 
 ## Putting it together: a full lifecycle script
 

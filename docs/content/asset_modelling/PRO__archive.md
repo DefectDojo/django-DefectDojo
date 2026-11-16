@@ -81,6 +81,8 @@ Triage Engine has two actions for retention, available while Archive is turned o
 - **Archive Findings** archives the Findings that reach it, with the reason you set. Each rule run makes one archive holding every Finding it archived, and restoring that archive brings them all back.
 - **Delete Findings Permanently** deletes each Finding that reaches it. This cannot be undone.
 
+Like every node that changes Findings, both act only on Findings the rule's owner (for a group's rule, the group's automation identity) may change: **Archive Findings** needs edit permission on the Finding, and **Delete Findings Permanently** needs delete permission. Other Findings are left alone, and the node's entry in the run trace counts them.
+
 Both actions require you to tick a confirmation in the node before the rule can be saved.
 
 A typical retention rule runs on a schedule and archives Findings older than a set age:

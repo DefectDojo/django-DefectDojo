@@ -22,10 +22,10 @@ class FileUpload(models.Model):
     def delete(self, *args, **kwargs):
         """Delete the model and remove the file from storage."""
         storage = self.file.storage
-        path = self.file.path
+        name = self.file.name
         super().delete(*args, **kwargs)
-        if path and storage.exists(path):
-            storage.delete(path)
+        if name and storage.exists(name):
+            storage.delete(name)
 
     def copy(self):
         copy = copy_model_util(self)

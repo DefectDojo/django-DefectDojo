@@ -46,7 +46,7 @@ Requirement 11.3.1.2 allows a system that cannot accept credentials, provided th
 
 ## The quarterly grid
 
-The **PCI Scan Evidence** page shows one Asset's assessment year as four quarters, with a row per check. Quarters are counted from the Asset's assessment anchor date, not from 1 January, because an assessor counts from the assessment date. Each cell is a verdict with the evidence behind it, and opens to show the tests and findings it rests on.
+The **PCI Scan Evidence** page shows one Asset's assessment year as four quarters, with a row per check. Opened from an item in an Asset's **PCI DSS Scope** widget, the page starts with that Asset chosen. Quarters are counted from the Asset's assessment anchor date, not from 1 January, because an assessor counts from the assessment date. Each cell is a verdict with the evidence behind it, and opens to show the tests and findings it rests on.
 
 | Check | Requirement | Satisfied when |
 |-------|-------------|----------------|

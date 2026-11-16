@@ -17,8 +17,9 @@ tracking. When there's exploit evidence, the finding shows a **Threat Intelligen
 
 * an **exploit-maturity** badge — *None → PoC → Weaponized → Active in the wild*
 * a **threat score** (0–100)
-* **evidence chips that link to the receipt** — the KEV entry (with its listing date),
-  used-in-ransomware, a Metasploit module, an Exploit-DB entry, a Nuclei template, and
+* the **highest-threat vulnerability ID**, which opens that vulnerability's page
+* **evidence chips that link to the receipt** — the KEV entry (with its listing date, which opens
+  the vulnerability's page), used-in-ransomware, a Metasploit module, an Exploit-DB entry, a Nuclei template, and
   public proof-of-concept repositories
 * a plain-language line explaining **why** the finding's priority rose
 
@@ -30,12 +31,57 @@ Beyond the card, the intelligence is a working surface across the app:
   Edit Finding forms — useful when no feed covers a finding (for example, one with no CVE).
   On a finding that does reference an enriched CVE, the next sync overwrites the hand-set
   value; see [Editing Findings](/triage_findings/findings_workflows/editing_findings/#edit-finding-form-fields).
+* an **Exploit Evidence filter** on the findings list (**Add Filter > Exploit Evidence**). Pick
+  one or more sources (**Metasploit Module**, **Nuclei Template**, **Exploit-DB Entry**), and it keeps
+  the findings where any of their vulnerability IDs has one of the sources you picked;
+  **Exclude** keeps every other finding. The filter and the Threat Intelligence card can show
+  different things in two cases:
+  * The card and the Exploit Maturity badge describe one vulnerability ID per finding, the one
+    with the strongest evidence, while the filter checks every ID. A finding with several IDs
+    can match **Metasploit Module** through an ID the card does not show, so the card has no
+    Metasploit chip.
+  * The filter reads the current feed, while the badge holds a downgrade for the stability
+    window described under [Trust and score stability](#trust-and-score-stability) (14 days by
+    default). So for the length of that window after a source drops an exploit, the badge and
+    the filter can disagree.
 * an **"Urgent & Actively Exploited"** tile on the Priority Insights dashboard (**Overview > Insights > Priority**), counting
   active Urgent-risk findings with in-the-wild exploitation — clicking through opens the
   exact filtered findings list
 * a **notification event** (`threat_intel_alert`) when an existing finding's CVE gains new
   exploit evidence, such as landing in CISA KEV or gaining a Metasploit module. Upgrades
   only — evidence quietly aging out never notifies.
+
+## The vulnerability page
+
+Each vulnerability ID has its own page in the Vulnerability Explorer
+(**Act > Vulnerability Explorer**, then select an ID). With threat intelligence enabled, the page
+shows what the intelligence feed knows about the ID, even when no Finding you can see carries it:
+
+* a **Threat Intelligence** summary: exploit maturity, threat score, the CISA KEV listing date,
+  when exploitation was last seen, EPSS, ransomware use and known threat actors
+* an **Evidence Timeline**: one row per source behind the rating, with the kind of evidence
+  (exploited in the wild, weaponized, proof of concept), a link to the source, the date where the
+  source gives one, and the source's rating
+* **Proof of Concept Exploits**: public exploit code by source, with a count where the source gives
+  one. This section appears once the feed includes an exploit-code source.
+
+When at least one Finding you can see carries the ID, the page also shows the Findings, Assets
+and parsers involved. When none does, the page says so and shows only the threat intelligence.
+An ID that is an alias of another (for example a GHSA linked to a CVE, in the feed or in your
+instance's linked identifiers) shows that vulnerability's threat intelligence and names the ID it
+came from. An ID that is in neither your Findings nor the intelligence feed shows "Vulnerability
+Not Found".
+
+You can reach the page from:
+
+* a Finding's Threat Intelligence card (the highest-threat ID, and the CISA KEV chip)
+* the **Known Exploited** column on the Findings list, where a check mark on a listed Finding
+  shows the ID CISA lists and opens its page
+* the search box: type a vulnerability ID such as `CVE-2021-44228` and the first result opens its
+  page, when your Findings or the intelligence feed know the ID
+
+The threat intelligence on this page is public data from the feed. It is the same for every user
+and says nothing about which Assets carry the ID.
 
 ## Source ratings
 
@@ -165,8 +211,11 @@ except intelligence freshness.
 
 ## Enabling it
 
-The feature ships off by default. Administrators can enable it directly, or first run it
-in **shadow mode** — which computes the would-be scores without changing anything live and
-produces a drift report showing exactly which findings would move — before turning it on.
-Contact support or see the operations runbook for the recommended rollout on large
-instances.
+From release 3.2.200, threat intelligence is on for every instance, with nothing to switch
+on. A self-hosted instance still needs one of the bundle options under
+[Self-hosted deployments](#self-hosted-deployments).
+
+Earlier releases shipped the feature off. On those, administrators can enable it directly, or
+first run it in **shadow mode**, which computes the would-be scores without changing anything
+live and produces a drift report showing exactly which findings would move. Contact support
+for the recommended rollout on large instances, or to switch the feature off.

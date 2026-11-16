@@ -131,6 +131,8 @@ Sensei is never trained on your data, and DefectDojo's AI provider does not trai
 
 Some Pro capabilities need an add-on license; they are marked with the license name.
 
+To see any Pro capability on your own use case, [book a demo](https://defectdojo.com/book-a-demo/open-source?utm_source=docs&utm_medium=docs&utm_campaign=oss-demo-prompt&utm_content=editions) with our team.
+
 ## A closer look at specific Pro features
 
 ### The Triage Engine

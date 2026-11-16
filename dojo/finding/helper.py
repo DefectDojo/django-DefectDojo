@@ -924,8 +924,11 @@ def prepare_duplicates_for_delete(obj, *, preview_only=False):
 
     # Bulk-reset inside-scope duplicates: single UPDATE instead of per-original mass_model_updater.
     # Clears the duplicate_finding FK so cascade_delete won't trip over dangling self-references.
+    # Selected by the link alone, not by the duplicate flag: the chunked delete commits chunk by
+    # chunk and leaves the rows of its own scope alone (resolve_inbound_duplicate_references),
+    # so a link this pass skips, on a row whose flag is False, still points at its target when
+    # the target's chunk commits, and that COMMIT fails the foreign key on every attempt.
     inside_reset_count = Finding.objects.filter(
-        duplicate=True,
         duplicate_finding_id__in=scope_ids_subquery,
         id__in=scope_ids_subquery,
     ).update(duplicate_finding=None, duplicate=False)
@@ -1813,6 +1816,10 @@ def close_finding(
         note_date=mitigated_date,
     )
 
+    # Risk acceptance. Before the endpoint statuses: unaccepting reopens them, so it has to run
+    # first for the close to leave them mitigated.
+    ra_helper.risk_unaccept(user, finding, perform_save=False)
+
     if locations_enabled():
         # Related locations
         for ref in finding.locations.all():
@@ -1826,9 +1833,6 @@ def close_finding(
             status.mitigated = True
             status.last_modified = current_time
             status.save()
-
-    # Risk acceptance
-    ra_helper.risk_unaccept(user, finding, perform_save=False)
 
     # External issues (best effort)
     close_external_issue(finding.id, "Closed by defectdojo", "github")

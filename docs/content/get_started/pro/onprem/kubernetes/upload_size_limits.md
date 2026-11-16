@@ -31,6 +31,20 @@ dojo:
   scanMaxFileSize: 100
 ```
 
+## The connector chunk limit
+
+Connectors send findings to DefectDojo in chunks of about 5,000 findings, and each chunk has its own size limit, separate from the scan file limit. A chunk over it fails the sync with `Chunk is too large. Maximum supported size is N MB`, or `decompressed chunk exceeds N MB` for a compressed chunk.
+
+The limit defaults to the larger of `dojo.scanMaxFileSize` and 100 MB, so lowering the scan file limit never shrinks it below 100 MB. Change it only if a connector sync fails with one of those messages. The chart has no dedicated value for it, so set `DD_CONNECTORS_CHUNK_MAX_MB`, in megabytes, through `config.extra`:
+
+```yaml
+config:
+  extra:
+    DD_CONNECTORS_CHUNK_MAX_MB: "200"
+```
+
+DefectDojo holds each chunk in memory while it checks it, so raise the limit in steps rather than removing it. The ingress limit below still applies.
+
 ## The ingress limit
 
 This is the one that produces a bare `413` with no DefectDojo styling, because the request never reaches the application.

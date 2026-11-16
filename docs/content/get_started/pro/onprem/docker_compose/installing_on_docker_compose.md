@@ -14,6 +14,8 @@ The result is two hosts. One runs the application and its supporting services un
 
 Almost all of the work is done by `dojo-compose-cli`, which DefectDojo provides alongside your license. Its `first-install` command is an interactive wizard that configures the deployment, pulls the images, starts everything, and registers a systemd service.
 
+> **Legacy:** `dojo-compose-cli` is now a legacy command. It keeps working, and every step on this page still applies. Going forward, `dojo-deploy` replaces it and runs the same commands as `dojo-deploy compose`. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for each legacy command's `dojo-deploy` equivalent.
+
 ## Before you start
 
 Size the deployment first. The hardware sizing guidance in this section covers what to provision for both the application host and the database.
@@ -318,7 +320,7 @@ sudo -E dojo-compose-cli app change-password
 
 Upgrades are covered on their own page: see the [DefectDojo Pro Upgrade Guide (Docker Compose)](/get_started/pro/onprem/docker_compose/upgrading_on_docker_compose/) for the one-command `app upgrade`, the step-by-step path, air-gapped upgrades, and rollback.
 
-## Command reference
+## Command reference (legacy) {#command-reference}
 
 `dojo-compose-cli --help` lists everything, and every subcommand takes `--help` as well. The commands you are most likely to need are below. `doctor`, `certs` and `bundle create` ship in the next `dojo-compose-cli` release after 2.1.5; see [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/).
 

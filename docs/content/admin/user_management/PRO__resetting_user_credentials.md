@@ -25,7 +25,7 @@ The action applies to the users you have explicitly checked. You **cannot includ
 
 ## Force Password Reset
 
-**Force Password Reset** sets the *force-password-reset-on-next-login* flag on each selected user. The next time that user makes a request, DefectDojo redirects them to the **Change Password** page and won't let them continue until they set a new password. The flag clears automatically once they do.
+**Force Password Reset** sets the *force-password-reset-on-next-login* flag on each selected user. The next time that user makes a request, DefectDojo redirects them to the **Change Password** page and won't let them continue until they set a new password. The flag clears automatically once they do. A user who has not accepted the current [End User License Agreement](../pro__eula_acceptance/) accepts it on the same page, with a checkbox below the password fields.
 
 Keep in mind what this action does **not** do:
 

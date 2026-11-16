@@ -78,6 +78,10 @@ Il **Vulnerability Explorer** elenca una riga per ogni ID di vulnerabilità, con
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+Nella tabella dei Riscontri, il segno di spunta **Known Exploited** di un Riscontro presente nel
+catalogo mostra anche l'ID di vulnerabilità elencato da CISA, e selezionarlo apre la pagina di
+quell'ID nel Vulnerability Explorer.
+
 Questi valori descrivono la vulnerabilità stessa, quindi sono identici indipendentemente da quanti Riscontri la referenzino. EPSS Score, EPSS Percentile, Known Exploited e KEV Date sono tutti ordinabili, il che rende questo il modo più rapido per rispondere alla domanda "quali vulnerabilità nel mio ambiente vengono effettivamente sfruttate?" — ordina per **EPSS Score** in ordine decrescente, oppure ordina per **Known Exploited** per portare in cima i CVE presenti nel catalogo.
 
 Il conteggio **Total Findings** di ogni riga rimanda all'elenco dei Riscontri filtrato per quella vulnerabilità, così puoi passare da "questo CVE è presente in KEV" a "ecco tutto ciò che riguarda" con un solo clic.

@@ -1,6 +1,6 @@
 ---
 title: "Similar Findings"
-description: "Find related Findings on the View Finding page and manually link them as duplicates"
+description: "See a Finding's duplicate cluster and the Findings similar to it, and link them as duplicates by hand"
 audience: pro
 weight: 3
 ---
@@ -11,45 +11,59 @@ Use it when automatic deduplication did not group Findings you believe belong to
 
 ## Where to find it
 
-Open any Finding and scroll to the **Duplicate & Similar Findings** card. It has two tabs:
+Open any Finding and scroll to the **Duplicate & Similar Findings** card. Its **Duplicates** tab answers one question: what is this Finding the same as? It holds, top to bottom:
 
-- **Duplicate Findings** – the Findings already linked to this one as duplicates (the automatic cluster).
-- **Similar Findings** – other Findings in the Asset that match the current Finding's values but are not yet part of its cluster.
+- A summary line: how many Findings are in this Finding's duplicate cluster, and how many similar Findings there are.
+- **This Cluster**: the duplicate cluster as a tree. The cluster's original comes first, with the Findings deduplicated into it indented under it.
+- **Similar, Not in This Cluster**: other Findings in the Asset that match the current Finding's values but are not part of its cluster.
+- **Open in Findings**, which opens the Findings list filtered to the cluster.
 
-Select the **Similar Findings** tab to run the query.
+The card's other tab, **Linked Findings**, lists the Findings a Keep Both Active rule linked to this one, and appears only when there are some. The Duplicates tab is hidden on a Finding with no duplicates and no similar Findings.
 
-![The Duplicate & Similar Findings card on the View Finding page](images/pro_similar_findings.png)
+![The Duplicates tab on the View Finding page](images/pro_similar_findings.png)
 
 ## How Findings are matched
 
-DefectDojo searches the **same Asset** for Findings that resemble the current one, based on values such as Vulnerability IDs (for example, CVE identifiers), CWE, file path, line number, and unique ID from tool. The current Finding is always excluded from its own results, and matching never reaches across Assets.
+DefectDojo searches the **same Asset** for Findings with the same test type as the current one that also share every one of its values that is set among CWE, file path, line number and unique ID from tool. When the current Finding has Vulnerability IDs (for example, CVE identifiers), a match carries at least one of them, not necessarily all. The current Finding is always excluded from its own results, and matching never reaches across Assets. Hover over the help icon beside **Similar, Not in This Cluster** to see what the matches share.
 
 This is different from the automatic deduplication algorithm, which compares `hash_code` (or Unique ID from tool) to decide matches. Similar Findings deliberately casts a wider net so you can discover related Findings that strict hash matching would miss.
 
 ## Working with the results
 
-The Similar Findings tab is a full data table with the same controls you use elsewhere in the Pro UI:
+**The cluster tree.** The Finding you are viewing is marked **This Finding**. If it is the cluster's original, it is the first row. If it is a duplicate, the first row is its original, and the Finding itself is one of the rows under it. Each row shows the Finding's severity, title, where it was found (the Test and its tool) and its date. When the original sits in an Asset you cannot open, its row says so and links nowhere.
 
-- **Keyword Search** and the per-column filter (funnel) and sort controls let you narrow the list.
-- The **saved views** dropdown (**Default**) and the save icon let you store a filter/column layout for reuse.
-- The column settings and layout buttons control which columns are shown.
-- **Export** downloads the current results, and **Clear Filters** resets the table.
+**Why is this a duplicate.** On a Finding that is a duplicate, **Why Is This a Duplicate** in the summary line opens the deduplication explanation in place: what matched (the hash fields, the scanner's own identifier, or the shared location), the algorithm, and the Dedupe Pool that governed the match. Select it again to close it.
 
-Each row shows the matching Finding's ID, Severity, Priority, Risk, Finding name, CWE, CVSS scores, Vulnerability IDs, EPSS data, exploit intelligence (Known Exploited / Ransomware), status, Asset, and more. Click a Finding name to open it.
+**The Cluster column.** Each similar Finding says which cluster it already belongs to:
+
+- **Not a duplicate**: it is in no cluster.
+- **Original of _n_**: it is the original of another cluster with _n_ duplicates you can view. When you can view none of them, the row reads **Original of another cluster**.
+- **Duplicate of #_id_**: it is a duplicate of another Finding, which the number links to.
+
+A similar Finding that is already in this cluster is listed in the tree, not again under it.
+
+**Open in Findings.** The tab shows up to 100 Findings in each part; past that, each part says how many it holds (for example, **First 100 of 250**). Search, filters, sorting, export and bulk actions live in the Findings list: **Open in Findings** opens it filtered to every duplicate in the cluster. It covers the cluster only: the Findings list has no filter for similar Findings, so similar Findings past the first 100 are counted but not listed.
 
 ## Actions
 
-Open the action menu (the **⋮** button at the start of a row) to manage the duplicate cluster directly from this page:
+Open the action menu (the **⋮** button at the start of a row) to manage the duplicate cluster directly from this page. Each action asks for confirmation before it changes anything.
 
-![The Similar Findings row action menu](images/pro_similar_findings_actions.png)
+![The similar Finding row action menu](images/pro_similar_findings_actions.png)
 
-- **Set as Original Finding** – promote a Finding to be the original (cluster root).
-- **Mark as Duplicate** – link the similar Finding into the current Finding's duplicate cluster.
+On a similar Finding:
 
-These actions manipulate the same duplicate relationships that automatic deduplication uses, so a Finding you link here behaves exactly like an automatically detected duplicate. Any Finding you mark as a duplicate then appears under the **Duplicate Findings** tab of this card.
+- **Mark as Duplicate**: link the similar Finding into the current Finding's duplicate cluster. It moves into the cluster tree.
+- **Set as Original Finding**: make the similar Finding the original of the current Finding's cluster.
+- **Reset Duplicate Status**: take a Finding that is a duplicate of another cluster out of that cluster.
 
-An action may be unavailable when it is not valid, for example when the similar Finding is already the original of a different cluster, or when linking it would cross an Engagement boundary while Engagement-level deduplication is enabled.
+These actions manipulate the same duplicate relationships that automatic deduplication uses, so a Finding you link here behaves exactly like an automatically detected duplicate.
+
+An action may be unavailable when it is not valid, for example when the similar Finding is already the original of a different cluster, or when linking it would cross an Engagement boundary while Engagement-level deduplication is enabled. The row then shows an information icon in place of the menu; hover over it to see why.
+
+Rows in the cluster tree carry the same action menu as the Findings list.
 
 ## Enabling and disabling Similar Findings
 
-Similar Findings is controlled by the global **Enable Similar Findings** system setting, which is enabled by default. Because the query looks across an entire Asset, it can be expensive on large Assets; if you notice slow View Finding pages, this setting can be turned off.
+Similar Findings is controlled by the global **Enable Similar Findings** system setting, which is enabled by default. Because the query looks across an entire Asset, it can be expensive on large Assets; if you notice slow View Finding pages, this setting can be turned off. With it off, the Duplicates tab shows the cluster only.
+
+A **Similar Findings** widget, which shows the similar Findings alone with chips for the values they share, can also be added to the View Finding page: select **Edit Layout**, then **Add Widget**, and add a Data Table showing Similar Findings.

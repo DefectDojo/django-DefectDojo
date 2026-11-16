@@ -1,6 +1,6 @@
 from dojo.models import Test
 from dojo.tools.syft.parser import SyftParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestSyftParser(DojoTestCase):
@@ -46,3 +46,15 @@ class TestSyftParser(DojoTestCase):
         self.assertEqual(["Apache-2.0"], parser._licenses({"licenses": [{"spdxExpression": "Apache-2.0"}]}))
         self.assertEqual(["BSD"], parser._licenses({"licenses": ["BSD"]}))
         self.assertEqual([], parser._licenses({}))
+
+
+class TestSyftParserDependencyLocations(DojoTestCase):
+    @skip_unless_v3
+    def test_each_package_is_a_dependency_with_its_package_url_and_cpes(self):
+        with (get_unit_tests_scans_path("syft") / "one_finding.json").open(encoding="utf-8") as testfile:
+            findings = SyftParser().get_findings(testfile, Test())
+        dependencies = [loc.data for loc in findings[0].unsaved_locations if loc.type == "dependency"]
+        self.assertEqual(1, len(dependencies))
+        self.assertEqual("pkg:pypi/certifi@2026.7.22", dependencies[0]["purl"])
+        self.assertEqual(["cpe:2.3:a:certifi:certifi:2026.7.22:*:*:*:*:python:*:*"], dependencies[0]["cpes"])
+        self.assertEqual("app/uv.lock", dependencies[0]["file_path"])
