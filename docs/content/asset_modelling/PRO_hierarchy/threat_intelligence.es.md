@@ -88,6 +88,8 @@ reduce, y un hallazgo cuyo EPSS ya supere el piso no se ve afectado. El conocido
 externa** por tipo de producto, en la configuración de su Motor de Priorización, escala esta contribución
 exactamente igual que siempre escaló EPSS/KEV.
 
+La próxima versión de esta tabla, que añade evidencia de explotación revisada por los analistas de DefectDojo, se describe en [Puntuación basada en evidencia (Rubric v2), todavía no disponible](../threat_intelligence_rubric_v2/). Hasta su publicación, cada hallazgo se puntúa con la tabla anterior.
+
 ### El piso de Riesgo por explotación activa
 
 La tabla anterior aumenta la **Prioridad**, pero de forma proporcional a la severidad base del hallazgo. Esto

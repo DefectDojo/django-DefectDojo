@@ -90,6 +90,8 @@ punteggio, mai abbassarlo, e un riscontro il cui EPSS supera già la soglia non 
 **scalare del punteggio esterno** per tipo di prodotto, nelle impostazioni del tuo Motore di Prioritizzazione, si applica a questo contributo
 esattamente come si è sempre applicato a EPSS/KEV.
 
+La prossima versione di questa tabella, che aggiunge le evidenze di sfruttamento esaminate dagli analisti di DefectDojo, è descritta in [Punteggio basato sulle evidenze (Rubric v2), non ancora disponibile](../threat_intelligence_rubric_v2/). Fino al suo rilascio, ogni riscontro riceve il punteggio secondo la tabella sopra.
+
 ### La soglia minima di Rischio per elementi attivamente sfruttati
 
 La tabella sopra aumenta la **Priorità**, ma in proporzione alla gravità di base di un riscontro. Questo ha
