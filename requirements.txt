@@ -78,7 +78,7 @@ hpack==4.2.0
 html2text==2025.4.15
 httpcore==1.0.9
 httpx==0.28.1
-humanize==4.16.0
+humanize==4.17.0
 hyperframe==6.1.0
 hyperlink==21.0.0
 idna==3.20
