@@ -509,6 +509,11 @@ release's current SBOM, but the earlier one stays listed, tagged **Superseded**,
 its history. The current one is tagged **Current**. A CycloneDX upload and an SPDX upload for the
 same release are each current: one does not replace the other.
 
+The version export, `GET /api/v2/sbom/<asset id>/?version=<version>`, is built from the release's
+newest upload of any format, whatever `spec` you ask it for. When a release has both a CycloneDX and
+an SPDX upload, download the one you need from its own line instead (or
+`GET /api/v2/bom_snapshots/<id>/download/`).
+
 The download button on a line saves that SBOM as it was recorded for that release: its components,
 licenses and dependency graph, in its own format. It is not the Asset's current inventory, which
 **Export SBOM and VEX** exports. The file name carries the Asset, the version and the SBOM's id.

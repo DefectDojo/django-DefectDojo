@@ -300,7 +300,7 @@ curl -X POST "$DD_URL/api/v2/sbom-import/" -H "Authorization: Token $DD_TOKEN" \
 | --- | --- |
 | **SBOM Imported** with the number of dependencies processed | A message at the top right |
 | The count on the **Locations** tile goes up | The Asset page |
-| The release's components | `GET /api/v2/sbom/<asset id>/?spec=cyclonedx&version=4.1`. A version never imported answers *No version '…' for this asset* |
+| The release's components | `GET /api/v2/sbom/<asset id>/?spec=cyclonedx&version=4.1`. A version never imported answers *No version '…' for this asset*. It is built from the release's newest upload of any format, so when a release has both a CycloneDX and an SPDX upload, download the one you need from the **SBOMs** widget instead |
 | The release's SBOM, with any earlier upload for it | The **SBOMs** widget on the Asset page. Add it from **Page Layout → Edit Layout → Add Widget → Data Table**, record set `SBOMs`. See [The SBOMs widget](/asset_modelling/engagements_tests/pro__assets/#the-sboms-widget) |
 
 **Export SBOM and VEX**, on the same **Locations** menu, exports the Asset as a whole. A single
