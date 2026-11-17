@@ -4,7 +4,7 @@ import logging
 import django_tagulous as tagulous
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -40,7 +40,7 @@ from dojo.api_v2.views import (
     report_generate_response,
 )
 from dojo.authorization import api_permissions as permissions
-from dojo.db_utils import is_foreign_key_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_vanished_row_error
 from dojo.filters import order_with_pk_tiebreak
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
@@ -181,7 +181,7 @@ class FindingViewSet(
         finding_pk = serializer.instance.pk
         try:
             serializer.save(push_to_jira=push_to_jira)
-        except IntegrityError as exc:
+        except DatabaseError as exc:
             # A finding PATCH is not wrapped in a single transaction
             # (ATOMIC_REQUESTS is False), so a concurrent delete of this finding --
             # a reimport close_old_findings, a bulk delete, or another pipeline step --
@@ -190,9 +190,13 @@ class FindingViewSet(
             # violation: the dojo_finding_tags through-row, and on Pro the
             # pro_enhanced_finding companion. That is not a server defect -- the
             # resource the client PATCHed no longer exists -- so answer 404 rather than
-            # letting a bare FK violation fall through to a 500. A genuine FK defect
-            # (the finding is still present) keeps surfacing as the original error.
-            if is_foreign_key_conflict(exc) and not Finding.objects.filter(pk=finding_pk).exists():
+            # letting a bare FK violation fall through to a 500. The finding row's own
+            # save is a forced UPDATE (Finding.save), so a delete landing before it is a
+            # forced-update miss rather than a silent re-insert, and is answered the same
+            # way. A genuine defect (the finding is still present) keeps surfacing as the
+            # original error.
+            vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
+            if vanished and not Finding.objects.filter(pk=finding_pk).exists():
                 msg = "This finding was deleted while the update was being processed."
                 raise NotFound(msg) from exc
             raise

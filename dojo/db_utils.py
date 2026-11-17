@@ -1,5 +1,7 @@
 """Database-level helpers that are not tied to any particular model or app."""
 
+from django.db import DatabaseError
+
 # SQLSTATEs meaning "this transaction lost a concurrency race": 40P01
 # deadlock_detected and 40001 serialization_failure. Postgres aborts one participant
 # and lets the other commit, so the aborted work is not invalid -- it just has to run
@@ -44,3 +46,14 @@ def is_foreign_key_conflict(exc):
     delete-vs-import race, not a generic transient conflict.
     """
     return any(state == FK_VIOLATION_SQLSTATE for state in _iter_sqlstates(exc))
+
+
+def is_vanished_row_error(exc):
+    """
+    Whether exc is Django reporting that a forced UPDATE (or an update_fields save) matched no row.
+
+    Model.save_base raises a bare DatabaseError for this; every genuine database failure is a
+    subclass (IntegrityError, OperationalError, ...), so the exact class is the discriminator and
+    the message only a second opinion.
+    """
+    return type(exc) is DatabaseError and "did not affect any rows" in str(exc)
