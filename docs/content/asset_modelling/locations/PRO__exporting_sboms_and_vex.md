@@ -150,7 +150,7 @@ OpenVEX is the VEX format usually paired with SPDX. Both the API (`?spec=openvex
 Through the API, that means Active and Risk Accepted are `affected`, Out of Scope and False Positive are `not_affected`, and Mitigated is `fixed`.
 
 - **Products.** Each statement's `products` are the components' Package URLs, the same identifiers the SBOM export uses. A statement about the whole Asset (a Finding with no component) names the Asset as `urn:defectdojo:product:<id>`.
-- **Justifications.** OpenVEX requires a justification or an impact statement on every `not_affected` statement. DefectDojo always writes an impact statement, and it quotes the Finding's CycloneDX justification when there is one. Where that justification has a clear OpenVEX counterpart, the statement also sets OpenVEX's `justification`:
+- **Justifications.** OpenVEX requires a justification or an impact statement on every `not_affected` statement. DefectDojo always writes an impact statement. Only the Asset page export carries justifications: it reads each Finding's own VEX analysis, while the API builds statements from Finding statuses, which have none. On the Asset page, the impact statement quotes the Finding's CycloneDX justification when there is one, and when the Finding's VEX state is Not Affected and that justification has a clear OpenVEX counterpart, the statement also sets OpenVEX's `justification`:
 
   | CycloneDX justification | OpenVEX `justification` |
   |---|---|
@@ -162,4 +162,4 @@ Through the API, that means Active and Risk Accepted are `affected`, Out of Scop
 - **Versions.** With `?version=`, every statement's `status_notes` names the version it describes, since OpenVEX has no document-level subject to hold it.
 - **Nothing to state.** An OpenVEX document must contain at least one statement, so an Asset with no findings to state returns a 400 rather than an invalid document.
 
-A document exported this way can be imported again with the [OpenVEX Scan parser](/supported_tools/parsers/file/openvex/), which reads the same Package URLs and chooses each `not_affected` Finding's status from the OpenVEX justification: a Finding exported as `code_not_reachable` comes back as a false positive, and one with no mapped justification comes back as out of scope.
+A document exported this way can be imported again with the [OpenVEX Scan parser](/supported_tools/parsers/file/openvex/), which reads the same Package URLs and chooses each `not_affected` Finding's status from the OpenVEX justification. From an Asset page export, a Finding exported as `code_not_present` or `code_not_reachable` comes back as a false positive, one exported with a `protected_*` justification comes back as mitigated, and one with no mapped justification comes back as out of scope. Every `not_affected` statement from the API export has no justification, so it comes back as out of scope.
