@@ -83,6 +83,8 @@ A user-defined field's name (such as `udf_sline_301`) is the key ServiceDesk Plu
 
 Attach a **Ticket Template** in the mapping's **Ticket Template** step to replace the built-in request subject and description, for Findings, Finding Groups or both. The template's summary becomes the request subject, shortened to 250 characters, and its description becomes the request description. A part the template leaves blank uses the built-in content: the Finding title or Finding Group name for the subject. If a template fails to render, the request is sent with the built-in subject or description instead, and the failure is listed under Errors.
 
+To give every mapping on a connector the same template, set **Default Ticket Template** on the connector itself (**Edit Connector** in the connector's menu). A mapping with no template of its own uses the connector's default, and a mapping that has its own template uses only that one: a part left blank in the mapping's template is the built-in content, not the connector default's part. If the default template is deleted, the connector goes back to the built-in content.
+
 A few ServiceDesk Plus-specific behaviors to be aware of:
 
 - Updates sync the full request content - unlike most trackers, ServiceDesk Plus allows the subject and description to be edited after creation.

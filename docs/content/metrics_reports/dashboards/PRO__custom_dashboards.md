@@ -179,7 +179,7 @@ Every row's actions are in the menu at the start of the row.
 
 ### Shared templates
 
-DefectDojo ships four ready-to-use shared templates you can clone as a starting point:
+DefectDojo ships ready-to-use shared templates you can clone as a starting point, among them:
 
 | Template | Purpose |
 |----------|---------|
@@ -187,6 +187,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 | **Priority Layout** | A triage-focused board built around finding priority and risk. |
 | **Mitigation Layout** | A remediation-velocity board (closure trends, MTTR/MTTD, aging). |
 | **Tool Layout** | A scanner-effectiveness board built around test types and recent scan activity. |
+| **EU CRA** | The Cyber Resilience Act at a glance: the CRA row of **Regulatory Scope** (Assets in scope, open, past-SLA and CISA KEV findings, support-period warnings) above **CRA Article 14 Deadlines**. Listed only while the Regulatory Profile feature is on. See [Setting Up EU CRA](/federal_compliance/eu_cra_setup/). |
 
 > **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it. A **collaborative** layout is the exception by design: it is used live rather than copied, so edits made to it are visible to everyone. Take your own copy of a collaborative layout only when you want a private version that no longer follows the shared one. A read-only collaborative layout works the same way, except that only a Maintainer or its owner can change it.
 
@@ -300,7 +301,7 @@ Some widgets read data that only exists when a feature is turned on, the license
 | **Shadow AI**, **AI Footprint** | The AI Inventory and Governance feature |
 | **CRA Article 14 Deadlines** | The Regulatory Profile feature |
 
-**Regulatory Scope** needs no feature: its rows are the regulations assigned to your Assets, which every instance can record. Only its support-period column reads the Regulatory Profile, and it counts nothing where no support period was recorded.
+**Regulatory Scope** needs no feature: its rows are the regulations assigned to your Assets, which every instance can record. Only its support-period column reads the Regulatory Profile, and it counts nothing where no support period was recorded. Its **CISA KEV** column counts each regulation's open findings marked **Known Exploited** (listed in the CISA KEV catalog).
 
 ## Charting scans by category
 

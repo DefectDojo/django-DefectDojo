@@ -717,7 +717,20 @@ def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-            duplicate_cluster.order_by("-id").delete()
+            # Lock the original and its cluster's finding rows, in id order, before the delete
+            # touches any of their child rows: the order the excess-duplicate delete and
+            # bulk_delete_findings take them in (lock_findings_for_delete). The queryset delete
+            # otherwise deleted the child rows (Test_Import_Finding_Action, ...) first and
+            # reached the finding rows last, so against a chunk holding a duplicate and waiting
+            # on its children the two deadlocked (Postgres 40P01). The ids come from the cluster
+            # just read above, so the lock is one primary-key lookup with no subquery to plan.
+            # The original's lock holds back deduplication (which locks an original before it
+            # links a duplicate to it) until this commits, and the delete reads the cluster
+            # again, so a duplicate linked before the lock was granted goes with the rest and
+            # one the cleanup removed in the meantime is simply no longer there.
+            with transaction.atomic(savepoint=False):
+                lock_findings_for_delete([instance.id, *(finding.id for finding in duplicate_cluster)])
+                duplicate_cluster.order_by("-id").delete()
         else:
             new_original = reconfigure_duplicate_cluster(instance, duplicate_cluster)
             if jira_sync_requested:
@@ -857,8 +870,9 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         return None
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-        # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
-        # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
+        # Don't delete here: the caller deletes the outside-scope duplicates itself
+        # (prepare_duplicates_for_delete via bulk_delete_findings, finding_delete via a
+        # locked queryset delete).
         return None
     logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
     # set new original to first finding in cluster (ordered by id)
