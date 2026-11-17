@@ -15,7 +15,7 @@ Each CPE location stores the CPE's attributes in their own columns:
 
 - **Part**: `a` for an application, `o` for an operating system, `h` for hardware.
 - **Vendor**, **Product** and **Version**.
-- The other CPE 2.3 attributes: update, edition, language, software edition, target software, target hardware and other.
+- The other CPE 2.3 attributes: update, edition, language, software edition, target software, target hardware and other. In the API they are `update`, `edition`, `cpe_language`, `sw_edition`, `target_sw`, `target_hw` and `other`.
 
 An attribute the CPE leaves open is stored as `*` (any value); `-` means not applicable.
 
