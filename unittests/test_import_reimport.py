@@ -898,8 +898,14 @@ class ImportReimportMixin:
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
-            self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+        sprint_start_date = fake_now.date() + relativedelta(days=7)
+        with patch(
+            "dojo.importers.default_reimporter.azure_devops_sprint_sla_start_date_enabled",
+            return_value=True,
+        ), patch("dojo.importers.default_reimporter.cache") as mock_cache:
+            mock_cache.get.return_value = sprint_start_date
+            with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
+                self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
@@ -915,10 +921,10 @@ class ImportReimportMixin:
         for finding in findings["results"]:
             if "Zap1" in finding["title"]:
                 self.assertTrue(finding["active"])
-                self.assertEqual(finding["sla_start_date"], fake_now.date().isoformat())
+                self.assertEqual(finding["sla_start_date"], sprint_start_date.isoformat())
                 sla_days = finding["severity"].lower()
                 sla_config = Finding.objects.get(id=finding["id"]).test.engagement.product.sla_configuration
-                sla_expiration_date = fake_now.date() + relativedelta(days=getattr(sla_config, sla_days))
+                sla_expiration_date = sprint_start_date + relativedelta(days=getattr(sla_config, sla_days))
                 self.assertEqual(finding["sla_expiration_date"], sla_expiration_date.isoformat())
             else:
                 self.assertIsNone(finding["sla_start_date"])

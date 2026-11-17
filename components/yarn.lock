@@ -139,18 +139,18 @@ datatables.net-bs@^3.1:
   dependencies:
     datatables.net "3.1.2"
 
-datatables.net-buttons-bs@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons-bs/-/datatables.net-buttons-bs-4.1.2.tgz#8f344915b48f446e797019472d6aaac403f269e5"
-  integrity sha512-zI31PmB0pPk/SSWUz20BlgVn5lop9iZkqs4lP0X79fWQNadw+V1tfM26wr73ydVIZ5e5U6/d41jC4TR+N03itg==
+datatables.net-buttons-bs@^4.1.3:
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons-bs/-/datatables.net-buttons-bs-4.1.3.tgz#44240e0cd7a0b3e2777557a3cedded499e98b231"
+  integrity sha512-ozBhH5tBSEu8FwAjh0IBvLLTRajHWZ8eMdzuUmNwca/imIZcLdEHd9Ky0QYSOUi/RN8poHcUHbzhwwgHT8wRgw==
   dependencies:
     datatables.net-bs "^3.1"
-    datatables.net-buttons "4.1.2"
+    datatables.net-buttons "4.1.3"
 
-datatables.net-buttons@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-4.1.2.tgz#d16352507ed2a3720d5f55c1f57cdd72ca45f84b"
-  integrity sha512-VigN0751S8r/brSZNRSPXgfUHZciujQ2zXkZifOuWYbgMaX/I68YyGmiuQTTrI7DMl0fXHgM4nA3lmJcdtKD2A==
+datatables.net-buttons@4.1.3:
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-4.1.3.tgz#24b7490e4c556bd805328e75256ed864300be82b"
+  integrity sha512-8ss6wBBfh5RUUYzNtbV+USx7L3Neu+KdjT+VU2by5HIEDZ0cf1xz0MNiIHUp3aPpN0tyMB5e0M9Vp2YGCEACPQ==
   dependencies:
     datatables.net "^3.1"
 
@@ -166,10 +166,10 @@ datatables.net@3.1.2:
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.2.tgz#a5a50257bf87b0f70eca710f6ef0feeb763c5556"
   integrity sha512-6PnhPw9lrPASP2n1t13zW595aKB41j3Qt6iykFVV6aohGtSF3CTjwQ+RsdlrGUQTj/Ji0or8+9Q7mMpf4YY1cQ==
 
-datatables.net@^3.1, datatables.net@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.4.tgz#b737343bef9ec0acfd4c6a3b5774a0925f83411f"
-  integrity sha512-tnk14y/AOr0Z1d7avIUvCcOGgqZpeo7B6g6RQiycMQckEMq2FaaZTG1Q1xD6Kci5gpAvdjZInDmbscoiVSTyGw==
+datatables.net@^3.1, datatables.net@^3.1.5:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-3.1.5.tgz#aea72d23adb015ff2b98e35fc38e1d23f2fd7a57"
+  integrity sha512-phu9fVz1cOhD7kZDO5Ztj15qwghCkmdwX5AezLi+PxfMtnFAq0itpewvXzdwdr6bOwPqO2zuXsXWUU5x3wQptw==
 
 delegate@^3.1.2:
   version "3.2.0"
@@ -381,10 +381,10 @@ pdfkit@^0.20.2:
     linebreak "^1.1.0"
     png-js "^2.0.0"
 
-pdfmake@^0.3.12:
-  version "0.3.12"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.12.tgz#c1f35e5f5b37f1fcc1cd8e7df63581b09438292a"
-  integrity sha512-Rhqr/IWpYeEzrKCaZJOfdNxMtBAaHb4NfVXRpTHtH8DRo++hUua9QjwP5UNau7rOsHpgE0xfQLqVtkxrpdNqJQ==
+pdfmake@^0.3.14:
+  version "0.3.14"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.14.tgz#0ffabfafd313cf14e74f479294b41bbbb6881e48"
+  integrity sha512-EDyOlwiDnE8e0eITSpHwZCVAP/veWq0TxA2RyhoDO0cSLat7HEGNtKUN6UiW9+YovO2GhcWlK99Q7tj9sof9gg==
   dependencies:
     linebreak "^1.1.0"
     pdfkit "^0.20.2"

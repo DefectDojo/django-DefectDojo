@@ -8,12 +8,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django.core.cache import cache
-from dojo.api_v2.metrics.serializers import MetricsIARecommendationSerializers
+from django.db.models import Exists, OuterRef, Q
+from dojo.api_v2.metrics.serializers import (
+    MetricsIARecommendationSerializers,
+    MetricsDevicesWithoutFindingsFilterSerializer,
+    MetricsDevicesWithoutFindingsSerializer,
+)
 from dojo.api_v2.api_error import ApiError
 from dojo.api_v2.metrics.helper import (
     get_metrics_ia_recommendation,
     apply_filter)
-from dojo.models import Finding
+from dojo.models import Engagement, Finding
 from drf_spectacular.utils import (
     extend_schema,
 )
@@ -21,6 +26,8 @@ from dojo.api_v2 import (
     permissions,
 )
 logger = logging.getLogger(__name__)
+
+METRICS_DEVICE_PROVIDERS = ("TENABLE", "SERVERLESS", "IMAGES")
 
 
 class MetricIARecommendationApiView(
@@ -99,3 +106,60 @@ class MetricIARecommendationApiView(
         else:
             return http_response.bad_request(
                 message="Invalid serializer", data=serializer.errors)
+
+
+class MetricsDevicesWithoutFindingsApiView(GenericAPIView):
+    permission_classes = (
+        IsAuthenticated,
+        permissions.UserHasPermissionMetrics,
+    )
+    serializer_class = MetricsDevicesWithoutFindingsFilterSerializer
+    pagination_class = LimitOffsetPagination
+
+    @extend_schema(
+        parameters=[MetricsDevicesWithoutFindingsFilterSerializer],
+        responses={
+            status.HTTP_200_OK: MetricsDevicesWithoutFindingsSerializer(many=True),
+        },
+    )
+    def get(self, request):
+        unsupported_parameters = set(request.query_params) - {
+            "provider",
+            "limit",
+            "offset",
+        }
+        if unsupported_parameters:
+            return http_response.bad_request(
+                message="Unsupported query parameters",
+                data={"unsupported": sorted(unsupported_parameters)},
+            )
+
+        filters = self.get_serializer(data=request.query_params)
+        if not filters.is_valid():
+            return http_response.bad_request(
+                message="Invalid serializer",
+                data=filters.errors,
+            )
+
+        provider = filters.validated_data.get("provider")
+        providers = (provider,) if provider else METRICS_DEVICE_PROVIDERS
+        provider_query = Q()
+        for allowed_provider in providers:
+            provider_pattern = (
+                rf"(^|\n)PROVIDER:[ \t]*{allowed_provider}[ \t]*(\r?\n|$)"
+            )
+            provider_query |= Q(description__iregex=provider_pattern)
+
+        findings = Finding.objects.filter(test__engagement=OuterRef("pk"))
+        engagements = (
+            Engagement.objects.filter(active=True)
+            .annotate(has_findings=Exists(findings))
+            .filter(has_findings=False)
+            .select_related("product", "product__prod_type")
+        )
+
+        engagements = engagements.filter(provider_query)
+
+        page = self.paginate_queryset(engagements)
+        serializer = MetricsDevicesWithoutFindingsSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)

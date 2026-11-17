@@ -237,7 +237,7 @@ class InputFlowViewSet(
     DojoModelViewSet
 ):
     queryset = InputFlow.objects.select_related(
-        "engagement"
+        "engagement__product__prod_type"
     ).prefetch_related(
         "urls__scenarios"
     ).order_by("id")

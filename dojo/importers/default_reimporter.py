@@ -1,6 +1,8 @@
 import logging
+from functools import cached_property
 from itertools import chain
 
+from django.core.cache import cache
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import serialize
 from django.db.models.query_utils import Q
@@ -18,6 +20,7 @@ from dojo.models import (
     Test_Import,
      System_Settings
 )
+from dojo.utils import azure_devops_sprint_sla_start_date_enabled
 from dojo.validators import clean_tags, resolve_persisted_tags
 
 logger = logging.getLogger(__name__)
@@ -69,6 +72,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             import_type=Test_Import.REIMPORT_TYPE,
             **kwargs,
         )
+
+    @cached_property
+    def next_sprint_start_date(self):
+        if azure_devops_sprint_sla_start_date_enabled(self.test):
+            return cache.get("azure_devops_next_sprint_start_date")
+        return None
 
     def process_scan(
         self,
@@ -144,10 +153,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Update the test progress to reflect that the import has completed
         logger.debug("REIMPORT_SCAN: Updating Test progress")
         self.update_test_progress()
+        include_untouched_in_priority = not self.test.tags.filter(name="ciclo_escaneo").exists()
         findings_for_priority_update = chain(
             new_findings,
-            reactivated_findings,
-            untouched_findings,
+            untouched_findings if include_untouched_in_priority else [],
         )
         finding_ids = [finding.id for finding in findings_for_priority_update]
         BaseImporter.update_priority_epss_kev.apply_async(args=(finding_ids, self.test.id))
@@ -578,6 +587,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if existing_finding.get_sla_configuration().restart_sla_on_reactivation:
             # restart the sla start date to the current date, finding.save() will set new sla_expiration_date
             existing_finding.sla_start_date = self.now
+
+        if self.next_sprint_start_date:
+            existing_finding.sla_start_date = self.next_sprint_start_date
 
         existing_finding.save(dedupe_option=False)
         # don't dedupe before endpoints are added

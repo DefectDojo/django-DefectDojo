@@ -120,7 +120,7 @@ def async_get_ia_recommendation(fid, user, save=True):
         finding.ia_recommendation["data"]["like_status"] = None
         finding.ia_recommendation["data"]["user"] = user.username
         finding.ia_recommendation["data"]["last_modified"] = str(timezone.now().date())
-        finding.save()
+        finding.save(update_fields=["ia_recommendation"])
         context = finding_helper.parser_ia_recommendation(finding.ia_recommendation)
     return http_response.ok(message="OK", data=context) 
 

@@ -74,6 +74,7 @@ def _get_findings(exclusion, active_only=True):
     if active_only:
         finding_filters.append(Q(active=True))
     findings = Finding.objects.filter(*finding_filters).prefetch_related("tags", "notes")
+    findings = findings.exclude(risk_status="On Blacklist")
     findings = _filter_findings_by_component(findings, exclusion)
     findings = _filter_findings_by_where(findings, exclusion)
 
@@ -157,8 +158,9 @@ def revert_cross_approval_exclusion(exclusion, exclude_request_id=None):
         if not finding.is_mitigated:
             finding.active = True
         finding.risk_status = "Risk Active"
+        finding.set_sla_expiration_date()
         finding.notes.add(note)
-        finding.save(update_fields=["active", "risk_status"])
+        finding.save(update_fields=["active", "risk_status", "sla_expiration_date"])
 
 
 def expire_cross_approval_exclusion(exclusion, user):

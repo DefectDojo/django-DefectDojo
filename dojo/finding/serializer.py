@@ -1,5 +1,22 @@
 from rest_framework import serializers
 
+from dojo.finding.prisma_images_identity import PrismaIdentityMigrationType
+
+
+class PrismaEngagementIdentityMigrationSerializer(serializers.Serializer):
+    engagement_ids = serializers.ListField(child=serializers.IntegerField(min_value=1), required=False,
+                                           allow_empty=False, max_length=100)
+    after_engagement_id = serializers.IntegerField(min_value=0, default=0)
+    limit = serializers.IntegerField(min_value=1, max_value=50, default=10)
+    dry_run = serializers.BooleanField(default=True)
+    migration_type = serializers.ChoiceField(
+        choices=PrismaIdentityMigrationType.choices,
+        default=PrismaIdentityMigrationType.DEPLOYMENT_CONTAINER_NAME,
+        help_text="Target custom ID format: ID uses Cloud Id (or impact Image ID); "
+                  "DeploymentContainerName updates runtime deployments and container names in description and impact. "
+                  "ID removes both fields from description and impact and does not query the Search Engine.",
+    )
+
 
 class IARecommendationSerializer(serializers.Serializer):
     status = serializers.CharField(required=False)

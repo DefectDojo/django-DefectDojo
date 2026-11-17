@@ -1405,6 +1405,7 @@ class ApiEngagementFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains", label="Engagement name")
     product__prod_type = NumberInFilter(field_name="product__prod_type", lookup_expr="in")
     product = NumberInFilter(field_name="product", lookup_expr="in")
+    product_id = NumberInFilter(field_name="product_id", lookup_expr="in")
     description = CharFilter(lookup_expr="icontains")
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
     tags = CharFieldInFilter(

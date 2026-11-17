@@ -2793,10 +2793,11 @@ class ImportScanSerializer(CommonImportScanSerializer):
         ):
             test = context.get("test")
             engagement = context.get("engagement")
+            findings_to_correlate = test.finding_set.filter(active=True, risk_accepted=False)
             queryset = search_finding_correlated(
-                test.finding_set.all(),
+                findings_to_correlate,
                 engagement)
-            add_finding_correlated(test.finding_set.all(), queryset)
+            add_finding_correlated(findings_to_correlate, queryset)
 
 
 class ReImportScanSerializer(CommonImportScanSerializer):
@@ -2953,11 +2954,12 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         ):
             test = context.get("test")
             engagement = context.get("engagement")
+            findings_to_correlate = test.finding_set.filter(active=True, risk_accepted=False)
             queryset = search_finding_correlated(
-                test.finding_set.all(),
+                findings_to_correlate,
                 engagement
             )
-            add_finding_correlated(test.finding_set.all(), queryset)
+            add_finding_correlated(findings_to_correlate, queryset)
 
 
 class EndpointMetaImporterSerializer(serializers.Serializer):

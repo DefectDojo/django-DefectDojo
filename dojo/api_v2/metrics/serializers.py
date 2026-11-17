@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from dojo.models import Engagement
 
 
 class MetricsIARecommendationSerializers(serializers.Serializer):
@@ -14,3 +15,29 @@ class MetricsIARecommendationSerializers(serializers.Serializer):
                     "invalid_choice": "Invalid choice.Available options are: [findings]."
             }
     )
+
+
+class MetricsDevicesWithoutFindingsFilterSerializer(serializers.Serializer):
+    PROVIDER_CHOICES = (
+        ("TENABLE", "TENABLE"),
+        ("SERVERLESS", "SERVERLESS"),
+        ("IMAGES", "IMAGES"),
+    )
+
+    provider = serializers.ChoiceField(
+        choices=PROVIDER_CHOICES,
+        required=False,
+    )
+
+
+class MetricsDevicesWithoutFindingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Engagement
+        fields = (
+            "name",
+            "product_name",
+            "product_type_name",
+            "provider",
+            "class_id",
+            "item_class_id",
+        )

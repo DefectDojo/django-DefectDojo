@@ -30,9 +30,17 @@ def close_all_finding_by_engagement(engagement_id: int):
 def close_all_finding_by_engagement_task():
     """Review if there are open findings in closed engagements"""
     try:
-        closed_engagements = Engagement.objects.filter(status="Closed")
+        closed_engagements = Engagement.objects.filter(
+            status="Completed",
+            test__finding__is_mitigated=False,
+        ).distinct()
+        logger.info("CLOSE_ENGAGEMENT_TASK: "
+                    f"closed engagements with active findings to process - {closed_engagements.count()}")
         for engagement in closed_engagements:
+            logger.info("CLOSE_ENGAGEMENT_TASK: "
+                        f"processing engagement id {engagement.id}")
             close_all_finding_by_engagement(engagement.id)
+        logger.info("CLOSE_ENGAGEMENT_TASK: finished processing closed engagements")
     except Exception as e:
         logger.error("CLOSE_ENGAGEMENT_TASK: "
                      f"An error occurred while closing findings for closed engagements: {e}")

@@ -1,11 +1,30 @@
 
 
 from dojo.models import Test
-from dojo.tools.twistlock.parser import TwistlockParser
+from dojo.tools.twistlock.parser import TwistlockCSVParser, TwistlockParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestTwistlockParser(DojoTestCase):
+    def test_csv_deployments_and_containers_preserve_custom_id(self):
+        import base64
+
+        identity = "registry/app@deploy-1,container-1,deploy-2,container-2,CVE-1,high,openssl,1,9,fixed"
+        custom_id = base64.b64encode(identity.encode("utf-8")).decode("ascii")
+        row = {
+            "CVE ID": "CVE-1", "Packages": "openssl", "Severity": "high", "Custom Id": custom_id,
+            "Deployment": "deploy-1,deploy-2", "Container Name": "container-1,container-2",
+        }
+
+        finding = TwistlockCSVParser().parse_issue(row, Test())
+
+        self.assertEqual(custom_id, finding.unique_id_from_tool)
+        self.assertIn(f"Custom Id:</strong> {identity}", finding.description)
+        self.assertIn("Deployment:</strong> deploy-1,deploy-2", finding.description)
+        self.assertIn("Container Name:</strong> container-1,container-2", finding.description)
+        self.assertIn("Deployment: deploy-1,deploy-2", finding.impact)
+        self.assertIn("Container Name: container-1,container-2", finding.impact)
+
     def test_parse_file_with_no_vuln(self):
         testfile = (get_unit_tests_scans_path("twistlock") / "no_vuln.json").open(encoding="utf-8")
         parser = TwistlockParser()

@@ -59,6 +59,8 @@ class TwistlockCSVParser:
         data_ami_id = row.get("Ami Id", "")
         data_labels = row.get("Labels", "")
         data_collections = row.get("Collections", "")
+        data_deployment = row.get("Deployment", "")
+        data_container_name = row.get("Container Name", "")
 
         # Build container/image metadata for impact field (Item 3)
         impact_parts = []
@@ -67,7 +69,8 @@ class TwistlockCSVParser:
         registry = row.get("Registry", "")
         repository = row.get("Repository", "")
         tag = row.get("Tag", "")
-        image_id = row.get("Id", "")
+        digest = row.get("Digest", "")
+        image_id = digest.split("@", 1)[1] if "@" in digest else row.get("Id", "")
         distro = row.get("Distro", "")
 
         if registry:
@@ -100,6 +103,10 @@ class TwistlockCSVParser:
             impact_parts.append(f"Binaries: {binaries}")
         if custom_labels:
             impact_parts.append(f"Custom Labels: {custom_labels}")
+        if data_deployment:
+            impact_parts.append(f"Deployment: {data_deployment}")
+        if data_container_name:
+            impact_parts.append(f"Container Name: {data_container_name}")
 
         impact_text = "\n".join(impact_parts) if impact_parts else data_severity
 
@@ -131,6 +138,8 @@ class TwistlockCSVParser:
                 data_tag,
                 data_cluster,
                 data_namespaces,
+                data_deployment,
+                data_container_name,
                 data_package_name,
                 data_package_license,
                 data_package_version,
@@ -211,6 +220,8 @@ class TwistlockCSVParser:
         data_tag,
         data_cluster,
         data_namespaces,
+        data_deployment,
+        data_container_name,
         data_package_name,
         data_package_license,
         data_package_version,
@@ -237,6 +248,15 @@ class TwistlockCSVParser:
         data_ami_id,
         data_labels,
     ):
+        from django.utils.html import format_html
+
+        deployment_html = ""
+        if data_deployment or data_container_name:
+            deployment_html = format_html(
+                "<p><strong>Deployment:</strong> {}</p><p><strong>Container Name:</strong> {}</p>",
+                data_deployment,
+                data_container_name,
+            )
         description = (
             "<p><strong>Description:</strong> "
             + data_description
@@ -248,7 +268,9 @@ class TwistlockCSVParser:
             + str(data_cluster)
             + "</p><p><strong>Namespaces:</strong> "
             + str(data_namespaces)
-            + "</p><p><strong>Vulnerable Package:</strong> "
+            + "</p>"
+            + deployment_html
+            + "<p><strong>Vulnerable Package:</strong> "
             + str(data_package_name)
             + "</p><p><strong>Vulnerable Package License:</strong> "
             + str(data_package_license)

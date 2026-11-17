@@ -1748,7 +1748,15 @@ def request_finding_review(request, fid):
                 if push_to_jira and not finding_in_group:
                     jira_helper.add_comment(finding, new_note, force_push=True)
                 # Save the finding
-                finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+                finding.save(push_to_jira=(push_to_jira and not finding_in_group), update_fields=[
+                    "active",
+                    "verified",
+                    "is_mitigated",
+                    "under_review",
+                    "review_requested_by",
+                    "last_reviewed",
+                    "last_reviewed_by",
+                ])
 
                 # we only push the group after saving the finding to make sure
                 # the updated data of the finding is pushed as part of the group

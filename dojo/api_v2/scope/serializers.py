@@ -320,6 +320,8 @@ class InputURLSerializer(serializers.ModelSerializer):
 class InputFlowSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
     engagement_name = serializers.CharField(source="engagement.name", read_only=True)
+    product = serializers.CharField(source="engagement.product.name", read_only=True, default=None)
+    product_type = serializers.CharField(source="engagement.product.prod_type.name", read_only=True, default=None)
     urls = InputURLSerializer(many=True, required=False)
 
     class Meta:
@@ -329,11 +331,13 @@ class InputFlowSerializer(serializers.ModelSerializer):
             "flowName",
             "engagement",
             "engagement_name",
+            "product",
+            "product_type",
             "created",
             "updated",
             "urls",
         ]
-        read_only_fields = ["id","created", "updated", "engagement_name"]
+        read_only_fields = ["id","created", "updated", "engagement_name", "product", "product_type"]
 
     def validate_flowName(self, value):
         return validate_safe_text(

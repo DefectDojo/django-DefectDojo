@@ -51,7 +51,7 @@ def risk_acceptance_decline(
         finding.active = True
         finding.risk_accepted = False
         finding.risk_status = "Risk Rejected"
-        finding.save()
+        finding.save(update_fields=["accepted_by", "reviewed_by", "active", "risk_accepted", "risk_status"])
         status = "OK"
         message = "Risk Rejected"
         title = f"Rejected request:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
@@ -234,7 +234,7 @@ def risk_acceptante_pending(eng: Engagement,
                     finding.reviewed_by = user.username
                     risk_acceptance.reviewed_date = timezone.now()
                     risk_acceptance.save()
-                    finding.save()
+                    finding.save(update_fields=["risk_status", "reviewed_by"])
                     message = "Finding has been marked as reviewed"
                     status_permission["status"] = "OK"
                 elif finding.risk_status == "Risk Reviewed" and user_has_permission_long_risk_acceptance(user, risk_acceptance, product):
@@ -242,6 +242,7 @@ def risk_acceptante_pending(eng: Engagement,
                     risk_acceptance.accepted_date = timezone.now()
                     risk_acceptance.save()
                     risk_accepted_succesfully(finding, risk_acceptance, True)
+                    finding.save(update_fields=["accepted_by"])
                     message = "Finding Accept successfully from risk acceptance."
                     status_permission["status"] = "OK"
 
@@ -258,7 +259,7 @@ def risk_acceptante_pending(eng: Engagement,
                         finding.accepted_by += ", " + user.username
                     if finding.risk_status == "Risk Rejected":
                         finding.risk_status = "Risk Pending"
-                    finding.save()
+                    finding.save(update_fields=["accepted_by", "risk_status"])
                     if status_permission.get("number_of_acceptors_required") == len(
                         get_confirmed_acceptors(finding)
                     ):
@@ -455,7 +456,7 @@ def risk_unaccept(finding):
             finding.risk_accepted = False
             finding.risk_status = "Risk Active"
             finding.acceptances_confirmed = 0
-            finding.save()
+            finding.save(update_fields=["active", "risk_accepted", "risk_status", "acceptances_confirmed"])
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
 
 
@@ -602,16 +603,14 @@ def search_finding_correlated(entry_findings: QuerySet[Finding] | list[Finding],
             return Risk_Acceptance.objects.none()
 
         if isinstance(engagement, int) or isinstance(engagement, Engagement):
-            tags_enabled = GeneralSettings.get_value('ENABLE_TAGS_CORRELATED_FINDINGS')
             queryset = (
                 Risk_Acceptance.objects.filter(
                     engagement=engagement,
                     expiration_date_handled__isnull=True)
                 .prefetch_related("accepted_findings")
                 .filter(
-                    Q(accepted_findings__cve__in=ids_vult) |
-                    Q(accepted_findings__vuln_id_from_tool__in=ids_from_tool) &
-                    Q(accepted_findings__tags__name__in=tags_enabled) &
+                    (Q(accepted_findings__cve__in=ids_vult) |
+                    Q(accepted_findings__vuln_id_from_tool__in=ids_from_tool)) &
                     ~Q(accepted_findings__id__in=ids)
                 )
             )
@@ -626,36 +625,36 @@ def add_finding_correlated(entry_findings, queryset):
     finding_accepted_ids = []
     tags_enable = GeneralSettings.get_value('ENABLE_TAGS_CORRELATED_FINDINGS')
     for finding in entry_findings:
-        risk_acceptance_query = None
-        risk_acceptance_query = queryset.filter(
+        risk_acceptance = queryset.filter(
             accepted_findings__cve__in=finding.vulnerability_ids,
             accepted_findings__priority=finding.priority,
             accepted_findings__severity=finding.severity,
             accepted_findings__tags__name__in=tags_enable,
-            accepted_findings__risk_status="Risk Accepted"
-            ).order_by("-created")
-        if not risk_acceptance_query.exists():
-            risk_acceptance_query = queryset.filter(
+            accepted_findings__risk_status="Risk Accepted",
+        ).order_by("-created").first()
+
+        if risk_acceptance is None:
+            risk_acceptance = queryset.filter(
                 accepted_findings__vuln_id_from_tool=finding.vuln_id_from_tool,
                 accepted_findings__priority=finding.priority,
                 accepted_findings__severity=finding.severity,
                 accepted_findings__tags__name__in=tags_enable,
-                accepted_findings__risk_status="Risk Accepted"
-                ).order_by("-created")
+                accepted_findings__risk_status="Risk Accepted",
+            ).order_by("-created").first()
         # add finding a risk-acceptance
-        if risk_acceptance_query:
+        if risk_acceptance is not None:
             logger.debug(
                 "CORRELATED_FINDING: adding %i finding to risk acceptance %i",
-                finding.id, risk_acceptance_query.first().id)
+                finding.id, risk_acceptance.id)
             finding.add_note(
                 note_text=(
                     f"This finding :{finding.id} "
                     f"is correlated whit cve {finding.vulnerability_ids} "
-                    f"or vuln_id_from_tool {finding.vuln_id_from_tool}"),
+                    f"or vuln_id_from_tool {finding.vuln_id_from_tool} with risk acceptance {risk_acceptance.id}"),
                 author=get_user(settings.SYSTEM_USER))
             finding_accepted_ids.append(finding.id)
             ra_helper.add_findings_to_risk_acceptance(
                 user=None,
-                risk_acceptance=risk_acceptance_query.first(),
+                risk_acceptance=risk_acceptance,
                 findings=[finding])
     return finding_accepted_ids

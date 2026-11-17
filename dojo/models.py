@@ -1650,7 +1650,7 @@ class Engagement(models.Model):
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
-    long_risk_acceptances = models.ForeignKey(RiskAcceptanceEngagement, on_delete=models.CASCADE, null=True, blank=True)
+    long_risk_acceptances = models.ForeignKey(RiskAcceptanceEngagement, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         ordering = ["-target_start"]
@@ -5688,3 +5688,5 @@ admin.site.register(Test_Import)
 admin.site.register(Test_Import_Finding_Action)
 admin.site.register(Finding_Group)
 admin.site.register(Component)
+admin.site.register(CrossApprovalRequest)
+admin.site.register(CrossApprovalExclusion)
