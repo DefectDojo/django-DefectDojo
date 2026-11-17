@@ -125,6 +125,8 @@ class Notification_Webhooks(models.Model):
 
 
 class Alerts(models.Model):
+    # 64-bit: cleanup_alerts keeps the table small, but the id sequence counts every alert ever created.
+    id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=250, default="", null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=True, blank=True)
