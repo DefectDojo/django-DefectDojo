@@ -129,13 +129,19 @@ def normalize_packages(packages):
     return ",".join(sorted({package.strip() for package in packages.split(",") if package.strip()}))
 
 
-def normalize_suffix_packages(suffix):
+def normalize_suffix_packages(suffix, fix_status):
     """Sort the Packages field of "CVE ID,Severity,Packages,Package Version,CVSS,Fix Status".
 
-    Packages may contain commas, so the fixed fields are split from both ends.
+    Packages and Fix Status may contain commas. Use the stored mitigation to
+    delimit Fix Status before splitting the remaining fixed fields.
     """
+    fix_status = fix_status or ""
+    fix_status_suffix = "," + fix_status
+    if not suffix.endswith(fix_status_suffix):
+        raise ValueError("Existing custom ID does not match the stored Fix Status.")
+    suffix = suffix[:-len(fix_status_suffix)]
     cve_id, severity, rest = suffix.split(",", 2)
-    packages, version, cvss, fix_status = rest.rsplit(",", 3)
+    packages, version, cvss = rest.rsplit(",", 2)
     packages = normalize_packages(packages)
     return ",".join([cve_id, severity, packages, version, cvss, fix_status]), packages
 
@@ -205,7 +211,7 @@ def prepare_finding_identity(finding, runtime_images, deployments_by_image,
     suffix = decoded[len(matching_prefix):]
     if suffix.count(",") < 5:
         raise ValueError("Existing custom ID does not contain all six vulnerability fields.")
-    suffix, packages = normalize_suffix_packages(suffix)
+    suffix, packages = normalize_suffix_packages(suffix, finding.mitigation)
     pairs = []
     if migration_type == PrismaIdentityMigrationType.ID:
         if not cloud_id:

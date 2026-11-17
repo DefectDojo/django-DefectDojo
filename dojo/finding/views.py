@@ -1744,7 +1744,6 @@ def request_finding_review(request, fid):
                     "review_requested_by",
                     "last_reviewed",
                     "last_reviewed_by",
-                    "reviewers",
                 ])
 
                 # we only push the group after saving the finding to make sure
