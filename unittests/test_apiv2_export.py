@@ -10,6 +10,7 @@ import pghistory
 from auditlog.models import LogEntry
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import connection
@@ -36,6 +37,7 @@ from dojo.export.api.serializers import (
 )
 from dojo.export.api.views import ACTIONS_PER_LINE, AUDIT_MODELS, COUNT_KEYS, PRODUCT_EXTRAS_COUNT_KEYS
 from dojo.finding.api.serializer import FindingSerializer
+from dojo.github.models import GITHUB_Conf, GITHUB_Issue, GITHUB_PKey
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -77,6 +79,8 @@ from dojo.models import (
     Product_Platform,
     Report_Type,
     Risk_Acceptance,
+    Sonarqube_Issue,
+    Sonarqube_Issue_Transition,
     System_Settings,
     Test,
     Test_Import,
@@ -89,6 +93,7 @@ from dojo.models import (
 from dojo.system_settings.ui.forms import SystemSettingsForm
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_type.models import Tool_Type
+from dojo.user.utils import get_configuration_permissions_codenames
 from unittests.dojo_test_case import DojoAPITestCase, skip_unless_v2, skip_unless_v3, versioned_fixtures
 
 FindingEvent = apps.get_model("dojo", "FindingEvent")
@@ -1536,6 +1541,162 @@ class TestExportJira(DojoAPITestCase):
 
 
 @versioned_fixtures
+class TestExportThreatModelAndLinks(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.product = Product.objects.get(id=2)
+        cls.engagement = Engagement.objects.filter(product=cls.product).order_by("id").first()
+        cls.other_engagement = Engagement.objects.filter(product=cls.product).order_by("id").last()
+        cls.finding = Finding.objects.filter(test__engagement__product=cls.product).order_by("id").first()
+        cls.second_finding = Finding.objects.filter(test__engagement__product=cls.product).order_by("id")[1]
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+
+    def export(self, **params):
+        return ndjson_lines(self.client.get(reverse("export-product", args=[2]), params))
+
+    def manifest(self, **params):
+        return self.client.get(reverse("export-manifest"), params).json()
+
+    def engagement_line(self, lines, engagement=None):
+        engagement = engagement or self.engagement
+        return next(line["data"] for line in lines if line["type"] == "engagement" and line["data"]["id"] == engagement.id)
+
+    def put_threat_model(self, content=b"threat", name="tm.pdf"):
+        folder = Path(settings.MEDIA_ROOT) / "threat"
+        folder.mkdir(parents=True, exist_ok=True)
+        path = folder / f"{self.engagement.id}-{uuid.uuid4().hex}-{name}"
+        path.write_bytes(content)
+        self.addCleanup(path.unlink, missing_ok=True)
+        Engagement.objects.filter(id=self.engagement.id).update(tmodel_path=str(path))
+        return path
+
+    def test_engagement_threat_model_file(self):
+        path = self.put_threat_model()
+        lines = self.export()
+        model = self.engagement_line(lines)["threat_model"]
+        self.assertEqual(
+            {"filename": path.name, "size": 6, "content_type": "application/pdf", "data_base64": base64.b64encode(b"threat").decode()},
+            model,
+        )
+        self.assertEqual(str(path), self.engagement_line(lines)["tmodel_path"])
+        before = self.export(max_file_bytes=0)[-1]["counts"]
+        self.assertEqual(before["files"], lines[-1]["counts"]["files"])
+        self.assertEqual(before["files_over_cap"] - 1, lines[-1]["counts"]["files_over_cap"])
+        manifest = self.manifest(max_file_bytes=0)
+        counts = self.get_results_by_id(manifest["products"], 2)["counts"]
+        self.assertEqual(before["files"], counts["files"])
+        self.assertEqual(before["files_over_cap"], counts["files_over_cap"])
+
+    def test_threat_model_counts_in_files(self):
+        without = self.export()[-1]["counts"]["files"]
+        without_manifest = self.get_results_by_id(self.manifest()["products"], 2)["counts"]["files"]
+        self.put_threat_model()
+        self.assertEqual(without + 1, self.export()[-1]["counts"]["files"])
+        self.assertEqual(without_manifest + 1, self.get_results_by_id(self.manifest()["products"], 2)["counts"]["files"])
+
+    def test_engagement_threat_model_outside_media_root(self):
+        for value in ("/etc/hostname", "../x"):
+            with self.subTest(value=value), mock.patch("dojo.export.api.serializers.Path.open") as opened:
+                Engagement.objects.filter(id=self.engagement.id).update(tmodel_path=value)
+                model = self.engagement_line(self.export())["threat_model"]
+                self.assertEqual("missing", model["error"])
+                self.assertIsNone(model["data_base64"])
+                opened.assert_not_called()
+
+    def test_engagement_without_threat_model(self):
+        for value in ("none", "", None):
+            with self.subTest(value=value):
+                Engagement.objects.filter(id=self.engagement.id).update(tmodel_path=value)
+                self.assertIsNone(self.engagement_line(self.export())["threat_model"])
+
+    def test_threat_model_over_cap(self):
+        self.put_threat_model(b"0123456789")
+        lines = self.export(max_file_bytes=4)
+        model = self.engagement_line(lines)["threat_model"]
+        self.assertIsNone(model["data_base64"])
+        self.assertEqual(10, model["size"])
+        self.assertNotIn("error", model)
+        base = self.export(max_file_bytes=4)[-1]["counts"]["files_over_cap"]
+        Engagement.objects.filter(id=self.engagement.id).update(tmodel_path="none")
+        self.assertEqual(base - 1, self.export(max_file_bytes=4)[-1]["counts"]["files_over_cap"])
+
+    def test_user_configuration_permissions(self):
+        user = Dojo_User.objects.get(username="user1")
+        user.user_permissions.set(Permission.objects.filter(codename__in=["add_user", "add_engagement"]))
+        manifest = self.manifest()
+        entry = next(row for row in manifest["reference"]["users"] if row["username"] == "user1")
+        self.assertEqual(["auth.add_user"], entry["configuration_permissions"])
+        expected = sorted(
+            f"{app}.{codename}"
+            for app, codename in Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
+            .values_list("content_type__app_label", "codename")
+        )
+        self.assertEqual(expected, manifest["reference"]["configuration_permissions"])
+        self.assertIn("auth.add_user", expected)
+
+    def test_external_issues_not_asked(self):
+        seed_external_issues(self)
+        for params in ({}, {"external_issues": "false"}):
+            with self.subTest(params=params):
+                lines = self.export(**params)
+                self.assertNotIn("github_projects", lines[0])
+                finding = next(line["data"] for line in lines if line["type"] == "finding" and line["data"]["id"] == self.finding.id)
+                self.assertNotIn("github_issue", finding)
+                self.assertEqual(self.sonarqube.id, finding["sonarqube_issue"])
+                for key in ("github_projects", "github_issues", "sonarqube_issues"):
+                    self.assertNotIn(key, lines[-1]["counts"])
+                manifest = self.manifest(**params)
+                self.assertNotIn("github_configurations", manifest["reference"])
+                self.assertNotIn("github_projects", manifest["totals"])
+        self.assertIn("external_issues", self.manifest()["features"])
+
+    def test_external_issues_asked(self):
+        seed_external_issues(self)
+        manifest = self.manifest(external_issues="true")
+        self.assertEqual([{"id": self.conf.id, "configuration_name": "Main"}], manifest["reference"]["github_configurations"])
+        self.assertNotIn("s3cret", json.dumps(manifest))
+        lines = self.export(external_issues="true")
+        self.assertEqual(
+            [{"id": self.pkey.id, "git_project": "acme/app", "git_conf": self.conf.id, "git_push_notes": True}],
+            lines[0]["github_projects"],
+        )
+        findings = {line["data"]["id"]: line["data"] for line in lines if line["type"] == "finding"}
+        found = findings[self.finding.id]
+        self.assertEqual({"issue_id": "12", "issue_url": "https://github.com/acme/app/issues/12"}, found["github_issue"])
+        sonarqube = found["sonarqube_issue"]
+        self.assertEqual(("KEY-1", "OPEN", "BUG"), (sonarqube["key"], sonarqube["status"], sonarqube["type"]))
+        self.assertEqual(
+            ["a", "b"], [row["transitions"] for row in sonarqube["transitions"]],
+        )
+        self.assertEqual({"created", "finding_status", "sonarqube_status", "transitions"}, set(sonarqube["transitions"][0]))
+        self.assertIsNone(findings[self.second_finding.id]["github_issue"])
+        self.assertIsNone(findings[self.second_finding.id]["sonarqube_issue"])
+        counts = lines[-1]["counts"]
+        self.assertEqual((1, 1, 1), (counts["github_projects"], counts["github_issues"], counts["sonarqube_issues"]))
+        product_counts = self.get_results_by_id(manifest["products"], 2)["counts"]
+        self.assertEqual((1, 1, 1), (product_counts["github_projects"], product_counts["github_issues"], product_counts["sonarqube_issues"]))
+        self.assertEqual(1, manifest["totals"]["github_issues"])
+        self.assertNotIn("api_key", json.dumps(lines))
+
+
+def seed_external_issues(case):
+    case.conf = GITHUB_Conf.objects.create(configuration_name="Main", api_key="s3cret")
+    case.pkey = GITHUB_PKey.objects.create(product=case.product, git_project="acme/app", git_conf=case.conf, git_push_notes=True)
+    GITHUB_Issue.objects.create(issue_id="12", issue_url="https://github.com/acme/app/issues/12", finding=case.finding)
+    case.sonarqube = Sonarqube_Issue.objects.create(key="KEY-1", status="OPEN", type="BUG")
+    for name in ("a", "b"):
+        Sonarqube_Issue_Transition.objects.create(
+            sonarqube_issue=case.sonarqube, finding_status="Active", sonarqube_status="OPEN", transitions=name,
+        )
+    Finding.objects.filter(id=case.finding.id).update(sonarqube_issue=case.sonarqube)
+
+
+@versioned_fixtures
 class TestExportProductEndpoints(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1840,7 +2001,7 @@ class TestExportManifest(DojoAPITestCase):
                 "sla_configurations", "development_environments", "regulations", "test_types", "note_types",
                 "product_platforms", "product_lifecycles", "product_origins", "finding_templates", "tool_types",
                 "tool_configurations", "users", "contacts", "report_types", "questionnaires", "general_surveys",
-                "open_survey_responses", "benchmark_types",
+                "open_survey_responses", "benchmark_types", "configuration_permissions",
             },
             set(reference),
         )
@@ -1851,7 +2012,7 @@ class TestExportManifest(DojoAPITestCase):
         self.assertEqual(Dojo_User.objects.count(), len(reference["users"]))
         user1 = next(user for user in reference["users"] if user["username"] == "user1")
         self.assertNotIn("password", user1)
-        self.assertNotIn("configuration_permissions", user1)
+        self.assertEqual([], user1["configuration_permissions"])
         self.assertNotIn("user_profile", user1["contact_info"])
         self.assertIn("email", user1)
         self.assertFalse(user1["is_superuser"])
@@ -1908,7 +2069,7 @@ class TestExportManifest(DojoAPITestCase):
             self.assertNotIn(value, body)
 
     def test_features_list_check_lists_the_history_parts_and_product_extras(self):
-        self.assertEqual(["check_lists", "import_history", "audit_history", "product_extras", "jira"], self.manifest["features"])
+        self.assertEqual(["check_lists", "import_history", "audit_history", "product_extras", "jira", "external_issues"], self.manifest["features"])
 
     def test_the_manifest_counts_import_history_only_when_asked(self):
         self.assertNotIn("test_imports", self.manifest["totals"])

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from auditlog.models import LogEntry
 from django.apps import apps
+from django.conf import settings
 from django.db.models import Prefetch, prefetch_related_objects
 from django.db.models.fields.files import FieldFile
 from rest_framework import serializers
@@ -13,6 +14,7 @@ from rest_framework import serializers
 from dojo.endpoint.api.serializer import EndpointStatusSerializer
 from dojo.engagement.api.serializer import EngagementSerializer
 from dojo.finding.api.serializer import BurpRawRequestResponseMultiSerializer, FindingSerializer
+from dojo.github.models import GITHUB_Conf, GITHUB_PKey
 from dojo.location.api.serializers import LocationFindingReferenceSerializer
 from dojo.location.feature import locations_enabled
 from dojo.models import (
@@ -42,6 +44,7 @@ from dojo.models import (
     Question,
     Report_Type,
     Risk_Acceptance,
+    Sonarqube_Issue,
     Test_Import,
     Test_Type,
 )
@@ -53,6 +56,7 @@ from dojo.test.api.serializer import TestSerializer
 from dojo.tool_config.api.serializer import ToolConfigurationSerializer
 from dojo.tool_config.models import Tool_Configuration
 from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
+from dojo.user.utils import get_configuration_permissions_codenames
 
 MAX_FILE_BYTES_DEFAULT = 10485760
 MAX_FILE_BYTES_LIMIT = 104857600
@@ -108,6 +112,15 @@ class ExportParamsSerializer(serializers.Serializer):
             "hold their project and issue. Finding lines hold their issue. No password crosses."
         ),
     )
+    external_issues = serializers.BooleanField(
+        default=False,
+        help_text=(
+            "Add the GitHub projects, GitHub issue links and SonarQube issues of the product to the stream, and the "
+            "GitHub configurations and the counts of projects and issues to the manifest. The header holds the "
+            "product GitHub projects. Finding lines hold their GitHub issue and their SonarQube issue with its "
+            "transitions. No GitHub API key crosses."
+        ),
+    )
 
 
 class ManifestParamsSerializer(ExportParamsSerializer):
@@ -151,6 +164,33 @@ def _file_payload(field_file, max_file_bytes: int, budget: InlineBudget) -> dict
         if budget.take(size):
             with field_file.open("rb") as handle:
                 payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
+        else:
+            payload["error"] = "line_cap"
+    return payload
+
+
+def threat_model_file(engagement) -> Path | None:
+    """The threat model path of an engagement, or None when it has none."""
+    return Path(engagement.tmodel_path) if engagement.tmodel_path not in {None, "", "none"} else None
+
+
+def inside_media_root(path: Path) -> bool:
+    return path.resolve().is_relative_to(Path(settings.MEDIA_ROOT).resolve())
+
+
+def export_threat_model(engagement, max_file_bytes: int, budget: InlineBudget) -> dict | None:
+    path = threat_model_file(engagement)
+    if path is None:
+        return None
+    payload = {"filename": path.name, "size": None, "content_type": mimetypes.guess_type(path.name)[0], "data_base64": None}
+    resolved = path.resolve()
+    if not inside_media_root(path) or not resolved.is_file():
+        payload["error"] = "missing"
+        return payload
+    payload["size"] = resolved.stat().st_size
+    if payload["size"] <= max_file_bytes:
+        if budget.take(payload["size"]):
+            payload["data_base64"] = base64.b64encode(resolved.read_bytes()).decode("ascii")
         else:
             payload["error"] = "line_cap"
     return payload
@@ -217,8 +257,14 @@ def export_product_endpoint(row, product_id: int, *, locations: bool) -> dict:
 class ExportFilesMixin(serializers.Serializer):
     files = serializers.SerializerMethodField()
 
+    budget = None
+
+    def to_representation(self, obj):
+        self.budget = InlineBudget()
+        return super().to_representation(obj)
+
     def get_files(self, obj) -> list[dict]:
-        budget = InlineBudget()
+        budget = self.budget or InlineBudget()
         return [
             export_file(file_upload, self.context["max_file_bytes"], budget)
             for file_upload in sorted(obj.files.all(), key=lambda file_upload: file_upload.id)
@@ -240,6 +286,40 @@ class ExportCheckListSerializer(serializers.ModelSerializer):
             *CHECK_LIST_ISSUE_FIELDS,
         )
         read_only_fields = fields
+
+
+class ExportGithubConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GITHUB_Conf
+        fields = ("id", "configuration_name")
+        read_only_fields = fields
+
+
+class ExportGithubProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GITHUB_PKey
+        fields = ("id", "git_project", "git_conf", "git_push_notes")
+        read_only_fields = fields
+
+
+class ExportSonarqubeIssueSerializer(serializers.ModelSerializer):
+    transitions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Sonarqube_Issue
+        fields = ("key", "status", "type", "transitions")
+        read_only_fields = fields
+
+    def get_transitions(self, obj) -> list[dict]:
+        return [
+            {
+                "created": render_datetime(row.created),
+                "finding_status": row.finding_status,
+                "sonarqube_status": row.sonarqube_status,
+                "transitions": row.transitions,
+            }
+            for row in sorted(obj.sonarqube_issue_transition_set.all(), key=attrgetter("id"))
+        ]
 
 
 class ExportJiraInstanceSerializer(serializers.ModelSerializer):
@@ -280,6 +360,7 @@ class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
         if self.context.get("jira"):
             data["jira_project"] = export_jira_row(ExportJiraProjectSerializer, obj, "jira_project")
             data["jira_issue"] = export_jira_row(ExportJiraIssueSerializer, obj, "jira_issue")
+        data["threat_model"] = export_threat_model(obj, self.context["max_file_bytes"], self.budget)
         return data
 
     def get_check_list_detail(self, obj) -> dict | None:
@@ -315,6 +396,12 @@ class ExportFindingSerializer(ExportFilesMixin, FindingSerializer):
         data = super().to_representation(obj)
         if self.context.get("jira"):
             data["jira_issue"] = export_jira_row(ExportJiraIssueSerializer, obj, "jira_issue")
+        if self.context.get("external_issues"):
+            issue = getattr(obj, "github_issue", None)
+            data["github_issue"] = {"issue_id": issue.issue_id, "issue_url": issue.issue_url} if issue else None
+            data["sonarqube_issue"] = (
+                ExportSonarqubeIssueSerializer(obj.sonarqube_issue).data if obj.sonarqube_issue_id else None
+            )
         return data
 
 
@@ -454,17 +541,25 @@ class ExportUserContactInfoSerializer(UserContactInfoSerializer):
 
 
 class ExportUserSerializer(UserSerializer):
-    configuration_permissions = None
+    configuration_permissions = serializers.SerializerMethodField()
     contact_info = ExportUserContactInfoSerializer(source="usercontactinfo", read_only=True, allow_null=True)
 
     class Meta(UserSerializer.Meta):
         fields = (
-            *(name for name in UserSerializer.Meta.fields if name != "configuration_permissions"),
+            *UserSerializer.Meta.fields,
             "contact_info",
         )
 
+    def get_configuration_permissions(self, obj) -> list[str]:
+        codenames = set(get_configuration_permissions_codenames())
+        return sorted(
+            f"{permission.content_type.app_label}.{permission.codename}"
+            for permission in obj.user_permissions.all()
+            if permission.codename in codenames
+        )
+
     def to_representation(self, instance):
-        # Skip UserSerializer.to_representation: it reads the configuration_permissions key this class drops.
+        # Skip UserSerializer.to_representation: it expects configuration_permissions as ids.
         return serializers.ModelSerializer.to_representation(self, instance)
 
 
