@@ -300,13 +300,43 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     risk_acceptance.save()
 
 
-def delete(eng, risk_acceptance):
-    findings = risk_acceptance.accepted_findings.all()
-    for finding in findings:
+def closed_for_another_reason(finding: Finding) -> bool:
+    """
+    Whether a finding is closed for a reason other than a risk acceptance: mitigated, false positive or out of scope.
+
+    An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
+    members, so a member can be closed afterwards and stay listed. Such a member is not inactive because of the
+    acceptance, so taking it out of the acceptance must not reopen it.
+    """
+    return bool(finding.is_mitigated or finding.mitigated or finding.false_p or finding.out_of_scope)
+
+
+def release_finding(finding: Finding) -> None:
+    """
+    Take a risk acceptance off a finding that leaves it, without saving.
+
+    A finding the acceptance held comes back active, and its endpoint statuses with it. A finding closed for another
+    reason (see closed_for_another_reason) stays closed with its close fields, and its endpoint statuses only lose
+    their risk accepted flag: setting it active would make its save clear the close.
+    """
+    finding.risk_accepted = False
+    if not closed_for_another_reason(finding):
         finding.active = True
-        finding.risk_accepted = False
-        # Update any endpoint statuses on each of the findings
         update_endpoint_statuses(finding, accept_risk=False)
+        return
+    for status in finding.status_finding.filter(risk_accepted=True):
+        status.risk_accepted = False
+        status.last_modified = timezone.now()
+        status.save()
+
+
+def delete(eng, risk_acceptance):
+    # Read the members from the database, not through the acceptance: a caller can hold it with its members prefetched
+    # (expire_now prefetches them), and a member closed since then would be judged and saved from that stale copy,
+    # reopening it.
+    findings = list(Finding.objects.filter(risk_acceptance=risk_acceptance).order_by("id"))
+    for finding in findings:
+        release_finding(finding)
         finding.save(dedupe_option=False)
 
     # best effort jira integration, no status changes
@@ -323,10 +353,7 @@ def delete(eng, risk_acceptance):
 def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, finding: Finding) -> None:
     logger.debug("removing finding %i from risk acceptance %i", finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
-    finding.active = True
-    finding.risk_accepted = False
-    # Update any endpoint statuses on each of the findings
-    update_endpoint_statuses(finding, accept_risk=False)
+    release_finding(finding)
     # this method both saves and pushed to JIRA (no other post processing)
     finding.save(dedupe_option=False)
     if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):

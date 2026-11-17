@@ -80,7 +80,7 @@ The Full Risk Acceptance's view also includes a table at the bottom for all othe
 
 Additionally, there is a Notes function that allows Users to include additional context to the Full Risk Acceptance. All public notes will appear in any Reports that are generated for the Full Risk Acceptance. Notes toggled as **Private** are visible only to their author and to superusers, and are left out of reports. 
 
-Importantly, if a Full Risk Acceptance is deleted entirely, the Findings within will have their status automatically reverted to “Active.”
+Importantly, if a Full Risk Acceptance is deleted entirely, the Findings within will have their status automatically reverted to “Active.” A Finding that was closed for another reason after the Risk Acceptance expired (Mitigated, False Positive or Out of Scope) is the exception: deleting the Risk Acceptance, or removing that Finding from it, leaves it closed.
 
 ### Simple Risk Acceptances
 
