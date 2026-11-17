@@ -38,6 +38,8 @@ class ApiAssetFilter(DojoFilter):
     # BooleanFilter
     external_audience = BooleanFilter(field_name="external_audience")
     internet_accessible = BooleanFilter(field_name="internet_accessible")
+    # true: the assets Delete Duplicates is held for (Product.dupe_delete_held_at set); false: the others.
+    dupe_delete_held = BooleanFilter(field_name="dupe_delete_held_at", lookup_expr="isnull", exclude=True)
     # CharFilter
     name = CharFilter(lookup_expr="icontains")
     name_exact = CharFilter(field_name="name", lookup_expr="iexact")
