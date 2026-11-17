@@ -157,12 +157,18 @@ de exploit, los hallazgos sin CVE bajan en la clasificación *relativa*, aunque 
 Los superusuarios pueden comprobar qué inteligencia usa la instancia en la tarjeta de solo lectura
 **Intelligence Sources**, en **Settings > System Settings**. La tarjeta muestra:
 
-* la versión del paquete cargado
-* la antigüedad del paquete, con una advertencia cuando tiene 14 días o más
-* cuándo caduca el paquete
-* cada fuente del paquete, con su licencia y lo actualizados que están sus datos
+* si la inteligencia de amenazas está activada, desactivada o en modo sombra
+* la versión del paquete cargado, cuándo se compiló su inteligencia (**Intelligence As Of**),
+  cuándo se cargó y cuándo caduca
+* una advertencia cuando el paquete se compiló hace 14 días o más, o cuando ha caducado. Las
+  puntuaciones siguen usando el paquete cargado hasta que se carga uno más reciente.
+* cada fuente del paquete: si está incluida, excluida o desactualizada, la antigüedad de sus datos,
+  su licencia, cuántas claves aporta y una nota, por ejemplo el motivo por el que se excluyó
 * la última carga fallida, si la hubo, y el motivo del fallo
 * las atribuciones de las fuentes del paquete
+
+Así, una fuente desactualizada o con fallos se ve en un solo lugar, antes de que aparezca como
+puntuaciones inesperadas.
 
 Un paquete cargado desde un archivo en una instancia aislada (air-gapped) se muestra en la misma
 tarjeta.

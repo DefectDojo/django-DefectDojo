@@ -157,12 +157,18 @@ i riscontri senza CVE scendono in classifica *relativa* anche se il loro puntegg
 I superuser possono verificare quale intelligence sta usando l’istanza nella scheda in sola lettura
 **Intelligence Sources**, in **Settings > System Settings**. La scheda mostra:
 
-* la versione del bundle caricato
-* l’età del bundle, con un avviso quando ha 14 giorni o più
-* la data di scadenza del bundle
-* ogni fonte contenuta nel bundle, con la sua licenza e quanto sono aggiornati i suoi dati
+* se la threat intelligence è attiva, disattivata o in modalità shadow
+* la versione del bundle caricato, quando è stata compilata la sua intelligence (**Intelligence As Of**),
+  quando è stato caricato e quando scade
+* un avviso quando il bundle è stato compilato 14 o più giorni fa, o quando è scaduto. I punteggi
+  continuano a usare il bundle caricato finché non ne viene caricato uno più recente.
+* ogni fonte contenuta nel bundle: se è inclusa, esclusa o non aggiornata, l’età dei suoi dati, la sua
+  licenza, quante chiavi fornisce e una nota, ad esempio il motivo per cui è stata esclusa
 * l’ultimo caricamento non riuscito, se c’è stato, e il motivo dell’errore
 * le attribuzioni delle fonti contenute nel bundle
+
+Così una fonte non aggiornata o in errore si vede in un unico punto, prima che si traduca in punteggi
+inattesi.
 
 Un bundle caricato da file su un’istanza air-gapped compare nella stessa scheda.
 

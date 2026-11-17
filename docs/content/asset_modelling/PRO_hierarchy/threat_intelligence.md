@@ -207,12 +207,17 @@ no-CVE findings drop in *relative* rank even though their score is unchanged.
 Superusers can check which intelligence the instance is using on the read-only
 **Intelligence Sources** card under **Settings > System Settings**. The card shows:
 
-* the version of the loaded bundle
-* the bundle's age, with a warning when it is 14 days old or more
-* when the bundle expires
-* each source in the bundle, with its license and how fresh its data is
+* whether threat intelligence is on, off or in shadow mode
+* the version of the loaded bundle, when its intelligence was compiled (**Intelligence As Of**),
+  when it was loaded and when it expires
+* a warning once the bundle was compiled 14 or more days ago, or has expired. Scores keep using
+  the loaded bundle until a newer one loads.
+* each source in the bundle: whether it is included, left out or stale, the age of its data, its
+  license, how many keys it contributes, and a note such as why it was left out
 * the last failed load, if there was one, and why it failed
 * the attributions for the sources in the bundle
+
+A stale or failing feed is visible here before it turns up as unexpected scores.
 
 A bundle loaded from a file on an air-gapped instance shows on the same card.
 

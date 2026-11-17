@@ -160,12 +160,18 @@ les constatations sans CVE reculent en rang *relatif*, même si leur score reste
 Les superutilisateurs peuvent vérifier quel renseignement l'instance utilise sur la carte en lecture seule
 **Intelligence Sources**, sous **Settings > System Settings**. La carte affiche :
 
-* la version du lot chargé
-* l'ancienneté du lot, avec un avertissement lorsqu'il a 14 jours ou plus
-* la date d'expiration du lot
-* chaque source du lot, avec sa licence et la fraîcheur de ses données
+* si le renseignement sur les menaces est activé, désactivé ou en mode observation (shadow mode)
+* la version du lot chargé, la date de compilation de son renseignement (**Intelligence As Of**),
+  la date de son chargement et sa date d'expiration
+* un avertissement lorsque le lot a été compilé il y a 14 jours ou plus, ou lorsqu'il a expiré. Les
+  scores continuent d'utiliser le lot chargé jusqu'au chargement d'un lot plus récent.
+* chaque source du lot : si elle est incluse, écartée ou périmée, l'âge de ses données, sa licence,
+  le nombre de clés qu'elle apporte, et une note, par exemple la raison pour laquelle elle a été écartée
 * le dernier chargement en échec, s'il y en a eu un, et la raison de cet échec
 * les mentions d'attribution des sources du lot
+
+Une source périmée ou en échec apparaît ainsi à un seul endroit, avant de se traduire par des scores
+inattendus.
 
 Un lot chargé depuis un fichier sur une instance air-gap s'affiche sur la même carte.
 

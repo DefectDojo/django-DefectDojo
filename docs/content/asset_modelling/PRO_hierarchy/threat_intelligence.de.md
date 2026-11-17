@@ -92,12 +92,14 @@ Eine ehrliche Konsequenz daraus: In einer gemischten Warteschlange sinken Befund
 
 Superuser können auf der schreibgeschützten Karte **Intelligence Sources** unter **Settings > System Settings** prüfen, welche Intelligence die Instanz verwendet. Die Karte zeigt:
 
-* die Version des geladenen Bundles
-* das Alter des Bundles, mit einer Warnung, sobald es 14 Tage oder älter ist
-* wann das Bundle abläuft
-* jede Quelle im Bundle, mit ihrer Lizenz und der Aktualität ihrer Daten
+* ob Threat Intelligence ein- oder ausgeschaltet ist oder im Shadow-Modus läuft
+* die Version des geladenen Bundles, wann seine Intelligence erstellt wurde (**Intelligence As Of**), wann es geladen wurde und wann es abläuft
+* eine Warnung, sobald das Bundle vor 14 oder mehr Tagen erstellt wurde oder abgelaufen ist. Die Bewertungen verwenden das geladene Bundle weiter, bis ein neueres geladen wird.
+* jede Quelle im Bundle: ob sie enthalten, ausgelassen oder veraltet ist, das Alter ihrer Daten, ihre Lizenz, wie viele Schlüssel sie beiträgt, und einen Hinweis, etwa warum sie ausgelassen wurde
 * den letzten fehlgeschlagenen Ladevorgang, falls es einen gab, und den Grund für den Fehler
 * die Quellenangaben (Attributions) für die Quellen im Bundle
+
+Ein veralteter oder fehlschlagender Feed ist so an einer Stelle sichtbar, bevor er sich in unerwarteten Bewertungen zeigt.
 
 Ein Bundle, das auf einer Air-Gapped-Instanz aus einer Datei geladen wurde, erscheint auf derselben Karte.
 

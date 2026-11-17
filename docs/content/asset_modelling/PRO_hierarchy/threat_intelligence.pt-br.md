@@ -152,12 +152,18 @@ os achados sem CVE caem em classificação *relativa*, mesmo que sua pontuação
 Superusuários podem verificar qual inteligência a instância está usando no card somente leitura
 **Intelligence Sources**, em **Settings > System Settings**. O card mostra:
 
-* a versão do pacote carregado
-* a idade do pacote, com um aviso quando ele tem 14 dias ou mais
-* quando o pacote expira
-* cada fonte do pacote, com sua licença e o quão atualizados estão seus dados
+* se a inteligência de ameaças está ligada, desligada ou em modo shadow
+* a versão do pacote carregado, quando sua inteligência foi compilada (**Intelligence As Of**),
+  quando foi carregado e quando expira
+* um aviso quando o pacote foi compilado há 14 dias ou mais, ou quando expirou. As pontuações
+  continuam usando o pacote carregado até que um mais recente seja carregado.
+* cada fonte do pacote: se está incluída, excluída ou desatualizada, a idade de seus dados, sua
+  licença, quantas chaves ela fornece e uma nota, por exemplo o motivo de ter sido excluída
 * a última falha de carregamento, se houver, e o motivo da falha
 * as atribuições das fontes do pacote
+
+Assim, uma fonte desatualizada ou com falha aparece em um só lugar, antes de se manifestar como
+pontuações inesperadas.
 
 Um pacote carregado a partir de um arquivo em uma instância air-gapped aparece no mesmo card.
 
