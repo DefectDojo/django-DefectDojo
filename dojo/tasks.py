@@ -20,7 +20,7 @@ from dojo.celery import app
 from dojo.finding.helper import bulk_delete_findings, fix_loop_duplicates
 from dojo.importers.import_lock import tests_under_import_now, tests_with_import_lock_held
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
-from dojo.models import Finding, System_Settings
+from dojo.models import Finding, System_Settings, Test
 from dojo.utils import schedule_product_grade
 
 logger = get_task_logger(__name__)
@@ -39,6 +39,49 @@ _excess_duplicate_handler = None
 def register_excess_duplicate_handler(func):
     global _excess_duplicate_handler  # noqa: PLW0603
     _excess_duplicate_handler = func
+
+
+# A plugin may keep duplicates out of the selection itself, before the per-run cap applies. Each
+# registered callable takes no arguments and returns a Q on Finding naming the duplicates to leave
+# out this run, or None to leave out nothing. Setting them aside later (in the handler above, or by
+# wrapping the deletion step) is too late: they would already hold places under the cap, and enough
+# of them would stop the task for every asset. Registering the same callable again is a no-op.
+_dupe_delete_excludes = []
+
+
+def register_dupe_delete_exclude(func):
+    if func not in _dupe_delete_excludes:
+        _dupe_delete_excludes.append(func)
+
+
+# A plugin may also decide how many of the selected duplicates go now. Each registered callable
+# gets the selected ids (already capped, never empty) and returns the ids to delete; the rest stay
+# and are selected again by a later run. This is where a per-asset budget belongs: it sees what
+# this run would delete, and can hold an asset (Product.dupe_delete_held_at) so later runs leave
+# it out of the selection. Registering the same callable again is a no-op.
+_dupe_delete_limits = []
+
+
+def register_dupe_delete_limit(func):
+    if func not in _dupe_delete_limits:
+        _dupe_delete_limits.append(func)
+
+
+def _excluded_duplicates():
+    """The duplicates to leave out of this run's selection, as a Q on Finding (empty when none)."""
+    excluded = Q()
+    # An asset whose hold is set loses no duplicates until an administrator clears it. Its tests are
+    # named by id so the filter sits on the finding row itself: the scan drops a held asset's rows
+    # before the per-row excess count runs. Joining to the product to read the hold instead made
+    # that count run on every held row first (about 0.9 s a run with 10 of 100 assets held).
+    if held_tests := list(
+        Test.objects.filter(engagement__product__dupe_delete_held_at__isnull=False).values_list("id", flat=True),
+    ):
+        excluded |= Q(test_id__in=held_tests)
+    for exclude in _dupe_delete_excludes:
+        if (q := exclude()) is not None:
+            excluded |= q
+    return excluded
 
 
 def _remove_excess_duplicates(findings):
@@ -158,6 +201,9 @@ def _async_dupe_delete_impl():
     # duplicates would only be skipped below, and enough of them would use up every run.
     if busy_tests := tests_with_import_lock_held():
         settled &= ~Q(test_id__in=busy_tests)
+    # Held assets and whatever a plugin excludes are left out here for the same reason.
+    if excluded := _excluded_duplicates():
+        settled &= ~excluded
 
     # Single query: excess (oldest) duplicates, newest-first within each original group.
     # select_related avoids N+1 queries when collecting affected products below.
@@ -175,6 +221,10 @@ def _async_dupe_delete_impl():
 
     product_by_finding = {finding.id: finding.test.engagement.product for finding in excess_dupes}
     ids_to_delete = list(product_by_finding)
+    for limit in _dupe_delete_limits:
+        if not ids_to_delete:
+            break
+        ids_to_delete = list(limit(ids_to_delete))
 
     logger.info("total number of excess duplicates to delete: %s", len(ids_to_delete))
 
