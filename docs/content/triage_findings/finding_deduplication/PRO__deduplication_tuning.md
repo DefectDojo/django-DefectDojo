@@ -26,7 +26,7 @@ A tool's row shows the algorithm in force for each kind, how many hash fields it
 
 In a tool's row, select the algorithm shown under the matching kind you want to change to edit that kind's algorithm, its hash fields, or both. Because a matching change decides which findings are treated as the same finding, it is not saved directly:
 
-1. Choose the new algorithm, the new hash fields, or both. The page explains what each algorithm matches on.
+1. Choose the new algorithm, the new hash fields, or both. The page explains what each algorithm matches on. The **Hash Fields** picker lists the finding's own fields under Finding and **Endpoints** under Engagement and Test, the headings the Findings list's **Add Filter** uses, alphabetically within each. For Global Locations, the two location types are one flat list.
 2. Select **Review Impact**. DefectDojo reports how many findings of that tool are in scope, and warns you about the two things that are easy to miss (see below).
 3. Confirm you understand the change, then select **Save**.
 

@@ -27,7 +27,7 @@ Nothing is installed and no repository is connected. Threat modeling reads only 
 Choose **New Threat Model**, pick the Asset, give it a name, and supply the design in whichever form you have it:
 
 - **Paste the description** directly, or
-- **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` or `.pdf`. Text extraction from PDF is best-effort; if a PDF is mostly images, paste the text instead.
+- **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` or `.pdf`. The text of a PDF is read from its text layer. A scan without OCR has none, so a PDF from which no text can be read is refused when it is the only input: paste the text instead, or add an architecture diagram. A PDF that needs a password to open is refused the same way: remove the password first.
 - **Optionally add an architecture diagram** — PNG, JPEG, WebP or GIF. The diagram is read alongside the text, so a component that only appears in the picture is still picked up.
 
 You can combine them: a short pasted summary plus a diagram often produces a better model than either alone.

@@ -206,7 +206,8 @@ def custom_exception_handler(exc, context):
         response.data = {"message": UPLOAD_LIMIT_RESPONSE_MESSAGE}
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
-            exception_message = str(exc.args[0])
+            # A bare `raise SomeError` has no args: name the exception rather than fail on args[0].
+            exception_message = str(exc.args[0]) if exc.args else type(exc).__name__
         else:
             exception_message = _("Internal server error, check logs for details")
         # There is no standard error response, so we assume an unexpected

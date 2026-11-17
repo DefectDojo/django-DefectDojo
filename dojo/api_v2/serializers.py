@@ -152,8 +152,9 @@ class TagListSerializerField(serializers.ListField):
         if isinstance(data, list) and data == [""] and self.allow_empty:
             return []
         if isinstance(data, six.string_types):
-            if not data:
-                data = []
+            # An empty or blank string is the empty list, the same as [].
+            if not data.strip():
+                return []
             try:
                 data = json.loads(data)
             except ValueError:

@@ -172,15 +172,18 @@ The short route, for the common case of announcing new findings from an import.
 
 1. Go to **Connect > Downstream** and select **Create Alert** on a messaging connection, or open **Messaging Alerts** directly.
 2. Select **New Alert** and fill in:
+   - **Owned By** (with Group Ownership on): the Group the alert's rule belongs to, or the instance. The choices are the Groups you can create rules in.
    - **Name**: what this alert is for, for example `New highs to the security channel`.
    - **Alert**: what it is about. **New Findings From an Import** is currently the only option.
    - **Send Over**: the messaging connection.
    - **Where it delivers**: the vendor's own destination field, so a Slack channel ID, an optional Teams channel label, a list of email addresses, or an SNS topic ARN.
    - **Severity**: the floor, from **Critical Only** through **Every Severity**.
    - **Mode**: **Simulate** records what would have been sent without sending it, **Live** actually sends.
-3. Select **Create Alert**.
+3. Select **Submit**.
 
 The page lists the alerts it created, with the trigger, the severity floor, and a toggle to enable or disable each one.
+
+With Group Ownership on, the page is open to Group members as well as to holders of the global **Integration View**. A member whose Role in a Group carries **Integration View** opens it and sees the alerts whose rules they may view: their Groups' own, and any shared with them. **New Alert** needs **Rule Add**, globally or on the Group Role, and **Send Over** offers only the connections the member can see. Edit, Delete and the enable toggle follow the alert's rule, so they show where the member may change or delete that rule. **Send Test Message** needs **Integration Edit** on the connection the alert sends over (see [Connectors and ticket templates a Group owns](/connectors/downstream/about/#connectors-and-ticket-templates-a-group-owns)).
 
 Start in **Simulate** if you want to see what an alert would have caught before anyone's channel hears about it. The rule runs, the deliveries are recorded, and nothing is sent.
 
