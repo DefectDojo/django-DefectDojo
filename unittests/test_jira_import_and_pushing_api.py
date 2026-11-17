@@ -436,7 +436,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         pre_jira_status = post_jira_status
         ra = Risk_Acceptance.objects.last()
-        ra_helper.expire_now(ra)
+        # The push goes out once the expiry is committed, as above: run each callback as it is registered.
+        with patch("dojo.risk_acceptance.helper.transaction.on_commit", side_effect=lambda func, *_args, **_kwargs: func()):
+            ra_helper.expire_now(ra)
 
         # we don't do any explicit push to JIRA here as it should happen automatically
 

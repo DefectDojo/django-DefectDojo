@@ -13,7 +13,8 @@ from django.contrib.messages import get_messages
 from django.test import override_settings
 from django.utils import timezone
 
-from dojo.models import Finding, Test, Test_Type
+from dojo.finding.ui.views import ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE
+from dojo.models import Engagement, Finding, Test, Test_Type
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 # dojo_testdata.json: finding 2 is an active cluster root and 3-6 are its duplicates; finding 7 is a
@@ -115,3 +116,46 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         self._mark(ROOT, OTHER)
         self.assertEqual(self._state(OTHER), {OTHER: (False, ROOT, True)})
         self.assertEqual(self._state(ROOT), {ROOT: (True, OTHER, False)})
+
+    def _move_root_to_other_engagement(self, *, dedupe_on_engagement, root_dedupe_on_engagement=None):
+        # Engagement 3 belongs to the same product as finding 2's engagement (1). Engagement 1 holds
+        # findings 3 and 7; engagement 3 takes the root.
+        if root_dedupe_on_engagement is None:
+            root_dedupe_on_engagement = dedupe_on_engagement
+        engagement = Engagement.objects.get(pk=3)
+        Engagement.objects.filter(pk=1).update(deduplication_on_engagement=dedupe_on_engagement)
+        Engagement.objects.filter(pk=3).update(deduplication_on_engagement=root_dedupe_on_engagement)
+        test = Finding.objects.get(pk=ROOT).test
+        now = timezone.now()
+        other_test = Test.objects.create(
+            engagement=engagement, test_type=test.test_type, target_start=now, target_end=now,
+        )
+        Finding.objects.filter(pk=ROOT).update(test=other_test)
+
+    def test_refuses_a_mark_under_a_root_in_another_engagement_with_engagement_deduplication(self):
+        # Finding 3 shares finding 7's engagement, but the mark would point 7 at 3's root, finding 2,
+        # which now sits in another engagement.
+        self._move_root_to_other_engagement(dedupe_on_engagement=True)
+        self._assert_refused(OTHER, MEMBERS[0], ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE)
+
+    def test_refuses_a_mark_under_a_root_whose_engagement_alone_has_engagement_deduplication(self):
+        # Neither the marked finding's engagement nor the original's has the setting; only the root's does.
+        self._move_root_to_other_engagement(dedupe_on_engagement=False, root_dedupe_on_engagement=True)
+        self._assert_refused(OTHER, MEMBERS[0], ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE)
+
+    def test_marks_under_a_root_in_another_engagement_without_engagement_deduplication(self):
+        self._move_root_to_other_engagement(dedupe_on_engagement=False)
+        self._mark(OTHER, MEMBERS[0])
+        self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})
+
+    def test_marks_under_a_root_in_the_same_engagement_from_a_member_in_another(self):
+        # The member sits in another engagement, but the root the mark points at shares finding 7's.
+        engagement = Engagement.objects.get(pk=3)
+        test = Finding.objects.get(pk=MEMBERS[0]).test
+        now = timezone.now()
+        other_test = Test.objects.create(
+            engagement=engagement, test_type=test.test_type, target_start=now, target_end=now,
+        )
+        Finding.objects.filter(pk=MEMBERS[0]).update(test=other_test)
+        self._mark(OTHER, MEMBERS[0])
+        self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})

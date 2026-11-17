@@ -11,7 +11,7 @@ The Backstage connector is an **asset connector**: instead of importing Findings
 | Backstage | DefectDojo |
 |---|---|
 | **System** | Organization (Components with no System are grouped under a configurable "Backstage / Uncategorized" Organization) |
-| **Component** | Asset — named from the entity `title` (falling back to `name`), with the catalog description |
+| **Component** | Asset — named from the entity `title` (falling back to `name`), with the catalog description. The description fills a new Asset, or one whose description is empty, and follows later edits in Backstage. A description someone wrote in DefectDojo, including on an existing Asset the connector maps to by name, is never replaced. |
 | **Owning Group** (`ownedBy` relation) | A DefectDojo Group linked to the Asset (default role: Maintainer, configurable) |
 | **Owning Group** `metadata.description` | The DefectDojo Group's description. It fills a new group, or one whose description is empty or still the connector's placeholder, and follows later edits in Backstage. A description an administrator wrote is never replaced. |
 | **Owner email** (Group profile email, or a User owner's email) | An Asset Member, when a DefectDojo user with that email already exists (users are never created) |
