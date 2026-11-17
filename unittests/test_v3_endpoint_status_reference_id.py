@@ -54,6 +54,14 @@ class V3EndpointStatusReferenceIdTests(DojoTestCase):
 
         # One Location shared by both products: two references, two findings.
         self.location = _url_location("status-ref-shared.example.com")
+        # The pads alone do not make the ids differ: sequences are never rolled back, so how far
+        # each one has run depends on which tests ran before. Move the reference sequence past the
+        # Location's id (never back) so the two references cannot take the Location's id.
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT setval(seq, GREATEST(nextval(seq), %s)) FROM CAST(pg_get_serial_sequence(%s, 'id') AS regclass) seq",
+                [self.location.id + 10, LocationProductReference._meta.db_table],
+            )
         self.first_ref = LocationProductReference.objects.create(location=self.location, product=self.first, status=ProductLocationStatus.Active)
         self.second_ref = LocationProductReference.objects.create(location=self.location, product=self.second, status=ProductLocationStatus.Active)
         self.first_status = self._status(self.first, "status_ref_first_finding")
