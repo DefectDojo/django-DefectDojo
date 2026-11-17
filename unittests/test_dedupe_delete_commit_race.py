@@ -1922,6 +1922,43 @@ class TestDupeDeleteRacesSingleFindingDelete(_CommittedFindingsMixin, SimpleTest
             resume_after_the_deadlock_check=True,
         )
 
+    # Regression: the cascade deleted only the cluster members it had read before taking its
+    # lock, so a duplicate deduplication linked to the original in between was left pointing at
+    # it, and the original's delete then failed at COMMIT (23503) with the cluster half gone.
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_cascade_delete_takes_a_duplicate_linked_after_the_cluster_read(self):
+        cluster = self._original_with_an_excess_and_a_fresh_duplicate()
+        original = cluster[0]
+        (late,) = self._create_findings("Cascade late duplicate")
+        real_lock = finding_helper.lock_findings_for_delete
+        linked = []
+
+        def link_a_duplicate_then_lock(finding_ids):
+            # The cascade's lock is the first one taken; link on another connection and commit
+            # just before it, as a concurrent deduplication landing after the cluster read would.
+            if not linked:
+                linked.append(late.id)
+                writer = _ConcurrentThread(
+                    lambda: Finding.objects.filter(id=late.id).update(
+                        duplicate=True, active=False, duplicate_finding_id=original.id,
+                    ),
+                )
+                writer.start()
+                writer.join_or_fail(self)
+            return real_lock(finding_ids)
+
+        with (
+            patch.object(finding_helper, "SINGLE_DELETE_MAX_CONFLICT_RETRIES", 0),
+            patch.object(finding_helper, "lock_findings_for_delete", link_a_duplicate_then_lock),
+        ):
+            finding_helper.delete_finding_with_conflict_retry(Finding.objects.get(id=original.id))
+
+        self.assertEqual(linked, [late.id], msg="the duplicate must be linked once, before the cascade's lock")
+        doomed = [finding.id for finding in cluster] + [late.id]
+        remaining = list(Finding.objects.filter(id__in=doomed).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"the original and every duplicate must be deleted, still present: {remaining}")
+        self.assertNoDanglingDuplicateLinks()
+
 
 # Regression: a background engagement delete failed, on the first run and on every retry, with
 # "update or delete on table dojo_finding violates foreign key constraint
