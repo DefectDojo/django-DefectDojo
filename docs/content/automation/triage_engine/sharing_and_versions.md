@@ -206,6 +206,8 @@ curl -H "Authorization: Token <your API key>" \
 
 The Pro UI calls an internal mirror of these endpoints under `/api/vue/`. Always automate against the `/api/v2/` paths documented here.
 
+This section covers moving and versioning rules. To create, validate, preview, change and run them, see [Building Rules with the API](../rules_api/).
+
 | Method and path | What it does |
 |---|---|
 | `GET /api/v2/rules_engine_v2/rules/{id}/export/` | Export one rule. Add `?event_id=<id>` to export one of its versions. |
