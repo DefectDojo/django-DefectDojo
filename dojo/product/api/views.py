@@ -13,6 +13,7 @@ import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.views import (
+    DeprecatedFieldsMixin,
     DeprecationNoticeMixin,
     PrefetchDojoModelViewSet,
     report_generate_response,
@@ -64,6 +65,7 @@ class ProductAPIScanConfigurationViewSet(
 
 @extend_schema_view(**schema_with_prefetch())
 class ProductViewSet(
+    DeprecatedFieldsMixin,
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     mixins.CreateModelMixin,
@@ -76,6 +78,7 @@ class ProductViewSet(
     queryset = Product.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiProductFilter
+    deprecated_fields = {"prod_numeric_grade": "product_grade"}
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasProductPermission,
