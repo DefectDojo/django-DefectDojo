@@ -134,6 +134,8 @@ If the scope of a Survey includes both internal and external Users, specify the 
 
 A single Survey template can be deployed multiple times simultaneously. All responses to multiple deployments of the same Survey template will be displayed together in the Responses table at the bottom of that Survey’s view. 
 
+To go straight to them, click the ⋮ kebab icon next to a Survey in the All Surveys view (or the gear icon on the Survey's own page) and choose **View Responses**. The Survey's view opens at its Responses table, which lists every response with the responding User (or **Anonymous** for an external response) and the date it was answered. Expand a row to read that response's answers. **View Responses** is shown to Users who can view Surveys.
+
 ![image](images/pq_ss11.png)
 
 Even after a Survey deployment has expired or been closed, its responses remain visible in the Responses table at the bottom of the Survey’s view, provided the Survey template itself has not been deleted. These responses are permanent and cannot be removed.
