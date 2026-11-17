@@ -116,6 +116,8 @@ The **Re\-Import Findings** form can be accessed on any Test page, under the **�
 
 The **Re\-import Findings** **Form** will **not** allow you to import a different scan type, or change the destination of the Findings you’re trying to upload. If you’re trying to do one of those things, you’ll need to use the **Import Scan Form**.
 
+In DefectDojo Pro, a Test that has no scan type on record (for example a Test created by hand with a Test Type such as "Pen Test") shows a required **Scan Type** field on the Reimport form. Choose the scan type of the report you are uploading. The field lists only Test Types that have a scan type, and it does not appear for a Test whose scan type is known, including a Test whose Test Type was named after its tool, such as "Semgrep Scan (GitLab SAST Report)", which reimports as "GitLab SAST Report". The `/reimport-scan` API is unchanged: it still needs a valid `scan_type`.
+
 ## Working with Import History
 
 The **Import History** widget on a **Test** page lists every Import and Reimport into that Test, newest first, one row per Import.
