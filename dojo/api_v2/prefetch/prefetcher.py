@@ -284,7 +284,7 @@ class _Prefetcher:
 
         Args:
             entry (ModelInstance): Instance of a model as returned by a django queryset
-            field_to_fetch (list[string]): fields to prefetch
+            fields_to_fetch (list[string]): fields to prefetch
 
         """
         self.prefetch_entries([entry], fields_to_fetch)
