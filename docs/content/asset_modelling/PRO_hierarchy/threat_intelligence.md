@@ -131,6 +131,10 @@ finding whose EPSS already exceeds the floor is unaffected. The familiar per-Org
 **external-score scalar** in your Prioritization Engine settings scales this contribution
 exactly as it always scaled EPSS/KEV.
 
+The next version of this table, which adds exploitation evidence that DefectDojo's analysts have
+reviewed, is described in [Evidence-Based Scoring (Rubric v2), not yet available](../threat_intelligence_rubric_v2/).
+Until it is released, every finding is scored with the table above.
+
 ### The actively-exploited Risk floor
 
 The table above raises **Priority**, but proportionally to a finding's base severity. That
