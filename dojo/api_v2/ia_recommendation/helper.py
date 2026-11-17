@@ -18,6 +18,12 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 logger = logging.getLogger(__name__)
 
+def _get_aws_bedrock_api_key():
+    secrets_client = boto3.client("secretsmanager", region_name=settings.AWS_REGION)
+    secret_value = secrets_client.get_secret_value(SecretId=settings.AWS_BEDROCK_SECRET_NAME)
+    return json.loads(secret_value["SecretString"])["api-key"]
+
+
 def _get_first_aws_bedrock_model_id():
     control_client = boto3.client("bedrock", region_name=settings.AWS_REGION)
     profiles = control_client.list_inference_profiles()["inferenceProfileSummaries"]
@@ -43,8 +49,7 @@ def async_get_aws_bedrock_recommendation(fid, user, save=True):
     )
     logger.debug("IA RECOMMENDATION: get AWS Bedrock recommendation by finding: %s", fid)
     try:
-        if settings.AWS_BEDROCK_API_KEY:
-            os.environ["AWS_BEARER_TOKEN_BEDROCK"] = settings.AWS_BEDROCK_API_KEY
+        os.environ["AWS_BEARER_TOKEN_BEDROCK"] = _get_aws_bedrock_api_key()
         model_id = _get_first_aws_bedrock_model_id()
         client = boto3.client("bedrock-runtime", region_name=settings.AWS_REGION)
         response = client.converse(
@@ -52,7 +57,7 @@ def async_get_aws_bedrock_recommendation(fid, user, save=True):
             messages=[{"role": "user", "content": [{"text": prompt}]}],
         )
         text = response["output"]["message"]["content"][0]["text"]
-    except (BotoCoreError, ClientError, KeyError, IndexError) as e:
+    except (BotoCoreError, ClientError, KeyError, IndexError, ValueError) as e:
         logger.error(" IA RECOMMENDATION: error calling AWS Bedrock: %s", e)
         return http_response.error(message="Error AWS Bedrock", data=error_response)
 
