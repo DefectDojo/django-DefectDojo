@@ -272,22 +272,34 @@ across the whole portfolio, one Asset at a time, as a background job. It runs:
   the page says when the last one failed or finished with failures. The list reloads when a
   backfill finishes.
 
-Only one backfill runs at a time: starting one while another is pending or running is refused.
-An Asset that fails is logged and skipped, the backfill carries on with the rest, and the page
-reports how many failed. Because correlation is idempotent, running the backfill again is safe
-and picks up anything a failed run missed. A backfill whose worker stops reporting progress for
-an hour is marked failed, so a lost worker does not block the next one.
+Only one backfill runs at a time: starting one while another is pending or running is refused,
+and the page then shows the one already running. An Asset that fails is logged and skipped, the
+backfill carries on with the rest, and the page reports how many failed. Running the backfill
+again retries them; correlation is idempotent, so a re-run never duplicates anything.
 
-The same backfill is available from the command line. Omit the argument to recompute the whole
-portfolio, or scope it to a single Asset:
+A backfill works through Assets in a fixed order and records the last one it finished. If it stops
+part way, the next backfill continues after that Asset instead of starting over:
+
+- **Its worker is lost** (a restart or a crash during the run). A backfill that has not reported
+  for 15 minutes (6 hours while it is still queued) is marked failed the next time the Root Causes
+  page reads its status, so the button is offered again. Starting a new backfill continues where
+  the lost one stopped.
+- **It reaches its time limit** (12 hours). It is marked failed and a new backfill that continues
+  from where it stopped starts on its own.
+
+The command line runs the same recompute in the foreground, outside the tracked backfill: it is
+not shown on the Root Causes page, it always starts from the first Asset, and nothing stops it
+from running at the same time as a background backfill (both are idempotent, so the result is the
+same, but the work is done twice). Omit the argument to recompute the whole portfolio, or scope it
+to a single Asset:
 
 ```bash
 python manage.py recompute_correlations
 python manage.py recompute_correlations --product-id 42
 ```
 
-The command runs in the foreground. A whole-portfolio run skips an Asset that fails, like the
-background backfill, and exits with a non-zero status when any Asset failed.
+A whole-portfolio run skips an Asset that fails, like the background backfill, and exits with a
+non-zero status when any Asset failed.
 
 ## What the API exposes
 
