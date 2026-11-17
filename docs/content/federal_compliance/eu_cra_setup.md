@@ -89,6 +89,7 @@ which component. Without it, every SBOM lands on the Asset as a whole.
 | Expected | Where |
 | --- | --- |
 | A **Version** field in the **Import SBOM** dialog | Step 10 |
+| An **SBOMs** widget for the Asset page, listing each release's SBOMs | Step 10 |
 
 ### Step 3 — Turn on known-exploited and EPSS enrichment
 
@@ -300,9 +301,10 @@ curl -X POST "$DD_URL/api/v2/sbom-import/" -H "Authorization: Token $DD_TOKEN" \
 | **SBOM Imported** with the number of dependencies processed | A message at the top right |
 | The count on the **Locations** tile goes up | The Asset page |
 | The release's components | `GET /api/v2/sbom/<asset id>/?spec=cyclonedx&version=4.1`. A version never imported answers *No version '…' for this asset* |
+| The release's SBOM, with any earlier upload for it | The **SBOMs** widget on the Asset page. Add it from **Page Layout → Edit Layout → Add Widget → Data Table**, record set `SBOMs`. See [The SBOMs widget](/asset_modelling/engagements_tests/pro__assets/#the-sboms-widget) |
 
-**Export SBOM and VEX**, on the same **Locations** menu, exports the Asset as a whole; a single
-release is exported through the API as above.
+**Export SBOM and VEX**, on the same **Locations** menu, exports the Asset as a whole. A single
+release's SBOM downloads from its line in the **SBOMs** widget, or through the API as above.
 
 ### Step 11 — Import the release's scan results
 
@@ -537,7 +539,6 @@ and keep the downloads with your technical documentation. See
 
 So nobody spends time hunting for these:
 
-* **No screen lists per-release SBOMs.** They are stored per version and exported through the API.
 * **The Article 14 report's audit trail has no screen.** The awareness reason is in each stage's
   **JSON** download.
 * **No dashboard widget or report reads assessment states or CRA classes.** They are on the EU

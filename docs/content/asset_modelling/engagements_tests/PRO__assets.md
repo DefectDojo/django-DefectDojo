@@ -492,6 +492,32 @@ version is used, or the upload stays on the unversioned stream if it declares no
 named for the first time here is created then and there, so it does not have to be declared
 first.
 
+### The SBOMs widget
+
+The **SBOMs** widget lists every SBOM recorded on the Asset, grouped by the release it describes, so
+you can show the bill of materials for each version you shipped. Add it the same way: **Page Layout →
+Edit Layout → Add Widget → Data Table**, record set `SBOMs`. It needs the same asset-versions setting
+as the Versions widget.
+
+Releases are ordered like the Versions widget: newest release date first, undated versions after
+the dated ones, and uploads that named no version last, under **Unversioned**. Under each release,
+every recorded SBOM has one line, newest first: the day it was recorded, its format and spec version,
+and how many components it lists.
+
+Uploading another SBOM for the same release from the same format replaces the earlier one as the
+release's current SBOM, but the earlier one stays listed, tagged **Superseded**, so the release keeps
+its history. The current one is tagged **Current**. A CycloneDX upload and an SPDX upload for the
+same release are each current: one does not replace the other.
+
+The download button on a line saves that SBOM as it was recorded for that release: its components,
+licenses and dependency graph, in its own format. It is not the Asset's current inventory, which
+**Export SBOM and VEX** exports. The file name carries the Asset, the version and the SBOM's id.
+
+Over the API, `GET /api/v2/bom_snapshots/?product=<asset id>` lists the same SBOMs (filter with
+`asset_version`, `version_name`, `source`, `spec` or `unversioned=true`), each with `is_current`,
+`component_count` and a `download_url`. `GET /api/v2/bom_snapshots/<id>/download/` returns the document;
+add `?spec=cyclonedx` or `?spec=spdx` to choose the format. Both need view permission on the Asset.
+
 ### Affected versions on a Finding
 
 A Finding carries **claims** about the versions it applies to — *found in* a version, or *fixed
