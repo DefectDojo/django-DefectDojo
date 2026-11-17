@@ -375,7 +375,7 @@ class ExportEngagementSerializer(ExportFilesMixin, EngagementSerializer):
         if self.context.get("jira"):
             data["jira_project"] = export_jira_row(ExportJiraProjectSerializer, obj, "jira_project")
             data["jira_issue"] = export_jira_row(ExportJiraIssueSerializer, obj, "jira_issue")
-        data["threat_model"] = export_threat_model(obj, self.context["max_file_bytes"], self.budget)
+        data["threat_model_file"] = export_threat_model(obj, self.context["max_file_bytes"], self.budget)
         return data
 
     def get_check_list_detail(self, obj) -> dict | None:

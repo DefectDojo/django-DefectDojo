@@ -499,8 +499,8 @@ def product_lines(
             files = data.get("files", [])
             counts[f"{line_type}s"] += 1
             counts["notes"] += len(data["notes"])
-            if line_type == "engagement" and data["threat_model"]:
-                files = [*files, data["threat_model"]]
+            if line_type == "engagement" and data["threat_model_file"]:
+                files = [*files, data["threat_model_file"]]
             counts["files"] += len(files)
             counts["files_over_cap"] += sum(1 for entry in files if entry["data_base64"] is None and "error" not in entry)
             if line_type == "finding":

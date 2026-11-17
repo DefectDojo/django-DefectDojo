@@ -256,7 +256,7 @@ An example `check_list_detail`:
 
 ### Threat model
 
-An `engagement` line always holds `threat_model`. It is `null` when the engagement has no threat model file. Otherwise it is an object with `filename`, `size`, `content_type` and `data_base64`. It follows the rules of [Files](#files), including `max_file_bytes` and the `line_cap` error.
+An `engagement` line always holds `threat_model_file`. It is `null` when the engagement has no threat model file. Otherwise it is an object with `filename`, `size`, `content_type` and `data_base64`. It follows the rules of [Files](#files), including `max_file_bytes` and the `line_cap` error. The boolean `threat_model` of the engagement stays as it was.
 The server reads the file only when it is inside the media root. A file outside the media root has `size` and `data_base64` set to `null`, and `"error": "missing"`.
 The threat model counts as one file in `files` and `files_over_cap`. `tmodel_path` stays on the line.
 

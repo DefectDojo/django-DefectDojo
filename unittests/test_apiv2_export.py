@@ -1581,7 +1581,7 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
     def test_engagement_threat_model_file(self):
         path = self.put_threat_model()
         lines = self.export()
-        model = self.engagement_line(lines)["threat_model"]
+        model = self.engagement_line(lines)["threat_model_file"]
         self.assertEqual(
             {"filename": path.name, "size": 6, "content_type": "application/pdf", "data_base64": base64.b64encode(b"threat").decode()},
             model,
@@ -1615,7 +1615,7 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
         for value in values:
             with self.subTest(value=value):
                 Engagement.objects.filter(id=self.engagement.id).update(tmodel_path=value)
-                model = self.engagement_line(self.export())["threat_model"]
+                model = self.engagement_line(self.export())["threat_model_file"]
                 self.assertEqual("missing", model["error"])
                 self.assertIsNone(model["data_base64"])
                 self.assertNotIn(base64.b64encode(b"secret").decode(), json.dumps(model))
@@ -1626,16 +1626,24 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
     def test_a_path_with_a_nul_byte_is_unreadable(self):
         self.assertIsNone(readable_threat_model(Path("bad\x00path")))
 
+    def test_the_threat_model_boolean_stays_next_to_the_file(self):
+        for flag in (True, False):
+            with self.subTest(flag=flag):
+                Engagement.objects.filter(id=self.engagement.id).update(threat_model=flag)
+                data = self.engagement_line(self.export())
+                self.assertIs(flag, data["threat_model"])
+                self.assertIn("threat_model_file", data)
+
     def test_engagement_without_threat_model(self):
         for value in ("none", "", None):
             with self.subTest(value=value):
                 Engagement.objects.filter(id=self.engagement.id).update(tmodel_path=value)
-                self.assertIsNone(self.engagement_line(self.export())["threat_model"])
+                self.assertIsNone(self.engagement_line(self.export())["threat_model_file"])
 
     def test_threat_model_over_cap(self):
         self.put_threat_model(b"0123456789")
         lines = self.export(max_file_bytes=4)
-        model = self.engagement_line(lines)["threat_model"]
+        model = self.engagement_line(lines)["threat_model_file"]
         self.assertIsNone(model["data_base64"])
         self.assertEqual(10, model["size"])
         self.assertNotIn("error", model)
