@@ -58,7 +58,7 @@
  &lt;/tr&gt;
  &lt;tr&gt;
  &lt;td&gt;&lt;strong&gt;Component&lt;/strong&gt;&lt;/td&gt;
- &lt;td&gt;製品 — エンティティの &lt;code&gt;title&lt;/code&gt;(なければ &lt;code&gt;name&lt;/code&gt; にフォールバック)から命名され、カタログの description が付与されます&lt;/td&gt;
+ &lt;td&gt;製品 — エンティティの &lt;code&gt;title&lt;/code&gt;(なければ &lt;code&gt;name&lt;/code&gt; にフォールバック)から命名され、カタログの description が付与されます。description は新しい製品、または description が空の製品に設定され、その後の Backstage での変更に追従します。DefectDojo で記入された description は、コネクターが名前で対応付けた既存の製品であっても置き換えられることはありません。&lt;/td&gt;
  &lt;/tr&gt;
  &lt;tr&gt;
  &lt;td&gt;&lt;strong&gt;Owning Group&lt;/strong&gt;(&lt;code&gt;ownedBy&lt;/code&gt; リレーション)&lt;/td&gt;
