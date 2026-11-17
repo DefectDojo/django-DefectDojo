@@ -109,6 +109,7 @@ Chaque élément porte un ensemble fixe de champs de Constatation. Cette liste e
 |-------|--------|
 | Identité | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Sévérité et notation | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Preuves d'exploitation | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Texte | `description`, `mitigation`, `impact` |
 | Statut | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Dates | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -120,6 +121,8 @@ En plus de `finding`, chaque élément porte `test` (`id`, `title`, `scan_type`)
 Les dates sont des chaînes ISO-8601. C'est délibéré : cela signifie que `gt` et `lt` les ordonnent correctement en tant que texte, de sorte que `2026-07-28` est correctement supérieur à `2026-01-01`.
 
 `priority`, `risk` et `risk_score` proviennent de la priorisation de Pro. Une Constatation qui n'a pas encore été notée ne porte aucune valeur pour ces champs.
+
+`vendor_exploited` et `vendor_ransomware_used` contiennent ce qu'un scanner, un connecteur ou une personne a signalé, indépendamment du catalogue de la CISA, et `vendor_exploited_source` indique l'auteur du signalement (le nom du Type de Test du scanner, le nom du connecteur, `manual` ou `pre-upgrade`). Une règle qui doit agir sur l'une ou l'autre source lit les deux champs. Dans le constructeur de conditions, les champs KEV apparaissent sous les noms **KEV: Known Exploited**, **KEV: Ransomware Used**, **KEV: Date Added** et **KEV: Remediation Due**, et les champs Vendor Reported sous les noms **Vendor Reported Exploited**, **Vendor Reported Ransomware** et **Vendor Reported Source**. Voir [Constatations](/asset_modelling/engagements_tests/pro__findings/#metadata).
 
 ### Conditions
 

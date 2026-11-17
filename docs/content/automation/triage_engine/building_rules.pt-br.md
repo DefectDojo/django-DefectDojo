@@ -108,6 +108,7 @@ Cada item carrega um conjunto fixo de campos do Achado. Esta lista é um contrat
 |-------|--------|
 | Identidade | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | Severidade e pontuação | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| Evidência de exploração | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | Texto | `description`, `mitigation`, `impact` |
 | Status | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | Datas | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -119,6 +120,8 @@ Além de `finding`, cada item carrega `test` (`id`, `title`, `scan_type`), `enga
 As datas são strings ISO-8601. Isso é proposital: significa que `gt` e `lt` as ordenam corretamente como texto, portanto `2026-07-28` é corretamente maior que `2026-01-01`.
 
 `priority`, `risk` e `risk_score` vêm da priorização do Pro. Um Achado que ainda não foi pontuado não carrega valor para eles.
+
+`vendor_exploited` e `vendor_ransomware_used` contêm o que um scanner, um conector ou uma pessoa reportou, independentemente do catálogo da CISA, e `vendor_exploited_source` indica quem fez o relato (o nome do Test Type do scanner, o nome do conector, `manual` ou `pre-upgrade`). Uma regra que deve agir com base em qualquer uma das origens lê os dois campos. No construtor de condições, os campos de KEV aparecem como **KEV: Known Exploited**, **KEV: Ransomware Used**, **KEV: Date Added** e **KEV: Remediation Due**, e os campos Vendor Reported como **Vendor Reported Exploited**, **Vendor Reported Ransomware** e **Vendor Reported Source**. Veja [Achados](/asset_modelling/engagements_tests/pro__findings/#metadata).
 
 ### Condições
 
