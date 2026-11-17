@@ -262,7 +262,7 @@ The threat model counts as one file in `files` and `files_over_cap`. `tmodel_pat
 
 ### Configuration permissions
 
-Each user in `reference.users` holds `configuration_permissions`: a sorted list of `app_label.codename` strings, one for each configuration permission that the user holds.
+Each user in `reference.users` holds `configuration_permissions`, a sorted list of `app_label.codename` strings. It lists the configuration permissions of the user and of its groups, each one time.
 `reference.configuration_permissions` is the sorted list of every configuration permission of the instance, in the same form. Both keys are always present.
 
 ### External issue lines

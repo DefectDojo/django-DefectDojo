@@ -822,7 +822,10 @@ def build_manifest(
     ]
     users = (
         Dojo_User.objects.select_related("usercontactinfo", "auth_token")
-        .prefetch_related(Prefetch("user_permissions", queryset=Permission.objects.select_related("content_type")))
+        .prefetch_related(
+            Prefetch("user_permissions", queryset=Permission.objects.select_related("content_type")),
+            Prefetch("groups__permissions", queryset=Permission.objects.select_related("content_type")),
+        )
         .order_by("id")
     )
     permission_names = configuration_permission_names()

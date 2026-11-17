@@ -569,11 +569,12 @@ class ExportUserSerializer(UserSerializer):
         names = self.context.get("configuration_permission_names")
         if names is None:
             names = configuration_permission_names()
-        return sorted(
+        permissions = [*obj.user_permissions.all(), *(p for group in obj.groups.all() for p in group.permissions.all())]
+        return sorted({
             name
-            for permission in obj.user_permissions.all()
+            for permission in permissions
             if (name := f"{permission.content_type.app_label}.{permission.codename}") in names
-        )
+        })
 
     def to_representation(self, instance):
         # Skip UserSerializer.to_representation: it expects configuration_permissions as ids.

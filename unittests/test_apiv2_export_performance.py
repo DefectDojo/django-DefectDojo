@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pghistory
 from auditlog.models import LogEntry
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import connection
@@ -279,6 +280,17 @@ class TestProductExportQueryCount(DojoAPITestCase):
         self.create_product("perf", prod_type=self.product.prod_type)
         after = self.measure(url)
         self.assertEqual(before, after, f"The manifest issues {before} queries before the added data and {after} after.")
+
+    def test_manifest_query_count_is_constant_with_group_permissions(self):
+        url = reverse("export-manifest")
+        group = Group.objects.create(name="perf configuration group")
+        group.permissions.set(Permission.objects.filter(codename__in=["add_user", "view_user"]))
+        Dojo_User.objects.get(username="user1").groups.add(group)
+        before = self.measure(url)
+        for i in range(4):
+            Dojo_User.objects.create(username=f"perf-group-{i}").groups.add(group)
+        after = self.measure(url)
+        self.assertEqual(before, after, f"The manifest issues {before} queries before the added group members and {after} after.")
 
     def test_manifest_queries_do_not_grow_with_questionnaires_or_benchmarks(self):
         url = reverse("export-manifest")

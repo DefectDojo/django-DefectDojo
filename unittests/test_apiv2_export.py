@@ -12,7 +12,7 @@ import pghistory
 from auditlog.models import LogEntry
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db import connection
@@ -1662,6 +1662,15 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
         expected = sorted(helper & stored)
         self.assertEqual(expected, manifest["reference"]["configuration_permissions"])
         self.assertIn("auth.add_user", expected)
+
+    def test_user_configuration_permissions_include_group_permissions(self):
+        user = Dojo_User.objects.get(username="user1")
+        group = Group.objects.create(name="export configuration group")
+        group.permissions.set(Permission.objects.filter(codename__in=["add_user", "view_user", "add_engagement"]))
+        user.groups.add(group)
+        user.user_permissions.set(Permission.objects.filter(codename="view_user"))
+        entry = next(row for row in self.manifest()["reference"]["users"] if row["username"] == "user1")
+        self.assertEqual(["auth.add_user", "auth.view_user"], entry["configuration_permissions"])
 
     def test_configuration_permissions_ignore_the_same_codename_in_another_app(self):
         user = Dojo_User.objects.get(username="user1")
