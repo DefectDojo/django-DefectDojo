@@ -26,10 +26,32 @@ The admin who creates the account is responsible for delivering the initial cred
    * A note that they should change the password and enable MFA (if your instance uses MFA) on first login.
 
 4. **The new user logs in and rotates the credential.** They can either:
-   * Log in with the temporary password and then change it from their profile menu, or
+   * Log in with the temporary password and then [change it](#changing-your-own-password) from the account menu or their User Profile, or
    * Use the **I forgot my password** link on the login page to set a password directly without using the temporary one. The temporary password is still required for the initial account record to exist, but the user does not need to remember it if they use the password-reset flow.
 
 5. **The new user configures MFA** from their profile menu. We strongly recommend requiring MFA for all users on instances that aren't behind SSO.
+
+## Changing your own password
+
+Any user who signs in with a DefectDojo password can change it without leaving the Pro UI. Either of these opens the **Change Password** dialog:
+
+* Open the account menu (your username at the bottom of the sidebar) and choose **Change Password**.
+* Open **User Profile** and select **Change Password** on the profile card.
+
+Enter your **Current Password**, then the **New Password** and **Confirm New Password**. The change is accepted only when:
+
+* the current password is right. If it is not, the dialog says "Current password is incorrect." and nothing changes;
+* the new password differs from the current one, and both new entries match;
+* the new password meets the instance's password policy (minimum and maximum length, required character types and the common-password check, set under **System Settings**). A policy message appears under **New Password**.
+
+You stay signed in after the change.
+
+A few safeguards apply:
+
+* **Too many wrong current passwords.** Incorrect current passwords are counted per account against the instance's rate limit (`DD_RATE_LIMITER_RATE`, 5 per minute by default). Once the limit is reached, every attempt is refused with "Too many incorrect current passwords. Try again later." for a while, even with the right password. A new password that only fails the policy does not count against the limit.
+* **Multi-factor authentication.** If your account uses MFA, the change is accepted only once the current session has passed the MFA check.
+* **Accounts without a password.** **Change Password** is not shown to accounts that sign in through single sign-on or are provisioned through SCIM, because they have no DefectDojo password; change those passwords with your identity provider. An attempt through the API is refused with "This account has no password to change."
+* **Forced resets.** When an administrator [forces a password reset](../pro__resetting_user_credentials/#force-password-reset), you are taken to the full-page **Change Password** form at your next request instead, and cannot continue until you set a new password.
 
 ## SSO Users
 
