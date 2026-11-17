@@ -39,7 +39,7 @@ class TestDupeDeleteSelectionExclude(DojoTestCase):
 
     def setUp(self):
         # Start from empty registries: whatever a plugin installed in this process registered is not under test.
-        for registry in ("_dupe_delete_excludes", "_dupe_delete_limits"):
+        for registry in ("_dupe_delete_excludes", "_dupe_delete_limits", "_dupe_delete_done"):
             patcher = patch.object(dojo_tasks, registry, [])
             patcher.start()
             self.addCleanup(patcher.stop)
@@ -162,6 +162,35 @@ class TestDupeDeleteSelectionExclude(DojoTestCase):
 
         self.assertEqual(calls, [])
 
+    def test_a_done_callback_gets_exactly_the_deleted_ids(self):
+        calls = []
+        dojo_tasks.register_dupe_delete_done(lambda ids: calls.append(sorted(ids)))
+        dojo_tasks.register_dupe_delete_done(calls.append)
+        # The second test's duplicates are under import: selected, but left for a later run.
+        busy = Finding.objects.get(id=self.held_excess[1]).test_id
+        with patch.object(dojo_tasks, "tests_under_import_now", lambda tests: {busy} & set(tests)):
+            _async_dupe_delete_impl()
+
+        self.assertEqual(calls[0], [], f"only deleted ids are reported, got {calls}")
+        self.assertEqual(len(calls), 2, "every registered callback is called")
+
+    def test_a_done_callback_is_not_called_when_nothing_is_selected(self):
+        calls = []
+        dojo_tasks.register_dupe_delete_done(calls.append)
+        Product.objects.update(dupe_delete_held_at=timezone.now())
+
+        _async_dupe_delete_impl()
+
+        self.assertEqual(calls, [])
+
+    def test_a_done_callback_gets_the_deleted_ids(self):
+        calls = []
+        dojo_tasks.register_dupe_delete_done(lambda ids: calls.append(sorted(ids)))
+
+        _async_dupe_delete_impl()
+
+        self.assertEqual(calls, [self.held_excess[:2]])
+
     def test_a_held_asset_is_left_out_with_nothing_registered(self):
         Product.objects.filter(id=self.held_product.id).update(dupe_delete_held_at=timezone.now())
 
@@ -242,6 +271,22 @@ class TestClearDupeDeleteHoldApi(DojoTestCase):
         self.assertIsNotNone(read.data["dupe_delete_held_at"], "the hold should be visible on the product")
         self.assertEqual(response.status_code, 200, response.content[:500])
         self.assertIsNotNone(self._held_at(), "PATCH must not lift the hold; only the clear action may")
+
+    def test_held_assets_can_be_listed_on_both_routes(self):
+        unheld = Product.objects.create(name="Unheld Asset API", description="unheld", prod_type=self.product.prod_type)
+        client = self._client(self.superuser)
+
+        for route in ("product-list", "asset-list"):
+            held = client.get(reverse(route), {"dupe_delete_held": "true"})
+            not_held = client.get(reverse(route), {"dupe_delete_held": "false"})
+
+            self.assertEqual(held.status_code, 200, held.content[:300])
+            held_ids = {row["id"] for row in held.data["results"]}
+            not_held_ids = {row["id"] for row in not_held.data["results"]}
+            self.assertIn(self.product.pk, held_ids, route)
+            self.assertNotIn(unheld.pk, held_ids, route)
+            self.assertIn(unheld.pk, not_held_ids, route)
+            self.assertNotIn(self.product.pk, not_held_ids, route)
 
     def test_the_asset_endpoint_clears_the_hold_too(self):
         url = reverse("asset-clear-dupe-delete-hold", args=[self.product.pk])

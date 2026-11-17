@@ -67,6 +67,18 @@ def register_dupe_delete_limit(func):
         _dupe_delete_limits.append(func)
 
 
+# A plugin that budgets deletions needs to know what was actually deleted, not only what it let
+# through: the deletion step still leaves out duplicates an import is writing or that were saved
+# since the selection. Each registered callable gets the ids deleted this run (possibly none)
+# whenever the run selected anything. Registering the same callable again is a no-op.
+_dupe_delete_done = []
+
+
+def register_dupe_delete_done(func):
+    if func not in _dupe_delete_done:
+        _dupe_delete_done.append(func)
+
+
 def _excluded_duplicates():
     """The duplicates to leave out of this run's selection, as a Q on Finding (empty when none)."""
     excluded = Q()
@@ -234,6 +246,9 @@ def _async_dupe_delete_impl():
     # order_desc=True deletes higher ids before lower ids, consistent with how
     # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
     deleted_ids = _delete_excess_duplicates(ids_to_delete)
+    if product_by_finding:
+        for done in _dupe_delete_done:
+            done(list(deleted_ids))
 
     logger.info("total number of excess duplicates deleted: %s", len(deleted_ids))
 

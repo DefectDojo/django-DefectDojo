@@ -198,6 +198,8 @@ A hold stays in place until a superuser clears it. It does not lift after a time
 
 Review the Asset's duplicates before you resume. Once the hold is cleared, the duplicates that were held are deleted by the next runs.
 
+Turning **Delete Deduplicate Findings** on, or lowering **Maximum Duplicates**, can hold every Asset whose backlog of excess duplicates is larger than its recent imports: that backlog is deleted all at once, which is what a hold is there to catch. To find the held Assets, list them through the API with `GET /api/v2/assets/?dupe_delete_held=true` (or `GET /api/v2/products/?dupe_delete_held=true`), then resume each one once you have checked it.
+
 ### Applying this setting
 
 Applying **Delete Deduplicate Findings** will begin a deletion process immediately. This setting can be applied on the **System Settings** page. See Enabling Deduplication for more information.
