@@ -16,6 +16,7 @@ has finished.
 import threading
 import uuid
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.db import transaction
 from django.test import SimpleTestCase
@@ -128,3 +129,50 @@ class ScheduledExpiryAgainstConcurrentAddTest(SimpleTestCase):
                     f"persisted active={finding.active} risk_accepted={finding.risk_accepted}"
                 ),
             )
+
+    def test_an_expiry_that_waited_for_another_does_not_expire_the_acceptance_again(self):
+        """
+        A manual expire and the scheduled run (or two manual expires) of one acceptance queue on its lock.
+
+        The one that waited reloads the acceptance, finds it expired, and leaves it as the first left it: the date,
+        the note, the comments and the notification are not repeated.
+        """
+        first_done = threading.Event()
+        second_pid = []
+
+        def first():
+            with transaction.atomic():
+                ra_helper.expire_now(Risk_Acceptance.objects.get(pk=self.risk_acceptance.pk), user=self.user)
+                first_done.set()
+                _wait_for(lambda: bool(second_pid), "the second expiry to start")
+                _wait_for(lambda: second.done or _is_waiting_on_a_lock(second_pid[0]), "the second expiry to block or finish")
+            return Risk_Acceptance.objects.get(pk=self.risk_acceptance.pk).expiration_date_handled
+
+        def expire_again():
+            second_pid.append(_backend_pid())
+            try:
+                with patch.object(ra_helper, "create_notification") as notify:
+                    ra_helper.expire_now(Risk_Acceptance.objects.get(pk=self.risk_acceptance.pk), user=self.user)
+                return notify.call_count
+            finally:
+                second.done = True
+
+        expiry = _ConcurrentThread(first)
+        second = _ConcurrentThread(expire_again)
+        second.done = False
+        expiry.start()
+        if not first_done.wait(WAIT_TIMEOUT_SECONDS):
+            expiry.join_or_fail(self)
+            self.fail("the first expiry never wrote")
+        second.start()
+        expiry.join_or_fail(self)
+        second.join_or_fail(self)
+
+        risk_acceptance = Risk_Acceptance.objects.get(pk=self.risk_acceptance.pk)
+        self.assertEqual(
+            expiry.result, risk_acceptance.expiration_date_handled,
+            msg=f"the expiry stamp was rewritten: first {expiry.result}, persisted {risk_acceptance.expiration_date_handled}",
+        )
+        notes = list(risk_acceptance.notes.values_list("entry", flat=True))
+        self.assertEqual(1, len(notes), msg=f"one expired note, persisted {notes}")
+        self.assertEqual(0, second.result, msg=f"the second expiry sent {second.result} notification(s)")

@@ -113,6 +113,8 @@ def expire_now(risk_acceptance, user=None, reason=None, run=None):
     # One transaction, so the acceptance stays locked from the read of its members until it is stamped expired.
     with transaction.atomic():
         reactivated_findings = _expire_now(risk_acceptance, user=user, reason=reason, run=run)
+    if reactivated_findings is None:
+        return
 
     # the expiry above is the job here, the notification below is best effort
     engagement = engagement_to_notify_about(risk_acceptance)
@@ -140,6 +142,11 @@ def _expire_now(risk_acceptance, user=None, reason=None, run=None):
     # and then finds the acceptance expired. Read without the lock (or from the members the caller prefetched),
     # a finding added at that moment stays risk accepted inside an expired acceptance, and nothing visits it again.
     risk_acceptance.refresh_from_db(from_queryset=Risk_Acceptance.objects.select_for_update())
+    if risk_acceptance.expiration_date_handled is not None:
+        # Expired while this waited for the lock (a manual expire and the scheduled run, or two manual expires):
+        # it is not expired a second time, so its date, note, comments and notification are not repeated.
+        logger.info("Risk acceptance %i:%s was expired while this expiry waited, nothing to do", risk_acceptance.id, risk_acceptance)
+        return None
     prefetch_related_objects([risk_acceptance], *EXPIRATION_PREFETCH)
     logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
@@ -224,8 +231,11 @@ def findings_closed_since_expiry(risk_acceptance):
 
 
 def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
-    # One transaction, so the members' lock below holds until the reinstate is written.
+    # One transaction, so the locks below hold until the reinstate is written. The acceptance is locked before its
+    # members, the order expire_now takes them in, so a reinstate and an expiry of the same acceptance queue
+    # instead of deadlocking.
     with transaction.atomic():
+        list(Risk_Acceptance.objects.select_for_update().filter(pk=risk_acceptance.pk).values_list("pk", flat=True))
         _reinstate(risk_acceptance, old_expiration_date, user=user, reason=reason)
 
 
