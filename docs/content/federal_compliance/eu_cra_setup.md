@@ -143,28 +143,34 @@ You assign it to products in Step 8.
 
 ### Step 5 — Put CRA on a dashboard
 
+From DefectDojo Pro 3.5.300, DefectDojo ships an **EU CRA** layout with both CRA widgets already
+placed and configured. It is offered once **Regulatory Profile** is on (Step 1). On an earlier
+release, build the layout by hand as described below the steps.
+
 In the left menu, go to **Overview > Dashboards**.
 
-1. Select **New Layout** (the **+** beside the layout name), type a **Layout Name** such as
-   *EU CRA*, and select **Submit**. A separate layout keeps the CRA widgets off your default
-   dashboard.
-2. The new layout is empty. Select the **Add Widget** button in the middle of the page. On the
-   **By Type** tab, select **CRA Article 14 Deadlines**. Adding a widget turns on edit mode.
-3. Select **Add Widget** again, now the orange **+** at the right of the toolbar, and select
-   **Regulatory Scope**.
-4. To show only the CRA on **Regulatory Scope**, select the widget's gear (**Edit Widget**), type
-   `CRA` in **Regulations**, and save. The gear shows only in edit mode, which adding a widget turns
-   on; otherwise select **Edit Layout** (the grid icon at the right of the toolbar) first.
-5. Select **Done Editing** (the check mark) to leave edit mode.
+1. Select **Manage Layouts** (the gear on the toolbar). Under **Shared Templates**, find **EU CRA**
+   in the **Compliance** group and select **Use Layout**.
+2. Type a **Layout Name** for your copy, such as *EU CRA*, and select **Submit**. Your copy opens,
+   and is separate from your default dashboard.
+
+The layout has two rows: **Regulatory Scope** set to the CRA only, with its support-period column
+on, and **CRA Article 14 Deadlines** below it. Your copy is yours to change: add, move or remove
+widgets as on any layout. To build the same layout by hand instead, add the **Regulatory Scope**
+and **CRA Article 14 Deadlines** widgets to a new layout, and type `CRA` in **Regulations** on
+**Regulatory Scope** (**Edit Widget**).
 
 ![The Regulatory Scope and CRA Article 14 Deadlines widgets on an EU CRA layout](images/40-cra-dashboard-widgets.png)
 
 **Regulatory Scope** lists every regulation on your Assets, one row each: the Assets in scope,
-their open findings by severity, findings past their deadline, and Assets whose support period has
-ended or ends within 90 days. In 3.4.201 and 3.4.202 the per-severity columns undercount (they can
-read 1 where there are several findings); rely on the **Assets**, **Past SLA** and **Support**
-columns, and on each Asset's own finding counts. It counts an Asset under the CRA from the Asset's **Regulations** (Step 7), not
-from its Regulatory card.
+their open findings by severity, findings past their deadline, open findings in the CISA KEV catalog
+(**CISA KEV**: findings marked **Known Exploited**, Step 3), and Assets whose support period has
+ended or ends within 90 days. A **Known Exploited** finding on a CRA Asset is what raises the
+Article 14 early-warning prompt (Part 4). A scanner's own report that a vulnerability is exploited
+is not counted there. In 3.4.201 and 3.4.202
+the per-severity columns undercount (they can read 1 where there are several findings); rely on the
+**Assets**, **Past SLA** and **Support** columns, and on each Asset's own finding counts. It counts
+an Asset under the CRA from the Asset's **Regulations** (Step 7), not from its Regulatory card.
 
 **CRA Article 14 Deadlines** counts the open stages of your Article 14 reports as **Breached**,
 **Overdue**, **Due Soon** and **On Track**, and lists the most urgent.
@@ -514,6 +520,7 @@ and keep the downloads with your technical documentation. See
 | No **Regulatory** card, or no **CRA Article 14 Reports** in the left menu | **Regulatory Profile** is off | Step 1 |
 | No **EU Evidence** tab | **EU Evidence Packs** or **Compliance** is off | Step 1 |
 | No **Dashboards** layouts or **Add Widget** button, or no **CRA Article 14 Deadlines** in **Add Widget** | **Dashboards 2.0** is off, or (for the deadlines widget) **Regulatory Profile** is off | Step 1 |
+| No **EU CRA** under **Shared Templates** | **Regulatory Profile** is off | Step 1 |
 | No **Version** field in **Import SBOM** | Per-release SBOMs are not enabled | Step 2 |
 | The SLA form will not save | The day counts are placeholders, not values | Type a number in each box (Step 4) |
 | CRA is missing from the **Regulations** list | The list shows only the first few until you search | Type `CRA` in its search box (Step 7) |
