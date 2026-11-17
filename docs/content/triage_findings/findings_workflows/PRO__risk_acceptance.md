@@ -461,9 +461,11 @@ status band, **Exception Requested**, instead of **Active**:
 - The Finding is not hidden and not suppressed. Its own status is still Active.
 - Charts and status splits show **Exception Requested** as its own slice, so the total still adds up
   and you can see how much work is sitting in a queue waiting on a decision.
-- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables,
-  alongside their real status — the Finding is still Active, and the badge says somebody is
-  waiting.
+- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables, on
+  Finding cards and on the Finding's own page, alongside their real status — the Finding is still
+  Active, and the badge says somebody is waiting. Select the badge to open the Risk Acceptance it is
+  waiting on. If that Risk Acceptance is not visible to you (Risk Acceptance visibility is its own
+  permission), the Finding opens instead and a message says so.
 - Finding tables offer an **Exception Requested** column, hidden by default: turn it on from the
   column picker and filter it to Yes to build that queue directly in the table. The same filter is
   available on the API as `has_pending_exception`.
