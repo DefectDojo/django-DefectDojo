@@ -66,8 +66,16 @@ def drop_foreign_key(connection, table, constraint):
                     f"ALTER TABLE {table} DROP CONSTRAINT IF EXISTS {connection.ops.quote_name(constraint)}",
                 )
         except OperationalError as error:
-            if getattr(error.__cause__, "sqlstate", None) != LOCK_NOT_AVAILABLE or attempt == ATTEMPTS:
+            if getattr(error.__cause__, "sqlstate", None) != LOCK_NOT_AVAILABLE:
                 raise
+            if attempt == ATTEMPTS:
+                msg = (
+                    f"Could not drop the foreign key {constraint} on {table}: another transaction kept a lock on a "
+                    f"table it references through {ATTEMPTS} attempts of {LOCK_TIMEOUT} each. Run migrate again "
+                    "when fewer imports, deletes or reports are running. A re-run is safe: it drops only the "
+                    "foreign keys still left and picks up where this run stopped."
+                )
+                raise OperationalError(msg) from error
             logger.warning(
                 "Could not lock the tables to drop %s on %s (attempt %d of %d), retrying",
                 constraint, table, attempt, ATTEMPTS,

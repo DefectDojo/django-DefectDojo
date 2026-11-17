@@ -283,9 +283,9 @@ class TestMigration0310(DojoTestCase):
         self.assertEqual(clock.sleep.call_count, 1, "the first attempt should time out on the lock, the second succeed")
         self.assertEqual(_legacy_foreign_keys(), [])
 
-    def test_gives_up_after_the_last_attempt(self):
+    def test_gives_up_after_the_last_attempt_and_a_rerun_finishes(self):
         self._add_legacy_foreign_key()
-        self._hold_a_lock_on_dojo_product()
+        release = self._hold_a_lock_on_dojo_product()
         with (
             mock.patch.object(self.migration, "LOCK_TIMEOUT", "50ms"),
             mock.patch.object(self.migration, "ATTEMPTS", 2),
@@ -293,6 +293,15 @@ class TestMigration0310(DojoTestCase):
             self.assertRaises(OperationalError) as raised,
         ):
             self._run()
-        self.assertEqual(raised.exception.__cause__.sqlstate, "55P03")
+        message = str(raised.exception)
+        # The operator is told what could not be dropped, why, and that running migrate again is safe.
+        self.assertIn("legacy_fk_probe on dojo_cred_mapping", message)
+        self.assertIn("2 attempts of 50ms", message)
+        self.assertIn("Run migrate again", message)
+        self.assertEqual(raised.exception.__cause__.__cause__.sqlstate, "55P03", "the lock timeout is the cause")
         self.assertEqual(clock.sleep.call_count, 1)
         self.assertEqual(len(_legacy_foreign_keys()), 1, "a drop that never got its lock leaves the constraint")
+        # Once the other transaction ends, a re-run drops what is left.
+        release()
+        self._run()
+        self.assertEqual(_legacy_foreign_keys(), [])
