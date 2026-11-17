@@ -35,7 +35,7 @@ class MetricIARecommendationApiView(
         ):
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasPermissionMetrics,)
+        permissions.UserHasPermissionMetricsIA,)
     serializer_class = MetricsIARecommendationSerializers
     pagination_class = LimitOffsetPagination
 
@@ -111,7 +111,7 @@ class MetricIARecommendationApiView(
 class MetricsDevicesWithoutFindingsApiView(GenericAPIView):
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasPermissionMetrics,
+        permissions.UserHasPermissionMetricsPanel,
     )
     serializer_class = MetricsDevicesWithoutFindingsFilterSerializer
     pagination_class = LimitOffsetPagination
