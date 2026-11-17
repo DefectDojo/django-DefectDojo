@@ -12,7 +12,7 @@ audience: pro
 [Threat Intelligence](../threat_intelligence/#how-it-changes-scoring) turns exploit evidence into a
 **floor** on the EPSS scale: a finding's external score is at least the floor its strongest evidence
 earns. The table of floors is called the **rubric**. Rubric v2 is its next version. It keeps every
-floor you know and adds one kind of evidence: **exploitation claims that DefectDojo's analysts have
+floor value and adds one kind of evidence: **exploitation claims that DefectDojo's analysts have
 reviewed and confirmed**.
 
 ## What changes
@@ -48,5 +48,5 @@ as evidence).
 ## Before it is turned on
 
 Moving an instance to rubric v2 can raise the priority of findings, so DefectDojo measures the move
-before making it: for each instance, how many findings would move from which floor to which, and the
-vulnerabilities behind the largest moves. Your live priorities stay on rubric v1 until rubric v2 is released.
+before making it: for each instance, how many findings would move from which floor to which, and,
+for each move, the vulnerabilities behind the most findings. Your live priorities stay on rubric v1 until rubric v2 is released.
