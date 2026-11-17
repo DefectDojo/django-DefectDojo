@@ -399,7 +399,7 @@ Key facts:
 - [Advisories](https://docs.defectdojo.com/psirt/advisories/): Write, review, publish and revise your own security advisories
 - [PSIRT dashboard](https://docs.defectdojo.com/psirt/dashboard/): A shared dashboard template that answers "am I affected?" first
 - [SLA Policies](https://docs.defectdojo.com/psirt/sla-policies/): Tune how long each severity tier gets before a PSIRT clock warns and breaches
-- [PSIRT Settings](https://docs.defectdojo.com/psirt/settings/): Case-worthiness calibration, the "new" item window, and what counts as a material change
+- [PSIRT Settings](https://docs.defectdojo.com/psirt/settings/): Case-worthiness calibration, the "new" item window, what counts as a material change, and the Advisory Site publisher profile
 
 ## Federal Compliance
 
