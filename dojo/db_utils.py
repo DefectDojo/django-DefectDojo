@@ -53,7 +53,9 @@ def is_vanished_row_error(exc):
     Whether exc is Django reporting that a forced UPDATE (or an update_fields save) matched no row.
 
     Model.save_base raises a bare DatabaseError for this; every genuine database failure is a
-    subclass (IntegrityError, OperationalError, ...), so the exact class is the discriminator and
-    the message only a second opinion.
+    subclass (IntegrityError, OperationalError, DataError, ...), so the exact class is the
+    discriminator and the message only a second opinion. Classifying on the exception rather than
+    with a follow-up query matters: a real failure can leave the connection in an aborted
+    transaction, where the query would raise in turn and bury the error that needs reporting.
     """
     return type(exc) is DatabaseError and "did not affect any rows" in str(exc)
