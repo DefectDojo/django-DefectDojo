@@ -86,7 +86,7 @@ With Group Ownership on, a connector or a ticket template can belong to a Group.
 
 * Each connector tile shows its owner. **Share** in the tile's menu shows a connector to other Groups, and **Transfer** moves it to another Group or to the instance.
 * **Ticket Templates** on the Downstream Connectors page lists the templates, with an **Owner** column, and offers **New Ticket Template**, **Share** and **Transfer**.
-* A connector's **Default Ticket Template** offers only the templates you can see. A default someone else chose stays in place when you edit the connector's other fields.
+* A connector's **Default Ticket Template** (offered on connectors that create tickets) lists only the templates you can see. A default someone else chose that you cannot see shows as **Saved Template (Kept Unchanged)** and stays in place when you edit the connector's other fields.
 * Connectors and ticket templates without a Group belong to the instance and keep needing the Integration permissions as a Global Role. Issue Tracker Mappings and Assignments, and a template's test render, stay with holders of the Global Role.
 
 #### Who can see and change an Assignment
