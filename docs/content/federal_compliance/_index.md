@@ -73,3 +73,4 @@ purpose.
 | [Regulatory Profile](regulatory_profile) | Recording an Asset's CRA, DORA and NIS2 facts: critical or important function, CRA product class, support period, and vulnerability report contacts |
 | [Control Coverage](control_coverage) | Which 800-53 controls your scanners test, and open weaknesses per control |
 | [Certification Control Catalogs](certification_catalogs) | Assessing an Asset against ISO/IEC 27001, SOC 2 and NIS2, and the cross-framework Shared Evidence view |
+| [Auditor Access](auditor_access) | Giving an external auditor time-boxed, read-only access to compliance evidence, with a log of everything they open |
