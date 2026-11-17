@@ -8,6 +8,8 @@ audience: pro
 
 This page collects the decisions to make before a self-hosted deployment on a private network: a Kubernetes cluster with no internet egress, images mirrored into your own registry, managed data services, and often FIPS 140-3 cryptography. The examples use Amazon EKS (including AWS GovCloud), RDS and ElastiCache, but the same answers apply on other platforms. Each section links to the page with the full procedure.
 
+Deploying inside a FedRAMP, DoD or other federal boundary? [Deploying in Federal Environments](/get_started/pro/onprem/federal_deployment/) lists what the images guarantee (FIPS 140-3, non-root users, signatures and SBOMs) and how an assessor collects the evidence for each.
+
 ## Which release to deploy
 
 Deploy the most recent release in the [DefectDojo Pro Changelog](/releases/pro/changelog/). DefectDojo releases at least weekly and fixes forward, so the newest release is the one that carries every fix; see [Releases and Support Lifecycle](/get_started/pro/onprem/support_lifecycle/).
