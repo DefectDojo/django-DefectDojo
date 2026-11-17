@@ -331,7 +331,10 @@ def release_finding(finding: Finding) -> None:
 
 
 def delete(eng, risk_acceptance):
-    findings = risk_acceptance.accepted_findings.all()
+    # Read the members from the database, not through the acceptance: a caller can hold it with its members prefetched
+    # (expire_now prefetches them), and a member closed since then would be judged and saved from that stale copy,
+    # reopening it.
+    findings = list(Finding.objects.filter(risk_acceptance=risk_acceptance).order_by("id"))
     for finding in findings:
         release_finding(finding)
         finding.save(dedupe_option=False)
