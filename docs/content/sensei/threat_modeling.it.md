@@ -28,7 +28,7 @@ Non viene installato nulla e non viene collegato alcun repository. Threat modeli
 Scegli **New Threat Model**, seleziona il Prodotto, assegnagli un nome e fornisci il design nel formato che hai a disposizione:
 
 - **Incolla la descrizione** direttamente, oppure
-- **Carica un documento di progettazione** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. Il testo di un PDF viene letto dal suo livello di testo. Un PDF scansionato non ne ha, quindi un PDF da cui non si riesce a leggere alcun testo viene rifiutato quando è l'unico input: incolla invece il testo oppure aggiungi un diagramma dell'architettura.
+- **Carica un documento di progettazione** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. Il testo di un PDF viene letto dal suo livello di testo. Una scansione senza OCR non ne ha, quindi un PDF da cui non si riesce a leggere alcun testo viene rifiutato quando è l'unico input: incolla invece il testo oppure aggiungi un diagramma dell'architettura. Un PDF che richiede una password per essere aperto viene rifiutato allo stesso modo: rimuovi prima la password.
 - **Facoltativamente aggiungi un diagramma architetturale** — PNG, JPEG, WebP o GIF. Il diagramma viene letto insieme al testo, quindi un componente che compare solo nell'immagine viene comunque rilevato.
 
 Puoi combinarli: un breve riepilogo incollato più un diagramma spesso produce un modello migliore rispetto a ciascuno dei due da solo.

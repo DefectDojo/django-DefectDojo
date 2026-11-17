@@ -29,7 +29,7 @@ Rien n'est installé et aucun dépôt n'est connecté. La modélisation des mena
 Choisissez **New Threat Model**, sélectionnez le produit, donnez-lui un nom, et fournissez la conception sous la forme dont vous disposez :
 
 - **Collez la description** directement, ou
-- **Téléversez un document de conception** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. Le texte d'un PDF est lu dans sa couche de texte. Un PDF numérisé n'en a pas : un PDF dont aucun texte ne peut être lu est donc refusé lorsqu'il est la seule entrée. Collez plutôt le texte, ou ajoutez un diagramme d'architecture.
+- **Téléversez un document de conception** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. Le texte d'un PDF est lu dans sa couche de texte. Une numérisation sans OCR n'en a pas : un PDF dont aucun texte ne peut être lu est donc refusé lorsqu'il est la seule entrée. Collez plutôt le texte, ou ajoutez un diagramme d'architecture. Un PDF qui demande un mot de passe à l'ouverture est refusé de la même façon : supprimez d'abord le mot de passe.
 - **Ajoutez éventuellement un diagramme d'architecture** — PNG, JPEG, WebP ou GIF. Le diagramme est lu en complément du texte, de sorte qu'un composant qui n'apparaît que dans l'image est tout de même pris en compte.
 
 Vous pouvez les combiner : un court résumé collé associé à un diagramme produit souvent un meilleur modèle que l'un ou l'autre seul.
