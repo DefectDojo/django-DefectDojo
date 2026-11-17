@@ -461,9 +461,11 @@ status band, **Exception Requested**, instead of **Active**:
 - The Finding is not hidden and not suppressed. Its own status is still Active.
 - Charts and status splits show **Exception Requested** as its own slice, so the total still adds up
   and you can see how much work is sitting in a queue waiting on a decision.
-- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables,
-  alongside their real status — the Finding is still Active, and the badge says somebody is
-  waiting.
+- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables, on
+  Finding cards and on the Finding's own page, alongside their real status — the Finding is still
+  Active, and the badge says somebody is waiting. Select the badge to open the Risk Acceptance it is
+  waiting on. If that Risk Acceptance is not visible to you (Risk Acceptance visibility is its own
+  permission), the Finding opens instead and a message says so.
 - Finding tables offer an **Exception Requested** column, hidden by default: turn it on from the
   column picker and filter it to Yes to build that queue directly in the table. The same filter is
   available on the API as `has_pending_exception`.
@@ -528,13 +530,23 @@ record says the criteria covered it rather than naming a person.
 
 Matchable attributes — all optional, and **all of the ones present must match**:
 
-| Key | Matches on |
-| --- | --- |
-| `vulnerability_ids` | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
-| `cwes` | the Finding's CWE |
-| `severities` | the Finding's severity, case-insensitive |
-| `component_name`, `component_version` | glob patterns — the same component is named differently by different scanners, and versions come in ranges |
-| `title_pattern` | a glob against the title |
+| Key | Value | Matches on |
+| --- | --- | --- |
+| `vulnerability_ids` | a list of strings | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
+| `cwes` | a list of CWE numbers (`79` or `"79"`) | the Finding's CWE |
+| `severities` | a list of strings | the Finding's severity, case-insensitive |
+| `component_name`, `component_version` | a string | glob patterns (the same component is named differently by different scanners, and versions come in ranges) |
+| `title_pattern` | a string | a glob against the title |
+
+A value of another shape is refused with `400` and nothing is saved: a single string where a list is
+expected (`"severities": "High"` rather than `["High"]`), a CWE that is not a number, or a pattern that
+is not a string. CWE numbers sent as strings are stored as numbers, and a CWE number must be between 0
+and 2147483647.
+
+A Risk Acceptance saved before these checks with a value of another shape stays Active and can still be
+read, but new Findings are not matched against it: imports skip it (with a warning in the server log)
+rather than fail. Save its criteria again in the accepted shape to have it apply to new Findings once
+more. Sending the stored criteria back unchanged is refused with the same `400`, naming the value.
 
 `scope` is **required** and is what stops an acceptance reaching Findings its author has no business
 accepting. `type` is `engagement`, `product`, `product_type` or `global`.

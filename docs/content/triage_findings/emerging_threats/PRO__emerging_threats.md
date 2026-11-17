@@ -9,7 +9,7 @@ A new vulnerability usually reaches advisory databases days after it is disclose
 
 ## Enabling Emerging Threats
 
-Emerging Threats is a **beta** feature behind the `emerging_threats` feature flag. A superuser can turn it on from **Settings > Feature Flags**. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Emerging Threats is an **experimental beta** feature behind the `emerging_threats` feature flag, which is off by default. A superuser can turn it on from **Settings > Feature Flags**, where it carries the **Experimental** tag. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
 When the flag is on, an **Emerging Threats** entry (marked **NEW**) appears in the **ACT** section of the sidebar, below **Vulnerability Explorer**.
 
