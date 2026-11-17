@@ -169,3 +169,51 @@ class RiskAcceptanceViewSet(
                     product_type=product_type.name
                 )
             raise ApiError.internal_server_error(detail=str(e))
+
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
+    )
+    @action(detail=True, methods=["get", "post"])
+    def notes(self, request, pk=None):
+        long_risk_acceptance = self.get_object()
+        if request.method == "POST":
+            new_note = serializers.AddNewNoteOptionSerializer(
+                data=request.data,
+            )
+            if new_note.is_valid():
+                entry = new_note.validated_data["entry"]
+                private = new_note.validated_data.get("private", False)
+                note_type = new_note.validated_data.get("note_type", None)
+            else:
+                return Response(
+                    new_note.errors, status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            notes = long_risk_acceptance.notes.filter(note_type=note_type).first()
+            if notes and note_type and note_type.is_single:
+                return Response("Only one instance of this note_type allowed on an engagement.", status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            notes = Notes(
+                entry=entry,
+                author=author,
+                private=private,
+                note_type=note_type,
+            )
+            notes.save()
+            long_risk_acceptance.notes.add(notes)
+
+            serialized_note = serializers.NoteSerializer(
+                {"author": author, "entry": entry, "private": private},
+            )
+            return Response(
+                serialized_note.data, status=status.HTTP_201_CREATED,
+            )
+        notes = long_risk_acceptance.notes.all()
+
+        serialized_notes = serializers.TransferFindingToNotesSerializer(
+            {"engagement_id": long_risk_acceptance, "notes": notes},
+        )
+        return Response(serialized_notes.data, status=status.HTTP_200_OK)

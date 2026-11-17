@@ -30,6 +30,7 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
 from dojo.decorators import dojo_ratelimit_view
+from dojo.azure_devops_helper import create_azure_work_item_task
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -1660,6 +1661,7 @@ def risk_unaccept(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def request_finding_review(request, fid):
+   
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
     form = ReviewFindingForm(finding=finding, user=user)
@@ -1667,6 +1669,8 @@ def request_finding_review(request, fid):
                                                  under_review=False,
                                                  test__engagement=finding.test.engagement,
                                                  active=True).order_by('title')
+
+
     if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
         finding_choices = exclude_test_or_finding_with_tag(
             objs=finding_choices,
@@ -1706,6 +1710,21 @@ def request_finding_review(request, fid):
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
+            finding_ids = [f.id for f in findings]
+            # create_azure_work_item_task.apply_async(args=(
+            #         f"Request Peer Review {fid}",
+            #         form.cleaned_data.get("entry"),
+            #         user.username,
+            #         form.cleaned_data.get("proof_file"),
+            #         finding_ids,
+            # ))
+            create_azure_work_item_task(
+                    f"Request Peer Review {fid}",
+                    form.cleaned_data.get("entry"),
+                    user.username,
+                    form.cleaned_data.get("proof_file"),
+                    finding_ids,
+            )
 
             for finding in findings:
                 finding.notes.add(new_note)
@@ -1742,6 +1761,7 @@ def request_finding_review(request, fid):
                 # the updated data of the finding is pushed as part of the group
                 if push_to_jira and finding_in_group:
                     jira_helper.push_to_jira(finding.finding_group)
+
 
                 create_notification(
                     event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces

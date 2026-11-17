@@ -8,14 +8,14 @@ import logging
 from datetime import date, datetime
 from typing import Optional
 from urllib.parse import urlparse
-
+from dojo.celery import app
 from azure.devops.connection import Connection
 from azure.devops.v7_1.work.models import TeamContext
 from azure.devops.v7_0.work_item_tracking.models import JsonPatchOperation, Wiql
 from django.conf import settings
 from msrest.authentication import BasicAuthentication
 
-from dojo.models import GeneralSettings
+from dojo.models import GeneralSettings, Dojo_User, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -142,17 +142,13 @@ class AzureDevOpsWorkItemHelper:
         "Soporte Ingenieria de SW - DevExp",
     )
     id_parent = GeneralSettings.get_value("AZURE_DEVOPS_ID_PARENT", None)
+    impact_team = GeneralSettings.get_value(
+        "AZURE_DEVOPS_IMPACT_TEAM",
+        "Seguridad de TI - DevSecOps",
+    )
     work_item_type = GeneralSettings.get_value(
         "AZURE_DEVOPS_WORK_ITEM_TYPE",
         "Asesoría o Solicitud",
-    )
-    default_title = GeneralSettings.get_value(
-        "AZURE_DEVOPS_WORK_ITEM_TITLE",
-        "Peer Review Requestes",
-    )
-    default_description = GeneralSettings.get_value(
-        "AZURE_DEVOPS_WORK_ITEM_DESCRIPTION",
-        "Automated support case for closing expired exclusions",
     )
 
     @classmethod
@@ -173,41 +169,56 @@ class AzureDevOpsWorkItemHelper:
             creds=BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN),
         )
 
-    @staticmethod
-    def _normalize_custom_field_name(field_name: str) -> str:
-        name = (field_name or "").strip()
-        if not name:
-            return name
-        if "." in name or "/" in name:
-            return name
-        if name.lower().startswith("custom."):
-            return name
-        if name.lower() == "equipo impactado":
-            return "Custom.EquipoImpactado"
-        return f"Custom.{name}"
-
     @classmethod
-    def _normalize_custom_fields(cls, custom_fields=None):
-        normalized = {}
-        for field_name, field_value in (custom_fields or {}).items():
-            key = cls._normalize_custom_field_name(field_name)
-            normalized[key] = field_value
-        return normalized
+    def _get_allowed_values_for_field(cls, wit_client, field_name, project, work_item_type):
+        field_name = (field_name or "").strip()
+        if not field_name:
+            return []
+
+        try:
+            fields = wit_client.get_work_item_type_fields(project=project, type=work_item_type)
+        except Exception:
+            logger.warning("Unable to fetch field definitions for %s/%s", project, work_item_type)
+            return []
+
+        for field in fields or []:
+            reference_name = getattr(field, "reference_name", None) or getattr(field, "referenceName", None)
+            friendly_name = getattr(field, "name", None)
+            if field_name in {reference_name, friendly_name} or (
+                field_name == "Custom.EquipoImpactado"
+                and (friendly_name or "").lower() == "equipo impactado"
+            ):
+                allowed_values = getattr(field, "allowed_values", None) or []
+                if not allowed_values:
+                    return []
+                values = []
+                for item in allowed_values:
+                    if isinstance(item, str):
+                        values.append(item)
+                    elif isinstance(item, dict):
+                        value = item.get("value") or item.get("name") or item.get("id")
+                        if value is not None:
+                            values.append(str(value))
+                    else:
+                        value = str(item)
+                        if value:
+                            values.append(value)
+                return values
+        return []
 
     @classmethod
     def get_or_create_work_item(
         cls,
-        work_item_type=None,
-        title=None,
-        description=None,
-        assigned_to=None,
-        custom_fields=None,
-        validate_only=False,
+        title,
+        description,
+        user,
+        evidence_and_image,
+        work_item_type,
+
     ):
         target_type = work_item_type or cls.work_item_type
-        item_title = title or cls.default_title
-        item_description = description or cls.default_description
-        custom_fields = cls._normalize_custom_fields(custom_fields)
+        user = Dojo_User.objects.get(username=user)
+        evidence_and_image = evidence_and_image if evidence_and_image else "Not file input"
 
         connection = cls._get_connection()
         wit_client = connection.clients.get_work_item_tracking_client()
@@ -244,7 +255,7 @@ class AzureDevOpsWorkItemHelper:
                 "SELECT [System.Id] "
                 "FROM WorkItems "
                 "WHERE [System.TeamProject] = @project "
-                f"AND [System.Title] = '{item_title.replace("'", "''")}' "
+                f"AND [System.Title] = '{title.replace("'", "''")}' "
                 "AND [System.IterationPath] = @currentIteration"
             )
             query_result = wit_client.query_by_wiql(
@@ -274,20 +285,17 @@ class AzureDevOpsWorkItemHelper:
                     logger.info("Using existing active work item: %s", work_item_id)
                 return str(work_item_id)
 
-            logger.info("Creating new %s for support case: %s", target_type, item_title)
-            if custom_fields:
-                logger.info("Sending custom fields for Azure work item: %s", sorted(custom_fields.keys()))
-            today = datetime.now().strftime("%Y-%m-%d")
+            logger.info("Creating new %s for support case: %s", target_type, title)
             patch_doc = [
                 JsonPatchOperation(
                     op="add",
                     path="/fields/System.Title",
-                    value=item_title,
+                    value=title,
                 ),
                 JsonPatchOperation(
                     op="add",
                     path="/fields/System.Description",
-                    value=item_description,
+                    value=description,
                 ),
                 JsonPatchOperation(
                     op="add",
@@ -296,74 +304,58 @@ class AzureDevOpsWorkItemHelper:
                 ),
                 JsonPatchOperation(
                     op="add",
-                    path="/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
-                    value=(
-                        "The support case must be created or reactivated in the current iteration "
-                        "and linked to the related request when the issue is processed."
-                    ),
+                    path="/fields/Custom.EquipoImpactado",
+                    value=cls.impact_team,
                 ),
                 JsonPatchOperation(
                     op="add",
-                    path="/fields/System.IterationPath",
-                    value=iteration_path,
+                    path="/fields/Custom.Analistquereporta",
+                    value="Asesoría técnica en seguridad",
                 ),
                 JsonPatchOperation(
                     op="add",
-                    path="/fields/Microsoft.VSTS.Scheduling.StoryPoints",
-                    value=0,
+                    path="/fields/Custom.e13a15e9-0c55-4fb1-b218-f76f047d4e11",
+                    value=evidence_and_image,
                 ),
                 JsonPatchOperation(
                     op="add",
-                    path="/fields/Microsoft.VSTS.Scheduling.DueDate",
-                    value=today,
+                    path="/fields/System.CreatedBy",
+                    value=f"{user.username} + <{user.email}>",
                 ),
             ]
-
-            assignee = assigned_to or user_display_name or user_email
-            if assignee:
-                patch_doc.append(
-                    JsonPatchOperation(
-                        op="add",
-                        path="/fields/System.AssignedTo",
-                        value=assignee,
-                    )
-                )
-
-            for field_name, field_value in custom_fields.items():
-                patch_doc.append(
-                    JsonPatchOperation(
-                        op="add",
-                        path=f"/fields/{field_name}",
-                        value=field_value,
-                    )
-                )
-
-            if cls.id_parent:
-                patch_doc.append(
-                    JsonPatchOperation(
-                        op="add",
-                        path="/relations/-",
-                        value={
-                            "rel": "System.LinkTypes.Hierarchy-Reverse",
-                            "url": (
-                                f"https://dev.azure.com/{cls.organization_url.rstrip('/').split('/')[-1]}"
-                                f"/{cls.project.replace(' ', '%20')}/_apis/wit/workItems/{cls.id_parent}"
-                            ),
-                            "attributes": {"isLocked": False},
-                        },
-                    )
-                )
-
             new_wi = wit_client.create_work_item(
                 document=patch_doc,
                 project=cls.project,
                 type=target_type,
-                validate_only=validate_only,
             )
             logger.info("Created new %s work item: %s", target_type, new_wi.id)
             return str(new_wi.id)
 
         except Exception as exc:
-            logger.exception("Error getting or creating Azure DevOps support case")
-            print(f"Error getting or creating work item: {exc}")
+            logger.error("Error getting or creating Azure DevOps support case %s", exc)
             return None
+
+
+@app.task
+def create_azure_work_item_task(
+    title,
+    description,
+    user,
+    evidence_and_image,
+    work_item_type,
+    finding_ids
+):
+    try:
+        work_item_id = AzureDevOpsWorkItemHelper.get_or_create_work_item(
+            title,
+            description,
+            user,
+            evidence_and_image,
+            work_item_type,
+        )
+        if finding_ids and work_item_id:
+            findings = Finding.objects.filter(id__in=finding_ids)
+            for finding in finding_ids:
+                finding.notes.add(f"A work item was automatically created: {work_item_id}")
+    except Exception as exc:
+        logger.error("Error creating Azure DevOps work item: %s", exc)

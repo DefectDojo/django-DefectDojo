@@ -2509,7 +2509,6 @@ class ReviewFindingForm(forms.Form):
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True
             )
-        AzureDevOpsWorkItemHelper().get_or_create_work_item()
         self.fields['findings_review'].queryset = get_authorized_findings(Permissions.Finding_View)
         # Remove the current user
         if user is not None:
