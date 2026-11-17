@@ -1873,6 +1873,55 @@ class TestDupeDeleteRacesSingleFindingDelete(_CommittedFindingsMixin, SimpleTest
         remaining = list(Finding.objects.filter(id__in=[duplicate.id, unrelated.id]).values_list("id", flat=True))
         self.assertEqual(remaining, [], msg=f"both findings must be deleted, still present: {remaining}")
 
+    # Regression: with DUPLICATE_CLUSTER_CASCADE_DELETE, deleting an original removed its cluster
+    # with a plain queryset delete, which clears the duplicates' child rows before it reaches
+    # their dojo_finding rows. Against the excess-duplicate delete, which locks those finding rows
+    # first and clears the children after, the two deadlocked (Postgres 40P01).
+    def _original_with_an_excess_and_a_fresh_duplicate(self):
+        """
+        An old original with two duplicates, each finding with a Test_Import_Finding_Action row.
+
+        The old duplicate is what the excess-duplicate delete removes. The fresh one is still
+        inside its grace period, so only the cascade of the original's delete can remove it.
+        """
+        original, old_duplicate, fresh_duplicate = self._create_findings(
+            "Cascade original", "Cascade old duplicate", "Cascade fresh duplicate",
+        )
+        past = timezone.now() - timedelta(minutes=120)
+        Finding.objects.filter(id__in=[old_duplicate.id, fresh_duplicate.id]).update(
+            duplicate=True, active=False, duplicate_finding=original,
+        )
+        Finding.objects.filter(id__in=[original.id, old_duplicate.id]).update(created=past, updated=past)
+        test_import = Test_Import.objects.create(test=self.test, type=Test_Import.IMPORT_TYPE)
+        Test_Import_Finding_Action.objects.bulk_create([
+            Test_Import_Finding_Action(test_import=test_import, finding_id=finding.id, action="N")
+            for finding in (original, old_duplicate, fresh_duplicate)
+        ])
+        return original, old_duplicate, fresh_duplicate
+
+    def _assert_deleting_the_original_of_a_cluster_being_trimmed_does_not_deadlock(self, **kwargs):
+        cluster = self._original_with_an_excess_and_a_fresh_duplicate()
+        cluster_ids = [finding.id for finding in cluster]
+
+        dupe_delete_error, single_delete_error = self._single_delete_during_dupe_delete(cluster[0].id, **kwargs)
+
+        self.assertIsNone(dupe_delete_error, msg=f"the excess-duplicate delete failed: {dupe_delete_error!r}")
+        self.assertIsNone(single_delete_error, msg=f"the single-finding delete failed: {single_delete_error!r}")
+        remaining = list(Finding.objects.filter(id__in=cluster_ids).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"the original and both duplicates must be deleted, still present: {remaining}")
+        orphans = list(Test_Import_Finding_Action.objects.filter(finding_id__in=cluster_ids).values_list("finding_id", flat=True))
+        self.assertEqual(orphans, [], msg=f"no import-history row may survive for the deleted cluster: {orphans}")
+
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_cascade_deleting_the_original_while_the_dupe_delete_removes_a_duplicate_does_not_deadlock(self):
+        self._assert_deleting_the_original_of_a_cluster_being_trimmed_does_not_deadlock()
+
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_dupe_delete_is_not_the_deadlock_victim_of_a_cascade_delete(self):
+        self._assert_deleting_the_original_of_a_cluster_being_trimmed_does_not_deadlock(
+            resume_after_the_deadlock_check=True,
+        )
+
 
 # Regression: a background engagement delete failed, on the first run and on every retry, with
 # "update or delete on table dojo_finding violates foreign key constraint
