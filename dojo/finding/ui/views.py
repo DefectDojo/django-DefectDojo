@@ -3105,8 +3105,12 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
         id=duplicate_id,
     )
 
-    if original.test.engagement != duplicate.test.engagement:
-        if (original.test.engagement.deduplication_on_engagement
+    # The mark points the duplicate at the original's cluster root, so the engagement check compares against
+    # that root, the finding the duplicate ends up under, not the original it was posted with.
+    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+
+    if root.test.engagement != duplicate.test.engagement:
+        if (root.test.engagement.deduplication_on_engagement
                 or duplicate.test.engagement.deduplication_on_engagement):
             messages.add_message(
                 request,
@@ -3118,10 +3122,8 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
                 request, reverse("view_finding", args=(duplicate.id,)),
             )
 
-    # The mark points the duplicate at the original's cluster root, so the duplicate must be neither the
-    # original nor that root, and the root must not itself be a duplicate (an orphan whose original is
-    # gone heads a cluster with no active finding).
-    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+    # The duplicate must be neither the original nor its root, and the root must not itself be a duplicate
+    # (an orphan whose original is gone heads a cluster with no active finding).
     refusal = None
     if duplicate.id == original.id:
         refusal = _("A finding cannot be marked as a duplicate of itself.")
