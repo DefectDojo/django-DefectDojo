@@ -3,10 +3,10 @@ Regression: dojo_alerts.id is a 32-bit integer, so alert creation stops once its
 
 dojo_alerts is pruned to MAX_ALERTS_PER_USER per user every few hours, so the live table stays small while
 its id sequence keeps climbing with every alert ever created. On a busy instance the sequence reaches the
-integer maximum and every new alert fails. Alerts.id is a BigAutoField from migration 0311 on.
+integer maximum and every new alert fails. Alerts.id is a BigAutoField from migration 0312 on.
 
 These tests check the column and its sequence in the migrated test database (a fresh install, which builds
-an identity column), create an alert with the sequence already past the integer maximum, and run 0311 itself
+an identity column), create an alert with the sequence already past the integer maximum, and run 0312 itself
 against the two shapes an upgraded install can have: an integer identity column, and the integer serial column
 (a sequence owned by the column, used as its default) that installs created before Django 4.1 still carry.
 
@@ -23,8 +23,8 @@ from django.test import TestCase
 
 from dojo.models import Alerts
 
-MIGRATION = ("dojo", "0311_alerts_bigint_id")
-PREVIOUS = ("dojo", "0310_drop_legacy_table_foreign_keys")
+MIGRATION = ("dojo", "0312_alerts_bigint_id")
+PREVIOUS = ("dojo", "0311_product_dupe_delete_held_at")
 INT4_MAX = 2**31 - 1
 INT8_MAX = 2**63 - 1
 
@@ -86,9 +86,9 @@ class TestAlertsIdIsBigint(AlertsSequenceMixin, TestCase):
         self._assert_alert_past_int4()
 
 
-class TestMigration0311Upgrade(AlertsSequenceMixin, TestCase):
+class TestMigration0312Upgrade(AlertsSequenceMixin, TestCase):
 
-    """Run 0311 against an integer dojo_alerts.id, as an upgraded install has it."""
+    """Run 0312 against an integer dojo_alerts.id, as an upgraded install has it."""
 
     @classmethod
     def setUpClass(cls):

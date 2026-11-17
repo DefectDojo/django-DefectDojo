@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("dojo", "0310_drop_legacy_table_foreign_keys"),
+        ("dojo", "0311_product_dupe_delete_held_at"),
     ]
 
     operations = [
