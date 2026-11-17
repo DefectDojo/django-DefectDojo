@@ -55,6 +55,7 @@ Each analysis can raise these alerts:
 | Git dependency | Warn | A dependency is fetched from a Git repository instead of the registry. |
 | HTTP dependency | Warn | A dependency is fetched from a plain URL. |
 | Recently published | Warn | The version is younger than the policy's cool-down (off by default). |
+| Analysis keeps failing | Warn | The engine could not read the version two times in a row, so nothing is known about its code. |
 | Yanked | Warn | The version was withdrawn by its publisher. |
 | npm shrinkwrap | Monitor | The package pins its own dependency tree. |
 | Network access | Monitor | The code opens network connections. |
@@ -69,7 +70,7 @@ Each analysis can raise these alerts:
 | Deprecated | Monitor | The publisher marked the version deprecated. |
 | Filesystem access | Ignore | The code reads or writes files. |
 
-A version the engine could not read (for example, a registry error) is marked failed and tried again after seven days. Each version is read as npm or pip would install it: for PyPI, every wheel and the sdist, up to eight files per version. Ecosystems other than npm and PyPI are not analyzed.
+A version the engine could not read (for example, a registry error) is marked failed and tried again after seven days. If that second read fails too, the version raises an Analysis keeps failing alert, because a package can be built so that installers accept it and analysis cannot read it. The alert stays until a read succeeds. Each version is read as npm or pip would install it: for PyPI, every wheel and the sdist, up to eight files per version. Ecosystems other than npm and PyPI are not analyzed.
 
 Analysis runs in the background: every ten minutes, a few jobs at a time and within a daily limit, so it never crowds out your other Sensei scans. A first pass over a large inventory spreads over several days. Versions you check through the evaluate API are also queued as they are met (see [Using the API](#using-the-api)).
 
