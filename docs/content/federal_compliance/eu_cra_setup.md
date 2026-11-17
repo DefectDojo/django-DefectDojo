@@ -490,6 +490,27 @@ A pack is a frozen snapshot that later changes never alter. Generate one at the 
 and keep the downloads with your technical documentation. See
 [Generate an evidence pack](../eu_evidence_packs/#generate-an-evidence-pack).
 
+### Step 15 — Generate the CRA reports
+
+DefectDojo ships two Report Builder templates for the CRA, so you do not have to build them. They
+are listed when **Regulatory Profile** is on (Step 1). In the left menu, go to **Reporting >
+Templates**; both are marked **Built-in**.
+
+| Template | Generate it | What it contains |
+| --- | --- | --- |
+| **EU CRA Readiness Summary** | For one Asset: **Generate Report** asks which | The **Regulatory** card's facts (Step 6), the Asset's open findings by severity, its open findings marked **Known Exploited**, its open Critical and High findings, and the stages of its Article 14 reports (Step 12) |
+| **EU CRA Article 14 Reporting Log** | For the instance | Every Article 14 report stage you can see: what is still due, nearest deadline first, then each stage with its deadline, when it was submitted, by whom, and the reporting platform's reference |
+
+Open a template's menu and choose **Generate Report**, pick **PDF**, and download it from
+**Reporting > Generated** when it is ready. To change a template, choose **Duplicate Template** first:
+the built-in itself cannot be edited, and the copy, with its own copies of the blocks, is yours.
+See [Built-in Templates](/metrics_reports/reports/pro__report_builder/#built-in-templates).
+
+| Expected | Where |
+| --- | --- |
+| **EU CRA Readiness Summary** and **EU CRA Article 14 Reporting Log**, each tagged **Built-in** | **Reporting > Templates** |
+| The IoT Gateway's class, support period end, contact and policy URL on the summary's **CRA Profile** table, and its Log4Shell finding under **Known Exploited Open Findings** | The generated summary for **IoT Gateway** |
+
 ## Check your setup
 
 | Check | Expected |
@@ -501,6 +522,7 @@ and keep the downloads with your technical documentation. See
 | A finding for a CVE in the CISA KEV catalog | Marked **Known Exploited** |
 | **Act > CRA Article 14 Reports** | The page opens with **New CRA Report**; your team knows who decides awareness and who submits |
 | **Settings > Notifications > Personal Notifications** | The people who own Article 14 have a channel set for **Other** events |
+| **Reporting > Templates** | **EU CRA Readiness Summary** and **EU CRA Article 14 Reporting Log**, tagged **Built-in** |
 | A current-period assessment per product, recomputed | VH-1, VH-2, VH-3, VH-5 and VH-6 Satisfied, or a known reason they are not; manual requirements recorded |
 
 ## Moving to a production workflow
@@ -546,8 +568,8 @@ and keep the downloads with your technical documentation. See
 
 So nobody spends time hunting for these:
 
-* **No dashboard widget or report reads assessment states or CRA classes.** They are on the EU
-  Evidence tab and in the evidence pack.
+* **No dashboard widget or report reads assessment states.** They are on the EU Evidence tab and in
+  the evidence pack. The CRA class is on the **EU CRA Readiness Summary** report (Step 15).
 * **SP-2, VH-4 and RP-7 are not computed.** SP-1 reads **Support Period End** from the
   Regulatory card, but the published support policy is still attached by the assessor.
 * **No PDF evidence pack.** The workbook and the OSCAL file are the pack.
