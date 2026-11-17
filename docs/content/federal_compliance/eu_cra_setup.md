@@ -162,9 +162,11 @@ and **CRA Article 14 Deadlines** widgets to a new layout, and type `CRA` in **Re
 ![The Regulatory Scope and CRA Article 14 Deadlines widgets on an EU CRA layout](images/40-cra-dashboard-widgets.png)
 
 **Regulatory Scope** lists every regulation on your Assets, one row each: the Assets in scope,
-their open findings by severity, findings past their deadline, open findings known to be exploited
-(**Exploited**), and Assets whose support period has ended or ends within 90 days. An exploited
-finding on a CRA Asset is the kind Article 14 asks you to report (Part 4). In 3.4.201 and 3.4.202
+their open findings by severity, findings past their deadline, open findings in the CISA KEV catalog
+(**CISA KEV**: findings marked **Known Exploited**, Step 3), and Assets whose support period has
+ended or ends within 90 days. A **Known Exploited** finding on a CRA Asset is what raises the
+Article 14 early-warning prompt (Part 4). A scanner's own report that a vulnerability is exploited
+is not counted there. In 3.4.201 and 3.4.202
 the per-severity columns undercount (they can read 1 where there are several findings); rely on the
 **Assets**, **Past SLA** and **Support** columns, and on each Asset's own finding counts. It counts
 an Asset under the CRA from the Asset's **Regulations** (Step 7), not from its Regulatory card.
