@@ -11,7 +11,7 @@ El conector de Backstage es un **conector de activos**: en lugar de importar Hal
 | Backstage | DefectDojo |
 |---|---|
 | **System** | Tipo de producto (los Components sin System se agrupan bajo un Tipo de producto configurable "Backstage / Uncategorized") |
-| **Component** | Producto — con el nombre tomado de la entidad `title` (o de `name` si no existe), junto con la descripción del catálogo |
+| **Component** | Producto — con el nombre tomado de la entidad `title` (o de `name` si no existe), junto con la descripción del catálogo. La descripción se rellena en un producto nuevo, o en uno cuya descripción está vacía, y sigue los cambios posteriores en Backstage. Una descripción escrita en DefectDojo nunca se reemplaza, tampoco en un producto existente que el conector asocia por nombre. |
 | **Owning Group** (relación `ownedBy`) | Un Grupo de DefectDojo vinculado al Producto (rol predeterminado: Maintainer, configurable) |
 | **Owning Group** `metadata.description` | La descripción del Grupo de DefectDojo. Se asigna a un grupo nuevo, o a uno cuya descripción está vacía o sigue siendo el texto provisional del conector, y sigue los cambios posteriores en Backstage. Una descripción escrita por un administrador nunca se reemplaza. |
 | **Owner email** (correo del perfil del Group, o correo del propietario User) | Un miembro del Producto, cuando ya existe un usuario de DefectDojo con ese correo (nunca se crean usuarios) |
