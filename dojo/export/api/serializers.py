@@ -7,6 +7,7 @@ from pathlib import Path
 from auditlog.models import LogEntry
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.models import Permission
 from django.db.models import Prefetch, prefetch_related_objects
 from django.db.models.fields.files import FieldFile
 from rest_framework import serializers
@@ -56,7 +57,7 @@ from dojo.test.api.serializer import TestSerializer
 from dojo.tool_config.api.serializer import ToolConfigurationSerializer
 from dojo.tool_config.models import Tool_Configuration
 from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
-from dojo.user.utils import get_configuration_permissions_codenames
+from dojo.user.utils import get_configuration_permissions_fields
 
 MAX_FILE_BYTES_DEFAULT = 10485760
 MAX_FILE_BYTES_LIMIT = 104857600
@@ -174,8 +175,22 @@ def threat_model_file(engagement) -> Path | None:
     return Path(engagement.tmodel_path) if engagement.tmodel_path not in {None, "", "none"} else None
 
 
-def inside_media_root(path: Path) -> bool:
-    return path.resolve().is_relative_to(Path(settings.MEDIA_ROOT).resolve())
+def readable_threat_model(path: Path) -> Path | None:
+    """The resolved path when it is a file inside MEDIA_ROOT, else None."""
+    try:
+        resolved = path.resolve()
+        inside = resolved.is_relative_to(Path(settings.MEDIA_ROOT).resolve())
+        return resolved if inside and resolved.is_file() else None
+    except (ValueError, OSError):
+        return None
+
+
+def configuration_permission_names() -> set[str]:
+    wanted = {f"{field.app}.{codename}" for field in get_configuration_permissions_fields() for codename in field.codenames()}
+    rows = Permission.objects.filter(codename__in={name.split(".")[1] for name in wanted}).values_list(
+        "content_type__app_label", "codename",
+    )
+    return {name for app_label, codename in rows if (name := f"{app_label}.{codename}") in wanted}
 
 
 def export_threat_model(engagement, max_file_bytes: int, budget: InlineBudget) -> dict | None:
@@ -183,8 +198,8 @@ def export_threat_model(engagement, max_file_bytes: int, budget: InlineBudget) -
     if path is None:
         return None
     payload = {"filename": path.name, "size": None, "content_type": mimetypes.guess_type(path.name)[0], "data_base64": None}
-    resolved = path.resolve()
-    if not inside_media_root(path) or not resolved.is_file():
+    resolved = readable_threat_model(path)
+    if resolved is None:
         payload["error"] = "missing"
         return payload
     payload["size"] = resolved.stat().st_size
@@ -541,6 +556,7 @@ class ExportUserContactInfoSerializer(UserContactInfoSerializer):
 
 
 class ExportUserSerializer(UserSerializer):
+    names = None
     configuration_permissions = serializers.SerializerMethodField()
     contact_info = ExportUserContactInfoSerializer(source="usercontactinfo", read_only=True, allow_null=True)
 
@@ -551,11 +567,12 @@ class ExportUserSerializer(UserSerializer):
         )
 
     def get_configuration_permissions(self, obj) -> list[str]:
-        codenames = set(get_configuration_permissions_codenames())
+        if self.names is None:
+            self.names = configuration_permission_names()
         return sorted(
-            f"{permission.content_type.app_label}.{permission.codename}"
+            name
             for permission in obj.user_permissions.all()
-            if permission.codename in codenames
+            if (name := f"{permission.content_type.app_label}.{permission.codename}") in self.names
         )
 
     def to_representation(self, instance):

@@ -58,11 +58,12 @@ from dojo.export.api.serializers import (
     ExportUserSerializer,
     ManifestParamsSerializer,
     audit_event_model,
+    configuration_permission_names,
     export_product_endpoint,
     file_size,
-    inside_media_root,
     prefetch_answers,
     prefetch_questions,
+    readable_threat_model,
     render_datetime,
     threat_model_file,
 )
@@ -111,7 +112,6 @@ from dojo.product_attributes.api.serializer import (
 from dojo.regulations.api.serializer import RegulationSerializer
 from dojo.tool_type.api.serializer import ToolTypeSerializer
 from dojo.user.authentication import token_expires_at
-from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import get_system_setting
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
@@ -689,9 +689,9 @@ def add_threat_model_counts(counts: dict, max_file_bytes: int, *, file_counts: b
     for engagement in Engagement.objects.exclude(tmodel_path__in=("", "none")).exclude(tmodel_path=None).only(
         "id", "tmodel_path", "product_id",
     ):
-        path = threat_model_file(engagement)
         counts[engagement.product_id]["files"] += 1
-        if file_counts and inside_media_root(path) and path.resolve().is_file() and path.resolve().stat().st_size > max_file_bytes:
+        resolved = readable_threat_model(threat_model_file(engagement)) if file_counts else None
+        if resolved and resolved.stat().st_size > max_file_bytes:
             counts[engagement.product_id]["files_over_cap"] += 1
 
 
@@ -825,6 +825,9 @@ def build_manifest(
         .prefetch_related(Prefetch("user_permissions", queryset=Permission.objects.select_related("content_type")))
         .order_by("id")
     )
+    permission_names = configuration_permission_names()
+    user_serializer = ExportUserSerializer(users, many=True)
+    user_serializer.child.names = permission_names
     return {
         "schema": SCHEMA_VERSION,
         "generated_at": timezone.now().isoformat(),
@@ -847,15 +850,11 @@ def build_manifest(
                 key: serializer(serializer.Meta.model.objects.order_by("id"), many=True).data
                 for key, serializer in REFERENCE_SERIALIZERS.items()
             },
-            "users": ExportUserSerializer(users, many=True).data,
+            "users": user_serializer.data,
             "questionnaires": questionnaires(),
             "open_survey_responses": open_survey_responses(),
             "benchmark_types": benchmark_types(),
-            "configuration_permissions": sorted(
-                f"{app_label}.{codename}"
-                for app_label, codename in Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
-                .values_list("content_type__app_label", "codename")
-            ),
+            "configuration_permissions": sorted(permission_names),
             **(
                 {"github_configurations": ExportGithubConfigurationSerializer(GITHUB_Conf.objects.order_by("id"), many=True).data}
                 if external_issues else {}

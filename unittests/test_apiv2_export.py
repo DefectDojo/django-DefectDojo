@@ -1,6 +1,8 @@
 import base64
 import json
 import re
+import shutil
+import tempfile
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -33,6 +35,7 @@ from dojo.export.api.serializers import (
     export_endpoint_entries,
     export_file,
     export_proof,
+    readable_threat_model,
     render_datetime,
 )
 from dojo.export.api.views import ACTIONS_PER_LINE, AUDIT_MODELS, COUNT_KEYS, PRODUCT_EXTRAS_COUNT_KEYS
@@ -93,7 +96,7 @@ from dojo.models import (
 from dojo.system_settings.ui.forms import SystemSettingsForm
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_type.models import Tool_Type
-from dojo.user.utils import get_configuration_permissions_codenames
+from dojo.user.utils import get_configuration_permissions_fields
 from unittests.dojo_test_case import DojoAPITestCase, skip_unless_v2, skip_unless_v3, versioned_fixtures
 
 FindingEvent = apps.get_model("dojo", "FindingEvent")
@@ -1600,13 +1603,28 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
         self.assertEqual(without_manifest + 1, self.get_results_by_id(self.manifest()["products"], 2)["counts"]["files"])
 
     def test_engagement_threat_model_outside_media_root(self):
-        for value in ("/etc/hostname", "../x"):
-            with self.subTest(value=value), mock.patch("dojo.export.api.serializers.Path.open") as opened:
+        outside = Path(tempfile.mkdtemp()) / "secret.pdf"
+        outside.write_bytes(b"secret")
+        self.addCleanup(shutil.rmtree, outside.parent, ignore_errors=True)
+        folder = Path(settings.MEDIA_ROOT) / "threat"
+        folder.mkdir(parents=True, exist_ok=True)
+        link = folder / f"link-{uuid.uuid4().hex}.pdf"
+        link.symlink_to(outside)
+        self.addCleanup(link.unlink, missing_ok=True)
+        values = ("/etc/hostname", "../x", str(folder / ".." / ".." / "x"), str(link))
+        for value in values:
+            with self.subTest(value=value):
                 Engagement.objects.filter(id=self.engagement.id).update(tmodel_path=value)
                 model = self.engagement_line(self.export())["threat_model"]
                 self.assertEqual("missing", model["error"])
                 self.assertIsNone(model["data_base64"])
-                opened.assert_not_called()
+                self.assertNotIn(base64.b64encode(b"secret").decode(), json.dumps(model))
+                counts = self.get_results_by_id(self.manifest(max_file_bytes=0)["products"], 2)["counts"]
+                stream = self.export(max_file_bytes=0)[-1]["counts"]
+                self.assertEqual(stream["files_over_cap"], counts["files_over_cap"])
+
+    def test_a_path_with_a_nul_byte_is_unreadable(self):
+        self.assertIsNone(readable_threat_model(Path("bad\x00path")))
 
     def test_engagement_without_threat_model(self):
         for value in ("none", "", None):
@@ -1631,13 +1649,22 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
         manifest = self.manifest()
         entry = next(row for row in manifest["reference"]["users"] if row["username"] == "user1")
         self.assertEqual(["auth.add_user"], entry["configuration_permissions"])
-        expected = sorted(
-            f"{app}.{codename}"
-            for app, codename in Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
-            .values_list("content_type__app_label", "codename")
-        )
+        helper = {f"{field.app}.{codename}" for field in get_configuration_permissions_fields() for codename in field.codenames()}
+        stored = {f"{app}.{codename}" for app, codename in Permission.objects.values_list("content_type__app_label", "codename")}
+        expected = sorted(helper & stored)
         self.assertEqual(expected, manifest["reference"]["configuration_permissions"])
         self.assertIn("auth.add_user", expected)
+
+    def test_configuration_permissions_ignore_the_same_codename_in_another_app(self):
+        user = Dojo_User.objects.get(username="user1")
+        other = Permission.objects.create(
+            codename="add_user", name="Can add other", content_type=ContentType.objects.get_for_model(Product),
+        )
+        user.user_permissions.set([other])
+        manifest = self.manifest()
+        entry = next(row for row in manifest["reference"]["users"] if row["username"] == "user1")
+        self.assertEqual([], entry["configuration_permissions"])
+        self.assertNotIn("dojo.add_user", manifest["reference"]["configuration_permissions"])
 
     def test_external_issues_not_asked(self):
         seed_external_issues(self)
