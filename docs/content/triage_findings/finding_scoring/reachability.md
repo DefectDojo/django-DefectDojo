@@ -98,7 +98,9 @@ A verdict lasts as long as its source keeps reporting it.
   the `DD_REACHABILITY_STALENESS_DAYS` environment variable. A source that reports more often can
   expire sooner: `DD_REACHABILITY_SOURCE_STALENESS_DAYS` takes a JSON object of source name to
   days, for example `{"Sysdig Vulnerability Report": 7}`. The source name is the one shown with
-  the verdict on the Finding.
+  the verdict on the Finding. A connector that syncs only what changed since its last sync (such
+  as Wiz) renews its verdicts on the active Findings it did not send, because those Findings did
+  not change.
 
 Manual verdicts are never removed by either.
 
