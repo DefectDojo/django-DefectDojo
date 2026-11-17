@@ -86,6 +86,8 @@ about, on advisories you have already decided about.
 
 ## Advisory Site
 
+**Not yet available.** Publishing to the advisory site is not yet available to customers. This page describes the feature ahead of its release.
+
 The **Advisory Site** card holds your publisher profile: the name, web address and
 contact that readers see on every advisory you publish to the
 [advisory site](../advisories/#publishing-to-the-advisory-site). Fill it in once,

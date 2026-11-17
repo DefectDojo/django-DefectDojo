@@ -119,6 +119,8 @@ was skipped because nothing is configured has not been delivered, and the status
 
 ## Publishing to the advisory site
 
+**Not yet available.** Publishing to the advisory site is not yet available to customers. This page describes the feature ahead of its release.
+
 The advisory site is a public website at `advisory.defectdojo.com`, run by DefectDojo.
 Each publisher has its own address there, with a page for every advisory, an Atom feed,
 and each advisory's CSAF 2.0 document for tools to fetch.
