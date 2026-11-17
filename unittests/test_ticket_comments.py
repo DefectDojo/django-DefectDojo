@@ -303,7 +303,9 @@ class TestRiskAcceptanceTicketComments(_IsolatedRegistry, DojoTestCase):
         member_ids = [f.id for f in self.findings[:2]]
         recorder = self.record()
 
-        ra_helper.expire_now(risk_acceptance)
+        # The comments go out once the expiry is committed; a test case never commits, so run its callbacks.
+        with self.captureOnCommitCallbacks(execute=True):
+            ra_helper.expire_now(risk_acceptance)
 
         expired_text = ra_helper.expiration_message_creator(risk_acceptance)
         self.assertEqual(
