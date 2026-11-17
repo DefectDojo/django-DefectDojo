@@ -538,7 +538,13 @@ Matchable attributes — all optional, and **all of the ones present must match*
 
 A value of another shape is refused with `400` and nothing is saved: a single string where a list is
 expected (`"severities": "High"` rather than `["High"]`), a CWE that is not a number, or a pattern that
-is not a string. CWE numbers sent as strings are stored as numbers.
+is not a string. CWE numbers sent as strings are stored as numbers, and a CWE number must be between 0
+and 2147483647.
+
+A Risk Acceptance saved before these checks with a value of another shape stays Active and can still be
+read, but new Findings are not matched against it: imports skip it (with a warning in the server log)
+rather than fail. Save its criteria again in the accepted shape to have it apply to new Findings once
+more. Sending the stored criteria back unchanged is refused with the same `400`, naming the value.
 
 `scope` is **required** and is what stops an acceptance reaching Findings its author has no business
 accepting. `type` is `engagement`, `product`, `product_type` or `global`.
