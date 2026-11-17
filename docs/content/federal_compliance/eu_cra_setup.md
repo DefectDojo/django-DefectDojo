@@ -504,7 +504,7 @@ Templates**; both are marked **Built-in**.
 Open a template's menu and choose **Generate Report**, pick **PDF**, and download it from
 **Reporting > Generated** when it is ready. To change a template, choose **Duplicate Template** first:
 the built-in itself cannot be edited, and the copy, with its own copies of the blocks, is yours.
-See [Built-in Templates](/metrics_reports/reports/pro__report_builder/#built-in-templates).
+See [Built-in Templates](/metrics_reports/reports/report-builder/#built-in-templates).
 
 | Expected | Where |
 | --- | --- |
