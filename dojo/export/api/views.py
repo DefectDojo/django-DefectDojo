@@ -826,8 +826,7 @@ def build_manifest(
         .order_by("id")
     )
     permission_names = configuration_permission_names()
-    user_serializer = ExportUserSerializer(users, many=True)
-    user_serializer.child.names = permission_names
+    user_serializer = ExportUserSerializer(users, many=True, context={"configuration_permission_names": permission_names})
     return {
         "schema": SCHEMA_VERSION,
         "generated_at": timezone.now().isoformat(),

@@ -556,7 +556,6 @@ class ExportUserContactInfoSerializer(UserContactInfoSerializer):
 
 
 class ExportUserSerializer(UserSerializer):
-    names = None
     configuration_permissions = serializers.SerializerMethodField()
     contact_info = ExportUserContactInfoSerializer(source="usercontactinfo", read_only=True, allow_null=True)
 
@@ -567,12 +566,13 @@ class ExportUserSerializer(UserSerializer):
         )
 
     def get_configuration_permissions(self, obj) -> list[str]:
-        if self.names is None:
-            self.names = configuration_permission_names()
+        names = self.context.get("configuration_permission_names")
+        if names is None:
+            names = configuration_permission_names()
         return sorted(
             name
             for permission in obj.user_permissions.all()
-            if (name := f"{permission.content_type.app_label}.{permission.codename}") in self.names
+            if (name := f"{permission.content_type.app_label}.{permission.codename}") in names
         )
 
     def to_representation(self, instance):
