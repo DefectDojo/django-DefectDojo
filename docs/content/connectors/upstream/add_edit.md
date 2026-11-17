@@ -40,7 +40,7 @@ When you submit, DefectDojo asks the tool what those credentials can actually se
 
 ## If the connector changed while you were editing it
 
-**Edit Configuration** saves every setting on the page together. If someone else saved the same connector after you opened it (or you saved it from another browser tab), your save is refused with **This connection was changed since the page loaded**, and nothing you entered is written, so the other change is not overwritten. Reload the page to see the connector as it is now, make your change again, and click **Submit**.
+**Edit Configuration** saves every setting on the page together. If the connector was changed after you opened it, your save is refused with **This connection was changed since the page loaded**. That happens when someone else saved the same connector, when you saved it from another browser tab, or when a hierarchy suggestion was applied to it (Advisor > Hierarchy can change where the connector places its Assets). Nothing you entered is written, so the other change is not overwritten. Reload the page to see the connector as it is now, make your change again, and click **Submit**.
 
 ## Next Steps
 
