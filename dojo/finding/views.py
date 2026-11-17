@@ -1711,21 +1711,14 @@ def request_finding_review(request, fid):
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
             finding_ids = [f.id for f in findings]
-            # create_azure_work_item_task.apply_async(args=(
-            #         f"Request Peer Review {fid}",
-            #         form.cleaned_data.get("entry"),
-            #         user.username,
-            #         form.cleaned_data.get("proof_file"),
-            #         finding_ids,
-            # ))
-            create_azure_work_item_task(
+            create_azure_work_item_task.apply_async(args=(
                     f"Request Peer Review {fid}",
                     form.cleaned_data.get("entry"),
                     user.username,
                     form.cleaned_data.get("proof_file"),
                     finding_ids,
-            )
-
+            ))
+            
             for finding in findings:
                 finding.notes.add(new_note)
                 # Attach uploaded file to finding if provided

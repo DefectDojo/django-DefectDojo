@@ -131,24 +131,24 @@ class AzureDevOpsSprintHelper:
 class AzureDevOpsWorkItemHelper:
     organization_url = GeneralSettings.get_value(
         "AZURE_DEVOPS_ORGANIZATION_URL",
-        "https://dev.azure.com/GrupoBancolombia",
+        "https://test.azure.com/GrupoTest",
     )
     project = GeneralSettings.get_value(
         "AZURE_DEVOPS_PROJECT",
-        "Soporte Ingeniería de TI",
+        "project name",
     )
     team_name = GeneralSettings.get_value(
         "AZURE_DEVOPS_TEAM_NAME",
-        "Soporte Ingenieria de SW - DevExp",
+        "team name",
     )
     id_parent = GeneralSettings.get_value("AZURE_DEVOPS_ID_PARENT", None)
     impact_team = GeneralSettings.get_value(
         "AZURE_DEVOPS_IMPACT_TEAM",
-        "Seguridad de TI - DevSecOps",
+        "impact team name",
     )
     work_item_type = GeneralSettings.get_value(
         "AZURE_DEVOPS_WORK_ITEM_TYPE",
-        "Asesoría o Solicitud",
+        "item type",
     )
 
     @classmethod
@@ -213,11 +213,9 @@ class AzureDevOpsWorkItemHelper:
         description,
         user,
         evidence_and_image,
-        work_item_type,
 
     ):
-        target_type = work_item_type or cls.work_item_type
-        user = Dojo_User.objects.get(username=user)
+        target_type = cls.work_item_type
         evidence_and_image = evidence_and_image if evidence_and_image else "Not file input"
 
         connection = cls._get_connection()
@@ -228,9 +226,6 @@ class AzureDevOpsWorkItemHelper:
             profile_connection = cls._get_profile_connection()
             profile_client = profile_connection.clients.get_profile_client()
             me = profile_client.get_profile("me")
-            user_display_name = me.additional_properties.get("displayName", "Unknown User")
-            user_email = me.additional_properties.get("emailAddress", None)
-
             team_context = TeamContext(project=cls.project, team=cls.team_name)
             team_field_values = work_client.get_team_field_values(team_context)
             area_path = getattr(team_field_values, "default_value", None)
@@ -238,7 +233,6 @@ class AzureDevOpsWorkItemHelper:
             if not area_path:
                 logger.warning("No default area path found for team: %s", cls.team_name)
                 return None
-            # Continaur con la validadcion de cusmton fields aquie sabieno dque retorna ese variable
             iterations = work_client.get_team_iterations(
                 team_context=team_context,
                 timeframe="current",
@@ -256,7 +250,7 @@ class AzureDevOpsWorkItemHelper:
                 "FROM WorkItems "
                 "WHERE [System.TeamProject] = @project "
                 f"AND [System.Title] = '{title.replace("'", "''")}' "
-                "AND [System.IterationPath] = @currentIteration"
+                "AND [System.IterationPath] = @CurrentIteration"
             )
             query_result = wit_client.query_by_wiql(
                 wiql=Wiql(query=wiql_query),
@@ -322,6 +316,11 @@ class AzureDevOpsWorkItemHelper:
                     path="/fields/System.CreatedBy",
                     value=f"{user.username} + <{user.email}>",
                 ),
+                JsonPatchOperation(
+                    op="add",
+                    path="/fields/System.IterationPath",
+                    value=iteration_path,
+                ),
             ]
             new_wi = wit_client.create_work_item(
                 document=patch_doc,
@@ -342,20 +341,22 @@ def create_azure_work_item_task(
     description,
     user,
     evidence_and_image,
-    work_item_type,
     finding_ids
 ):
     try:
+        user_obj = Dojo_User.objects.get(username=user)
         work_item_id = AzureDevOpsWorkItemHelper.get_or_create_work_item(
             title,
             description,
-            user,
-            evidence_and_image,
-            work_item_type,
+            user=user_obj,
+            evidence_and_image=evidence_and_image,
         )
         if finding_ids and work_item_id:
             findings = Finding.objects.filter(id__in=finding_ids)
-            for finding in finding_ids:
-                finding.notes.add(f"A work item was automatically created: {work_item_id}")
+            for finding in findings:
+                finding.add_note(
+                    note_text=f"A work item was automatically created :{work_item_id}",
+                    author=user_obj
+                )
     except Exception as exc:
         logger.error("Error creating Azure DevOps work item: %s", exc)
