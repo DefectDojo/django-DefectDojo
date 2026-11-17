@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<bom serialNumber="urn:uuid:7e2d9b14-3c6a-4f8e-a1b5-0d4c2e6f8a93" version="1" xmlns="http://cyclonedx.org/schema/bom/1.4">
+    <components>
+        <component type="library" bom-ref="with-cpe23">
+            <name>example-lib</name>
+            <version>1.2.3</version>
+            <cpe>cpe:2.3:a:example_vendor:example_lib:1.2.3:*:*:*:*:*:*:*</cpe>
+            <purl>pkg:generic/example-lib@1.2.3</purl>
+        </component>
+        <component type="library" bom-ref="no-cpe">
+            <name>other-lib</name>
+            <version>0.1</version>
+            <purl>pkg:generic/other-lib@0.1</purl>
+        </component>
+    </components>
+    <vulnerabilities>
+        <vulnerability bom-ref="vuln-1">
+            <id>CVE-2099-1001</id>
+            <ratings>
+                <rating>
+                    <severity>high</severity>
+                </rating>
+            </ratings>
+            <affects>
+                <target>
+                    <ref>with-cpe23</ref>
+                </target>
+            </affects>
+        </vulnerability>
+        <vulnerability bom-ref="vuln-2">
+            <id>CVE-2099-1003</id>
+            <ratings>
+                <rating>
+                    <severity>low</severity>
+                </rating>
+            </ratings>
+            <affects>
+                <target>
+                    <ref>no-cpe</ref>
+                </target>
+            </affects>
+        </vulnerability>
+    </vulnerabilities>
+</bom>

@@ -82,6 +82,16 @@ class TestCpeStrings(DojoTestCase):
 
 
 @skip_unless_v3
+class TestLocationDataCpeFactory(DojoTestCase):
+    def test_the_cpe_is_carried_as_the_report_gives_it(self):
+        # The consumer normalizes; the factory passes a 2.3 string or a 2.2 URI through untouched.
+        for value in ("cpe:2.3:a:Example:Lib:1.0:*:*:*:*:*:*:*", "cpe:/a:example:lib:1.0"):
+            with self.subTest(value=value):
+                data = LocationData.cpe(cpe=value)
+                self.assertEqual("cpe", data.type)
+                self.assertEqual({"cpe": value}, data.data)
+
+
 class TestGetLocationsHashSymmetry(DojoTestCase):
     @classmethod
     def setUpTestData(cls):

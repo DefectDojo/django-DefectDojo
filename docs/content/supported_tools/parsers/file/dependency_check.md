@@ -25,6 +25,9 @@ DC bundles dependencies under five scenarios:
 5. **NPM same name + version** — the same npm package discovered via different resolution paths (e.g. `package-lock.json` + `node_modules`).
 
 
+### CPE locations (Pro)
+With Locations enabled, each finding also carries a [CPE location](/asset_modelling/locations/pro__cpe_locations/) for every CPE Dependency-Check matched its dependency to (`identifiers/vulnerabilityIds/id`, or `identifier type="cpe"` in older reports).
+
 ### Sample Scan Data
 Sample Dependency Check scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/dependency_check).
 

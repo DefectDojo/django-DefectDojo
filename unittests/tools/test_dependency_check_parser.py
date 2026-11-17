@@ -5,7 +5,7 @@ from dateutil.tz import tzlocal, tzoffset
 
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2, skip_unless_v3
 
 logger = logging.getLogger(__name__)
 
@@ -302,3 +302,67 @@ class TestDependencyCheckParser(DojoTestCase):
                 )  # 2016-11-05T14:52:15.748-0400
                 self.assertEqual(1, len(items[0].unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2015-3208", items[0].unsaved_vulnerability_ids[0])
+
+    @staticmethod
+    def _cpe_locations(filename):
+        """Parse a fixture and return {(file_path, title): [cpe values]} and the product-level location types."""
+        test = Test()
+        with (get_unit_tests_scans_path("dependency_check") / filename).open(encoding="utf-8") as testfile:
+            findings = DependencyCheckParser().get_findings(testfile, test)
+        per_finding = {
+            (finding.file_path, finding.title): [
+                location.data["cpe"]
+                for location in getattr(finding, "unsaved_locations", [])
+                if location.type == "cpe"
+            ]
+            for finding in findings
+        }
+        return per_finding, {location.type for location in test.unsaved_metadata}
+
+    @skip_unless_v3
+    def test_findings_carry_the_cpes_dependency_check_matched(self):
+        # Both report shapes, in report order: identifiers/vulnerabilityIds/id (a 2.3 string) and the
+        # older identifier[@type="cpe"] (a 2.2 URI, passed through as spelled). A dependency with no
+        # CPE identifier gives its findings none.
+        per_finding, _product_types = self._cpe_locations("multiple_vulnerabilities_has_multiple_findings.xml")
+        cpes_by_file = {}
+        for (file_path, _title), cpes in per_finding.items():
+            cpes_by_file.setdefault(file_path, []).append(cpes)
+        both = ["cpe:2.3:a:dom4j_project:dom4j:2.1.1.hat-00001:*:*:*:*:*:*:*", "cpe:/a:apache:xalan-java:2.7.1"]
+        self.assertEqual([both], cpes_by_file["adapter-ear1.ear: dom4j-2.1.1.jar"])
+        self.assertEqual([both], cpes_by_file["adapter-ear2.ear: dom4j-2.1.1.jar"])
+        self.assertEqual([[]], cpes_by_file["adapter-ear3.ear: dom4j-2.1.1.jar"])
+        self.assertTrue(cpes_by_file["yargs-parser:5.0.0"])
+        self.assertTrue(all(cpes == [] for cpes in cpes_by_file["yargs-parser:5.0.0"]))
+
+    @skip_unless_v3
+    def test_cpe_values_are_stripped_and_deduplicated(self):
+        # PR6439.xml wraps one id in whitespace; the jar names five CPEs and each arrives once.
+        per_finding, _product_types = self._cpe_locations("PR6439.xml")
+        bcprov = [cpes for (file_path, _title), cpes in per_finding.items() if file_path == "bcprov-jdk15on-1.64.jar"]
+        self.assertTrue(bcprov)
+        for cpes in bcprov:
+            self.assertEqual(
+                [
+                    "cpe:2.3:a:bouncycastle:bouncy-castle-crypto-package:1.64:*:*:*:*:*:*:*",
+                    "cpe:2.3:a:bouncycastle:bouncy_castle_crypto_package:1.64:*:*:*:*:*:*:*",
+                    "cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle:1.64:*:*:*:*:*:*:*",
+                    "cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.64:*:*:*:*:*:*:*",
+                    "cpe:2.3:a:bouncycastle:the_bouncy_castle_crypto_package_for_java:1.64:*:*:*:*:*:*:*",
+                ],
+                cpes,
+            )
+        woodstox = [cpes for (file_path, _title), cpes in per_finding.items() if file_path == "woodstox-core-6.2.8.jar"]
+        self.assertEqual([[]], woodstox)
+
+    @skip_unless_v3
+    def test_single_cpe_from_version_6_5_3(self):
+        per_finding, _product_types = self._cpe_locations("version-6.5.3.xml")
+        self.assertEqual([["cpe:2.3:a:apache:log4j:2.12.4:*:*:*:*:*:*:*"]], list(per_finding.values()))
+
+    @skip_unless_v2
+    def test_cpes_add_no_locations_with_locations_off(self):
+        per_finding, product_types = self._cpe_locations("multiple_vulnerabilities_has_multiple_findings.xml")
+        self.assertTrue(per_finding)
+        self.assertTrue(all(cpes == [] for cpes in per_finding.values()))
+        self.assertEqual(set(), product_types)

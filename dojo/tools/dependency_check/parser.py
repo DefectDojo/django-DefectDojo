@@ -306,6 +306,28 @@ class DependencyCheckParser:
             "cvssv3_score": cvssv3_score,
         }
 
+    def get_cpes_from_dependency(self, dependency, namespace):
+        """
+        The CPE identifiers Dependency-Check matched the dependency to, in report order without repeats:
+        ``identifiers/vulnerabilityIds/id`` (Dependency-Check 5 and later, CPE 2.3 strings) and
+        ``identifier[@type="cpe"]/name`` (older reports, CPE 2.2 URIs).
+        """
+        identifiers_node = dependency.find(namespace + "identifiers")
+        if identifiers_node is None:
+            return []
+        cpes = []
+        for node in identifiers_node.iter():
+            if node.tag == namespace + "vulnerabilityIds":
+                value = node.findtext(f"{namespace}id")
+            elif node.tag == namespace + "identifier" and node.attrib.get("type") == "cpe":
+                value = node.findtext(f"{namespace}name")
+            else:
+                continue
+            value = (value or "").strip()
+            if value.lower().startswith("cpe:") and value not in cpes:
+                cpes.append(value)
+        return cpes
+
     def get_finding_from_vulnerability(
         self,
         dependency,
@@ -465,6 +487,10 @@ class DependencyCheckParser:
         if locations_enabled() and component_purl:
             finding.unsaved_locations.append(
                 LocationData.dependency(purl=component_purl, file_path=dependency_filename),
+            )
+        if locations_enabled():
+            finding.unsaved_locations.extend(
+                LocationData.cpe(cpe=cpe) for cpe in self.get_cpes_from_dependency(dependency, namespace)
             )
 
         if vulnerability_id:
