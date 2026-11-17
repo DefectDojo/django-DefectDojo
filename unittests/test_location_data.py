@@ -92,6 +92,7 @@ class TestLocationDataCpeFactory(DojoTestCase):
                 self.assertEqual({"cpe": value}, data.data)
 
 
+@skip_unless_v3
 class TestGetLocationsHashSymmetry(DojoTestCase):
     @classmethod
     def setUpTestData(cls):
