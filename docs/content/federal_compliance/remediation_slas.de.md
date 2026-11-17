@@ -42,7 +42,7 @@ hier nicht glaubhaft ausnutzbar und ändert seine Frist nicht. Nur eine Vulnerab
 eine solche Meldung berücksichtigen, über eine Regel, die aus ihr die glaubhafte Ausnutzbarkeit setzt; siehe
 [Vulnerability Response Policies](/asset_modelling/pro_hierarchy/priority_sla/#vulnerability-response-policies).
 **Über das Internet erreichbar** wird durch einen Befund-Tag
-signalisiert — standardmäßig `internet-reachable`.
+signalisiert, standardmäßig `internet-reachable`.
 
 Alle Schwellenwerte, Tag-Namen und Tagesangaben sind in der SLA-Konfiguration bearbeitbar.
 
