@@ -533,6 +533,17 @@ class BulkTagMappingNameLookupTest(TestCase):
             self.assertEqual(2, self.tag_model.objects.count(), msg=f"{case}: tags applied: {applied}")
             self.assertNotEqual(existing_name, applied[0][1])
 
+    def test_stored_case_variants_resolve_to_the_oldest_tag(self):
+        # The case-sensitive unique index on name allows rows that differ only in case (older data).
+        oldest = self._existing_tag("network")
+        self._existing_tag("Network")
+        self._existing_tag("NETWORK")
+
+        bulk_apply_parser_tags([(self.finding, ["Network"])])
+
+        self.assertEqual([oldest.id], list(self.finding.tags.values_list("id", flat=True)))
+        self.assertEqual(1, self.tag_model.objects.get(id=oldest.id).count)
+
     def test_case_variants_in_one_batch_share_the_existing_tag(self):
         existing = self._existing_tag("network")
         other = Finding.objects.create(title="F-Name-Lookup-2", severity="Low", test=self.finding.test, reporter=self.finding.reporter)

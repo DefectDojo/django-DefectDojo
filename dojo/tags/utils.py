@@ -379,6 +379,7 @@ def bulk_add_tag_mapping(
         # the UPPER(name) index serves; LOWER(name) is served by no index and reads the whole tag table.
         # PostgreSQL upper-cases both sides: Python's str.upper() differs from it for some letters
         # ("ß", and letters newer than the database's Unicode tables), and would match other tags.
+        # Where several stored tags differ only in case, a name resolves to the oldest of them.
         for t in tag_model.objects.raw(
             "SELECT t.*, requested.name AS requested_name"
             " FROM unnest(%s::text[]) AS requested(name)"
