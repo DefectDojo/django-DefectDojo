@@ -28,9 +28,9 @@ instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 While the flag is off, the engine does no work at all: no clusters are built, no links are
 created, and nothing is dispatched after an import.
 
-After turning the flag on, existing Findings are **not** correlated retroactively until either
-they are next imported or you run a backfill (see
-[Backfilling existing Findings](#backfilling-existing-findings)).
+Turning the flag on also starts a background backfill that correlates the Findings imported
+while the flag was off, so existing Findings get their Root Causes without anyone having to run
+anything (see [Backfilling existing Findings](#backfilling-existing-findings)).
 
 ## What gets correlated
 
@@ -259,13 +259,35 @@ version bump moves the Finding to the new cluster and prunes the old one once it
 
 ### Backfilling existing Findings
 
-To correlate Findings that predate the feature being enabled, run the management command. Omit
-the argument to recompute the whole portfolio, or scope it to a single Asset:
+Correlation only runs after an import, and only while the flag is on, so Findings imported
+before the flag was turned on have no Root Causes of their own. A backfill recomputes Root Causes
+across the whole portfolio, one Asset at a time, as a background job. It runs:
+
+- **Automatically when the flag is turned on.** Switching Root Cause Correlation from off to on
+  in **Settings > Feature Flags** starts one backfill. Saving the flag again while it is already
+  on starts nothing.
+- **On demand from the Root Causes page.** A superuser sees a **Recompute Root Causes** button
+  above the list. It starts the same backfill and shows its progress (Assets done out of the
+  total) beside the button while it runs. The button is disabled while a backfill is running, and
+  the page says when the last one failed or finished with failures. The list reloads when a
+  backfill finishes.
+
+Only one backfill runs at a time: starting one while another is pending or running is refused.
+An Asset that fails is logged and skipped, the backfill carries on with the rest, and the page
+reports how many failed. Because correlation is idempotent, running the backfill again is safe
+and picks up anything a failed run missed. A backfill whose worker stops reporting progress for
+an hour is marked failed, so a lost worker does not block the next one.
+
+The same backfill is available from the command line. Omit the argument to recompute the whole
+portfolio, or scope it to a single Asset:
 
 ```bash
 python manage.py recompute_correlations
 python manage.py recompute_correlations --product-id 42
 ```
+
+The command runs in the foreground. A whole-portfolio run skips an Asset that fails, like the
+background backfill, and exits with a non-zero status when any Asset failed.
 
 ## What the API exposes
 
