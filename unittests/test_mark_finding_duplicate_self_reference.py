@@ -6,7 +6,9 @@ cluster root. Without guards, a POST could mark a finding as a duplicate of itse
 root as a duplicate of one of its own members (the root then points at itself and the cluster has
 no active original), mark a finding under an orphaned duplicate (it was saved as a duplicate of
 nothing), or mark a cluster's root under another original while its members kept pointing at it
-(a two-level chain). Each test posts to the real route and reloads the rows.
+(a two-level chain). The marked finding's own duplicates move onto the root with it, so the engagement
+deduplication rule applies to each of them too, and a root outside the marked finding's product is refused.
+Each test posts to the real route and reloads the rows.
 """
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
@@ -159,3 +161,42 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         Finding.objects.filter(pk=MEMBERS[0]).update(test=other_test)
         self._mark(OTHER, MEMBERS[0])
         self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})
+
+    # A member of the marked finding moves onto the root with it, so the engagement rule applies to each
+    # member as it does to the marked finding.
+    def _move_member_of_other_to_another_engagement(self, *, member_dedupe, root_dedupe):
+        # Finding 4 becomes a duplicate of finding 7 and moves to engagement 4 (test 4), in the same product
+        # as engagement 1, which holds the root (finding 2) and finding 7.
+        Engagement.objects.filter(pk=1).update(deduplication_on_engagement=root_dedupe)
+        Engagement.objects.filter(pk=4).update(deduplication_on_engagement=member_dedupe)
+        Finding.objects.filter(pk=MEMBERS[1]).update(duplicate_finding=OTHER, test=Test.objects.get(pk=4))
+
+    def test_refuses_moving_a_member_into_another_engagement_with_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=True, root_dedupe=True)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+
+    def test_refuses_moving_a_member_whose_engagement_alone_has_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=True, root_dedupe=False)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+
+    def test_refuses_moving_a_member_when_the_root_engagement_alone_has_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=False, root_dedupe=True)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+
+    def test_moves_a_member_in_another_engagement_without_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=False, root_dedupe=False)
+        self._mark(OTHER, MEMBERS[0])
+        self.assertEqual(
+            self._state(OTHER, MEMBERS[1]), {MEMBERS[1]: (True, ROOT, False), OTHER: (True, ROOT, False)},
+        )
+
+    def test_refuses_a_mark_under_a_root_in_another_product(self):
+        # Only reachable with inconsistent data: the root (finding 2) sits in test 13, engagement 2, product 1,
+        # while its member 3 and finding 7 stay in product 2. Engagement deduplication is off everywhere.
+        Engagement.objects.all().update(deduplication_on_engagement=False)
+        Finding.objects.filter(pk=ROOT).update(test=Test.objects.get(pk=13))
+        ids = (ROOT, *MEMBERS, OTHER)
+        before = self._state(*ids)
+        response = self.client.post(f"/finding/{OTHER}/duplicate/{MEMBERS[0]}")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(self._state(*ids), before)

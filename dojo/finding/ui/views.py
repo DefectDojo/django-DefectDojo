@@ -3108,6 +3108,9 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     # The mark points the duplicate at the original's cluster root, so the engagement check compares against
     # that root, the finding the duplicate ends up under, not the original it was posted with.
     root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+    # The root is where the duplicate lands, so it must sit in the duplicate's product, as the original must.
+    if root.test.engagement.product_id != duplicate.test.engagement.product_id:
+        raise Http404
 
     if root.test.engagement != duplicate.test.engagement:
         if (root.test.engagement.deduplication_on_engagement
@@ -3158,6 +3161,27 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     # if older data points it at the duplicate. Under a mitigated root, the same rule applies to each of
     # them: one that is still active would be hidden, so the mark is refused. Only queried in that case.
     members = Finding.objects.filter(duplicate_finding=duplicate).exclude(pk=root.pk)
+    # The engagement rule applies to each member as it does to the duplicate: one in another engagement than
+    # the root's may not move there while either engagement has deduplication_on_engagement.
+    crossing = members.exclude(test__engagement=root.test.engagement)
+    if not root.test.engagement.deduplication_on_engagement:
+        crossing = crossing.filter(test__engagement__deduplication_on_engagement=True)
+    crossing_member_id = crossing.values_list("id", flat=True).first()
+    if crossing_member_id is not None:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _(
+                "Finding %(member)s, a duplicate of finding %(duplicate)s, is not in the same engagement as finding "
+                "%(original)s, and deduplication on engagement is enabled for at least one of them, so finding "
+                "%(duplicate)s cannot be marked as its duplicate. Use Reset Duplicate Status on finding %(member)s "
+                "first.",
+            ) % {"original": root.id, "member": crossing_member_id, "duplicate": duplicate.id},
+            extra_tags="alert-danger",
+        )
+        return redirect_to_return_url_or_else(
+            request, reverse("view_finding", args=(duplicate.id,)),
+        )
     if finding_mitigated(root) and finding_not_human_set_status(root):
         open_member_id = members.filter(active=True).values_list("id", flat=True).first()
         if open_member_id is not None:
