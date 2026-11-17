@@ -116,7 +116,9 @@ The **Re\-Import Findings** form can be accessed on any Test page, under the **�
 
 The **Re\-import Findings** **Form** will **not** allow you to import a different scan type, or change the destination of the Findings you’re trying to upload. If you’re trying to do one of those things, you’ll need to use the **Import Scan Form**.
 
-In DefectDojo Pro, a Test that has no scan type on record (for example a Test created by hand with a Test Type such as "Pen Test") shows a required **Scan Type** field on the Reimport form. Choose the scan type of the report you are uploading. The field lists only Test Types that have a scan type, and it does not appear for a Test whose scan type is known, including a Test whose Test Type was named after its tool, such as "Semgrep Scan (GitLab SAST Report)", which reimports as "GitLab SAST Report". The `/reimport-scan` API is unchanged: it still needs a valid `scan_type`.
+In DefectDojo Pro, a Test that has no scan type that can be reimported (for example a Test created by hand with a Test Type such as "Pen Test") shows a required **Scan Type** field on the Reimport form. Choose the scan type of the report you are uploading. After a successful Reimport the Test keeps that scan type, so the next Reimport uses it without asking again. The field does not appear for a Test whose scan type is known, including a Test whose Test Type was named after its tool, such as "Semgrep Scan (GitLab SAST Report)", which reimports as "GitLab SAST Report".
+
+The field lists only scan types whose parser does not name the Test Type itself. Parsers that do, such as **Generic Findings Import**, **SARIF** and **GitLab SAST Report**, can only be reimported into a Test of the tool their report names, so a Reimport of one of them into a hand-made Test is refused with "Test type mismatch". To bring such a report in, use the **Import Scan Form**, which creates a new Test. The `/reimport-scan` API is unchanged: it still needs a valid `scan_type`.
 
 ## Working with Import History
 
