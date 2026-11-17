@@ -120,6 +120,12 @@ attributed to the user who triggered it.
 
 A View As Session's create is the start of a [View As User](../pro__view_as_user/) session and its update is the end. The browser session it ran in is never stored, only a digest of it, and the digest is excluded from the audit log.
 
+| Object            | Create | Update | Delete |
+| ----------------- | :----: | :----: | :----: |
+| Audit Log Export  |   ✅   |        |        |
+
+Each [export of the Audit Logs](../pro__audit_logging/#exporting-audit-logs) is recorded as an Audit Log Export: who exported, from which IP address, the filters used, the format and the number of entries.
+
 ### Pro — relationship (add / remove) events
 
 | Relationship                | Add | Remove |
@@ -134,6 +140,8 @@ A View As Session's create is the start of a [View As User](../pro__view_as_user
 | Retention period     | `DD_AUDITLOG_FLUSH_RETENTION_PERIOD`  | `-1` (never flush) | Months of history to keep; older events are batch-deleted by the flush job  |
 | Flush batch size     | `DD_AUDITLOG_FLUSH_BATCH_SIZE`        | `1000`             | Rows deleted per batch during cleanup                              |
 | Flush max batches    | `DD_AUDITLOG_FLUSH_MAX_BATCHES`       | `100`              | Cap on the number of batches per flush run                        |
+
+In DefectDojo Pro, administrators can also set the retention in the UI, under **Settings > System Settings > Delete Audit Log Events After (Months)**. That setting covers every audit event table, including the Pro ones. `DD_AUDITLOG_FLUSH_RETENTION_PERIOD` only ever reaches the open-source tables, so it does not shorten how long the Pro tables keep their events, and it is not a substitute for the System Settings value. Neither deletes the entries shown on **Legacy Audit Logs**. See [Audit Log Retention](../pro__audit_logging/#audit-log-retention).
 
 ## Notes and limitations
 
