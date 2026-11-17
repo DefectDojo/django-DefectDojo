@@ -46,7 +46,7 @@ Notes:
 - The same claim may feed more than one field. Each DefectDojo field may be mapped from only one claim.
 - Claims are read from the ID token as well as the userinfo response, so a claim your provider releases in only one of the two still works.
 - If a mapped claim is missing or empty for a given user, that field keeps its standard value rather than being blanked.
-- A **Username** row names the account DefectDojo creates on a user's first OIDC sign-in. Without one, or when the user's token does not carry that claim, the new account's username is the user's email address. If another account already has the username, the new account gets that username with a random suffix; it is never signed in as the existing account. The username is set only when the account is created: changing the claim or the mapping later does not rename existing users.
+- A **Username** row names the account DefectDojo creates on a user's first OIDC sign-in. Spaces and punctuation other than `@ . + - _` are removed from the claim. The new account's username is the user's email address instead when there is no Username row, when the user's token does not carry that claim, when the claim contains letters outside A to Z (accented, Cyrillic or CJK letters, for example), or when nothing is left once the punctuation is removed. If another account already has the username, the new account gets that username with a random suffix; it is never signed in as the existing account. The username is set only when the account is created: changing the claim or the mapping later does not rename existing users. The Username row applies while DefectDojo creates usernames from the username claim, which is the default (`DD_SOCIAL_AUTH_CREATE_USER_MAPPING=username`).
 
 ## Group Mapping
 
