@@ -9,9 +9,9 @@ A new vulnerability usually reaches advisory databases days after it is disclose
 
 ## Enabling Emerging Threats
 
-Emerging Threats is a **beta** feature behind the `emerging_threats` feature flag. A superuser can turn it on from **Settings > Feature Flags**. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Emerging Threats is in early **beta**. DefectDojo turns it on for each instance, so it is not listed under **Settings > Feature Flags**. To ask for it on your instance, contact DefectDojo Support.
 
-When the flag is on, an **Emerging Threats** entry (marked **NEW**) appears in the **ACT** section of the sidebar, below **Vulnerability Explorer**.
+When it is on, an **Emerging Threats** entry (marked **NEW**) appears in the **ACT** section of the sidebar, below **Vulnerability Explorer**.
 
 DefectDojo Pro reads the list of threats from a signed feed every 30 minutes. An air-gapped instance reads the same list from the nightly threat intelligence bundle.
 
