@@ -728,8 +728,18 @@ class Finding(BaseModel):
         self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        save_kwargs = kwargs
+        if not is_new_finding and not self._state.adding and not kwargs.get("force_insert") and not kwargs.get("update_fields"):
+            # An update must never INSERT. When a concurrent delete removed the row after this
+            # instance was loaded, a plain save's UPDATE matches nothing and Django falls back to an
+            # INSERT under the same pk, re-creating the finding from the stale copy without the
+            # tags, found_by and notes the delete cascaded away. Forcing the UPDATE makes that miss
+            # raise "Forced update did not affect any rows" instead, which the API answers with a
+            # 404 and the importers' vanished-row check skips. Only the row write gets the flag:
+            # kwargs also reach post_process_finding_save below.
+            save_kwargs = {"force_update": True, **kwargs}
         # We cannot run the full_clean method here without issue, so we specify skip_validation
-        super().save(*args, **kwargs, skip_validation=True)
+        super().save(*args, **save_kwargs, skip_validation=True)
 
         # Only add to found_by for newly-created findings (avoid doing this on every update)
         if is_new_finding:
