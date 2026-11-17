@@ -143,19 +143,21 @@ curl -s -H "Authorization: Token ${DD_IMPORTER_DOJO_API_TOKEN}" -H "Accept: appl
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_data/record_metrics/?model=product"
 ```
 
-`dimensions/` returns each dimension's `key` (the value to pass as `group_by`), a human `label`, and a `kind`:
+`dimensions/` returns each dimension's `key` (the value to pass as `group_by`), a human `label`, a `kind`, and a `group`:
 
 ```json
 {
   "model": "finding",
   "dimensions": [
-    {"key": "severity",  "label": "Severity",        "kind": "categorical"},
-    {"key": "status",    "label": "Status",          "kind": "banded"},
-    {"key": "date",      "label": "Discovered Date", "kind": "time"},
-    {"key": "test_type", "label": "Test Type",       "kind": "categorical"}
+    {"key": "severity",  "label": "Severity",        "kind": "categorical", "group": "finding"},
+    {"key": "status",    "label": "Status",          "kind": "banded",      "group": "finding"},
+    {"key": "date",      "label": "Discovered Date", "kind": "time",        "group": "dates"},
+    {"key": "test_type", "label": "Test Type",       "kind": "categorical", "group": "engagementAndTest"}
   ]
 }
 ```
+
+The `group` is the heading the dimension is listed under in the widget dialog's dimension pickers (`finding`, `asset`, `engagementAndTest`, `dates`, `people`, and so on). Every `time` dimension has the group `dates`. It is informational: you never send it back, and it does not change what `group_by` accepts.
 
 The `kind` matters: a `time` dimension (like `date`) requires you to also send a `time_bucket` (`day`/`week`/`month`/`quarter`/`year`); a `categorical` or `banded` dimension does not. The `priority` field is intentionally **not** a group-by dimension (it is a continuous score) — use the `risk` dimension for a banded view, or the dedicated **Priority Histogram** widget.
 
