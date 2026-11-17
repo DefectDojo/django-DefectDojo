@@ -585,8 +585,22 @@ class LocationManager(BaseLocationManager):
         """
         Convert locations represented as LocationData dataclasses to the appropriate AbstractLocation type, then clean
         them. For any endpoints that fail this validation process, log a message that broken locations are being stored.
+
+        Of two equal locations (the same type and value, but possibly different descriptive fields such as a
+        dependency's component type) the LAST one reported is kept, as _persist_locations does across calls. The
+        result is in last-reported order.
         """
-        locations = list(set(cls.make_abstract_locations(locations)))
+        # Walk backwards so the first copy seen is the last one reported. The key is what AbstractLocation equality
+        # compares (type and rendered value), rendered once per location rather than on every hash and comparison.
+        seen: set[tuple[type, str]] = set()
+        deduplicated: list[AbstractLocation] = []
+        for location in reversed(cls.make_abstract_locations(locations)):
+            key = (type(location), str(location))
+            if key not in seen:
+                seen.add(key)
+                deduplicated.append(location)
+        deduplicated.reverse()
+        locations = deduplicated
         for location in locations:
             try:
                 location.clean()
