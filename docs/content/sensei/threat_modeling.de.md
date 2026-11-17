@@ -28,7 +28,7 @@ Es wird nichts installiert und kein Repository verbunden. Threat Modeling liest 
 Wählen Sie **New Threat Model**, wählen Sie das Produkt aus, vergeben Sie einen Namen und liefern Sie den Entwurf in der Form, in der er vorliegt:
 
 - **Fügen Sie die Beschreibung** direkt ein, oder
-- **Laden Sie ein Design-Dokument hoch** — `.md`, `.markdown`, `.txt`, `.text` oder `.pdf`. Die Textextraktion aus PDF erfolgt nach bestem Bemühen; besteht ein PDF größtenteils aus Bildern, fügen Sie den Text stattdessen direkt ein.
+- **Laden Sie ein Design-Dokument hoch** — `.md`, `.markdown`, `.txt`, `.text` oder `.pdf`. Der Text eines PDF wird aus seiner Textebene gelesen. Ein gescanntes PDF hat keine; ein PDF, aus dem sich kein Text lesen lässt, wird daher abgelehnt, wenn es die einzige Eingabe ist: Fügen Sie den Text stattdessen direkt ein oder fügen Sie ein Architekturdiagramm hinzu.
 - **Fügen Sie optional ein Architekturdiagramm hinzu** — PNG, JPEG, WebP oder GIF. Das Diagramm wird zusammen mit dem Text ausgewertet, sodass auch eine Komponente erfasst wird, die nur im Bild vorkommt.
 
 Sie können beides kombinieren: Eine kurze eingefügte Zusammenfassung plus ein Diagramm ergibt oft ein besseres Modell als jedes für sich allein.

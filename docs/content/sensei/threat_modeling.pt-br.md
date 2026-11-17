@@ -28,7 +28,7 @@ Nada é instalado e nenhum repositório é conectado. A modelagem de ameaças l�
 Escolha **New Threat Model**, selecione o produto, dê um nome a ele e forneça o design na forma que você tiver:
 
 - **Cole a descrição** diretamente, ou
-- **Faça upload de um documento de design** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. A extração de texto de PDF é feita em base de melhor esforço; se um PDF for majoritariamente composto de imagens, cole o texto em vez disso.
+- **Faça upload de um documento de design** — `.md`, `.markdown`, `.txt`, `.text` ou `.pdf`. O texto de um PDF é lido da sua camada de texto. Um PDF digitalizado não tem uma, então um PDF do qual nenhum texto pode ser lido é recusado quando é a única entrada: cole o texto em vez disso ou adicione um diagrama de arquitetura.
 - **Opcionalmente, adicione um diagrama de arquitetura** — PNG, JPEG, WebP ou GIF. O diagrama é lido junto com o texto, então um componente que aparece apenas na imagem ainda assim é identificado.
 
 Você pode combiná-los: um resumo curto colado junto com um diagrama costuma produzir um modelo melhor do que qualquer um dos dois isoladamente.

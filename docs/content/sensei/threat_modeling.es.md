@@ -28,7 +28,7 @@ No se instala nada ni se conecta ningún repositorio. El modelado de amenazas so
 Elija **New Threat Model**, seleccione el producto, asígnele un nombre y proporcione el diseño en el formato que tenga disponible:
 
 - **Paste the description** directamente, o
-- **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. La extracción de texto desde PDF es best-effort; si un PDF es mayormente imágenes, pegue el texto en su lugar.
+- **Upload a design document** — `.md`, `.markdown`, `.txt`, `.text` o `.pdf`. El texto de un PDF se lee de su capa de texto. Un PDF escaneado no la tiene, así que un PDF del que no se puede leer texto se rechaza cuando es la única entrada: pegue el texto en su lugar o agregue un diagrama de arquitectura.
 - **Optionally add an architecture diagram** — PNG, JPEG, WebP o GIF. El diagrama se lee junto con el texto, por lo que un componente que solo aparece en la imagen igualmente se detecta.
 
 Puede combinarlos: un resumen breve pegado junto con un diagrama suele producir un mejor modelo que cualquiera de los dos por separado.
