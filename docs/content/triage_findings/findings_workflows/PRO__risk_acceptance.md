@@ -714,6 +714,14 @@ With **Risk Acceptances 2.0** off there is no review state to put them in, so th
 alone. They are never accepted anyway; that is the one thing the limit exists to prevent. A rule
 preview creates nothing, as with every other action.
 
+### Approvals in ServiceNow
+
+If your exceptions are approved in ServiceNow, DefectDojo can open a ServiceNow record for every
+request and apply the decision made there, as the DefectDojo user a superuser has linked to that
+ServiceNow approver, only while the request still matches what was sent, and only if that user could
+have approved it here. See
+[Risk Acceptance Approvals in ServiceNow](../pro__risk_acceptance_servicenow/).
+
 ### API
 
 ```
