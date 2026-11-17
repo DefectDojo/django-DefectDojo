@@ -118,6 +118,7 @@ Key facts:
 - [Reachability (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/reachability/): How DefectDojo Pro records whether a Finding's vulnerable code is actually reachable, and how that verdict adjusts priority
 - [Asset Exposure (Pro)](https://docs.defectdojo.com/triage_findings/finding_scoring/asset_exposure/): How DefectDojo Pro records whether an asset is reachable from outside, whether a Finding is deployed in production, and how both adjust priority
 - [Remediation Center (Pro)](https://docs.defectdojo.com/triage_findings/remediation_center/pro__remediation_center/): Group open Findings by the change that resolves them, one remediation action per change per location, with a due date, owners, workflow status and campaign rollups
+- [Emerging Threats (Pro)](https://docs.defectdojo.com/triage_findings/emerging_threats/pro__emerging_threats/): See the new vulnerabilities DefectDojo is building Early Light detectors for, check your Findings against them, and request a detector
 
 ## Model Your Assets
 
