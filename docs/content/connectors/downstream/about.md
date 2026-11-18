@@ -128,7 +128,7 @@ curl -H "Authorization: Token <your API key>" \
 - Ticket links are read only. The connector creates them when it opens a ticket and updates their status when it syncs, so the API does not create, change or delete them.
 - Reading them needs the global Integration View permission, and lists only the links of Findings and Finding Groups you can view.
 
-A single Finding can also list its tickets: add `ticket_links` to `response_fields` on `/api/v2/findings/`, for example `/api/v2/findings/123/?response_fields=id,title,ticket_links`. The field is left out of a Finding unless it is asked for.
+A single Finding can also list its tickets: add `ticket_links` to `response_fields` on `/api/v2/findings/`, for example `/api/v2/findings/123/?response_fields=id,title,ticket_links`. The field is left out of a Finding unless it is asked for. Unlike the ticket link list, it needs only permission to view that Finding, not the global Integration View permission: anyone who can open the Finding sees its tickets, as on the Finding page.
 
 ## Vendor-Specific Requirements
 
