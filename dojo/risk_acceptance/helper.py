@@ -5,7 +5,7 @@ import pghistory
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef, Q, prefetch_related_objects
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ngettext
@@ -110,49 +110,11 @@ def expire_now(risk_acceptance, user=None, reason=None, run=None):
     :param run: The scheduled run this expiry is part of (see ExpirationRun), which then sends the comments and
         the notification once for the whole run. None sends them now, for this acceptance alone.
     """
-    logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
-
-    reactivated_findings = []
-    if risk_acceptance.reactivate_expired:
-        for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active:  # not sure why this is important
-                logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
-                finding.active = True
-                finding.risk_accepted = False
-
-                # Restore Verified so the finding returns to "Active, Verified" rather than
-                # keeping the (usually unverified) state it had while risk accepted. Opt-in,
-                # because the pre-acceptance verified value is not tracked and some workflows
-                # rely on reactivated findings staying unverified until re-triaged.
-                if risk_acceptance.restore_verified_expired:
-                    finding.verified = True
-
-                # Update any endpoint statuses on each of the findings
-                update_endpoint_statuses(finding, accept_risk=False)
-
-                if risk_acceptance.restart_sla_expired:
-                    finding.sla_start_date = timezone.now().date()
-                # this method both saves and pushed to JIRA (no other post processing)
-                finding.save(dedupe_option=False)
-                if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
-                    logger.info("pushing finding to JIRA after expiration of risk acceptance")
-                    jira_services.push(finding)
-
-                reactivated_findings.append(finding)
-            else:
-                logger.debug("%i:%s already active, no changes made.", finding.id, finding)
-
-        # best effort JIRA integration, no status changes, just a comment
-        if run is None:
-            post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
-        else:
-            run.comment(risk_acceptance, risk_acceptance.accepted_findings.all())
-
-    risk_acceptance.expiration_date = timezone.now()
-    risk_acceptance.expiration_date_handled = timezone.now()
-    risk_acceptance.save()
-
-    note_on_risk_acceptance(risk_acceptance, user, "expired", reason=reason)
+    # One transaction, so the acceptance stays locked from the read of its members until it is stamped expired.
+    with transaction.atomic():
+        reactivated_findings = _expire_now(risk_acceptance, user=user, reason=reason, run=run)
+    if reactivated_findings is None:
+        return
 
     # the expiry above is the job here, the notification below is best effort
     engagement = engagement_to_notify_about(risk_acceptance)
@@ -172,6 +134,67 @@ def expire_now(risk_acceptance, user=None, reason=None, run=None):
         create_notification(**notification)
     else:
         run.notify(notification)
+
+
+def _expire_now(risk_acceptance, user=None, reason=None, run=None):
+    # The acceptance is locked and read again before its members are: a write adding findings to it in another
+    # transaction either commits first, and its findings are read and reactivated here, or waits for this expiry
+    # and then finds the acceptance expired. Read without the lock (or from the members the caller prefetched),
+    # a finding added at that moment stays risk accepted inside an expired acceptance, and nothing visits it again.
+    risk_acceptance.refresh_from_db(from_queryset=Risk_Acceptance.objects.select_for_update())
+    if risk_acceptance.expiration_date_handled is not None:
+        # Expired while this waited for the lock (a manual expire and the scheduled run, or two manual expires):
+        # it is not expired a second time, so its date, note, comments and notification are not repeated.
+        logger.info("Risk acceptance %i:%s was expired while this expiry waited, nothing to do", risk_acceptance.id, risk_acceptance)
+        return None
+    prefetch_related_objects([risk_acceptance], *EXPIRATION_PREFETCH)
+    logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+
+    reactivated_findings = []
+    if risk_acceptance.reactivate_expired:
+        for finding in risk_acceptance.accepted_findings.all():
+            if finding.duplicate and not finding.risk_accepted:
+                # A duplicate the acceptance never accepted (see not_held): it was not inactive because of the
+                # acceptance, so its expiry has nothing to give back.
+                logger.debug("%i:%s: duplicate never accepted, no changes made.", finding.id, finding)
+            elif not finding.active:  # not sure why this is important
+                logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
+                finding.active = True
+                finding.risk_accepted = False
+
+                # Restore Verified so the finding returns to "Active, Verified" rather than
+                # keeping the (usually unverified) state it had while risk accepted. Opt-in,
+                # because the pre-acceptance verified value is not tracked and some workflows
+                # rely on reactivated findings staying unverified until re-triaged.
+                if risk_acceptance.restore_verified_expired:
+                    finding.verified = True
+
+                # Update any endpoint statuses on each of the findings
+                update_endpoint_statuses(finding, accept_risk=False)
+
+                if risk_acceptance.restart_sla_expired:
+                    finding.sla_start_date = timezone.now().date()
+                # this method both saves and pushed to JIRA (no other post processing)
+                finding.save(dedupe_option=False)
+                push_to_jira_after_commit(finding, "expiration of risk acceptance")
+
+                reactivated_findings.append(finding)
+            else:
+                logger.debug("%i:%s already active, no changes made.", finding.id, finding)
+
+        # best effort JIRA integration, no status changes, just a comment, sent once the expiry is committed
+        if run is None:
+            members = list(risk_acceptance.accepted_findings.all())
+            transaction.on_commit(lambda: post_jira_comments(risk_acceptance, members, expiration_message_creator))
+        else:
+            run.comment(risk_acceptance, risk_acceptance.accepted_findings.all())
+
+    risk_acceptance.expiration_date = timezone.now()
+    risk_acceptance.expiration_date_handled = timezone.now()
+    risk_acceptance.save()
+
+    note_on_risk_acceptance(risk_acceptance, user, "expired", reason=reason)
+    return reactivated_findings
 
 
 def findings_accepted_elsewhere(risk_acceptance):
@@ -196,14 +219,16 @@ def findings_accepted_elsewhere(risk_acceptance):
 
 def findings_closed_since_expiry(risk_acceptance):
     """
-    The members of an expired risk acceptance that have been closed since it expired.
+    The members of an expired risk acceptance that have been closed since it expired, or that it never accepted.
 
     An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
     members. Closing one of them afterwards (mitigated, false positive, out of scope, or marked as an inactive
     duplicate) leaves it listed, and reinstating does not accept it again because it is not active. Kept as a
     member, the next expiry would set it active again: its save would clear a mitigation, and a duplicate would
-    read active while still a duplicate. Without reactivation the expiry reopens nothing and the members keep
-    their flag, so none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
+    read active while still a duplicate. A duplicate the acceptance never accepted is counted the same way: the
+    expiry left it inactive (see not_held), so it reads exactly like a held member marked a duplicate since, and
+    reinstating leaves it out. Without reactivation the expiry reopens nothing and the members keep their flag, so
+    none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
     """
     if not risk_acceptance.reactivate_expired:
         return risk_acceptance.accepted_findings.none()
@@ -212,8 +237,11 @@ def findings_closed_since_expiry(risk_acceptance):
 
 
 def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
-    # One transaction, so the members' lock below holds until the reinstate is written.
+    # One transaction, so the locks below hold until the reinstate is written. The acceptance is locked before its
+    # members, the order expire_now takes them in, so a reinstate and an expiry of the same acceptance queue
+    # instead of deadlocking.
     with transaction.atomic():
+        list(Risk_Acceptance.objects.select_for_update().filter(pk=risk_acceptance.pk).values_list("pk", flat=True))
         _reinstate(risk_acceptance, old_expiration_date, user=user, reason=reason)
 
 
@@ -234,10 +262,10 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
                 len(accepted_elsewhere),
             )
             risk_acceptance.accepted_findings.remove(*accepted_elsewhere)
-        # A member closed since the expiry stays closed and leaves too: the next expiry would otherwise reopen it.
+        # A member closed since the expiry, or a duplicate the acceptance never accepted, stays as it is and leaves too.
         if closed_since := list(findings_closed_since_expiry(risk_acceptance)):
             logger.info(
-                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired",
+                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired or never accepted",
                 risk_acceptance.id,
                 risk_acceptance,
                 len(closed_since),
@@ -278,13 +306,57 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     risk_acceptance.save()
 
 
-def delete(eng, risk_acceptance):
-    findings = risk_acceptance.accepted_findings.all()
-    for finding in findings:
+def closed_for_another_reason(finding: Finding) -> bool:
+    """
+    Whether a finding is closed for a reason other than a risk acceptance: mitigated, false positive or out of scope.
+
+    An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
+    members, so a member can be closed afterwards and stay listed. Such a member is not inactive because of the
+    acceptance, so taking it out of the acceptance must not reopen it.
+    """
+    return bool(finding.is_mitigated or finding.mitigated or finding.false_p or finding.out_of_scope)
+
+
+def not_held(finding: Finding) -> bool:
+    """
+    Whether a member is inactive on its own account rather than because its acceptance holds it.
+
+    That is a member closed for another reason (see closed_for_another_reason), or a duplicate the acceptance never
+    accepted: add_findings_to_risk_acceptance leaves a duplicate that is not risk accepted as it is while it stays a
+    member. Neither comes back active when it leaves the acceptance or the acceptance expires. Read it before the
+    finding's risk accepted flag is cleared.
+    """
+    return closed_for_another_reason(finding) or (finding.duplicate and not finding.risk_accepted)
+
+
+def release_finding(finding: Finding) -> None:
+    """
+    Take a risk acceptance off a finding that leaves it, without saving.
+
+    A finding the acceptance held comes back active, and its endpoint statuses with it. A member it does not hold (see
+    not_held) keeps its active value: one closed for another reason stays closed with its close fields (setting it
+    active would make its save clear the close), and a duplicate the acceptance never accepted stays inactive. Its
+    endpoint statuses only lose their risk accepted flag.
+    """
+    held = not not_held(finding)
+    finding.risk_accepted = False
+    if held:
         finding.active = True
-        finding.risk_accepted = False
-        # Update any endpoint statuses on each of the findings
         update_endpoint_statuses(finding, accept_risk=False)
+        return
+    for status in finding.status_finding.filter(risk_accepted=True):
+        status.risk_accepted = False
+        status.last_modified = timezone.now()
+        status.save()
+
+
+def delete(eng, risk_acceptance):
+    # Read the members from the database, not through the acceptance: a caller can hold it with its members prefetched
+    # (expire_now prefetches them), and a member closed since then would be judged and saved from that stale copy,
+    # reopening it.
+    findings = list(Finding.objects.filter(risk_acceptance=risk_acceptance).order_by("id"))
+    for finding in findings:
+        release_finding(finding)
         finding.save(dedupe_option=False)
 
     # best effort jira integration, no status changes
@@ -301,10 +373,7 @@ def delete(eng, risk_acceptance):
 def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, finding: Finding) -> None:
     logger.debug("removing finding %i from risk acceptance %i", finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
-    finding.active = True
-    finding.risk_accepted = False
-    # Update any endpoint statuses on each of the findings
-    update_endpoint_statuses(finding, accept_risk=False)
+    release_finding(finding)
     # this method both saves and pushed to JIRA (no other post processing)
     finding.save(dedupe_option=False)
     if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
@@ -728,12 +797,18 @@ def get_almost_expired_risk_acceptances_to_handle(heads_up_days):
     return prefetch_for_expiration(risk_acceptances)
 
 
+# What an expiry reads of an acceptance: its members and their JIRA issues, and its engagement's JIRA project.
+EXPIRATION_PREFETCH = (
+    "accepted_findings",
+    "accepted_findings__jira_issue",
+    "engagement_set",
+    "engagement__jira_project",
+    "engagement__jira_project__jira_instance",
+)
+
+
 def prefetch_for_expiration(risk_acceptances):
-    return risk_acceptances.prefetch_related("accepted_findings", "accepted_findings__jira_issue",
-                                                "engagement_set",
-                                                "engagement__jira_project",
-                                                "engagement__jira_project__jira_instance",
-                                             )
+    return risk_acceptances.prefetch_related(*EXPIRATION_PREFETCH)
 
 
 def simple_risk_accept(user: Dojo_User, finding: Finding, *, perform_save=True) -> None:

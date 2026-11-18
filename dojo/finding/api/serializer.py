@@ -23,6 +23,7 @@ from dojo.finding.helper import (
     save_endpoints_template,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
+    set_found_by_locking_finding_first,
 )
 from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
@@ -633,7 +634,7 @@ class FindingSerializer(serializers.ModelSerializer):
         found_by = validated_data.pop("found_by", None)
         # Handle updates to found_by data
         if found_by:
-            instance.found_by.set(found_by)
+            set_found_by_locking_finding_first(instance, found_by)
         # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
         # Findings still maintain original found_by value associated with their test
         # In the event the user does not supply the found_by field at all, we do not modify it
@@ -834,7 +835,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if notes:
             new_finding.notes.set(notes)
         if found_by:
-            new_finding.found_by.set(found_by)
+            set_found_by_locking_finding_first(new_finding, found_by)
         if reviewers:
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:

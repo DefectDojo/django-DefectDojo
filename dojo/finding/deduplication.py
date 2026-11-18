@@ -219,6 +219,15 @@ def is_duplicate_reopen(new_finding, existing_finding) -> bool:
     return finding_mitigated(existing_finding) and finding_not_human_set_status(existing_finding) and not finding_mitigated(new_finding)
 
 
+def cluster_root(finding):
+    """
+    The original a manual duplicate mark from ``finding`` lands under.
+
+    That is ``finding``'s own original when it is a duplicate that still has one, and ``finding`` itself otherwise.
+    """
+    return finding.duplicate_finding if finding.duplicate and finding.duplicate_finding else finding
+
+
 def manual_duplicate_hides_open_finding(duplicate, original) -> bool:
     """
     Whether marking ``duplicate`` as a duplicate of ``original`` by hand would hide an open finding.
@@ -229,8 +238,7 @@ def manual_duplicate_hides_open_finding(duplicate, original) -> bool:
     original) apply the same rule. ``original`` is resolved to the root of its cluster first,
     because that is the finding ``duplicate`` would end up pointing at.
     """
-    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
-    return is_duplicate_reopen(duplicate, root)
+    return is_duplicate_reopen(duplicate, cluster_root(original))
 
 
 def finding_mitigated(finding: Finding) -> bool:

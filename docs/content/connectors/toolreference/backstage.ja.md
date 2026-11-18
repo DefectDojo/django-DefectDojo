@@ -11,7 +11,7 @@ Backstage コネクタは**asset connector**です。検出事項をインポー
 | Backstage | DefectDojo |
 |---|---|
 | **System** | 製品タイプ(System を持たない Component は、設定可能な「Backstage / Uncategorized」製品タイプの下にグループ化されます) |
-| **Component** | 製品 — エンティティの `title`(なければ `name` にフォールバック)から命名され、カタログの description が付与されます |
+| **Component** | 製品 — エンティティの `title`(なければ `name` にフォールバック)から命名され、カタログの description が付与されます。description は新しい製品、または description が空の製品に設定され、その後の Backstage での変更に追従します。DefectDojo で記入された description は、コネクターが名前で対応付けた既存の製品であっても置き換えられることはありません。 |
 | **Owning Group**(`ownedBy` リレーション) | 製品に紐づく DefectDojo のグループ(デフォルトのロール: Maintainer、設定変更可能) |
 | **Owning Group** の `metadata.description` | DefectDojo グループの説明。新しいグループ、または説明が空かコネクターのプレースホルダーのままのグループに設定され、その後の Backstage での変更にも追従します。管理者が書いた説明は置き換えられません。 |
 | **Owner email**(グループプロファイルの email、または User オーナーの email) | 同じ email を持つ DefectDojo ユーザーが既に存在する場合、そのユーザーが製品メンバーになります(ユーザーが新規作成されることはありません) |

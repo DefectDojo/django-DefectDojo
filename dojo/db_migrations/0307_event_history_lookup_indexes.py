@@ -167,11 +167,26 @@ class AddHistoryLookupIndexes(Operation):
 
     @staticmethod
     def _build_in_progress(cursor, index_name):
+        """
+        Whether another backend is still building the index, up to and including its commit.
+
+        Postgres ends a build's pg_stat_progress_create_index row just before its last transaction
+        commits, and that transaction is the one that marks the index valid, so in that window
+        indisvalid still reads false. The pg_index row's xmax then names the build's open
+        transaction, which holds a lock on its own id in pg_locks until it ends.
+        """
         cursor.execute(
-            "SELECT 1 FROM pg_stat_progress_create_index WHERE index_relid = to_regclass(%s) AND pid <> pg_backend_pid()",
-            [index_name],
+            "SELECT EXISTS ("
+            "  SELECT 1 FROM pg_stat_progress_create_index"
+            "  WHERE index_relid = to_regclass(%s) AND pid <> pg_backend_pid()"
+            ") OR EXISTS ("
+            "  SELECT 1 FROM pg_index i"
+            "  JOIN pg_locks l ON l.locktype = 'transactionid' AND l.transactionid = i.xmax"
+            "  WHERE i.indexrelid = to_regclass(%s) AND l.pid <> pg_backend_pid()"
+            ")",
+            [index_name, index_name],
         )
-        return cursor.fetchone() is not None
+        return cursor.fetchone()[0]
 
 
 class Migration(migrations.Migration):

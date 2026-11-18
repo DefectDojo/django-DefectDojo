@@ -78,7 +78,7 @@ Moving a Finding also updates the things that belong to its old position in the 
 
 * Its **Endpoints** (or **Locations**) are re-homed onto the destination Asset, so they no longer point at the Asset it came from. An Endpoint shared with a Finding that stayed behind is left in place for that Finding.
 * It is removed from its **Finding Group**, because a group belongs to a single Test.
-* A **Risk Acceptance** belongs to a single Engagement. A Finding moved to another Test in the same Engagement stays accepted; a Finding moved to another Engagement is removed from its Risk Acceptance and becomes active again. Re-accept the risk in the destination Engagement if it still applies.
+* A **Risk Acceptance** belongs to a single Engagement. A Finding moved to another Test in the same Engagement stays accepted; a Finding moved to another Engagement is removed from its Risk Acceptance and becomes active again. A duplicate the Risk Acceptance never accepted is the exception when it stays a duplicate after the move (a move between Engagements of one Asset, when neither Engagement has **Deduplication within this engagement only** set): it stays inactive. Re-accept the risk in the destination Engagement if it still applies.
 * Its **SLA** dates are recalculated against the destination Asset's SLA configuration, which may change its due date. Its priority and the Asset grades are recalculated when it changes Asset.
 * **Deduplication** runs again in the destination's scope.
 * A **note** is added to each moved Finding recording where it came from and where it went.
@@ -137,6 +137,25 @@ The remaining bulk-action buttons open their own dialogs:
 * **Finding Group** — create a new **Finding Group**, add the Findings to an existing group, or remove them from their current group. Finding Groups can only be created within a single **Test** — Findings from different Tests, Engagements, or Assets cannot share a group.
 * **Merge** — merge multiple selected Findings (all from the same Asset) into one.
 * **Delete** — delete the selected Findings after confirming in a popup.
+
+### Automating a bulk delete
+
+Scripts and integrations delete several Findings at once with `POST /api/v2/findings/bulk_delete/`, with the Finding IDs in `findings`:
+
+```json
+{ "findings": [101, 102, 103] }
+```
+
+The delete runs in the request and is all or nothing. Each Finding is deleted as `DELETE /api/v2/findings/{id}/` deletes it, with its notes, files and tags. When duplicate cluster cascade delete is on, its duplicates go with it. The response (`200`) reports what the request deleted, and why any Finding was skipped:
+
+```json
+{ "deleted": 2, "deleted_duplicates": 0, "skipped_messages": ["You are not authorized to delete finding 103."] }
+```
+
+* `deleted` counts the selected Findings this request deleted. A selected Finding that was already deleted by another request is not counted.
+* `deleted_duplicates` counts the duplicates deleted along with them by duplicate cluster cascade delete. It is always `0` when cascade delete is off. These duplicates can be Findings you cannot see, so only their number is reported.
+
+A Finding is deleted only if you have permission to delete it. An ID that does not exist is skipped and listed, like one you may not delete. If you may delete none of the selected Findings, the request is refused with `403` and nothing is deleted. A request takes up to 1,000 Finding IDs, and a longer list is refused with `400`, so split a larger cleanup into batches. Authenticate with an API token, as for the rest of `/api/v2/`.
 
 ## Availability and skipped Findings
 

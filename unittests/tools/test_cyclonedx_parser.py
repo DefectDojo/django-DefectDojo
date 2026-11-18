@@ -2,7 +2,7 @@ import datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.cyclonedx.parser import CycloneDXParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2, skip_unless_v3
 
 
 class TestCyclonedxParser(DojoTestCase):
@@ -91,6 +91,72 @@ class TestCyclonedxParser(DojoTestCase):
                 },
                 product_level,
             )
+
+    @staticmethod
+    def _cpe_locations(filename):
+        """Parse a fixture and return {vuln_id_from_tool: [cpe values]} and the product-level location types."""
+        test = Test()
+        with (get_unit_tests_scans_path("cyclonedx") / filename).open(encoding="utf-8") as file:
+            findings = CycloneDXParser().get_findings(file, test)
+        per_finding = {
+            finding.vuln_id_from_tool: [
+                location.data["cpe"]
+                for location in getattr(finding, "unsaved_locations", [])
+                if location.type == "cpe"
+            ]
+            for finding in findings
+        }
+        return per_finding, {location.type for location in test.unsaved_metadata}
+
+    @skip_unless_v3
+    def test_json_findings_carry_their_component_cpe_as_reported(self):
+        # A 2.3 string and a 2.2 URI each pass through as the report spells them, a component with no
+        # CPE gives none, and a component with a CPE but no vulnerability adds no product-level CPE.
+        per_finding, product_types = self._cpe_locations("cpe_components.json")
+        self.assertEqual(
+            {
+                "CVE-2099-1001": ["cpe:2.3:a:example_vendor:example_lib:1.2.3:*:*:*:*:*:*:*"],
+                "CVE-2099-1002": ["cpe:/a:example_vendor:example_app:4.5"],
+                "CVE-2099-1003": [],
+            },
+            per_finding,
+        )
+        self.assertEqual({"dependency"}, product_types)
+
+    @skip_unless_v3
+    def test_xml_findings_carry_their_component_cpe(self):
+        per_finding, product_types = self._cpe_locations("cpe_components_1.4.xml")
+        self.assertEqual(
+            {
+                "CVE-2099-1001": ["cpe:2.3:a:example_vendor:example_lib:1.2.3:*:*:*:*:*:*:*"],
+                "CVE-2099-1003": [],
+            },
+            per_finding,
+        )
+        self.assertEqual({"dependency"}, product_types)
+
+    @skip_unless_v3
+    def test_xml_legacy_extension_findings_carry_their_component_cpe(self):
+        # Both legacy paths: a vulnerability embedded in its component, and a root-level one
+        # resolved through the bom-ref.
+        per_finding, _product_types = self._cpe_locations("cpe_components_legacy.xml")
+        self.assertEqual(
+            {
+                "CVE-2099-1002": ["cpe:/a:example_vendor:example_app:4.5"],
+                "CVE-2099-1001": ["cpe:2.3:a:example_vendor:example_lib:1.2.3:*:*:*:*:*:*:*"],
+                "CVE-2099-1003": [],
+            },
+            per_finding,
+        )
+
+    @skip_unless_v2
+    def test_cpe_components_add_no_locations_with_locations_off(self):
+        for filename in ("cpe_components.json", "cpe_components_1.4.xml", "cpe_components_legacy.xml"):
+            with self.subTest(filename=filename):
+                per_finding, product_types = self._cpe_locations(filename)
+                self.assertTrue(per_finding)
+                self.assertEqual(set(), product_types)
+                self.assertTrue(all(cpes == [] for cpes in per_finding.values()))
 
     def test_grype_report(self):
         with (get_unit_tests_scans_path("cyclonedx") / "grype_dd_1_14_1.xml").open(encoding="utf-8") as file:

@@ -79,4 +79,4 @@ A finding without the flag gets no verdict from Wiz. This includes a finding tha
 
 When Wiz stops reporting the flag, the verdict ends as described in [How verdicts end](/triage_findings/finding_scoring/reachability/#how-verdicts-end).
 
-After the first sync, the connector reads only the findings that Wiz updated since the last sync. If Wiz does not update a finding for 30 days, the daily staleness sweep removes its verdict, even if Wiz still marks the finding as validated in runtime. To keep Wiz verdicts longer, give the Wiz source its own window with `DD_REACHABILITY_SOURCE_STALENESS_DAYS`, for example `{"Wiz - Connectors Import": 90}`.
+After the first sync, the connector reads only the findings that Wiz updated since the last sync. A finding Wiz did not update is unchanged, so each complete sync renews the Wiz verdicts of the active findings it did not send, and the daily staleness sweep does not remove them while Wiz still marks the finding as validated in runtime. A verdict on a finding that is closed is not renewed, and it expires at the end of the staleness window.

@@ -125,12 +125,13 @@ Each widget opens a configuration dialog tailored to its type. Common settings i
 
 #### Graph options
 
-A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**). Every dimension picker (the Graph, Top-N, Rate Chart, Sankey and Sunburst settings) lists its dimensions under the same headings as the chosen model's list page uses for **Add Filter**, in the same order, with every date dimension under Dates:
+A Graph widget groups its records by one dimension (**Group By**) and can split each group by a second (**Split By**). Every dimension picker (the Graph, Top-N, Rate Chart, Sankey and Sunburst settings) lists its dimensions under the same headings as the chosen model's list page uses for **Add Filter**, in the same order, with every date dimension under Dates, once it offers at least twelve dimensions under two or more headings (the Finding model's dimensions do; the shorter Asset, Engagement and Test lists are one flat list). The options:
 
 - **Split By** draws one line, or one run of bars, per value of a second dimension. Grouping by **Created Date** by month and splitting by **Severity Group** gives new findings per month as two lines, one for Critical and High findings and one for Medium and Low findings. Split By takes any dimension that is not a date and not the Group By, and is available on bar, line and area charts (a pie or doughnut shows one dimension). A chart draws up to 10 series: past that, the smallest values are combined into one **Other** series. A chart that counts unique CWEs or vulnerability IDs cannot combine values that way, so it asks for a filter or a dimension with fewer values instead.
 - **Severity Group** is a finding dimension with three values: **Critical and High**, **Medium and Low**, and **Info**. It works as a Group By (a two or three slice doughnut) or as a Split By. Its lines and slices are red for Critical and High and green for Medium and Low unless you pick other colors. Clicking one opens the Findings list filtered to that group's severities.
+- **PAIN Rating** is a finding dimension with the FedRAMP Potential Agency Impact ratings as its values: **N5** to **N1**, then **Unrated** for every finding nobody has rated, so the values add up to the chart's total. It works as a Group By or a Split By on a **Graph**, and as the dimension of a **Top-N Leaderboard**. Clicking a value on a Graph opens the Findings list filtered to that rating. See [PAIN ratings](/federal_compliance/pain_ratings/).
 - **Created Date** is when a finding was created in DefectDojo (when it was imported or added), as opposed to **Discovered Date**, the date the scanner reported. Charting new findings per month by Created Date counts each finding in the month it arrived.
-- **Order**: a chart grouped by **Severity**, **Status**, **Risk** or a band (**Severity Group**, **SLA Band**, **Age Band**, the CVSS bands) lists its values in that dimension's own order: Critical, High, Medium, Low, Info for severity; Active first, then each way a finding is closed, for status; Urgent, Needs Action, Medium, Low for risk. Any other dimension (a component, an Asset, a test type) lists the biggest values first. With a limit on the number of values, the chart keeps the biggest ones and then puts them in that order. The **Top-N Leaderboard** always ranks by count, whatever the dimension, so its first row is the biggest. The `/api/v2/dashboards/widget_data/aggregate/` endpoint returns its labels in the same order as the chart, and ranks them by count when the request sets `"order": "count"`.
+- **Order**: a chart grouped by **Severity**, **Status**, **Risk** or a band (**Severity Group**, **SLA Band**, **Age Band**, the CVSS bands, **PAIN Rating**) lists its values in that dimension's own order: Critical, High, Medium, Low, Info for severity; Active first, then each way a finding is closed, for status; Urgent, Needs Action, Medium, Low for risk; N5 to N1, then Unrated, for PAIN Rating. Any other dimension (a component, an Asset, a test type) lists the biggest values first. With a limit on the number of values, the chart keeps the biggest ones and then puts them in that order. The **Top-N Leaderboard** always ranks by count, whatever the dimension, so its first row is the biggest. The `/api/v2/dashboards/widget_data/aggregate/` endpoint returns its labels in the same order as the chart, and ranks them by count when the request sets `"order": "count"`.
 - **Show Values** prints the number on each bar, point or slice. A pie or doughnut also shows each slice's share of the total.
 - **Stacked** stacks the series of a split chart on top of each other instead of drawing them side by side. It appears once Split By is set.
 - **Colors** sets the color of each series (with Split By) or of each slice or bar (without). **Default** keeps the color the chart would pick, such as the severity colors.
@@ -179,7 +180,7 @@ Every row's actions are in the menu at the start of the row.
 
 ### Shared templates
 
-DefectDojo ships four ready-to-use shared templates you can clone as a starting point:
+DefectDojo ships ready-to-use shared templates you can clone as a starting point, among them:
 
 | Template | Purpose |
 |----------|---------|
@@ -187,6 +188,7 @@ DefectDojo ships four ready-to-use shared templates you can clone as a starting 
 | **Priority Layout** | A triage-focused board built around finding priority and risk. |
 | **Mitigation Layout** | A remediation-velocity board (closure trends, MTTR/MTTD, aging). |
 | **Tool Layout** | A scanner-effectiveness board built around test types and recent scan activity. |
+| **EU CRA** | The Cyber Resilience Act at a glance: the CRA row of **Regulatory Scope** (Assets in scope, open, past-SLA and CISA KEV findings, support-period warnings) above **CRA Article 14 Deadlines**. Listed only while the Regulatory Profile feature is on. See [Setting Up EU CRA](/federal_compliance/eu_cra_setup/). |
 
 > **💡 Tip:** Cloning a template makes an independent copy. Customize the clone freely — you will not affect the template or anyone else who clones it. A **collaborative** layout is the exception by design: it is used live rather than copied, so edits made to it are visible to everyone. Take your own copy of a collaborative layout only when you want a private version that no longer follows the shared one. A read-only collaborative layout works the same way, except that only a Maintainer or its owner can change it.
 
@@ -300,7 +302,7 @@ Some widgets read data that only exists when a feature is turned on, the license
 | **Shadow AI**, **AI Footprint** | The AI Inventory and Governance feature |
 | **CRA Article 14 Deadlines** | The Regulatory Profile feature |
 
-**Regulatory Scope** needs no feature: its rows are the regulations assigned to your Assets, which every instance can record. Only its support-period column reads the Regulatory Profile, and it counts nothing where no support period was recorded.
+**Regulatory Scope** needs no feature: its rows are the regulations assigned to your Assets, which every instance can record. Only its support-period column reads the Regulatory Profile, and it counts nothing where no support period was recorded. Its **CISA KEV** column counts each regulation's open findings marked **Known Exploited** (listed in the CISA KEV catalog).
 
 ## Charting scans by category
 

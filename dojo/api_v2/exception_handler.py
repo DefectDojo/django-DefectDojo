@@ -10,12 +10,14 @@ from django.db.models.deletion import RestrictedError
 from django.db.utils import IntegrityError
 from django.utils.log import log_response
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_noop
 from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_410_GONE,
     HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -23,6 +25,7 @@ from rest_framework.status import (
 )
 from rest_framework.views import exception_handler
 
+from dojo.db_utils import is_vanished_row_error
 from dojo.endpoint.models import EndpointDeprecatedError
 from dojo.location.api.deprecation import sunset_body
 from dojo.models import System_Settings
@@ -45,6 +48,9 @@ UNIQUE_VIOLATION_MESSAGE_MARKERS = (
 
 # Deliberately generic: the driver message carries the constraint name, the table
 # name and the offending value, none of which belong in an API response body.
+# Returned when a write's row was deleted by a concurrent request after this one loaded it.
+VANISHED_ROW_RESPONSE_MESSAGE = gettext_noop("This object was deleted while the request was being processed.")
+
 UNIQUE_VIOLATION_RESPONSE_MESSAGE = (
     "The request conflicts with an existing record because a unique field value "
     "already exists. Retrieve or update the existing record instead of creating "
@@ -173,6 +179,20 @@ def custom_exception_handler(exc, context):
         # Matching the RestrictedError 409 above, no product announcement is
         # attached to a conflict response.
         response.data = {"message": UNIQUE_VIOLATION_RESPONSE_MESSAGE}
+    elif is_vanished_row_error(exc):
+        # A forced UPDATE (an update of a saved Finding, an importer write-back) or an update_fields
+        # save matched no row: a concurrent request deleted the object after this one loaded it.
+        # Django raises that miss instead of re-inserting the row, and no other failure raises it, so
+        # the object the caller wrote to no longer exists: answer 404, as a request to a deleted
+        # object does, rather than the generic 500 below. Logged at info: a race the caller lost.
+        logger.info(
+            "object deleted mid-request on %s: %s",
+            (context or {}).get("request", "unknown request"),
+            exc,
+        )
+        response = Response()
+        response.status_code = HTTP_404_NOT_FOUND
+        response.data = {"message": _(VANISHED_ROW_RESPONSE_MESSAGE)}
     elif isinstance(exc, EndpointDeprecatedError):
         # A v2 route reached the deprecated Endpoint model. Answer the documented
         # sunset contract rather than the generic 500 below, and log at info: an
@@ -206,7 +226,8 @@ def custom_exception_handler(exc, context):
         response.data = {"message": UPLOAD_LIMIT_RESPONSE_MESSAGE}
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
-            exception_message = str(exc.args[0])
+            # A bare `raise SomeError` has no args: name the exception rather than fail on args[0].
+            exception_message = str(exc.args[0]) if exc.args else type(exc).__name__
         else:
             exception_message = _("Internal server error, check logs for details")
         # There is no standard error response, so we assume an unexpected

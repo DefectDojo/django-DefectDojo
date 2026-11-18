@@ -86,6 +86,7 @@ With Group Ownership on, a connector or a ticket template can belong to a Group.
 
 * Each connector tile shows its owner. **Share** in the tile's menu shows a connector to other Groups, and **Transfer** moves it to another Group or to the instance.
 * **Ticket Templates** on the Downstream Connectors page lists the templates, with an **Owner** column, and offers **New Ticket Template**, **Share** and **Transfer**.
+* A connector's **Default Ticket Template** (offered on connectors that create tickets) lists only the templates you can see. A default someone else chose that you cannot see shows as **Saved Template (Kept Unchanged)** and stays in place when you edit the connector's other fields.
 * Connectors and ticket templates without a Group belong to the instance and keep needing the Integration permissions as a Global Role. Issue Tracker Mappings and Assignments, and a template's test render, stay with holders of the Global Role.
 
 #### Who can see and change an Assignment
@@ -112,6 +113,22 @@ Icons from left to right:
 - **Changelog**: Specifies when the Issue Tracker Ticket was associated with a Finding or Finding Group, as well as the last time DefectDojo made a change to the ticket
 
 ![image](images/integrators_1.png)
+
+### Reading ticket links with the API
+
+The tickets a Downstream Connector opened can be read with an API token on `/api/v2/downstream/ticket_links/`. Each ticket link names its connector type, its Issue Tracker Mapping, the ticket's ID, URL and status, and the Finding (`id`, `title`, `severity`) or Finding Group (`id`, `name`, `severity`) it belongs to.
+
+```bash
+# Every ticket opened for Finding 123
+curl -H "Authorization: Token <your API key>" \
+  "https://<your instance>/api/v2/downstream/ticket_links/?finding_equals=123"
+```
+
+- `finding_equals` and `finding_group_equals` take the Finding or Finding Group ID. `integration_type_equals` (for example `Jira`) and `issue_tracker_mapping_equals` narrow the list by connector type and by mapping.
+- Ticket links are read only. The connector creates them when it opens a ticket and updates their status when it syncs, so the API does not create, change or delete them.
+- Reading them needs the global Integration View permission, and lists only the links of Findings and Finding Groups you can view.
+
+A single Finding can also list its tickets: add `ticket_links` to `response_fields` on `/api/v2/findings/`, for example `/api/v2/findings/123/?response_fields=id,title,ticket_links`. The field is left out of a Finding unless it is asked for. Unlike the ticket link list, it needs only permission to view that Finding, not the global Integration View permission: anyone who can open the Finding sees its tickets, as on the Finding page.
 
 ## Vendor-Specific Requirements
 

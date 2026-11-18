@@ -24,7 +24,7 @@ reports show, mirroring ``test_finding_delete_conflict_retry.py`` -- no database
 """
 from unittest.mock import MagicMock, patch
 
-from django.db import IntegrityError
+from django.db import DatabaseError, IntegrityError
 from django.test import SimpleTestCase
 from psycopg.errors import ForeignKeyViolation, UniqueViolation
 from rest_framework.exceptions import NotFound
@@ -96,6 +96,31 @@ class TestPerformUpdateConcurrentDelete(SimpleTestCase):
                     msg=f"the {label} FK violation on a vanished finding must report the deletion, "
                         f"got: {caught.exception}",
                 )
+
+    def test_forced_update_miss_on_a_deleted_finding_returns_404(self):
+        """
+        Regression: the finding row's own save, which Finding.save forces to an UPDATE, missing a
+        finding deleted mid-request must be a 404, not a 500 and not a re-insert.
+        """
+        serializer = self._serializer()
+        serializer.save.side_effect = DatabaseError("Forced update did not affect any rows.")
+        with self.assertRaises(NotFound) as caught:
+            self._perform_update(serializer, finding_exists=False)
+        self.assertIn("deleted while the update was being processed", str(caught.exception))
+
+    def test_forced_update_miss_while_finding_still_exists_is_not_translated(self):
+        """Control: a forced-update miss on a finding that is still there is not the delete race."""
+        serializer = self._serializer()
+        serializer.save.side_effect = DatabaseError("Forced update did not affect any rows.")
+        with self.assertRaises(DatabaseError):
+            self._perform_update(serializer, finding_exists=True)
+
+    def test_other_database_error_is_not_translated(self):
+        """Control: a DatabaseError subclass carrying the phrase is a real failure, never a vanished row."""
+        serializer = self._serializer()
+        serializer.save.side_effect = _wrapped(IntegrityError, UniqueViolation, "did not affect any rows")
+        with self.assertRaises(IntegrityError):
+            self._perform_update(serializer, finding_exists=False)
 
     def test_fk_violation_while_finding_still_exists_is_not_translated(self):
         """

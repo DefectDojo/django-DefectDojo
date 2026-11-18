@@ -152,6 +152,22 @@ the findings list, add the **PAIN** column, or filter on it. The filter accepts 
 is the queue of findings waiting for an impact decision. Through the API the same filter is
 `?pain_rating=unrated` or `?pain_rating=4,5`.
 
+## Reporting on ratings
+
+A report or a dashboard can show the ratings directly, so a monthly summary is one table or one
+chart rather than one per rating:
+
+* **Report Builder**: a Finding table or detail block offers the **Potential Agency Impact (PAIN)**
+  field, printed as its N-level (N1 to N5), and the **PAIN Evaluated** field. An unrated finding
+  shows `-` in PDF and HTML output, as every empty field does, an empty cell in CSV and Excel, and
+  `null` in JSON. Both fields are also **Order By** choices. Ordering by **Potential Agency Impact (PAIN)**,
+  descending, lists N5 first, and unrated findings come last in either direction.
+* **Dashboards**: a **Graph** or **Top-N Leaderboard** widget on findings can group by
+  **PAIN Rating**, with an **Unrated** value for every finding without a rating, so the values add
+  up to the widget's total. The **Graph** draws one bar per rating in order, N5 first and
+  **Unrated** last, and clicking a bar opens the findings list filtered to that rating, or to
+  **Unrated**. The **Top-N Leaderboard** ranks the ratings by count, the largest first.
+
 ## Rating findings with the Rules Engine
 
 Ratings can also be assigned through **Triage Engine**, which is the way to rate findings at scale.

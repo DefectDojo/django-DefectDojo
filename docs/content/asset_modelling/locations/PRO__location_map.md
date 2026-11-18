@@ -66,7 +66,7 @@ With no node selected, the right panel shows a short **Map Overview**. Click the
 
 When a single location is selected, the left panel offers two actions:
 
-- **View Findings** opens the active findings recorded on that location. To see all of its findings, whatever their status, use the **Total Findings** count in the location list (see [Narrowing the Map with the List](#narrowing-the-map-with-the-list)).
+- **View Findings** opens the active findings recorded on that location in this Asset, the same findings the node counts. To see all of them, whatever their status, use the **Total Findings** count in the location list (see [Narrowing the Map with the List](#narrowing-the-map-with-the-list)).
 - **Copy Value** copies the full location value to the clipboard.
 
 A group is drawn from several locations, so these actions apply only to a single location.

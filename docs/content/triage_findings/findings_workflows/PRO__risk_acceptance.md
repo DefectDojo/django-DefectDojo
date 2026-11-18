@@ -69,7 +69,7 @@ Each Full Risk Acceptance adds additional context to Risk Acceptance, such as:
     - Whether the Finding’s status will return to “Active” upon expiration.
     - Whether the SLA will restart upon expiration.
 
-Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. When a Risk Acceptance expires, its Findings are set back to Active only if **Reactivate Findings on Expiration** is checked on it (it is by default). With that option unchecked, the Findings stay Risk Accepted after the expiration date.
+Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. When a Risk Acceptance expires, its Findings are set back to Active only if **Reactivate Findings on Expiration** is checked on it (it is by default). With that option unchecked, the Findings stay Risk Accepted after the expiration date. A Finding that was already a duplicate when it was added was never Risk Accepted, so an expiration leaves it inactive either way.
 
 A new Risk Acceptance starts with its **Expiration Date** filled in: today plus the **Default Risk Acceptance Days** setting on the System Settings page (180 unless changed, and 180 when the field is left empty). The date sits in the main part of the form, so you can see it, change it, or clear it before submitting. A Risk Acceptance with no expiration date never expires. If the setting is 0, new Risk Acceptances start with no date.
 
@@ -128,7 +128,7 @@ Findings can also be added and removed from the object using the same menu. Alte
 
 Closing a risk-accepted Finding for another reason also takes it out of its Risk Acceptance, on any Asset: **Close Finding**, a **Bulk Edit** **Status** of False Positive, Out of Scope or Mitigated, a Triage Engine rule that sets one of those, and an API update (`PATCH /api/v2/findings/{id}/`) that sets `false_p`, `out_of_scope` or `is_mitigated` to `true`. The Finding stays closed, its Endpoint statuses stay mitigated, and a note on it records the removal. A later expiration of that Risk Acceptance does not reopen it. A request that both risk accepts a Finding and closes it is refused, for example an API update that sends `risk_accepted: true` with `out_of_scope: true` for a Finding that is not yet accepted.
 
-Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.”
+Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.” A Finding that was closed for another reason after the Risk Acceptance expired (Mitigated, False Positive or Out of Scope) is the exception: deleting the object, or removing that Finding from it, leaves it closed. A Finding that was already a duplicate when it was added, and so was never Risk Accepted, keeps its status too: it stays inactive.
 
 ### Simple Risk Acceptances
 
@@ -188,7 +188,7 @@ The expiration job runs every three hours. Each run sends one notification per A
 The gear menu on a Risk Acceptance — in the table or on its detail page — offers whichever of these applies:
 
 - **Expire Risk Acceptance**, on one that is still live.  It expires immediately rather than waiting for its expiration date, and its Findings are reactivated according to its **Reactivate Expired Findings** and **Restart SLA Expired** settings.
-- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.  A Finding closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate), or Risk Accepted again somewhere else, is removed from it instead.
+- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.  A Finding closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate), or Risk Accepted again somewhere else, is removed from it instead. A duplicate the Risk Acceptance never accepted is removed the same way and stays inactive.
 
 Both require the same permission as editing the Risk Acceptance, and both ask for confirmation first.  To reinstate for a specific length of time instead of the default window, edit the expiration date rather than using the Reinstate action — see below.
 
@@ -211,7 +211,7 @@ If the Risk Acceptance has **already expired** — meaning the periodic job has 
 - The Risk Acceptance is reinstated and is no longer in the expired state.
 - Every Finding that was linked to the Risk Acceptance and is currently Active is re-accepted (set back to Risk Accepted / Inactive).
 - A Finding that has been Risk Accepted again since the expiry, through another Risk Acceptance or a Simple Risk Acceptance, stays where it is: it is removed from the reinstated Risk Acceptance, so it is never held by two at once.
-- A Finding that has been closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate) stays closed: it is removed from the reinstated Risk Acceptance, so a later expiry cannot reopen it.
+- A Finding that has been closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate) stays closed: it is removed from the reinstated Risk Acceptance, so a later expiry cannot reopen it. A duplicate the Risk Acceptance never accepted is removed the same way and stays inactive.
 - Endpoint statuses on those Findings are updated to reflect the re-acceptance.
 - A comment is posted to any linked Jira issues recording the reinstate.
 
@@ -461,9 +461,11 @@ status band, **Exception Requested**, instead of **Active**:
 - The Finding is not hidden and not suppressed. Its own status is still Active.
 - Charts and status splits show **Exception Requested** as its own slice, so the total still adds up
   and you can see how much work is sitting in a queue waiting on a decision.
-- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables,
-  alongside their real status — the Finding is still Active, and the badge says somebody is
-  waiting.
+- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables, on
+  Finding cards and on the Finding's own page, alongside their real status — the Finding is still
+  Active, and the badge says somebody is waiting. Select the badge to open the Risk Acceptance it is
+  waiting on. If that Risk Acceptance is not visible to you (Risk Acceptance visibility is its own
+  permission), the Finding opens instead and a message says so.
 - Finding tables offer an **Exception Requested** column, hidden by default: turn it on from the
   column picker and filter it to Yes to build that queue directly in the table. The same filter is
   available on the API as `has_pending_exception`.
@@ -528,13 +530,23 @@ record says the criteria covered it rather than naming a person.
 
 Matchable attributes — all optional, and **all of the ones present must match**:
 
-| Key | Matches on |
-| --- | --- |
-| `vulnerability_ids` | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
-| `cwes` | the Finding's CWE |
-| `severities` | the Finding's severity, case-insensitive |
-| `component_name`, `component_version` | glob patterns — the same component is named differently by different scanners, and versions come in ranges |
-| `title_pattern` | a glob against the title |
+| Key | Value | Matches on |
+| --- | --- | --- |
+| `vulnerability_ids` | a list of strings | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
+| `cwes` | a list of CWE numbers (`79` or `"79"`) | the Finding's CWE |
+| `severities` | a list of strings | the Finding's severity, case-insensitive |
+| `component_name`, `component_version` | a string | glob patterns (the same component is named differently by different scanners, and versions come in ranges) |
+| `title_pattern` | a string | a glob against the title |
+
+A value of another shape is refused with `400` and nothing is saved: a single string where a list is
+expected (`"severities": "High"` rather than `["High"]`), a CWE that is not a number, or a pattern that
+is not a string. CWE numbers sent as strings are stored as numbers, and a CWE number must be between 0
+and 2147483647.
+
+A Risk Acceptance saved before these checks with a value of another shape stays Active and can still be
+read, but new Findings are not matched against it: imports skip it (with a warning in the server log)
+rather than fail. Save its criteria again in the accepted shape to have it apply to new Findings once
+more. Sending the stored criteria back unchanged is refused with the same `400`, naming the value.
 
 `scope` is **required** and is what stops an acceptance reaching Findings its author has no business
 accepting. `type` is `engagement`, `product`, `product_type` or `global`.

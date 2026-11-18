@@ -1,14 +1,14 @@
 {
   "name": "defectdojo",
-  "version": "3.5.200",
+  "version": "3.5.201",
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
     "@fontsource-variable/inter": "^5.2",
     "@fontsource-variable/jetbrains-mono": "^5.2",
-    "@scalar/api-reference": "1.75.0",
+    "@scalar/api-reference": "1.78.1",
     "bootstrap-wysiwyg": "^2.0.0",
-    "chart.js": "^4.4",
+    "chart.js": "^4.6",
     "chartjs-adapter-moment": "^1.0",
     "chosen-bootstrap": "https://github.com/dbtek/chosen-bootstrap",
     "chosen-js": "^1.8.7",
@@ -24,7 +24,7 @@
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
     "jszip": "^3.10.2",
     "moment": "^2.31.0",
-    "pdfmake": "^0.3.12"
+    "pdfmake": "^0.3.14"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3",

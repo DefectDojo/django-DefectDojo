@@ -102,8 +102,10 @@ STEP 1 — DISCOVER (do this BEFORE designing anything; never invent values)
 
 2. For any chart/leaderboard that groups data, fetch the valid dimensions:
      GET /api/v2/dashboards/widget_data/dimensions/?model=<finding|product|engagement|test>
-   Each dimension has key, label, and kind (categorical | boolean | time |
-   banded). Pass the key as the widget's group_by. A "time" dimension also
+   Each dimension has key, label, kind (categorical | boolean | time |
+   banded) and group (the heading the UI lists it under, such as finding,
+   asset, engagementAndTest, dates or people; informational only). Pass the
+   key as the widget's group_by. A "time" dimension also
    needs a time_bucket (day|week|month|quarter|year); others do not.
    NOTE: "priority" is NOT a group-by dimension (it is a continuous score).
    Use the "risk" dimension for a banded view, or the priority_histogram widget.

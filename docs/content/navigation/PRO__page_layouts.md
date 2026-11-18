@@ -106,6 +106,8 @@ The fields can sit under named headers, and each header folds its group away. To
 
 The field list offers every field the page has, whatever record you edit the layout from: the Jira and connector fields, for example, are on offer whenever Jira or connectors are turned on, even when the record open at the time has no ticket. On a record without a value for one of them, its row is left out.
 
+To help find a field in a long list, **Available** sorts the fields under the same headings as the **Add Filter** menu of the page's list, in the same order: on a Finding, for example, **Finding**, **Threat Intel**, **Asset**, **Engagement and Test**, **Dates**, **People**, **Integrations** and **Custom Fields**. The headings are only a guide to the list. They are not the table's **Groups**, they are not saved with the layout, and **Shown** keeps the fields in the order you give them. The **Field** widget's list of fields uses the same headings. A page that offers fewer than twelve fields, or whose fields all fall under one heading, lists them without headings.
+
 On the page, each group's header shows its name and counts the fields it shows for that record, so a field left out because it is empty or does not apply is not counted. Select it, or press Enter or Space on it, to fold the group to its header or to open it again. Which groups you fold is remembered for you and for that table only: it does not change the layout, the record or what anyone else sees. In a wide table the groups flow into columns; in a narrow one the label sits above its value.
 
 The default layouts already group the larger tables, for example the Finding's **Details** table into **Triage**, **Ownership and Plan**, **Where Found**, **Scores and Intel** and **Tracking**.
