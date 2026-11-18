@@ -6,8 +6,9 @@ row, and that serializer built a new ``FindingTestSerializer`` (three levels of 
 and a new ``JIRAIssueSerializer`` for every row too. Building a serializer builds its whole field
 tree, so a 1000-row page spent seconds rebuilding the same trees. Nothing in those trees depends on
 the row, so one instance now serves every row a serializer renders. The same page read each JIRA
-issue's project and instance with a query each to render the issue's url; a ``related_fields`` page
-now loads them with the page.
+issue's project and instance with a query each to render the issue's url (for an issue with no project,
+the engagement's or the product's); a ``related_fields`` page now loads them with the page while JIRA is
+enabled.
 
 The tests pin that each of the three is built once for 2 rows and for 6, that related_fields adds the
 same statements to 2 rows as to 6, and that the payload is the one the per-row construction produced,
@@ -128,13 +129,17 @@ class FindingRelatedFieldsReuseTest(DojoTestCase):
         # A JIRA issue's url is resolved through its project and instance only while JIRA is enabled
         self.system_settings(enable_jira=True)
 
-    def _add_finding(self, index, *, jira=True):
+    def _add_finding(self, index, *, jira=True, linked=True):
+        """A finding with a JIRA issue linked to the product's project, or (``linked=False``) with no project of its own."""
         finding = Finding.objects.create(
             title=f"related {index}", test=self.test, reporter=self.admin, severity="High", numerical_severity="S1",
         )
         if jira:
             JIRA_Issue.objects.create(
-                jira_id=f"r{index}", jira_key=f"REL-{index}", finding=finding, jira_project=self.jira_project,
+                jira_id=f"r{index}",
+                jira_key=f"REL-{index}",
+                finding=finding,
+                jira_project=self.jira_project if linked else None,
             )
         return finding
 
@@ -155,14 +160,15 @@ class FindingRelatedFieldsReuseTest(DojoTestCase):
         return [query["sql"] for query in queries.captured_queries], body
 
     def test_related_fields_adds_no_statements_per_row(self):
-        # Measured against the plain page, so only what related_fields itself reads is counted.
+        # Measured against the plain page, so only what related_fields itself reads is counted. Odd rows' issues have
+        # no project of their own, so their url comes from the product's project.
         for index in range(2):
-            self._add_finding(index)
+            self._add_finding(index, linked=index % 2 == 0)
         self._render({"related_fields": "true"})  # per-process caches (system settings) fill on first use
         two, _ = self._statements({"related_fields": "true"})
         two_plain, _ = self._statements({})
         for index in range(2, 6):
-            self._add_finding(index)
+            self._add_finding(index, linked=index % 2 == 0)
         six, body = self._statements({"related_fields": "true"})
         six_plain, _ = self._statements({})
         added_two = _shapes(two) - _shapes(two_plain)
@@ -175,13 +181,27 @@ class FindingRelatedFieldsReuseTest(DojoTestCase):
         for index in range(6):
             self.assertIn(f'"url":"https://jira.test/browse/REL-{index}"'.encode(), body)
 
-    def test_jira_project_is_prefetched_only_for_related_fields(self):
-        request = Request(APIRequestFactory().get("/api/v2/findings/"))
+    def _jira_lookups(self, params):
+        request = Request(APIRequestFactory().get("/api/v2/findings/", params))
         request.user = self.admin
         view = FindingViewSet()
         view.request = request
         with impersonate(self.admin):
-            self.assertNotIn("jira_issue__jira_project__jira_instance", view.get_queryset()._prefetch_related_lookups)
+            lookups = view.get_queryset()._prefetch_related_lookups
+        return {lookup for lookup in lookups if isinstance(lookup, str) and "jira_project" in lookup}
+
+    def test_jira_projects_are_prefetched_only_for_related_fields_while_jira_is_enabled(self):
+        self.assertEqual(
+            self._jira_lookups({"related_fields": "true"}),
+            {
+                "jira_issue__jira_project__jira_instance",
+                "test__engagement__jira_project__jira_instance",
+                "test__engagement__product__jira_project_set__jira_instance",
+            },
+        )
+        self.assertEqual(self._jira_lookups({}), set())
+        self.system_settings(enable_jira=False)
+        self.assertEqual(self._jira_lookups({"related_fields": "true"}), set())
 
     def _constructions(self, params):
         spies = {
@@ -217,6 +237,7 @@ class FindingRelatedFieldsReuseTest(DojoTestCase):
         for index in range(3):
             self._add_finding(index)
         self._add_finding(3, jira=False)
+        self._add_finding(4, linked=False)
         for params in ({"related_fields": "true"}, {}):
             after = self._render(params)
             with patch.object(FindingSerializer, "get_related_fields", _get_related_fields_before):
@@ -225,5 +246,6 @@ class FindingRelatedFieldsReuseTest(DojoTestCase):
         after = self._render({"related_fields": "true"})
         self.assertIn(b'"jira":null', after)
         self.assertIn(b'"url":"https://jira.test/browse/REL-2"', after)
+        self.assertIn(b'"url":"https://jira.test/browse/REL-4"', after)
         self.assertIn(b'"environment":{"id":', after)
         self.assertIn(b'"prod_type":{"id":', after)
