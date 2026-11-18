@@ -21,6 +21,7 @@ from django.test.utils import CaptureQueriesContext
 from django.utils.timezone import now
 from rest_framework.test import APIClient
 
+from dojo.finding import services
 from dojo.finding.api import serializer as serializer_module
 from dojo.finding.api.serializer import set_found_by_locking_finding_first
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
@@ -33,7 +34,9 @@ def _is_finding_key_share_lock(sql):
 
 
 def _writes_found_by(sql):
-    return sql.startswith((f'DELETE FROM "{FOUND_BY_TABLE}"', f'INSERT INTO "{FOUND_BY_TABLE}"'))
+    # Inside a request pghistory prefixes each write with its context ("SELECT set_config(...); DELETE ..."),
+    # so the write is matched anywhere in the statement, not only at its start.
+    return f'DELETE FROM "{FOUND_BY_TABLE}"' in sql or f'INSERT INTO "{FOUND_BY_TABLE}"' in sql
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -99,4 +102,87 @@ class TestFindingCreateFoundByLockOrder(TestCase):
         statements, lock_index = self._found_by_statements(ctx)
         first_write = next(index for index, sql in enumerate(statements) if _writes_found_by(sql))
         self.assertLess(lock_index, first_write, msg=f"the finding must be locked before found_by: {statements}")
+        self.assertEqual(list(finding.found_by.values_list("id", flat=True)), [self.requested_type.id])
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class TestFindingFoundByWritersLockOrder(TestCase):
+
+    """
+    The other writers of an existing finding's found_by take the same lock first (dojo-pro#7979).
+
+    The v3 create (``services.create_finding``), the v3 update (``services.update_finding``) and the v2 update
+    (``FindingSerializer.update``) each replace found_by with ``set()`` in its own transaction, so each deadlocked
+    against a bulk delete exactly as the v2 create did. Each test pins that the writer's first statement on the
+    found_by table comes after the finding's FOR KEY SHARE lock, and that found_by ends up as requested.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.admin = get_user_model().objects.create_superuser("found-by-writers-admin", "admin@example.com", "pw")
+        cls.scan_type = Test_Type.objects.create(name="found-by-writers-scan")
+        cls.requested_type = Test_Type.objects.create(name="found-by-writers-requested")
+        product = Product.objects.create(
+            name="found-by-writers product", description="d",
+            prod_type=Product_Type.objects.create(name="found-by-writers type"),
+        )
+        engagement = Engagement.objects.create(product=product, target_start=now(), target_end=now())
+        cls.test = Test.objects.create(
+            engagement=engagement, test_type=cls.scan_type, target_start=now(), target_end=now(),
+        )
+
+    def _finding(self):
+        finding = Finding.objects.create(
+            test=self.test, title="found by writer", severity="High", numerical_severity="S1", reporter=self.admin,
+        )
+        self.assertEqual(list(finding.found_by.values_list("id", flat=True)), [self.scan_type.id])
+        return finding
+
+    def assert_locked_before_found_by_write(self, ctx):
+        """
+        The finding's FOR KEY SHARE lock comes before set()'s writes: the DELETE of the row that was not requested
+        and the INSERT of the requested type. On a create, Finding.save()'s own add of the test's type comes
+        earlier still; that plain insert holds no row the delete waits for, so it is not what this pins.
+        """
+        statements = [query["sql"] for query in ctx.captured_queries]
+        set_writes = [
+            index for index, sql in enumerate(statements)
+            if f'DELETE FROM "{FOUND_BY_TABLE}"' in sql
+            or (f'INSERT INTO "{FOUND_BY_TABLE}"' in sql and f", {self.requested_type.id})" in sql)
+        ]
+        self.assertTrue(set_writes, msg=f"set() never writes found_by: {statements}")
+        locks = [index for index, sql in enumerate(statements[:set_writes[0]]) if _is_finding_key_share_lock(sql)]
+        self.assertTrue(locks, msg=f"the finding must be locked FOR KEY SHARE before found_by: {statements}")
+
+    def test_v3_create_locks_the_finding_before_found_by(self):
+        with CaptureQueriesContext(connection) as ctx:
+            created = services.create_finding(test=self.test, user=self.admin, data={
+                "title": "v3 found by lock", "severity": "High", "description": "d",
+                "active": True, "verified": False, "found_by": [self.requested_type.id],
+            })
+
+        self.assert_locked_before_found_by_write(ctx)
+        self.assertEqual(list(created.found_by.values_list("id", flat=True)), [self.requested_type.id])
+
+    def test_v3_update_locks_the_finding_before_found_by(self):
+        finding = self._finding()
+
+        with CaptureQueriesContext(connection) as ctx:
+            services.update_finding(finding, changes={"found_by": [self.requested_type.id]}, user=self.admin)
+
+        self.assert_locked_before_found_by_write(ctx)
+        self.assertEqual(list(finding.found_by.values_list("id", flat=True)), [self.requested_type.id])
+
+    def test_v2_update_locks_the_finding_before_found_by(self):
+        finding = self._finding()
+        client = APIClient()
+        client.force_authenticate(user=self.admin)
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.patch(
+                f"/api/v2/findings/{finding.id}/", {"found_by": [self.requested_type.id]}, format="json",
+            )
+
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assert_locked_before_found_by_write(ctx)
         self.assertEqual(list(finding.found_by.values_list("id", flat=True)), [self.requested_type.id])
