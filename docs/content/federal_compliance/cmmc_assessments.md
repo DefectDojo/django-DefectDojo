@@ -60,6 +60,12 @@ or 5 points, so scores range from 110 down to -203.
 Requirement 3.12.4 (the System Security Plan requirement) scores as not applicable, per the
 methodology.
 
+An assessment with no requirement results (created through the API without populating its
+requirements, or one whose requirements could not be populated) has no score: the scorecard and the
+Asset's Compliance summary say **Not scored**, the assessment is not eligible for conditional
+status, and it stays in progress. The API reports its `sprs_score` as `null`.
+`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` populates the requirements from the catalog.
+
 ### Whether a conditional status is possible
 
 CMMC allows conditional certification at a score of at least **88** (80 percent) with every open

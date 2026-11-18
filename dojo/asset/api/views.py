@@ -24,6 +24,7 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
 )
+from dojo.product.api.dupe_delete_hold import ClearDupeDeleteHoldMixin
 from dojo.product.queries import (
     get_authorized_product_api_scan_configurations,
     get_authorized_products,
@@ -56,6 +57,7 @@ class AssetAPIScanConfigurationViewSet(
 
 @extend_schema_view(**schema_with_prefetch())
 class AssetViewSet(
+    ClearDupeDeleteHoldMixin,
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     mixins.CreateModelMixin,

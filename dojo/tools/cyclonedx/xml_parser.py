@@ -44,6 +44,7 @@ class CycloneDXXMLParser:
             component_hashes = self._parse_component_hashes_xml(component, namespace)
             component_license = Cyclonedxhelper.extract_license_expression_xml(component, namespace)
             component_type = component.attrib.get("type") or ""
+            component_cpe = (component.findtext(f"{namespace}cpe") or "").strip()
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
@@ -53,6 +54,7 @@ class CycloneDXXMLParser:
                     "hashes": component_hashes,
                     "license": component_license,
                     "type": component_type,
+                    "cpe": component_cpe,
                 }
             # Collect product-level dependency locations for all components
             if locations_enabled() and component_purl:
@@ -79,6 +81,7 @@ class CycloneDXXMLParser:
                     component_hashes=component_hashes,
                     component_license=component_license,
                     component_type=component_type,
+                    component_cpe=component_cpe,
                 )
                 findings.append(finding_vuln)
         # manage adhoc vulnerabilities
@@ -131,6 +134,7 @@ class CycloneDXXMLParser:
         component_hashes=None,
         component_license="",
         component_type="",
+        component_cpe="",
     ):
         ref = vulnerability.attrib["ref"]
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
@@ -157,6 +161,7 @@ class CycloneDXXMLParser:
             component_hashes = bom.get("hashes")
             component_license = bom.get("license", "")
             component_type = bom.get("type", "")
+            component_cpe = bom.get("cpe", "")
 
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
@@ -217,6 +222,8 @@ class CycloneDXXMLParser:
                     component_type=component_type,
                 ),
             )
+        if locations_enabled() and component_cpe:
+            finding.unsaved_locations.append(LocationData.cpe(cpe=component_cpe))
         return finding
 
     def get_cwes(self, node, prefix, namespaces):
@@ -289,6 +296,7 @@ class CycloneDXXMLParser:
             component_hashes = bom_refs.get(ref.text, {}).get("hashes") if ref is not None else {}
             component_license = bom_refs.get(ref.text, {}).get("license", "") if ref is not None else ""
             component_type = bom_refs.get(ref.text, {}).get("type", "") if ref is not None else ""
+            component_cpe = bom_refs.get(ref.text, {}).get("cpe", "") if ref is not None else ""
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -356,5 +364,7 @@ class CycloneDXXMLParser:
                         component_type=component_type,
                     ),
                 )
+            if locations_enabled() and component_cpe:
+                finding.unsaved_locations.append(LocationData.cpe(cpe=component_cpe))
             findings.append(finding)
         return findings

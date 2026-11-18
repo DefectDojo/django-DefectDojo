@@ -38,6 +38,7 @@ from dojo.finding.helper import (
     can_edit_mitigated_data,
     save_cwes,
     save_vulnerability_ids,
+    set_found_by_locking_finding_first,
 )
 from dojo.jira import services as jira_services
 from dojo.models import SEVERITIES, Dojo_User, Finding, Test_Type
@@ -188,7 +189,7 @@ def create_finding(*, test: Test, data: dict, user, push_to_jira: bool = False,
     new_finding.save()
 
     if found_by_ids:
-        new_finding.found_by.set(_resolve_test_types(found_by_ids))
+        set_found_by_locking_finding_first(new_finding, _resolve_test_types(found_by_ids))
     if vulnerability_ids:
         save_vulnerability_ids(new_finding, vulnerability_ids)
     # Create always persists the primary Finding.cwe as a Finding_CWE row (mirror serializer); when a
@@ -269,7 +270,7 @@ def update_finding(finding: Finding, *, changes: dict, user, push_to_jira: bool 
 
     if found_by_ids is not _UNSET:
         if found_by_ids:
-            finding.found_by.set(_resolve_test_types(found_by_ids))
+            set_found_by_locking_finding_first(finding, _resolve_test_types(found_by_ids))
         else:
             finding.found_by.clear()
 

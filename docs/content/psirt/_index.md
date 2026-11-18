@@ -56,7 +56,21 @@ first; it is environment-sourced, so it needs a restart to take effect.
 
 If the entries are visible but locked, that is the other gate: the licence.
 PSIRT needs the **PSIRT Advisory Engine** entitlement, and a locked entry
-explains what to ask for.
+explains what to ask for. Settings → Feature Flags shows "Not included in the
+current license." on the PSIRT row while the license lacks it. The flag can
+still be turned on ahead of the license.
+
+### After a license update
+
+A license that adds PSIRT unlocks it without a restart:
+
+- **Uploaded on the License page:** at once, on the next page load.
+- **Helm:** the chart mounts the license Secret as a file and also passes it
+  as `DD_LICENSE`. After the Secret changes, Kubernetes refreshes the file in
+  the running pods (usually within a minute or two), but not the environment
+  variable. DefectDojo takes the file when it was issued after the
+  `DD_LICENSE` value, at its next license check: within five minutes, or
+  straight away when an administrator opens the License page.
 
 ## Who can use PSIRT
 
@@ -107,6 +121,8 @@ The permission appears in the picker only when the PSIRT feature flag is on.
 7. **[Advisories](advisories/)** — write, review and publish your *own* advisories
    about your own products, with fingerprint-bound signoffs and honest delivery
    states.
+   Where it is turned on for your instance, an approved advisory can also be
+   published to the public advisory site.
 8. **[PSIRT dashboard](dashboard/)** — a shared template that leads with the
    affected question, beside whether the pipeline is actually working.
 
@@ -116,6 +132,7 @@ Two pages are configuration rather than workflow:
   triage clock warns and breaches.
 - **[PSIRT Settings](settings/)** — the case-worthiness calibration, the "new"
   item window, and which upstream changes count as material.
+  It also holds the Advisory Site publisher profile.
 
 All of it is also reachable from an AI assistant: the
 **[MCP Server's PSIRT Toolset](../metrics_reports/ai/mcp_server_pro/#psirt-toolset)**

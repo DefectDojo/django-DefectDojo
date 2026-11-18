@@ -78,6 +78,10 @@ L'**Explorateur de vulnérabilités** liste une ligne par identifiant de vulnér
 
 ![image](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+Dans le tableau des Constatations, la coche **Known Exploited** d'une Constatation listée affiche
+aussi l'identifiant de vulnérabilité listé par la CISA, et la sélectionner ouvre la page de cet
+identifiant dans l'Explorateur de vulnérabilités.
+
 Ces valeurs décrivent la vulnérabilité elle-même, elles sont donc identiques quel que soit le nombre de Constatations qui y font référence. EPSS Score, EPSS Percentile, Known Exploited et KEV Date sont tous triables, ce qui en fait le moyen le plus rapide de répondre à la question « quelles vulnérabilités de mon environnement sont réellement exploitées ? » — triez par **EPSS Score** décroissant, ou par **Known Exploited** pour faire remonter les CVE listés au catalogue en tête.
 
 Le nombre **Total Findings** de chaque ligne renvoie vers la liste des Constatations filtrée sur cette vulnérabilité, ce qui permet de passer de « ce CVE est listé au KEV » à « voici tout ce qu'il affecte » en un clic.

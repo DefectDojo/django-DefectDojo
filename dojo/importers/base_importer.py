@@ -30,10 +30,20 @@ from django.utils.timezone import make_aware
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict, is_vanished_row_error
 from dojo.finding.cwe import finding_cwe_labels
-from dojo.importers.import_lock import lock_tests_under_import, unlock_tests_under_import
+from dojo.importers.import_lock import (
+    lock_tests_under_import,
+    release_test_import_turns,
+    unlock_tests_under_import,
+    wait_for_test_import_turn,
+)
 from dojo.importers.options import ImporterOptions
+from dojo.importers.test_type_names import (
+    accepted_test_type_names,
+    dynamic_test_type_name,
+    legacy_dynamic_test_type_name,
+)
 from dojo.jira import services as jira_services
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.feature import locations_enabled
@@ -470,8 +480,7 @@ class BaseImporter(ImporterOptions):
             # identity to conflict with. The historical name is kept rather than rewritten, as it
             # is for the legacy name above.
             expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
-            legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
-            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name, self.scan_type}:
+            if self.test.test_type.name not in accepted_test_type_names(test_raw.type, self.scan_type):
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "
@@ -904,14 +913,9 @@ class BaseImporter(ImporterOptions):
         """
         Return True when `exception` is Django reporting that a forced UPDATE matched no rows.
 
-        Model.save_base raises a bare DatabaseError for this; every genuine database
-        failure arrives as a subclass (IntegrityError, OperationalError, DataError, ...),
-        so the exact class is the discriminator and the message only a second opinion.
-        Classifying on the exception rather than with a follow-up query matters: a real
-        failure can leave the connection in an aborted transaction, where the query would
-        raise in turn and bury the error that actually needs reporting.
+        Kept as a method for subclasses and callers; the predicate is dojo.db_utils.is_vanished_row_error.
         """
-        return type(exception) is DatabaseError and "did not affect any rows" in str(exception)
+        return is_vanished_row_error(exception)
 
     @contextmanager
     def import_lock_scope(self):
@@ -920,7 +924,8 @@ class BaseImporter(ImporterOptions):
 
         process_scan opens one; a caller that goes on writing this import's findings after
         process_scan returns opens its own around the call, and the lock is held until that one
-        exits. See dojo.importers.import_lock.
+        exits. The same goes for the lock that lets one import at a time into the test. See
+        dojo.importers.import_lock.
         """
         depth = getattr(self, "_import_lock_depth", 0)
         self._import_lock_depth = depth + 1
@@ -929,21 +934,40 @@ class BaseImporter(ImporterOptions):
         finally:
             self._import_lock_depth = depth
             if depth == 0:
-                unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
-                self._import_locked_tests = []
+                try:
+                    unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
+                finally:
+                    self._import_locked_tests = []
+                    self._import_turn_checked = []
+                    release_test_import_turns(getattr(self, "_import_turn_tests", []))
+                    self._import_turn_tests = []
 
-    def lock_test_under_import(self, test: Test) -> None:
+    def lock_test_under_import(self, test: Test, *, wait_seconds: int | None = None) -> None:
         """
         Tell the excess-duplicate delete this test is being imported, until the import ends.
 
-        Call before the first finding is created or matched. Waits if a delete is removing this
-        test's duplicates right now, so the import starts from what that delete left.
+        Call before the first finding is created or matched. Waits first for any other import into
+        this test to finish (raising TestImportInProgress, a 409, if that takes longer than
+        DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS, or ``wait_seconds`` when given), then if a delete is
+        removing this test's duplicates right now, so the import starts from what both left.
+
+        The test's turn is asked for once per scope: a caller that took it up front (a background
+        import trying without waiting) is not made to wait again by process_scan, and neither is one
+        that was let through because the lock is off or was left behind.
         """
         if getattr(self, "_import_lock_depth", 0) == 0:
             msg = "lock_test_under_import must run inside import_lock_scope"
             raise RuntimeError(msg)
+        if test is None or test.pk is None:
+            return
+        checked = getattr(self, "_import_turn_checked", [])
+        if test.pk not in checked:
+            # Recorded for release by wait_for_test_import_turn itself, the moment the lock is taken.
+            self._import_turn_tests = getattr(self, "_import_turn_tests", [])
+            wait_for_test_import_turn(test.pk, wait_seconds=wait_seconds, on_taken=self._import_turn_tests.append)
+            self._import_turn_checked = [*checked, test.pk]
         locked = getattr(self, "_import_locked_tests", [])
-        if test is None or test.pk is None or test.pk in locked:
+        if test.pk in locked:
             return
         self._import_locked_tests = locked + lock_tests_under_import([test.pk])
 
@@ -1042,40 +1066,12 @@ class BaseImporter(ImporterOptions):
         self.save_without_resurrecting(self.test)
 
     def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
-        """
-        Compute the Test_Type name for a dynamic-test-type report (e.g. Generic, SARIF).
-
-        - No type, or type already equals the scan type -> use the scan type as-is.
-        - Type already carries the scan-type suffix (e.g. "Prisma Cloud (Generic Findings
-          Import)") -> use it verbatim. This keeps the composition idempotent and prevents
-          doubled names like "X (scan_type) Scan (scan_type)".
-        - Type plus a " Scan" suffix already equals the scan type (e.g. type "Horusec" with
-          scan_type "Horusec Scan") -> use the scan type as-is. This preserves the behavior of
-          dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security Hub,
-          Rusty Hog, ...) so their Test_Type name is not doubled into "Horusec Scan (Horusec Scan)".
-        - Otherwise -> the intentional "{type} Scan ({scan_type})" format (also used by SARIF,
-          so a report labeled 'CodeScanner' becomes 'CodeScanner Scan (SARIF)').
-        """
-        if not raw_type or raw_type == self.scan_type:
-            return self.scan_type
-        if raw_type.endswith(f" ({self.scan_type})"):
-            return raw_type
-        if f"{raw_type} Scan" == self.scan_type:
-            return self.scan_type
-        return f"{raw_type} Scan ({self.scan_type})"
+        """The Test_Type name for a dynamic-test-type report (``dojo.importers.test_type_names``)."""
+        return dynamic_test_type_name(raw_type, self.scan_type)
 
     def legacy_dynamic_test_type_name(self, raw_type: str | None) -> str:
-        """
-        Reproduce the name the pre-idempotency code produced. Used only for the reimport
-        compatibility check so reimports into existing (pre-patch) tests whose test_type
-        already has a doubled suffix keep working instead of raising a mismatch error.
-        """
-        if not raw_type or raw_type == self.scan_type:
-            return self.scan_type
-        name = f"{raw_type} Scan"
-        if name != self.scan_type:
-            name = f"{name} ({self.scan_type})"
-        return name
+        """The pre-idempotency Test_Type name, accepted on reimport (``dojo.importers.test_type_names``)."""
+        return legacy_dynamic_test_type_name(raw_type, self.scan_type)
 
     def get_or_create_test_type(
         self,

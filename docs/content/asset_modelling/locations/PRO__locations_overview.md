@@ -24,6 +24,7 @@ Locations fix all three by introducing a **base `Location` object** with a typed
 - **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
 - **[Container Image Locations](/asset_modelling/locations/pro__container_image_locations/)**: the container image a finding was found in, identified by registry, repository and digest, together with the assets that run it and the repository that built it. Scan-managed, behind its own flag.
 - **[Domain, IP Address and Certificate Locations](/asset_modelling/locations/pro__attack_surface_locations/)**: the DNS names, IP addresses and TLS certificates that make up an organization's internet-facing attack surface. Scan-managed, behind the **External Asset Discovery** flag.
+- **[CPE Locations](/asset_modelling/locations/pro__cpe_locations/)**: a platform (application, operating system or hardware) named by a CPE, stored as one canonical CPE 2.3 string with its vendor, product and version. CycloneDX, SPDX and Dependency-Check imports link a finding to the CPEs its report names, and **Import CPEs** on the Locations page ties a plain list of CPEs to an Asset.
 - **Host Locations**: a machine identified by its name (a system name, NetBIOS name or DNS name), stored exactly as the scanner reports it. Scan-managed. Qualys VMDR imports create one from each finding's Asset Name, and the Qualys connector creates one from each host's DNS or NetBIOS name when **Create Endpoints From Hosts** is on. The host's IP addresses stay URL Locations beside it.
 
 Cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) arrive as Cloud Resource locations from cloud posture scans, and from asset connectors when **Connector Location Inventory** is on. **Cloud Resources** under **Explore > Attack Surface** in the sidebar lists them. Container images arrive as [Container Image Locations](/asset_modelling/locations/pro__container_image_locations/).
@@ -60,6 +61,8 @@ To show one status for a Location on a Finding, DefectDojo combines its referenc
 2. Otherwise the Location is `Active` if any Test still reports it.
 3. Otherwise it is `Mitigated`.
 
+Closing a Finding outside an import (an edit, the Close action or a bulk edit) sets its `Active` references to `Mitigated`. Reopening it sets its `Mitigated` references back to `Active`, except one a later scan replaced. `False Positive`, `Risk Accepted` and `Out of Scope` references keep their status. An Asset Reference is `Active` while any Finding on that Asset still has an `Active` reference to the Location, and `Mitigated` otherwise.
+
 When you upgrade, every existing reference is assigned to its Finding's Test. A reference added through the API or the UI belongs to the Finding's own Test.
 
 This separation is what allows a library to exist on an Asset *without* needing a Finding — a missing capability in the old Components model.
@@ -69,7 +72,7 @@ This separation is what allows a library to exist on an Asset *without* needing 
 When a parser produces a Finding that references a URL or library, the importer:
 
 1. Looks up an existing Location matching the URL or pURL; if none exists, it creates one.
-2. Creates a Finding Reference linking the Finding to the Location with status `Active`.
+2. Creates a Finding Reference linking the Finding to the Location. The reference is `Mitigated` when the report already marks the Finding mitigated, and `Active` otherwise (including an inactive, duplicate, False Positive, Out of Scope or Risk Accepted Finding).
 3. Creates (or reuses) an Asset Reference so the Location also lives on the parent Asset.
 
 Existing parsers have been updated to emit Location data when the feature flag is on, and to fall back to the legacy Endpoint model when it is off. No reconfiguration is needed when Locations are enabled — the next import will route through the Locations pipeline automatically.

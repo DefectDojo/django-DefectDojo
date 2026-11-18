@@ -466,12 +466,16 @@ Versions appear as an optional widget on the Asset page. Add it from **Page Layo
 → Add Widget → Data Table**, then choose `Versions` as the record set. The widget's header counts
 the versions declared on the Asset.
 
-The newest version leads: its name, its optional release date, and three counts: how many BOM
-snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
-Earlier versions list below it, or beside it on a wide widget, one line each with their release
-date and their Found In and Fixed In counts. A long list scrolls inside the widget. Versions are
-ordered by release date, newest first, and a version without a release date sorts ahead of the
-dated ones. On a small widget only the newest version shows, with the number of earlier ones.
+The latest release leads, tagged **Newest**: the newest dated version, or the most recently declared
+one when no version has a release date. It shows its name, its release date, and three counts: how
+many BOM snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
+The rest list under **Earlier Versions**, below it or beside it on a wide widget, one line each with
+their release date and their Found In and Fixed In counts. A long list scrolls inside the widget.
+A long release history loads its newest 200 versions first, and **Show More**, after the last line,
+loads the rest; the header and Earlier Versions counts always cover every version on the Asset.
+Versions are ordered by release date, newest first, and versions without a release date follow the
+dated ones, the most recently declared first, so an SBOM import newer than every dated release is
+listed after them. On a small widget only the leading version shows, with the number of the rest.
 
 **Add Version** declares one by hand, which is useful for a release you want to record claims
 against before any SBOM has been uploaded for it. Name it the way its producer does (`5.2.0`,
@@ -490,6 +494,37 @@ version is used, or the upload stays on the unversioned stream if it declares no
 named for the first time here is created then and there, so it does not have to be declared
 first.
 
+### The SBOMs widget
+
+The **SBOMs** widget lists every SBOM recorded on the Asset, grouped by the release it describes, so
+you can show the bill of materials for each version you shipped. Add it the same way: **Page Layout →
+Edit Layout → Add Widget → Data Table**, record set `SBOMs`. It needs the same asset-versions setting
+as the Versions widget.
+
+Releases are ordered like the Versions widget: newest release date first, undated versions after
+the dated ones, and uploads that named no version last, under **Unversioned**. Under each release,
+every recorded SBOM has one line, newest first: the day it was recorded, its format and spec version,
+and how many components it lists.
+
+Uploading another SBOM for the same release from the same format replaces the earlier one as the
+release's current SBOM, but the earlier one stays listed, tagged **Superseded**, so the release keeps
+its history. The current one is tagged **Current**. A CycloneDX upload and an SPDX upload for the
+same release are each current: one does not replace the other.
+
+The version export, `GET /api/v2/sbom/<asset id>/?version=<version>`, is built from the release's
+newest upload of any format, whatever `spec` you ask it for. When a release has both a CycloneDX and
+an SPDX upload, download the one you need from its own line instead (or
+`GET /api/v2/bom_snapshots/<id>/download/`).
+
+The download button on a line saves that SBOM as it was recorded for that release: its components,
+licenses and dependency graph, in its own format. It is not the Asset's current inventory, which
+**Export SBOM and VEX** exports. The file name carries the Asset, the version and the SBOM's id.
+
+Over the API, `GET /api/v2/bom_snapshots/?product=<asset id>` lists the same SBOMs (filter with
+`asset_version`, `version_name`, `source`, `spec` or `unversioned=true`), each with `is_current`,
+`component_count` and a `download_url`. `GET /api/v2/bom_snapshots/<id>/download/` returns the document;
+add `?spec=cyclonedx` or `?spec=spdx` to choose the format. Both need view permission on the Asset.
+
 ### Affected versions on a Finding
 
 A Finding carries **claims** about the versions it applies to — *found in* a version, or *fixed
@@ -499,7 +534,8 @@ Layout → Add Widget → Data Table**, record set `Affected Versions`.
 
 Each row names the version, whether the claim is Found In or Fixed In, and where it came from —
 an import or a person — so it is clear whether a scanner said it or someone recorded it. Use
-**Record Claim** to add one, and the row action to withdraw one. Claims are added and withdrawn
+**Record Claim** to add one, and the row action to withdraw one. Its **Version** list searches
+the Asset's versions as you type and loads more as you scroll, so every version can be claimed. Claims are added and withdrawn
 rather than edited, and nothing is inferred between them: a Finding found in 5.0.0 and fixed in
 5.2.0 says nothing on its own about 5.1.3.
 

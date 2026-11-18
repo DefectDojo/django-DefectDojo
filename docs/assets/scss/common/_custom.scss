@@ -481,6 +481,39 @@ html:not([data-dd-version='pro']) .version-pro {
   display: none;
 }
 
+// "Book a demo" link in the header. It is for readers of the open-source
+// edition, so the attribute that swaps the sidebar also hides it from Pro
+// readers. Without JS the attribute is absent and the link shows.
+.dd-header .dd-demo-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #ffffff;
+  border: 1px solid var(--dd-hairline-dark);
+  padding: 0.3rem 0.75rem;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    color: #ffffff;
+    border-color: var(--dd-orange);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .dd-header .offcanvas .dd-demo-link {
+    color: var(--dd-ink);
+    border-color: var(--dd-border);
+  }
+}
+
+html[data-dd-version='pro'] .dd-demo-link {
+  display: none;
+}
+
 // Pro badge — appears next to sidebar items with audience: pro
 .pro-badge {
   display: inline-flex;

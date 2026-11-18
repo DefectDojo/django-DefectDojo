@@ -3,15 +3,18 @@ custom_exception_handler answers unexpected API errors itself, so Django's djang
 record (and the mail_admins email) must still carry the exception's traceback.
 """
 
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.core import mail
+from django.test import SimpleTestCase
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import APIException
 from rest_framework.test import APIClient, APITestCase
 
 from dojo.api_v2.exception_handler import custom_exception_handler
+from dojo.models import System_Settings
 from dojo.product.api.views import ProductViewSet
 from unittests.dojo_test_case import versioned_fixtures
 
@@ -79,3 +82,28 @@ class ApiServerErrorLoggingTest(APITestCase):
             response = custom_exception_handler(RuntimeError("no request in context"), {})
 
         self.assertEqual(response.status_code, 500)
+
+
+class ApiExposedErrorDetailsTest(SimpleTestCase):
+
+    """With api_expose_error_details on, the 500 body names the error, and an exception with no args must not crash."""
+
+    def _handle(self, exc):
+        exposed = SimpleNamespace(api_expose_error_details=True)
+        with patch.object(System_Settings.objects, "get", return_value=exposed), \
+                self.assertLogs("dojo.api_v2.exception_handler", level="ERROR"):
+            return custom_exception_handler(exc, {})
+
+    def test_exception_with_a_message_exposes_the_message(self):
+        response = self._handle(RuntimeError("detail for the caller"))
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.data["message"], "detail for the caller")
+
+    def test_exception_without_args_names_the_exception_instead_of_crashing(self):
+        # Regression: str(exc.args[0]) raised IndexError for a bare `raise NotImplementedError`, which replaced the
+        # original error with an unhandled one, so the caller got no JSON body and the log named the wrong error.
+        response = self._handle(NotImplementedError())
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.data["message"], "NotImplementedError")

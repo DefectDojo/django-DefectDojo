@@ -72,7 +72,7 @@ Expanding an archive on the **Archived** page lists what it holds in the same li
 
 Select an object in one of those lists to open its usual page, such as a Finding's or a Test's detail page. It loads as it did before it was archived, with a banner saying you are viewing archived data. Links from that page to other objects in the same archive, for example from a Test to one of its Findings, keep the archive open.
 
-Archived data is read-only. Changes to an archived object are refused until its archive is restored. Only people who can restore an archive can open it this way: anyone else gets the same "not found" response as before.
+Archived data is read-only. While the banner is shown, the page and the lists on it offer no way to change anything: edit, delete, import, notes, review and bulk actions are hidden. The rest of the app is read-only for as long as that page is open, so actions elsewhere that make changes, such as **Import** in the sidebar or the add buttons under **Settings**, are hidden too and come back as soon as you open any page that is not archived. To change an archived object, restore its archive on the **Archived** page first. Only people who can restore an archive can open it this way: anyone else gets the same "not found" response as before.
 
 ## Removing old Findings with Triage Engine rules
 

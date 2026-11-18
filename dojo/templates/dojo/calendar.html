@@ -40,10 +40,10 @@
                 $('#calfilter').attr('action', '/calendar/' + $(this).val());
             });
             if (caltype) {
-                $('#caltype').val('{{ caltype }}');
+                $('#caltype').val('{{ caltype|escapejs }}');
                 $('#caltype').trigger('change');
             }
-            $('#lead').val([{% for lead in leads %} '{{ lead }}', {% endfor %}]);
+            $('#lead').val([{% for lead in leads %} '{{ lead|escapejs }}', {% endfor %}]);
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
@@ -56,7 +56,7 @@
                     {% if caltype == 'tests' %}
                         {% for t in tests %}
                             {
-                                title: '{{t.engagement.product.name}}: {{ t.engagement.name|default:"Unknown" }} - {{ t.test_type }} ({{ t.lead|default:"Unassigned" }})',
+                                title: '{{ t.engagement.product.name|escapejs }}: {{ t.engagement.name|default:"Unknown"|escapejs }} - {{ t.test_type|escapejs }} ({{ t.lead|default:"Unassigned"|escapejs }})',
                                 start: '{{t.target_start|date:"c"}}',
                                 end: '{{t.target_end|date:"c"}}',
                                 url: '{% url 'view_test' t.id %}',
@@ -67,7 +67,7 @@
                     {% else %}
                         {% for e in engagements %}
                             {
-                                title: '{{e.product.name}}: {{ e.name|default:"Unknown" }} ({{ e.lead|default:"Unassigned" }})',
+                                title: '{{ e.product.name|escapejs }}: {{ e.name|default:"Unknown"|escapejs }} ({{ e.lead|default:"Unassigned"|escapejs }})',
                                 start: '{{e.target_start|date:"c"}}',
                                 end: '{{e.target_end|date:"c"}}',
                                 url: '{% url 'view_engagement' e.id %}',
