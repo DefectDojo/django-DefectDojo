@@ -219,14 +219,16 @@ def findings_accepted_elsewhere(risk_acceptance):
 
 def findings_closed_since_expiry(risk_acceptance):
     """
-    The members of an expired risk acceptance that have been closed since it expired.
+    The members of an expired risk acceptance that have been closed since it expired, or that it never accepted.
 
     An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
     members. Closing one of them afterwards (mitigated, false positive, out of scope, or marked as an inactive
     duplicate) leaves it listed, and reinstating does not accept it again because it is not active. Kept as a
     member, the next expiry would set it active again: its save would clear a mitigation, and a duplicate would
-    read active while still a duplicate. Without reactivation the expiry reopens nothing and the members keep
-    their flag, so none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
+    read active while still a duplicate. A duplicate the acceptance never accepted is counted the same way: the
+    expiry left it inactive (see not_held), so it reads exactly like a held member marked a duplicate since, and
+    reinstating leaves it out. Without reactivation the expiry reopens nothing and the members keep their flag, so
+    none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
     """
     if not risk_acceptance.reactivate_expired:
         return risk_acceptance.accepted_findings.none()
@@ -260,10 +262,10 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
                 len(accepted_elsewhere),
             )
             risk_acceptance.accepted_findings.remove(*accepted_elsewhere)
-        # A member closed since the expiry stays closed and leaves too: the next expiry would otherwise reopen it.
+        # A member closed since the expiry, or a duplicate the acceptance never accepted, stays as it is and leaves too.
         if closed_since := list(findings_closed_since_expiry(risk_acceptance)):
             logger.info(
-                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired",
+                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired or never accepted",
                 risk_acceptance.id,
                 risk_acceptance,
                 len(closed_since),

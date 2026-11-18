@@ -78,7 +78,7 @@ Moving a Finding also updates the things that belong to its old position in the 
 
 * Its **Endpoints** (or **Locations**) are re-homed onto the destination Asset, so they no longer point at the Asset it came from. An Endpoint shared with a Finding that stayed behind is left in place for that Finding.
 * It is removed from its **Finding Group**, because a group belongs to a single Test.
-* A **Risk Acceptance** belongs to a single Engagement. A Finding moved to another Test in the same Engagement stays accepted; a Finding moved to another Engagement is removed from its Risk Acceptance and becomes active again. A duplicate the Risk Acceptance never accepted is the exception when it stays a duplicate after the move (a move between Engagements of one Asset that deduplicates per Asset): it stays inactive. Re-accept the risk in the destination Engagement if it still applies.
+* A **Risk Acceptance** belongs to a single Engagement. A Finding moved to another Test in the same Engagement stays accepted; a Finding moved to another Engagement is removed from its Risk Acceptance and becomes active again. A duplicate the Risk Acceptance never accepted is the exception when it stays a duplicate after the move (a move between Engagements of one Asset, when neither Engagement has **Deduplication within this engagement only** set): it stays inactive. Re-accept the risk in the destination Engagement if it still applies.
 * Its **SLA** dates are recalculated against the destination Asset's SLA configuration, which may change its due date. Its priority and the Asset grades are recalculated when it changes Asset.
 * **Deduplication** runs again in the destination's scope.
 * A **note** is added to each moved Finding recording where it came from and where it went.
