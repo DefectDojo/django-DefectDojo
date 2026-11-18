@@ -181,15 +181,15 @@ class AzureDevOpsWorkItemHelper:
 
     def _get_connection(cls):
         credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
-        return Connection(base_url=cls._organization_url.rstrip("/"), creds=credentials)
+        return Connection(base_url=cls.organization_url.rstrip("/"), creds=credentials)
 
     def _get_profile_connection(cls):
-        parsed = urlparse(cls._organization_url.rstrip("/"))
+        parsed = urlparse(cls.organization_url.rstrip("/"))
         org = parsed.path.strip("/") if parsed.netloc.endswith("dev.azure.com") else parsed.netloc
         if parsed.netloc.endswith("dev.azure.com"):
             profile_base = f"https://vssps.dev.azure.com/{org}/"
         else:
-            profile_base = cls._organization_url.rstrip("/")
+            profile_base = cls.organization_url.rstrip("/")
         return Connection(
             base_url=profile_base,
             creds=BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN),
