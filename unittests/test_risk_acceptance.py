@@ -86,7 +86,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data["accepted_findings"] = [2, 3]
+        # Two findings the acceptance holds. Finding 3 would be a member it never accepts (a duplicate), which an
+        # expiry leaves inactive: see the unaccepted duplicate tests below.
+        ra_data["accepted_findings"] = [2, 7]
         response = self.add_risk_acceptance(1, ra_data)
         self.assertEqual("/engagement/1", response.url)
         ra = Risk_Acceptance.objects.last()
@@ -154,7 +156,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         response = self.client.post(reverse("edit_risk_acceptance", args=(1, ra.id)), data)
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(id=2))
-        self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=3))
+        self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=7))
 
     def test_remove_risk_acceptance_findings_active(self):
         self.test_add_risk_acceptance_multiple_findings_accepted()
