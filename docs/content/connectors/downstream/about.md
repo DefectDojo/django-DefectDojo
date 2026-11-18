@@ -114,6 +114,22 @@ Icons from left to right:
 
 ![image](images/integrators_1.png)
 
+### Reading ticket links with the API
+
+The tickets a Downstream Connector opened can be read with an API token on `/api/v2/downstream/ticket_links/`. Each ticket link names its connector type, its Issue Tracker Mapping, the ticket's ID, URL and status, and the Finding (`id`, `title`, `severity`) or Finding Group (`id`, `name`, `severity`) it belongs to.
+
+```bash
+# Every ticket opened for Finding 123
+curl -H "Authorization: Token <your API key>" \
+  "https://<your instance>/api/v2/downstream/ticket_links/?finding_equals=123"
+```
+
+- `finding_equals` and `finding_group_equals` take the Finding or Finding Group ID. `integration_type_equals` (for example `Jira`) and `issue_tracker_mapping_equals` narrow the list by connector type and by mapping.
+- Ticket links are read only. The connector creates them when it opens a ticket and updates their status when it syncs, so the API does not create, change or delete them.
+- Reading them needs the global Integration View permission, and lists only the links of Findings and Finding Groups you can view.
+
+A single Finding can also list its tickets: add `ticket_links` to `response_fields` on `/api/v2/findings/`, for example `/api/v2/findings/123/?response_fields=id,title,ticket_links`. The field is left out of a Finding unless it is asked for. Unlike the ticket link list, it needs only permission to view that Finding, not the global Integration View permission: anyone who can open the Finding sees its tickets, as on the Finding page.
+
 ## Vendor-Specific Requirements
 
 Each vendor will have varying requirements for how DefectDojo will need to interact with them. This could be in the form of an authentication mechanism, additional fields on a per "project" basis, or severity/status mappings.
