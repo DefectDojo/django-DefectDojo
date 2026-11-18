@@ -566,6 +566,15 @@ cannot be ranked it cannot be called safe), while a *limit* that cannot be recog
 rather than blocking everything, because a rule that silently stops working is harder to notice than
 one that keeps going.
 
+#### What `acceptance` mode changes on each Finding
+
+Adding a Finding to a Risk Acceptance also makes it inactive: the Finding becomes risk accepted and
+inactive. Its record on the Finding, in the run and in a preview, names what changed (risk accepted,
+and inactive when it was active) along with the Risk Acceptance it joined. A Finding that is a
+duplicate and is not risk accepted yet is left as it was, as adding it to a Risk Acceptance by hand
+leaves it. It gets the note saying it was added to the Risk Acceptance, but it does not become a member
+of it, so the node counts it as unchanged and records no change for it.
+
 #### Only an active Risk Acceptance takes Findings from a rule
 
 In `acceptance` mode a rule adds Findings only to a Risk Acceptance that is in force. A rule never
