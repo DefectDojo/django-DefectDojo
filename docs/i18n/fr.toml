@@ -189,3 +189,15 @@ other = "Nouveautés de {{ .release }}"
 [card_connectors_title]
 other = "Connecteurs"
 
+# Page actions under the title (layouts/_partials/main/page-actions.html)
+[dd_copy_markdown]
+other = "Copier la page en Markdown"
+
+[dd_copy_markdown_done]
+other = "Copié"
+
+[dd_copy_markdown_failed]
+other = "La copie a échoué. Utilisez « Afficher en Markdown »."
+
+[dd_view_markdown]
+other = "Afficher en Markdown"

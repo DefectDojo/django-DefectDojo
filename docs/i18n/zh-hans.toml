@@ -250,3 +250,15 @@ other = "{{ .release }} 中的新增功能"
 [card_connectors_title]
 other = "连接器"
 
+# Page actions under the title (layouts/_partials/main/page-actions.html)
+[dd_copy_markdown]
+other = "将页面复制为 Markdown"
+
+[dd_copy_markdown_done]
+other = "已复制"
+
+[dd_copy_markdown_failed]
+other = "复制失败。请改用“以 Markdown 查看”。"
+
+[dd_view_markdown]
+other = "以 Markdown 查看"
