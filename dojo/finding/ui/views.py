@@ -3432,22 +3432,38 @@ def duplicate_cluster(request, finding):
 # and we assign this dictionary to the finding so it can be accessed in the template.
 # these actions are always calculated in the context of the finding the user is viewing
 # because this determines which actions are possible
+def _engagement_deduplication_separates(finding, other):
+    """True when the two findings sit in different engagements and either engagement deduplicates on its own."""
+    return finding.test.engagement != other.test.engagement and (
+        finding.test.engagement.deduplication_on_engagement
+        or other.test.engagement.deduplication_on_engagement
+    )
+
+
 def calculate_possible_related_actions_for_similar_finding(
     request, finding, similar_finding,
 ):
+    engagement_mismatch = {
+        "action": "None",
+        "reason": ("This finding is in a different engagement and deduplication_inside_engagment "
+                   "is enabled here or in that finding"),
+    }
+    # Set as Original and Reset Duplicate Status compare the similar finding with the finding on the page, as their
+    # routes do. Mark as Duplicate lands the similar finding under the page finding's cluster root, so it is
+    # compared with that root, as the mark route does.
+    root = finding.duplicate_finding if finding.duplicate and finding.duplicate_finding else finding
+    page_separated = _engagement_deduplication_separates(similar_finding, finding)
+    root_separated = page_separated if root is finding else _engagement_deduplication_separates(similar_finding, root)
+    blocked = set()
+    if page_separated:
+        blocked.update(("set_finding_as_original", "reset_finding_duplicate_status"))
+    if root_separated:
+        blocked.add("mark_finding_duplicate")
+    if len(blocked) == 3:
+        return [engagement_mismatch]
+
     actions = []
-    if similar_finding.test.engagement != finding.test.engagement and (
-        similar_finding.test.engagement.deduplication_on_engagement
-        or finding.test.engagement.deduplication_on_engagement
-    ):
-        actions.append(
-            {
-                "action": "None",
-                "reason": ("This finding is in a different engagement and deduplication_inside_engagment "
-                           "is enabled here or in that finding"),
-            },
-        )
-    elif finding.duplicate_finding == similar_finding:
+    if finding.duplicate_finding == similar_finding:
         actions.append(
             {
                 "action": "None",
@@ -3523,4 +3539,5 @@ def calculate_possible_related_actions_for_similar_finding(
             },
         ))
 
-    return actions
+    allowed = [action for action in actions if action["action"] not in blocked]
+    return allowed or [engagement_mismatch]
