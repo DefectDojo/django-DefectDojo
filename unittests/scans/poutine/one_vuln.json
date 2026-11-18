@@ -1,1 +1,140 @@
-{"findings":[{"meta":{"details":"Command: curl -sSL https://example.com/install.sh | bash","event_triggers":["push"],"job":"build","line":12,"path":".github/workflows/build.yml","step":"0"},"purl":"pkg:localrepo/localrepo/local?repository_url=.","rule_id":"unverified_script_exec"}],"packages":{"pkg:localrepo/localrepo/local?repository_url=.":{"commit_sha":"e9f5db80740cbe721c0f09abf700490825c8d1c3","dependencies":[],"ref":"main"}},"rules":{"confused_deputy_auto_merge":{"description":"Confused Deputy for GitHub Actions is a situation where a GitHub event attribute (ex. github.actor) is used to check the last interaction of a certain event. This allows an attacker abuse an event triggered by a Bot (ex. @dependabot recreate) and trigger as a side effect other privileged workflows, which may for instance automatically merge unapproved changes.","id":"confused_deputy_auto_merge","level":"error","title":"Confused Deputy Auto-Merge"},"debug_enabled":{"description":"The workflow is configured to increase the verbosity of the runner.\nThis can potentially expose sensitive information.","id":"debug_enabled","level":"note","refs":[{"description":"","ref":"https://docs.gitlab.com/ee/ci/variables/index.html#enable-debug-logging"},{"description":"","ref":"https://docs.gitlab.com/ee/ci/variables/index.html#mask-a-cicd-variable"}],"title":"CI Runner Debug Enabled"},"default_permissions_on_risky_events":{"description":"The workflow and some of its jobs do not explicitely define permissions\nand the workflow triggers on events that are typically used to run builds from forks.\nBecause no permissions is set, the workflow inherits the default permissions\nconfigured on the repository or the organization.","id":"default_permissions_on_risky_events","level":"warning","title":"Default permissions used on risky events"},"github_action_from_unverified_creator_used":{"description":"Usage of the following GitHub Actions repositories was detected in workflows\nor composite actions, but their owner is not a verified creator.","id":"github_action_from_unverified_creator_used","level":"note","title":"Github Action from Unverified Creator used"},"if_always_true":{"description":"GitHub Actions expressions used in if condition of jobs or steps\nmust not contain extra characters or spaces.\nOtherwise, the condition is always true.","id":"if_always_true","level":"error","title":"If condition always evaluates to true"},"injection":{"description":"The pipeline contains an injection into bash or JavaScript with an expression\nthat can contain user input. Prefer placing the expression in an environment variable\ninstead of interpolating it directly into a script.","id":"injection","level":"warning","refs":[{"description":"","ref":"https://securitylab.github.com/research/github-actions-preventing-pwn-requests/"}],"title":"Injection with Arbitrary External Contributor Input"},"job_all_secrets":{"description":"The GitHub Actions Runner attempts to keep in memory only the secrets\nthat are necessary to execute a workflow job.\nIf a job converts the secrets object to JSON or accesses it using an expression,\nall secrets will be retained in memory for the duration of the job.","id":"job_all_secrets","level":"warning","title":"Workflow job exposes all secrets"},"known_vulnerability_in_build_component":{"description":"The workflow or action depends on a GitHub Action with known vulnerabilities.","id":"known_vulnerability_in_build_component","level":"warning","refs":[{"description":"Source Advisory Database","ref":"https://osv.dev/"}],"title":"Build Component with a Known Vulnerability used"},"known_vulnerability_in_build_platform":{"description":"The build or SCM provider used has a known vulnerability.","id":"known_vulnerability_in_build_platform","level":"warning","refs":[{"description":"Source Advisory Database","ref":"https://osv.dev/"}],"title":"Build Platform with a Known Vulnerability used"},"pr_runs_on_self_hosted":{"config":{"allowed_runners":{"default":[],"description":"List of runners name, label or group that are allowed to be used in PR workflows.","value":[]}},"description":"This job runs on a self-hosted GitHub Actions runner in a workflow\nthat is triggered by a pull request event.","id":"pr_runs_on_self_hosted","level":"warning","title":"Pull Request Runs on Self-Hosted GitHub Actions Runner"},"unpinnable_action":{"description":"Pinning this GitHub Action is likely ineffective\nas it depends on other mutable supply chain components.","id":"unpinnable_action","level":"note","title":"Unpinnable CI component used"},"untrusted_checkout_exec":{"description":"The workflow appears to checkout untrusted code from a fork\nand uses a command that is known to allow code execution.","id":"untrusted_checkout_exec","level":"error","title":"Arbitrary Code Execution from Untrusted Code Changes"},"unverified_script_exec":{"description":"The pipeline executes a script or binary fetched from a remote\nserver without verifying its integrity.","id":"unverified_script_exec","level":"note","title":"Unverified Script Execution"}}}
+{
+  "findings": [
+    {
+      "meta": {
+        "details": "Command: curl -sSL https://example.com/install.sh | bash",
+        "event_triggers": [
+          "push"
+        ],
+        "job": "build",
+        "line": 12,
+        "path": ".github/workflows/build.yml",
+        "step": "0"
+      },
+      "purl": "pkg:localrepo/localrepo/local?repository_url=.",
+      "rule_id": "unverified_script_exec"
+    }
+  ],
+  "packages": {
+    "pkg:localrepo/localrepo/local?repository_url=.": {
+      "commit_sha": "e9f5db80740cbe721c0f09abf700490825c8d1c3",
+      "dependencies": [],
+      "ref": "main"
+    }
+  },
+  "rules": {
+    "confused_deputy_auto_merge": {
+      "description": "Confused Deputy for GitHub Actions is a situation where a GitHub event attribute (ex. github.actor) is used to check the last interaction of a certain event. This allows an attacker abuse an event triggered by a Bot (ex. @dependabot recreate) and trigger as a side effect other privileged workflows, which may for instance automatically merge unapproved changes.",
+      "id": "confused_deputy_auto_merge",
+      "level": "error",
+      "title": "Confused Deputy Auto-Merge"
+    },
+    "debug_enabled": {
+      "description": "The workflow is configured to increase the verbosity of the runner.\nThis can potentially expose sensitive information.",
+      "id": "debug_enabled",
+      "level": "note",
+      "refs": [
+        {
+          "description": "",
+          "ref": "https://docs.gitlab.com/ee/ci/variables/index.html#enable-debug-logging"
+        },
+        {
+          "description": "",
+          "ref": "https://docs.gitlab.com/ee/ci/variables/index.html#mask-a-cicd-variable"
+        }
+      ],
+      "title": "CI Runner Debug Enabled"
+    },
+    "default_permissions_on_risky_events": {
+      "description": "The workflow and some of its jobs do not explicitely define permissions\nand the workflow triggers on events that are typically used to run builds from forks.\nBecause no permissions is set, the workflow inherits the default permissions\nconfigured on the repository or the organization.",
+      "id": "default_permissions_on_risky_events",
+      "level": "warning",
+      "title": "Default permissions used on risky events"
+    },
+    "github_action_from_unverified_creator_used": {
+      "description": "Usage of the following GitHub Actions repositories was detected in workflows\nor composite actions, but their owner is not a verified creator.",
+      "id": "github_action_from_unverified_creator_used",
+      "level": "note",
+      "title": "Github Action from Unverified Creator used"
+    },
+    "if_always_true": {
+      "description": "GitHub Actions expressions used in if condition of jobs or steps\nmust not contain extra characters or spaces.\nOtherwise, the condition is always true.",
+      "id": "if_always_true",
+      "level": "error",
+      "title": "If condition always evaluates to true"
+    },
+    "injection": {
+      "description": "The pipeline contains an injection into bash or JavaScript with an expression\nthat can contain user input. Prefer placing the expression in an environment variable\ninstead of interpolating it directly into a script.",
+      "id": "injection",
+      "level": "warning",
+      "refs": [
+        {
+          "description": "",
+          "ref": "https://securitylab.github.com/research/github-actions-preventing-pwn-requests/"
+        }
+      ],
+      "title": "Injection with Arbitrary External Contributor Input"
+    },
+    "job_all_secrets": {
+      "description": "The GitHub Actions Runner attempts to keep in memory only the secrets\nthat are necessary to execute a workflow job.\nIf a job converts the secrets object to JSON or accesses it using an expression,\nall secrets will be retained in memory for the duration of the job.",
+      "id": "job_all_secrets",
+      "level": "warning",
+      "title": "Workflow job exposes all secrets"
+    },
+    "known_vulnerability_in_build_component": {
+      "description": "The workflow or action depends on a GitHub Action with known vulnerabilities.",
+      "id": "known_vulnerability_in_build_component",
+      "level": "warning",
+      "refs": [
+        {
+          "description": "Source Advisory Database",
+          "ref": "https://osv.dev/"
+        }
+      ],
+      "title": "Build Component with a Known Vulnerability used"
+    },
+    "known_vulnerability_in_build_platform": {
+      "description": "The build or SCM provider used has a known vulnerability.",
+      "id": "known_vulnerability_in_build_platform",
+      "level": "warning",
+      "refs": [
+        {
+          "description": "Source Advisory Database",
+          "ref": "https://osv.dev/"
+        }
+      ],
+      "title": "Build Platform with a Known Vulnerability used"
+    },
+    "pr_runs_on_self_hosted": {
+      "config": {
+        "allowed_runners": {
+          "default": [],
+          "description": "List of runners name, label or group that are allowed to be used in PR workflows.",
+          "value": []
+        }
+      },
+      "description": "This job runs on a self-hosted GitHub Actions runner in a workflow\nthat is triggered by a pull request event.",
+      "id": "pr_runs_on_self_hosted",
+      "level": "warning",
+      "title": "Pull Request Runs on Self-Hosted GitHub Actions Runner"
+    },
+    "unpinnable_action": {
+      "description": "Pinning this GitHub Action is likely ineffective\nas it depends on other mutable supply chain components.",
+      "id": "unpinnable_action",
+      "level": "note",
+      "title": "Unpinnable CI component used"
+    },
+    "untrusted_checkout_exec": {
+      "description": "The workflow appears to checkout untrusted code from a fork\nand uses a command that is known to allow code execution.",
+      "id": "untrusted_checkout_exec",
+      "level": "error",
+      "title": "Arbitrary Code Execution from Untrusted Code Changes"
+    },
+    "unverified_script_exec": {
+      "description": "The pipeline executes a script or binary fetched from a remote\nserver without verifying its integrity.",
+      "id": "unverified_script_exec",
+      "level": "note",
+      "title": "Unverified Script Execution"
+    }
+  }
+}
