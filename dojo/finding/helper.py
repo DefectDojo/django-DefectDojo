@@ -7,7 +7,7 @@ from time import sleep, strftime
 from types import SimpleNamespace
 
 from django.conf import settings
-from django.db import OperationalError, router, transaction
+from django.db import OperationalError, connection, router, transaction
 from django.db.models import Count
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, post_save, pre_delete
@@ -717,7 +717,20 @@ def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-            duplicate_cluster.order_by("-id").delete()
+            # Lock the original and its cluster's finding rows, in id order, before the delete
+            # touches any of their child rows: the order the excess-duplicate delete and
+            # bulk_delete_findings take them in (lock_findings_for_delete). The queryset delete
+            # otherwise deleted the child rows (Test_Import_Finding_Action, ...) first and
+            # reached the finding rows last, so against a chunk holding a duplicate and waiting
+            # on its children the two deadlocked (Postgres 40P01). The ids come from the cluster
+            # just read above, so the lock is one primary-key lookup with no subquery to plan.
+            # The original's lock holds back deduplication (which locks an original before it
+            # links a duplicate to it) until this commits, and the delete reads the cluster
+            # again, so a duplicate linked before the lock was granted goes with the rest and
+            # one the cleanup removed in the meantime is simply no longer there.
+            with transaction.atomic(savepoint=False):
+                lock_findings_for_delete([instance.id, *(finding.id for finding in duplicate_cluster)])
+                duplicate_cluster.order_by("-id").delete()
         else:
             new_original = reconfigure_duplicate_cluster(instance, duplicate_cluster)
             if jira_sync_requested:
@@ -857,8 +870,9 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         return None
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-        # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
-        # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
+        # Don't delete here: the caller deletes the outside-scope duplicates itself
+        # (prepare_duplicates_for_delete via bulk_delete_findings, finding_delete via a
+        # locked queryset delete).
         return None
     logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
     # set new original to first finding in cluster (ordered by id)
@@ -924,8 +938,11 @@ def prepare_duplicates_for_delete(obj, *, preview_only=False):
 
     # Bulk-reset inside-scope duplicates: single UPDATE instead of per-original mass_model_updater.
     # Clears the duplicate_finding FK so cascade_delete won't trip over dangling self-references.
+    # Selected by the link alone, not by the duplicate flag: the chunked delete commits chunk by
+    # chunk and leaves the rows of its own scope alone (resolve_inbound_duplicate_references),
+    # so a link this pass skips, on a row whose flag is False, still points at its target when
+    # the target's chunk commits, and that COMMIT fails the foreign key on every attempt.
     inside_reset_count = Finding.objects.filter(
-        duplicate=True,
         duplicate_finding_id__in=scope_ids_subquery,
         id__in=scope_ids_subquery,
     ).update(duplicate_finding=None, duplicate=False)
@@ -1155,6 +1172,37 @@ def lock_findings_for_delete(finding_ids):
         .order_by("id")
         .values_list("id", flat=True),
     )
+
+
+def set_found_by_locking_finding_first(finding, found_by):
+    """
+    ``finding.found_by.set(found_by)``, in one transaction that locks the finding before any found_by row.
+
+    The API writers that replace a finding's found_by go through here: the v2 and v3 create and the v2 and v3
+    update. Other ``found_by.set()`` callers (copying a cluster's found_by to a new original, for one) do not.
+    ``set()`` deletes the rows that were not requested (on a create, the one ``Finding.save()`` added for the test's
+    type) and inserts the requested rows. Both stay locked until COMMIT, where Postgres checks the new rows'
+    deferred foreign key with FOR KEY SHARE on the finding. The chunked bulk delete (the excess-duplicate delete,
+    a test or engagement delete) takes the same two locks the other way round: the finding FOR UPDATE first
+    (lock_findings_for_delete), then its found_by rows (bulk_clear_finding_m2m). Each then waited for the other
+    and Postgres aborted one of them with "deadlock detected" (40P01), which failed the write.
+
+    Taking FOR KEY SHARE on the finding first puts both in the same order. Whichever gets the finding first
+    finishes, and the other waits for it rather than deadlocking: a delete that is first removes the finding,
+    and the deferred foreign key then rejects this set() at COMMIT as for any other write to a deleted finding.
+    FOR KEY SHARE is the lock the foreign-key check takes anyway, so it blocks nothing that check did not.
+
+    ``clear()`` needs no lock: it only deletes rows, so its COMMIT checks no foreign key and never waits on the
+    finding, and a delete waiting for its rows simply follows it.
+    """
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"SELECT id FROM {connection.ops.quote_name(Finding._meta.db_table)} "
+                "WHERE id = %s FOR KEY SHARE",
+                [finding.id],
+            )
+        finding.found_by.set(found_by)
 
 
 def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
@@ -1813,6 +1861,10 @@ def close_finding(
         note_date=mitigated_date,
     )
 
+    # Risk acceptance. Before the endpoint statuses: unaccepting reopens them, so it has to run
+    # first for the close to leave them mitigated.
+    ra_helper.risk_unaccept(user, finding, perform_save=False)
+
     if locations_enabled():
         # Related locations
         for ref in finding.locations.all():
@@ -1826,9 +1878,6 @@ def close_finding(
             status.mitigated = True
             status.last_modified = current_time
             status.save()
-
-    # Risk acceptance
-    ra_helper.risk_unaccept(user, finding, perform_save=False)
 
     # External issues (best effort)
     close_external_issue(finding.id, "Closed by defectdojo", "github")

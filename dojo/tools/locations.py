@@ -89,12 +89,14 @@ class LocationData:
         license_expression: str = "",
         file_path: str = "",
         component_type: str = "",
+        cpes: list[str] | None = None,
     ) -> LocationData:
         """
         A software component. ``component_type`` is the CycloneDX ``component.type``
         (library, application, machine-learning-model, ...) when the report says;
-        empty means unknown, which a consumer reads as library. It describes the
-        component, it is not part of its identity (the purl is).
+        empty means unknown, which a consumer reads as library. ``cpes`` are the CPE
+        identifiers the report names for the component (see ``cpe_strings``). Neither
+        is part of its identity (the purl is).
         """
         return cls(
             type="dependency",
@@ -110,6 +112,7 @@ class LocationData:
                 "license_expression": license_expression,
                 "file_path": file_path,
                 "component_type": component_type,
+                "cpes": cpes or [],
             },
         )
 
@@ -258,6 +261,34 @@ class LocationData:
                 "oci_revision": oci_revision,
             },
         )
+
+    @classmethod
+    def cpe(cls, *, cpe: str) -> LocationData:
+        """
+        A platform named by a CPE: a CPE 2.3 formatted string (``cpe:2.3:a:vendor:product:1.2.3:...``)
+        or a CPE 2.2 URI (``cpe:/a:vendor:product:1.2.3``), passed as the report gives it. The consumer
+        binds both spellings to one canonical CPE 2.3 string, which is the identity, and skips a value
+        that is not a CPE. Emit one only for the finding the report ties the CPE to: a CPE location is
+        never matched to findings by its vendor, product or version.
+
+        DefectDojo Pro stores cpe locations; Community Edition does not register this type and drops it,
+        as it does container images.
+        """
+        return cls(type="cpe", data={"cpe": cpe})
+
+
+def cpe_strings(values: Any) -> list[str]:
+    """
+    The CPE identifiers from a report's ``cpes`` list, in order and without repeats.
+    Scanners write either bare strings or ``{"cpe": "..."}`` objects (Syft's current
+    schema, which Grype copies into its matches); anything else is skipped.
+    """
+    cpes: list[str] = []
+    for value in values if isinstance(values, list) else []:
+        cpe = value.get("cpe") if isinstance(value, dict) else value
+        if isinstance(cpe, str) and cpe.strip() and cpe.strip() not in cpes:
+            cpes.append(cpe.strip())
+    return cpes
 
 
 def split_image_reference(reference: str) -> dict[str, str]:

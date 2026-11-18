@@ -46,7 +46,7 @@ A lookup that fails leaves the form reachable. The box shows no matches and you 
 
 Support works the same way on a self-hosted instance. The instance enrols with DefectDojo using its own signed license rather than a portal secret. Enrolment happens on the first support call and needs no extra configuration.
 
-The instance calls `cloud.defectdojo.com` for support requests and the community board, and `docs.defectdojo.com` for the documentation search. Allow outbound HTTPS to both. If the instance has no route off its network, turn on **Airgapped instance** instead (see below).
+The instance calls `cloud.defectdojo.com` for support requests and the community board, and `docs.defectdojo.com` for the documentation search. Allow outbound HTTPS to both. If the instance has no route off its network, turn on **Airgapped Instance** instead (see below).
 
 **One instance per license holds the enrolment.** The first instance to enrol keeps it. A second instance running the same license is refused: it writes an error to its log naming its own key, and its support pages stay unavailable. To move the enrolment, ask DefectDojo support to reset it, then open the support pages on the instance that must keep it. The next instance to make a support call enrols.
 
@@ -58,7 +58,7 @@ If enrolment is refused for any other reason, the log line names the credential 
 
 ## Airgapped instances
 
-An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped instance** feature flag under **Settings → Feature Flags**, or set `DD_AIRGAPPED=True` on the deployment. Both pages then open a dialog that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. Its **Back** button returns you to the page you came from. The flag takes effect on the next page load; no restart is needed.
+An instance with no route off its network cannot use the support pages at all. Turn on the **Airgapped Instance** feature flag under **Settings → Feature Flags**, or set `DD_AIRGAPPED=True` on the deployment. Both pages then open a dialog that says support tracking is not supported for airgapped instances, with the DefectDojo support address to write to instead. Its **Back** button returns you to the page you came from. The flag takes effect on the next page load; no restart is needed.
 
 With the setting on, the instance makes no outbound support call and no documentation call. The dialog opens as soon as the page loads. It does not wait for a call to time out first.
 
@@ -74,8 +74,8 @@ To remove the support pages from an instance, a superuser turns off the **Suppor
 
 Turning the flag back on restores the pages, and **My requests** shows everything the account filed before. The flag takes effect on the next page load; no restart is needed.
 
-Use **Airgapped instance** rather than this flag when the instance should keep its support pages but cannot reach DefectDojo. Users then see the support address to write to instead of a missing page.
+Use **Airgapped Instance** rather than this flag when the instance should keep its support pages but cannot reach DefectDojo. Users then see the support address to write to instead of a missing page.
 
 ## Settings
 
-The support pages need no environment variables. Two feature flags under **Settings → Feature Flags** control them: **Support** (on by default) shows or removes the pages, and **Airgapped instance** (off by default) replaces them with the support address. `DD_AIRGAPPED=True` turns **Airgapped instance** on from the deployment and locks it on. The dialog address is `support@defectdojo.com`.
+The support pages need no environment variables. Two feature flags under **Settings → Feature Flags** control them: **Support** (on by default) shows or removes the pages, and **Airgapped Instance** (off by default) replaces them with the support address. `DD_AIRGAPPED=True` turns **Airgapped Instance** on from the deployment and locks it on. The dialog address is `support@defectdojo.com`.

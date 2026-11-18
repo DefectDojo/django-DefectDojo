@@ -11,7 +11,7 @@ Der Backstage-Connector ist ein **Asset-Connector**: Anstatt Befunde zu importie
 | Backstage | DefectDojo |
 |---|---|
 | **System** | Produkttyp (Components ohne System werden unter einem konfigurierbaren Produkttyp „Backstage / Uncategorized" gruppiert) |
-| **Component** | Produkt — benannt nach dem `title` der Entität (Rückgriff auf `name`), mit der Katalogbeschreibung |
+| **Component** | Produkt — benannt nach dem `title` der Entität (Rückgriff auf `name`), mit der Katalogbeschreibung. Die Beschreibung wird bei einem neuen Produkt gesetzt oder bei einem, dessen Beschreibung leer ist, und folgt späteren Änderungen in Backstage. Eine in DefectDojo verfasste Beschreibung wird nie ersetzt, auch nicht bei einem bestehenden Produkt, dem der Connector über den Namen zugeordnet wird. |
 | **Owning Group** (`ownedBy`-Beziehung) | Eine mit dem Produkt verknüpfte DefectDojo-Gruppe (Standardrolle: Maintainer, konfigurierbar) |
 | **Owning Group** `metadata.description` | Die Beschreibung der DefectDojo-Gruppe. Sie wird bei einer neuen Gruppe gesetzt oder bei einer, deren Beschreibung leer ist oder noch dem Platzhalter des Connectors entspricht, und folgt späteren Änderungen in Backstage. Eine von einem Administrator verfasste Beschreibung wird nie ersetzt. |
 | **Owner email** (E-Mail des Gruppenprofils oder E-Mail eines User-Owners) | Ein Produktmitglied, sofern bereits ein DefectDojo-Benutzer mit dieser E-Mail-Adresse existiert (es werden nie Benutzer angelegt) |

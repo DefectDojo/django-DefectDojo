@@ -123,6 +123,12 @@ The four assignable Risk levels are:
 
 A Finding's EPSS / exploitability is much more emphasized in the Risk calculation.  As a result, a Finding can have both a high priority and a low risk value.
 
+### An Asset's Risk
+
+The **All Assets** table has a Risk column too, and so does the **Assets** tile on an Organization's page. It shows the highest Risk among the Asset's active Findings, drawn the same way as on a Findings table, with its Risk Score beside it on the Organization tile. The highest band decides, and the highest Risk Score within that band breaks the tie, so a Finding whose band was overridden counts at its overridden band. Only the Findings you are allowed to see count, so two people can see a different Risk on the same Asset. An Asset with no active Finding that has a Risk reads **None**.
+
+Sort the All Assets table by Risk to list the riskiest Assets first; Assets with no Risk sort last either way. The column is shown by default, and you can hide it from the column picker like any other column.
+
 The Risk calculation itself cannot currently be adjusted directly. However, if [Threat Intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/) is enabled, the **Actively-Exploited Risk Floor** does let you control the outcome for the case that matters most: a Finding confirmed to be exploited in the wild is lifted to at least a Risk band you choose, rather than being left in a low band because its base severity is Low. It ships set to **Needs Action**, and each Prioritization Engine can raise it, lower it, or clear it to switch the floor off. See [the Actively-Exploited Risk Floor](/asset_modelling/pro_hierarchy/threat_intelligence/#the-actively-exploited-risk-floor).
 
 ## Priority Insights Dashboard
@@ -227,6 +233,59 @@ High)
 * **Revenue** - the related Asset's revenue, relative to the total revenue of the Organization
 * **External Audience** - whether or not the related Asset has an external audience
 * **Internet Accessible** - whether or not the related Asset is internet accessible
+
+#### Custom Field Multipliers
+
+When [Custom Fields](/asset_modelling/pro__custom_fields/) are enabled, a Prioritization Engine can also
+score Asset custom fields. Open the engine's edit form, choose **Add Custom Field** in the **Custom Field
+Multipliers** group, and pick an Asset custom field. Each added field gets the same multiplier slider as
+the built-in factors, and an engine can score up to ten custom fields.
+
+How a custom field contributes depends on its data type. Each type works the same way as one of the
+built-in Asset factors:
+
+| Data type | How it scores | Works like |
+| --- | --- | --- |
+| Integer, Decimal | The Asset's value as a share of the total for that field across its Organization | Revenue, User Records |
+| Boolean | A bonus when the value is Yes | External Audience |
+| Single select | A weight you set for each option, from -25% to +25% | Business Criticality |
+| Multi select | The highest weight among the selected options | Business Criticality |
+
+A few things to know:
+
+* An Asset with no value for a field gets no contribution from it, and is not counted in its
+  Organization's total. A negative number counts as zero.
+* An option you leave unweighted, and an **Other** value, weigh nothing.
+* Text and date fields cannot be priority factors.
+* A computed integer or decimal field can be a factor (for example, a count of the Asset's open Critical
+  Findings). A computed field whose formula reads Finding Priority, Risk or Risk Score cannot, directly or
+  through another computed field, because its value would then follow the score it feeds. Editing the
+  formula of a field an engine scores so that it reads them is refused for the same reason.
+* Custom fields keep the 0 to 100 Risk Score scale. Each one's largest possible contribution is part of
+  the engine's maximum Priority, so adding, removing or reweighting a custom field rescales the engine the
+  same way changing a built-in multiplier does, and the Risk Thresholds keep their meaning.
+* Custom fields add to the score on top of the built-in factors. The built-in factors are scored exactly
+  as before, and an engine with no custom fields scores exactly as it would without this feature.
+* The **Default** engine always keeps the original algorithm and cannot score custom fields. Create a
+  separate engine and assign it to the Assets that should use custom fields.
+* Changing a scored field's value on an Asset recalculates the affected Findings. A numeric field
+  recalculates the whole Organization, because the Organization's total changed, even when the Asset
+  whose value changed uses another engine. Moving, deleting or archiving an Asset that holds a numeric
+  value recalculates its Organization for the same reason.
+* A computed numeric field changes whenever the Findings its formula counts change, so scoring one
+  recalculates its Organization after each import that moves its value. On a large Organization, prefer a
+  field that changes less often.
+* While an engine scores a custom field, that field cannot be deleted, its data type cannot change, and
+  an option with a weight cannot be removed. Remove the field from the engine (or clear the option's
+  weight) first.
+
+The **Priority Drivers** card on an Asset's page lists each custom field the Asset's engine scores, with
+the Asset's value and what it contributes.
+
+#### Turning a factor off
+
+Every factor, built-in or custom, has an **Off** toggle next to its slider. Turning a factor off sets its
+multiplier to 0%, which removes it from the calculation entirely. Turning it back on restores 100%.
 
 ### Risk Thresholds
 

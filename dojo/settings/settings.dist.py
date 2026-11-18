@@ -237,6 +237,15 @@ env = environ.FileAwareEnv(
     # An import lock whose every holder has been idle this many minutes is treated as abandoned (left
     # behind by a host that died, or by a pooler) and no longer holds the delete back. 0 never does.
     DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES=(int, 30),
+    # Imports and reimports into one test run one at a time: a second one waits for the first to
+    # finish (a PostgreSQL advisory lock; see dojo/importers/import_lock.py). Turn off behind a
+    # connection pooler in transaction mode, where session locks do not hold.
+    DD_SERIALIZE_TEST_IMPORTS=(bool, True),
+    # How long an import or reimport waits for another one into the same test to finish before it
+    # gives up and fails with HTTP 409 Conflict (default 10 minutes). 0 fails at once instead of waiting.
+    # A synchronous request that waits still has to import afterwards within the web server's and
+    # proxy's request timeouts (30 minutes on the stock deployments), so keep it well below those.
+    DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS=(int, 600),
     # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
     # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
     # because backdating a mitigation can distort SLA-compliance metrics. Changing this
@@ -2008,6 +2017,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
     "OPF Scan": DEDUPE_ALGO_HASH_CODE,
+    # The parser builds a stable unique_id_from_tool for every finding (detector, kind, target, path and the
+    # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
+    "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
@@ -2029,6 +2041,8 @@ DUPE_DELETE_LOCK_EXPIRE = env("DD_DUPE_DELETE_LOCK_EXPIRE")
 DUPE_DELETE_GRACE_MINUTES = env("DD_DUPE_DELETE_GRACE_MINUTES")
 DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT = env("DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT")
 DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES = env("DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES")
+SERIALIZE_TEST_IMPORTS = env("DD_SERIALIZE_TEST_IMPORTS")
+SERIALIZE_TEST_IMPORTS_WAIT_SECONDS = env("DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS")
 
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 

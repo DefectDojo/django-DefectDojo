@@ -554,6 +554,9 @@ class UserHasImportPermission(permissions.BasePermission):
         # in this case and wrap them in a DRF exception
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            # engagement_id is read-only on ImportScanSerializer and dropped during validation,
+            # so only the engagement field may name the target here, as it does at execution
+            converted_dict.pop("engagement_id", None)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
@@ -627,6 +630,8 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         # in this case and wrap them in a DRF exception
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            # product_id is read-only on EndpointMetaImporterSerializer, so only product may name the target
+            converted_dict.pop("product_id", None)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # Get an existing product
             product = auto_create.get_target_product_if_exists(**converted_dict)
@@ -755,6 +760,8 @@ class UserHasReimportPermission(permissions.BasePermission):
         # in this case and wrap them in a DRF exception
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
+            # test_id is read-only on ReImportScanSerializer, so only test may name the target
+            converted_dict.pop("test_id", None)
             auto_create.process_import_meta_data_from_dict(converted_dict)
             # engagement is not a declared field on ReImportScanSerializer and will be
             # stripped during validation — don't use it in the permission check either,
@@ -765,6 +772,16 @@ class UserHasReimportPermission(permissions.BasePermission):
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
             converted_dict["engagement"] = auto_create.get_target_engagement_if_exists(**converted_dict)
+            # The title lookup reads the report for its tool. Refuse a user who may not import into
+            # the engagement before it does: every test it can match is in this engagement and takes
+            # its product's permission, so the test check below would refuse them all the same.
+            if (
+                (engagement := converted_dict["engagement"]) is not None
+                and converted_dict.get("test_title")
+                and not converted_dict.get("test_id")
+                and not user_has_permission(request.user, engagement, "import")
+            ):
+                return False
             converted_dict["test"] = auto_create.get_target_test_if_exists(**converted_dict)
         except (TooManyFieldsSent, RequestDataTooBig) as e:
             # A very large scan import (too many form fields, or a body over the size limit)

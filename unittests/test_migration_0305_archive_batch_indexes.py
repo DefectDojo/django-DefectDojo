@@ -16,7 +16,7 @@ afterwards.
 import importlib
 import threading
 import time
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import psycopg
 from django.db import IntegrityError, connection
@@ -27,6 +27,9 @@ NAME = ("dojo", "0305_archive_batch_indexes")
 INDEX = "dojo_test_archive_batch"
 SCRATCH_TABLE = "unittest_0305_scratch"
 WAIT_TIMEOUT_SECONDS = 30
+BUILDER_APPLICATION_NAME = "unittest_0305_builder"
+HOLD_LOCK_KEY = 305_0305
+HOLD_FUNCTION = "unittest_0305_hold_build"
 
 
 def _index():
@@ -138,17 +141,136 @@ class TestMigration0305Rerun(SimpleTestCase):
             in_flight_oid, valid, _ = _index()
             self.assertFalse(valid, "the build should still be running")
 
-            release = threading.Timer(1, snapshot_holder.commit)
-            release.start()
+            # The snapshot is released from inside the wait, not on a timer: a timer that fires
+            # before the operation first looks lets the build finish unseen on a slow runner.
+            # The second check is the wait loop's first, so the wait has started by then. The
+            # build is let finish and its transaction end before that check answers (still in
+            # progress, as it was when the check began), so the next one sees it done.
+            real_build_in_progress = self.operation._build_in_progress
+            checks = []
+
+            def build_in_progress(cursor, quoted_name):
+                checks.append(quoted_name)
+                if len(checks) == 2:
+                    snapshot_holder.commit()
+                    builder_thread.join(WAIT_TIMEOUT_SECONDS)
+                    return True
+                return real_build_in_progress(cursor, quoted_name)
+
             with (
                 patch.object(self.operation, "poll_seconds", 0.1),
+                patch.object(self.operation, "_build_in_progress", build_in_progress),
                 self.assertLogs(f"dojo.db_migrations.{NAME[1]}", "WARNING") as logs,
             ):
                 self._run_operation()
-            release.join()
+            self.assertGreaterEqual(len(checks), 2)
             # Once when the wait starts and once when it ends, however many polls it took.
             self.assertEqual(2, len(logs.records))
 
+        builder_thread.join(WAIT_TIMEOUT_SECONDS)
+        self.assertEqual([], build_error)
+        self.assertEqual((in_flight_oid, True, "dojo_test"), _index())
+
+    def test_build_ending_is_waited_for_until_it_commits(self):
+        """
+        A build whose progress row has ended but whose transaction has not committed is kept.
+
+        Postgres ends a concurrent build's pg_stat_progress_create_index row a moment before the
+        build's last transaction commits, and until then indisvalid still reads false. A
+        ddl_command_end event trigger runs in that window, so one that waits on an advisory lock
+        holds the real build there for as long as the test needs, with no timing involved.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")
+            if not cursor.fetchone()[0]:
+                self.skipTest("needs a superuser to create an event trigger")
+        _execute(f"DROP INDEX {INDEX}")
+        params = connection.get_connection_params()
+        build_error = []
+
+        lock_holder = psycopg.connect(**params, autocommit=True)
+        self.addCleanup(lock_holder.close)  # also releases the lock if the test fails early
+        lock_holder.execute("SELECT pg_advisory_lock(%s)", [HOLD_LOCK_KEY])
+        _execute(
+            f"CREATE FUNCTION {HOLD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$"
+            f" BEGIN IF current_setting('application_name') = '{BUILDER_APPLICATION_NAME}' THEN"
+            f" PERFORM pg_advisory_xact_lock({HOLD_LOCK_KEY}); END IF; END $$",
+        )
+        self.addCleanup(_execute, f"DROP FUNCTION {HOLD_FUNCTION}()")
+        _execute(
+            f"CREATE EVENT TRIGGER {HOLD_FUNCTION} ON ddl_command_end"
+            f" WHEN TAG IN ('CREATE INDEX') EXECUTE FUNCTION {HOLD_FUNCTION}()",
+        )
+        self.addCleanup(_execute, f"DROP EVENT TRIGGER {HOLD_FUNCTION}")
+
+        def build():
+            try:
+                with psycopg.connect(**params, autocommit=True, application_name=BUILDER_APPLICATION_NAME) as builder:
+                    builder.execute(
+                        f"CREATE INDEX CONCURRENTLY {INDEX} ON dojo_test (archive_batch)"
+                        " WHERE archive_batch IS NOT NULL",
+                    )
+            except Exception as error:  # reported by the assertion on build_error below
+                build_error.append(error)
+
+        builder_thread = threading.Thread(target=build)
+        builder_thread.start()
+        self.addCleanup(builder_thread.join, WAIT_TIMEOUT_SECONDS)
+        self.addCleanup(lock_holder.execute, "SELECT pg_advisory_unlock_all()")
+        with connection.cursor() as cursor:
+            deadline = time.monotonic() + WAIT_TIMEOUT_SECONDS
+            while True:
+                cursor.execute(
+                    "SELECT 1 FROM pg_stat_activity WHERE application_name = %s"
+                    " AND wait_event_type = 'Lock' AND wait_event = 'advisory'",
+                    [BUILDER_APPLICATION_NAME],
+                )
+                if cursor.fetchone() is not None:
+                    break
+                self.assertLess(time.monotonic(), deadline, "the build never reached its event trigger")
+                self.assertTrue(builder_thread.is_alive(), build_error)
+                time.sleep(0.05)
+            # The state the migration meets in that window: no progress row, and not valid yet.
+            cursor.execute(
+                "SELECT 1 FROM pg_stat_progress_create_index WHERE index_relid = to_regclass(%s)", [INDEX],
+            )
+            self.assertIsNone(cursor.fetchone(), "the build's progress row should have ended")
+        in_flight_oid, valid, _ = _index()
+        self.assertFalse(valid, "the build's commit should still be held back")
+
+        # The build is let commit from inside the wait, the first time the operation sleeps.
+        migration_module = importlib.import_module(f"dojo.db_migrations.{NAME[1]}")
+        sleeps = []
+
+        def sleep(seconds):
+            sleeps.append(seconds)
+            if len(sleeps) == 1:
+                lock_holder.execute("SELECT pg_advisory_unlock(%s)", [HOLD_LOCK_KEY])
+                builder_thread.join(WAIT_TIMEOUT_SECONDS)
+
+        dropped = []
+
+        with connection.schema_editor(atomic=False) as editor:
+            real_execute = editor.execute
+
+            def execute(sql, params=()):
+                if str(sql).startswith("DROP INDEX"):
+                    # Refused rather than run: the drop would wait on the held build and hang.
+                    dropped.append(str(sql))
+                    msg = f"dropped an index whose build had not committed yet: {sql}"
+                    raise AssertionError(msg)
+                return real_execute(sql, params)
+
+            with (
+                patch.object(editor, "execute", execute),
+                patch.object(migration_module, "time", Mock(sleep=sleep)),
+                self.assertLogs(f"dojo.db_migrations.{NAME[1]}", "WARNING") as logs,
+            ):
+                self.operation.database_forwards("dojo", editor, self.state, self.state)
+
+        self.assertEqual([], dropped)
+        self.assertEqual(1, len(sleeps))
+        self.assertEqual(2, len(logs.records))
         builder_thread.join(WAIT_TIMEOUT_SECONDS)
         self.assertEqual([], build_error)
         self.assertEqual((in_flight_oid, True, "dojo_test"), _index())

@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dojo.auditlog.helpers import get_delete_event_user
-from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.celery_dispatch import dojo_dispatch_task_on_commit
 from dojo.file_uploads.helper import delete_related_files
 from dojo.models import Engagement, Product
 from dojo.notes.helper import delete_related_notes
@@ -21,7 +21,9 @@ def engagement_post_save(sender, instance, created, **kwargs):
         return
     if created:
         title = _('Engagement created for "%(product)s": %(name)s') % {"product": instance.product, "name": instance.name}
-        dojo_dispatch_task(
+        # After the COMMIT: the task loads the new engagement by id, and a worker that picks it up
+        # before the creating transaction commits finds no row and sends nothing to anyone.
+        dojo_dispatch_task_on_commit(
             async_create_notification,
             event="engagement_added",
             title=title,

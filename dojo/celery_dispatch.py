@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 from celery.canvas import Signature
+from django.db import transaction
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
 
 # The dispatcher injects these itself; a caller must never supply them.
@@ -77,6 +78,31 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     - sync: underlying return value of the task
 
     """
+    return _prepare_dispatch(task_or_sig, *args, **kwargs)()
+
+
+def dojo_dispatch_task_on_commit(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signature, *args: Any, **kwargs: Any) -> None:
+    """
+    Dispatch a task/signature like `dojo_dispatch_task`, once the current transaction commits.
+
+    Use it for a task that reads back a row the caller has just written, such as a
+    notification for a new product that the task loads by id. Dispatched inside the
+    transaction, a worker can run the task before the COMMIT, find no row and do nothing.
+
+    - Outside a transaction (autocommit) it dispatches right away, as `dojo_dispatch_task` does.
+    - If the transaction rolls back it never dispatches.
+    - The acting user, the pghistory context and the foreground/background choice are
+      taken now, so the task runs as the user who made the change even if the commit
+      happens after that context has ended.
+    - A dispatch that fails (a broker error, or a foreground task that raises) is logged
+      and does not fail the caller, whose write has already committed, or stop the
+      on_commit hooks registered after it.
+    """
+    transaction.on_commit(_prepare_dispatch(task_or_sig, *args, **kwargs), robust=True)
+
+
+def _prepare_dispatch(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signature, *args: Any, **kwargs: Any) -> Callable[[], Any]:
+    """Build the signature and pick foreground or background now; the returned callable sends it."""
     from dojo.decorators import dojo_async_task_counter, we_want_async  # noqa: PLC0415 circular import
 
     if reserved := RESERVED_DISPATCH_KWARGS.intersection(kwargs):
@@ -100,15 +126,18 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
         apply_kwargs = {"countdown": countdown}
         if ignore_result is not None:
             apply_kwargs["ignore_result"] = ignore_result
-        return sig.apply_async(**apply_kwargs)
+        return lambda: sig.apply_async(**apply_kwargs)
 
-    # Track foreground execution as a "created task" as well (matches historical dojo_async_task behavior)
-    dojo_async_task_counter.incr(str(sig.task), args=sig.args, kwargs=sig_kwargs)
+    def run_in_foreground() -> Any:
+        # Track foreground execution as a "created task" as well (matches historical dojo_async_task behavior)
+        dojo_async_task_counter.incr(str(sig.task), args=sig.args, kwargs=sig_kwargs)
 
-    eager = sig.apply()
-    try:
-        return eager.get(propagate=True)
-    except RuntimeError:
-        # Since we are intentionally running synchronously, we can propagate exceptions directly, and enable sync subtasks
-        # If the requests desires this. Celery docs explain that this is a rare use case, but we support it _just in case_
-        return eager.get(propagate=True, disable_sync_subtasks=False)
+        eager = sig.apply()
+        try:
+            return eager.get(propagate=True)
+        except RuntimeError:
+            # Since we are intentionally running synchronously, we can propagate exceptions directly, and enable sync subtasks
+            # If the requests desires this. Celery docs explain that this is a rare use case, but we support it _just in case_
+            return eager.get(propagate=True, disable_sync_subtasks=False)
+
+    return run_in_foreground

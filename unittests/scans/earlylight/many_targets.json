@@ -1,0 +1,546 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    },
+    {
+      "id": "brotli",
+      "title": "Brotli decoder vulnerable to CVE-2026-111497",
+      "cves": [
+        "CVE-2026-111497"
+      ],
+      "advisories": [
+        "https://github.com/advisories/GHSA-9v8h-qqgm-4m35",
+        "https://github.com/google/brotli/releases/tag/v1.2.1",
+        "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+        "https://github.com/dotnet/announcements/issues/494"
+      ],
+      "data": "Brotli decoder error-code tables (google/brotli 1.0.0 to 1.2.1) and the fixed Node.js, .NET and Bun releases"
+    }
+  ],
+  "targets": [
+    {
+      "target": "php:8.3.36-cli",
+      "type": "image",
+      "digest": "sha256:d716009046f4acac161ed7a14921111398228c2311696f132686be8613cb19ab",
+      "platform": "linux/amd64",
+      "files_scanned": 9113,
+      "files_read": 1251,
+      "findings": [
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/bin/php",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/bin/php",
+            "php_version": "8.3.36",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-web",
+          "path": "/usr/local/bin/php-cgi",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (cgi-fcgi)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "cgi-fcgi"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/bin/php-cgi",
+            "php_version": "8.3.36",
+            "sapi": "cgi-fcgi",
+            "web_facing": true,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/bin/phpdbg",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/bin/phpdbg",
+            "php_version": "8.3.36",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/lib/libphp.so",
+          "verdict": "fixed",
+          "reason": "PHP 8.3.36 is the fixed release",
+          "message": "PHP 8.3.36 (embed)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.36",
+            "sapi": "embed"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "fixed",
+              "reason": "PHP 8.3.36 is the fixed release"
+            }
+          ],
+          "severity": "none",
+          "details": {
+            "path": "/usr/local/lib/libphp.so",
+            "php_version": "8.3.36",
+            "sapi": "embed",
+            "web_facing": false,
+            "status": "fixed",
+            "severity": "none",
+            "reason": "PHP 8.3.36 is the fixed release",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "fixed",
+                "reason": "PHP 8.3.36 is the fixed release"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "13",
+              "codename": "trixie",
+              "pretty_name": "Debian GNU/Linux 13 (trixie)"
+            }
+          }
+        },
+        {
+          "detector": "brotli",
+          "kind": "decoder-library",
+          "path": "/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0",
+          "verdict": "fixed",
+          "reason": "the decoder's error table has BLOCK_SWITCH, the error code the fix added, so it has the fix (upstream or a vendor backport)",
+          "message": "Brotli decoder with the CVE-2026-111497 fix (libbrotlidec)",
+          "method": "brotli-error-table",
+          "facts": {
+            "block_switch": "yes",
+            "distance": "yes",
+            "error_table": "prefixed",
+            "product": "libbrotlidec"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-111497",
+              "verdict": "fixed",
+              "reason": "the decoder's error table has BLOCK_SWITCH, the error code the fix added, so it has the fix (upstream or a vendor backport)"
+            }
+          ],
+          "details": {
+            "kind": "decoder-library",
+            "path": "/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0",
+            "status": "fixed",
+            "reason": "the decoder's error table has BLOCK_SWITCH, the error code the fix added, so it has the fix (upstream or a vendor backport)",
+            "message": "Brotli decoder with the CVE-2026-111497 fix (libbrotlidec)",
+            "method": "brotli-error-table",
+            "product": "libbrotlidec",
+            "table": "prefixed",
+            "block_switch": true,
+            "distance": true
+          }
+        }
+      ],
+      "skipped": [
+        {
+          "path": "/usr/src/php.tar.xz!/php-8.3.36/ext/bz2/tests/004_2.txt.bz2",
+          "reason": "bzip2: bzip2 data invalid: block checksum mismatch"
+        },
+        {
+          "path": "/usr/src/php.tar.xz!/php-8.3.36/ext/bz2/tests/72613.bz2",
+          "reason": "bzip2: bzip2 data invalid: block checksum mismatch"
+        }
+      ],
+      "annotations": {
+        "os": {
+          "id": "debian",
+          "version_id": "13",
+          "codename": "trixie",
+          "pretty_name": "Debian GNU/Linux 13 (trixie)"
+        }
+      }
+    },
+    {
+      "target": "trafex/php-nginx:2.0.1",
+      "type": "image",
+      "digest": "sha256:c9c6d912ce5dbb57e204e7368cacad02530e56f068a8ba10013e0a8cda66983e",
+      "platform": "linux/amd64",
+      "files_scanned": 3734,
+      "files_read": 200,
+      "findings": [
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/bin/php8",
+          "verdict": "unknown",
+          "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+          "message": "PHP 8.0.2 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "package": "php8 8.0.2-r0",
+            "php_version": "8.0.2",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "unknown",
+              "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "unknown",
+              "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            }
+          ],
+          "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed.",
+          "severity": "review",
+          "details": {
+            "path": "/usr/bin/php8",
+            "php_version": "8.0.2",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "unknown",
+            "severity": "review",
+            "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "unknown",
+                "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "unknown",
+                "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              }
+            ],
+            "package": {
+              "format": "apk",
+              "name": "php8",
+              "version": "8.0.2-r0",
+              "source": "php8",
+              "arch": "x86_64",
+              "db": "/lib/apk/db/installed"
+            },
+            "os": {
+              "id": "alpine",
+              "version_id": "3.13.5",
+              "pretty_name": "Alpine Linux v3.13"
+            },
+            "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed."
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-web",
+          "path": "/usr/sbin/php-fpm8",
+          "verdict": "unknown",
+          "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+          "message": "PHP 8.0.2 (fpm-fcgi)",
+          "method": "elf-strings",
+          "facts": {
+            "package": "php8-fpm 8.0.2-r0",
+            "php_version": "8.0.2",
+            "sapi": "fpm-fcgi"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "unknown",
+              "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "unknown",
+              "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            }
+          ],
+          "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed.",
+          "severity": "review",
+          "details": {
+            "path": "/usr/sbin/php-fpm8",
+            "php_version": "8.0.2",
+            "sapi": "fpm-fcgi",
+            "web_facing": true,
+            "status": "unknown",
+            "severity": "review",
+            "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "unknown",
+                "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "unknown",
+                "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              }
+            ],
+            "package": {
+              "format": "apk",
+              "name": "php8-fpm",
+              "version": "8.0.2-r0",
+              "source": "php8",
+              "arch": "x86_64",
+              "db": "/lib/apk/db/installed"
+            },
+            "os": {
+              "id": "alpine",
+              "version_id": "3.13.5",
+              "pretty_name": "Alpine Linux v3.13"
+            },
+            "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed."
+          }
+        },
+        {
+          "detector": "brotli",
+          "kind": "decoder-library",
+          "path": "/usr/lib/libbrotlidec.so.1.0.9",
+          "verdict": "vulnerable",
+          "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added",
+          "message": "Brotli decoder without the CVE-2026-111497 fix (libbrotlidec)",
+          "method": "brotli-error-table",
+          "facts": {
+            "block_switch": "no",
+            "distance": "yes",
+            "error_table": "bare",
+            "product": "libbrotlidec"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-111497",
+              "verdict": "vulnerable",
+              "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added"
+            }
+          ],
+          "fix": "Update the system Brotli package (libbrotli1, brotli-libs, libbrotli or brotli) to your vendor's fixed build, or build Brotli 1.0.10, 1.1.1 or 1.2.1, then restart the programs that load it.",
+          "details": {
+            "kind": "decoder-library",
+            "path": "/usr/lib/libbrotlidec.so.1.0.9",
+            "status": "vulnerable",
+            "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added",
+            "message": "Brotli decoder without the CVE-2026-111497 fix (libbrotlidec)",
+            "method": "brotli-error-table",
+            "product": "libbrotlidec",
+            "fix": "Update the system Brotli package (libbrotli1, brotli-libs, libbrotli or brotli) to your vendor's fixed build, or build Brotli 1.0.10, 1.1.1 or 1.2.1, then restart the programs that load it.",
+            "table": "bare",
+            "block_switch": false,
+            "distance": true
+          }
+        }
+      ],
+      "skipped": [],
+      "annotations": {
+        "os": {
+          "id": "alpine",
+          "version_id": "3.13.5",
+          "pretty_name": "Alpine Linux v3.13"
+        }
+      }
+    },
+    {
+      "target": "node:20.0.0-slim",
+      "type": "image",
+      "digest": "sha256:130e0957d64695f37eea9ff80541f628e811da1d969c36988759738e39a0ab3b",
+      "platform": "linux/amd64",
+      "files_scanned": 8066,
+      "files_read": 900,
+      "findings": [
+        {
+          "detector": "brotli",
+          "kind": "bundled-decoder",
+          "path": "/usr/local/bin/node",
+          "verdict": "vulnerable",
+          "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added",
+          "message": "Brotli decoder without the CVE-2026-111497 fix (Node.js 20.0.0)",
+          "method": "brotli-error-table",
+          "facts": {
+            "block_switch": "no",
+            "distance": "yes",
+            "error_table": "bare",
+            "product": "node",
+            "version": "20.0.0"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-111497",
+              "verdict": "vulnerable",
+              "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added"
+            }
+          ],
+          "fix": "Node.js 20 has no fixed release: move to 22.23.4, 24.22.1 or 26.12.1.",
+          "details": {
+            "kind": "bundled-decoder",
+            "path": "/usr/local/bin/node",
+            "status": "vulnerable",
+            "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added",
+            "message": "Brotli decoder without the CVE-2026-111497 fix (Node.js 20.0.0)",
+            "method": "brotli-error-table",
+            "product": "node",
+            "version": "20.0.0",
+            "fix": "Node.js 20 has no fixed release: move to 22.23.4, 24.22.1 or 26.12.1.",
+            "table": "bare",
+            "block_switch": false,
+            "distance": true
+          }
+        }
+      ],
+      "skipped": [],
+      "annotations": {
+        "os": {
+          "id": "debian",
+          "version_id": "11",
+          "codename": "bullseye",
+          "pretty_name": "Debian GNU/Linux 11 (bullseye)"
+        }
+      }
+    }
+  ]
+}

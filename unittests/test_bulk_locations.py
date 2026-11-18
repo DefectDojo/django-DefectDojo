@@ -226,6 +226,18 @@ class TestBulkGetOrCreateLocations(DojoTestCase):
     def test_empty_input(self):
         self.assertEqual(LocationManager._bulk_get_or_create_locations([]), [])
 
+    def test_clean_keeps_the_last_copy_of_a_duplicate_in_last_reported_order(self):
+        # Regression: a set kept the FIRST of two equal locations, while _persist_locations keeps the last.
+        first = _make_url("oss-dup.example.com", "a")
+        other = _make_url("oss-other.example.com")
+        last = _make_url("oss-dup.example.com", "a")
+
+        cleaned = LocationManager.clean_unsaved_locations([first, other, last])
+
+        self.assertEqual(len(cleaned), 2)
+        self.assertIs(cleaned[0], other)
+        self.assertIs(cleaned[1], last, msg="the last copy of a duplicate is the one kept")
+
 
 # ---------------------------------------------------------------------------
 # LocationManager.persist — ref creation details

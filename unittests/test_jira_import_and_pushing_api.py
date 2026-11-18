@@ -436,7 +436,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         pre_jira_status = post_jira_status
         ra = Risk_Acceptance.objects.last()
-        ra_helper.expire_now(ra)
+        # The push goes out once the expiry is committed, as above: run each callback as it is registered.
+        with patch("dojo.risk_acceptance.helper.transaction.on_commit", side_effect=lambda func, *_args, **_kwargs: func()):
+            ra_helper.expire_now(ra)
 
         # we don't do any explicit push to JIRA here as it should happen automatically
 
@@ -1346,11 +1348,13 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             "engagement": None,  # This is hardcoded on the test function, so lets just null it out
             "auto_create_context": True,
         }
-        # First have a regular import create all the things
-        import0 = self.import_scan_with_params(
-            self.zap_sample5_filename,
-            **import_reimport_config,
-        )
+        # First have a regular import create all the things. The product type, product and engagement
+        # "added" webhooks (recorded in the cassette) go out once the creating transaction commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            import0 = self.import_scan_with_params(
+                self.zap_sample5_filename,
+                **import_reimport_config,
+            )
         test_id = import0["test"]
         test = Test.objects.get(id=test_id)
         engagement = test.engagement

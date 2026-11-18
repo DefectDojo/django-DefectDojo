@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
+from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.models import (
     FileUpload,
@@ -64,7 +65,12 @@ class TestsViewSet(
         # (with their JIRA issue) are serialized per test, and notes/files are
         # already prefetched. Without these the list view's query count grows
         # with the number of tests returned, producing 400+ queries for a single
-        # page on large instances.
+        # page on large instances. A group's JIRA issue url reads the issue's
+        # jira_project and its jira_instance, but only while JIRA is enabled, so
+        # those are batched too only then.
+        finding_group_issues = "finding_group_set__jira_issue"
+        if jira_services.is_enabled():
+            finding_group_issues += "__jira_project__jira_instance"
         return (
             get_authorized_tests("view")
             .select_related("test_type")
@@ -72,7 +78,7 @@ class TestsViewSet(
                 notes_prefetch(),
                 "files",
                 "tags",
-                "finding_group_set__jira_issue",
+                finding_group_issues,
             )
             .distinct()
         )

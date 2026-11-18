@@ -69,6 +69,7 @@ from dojo.models import (
 )
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tasks import _async_dupe_delete_impl  # noqa: PLC2701
+from dojo.utils import _async_delete_object  # noqa: PLC2701
 from dojo.vulnerability.models import Vulnerability
 
 logger = logging.getLogger(__name__)
@@ -1871,3 +1872,136 @@ class TestDupeDeleteRacesSingleFindingDelete(_CommittedFindingsMixin, SimpleTest
         self.assertIsNone(single_delete_error, msg=f"the single-finding delete failed: {single_delete_error!r}")
         remaining = list(Finding.objects.filter(id__in=[duplicate.id, unrelated.id]).values_list("id", flat=True))
         self.assertEqual(remaining, [], msg=f"both findings must be deleted, still present: {remaining}")
+
+    # Regression: with DUPLICATE_CLUSTER_CASCADE_DELETE, deleting an original removed its cluster
+    # with a plain queryset delete, which clears the duplicates' child rows before it reaches
+    # their dojo_finding rows. Against the excess-duplicate delete, which locks those finding rows
+    # first and clears the children after, the two deadlocked (Postgres 40P01).
+    def _original_with_an_excess_and_a_fresh_duplicate(self):
+        """
+        An old original with two duplicates, each finding with a Test_Import_Finding_Action row.
+
+        The old duplicate is what the excess-duplicate delete removes. The fresh one is still
+        inside its grace period, so only the cascade of the original's delete can remove it.
+        """
+        original, old_duplicate, fresh_duplicate = self._create_findings(
+            "Cascade original", "Cascade old duplicate", "Cascade fresh duplicate",
+        )
+        past = timezone.now() - timedelta(minutes=120)
+        Finding.objects.filter(id__in=[old_duplicate.id, fresh_duplicate.id]).update(
+            duplicate=True, active=False, duplicate_finding=original,
+        )
+        Finding.objects.filter(id__in=[original.id, old_duplicate.id]).update(created=past, updated=past)
+        test_import = Test_Import.objects.create(test=self.test, type=Test_Import.IMPORT_TYPE)
+        Test_Import_Finding_Action.objects.bulk_create([
+            Test_Import_Finding_Action(test_import=test_import, finding_id=finding.id, action="N")
+            for finding in (original, old_duplicate, fresh_duplicate)
+        ])
+        return original, old_duplicate, fresh_duplicate
+
+    def _assert_deleting_the_original_of_a_cluster_being_trimmed_does_not_deadlock(self, **kwargs):
+        cluster = self._original_with_an_excess_and_a_fresh_duplicate()
+        cluster_ids = [finding.id for finding in cluster]
+
+        dupe_delete_error, single_delete_error = self._single_delete_during_dupe_delete(cluster[0].id, **kwargs)
+
+        self.assertIsNone(dupe_delete_error, msg=f"the excess-duplicate delete failed: {dupe_delete_error!r}")
+        self.assertIsNone(single_delete_error, msg=f"the single-finding delete failed: {single_delete_error!r}")
+        remaining = list(Finding.objects.filter(id__in=cluster_ids).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"the original and both duplicates must be deleted, still present: {remaining}")
+        orphans = list(Test_Import_Finding_Action.objects.filter(finding_id__in=cluster_ids).values_list("finding_id", flat=True))
+        self.assertEqual(orphans, [], msg=f"no import-history row may survive for the deleted cluster: {orphans}")
+
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_cascade_deleting_the_original_while_the_dupe_delete_removes_a_duplicate_does_not_deadlock(self):
+        self._assert_deleting_the_original_of_a_cluster_being_trimmed_does_not_deadlock()
+
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_dupe_delete_is_not_the_deadlock_victim_of_a_cascade_delete(self):
+        self._assert_deleting_the_original_of_a_cluster_being_trimmed_does_not_deadlock(
+            resume_after_the_deadlock_check=True,
+        )
+
+    # Regression: the cascade deleted only the cluster members it had read before taking its
+    # lock, so a duplicate deduplication linked to the original in between was left pointing at
+    # it, and the original's delete then failed at COMMIT (23503) with the cluster half gone.
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_cascade_delete_takes_a_duplicate_linked_after_the_cluster_read(self):
+        cluster = self._original_with_an_excess_and_a_fresh_duplicate()
+        original = cluster[0]
+        (late,) = self._create_findings("Cascade late duplicate")
+        real_lock = finding_helper.lock_findings_for_delete
+        linked = []
+
+        def link_a_duplicate_then_lock(finding_ids):
+            # The cascade's lock is the first one taken; link on another connection and commit
+            # just before it, as a concurrent deduplication landing after the cluster read would.
+            if not linked:
+                linked.append(late.id)
+                writer = _ConcurrentThread(
+                    lambda: Finding.objects.filter(id=late.id).update(
+                        duplicate=True, active=False, duplicate_finding_id=original.id,
+                    ),
+                )
+                writer.start()
+                writer.join_or_fail(self)
+            return real_lock(finding_ids)
+
+        with (
+            patch.object(finding_helper, "SINGLE_DELETE_MAX_CONFLICT_RETRIES", 0),
+            patch.object(finding_helper, "lock_findings_for_delete", link_a_duplicate_then_lock),
+        ):
+            finding_helper.delete_finding_with_conflict_retry(Finding.objects.get(id=original.id))
+
+        self.assertEqual(linked, [late.id], msg="the duplicate must be linked once, before the cascade's lock")
+        doomed = [finding.id for finding in cluster] + [late.id]
+        remaining = list(Finding.objects.filter(id__in=doomed).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"the original and every duplicate must be deleted, still present: {remaining}")
+        self.assertNoDanglingDuplicateLinks()
+
+
+# Regression: a background engagement delete failed, on the first run and on every retry, with
+# "update or delete on table dojo_finding violates foreign key constraint
+# dojo_finding_duplicate_finding_id_... Key (id)=(N) is still referenced from table
+# dojo_finding". A finding of the engagement held a duplicate_finding link to another finding
+# of the same engagement while its own duplicate flag was False. The reset that runs before the
+# delete only cleared the links of rows flagged as duplicates, and the per-chunk resolve leaves
+# the rows of the delete alone, so the link was still there when the chunk that holds its
+# target committed. No concurrency is involved; it needs real commits because each chunk
+# commits on its own and the foreign key is only checked there.
+@override_settings(ASYNC_OBEJECT_DELETE_CHUNK_SIZE=1, DUPLICATE_CLUSTER_CASCADE_DELETE=False)
+class TestCascadeDeleteWithUnflaggedDuplicateLink(_CommittedFindingsMixin, SimpleTestCase):
+
+    """A cascade delete clears every duplicate link inside its scope, whatever the duplicate flag says."""
+
+    def _linked_findings_a_chunk_apart(self, *, flagged):
+        """Two findings of one engagement, the later one linked to the earlier one."""
+        target, holder = self._create_findings("Cascade link target", "Cascade link holder")
+        # Chunks go lowest id first and hold one finding each, so the target's chunk commits
+        # while the holder is still there.
+        self.assertLess(target.id, holder.id)
+        Finding.objects.filter(id=holder.id).update(duplicate=flagged, duplicate_finding=target)
+        return target, holder
+
+    def _assert_engagement_delete_succeeds(self, target, holder):
+        with impersonate(self.user):
+            _async_delete_object("dojo.engagement", self.engagement.id)
+
+        self.assertFalse(
+            Engagement.objects.filter(id=self.engagement.id).exists(),
+            msg="the engagement must be deleted",
+        )
+        remaining = list(Finding.objects.filter(id__in=[target.id, holder.id]).values_list("id", flat=True))
+        self.assertEqual(remaining, [], msg=f"both findings must be deleted, still present: {remaining}")
+        self.assertNoDanglingDuplicateLinks()
+
+    def test_engagement_delete_with_unflagged_link_into_an_earlier_chunk(self):
+        target, holder = self._linked_findings_a_chunk_apart(flagged=False)
+
+        self._assert_engagement_delete_succeeds(target, holder)
+
+    def test_engagement_delete_with_flagged_link_into_an_earlier_chunk(self):
+        """Control: the same shape with the flag set, which the reset always covered."""
+        target, holder = self._linked_findings_a_chunk_apart(flagged=True)
+
+        self._assert_engagement_delete_succeeds(target, holder)

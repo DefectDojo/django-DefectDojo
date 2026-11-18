@@ -78,6 +78,8 @@ Der **Vulnerability Explorer** listet eine Zeile pro Schwachstellen-ID mit dense
 
 ![Bild](images/Pro_EPSS_KEV_Explorer_Columns.png)
 
+In der Befundtabelle zeigt das Häkchen **Known Exploited** bei einem gelisteten Befund außerdem die von CISA gelistete Schwachstellen-ID, und ein Klick darauf öffnet die Seite dieser ID im Vulnerability Explorer.
+
 Diese Werte beschreiben die Schwachstelle selbst und sind daher immer gleich, unabhängig davon, wie viele Befunde auf sie verweisen. EPSS Score, EPSS Percentile, Known Exploited und KEV Date sind alle sortierbar, was dies zum schnellsten Weg macht, um die Frage zu beantworten: „Welche Schwachstellen in meiner Umgebung werden tatsächlich ausgenutzt?" — sortieren Sie absteigend nach **EPSS Score** oder nach **Known Exploited**, um die im Katalog gelisteten CVEs nach oben zu bringen.
 
 Die **Total Findings**-Zahl jeder Zeile verlinkt zur Befundliste, gefiltert nach dieser Schwachstelle, sodass Sie mit einem Klick von „diese CVE ist KEV-gelistet" zu „hier ist alles, was sie betrifft" gelangen.

@@ -62,6 +62,12 @@ Text filters such as **Title**, **Component Name** and **File Path** offer **In 
 - A list with no values left applies no filter, the same as an empty text box.
 - The list is saved in the table's address and in a saved table preference, so it is still there after a reload or when you return to the table.
 
+### Exact (Case Sensitive) on Component Name
+
+**Component Name** also offers **Exact (Case Sensitive)**, which matches the whole name with its case and spaces as written: `PYPI:DJANGO` matches only `PYPI:DJANGO`, while **Exact** also matches `pypi:django`. The chip reads **is exactly**.
+
+**All Components** and the **Components** widget on an Asset list a name once for each way it is spelled, so `pypi:django` and `PYPI:DJANGO` are two rows with their own counts. Selecting a count opens the Findings list with **Exact (Case Sensitive)** on that name, so the list holds the same Findings the count does.
+
 ### Include and Exclude on multi-select filters
 
 Every multi-select filter has an **Include** / **Exclude** choice at the top. **Include** keeps the rows that match a selected value. **Exclude** keeps every row except those, so "all but these three scanners" is three picks instead of unticking everything else. Rows with no value in that column are kept under **Exclude**. Filters that already offer **Any** / **All**, such as **Status**, do not have this choice.
@@ -89,12 +95,13 @@ Numeric filters — including **Age** and **SLA** — offer a match operator alo
 
 ## SLA filters
 
-Three filters cover SLA, and they answer different questions:
+Four filters cover SLA, and they answer different questions:
 
 | Filter | Type | What it matches |
 | --- | --- | --- |
 | **SLA Expiration Date** | Date, with the operators above | The date the Finding's SLA runs out. |
-| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline, and `Less Than 7` finds what is due within the week. |
+| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline. `Less Than or Equal To 7` finds what is due within the week **and** everything already overdue; add **SLA Status** to leave the overdue ones out. |
+| **SLA Status** | Breached / Within SLA | Whether the Finding has breached its SLA, the same verdict as the icon in the **SLA** column. **Breached** matches Findings that are not Mitigated and are past their SLA Expiration Date (Risk Accepted, False Positive and Out of Scope Findings included), and Mitigated Findings that were Mitigated after it. **Within SLA** matches the rest, including a Finding due today. Findings with no SLA match neither value. |
 | **Mitigated Within SLA** | True / False | Whether a Finding that **has been mitigated** was mitigated before its SLA expired. |
 
 **Mitigated Within SLA is narrower than it sounds, and this catches people out.** Both values only ever match Findings that are **already mitigated** and are **not Info severity**:
@@ -103,6 +110,16 @@ Three filters cover SLA, and they answer different questions:
 * **False** — mitigated after the SLA expiration date.
 
 An **open** Finding that is already overdue matches **neither** value, because it has not been mitigated yet. To find those, use **SLA** `Less Than 0` instead. Info-severity Findings are excluded from both sides.
+
+### Findings due soon, without the overdue ones
+
+The **SLA** filter holds one condition, so it cannot say "between 0 and 7 days" on its own. Combine it with **SLA Status**:
+
+1. Add **Status** with `Active`.
+2. Add **SLA** with **Less Than or Equal To** `7`.
+3. Add **SLA Status** with **Within SLA**.
+
+The list then shows active Findings due today or within the next 7 days, and none that have already breached. Without **Status** `Active`, it also lists Mitigated Findings that were closed up to 7 days before their SLA date.
 
 > If a Finding's SLA configuration has **Cap SLA by CISA KEV Due Date** enabled, both **SLA** and **SLA Expiration Date** reflect the tightened, KEV-capped deadline rather than the plain severity-based window. There is no separate indicator for this in the filters — see [EPSS / KEV](/triage_findings/finding_scoring/epss_kev/).
 
@@ -129,6 +146,7 @@ These Filters are assigned at the time of issue creation, and cannot be directly
 * Age (Finding age in days)
 * SLA (days remaining on the SLA clock — negative means overdue; see [SLA filters](#sla-filters))
 * SLA Expiration Date (see [SLA filters](#sla-filters))
+* SLA Status (Breached or Within SLA; see [SLA filters](#sla-filters))
 * Mitigated Within SLA (True or False — note this only matches Findings that have already been Mitigated; see [SLA filters](#sla-filters))
 * Reporter (user or service who created the Finding)
 * Found by (refers to the Tool)

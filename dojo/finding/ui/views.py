@@ -12,8 +12,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import models
-from django.db.models import Case, F, QuerySet, Value, When
+from django.db import models, transaction
+from django.db.models import Case, F, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -33,7 +33,11 @@ from dojo.authorization.authorization import user_has_global_permission_or_403, 
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
+    cluster_root,
     do_false_positive_history_batch,
+    finding_mitigated,
+    finding_not_human_set_status,
+    is_deduplication_on_engagement_mismatch,
     manual_duplicate_hides_open_finding,
     match_finding_to_existing_findings,
 )
@@ -94,6 +98,7 @@ from dojo.models import (
     Test,
     Test_Import,
     Test_Import_Finding_Action,
+    Test_Type,
 )
 from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
@@ -3102,8 +3107,15 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
         id=duplicate_id,
     )
 
-    if original.test.engagement != duplicate.test.engagement:
-        if (original.test.engagement.deduplication_on_engagement
+    # The mark points the duplicate at the original's cluster root, so the engagement check compares against
+    # that root, the finding the duplicate ends up under, not the original it was posted with.
+    root = cluster_root(original)
+    # The root is where the duplicate lands, so it must sit in the duplicate's product, as the original must.
+    if root.test.engagement.product_id != duplicate.test.engagement.product_id:
+        raise Http404
+
+    if root.test.engagement != duplicate.test.engagement:
+        if (root.test.engagement.deduplication_on_engagement
                 or duplicate.test.engagement.deduplication_on_engagement):
             messages.add_message(
                 request,
@@ -3115,8 +3127,28 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
                 request, reverse("view_finding", args=(duplicate.id,)),
             )
 
+    # The duplicate must be neither the original nor its root, and the root must not itself be a duplicate
+    # (an orphan whose original is gone heads a cluster with no active finding).
+    refusal = None
+    if duplicate.id == original.id:
+        refusal = _("A finding cannot be marked as a duplicate of itself.")
+    elif duplicate.id == root.id:
+        refusal = _(
+            "Finding %(page)s is a duplicate of finding %(original)s, so finding %(original)s cannot be "
+            "marked as its duplicate.",
+        ) % {"page": original.id, "original": duplicate.id}
+    elif root.duplicate:
+        refusal = _(
+            "Finding %(root)s is itself a duplicate, so finding %(duplicate)s cannot be marked as its duplicate. "
+            "Use Reset Duplicate Status on finding %(root)s first.",
+        ) % {"root": root.id, "duplicate": duplicate.id}
+    if refusal:
+        messages.add_message(request, messages.ERROR, refusal, extra_tags="alert-danger")
+        return redirect_to_return_url_or_else(
+            request, reverse("view_finding", args=(duplicate.id,)),
+        )
+
     if manual_duplicate_hides_open_finding(duplicate, original):
-        root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
         messages.add_message(
             request,
             messages.ERROR,
@@ -3127,26 +3159,82 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
             request, reverse("view_finding", args=(duplicate.id,)),
         )
 
+    # The duplicate's own duplicates move onto the root with it (below). The root stays out of that set even
+    # if older data points it at the duplicate. Under a mitigated root, the same rule applies to each of
+    # them: one that is still active would be hidden, so the mark is refused. Only queried in that case.
+    members = Finding.objects.filter(duplicate_finding=duplicate).exclude(pk=root.pk)
+    # A member outside the duplicate's product never moves under the root, as a root outside it is refused. The
+    # engagement rule applies to each member as it does to the duplicate: one in another engagement than the root's
+    # may not move there while either engagement has deduplication_on_engagement. One query, the members in another
+    # product first.
+    other_product = ~Q(test__engagement__product_id=duplicate.test.engagement.product_id)
+    crossing = ~Q(test__engagement=root.test.engagement)
+    if not root.test.engagement.deduplication_on_engagement:
+        crossing &= Q(test__engagement__deduplication_on_engagement=True)
+    blocking = (
+        members.filter(other_product | crossing)
+        .annotate(
+            in_another_product=Case(When(other_product, then=Value(1)), default=Value(0), output_field=IntegerField()),
+        )
+        .order_by("-in_another_product", "id")
+        .values_list("id", "in_another_product")
+        .first()
+    )
+    if blocking is not None and blocking[1]:
+        raise Http404
+    crossing_member_id = blocking[0] if blocking is not None else None
+    if crossing_member_id is not None:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _(
+                "Finding %(member)s, a duplicate of finding %(duplicate)s, is not in the same engagement as finding "
+                "%(original)s, and deduplication on engagement is enabled for at least one of them, so finding "
+                "%(duplicate)s cannot be marked as its duplicate. Use Reset Duplicate Status on finding %(member)s "
+                "first.",
+            ) % {"original": root.id, "member": crossing_member_id, "duplicate": duplicate.id},
+            extra_tags="alert-danger",
+        )
+        return redirect_to_return_url_or_else(
+            request, reverse("view_finding", args=(duplicate.id,)),
+        )
+    if finding_mitigated(root) and finding_not_human_set_status(root):
+        open_member_id = members.filter(active=True).values_list("id", flat=True).first()
+        if open_member_id is not None:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                _(
+                    "Finding %(original)s is mitigated, and finding %(member)s, a duplicate of finding "
+                    "%(duplicate)s, is still open. Marking finding %(duplicate)s as its duplicate would hide it. "
+                    "Reopen finding %(original)s first, or close finding %(member)s.",
+                ) % {"original": root.id, "member": open_member_id, "duplicate": duplicate.id},
+                extra_tags="alert-danger",
+            )
+            return redirect_to_return_url_or_else(
+                request, reverse("view_finding", args=(duplicate.id,)),
+            )
+
     duplicate.duplicate = True
     duplicate.active = False
     duplicate.verified = False
-    # make sure we don't create circular or transitive duplicates
-    if original.duplicate:
-        duplicate.duplicate_finding = original.duplicate_finding
-    else:
-        duplicate.duplicate_finding = original
+    # The root resolved above, which is never itself a duplicate, so no chain or cycle forms.
+    duplicate.duplicate_finding = root
 
-    logger.debug(
-        "marking finding %i as duplicate of %i",
-        duplicate.id,
-        duplicate.duplicate_finding.id,
-    )
+    logger.debug("marking finding %i as duplicate of %i", duplicate.id, root.id)
 
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = request.user
-    duplicate.save(dedupe_option=False)
-    original.found_by.add(duplicate.test.test_type)
-    original.save(dedupe_option=False)
+    with transaction.atomic():
+        duplicate.save(dedupe_option=False)
+        # The members move as set_duplicate moves them: they stay inactive duplicates, the cluster stays one
+        # level deep, and their test types join the root's found_by. Read the types before the move.
+        found_by = {duplicate.test.test_type, *Test_Type.objects.filter(test__finding__in=members).distinct()}
+        members.update(duplicate_finding=root, duplicate=True, active=False, verified=False)
+        root.found_by.add(*found_by)
+        # Read the root's duplicate fields back first, so its save cannot write a stale copy over the move.
+        root.refresh_from_db(fields=["duplicate", "duplicate_finding", "active", "verified"])
+        root.save(dedupe_option=False)
 
     return redirect_to_return_url_or_else(
         request, reverse("view_finding", args=(duplicate.id,)),
@@ -3387,19 +3475,28 @@ def duplicate_cluster(request, finding):
 def calculate_possible_related_actions_for_similar_finding(
     request, finding, similar_finding,
 ):
+    engagement_mismatch = {
+        "action": "None",
+        "reason": ("This finding is in a different engagement, and deduplication on engagement is enabled "
+                   "for one of them."),
+    }
+    # Each action is offered only where its route accepts it. Set as Original compares the similar finding with
+    # the finding on the page. Mark as Duplicate lands the similar finding under the page finding's cluster root,
+    # so it compares with that root. Reset Duplicate Status compares no engagements.
+    root = cluster_root(finding)
+    page_separated = is_deduplication_on_engagement_mismatch(similar_finding, finding)
+    root_separated = page_separated if root is finding else is_deduplication_on_engagement_mismatch(similar_finding, root)
+    blocked = set()
+    if page_separated:
+        blocked.add("set_finding_as_original")
+    if root_separated:
+        blocked.add("mark_finding_duplicate")
+    if len(blocked) == 2 and not similar_finding.duplicate_finding:
+        # Without a duplicate_finding the row can only offer those two actions, so skip the per-row checks.
+        return [engagement_mismatch]
+
     actions = []
-    if similar_finding.test.engagement != finding.test.engagement and (
-        similar_finding.test.engagement.deduplication_on_engagement
-        or finding.test.engagement.deduplication_on_engagement
-    ):
-        actions.append(
-            {
-                "action": "None",
-                "reason": ("This finding is in a different engagement and deduplication_inside_engagment "
-                           "is enabled here or in that finding"),
-            },
-        )
-    elif finding.duplicate_finding == similar_finding:
+    if finding.duplicate_finding == similar_finding:
         actions.append(
             {
                 "action": "None",
@@ -3475,4 +3572,5 @@ def calculate_possible_related_actions_for_similar_finding(
             },
         ))
 
-    return actions
+    allowed = [action for action in actions if action["action"] not in blocked]
+    return allowed or [engagement_mismatch]

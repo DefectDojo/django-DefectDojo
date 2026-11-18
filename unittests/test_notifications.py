@@ -637,7 +637,7 @@ class TestAsyncNotificationDispatch(DojoTestCase):
     def setUp(self):
         self.admin = User.objects.get(username="admin")
 
-    @patch("dojo.engagement.signals.dojo_dispatch_task")
+    @patch("dojo.engagement.signals.dojo_dispatch_task_on_commit")
     def test_engagement_added_dispatches_async(self, mock_dispatch):
         prod = Product.objects.first()
         eng = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
@@ -652,7 +652,7 @@ class TestAsyncNotificationDispatch(DojoTestCase):
         self.assertNotIn("engagement", kwargs)
         self.assertNotIn("product", kwargs)
 
-    @patch("dojo.product.signals.dojo_dispatch_task")
+    @patch("dojo.product.signals.dojo_dispatch_task_on_commit")
     def test_product_added_dispatches_async(self, mock_dispatch):
         prod_type = Product_Type.objects.first()
         prod = Product.objects.create(prod_type=prod_type, description="test", name="async dispatch prod")
@@ -665,7 +665,7 @@ class TestAsyncNotificationDispatch(DojoTestCase):
         self.assertEqual(kwargs["product_id"], prod.id)
         self.assertNotIn("product", kwargs)
 
-    @patch("dojo.product_type.signals.dojo_dispatch_task")
+    @patch("dojo.product_type.signals.dojo_dispatch_task_on_commit")
     def test_product_type_added_dispatches_async(self, mock_dispatch):
         prod_type = Product_Type.objects.create(name="async dispatch prod type")
 
@@ -750,7 +750,9 @@ class TestAsyncNotificationTaskBody(DojoTestCase):
         # dojo_dispatch_task takes the sync branch and the task body calls create_notification
         # (module-level helper inside async_create_notification) synchronously.
         prod = Product.objects.first()
-        eng = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
+        # The signal dispatches once the creating transaction commits.
+        with self.captureOnCommitCallbacks(execute=True):
+            eng = Engagement.objects.create(product=prod, target_start=timezone.now(), target_end=timezone.now())
 
         mock_create.assert_called_once()
         kwargs = mock_create.call_args[1]
@@ -1042,7 +1044,8 @@ class TestNotificationWebhooks(DojoTestCase):
 
     @patch("requests.request", **{"return_value.status_code": 200})
     def test_headers(self, mock):
-        Product_Type.objects.create(name="notif prod type")
+        with self.captureOnCommitCallbacks(execute=True):
+            Product_Type.objects.create(name="notif prod type")
         self.assertEqual(mock.call_args.kwargs["headers"], {
             "User-Agent": f"DefectDojo-{dd_version}",
             "X-DefectDojo-Event": "product_type_added",
@@ -1065,7 +1068,8 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("product_type_added"):
-            prod_type = Product_Type.objects.create(name="notif prod type")
+            with self.captureOnCommitCallbacks(execute=True):
+                prod_type = Product_Type.objects.create(name="notif prod type")
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "product_type_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
@@ -1083,7 +1087,8 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("product_added"):
-            prod = Product.objects.create(name="notif prod", description="test", prod_type=prod_type)
+            with self.captureOnCommitCallbacks(execute=True):
+                prod = Product.objects.create(name="notif prod", description="test", prod_type=prod_type)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "product_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
@@ -1107,7 +1112,8 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("engagement_added"):
-            eng = Engagement.objects.create(name="notif eng", product=prod, target_start=timezone.now(), target_end=timezone.now())
+            with self.captureOnCommitCallbacks(execute=True):
+                eng = Engagement.objects.create(name="notif eng", product=prod, target_start=timezone.now(), target_end=timezone.now())
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "engagement_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {

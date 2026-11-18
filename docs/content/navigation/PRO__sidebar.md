@@ -70,7 +70,7 @@ The **What's New** button in the sidebar footer, which names the release and cou
 
 Below the highlights, **Badged in the Menu** lists every sidebar entry that carries a `NEW` or `BETA` badge right now (see [Menu Badges](/navigation/pro__menu_badges/)), each linking to its page, and **Full Changelog** opens the complete release notes on this site.
 
-An air-gapped instance never contacts the documentation site: the panel shows the release notes bundled with its version and says so, without the changelog link. The bundled notes are also what you see when the documentation site cannot be reached. The panel follows the **What's New Panel** feature flag, which is on by default; turning it off removes the button. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+An air-gapped instance never contacts the documentation site, so the panel shows no release notes there: it says the release notes are published online and gives the address of the [Pro changelog](/releases/pro/changelog/), written out so you can open it from a machine that has internet access, with an **Open the Pro Changelog** link. An instance that cannot reach the documentation site shows the same address and link. The **Badged in the Menu** list and the **Deprecations** tab work either way. The panel follows the **What's New Panel** feature flag, which is on by default; turning it off removes the button. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
 ## Collapsing the sidebar
 

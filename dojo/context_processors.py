@@ -21,7 +21,9 @@ def globalize_vars(request):
         "DOCUMENTATION_URL": settings.DOCUMENTATION_URL,
         "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
-        "SHOW_PLG_LINK": True,
+        # The user-menu Pro link follows the same switch as the promo banner, so
+        # DD_OS_MESSAGE_ENABLED=False turns both off.
+        "SHOW_PLG_LINK": settings.OS_MESSAGE_ENABLED,
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": locations_enabled(),
         "SHOW_A11Y_REQUIRED_FIELDS_NOTICE": settings.SHOW_A11Y_REQUIRED_FIELDS_NOTICE,

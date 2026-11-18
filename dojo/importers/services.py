@@ -28,6 +28,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import Development_Environment, Dojo_User
+from dojo.utils import get_current_request
 
 if TYPE_CHECKING:
     from datetime import date
@@ -278,8 +279,12 @@ def auto_import_scan(
     while this function keeps ownership of the resolution and of the ``close_old_findings`` guard
     above -- which is the whole point, since re-implementing the resolution in order to swap the
     importer is exactly how that guard gets dropped.
+
+    Inside a request the manager is the request's own (``AutoCreateContextManager.for_request``),
+    the one the route's permission check resolved the same target on, so a report is read for its
+    tool once per request. Without a request (a task, a script) the manager is a new one.
     """
-    auto = AutoCreateContextManager()
+    auto = AutoCreateContextManager.for_request(get_current_request())
     context: dict[str, Any] = {
         "scan_type": scan_type,
         "engagement": engagement,
@@ -289,6 +294,8 @@ def auto_import_scan(
         "product_type_name": product_type_name,
         "test_title": test_title,
         "auto_create_context": auto_create_context,
+        # A report's tool picks between tests that share a title (get_target_test_if_exists).
+        "scan": scan_file,
     }
     try:
         auto.process_import_meta_data_from_dict(context)

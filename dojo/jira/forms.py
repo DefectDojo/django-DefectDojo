@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from dojo.jira import services as jira_services
 from dojo.models import (
@@ -118,8 +119,45 @@ class DeleteJIRAInstanceForm(forms.ModelForm):
         fields = ["id"]
 
 
+# The form shows the SLA comment setting as one choice, stored on two booleans:
+# (product_jira_sla_notification, suppress_sla_notification_comments). Neither set follows the JIRA instance.
+SLA_NOTIFICATION_COMMENT_FIELDS = {
+    "inherit": (False, False),
+    "always": (True, False),
+    "never": (False, True),
+}
+
+
+def sla_notification_comment_choice(jira_project):
+    # Suppress wins when both are set, as it does in the SLA job.
+    if jira_project.suppress_sla_notification_comments:
+        return "never"
+    if jira_project.product_jira_sla_notification:
+        return "always"
+    return "inherit"
+
+
+class SlaNotificationCommentsField(forms.ChoiceField):
+
+    """A post without the choice keeps the stored setting (see JIRAProjectForm.clean), so it is no change."""
+
+    def has_changed(self, initial, data):
+        return bool(data) and super().has_changed(initial, data)
+
+
 class JIRAProjectForm(forms.ModelForm):
     inherit_from_product = forms.BooleanField(label="inherit JIRA settings from product", required=False)
+    sla_notification_comments = SlaNotificationCommentsField(
+        required=False,
+        initial="inherit",
+        choices=(
+            ("inherit", _("Inherit from Jira instance")),
+            ("always", _("Always send")),
+            ("never", _("Never send")),
+        ),
+        label=_("Send SLA notifications as comment?"),
+        help_text=_("Inherit from Jira instance follows the Jira instance's 'Globally send SLA notifications as comment?' setting. Always send and Never send override it for this Jira project."),
+    )
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label="JIRA Instance", required=False)
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
@@ -130,7 +168,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ["product", "engagement"]
-        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "close_transition_fields", "reopen_transition_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
+        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "close_transition_fields", "reopen_transition_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "sla_notification_comments", "risk_acceptance_expiration_notification"]
 
     def __init__(self, *args, **kwargs):
         # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
@@ -138,6 +176,9 @@ class JIRAProjectForm(forms.ModelForm):
         self.product = kwargs.pop("product", None)
         self.engagement = kwargs.pop("engagement", None)
         super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.initial.setdefault("sla_notification_comments", sla_notification_comment_choice(self.instance))
 
         self.fields["component"].help_text = (
             "Comma-separate multiple components to assign more than one to the JIRA issue, "
@@ -179,7 +220,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields["push_all_issues"].disabled = False
                 self.fields["enable_engagement_epic_mapping"].disabled = False
                 self.fields["push_notes"].disabled = False
-                self.fields["product_jira_sla_notification"].disabled = False
+                self.fields["sla_notification_comments"].disabled = False
                 self.fields["risk_acceptance_expiration_notification"].disabled = False
 
             elif self.product:
@@ -206,7 +247,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial["push_all_issues"] = jira_project_product.push_all_issues
                     self.initial["enable_engagement_epic_mapping"] = jira_project_product.enable_engagement_epic_mapping
                     self.initial["push_notes"] = jira_project_product.push_notes
-                    self.initial["product_jira_sla_notification"] = jira_project_product.product_jira_sla_notification
+                    self.initial["sla_notification_comments"] = sla_notification_comment_choice(jira_project_product)
                     self.initial["risk_acceptance_expiration_notification"] = jira_project_product.risk_acceptance_expiration_notification
 
                     self.fields["jira_instance"].disabled = True
@@ -224,7 +265,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields["push_all_issues"].disabled = True
                     self.fields["enable_engagement_epic_mapping"].disabled = True
                     self.fields["push_notes"].disabled = True
-                    self.fields["product_jira_sla_notification"].disabled = True
+                    self.fields["sla_notification_comments"].disabled = True
                     self.fields["risk_acceptance_expiration_notification"].disabled = True
 
         else:
@@ -237,9 +278,28 @@ class JIRAProjectForm(forms.ModelForm):
             self.fields["project_key"].required = True
             self.fields["epic_issue_type_name"].required = True
 
+    def legacy_sla_notification_posted(self):
+        """True when the post checks the product_jira_sla_notification checkbox the SLA comment select replaced."""
+        return self.data.get(self.add_prefix("product_jira_sla_notification"), "").lower() in {"on", "true", "1"}
+
+    def has_changed(self):
+        # The legacy checkbox is no form field, so it would not count as a change on its own.
+        return super().has_changed() or (
+            self.legacy_sla_notification_posted() and sla_notification_comment_choice(self.instance) != "always"
+        )
+
     def clean(self):
         logger.debug("validating jira project form")
         cleaned_data = super().clean()
+
+        # A post without the choice keeps the stored setting, unless it sends the checkbox this select replaced
+        # (a script or a saved form): "on" there still means always send. The model's clean() rejects send and
+        # suppress together.
+        choice = cleaned_data.get("sla_notification_comments")
+        if not choice and self.legacy_sla_notification_posted():
+            choice = "always"
+        choice = choice or sla_notification_comment_choice(self.instance)
+        self.instance.product_jira_sla_notification, self.instance.suppress_sla_notification_comments = SLA_NOTIFICATION_COMMENT_FIELDS[choice]
 
         logger.debug("clean: inherit: %s", self.cleaned_data.get("inherit_from_product", False))
         if not self.cleaned_data.get("inherit_from_product", False):

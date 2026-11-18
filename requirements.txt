@@ -9,13 +9,13 @@ defusedxml==0.7.1
 django_celery_results==2.6.0
 django-auditlog==3.2.1
 django-pghistory==3.9.2
-django-dbbackup==5.3.1
+django-dbbackup==5.4.0
 django-environ==0.14.0
 django-filter==26.2
 django-htmx==1.29.0
 django-imagekit==6.1.1
 django-multiselectfield==1.0.1
-django-ninja==1.7.1  # API v3 framework (alpha); pulls pydantic v2 (already present transitively)
+django-ninja==1.7.3  # API v3 framework (alpha); pulls pydantic v2 (already present transitively)
 django-polymorphic==4.11.7
 django-crispy-forms==2.7
 django_extensions==4.1
@@ -39,7 +39,7 @@ cryptography==50.0.2
 python-dateutil==2.9.0.post0
 redis==8.1.0
 requests==2.34.2
-sqlalchemy==2.1.5  # Required by Celery broker transport
+sqlalchemy==2.1.6  # Required by Celery broker transport
 urllib3==2.8.0
 uWSGI==2.0.31
 vobject==0.9.9
@@ -73,4 +73,4 @@ fontawesomefree==6.6.0
 PyYAML==6.0.3
 pyopenssl==26.4.0
 parameterized==0.9.0
-setuptools==84.0.0
+setuptools==84.2.1

@@ -115,6 +115,8 @@ class CycloneDXJSONParser:
                                     component_type=component_data.get("type") or "",
                                 ),
                             )
+                        if (component_cpe := component_data.get("cpe")) and isinstance(component_cpe, str) and component_cpe.strip():
+                            finding.unsaved_locations.append(LocationData.cpe(cpe=component_cpe.strip()))
                 if report_date:
                     finding.date = report_date
                 ratings = vulnerability.get("ratings", [])
