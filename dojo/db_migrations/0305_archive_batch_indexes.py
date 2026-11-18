@@ -23,6 +23,13 @@ class AddIndexConcurrentlyIfMissing(AddIndexConcurrently):
     runs on to completion. A build of this index that is still in progress is
     waited for first, so a retry keeps its result instead of dropping and
     rebuilding it.
+
+    A build counts as in progress until its transaction commits. Postgres ends
+    the build's pg_stat_progress_create_index row just before that commit, while
+    the pg_index update that marks the index valid is still uncommitted, so in
+    that window indisvalid still reads false. The pg_index row's xmax then names
+    the build's open transaction, which holds a lock on its own id in pg_locks
+    until it ends, and that is waited for too.
     """
 
     poll_seconds = 5
@@ -53,11 +60,17 @@ class AddIndexConcurrentlyIfMissing(AddIndexConcurrently):
     @staticmethod
     def _build_in_progress(cursor, quoted_name):
         cursor.execute(
-            "SELECT 1 FROM pg_stat_progress_create_index"
-            " WHERE index_relid = to_regclass(%s) AND pid <> pg_backend_pid()",
-            [quoted_name],
+            "SELECT EXISTS ("
+            "  SELECT 1 FROM pg_stat_progress_create_index"
+            "  WHERE index_relid = to_regclass(%s) AND pid <> pg_backend_pid()"
+            ") OR EXISTS ("
+            "  SELECT 1 FROM pg_index i"
+            "  JOIN pg_locks l ON l.locktype = 'transactionid' AND l.transactionid = i.xmax"
+            "  WHERE i.indexrelid = to_regclass(%s) AND l.pid <> pg_backend_pid()"
+            ")",
+            [quoted_name, quoted_name],
         )
-        return cursor.fetchone() is not None
+        return cursor.fetchone()[0]
 
 
 class Migration(migrations.Migration):

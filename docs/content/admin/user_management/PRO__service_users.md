@@ -68,7 +68,7 @@ A client that supports the OAuth 2.0 client credentials grant can exchange the t
       -d client_id=svc-gitlab-payments \
       -d client_secret=ddsu_<token>
 
-The response carries `access_token`, `token_type` (`Bearer`) and `expires_in` (seconds). Send the access token as `Authorization: Bearer <access_token>`, and request a new one when it expires. Disabling the service user, or turning the feature off, stops its access tokens at once. Regenerating its token does not end access tokens already issued; they expire within the hour.
+The response carries `access_token`, `token_type` (`Bearer`) and `expires_in` (seconds). Send the access token as `Authorization: Bearer <access_token>`, and request a new one when it expires. An access token stops working at once when the service user is disabled, when the feature is turned off, and when the token it was exchanged from is regenerated, revoked or expires.
 
 ## Manage service users
 
@@ -76,7 +76,7 @@ Select a service user's name to open its page. Each row's menu on the Service Us
 
 * **View Service User**: the service user's page.
 * **Edit Service User**: change the label, description, global role and token expiry. The username cannot be changed.
-* **Regenerate Token**: issue a new token and show it once. The current token stops working immediately. OAuth access tokens already issued from it keep working until they expire, within the hour.
+* **Regenerate Token**: issue a new token and show it once. The current token, and every OAuth access token already exchanged from it, stops working immediately.
 * **Disable Service User** and **Enable Service User**: a disabled service user keeps its token, but the token is refused until the service user is enabled again.
 * **Delete Service User**: remove the service user, its token, its memberships, its groups and its global role. A service user that is recorded on findings or other records, for example as the reporter of findings it imported, cannot be deleted: disable it instead.
 

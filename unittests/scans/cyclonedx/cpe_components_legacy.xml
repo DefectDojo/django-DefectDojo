@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<bom serialNumber="urn:uuid:2a8f4c6e-9b1d-4e3a-b7c5-1f6d8e0a2c47" version="1" xmlns="http://cyclonedx.org/schema/bom/1.2" xmlns:v="http://cyclonedx.org/schema/ext/vulnerability/1.0">
+    <components>
+        <component type="application" bom-ref="with-cpe22">
+            <name>example-app</name>
+            <version>4.5</version>
+            <cpe>cpe:/a:example_vendor:example_app:4.5</cpe>
+            <v:vulnerabilities>
+                <v:vulnerability ref="with-cpe22">
+                    <v:id>CVE-2099-1002</v:id>
+                    <v:ratings>
+                        <v:rating>
+                            <v:severity>Medium</v:severity>
+                        </v:rating>
+                    </v:ratings>
+                </v:vulnerability>
+            </v:vulnerabilities>
+        </component>
+        <component type="library" bom-ref="adhoc-cpe">
+            <name>example-lib</name>
+            <version>1.2.3</version>
+            <cpe>cpe:2.3:a:example_vendor:example_lib:1.2.3:*:*:*:*:*:*:*</cpe>
+        </component>
+        <component type="library" bom-ref="no-cpe">
+            <name>other-lib</name>
+            <version>0.1</version>
+        </component>
+    </components>
+    <v:vulnerabilities>
+        <v:vulnerability ref="adhoc-cpe">
+            <v:id>CVE-2099-1001</v:id>
+            <v:ratings>
+                <v:rating>
+                    <v:severity>High</v:severity>
+                </v:rating>
+            </v:ratings>
+        </v:vulnerability>
+        <v:vulnerability ref="no-cpe">
+            <v:id>CVE-2099-1003</v:id>
+            <v:ratings>
+                <v:rating>
+                    <v:severity>Low</v:severity>
+                </v:rating>
+            </v:ratings>
+        </v:vulnerability>
+    </v:vulnerabilities>
+</bom>

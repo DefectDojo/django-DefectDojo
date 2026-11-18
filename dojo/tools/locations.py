@@ -262,6 +262,20 @@ class LocationData:
             },
         )
 
+    @classmethod
+    def cpe(cls, *, cpe: str) -> LocationData:
+        """
+        A platform named by a CPE: a CPE 2.3 formatted string (``cpe:2.3:a:vendor:product:1.2.3:...``)
+        or a CPE 2.2 URI (``cpe:/a:vendor:product:1.2.3``), passed as the report gives it. The consumer
+        binds both spellings to one canonical CPE 2.3 string, which is the identity, and skips a value
+        that is not a CPE. Emit one only for the finding the report ties the CPE to: a CPE location is
+        never matched to findings by its vendor, product or version.
+
+        DefectDojo Pro stores cpe locations; Community Edition does not register this type and drops it,
+        as it does container images.
+        """
+        return cls(type="cpe", data={"cpe": cpe})
+
 
 def cpe_strings(values: Any) -> list[str]:
     """
