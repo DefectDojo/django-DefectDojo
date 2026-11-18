@@ -7,7 +7,7 @@ from time import sleep, strftime
 from types import SimpleNamespace
 
 from django.conf import settings
-from django.db import OperationalError, router, transaction
+from django.db import OperationalError, connection, router, transaction
 from django.db.models import Count
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, post_save, pre_delete
@@ -1172,6 +1172,37 @@ def lock_findings_for_delete(finding_ids):
         .order_by("id")
         .values_list("id", flat=True),
     )
+
+
+def set_found_by_locking_finding_first(finding, found_by):
+    """
+    ``finding.found_by.set(found_by)``, in one transaction that locks the finding before any found_by row.
+
+    The API writers that replace a finding's found_by go through here: the v2 and v3 create and the v2 and v3
+    update. Other ``found_by.set()`` callers (copying a cluster's found_by to a new original, for one) do not.
+    ``set()`` deletes the rows that were not requested (on a create, the one ``Finding.save()`` added for the test's
+    type) and inserts the requested rows. Both stay locked until COMMIT, where Postgres checks the new rows'
+    deferred foreign key with FOR KEY SHARE on the finding. The chunked bulk delete (the excess-duplicate delete,
+    a test or engagement delete) takes the same two locks the other way round: the finding FOR UPDATE first
+    (lock_findings_for_delete), then its found_by rows (bulk_clear_finding_m2m). Each then waited for the other
+    and Postgres aborted one of them with "deadlock detected" (40P01), which failed the write.
+
+    Taking FOR KEY SHARE on the finding first puts both in the same order. Whichever gets the finding first
+    finishes, and the other waits for it rather than deadlocking: a delete that is first removes the finding,
+    and the deferred foreign key then rejects this set() at COMMIT as for any other write to a deleted finding.
+    FOR KEY SHARE is the lock the foreign-key check takes anyway, so it blocks nothing that check did not.
+
+    ``clear()`` needs no lock: it only deletes rows, so its COMMIT checks no foreign key and never waits on the
+    finding, and a delete waiting for its rows simply follows it.
+    """
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"SELECT id FROM {connection.ops.quote_name(Finding._meta.db_table)} "
+                "WHERE id = %s FOR KEY SHARE",
+                [finding.id],
+            )
+        finding.found_by.set(found_by)
 
 
 def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):

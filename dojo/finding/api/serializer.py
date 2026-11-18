@@ -6,7 +6,6 @@ import logging
 import six
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import connection, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
@@ -24,6 +23,7 @@ from dojo.finding.helper import (
     save_endpoints_template,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
+    set_found_by_locking_finding_first,
 )
 from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
@@ -634,7 +634,7 @@ class FindingSerializer(serializers.ModelSerializer):
         found_by = validated_data.pop("found_by", None)
         # Handle updates to found_by data
         if found_by:
-            instance.found_by.set(found_by)
+            set_found_by_locking_finding_first(instance, found_by)
         # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
         # Findings still maintain original found_by value associated with their test
         # In the event the user does not supply the found_by field at all, we do not modify it
@@ -752,33 +752,6 @@ class FindingSerializer(serializers.ModelSerializer):
             {"req_resp": burp_list},
         )
         return serialized_burps.data
-
-
-def set_found_by_locking_finding_first(finding, found_by):
-    """
-    ``finding.found_by.set(found_by)``, in one transaction that locks the finding before any found_by row.
-
-    For a finding just saved, ``set()`` deletes the found_by row ``Finding.save()`` added for the test's type
-    (unless it was requested) and inserts the requested rows. Both stay locked until COMMIT, where Postgres
-    checks the new rows' deferred foreign key with FOR KEY SHARE on the finding. The chunked bulk delete (the
-    excess-duplicate delete, a test or engagement delete) takes the same two locks the other way round: the
-    finding FOR UPDATE first (lock_findings_for_delete), then its found_by rows (bulk_clear_finding_m2m). Each
-    then waited for the other and Postgres aborted one of them with "deadlock detected" (40P01), which failed
-    the create.
-
-    Taking FOR KEY SHARE on the finding first puts both in the same order. Whichever gets the finding first
-    finishes, and the other waits for it rather than deadlocking: a delete that is first removes the finding,
-    and the deferred foreign key then rejects this set() at COMMIT as for any other write to a deleted finding.
-    FOR KEY SHARE is the lock the foreign-key check takes anyway, so it blocks nothing that check did not.
-    """
-    with transaction.atomic():
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"SELECT id FROM {connection.ops.quote_name(Finding._meta.db_table)} "
-                "WHERE id = %s FOR KEY SHARE",
-                [finding.id],
-            )
-        finding.found_by.set(found_by)
 
 
 class FindingCreateSerializer(serializers.ModelSerializer):
