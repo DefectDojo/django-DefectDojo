@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models, transaction
-from django.db.models import Case, F, QuerySet, Value, When
+from django.db.models import Case, F, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -3161,12 +3161,26 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     # if older data points it at the duplicate. Under a mitigated root, the same rule applies to each of
     # them: one that is still active would be hidden, so the mark is refused. Only queried in that case.
     members = Finding.objects.filter(duplicate_finding=duplicate).exclude(pk=root.pk)
-    # The engagement rule applies to each member as it does to the duplicate: one in another engagement than
-    # the root's may not move there while either engagement has deduplication_on_engagement.
-    crossing = members.exclude(test__engagement=root.test.engagement)
+    # A member outside the duplicate's product never moves under the root, as a root outside it is refused. The
+    # engagement rule applies to each member as it does to the duplicate: one in another engagement than the root's
+    # may not move there while either engagement has deduplication_on_engagement. One query, the members in another
+    # product first.
+    other_product = ~Q(test__engagement__product_id=duplicate.test.engagement.product_id)
+    crossing = ~Q(test__engagement=root.test.engagement)
     if not root.test.engagement.deduplication_on_engagement:
-        crossing = crossing.filter(test__engagement__deduplication_on_engagement=True)
-    crossing_member_id = crossing.values_list("id", flat=True).first()
+        crossing &= Q(test__engagement__deduplication_on_engagement=True)
+    blocking = (
+        members.filter(other_product | crossing)
+        .annotate(
+            in_another_product=Case(When(other_product, then=Value(1)), default=Value(0), output_field=IntegerField()),
+        )
+        .order_by("-in_another_product", "id")
+        .values_list("id", "in_another_product")
+        .first()
+    )
+    if blocking is not None and blocking[1]:
+        raise Http404
+    crossing_member_id = blocking[0] if blocking is not None else None
     if crossing_member_id is not None:
         messages.add_message(
             request,
@@ -3471,6 +3485,17 @@ def calculate_possible_related_actions_for_similar_finding(
                            "is enabled here or in that finding"),
             },
         )
+        # Resetting a duplicate only takes it out of its cluster, which is valid whatever its engagement, and it is
+        # the remedy a refused Mark as Duplicate names for a duplicate in another engagement.
+        if similar_finding.duplicate and similar_finding.duplicate_finding_id:
+            actions.append(
+                {
+                    "action": "reset_finding_duplicate_status",
+                    "reason": ("This will remove the finding from the cluster, "
+                               "effectively marking it no longer as duplicate. "
+                               "Will not trigger deduplication logic after saving."),
+                },
+            )
     elif finding.duplicate_finding == similar_finding:
         actions.append(
             {

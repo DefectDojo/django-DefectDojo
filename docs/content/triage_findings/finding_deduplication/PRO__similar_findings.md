@@ -60,7 +60,7 @@ These actions manipulate the same duplicate relationships that automatic dedupli
 
 An action may be unavailable when it is not valid, for example when the similar Finding is already the original of a different cluster, or when linking it would cross an Engagement boundary while Engagement-level deduplication is enabled. The row then shows an information icon in place of the menu; hover over it to see why.
 
-Marking a Finding as a duplicate also moves that Finding's own duplicates into the cluster. If one of them sits in a different Engagement from the cluster's original while Engagement-level deduplication is enabled for either Engagement, the mark is refused and the message names that duplicate. Use **Reset Duplicate Status** on it first, then mark again.
+Marking a Finding as a duplicate also moves that Finding's own duplicates into the cluster. If one of them sits in a different Engagement from the cluster's original while Engagement-level deduplication is enabled for either Engagement, the mark is refused and the message names that duplicate. That duplicate's row under Similar Findings still offers **Reset Duplicate Status**: use it first, then mark again.
 
 Rows in the cluster tree carry the same action menu as the Findings list.
 

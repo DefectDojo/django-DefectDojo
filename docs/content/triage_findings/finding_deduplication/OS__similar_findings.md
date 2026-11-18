@@ -66,7 +66,7 @@ If you have edit permission on a Finding, the **Action** column offers a dropdow
 
 An action may be unavailable (shown as **None**) when it is not valid, for example when the similar Finding lives in a different Engagement and Engagement-level deduplication is enabled, or when it is already the original of a different cluster. These actions manipulate the same duplicate relationships that automatic deduplication uses, so a Finding you mark here behaves exactly like an automatically detected duplicate.
 
-Marking a Finding as a duplicate also moves that Finding's own duplicates into the cluster. If one of them sits in a different Engagement from the cluster's original while Engagement-level deduplication is enabled for either Engagement, the mark is refused and the message names that duplicate. Reset that duplicate's status first, then mark again.
+Marking a Finding as a duplicate also moves that Finding's own duplicates into the cluster. If one of them sits in a different Engagement from the cluster's original while Engagement-level deduplication is enabled for either Engagement, the mark is refused and the message names that duplicate. That duplicate's row in the similar findings table still offers **Reset duplicate status**: use it first, then mark again.
 
 ## Enabling and disabling Similar Findings
 
