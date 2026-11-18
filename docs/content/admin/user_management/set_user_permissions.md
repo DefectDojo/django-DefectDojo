@@ -112,6 +112,23 @@ An Asset Role will supersede a user’s standard Organization Role or Global Rol
 
 However, this does not work in reverse. If a User has an Organization Role or Global Role of **Owner**, assigning them a **Reader** role on a particular Asset will not take away their **Owner** permissions. **Roles cannot take away permissions granted to a User by other Roles, they can only add additional permissions.**
 
+### Give a Role from the User's page (Pro)
+
+With Access Administration on, a user's page has **Organizations** and **Assets** tabs that list the Roles the user holds directly, and change them without leaving the user.
+
+1. Navigate to **Settings > Users & Permissions > Users** and open the User.
+2. Select the **Organizations** or **Assets** tab and click **Add to Organization** or **Add to Asset**.
+3. Choose one or more Organizations or Assets. Only those where you can manage Members are listed, and those the User already holds a Role on are left out.
+4. Choose the Role and click **Submit**.
+
+Each item is checked exactly as it is on its own Members dialog: the **Owner** Role is offered only when you can grant it on every selected item, and an item that refuses is listed in the window with the reason while the others are saved. The ⋮ menu on each row offers **Change Role** and **Remove**.
+
+The **Access** tab on the same page lists everything the User reaches and why. See [Permission Audit and Effective Access](../pro__permission_audit/).
+
+### Add or remove several Users at once (Pro)
+
+On the Users list, select the Users and use **Add To** or **Remove From** above the table, then choose **Group**, **Organization** or **Asset**. The window lists the selected Users; pick the targets (and, when adding, the Role) and click **Submit**. Each User and target pair is its own request with its own permission check. When some pairs are refused, the window stays open and names each one with the reason, for example a User who is already a Member or not a Member at all.
+
 ## Configuration Permissions
 
 Many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their superuser status. These Configuration Permissions allow regular users to access and contribute to parts of DefectDojo outside of their standard Asset or Asset Role assignment.

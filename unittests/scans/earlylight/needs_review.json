@@ -1,0 +1,165 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    }
+  ],
+  "targets": [
+    {
+      "target": "trafex/php-nginx:2.0.1",
+      "type": "image",
+      "digest": "sha256:c9c6d912ce5dbb57e204e7368cacad02530e56f068a8ba10013e0a8cda66983e",
+      "platform": "linux/amd64",
+      "files_scanned": 3734,
+      "files_read": 197,
+      "findings": [
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/bin/php8",
+          "verdict": "unknown",
+          "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+          "message": "PHP 8.0.2 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "package": "php8 8.0.2-r0",
+            "php_version": "8.0.2",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "unknown",
+              "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "unknown",
+              "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            }
+          ],
+          "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed.",
+          "severity": "review",
+          "details": {
+            "path": "/usr/bin/php8",
+            "php_version": "8.0.2",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "unknown",
+            "severity": "review",
+            "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "unknown",
+                "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "unknown",
+                "reason": "installed by php8 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              }
+            ],
+            "package": {
+              "format": "apk",
+              "name": "php8",
+              "version": "8.0.2-r0",
+              "source": "php8",
+              "arch": "x86_64",
+              "db": "/lib/apk/db/installed"
+            },
+            "os": {
+              "id": "alpine",
+              "version_id": "3.13.5",
+              "pretty_name": "Alpine Linux v3.13"
+            },
+            "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed."
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-web",
+          "path": "/usr/sbin/php-fpm8",
+          "verdict": "unknown",
+          "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+          "message": "PHP 8.0.2 (fpm-fcgi)",
+          "method": "elf-strings",
+          "facts": {
+            "package": "php8-fpm 8.0.2-r0",
+            "php_version": "8.0.2",
+            "sapi": "fpm-fcgi"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "unknown",
+              "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "unknown",
+              "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+            }
+          ],
+          "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed.",
+          "severity": "review",
+          "details": {
+            "path": "/usr/sbin/php-fpm8",
+            "php_version": "8.0.2",
+            "sapi": "fpm-fcgi",
+            "web_facing": true,
+            "status": "unknown",
+            "severity": "review",
+            "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "unknown",
+                "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "unknown",
+                "reason": "installed by php8-fpm 8.0.2-r0 (apk package php8) on Alpine Linux v3.13; this tool has no fix data for that package stream, and the vendor may have backported the fix without changing the version PHP reports"
+              }
+            ],
+            "package": {
+              "format": "apk",
+              "name": "php8-fpm",
+              "version": "8.0.2-r0",
+              "source": "php8",
+              "arch": "x86_64",
+              "db": "/lib/apk/db/installed"
+            },
+            "os": {
+              "id": "alpine",
+              "version_id": "3.13.5",
+              "pretty_name": "Alpine Linux v3.13"
+            },
+            "fix": "Check the security advisories for php8 on Alpine Linux v3.13 and upgrade the package if a fix is listed."
+          }
+        }
+      ],
+      "skipped": [],
+      "annotations": {
+        "os": {
+          "id": "alpine",
+          "version_id": "3.13.5",
+          "pretty_name": "Alpine Linux v3.13"
+        }
+      }
+    }
+  ]
+}

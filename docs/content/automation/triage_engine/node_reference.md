@@ -11,6 +11,10 @@ aliases:
 
 Triage Engine's nodes come in five categories, which this page follows. The AI, Alerts and DAST nodes appear in the palette only when the feature or licence they depend on is enabled, and are not covered on this page.
 
+Throughout this page, the **rule owner** is the identity the rule runs as: for a group's rule, the group's automation identity, and for an Instance rule, the person who owns it. See [Runs As](../sharing_and_versions/#runs-as).
+
+Some nodes also need a node family permission (Webhook, Messaging, Ticket, Report, Scan, Sensor or AI) before you can place them in a rule. The palette hides the ones you may not use. See [Node family permissions](../building_rules/#node-family-permissions).
+
 Unless stated otherwise, a node takes one input, produces one output called `out`, and passes every item it received on to that output. That matters when you chain nodes: a Findings node changes the Finding and then hands the item onward, so several of them in a row all apply.
 
 ## Triggers
@@ -38,8 +42,10 @@ Runs when Assets (Products) are created or updated. Tag changes count as updates
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Event** | `created` | Which Asset change wakes this rule: `created`, `updated`, or `any` for both. |
+| **Event** | `created` | Which Asset change wakes this rule: `created`, `updated`, `any` for both, or `findings_changed`. |
 | **Scope** | empty | Which Assets this rule considers, in the Assets list's own filters. Empty means every Asset the rule owner can see. |
+
+**Findings Changed** (`findings_changed`) wakes the rule when a Finding of the Asset is created, closed, reopened or updated, including a change another rule made. It is not part of `any`, so a rule written for any change to the Asset itself does not start waking on every Finding save. It is what keeps a score computed from the Asset's Findings current (see [Formulas](#formulas)). Changes written in bulk without saving each Finding, and a Finding moving to another priority band, do not wake it, so pair such a rule with a scheduled copy, or use a [computed custom field](/asset_modelling/pro__custom_fields/#computed-fields), which also recomputes hourly.
 
 Assets named by the event are matched against scope before they enter the graph. For an update, the names of the changed fields travel with the items as `ctx.changed_fields`, so an If / Filter node can say "only when the organization changed" (`ctx.changed_fields` `contains` `organization`) or "only when tagged" (`contains` `tags`).
 
@@ -64,6 +70,26 @@ Sweeps everything in scope when you press **Run Now** on the rule.
 |---------|---------|-------|
 | **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
 | **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
+
+### On Rule Complete
+
+`trigger.rule_completed`
+
+Sweeps everything in scope each time the rule you pick finishes a run successfully. Use it to run rules in a fixed order: Rule B picks Rule A, so B runs once A is done, and Rule C can pick B in turn. A run of A that fails does not start B.
+
+B does not receive anything from A. It sweeps its own scope, exactly as **Manual Run** does, so B can work on different Findings or Assets than A did. **Run Now** on B sweeps the same way, without waiting for A.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Rule** | none (required) | The rule to wait for. The list offers the rules you can see. A rule cannot pick itself. |
+| **Sweep Over** | `Findings` | What kind of item this rule sweeps: `Findings` or `Assets`. The trigger decides what every node downstream works on. |
+| **Scope** | empty | What this rule considers. Follows Sweep Over: a Finding sweep filters in the Findings list's vocabulary, an Asset sweep in the Assets list's. |
+
+Each of A's successful runs starts B, whatever started A: a schedule, an event, or **Run Now**. When A runs on every event (for example **On Finding Event**), completions that arrive while B is still waiting to start share one run of B, so a burst of events gives one sweep rather than one per event. A completion that arrives while B is already running starts B once more afterwards. If several rules pick A, they all start when A finishes, and run at the same time. To run them one after another, have each pick the one before it instead.
+
+A rule with an AI step (such as **Check for False Positive**) is done when the step's answers have been applied, not when it hands its Findings to the model. B starts after the run that applies the last answers, once.
+
+Ordered rules are a chain, and the [cascade limits](../runs/#cascading) apply to it: a chain stops after 3 hops (A, B, C and D), and a rule never runs twice in one chain, so two rules that pick each other stop after one round. If B's owner can no longer see A, B's run sweeps nothing, its trace says why, and the rules that pick B do not start either. An export carries the picked rule by its name. When the rule it picks is in the same file, an import picks that rule, so an exported chain imports as a working chain. Otherwise it matches the rule of that name you can see, and leaves it blank, saying so in the import report, when no rule or more than one rule has that name.
 
 ### On a Missing Scan
 
@@ -200,7 +226,7 @@ Runs when deduplication matches a newly imported Finding to an existing one. Use
 | **When the Match Is in Another Asset** | `Mark as Duplicate` | `Mark as Duplicate` leaves deduplication as it is and runs the rule on the new duplicates. `Keep Both Active` stops deduplication from marking a Finding in scope as a duplicate of a Finding in another Asset. |
 | **Scope** | empty | Which newly imported Findings this rule considers. Empty means every Finding the rule owner can see. |
 
-With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted. Deduplication for every other Finding works as before. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
+With **Keep Both Active**, the decision is made during deduplication, before anything is written: a Finding inside the rule's scope whose only match is in another Asset stays active, keeps its own SLA, and is linked to the Finding it matched. A match inside the Finding's own Asset always wins, so importing the same scan into production a second time makes the new Finding a duplicate of the first production Finding, not another active copy. A Finding that is already linked is not announced again when it is deduplicated again later, and the link keeps it active even after the rule is disabled or deleted. Disabling the rule stops new Findings from being kept active; Findings it already kept stay active and linked until one of the pair is deleted or someone removes the link. Deduplication for every other Finding works as before. The import and reimport previews (`/api/v2/import-scan/preview/` and `/api/v2/reimport-scan/preview/`) match across a Dedupe Pool the way the import does, and count a Finding such a rule would keep active as created, and again under `created_linked`, rather than as a duplicate. The parsed Findings are not saved, so a rule scope that filters on tags, endpoints, locations or other related records matches none of them in the preview, and under the unique-id and legacy algorithms `created_linked` is an upper bound. Their counts follow every matching pass the import runs, in its order: the tool's same-tool matching, then the identity-signature match when it is turned on, then cross-tool matching against other tools' Findings. A cross-tool match under the **Global Locations** algorithm, or under **Global Component** with Locations enabled, is not counted, because it compares locations the parsed Findings have not stored yet. The rule itself then runs on the Findings that were kept active, so it can copy the matched Finding's status (see **Copy Status from Matched Finding**), tag them, or notify someone.
 
 Each item carries the match on `ctx`:
 
@@ -210,6 +236,16 @@ ctx.kept_active          true when deduplication kept this Finding active
 ```
 
 **Run Now** replays the matches still on record: the linked Findings for **Keep Both Active**, and existing duplicates for **Mark as Duplicate**.
+
+**Run Now** of a **Keep Both Active** rule also brings in the matches deduplication made before the rule existed, for example when both Assets were in a Dedupe Pool before the rule was added. A Finding in the rule's scope that is a duplicate of a Finding in another Asset becomes active again (unless it is closed for a reason of its own, such as mitigated or a false positive), is linked to that Finding, and then goes through the rest of the rule like a Finding kept at import, so **Copy Status from Matched Finding** gives it the matched Finding's status. A match inside one Asset still wins: of several duplicates of the same Finding in one Asset, only one becomes active, and the others stay duplicates of it. The rule owner must be able to edit the Finding; a Finding they cannot edit is left as it is. A run brings back every such Finding in scope. Preview the rule first: the preview lists the Findings a run would bring back, up to the preview's item limit, and changes nothing. Two copies that are both still active are linked by **Apply Now** on the Dedupe Pool instead.
+
+#### Linked Findings
+
+A Finding's links show on its page, in the **Linked Findings** tab beside **Duplicate Findings** (the tab is hidden while a Finding has none). Each row names the linked Finding, its Asset, severity and status, which of the two was kept active, the rule that linked them and when. Only links to Findings you can see are listed.
+
+To break a wrong link, open the row's menu and choose **Remove Link**; it takes permission to edit the Finding whose page you are on. Statuses are then no longer carried between the two Findings in either direction. The Finding that was kept active stays active, and deduplication neither links the two again nor marks it a duplicate of the other when it next runs on it. A removed link stays in the tab, marked **Removed** with who removed it and when, and **Restore Link** in its menu puts it back.
+
+Automation reads a Finding's links, removed ones included, with `GET /api/v2/finding_links/?finding=<id>`, removes one with `DELETE /api/v2/finding_links/<link id>/?finding=<id>` and restores one with `POST /api/v2/finding_links/<link id>/restore/?finding=<id>`, with the same permissions.
 
 #### Example: keep staging and production in step
 
@@ -317,6 +353,8 @@ A message about the whole batch cannot name one item's value: there, `{{ctx.look
 
 These nodes change Findings. Every change is attributed back to the rule, run and node that made it, and shows up on the Finding's provenance timeline.
 
+A Findings node changes only Findings the rule owner has permission to edit. A Finding the owner can see but not edit is passed on unchanged, and the node's entry in the run trace counts it, for example "12 findings not edited: no edit permission". If a rule reports skipped Findings you expected it to change, give the rule owner (for a group's rule, the group) an edit role on those Findings' Assets or Organizations.
+
 ### Set Severity
 
 `finding.set_severity`
@@ -350,6 +388,10 @@ Moves the Finding to a status.
 | **Status** | none | `active`, `inactive`, `verified`, `unverified`, `false_positive`, `mitigated`, `reopen`. |
 | **Note** | empty | An optional note recorded alongside the status change. |
 
+`false_positive` and `mitigated` take a risk-accepted Finding out of its risk acceptance first, as closing it by hand does: it leaves the acceptance, and a note on the Finding says so.
+
+As closing it by hand does, `false_positive` and `mitigated` also mitigate the Finding's open Endpoints (or, with Locations on, set its Locations to Mitigated), naming the rule owner and the time of the run. An Endpoint already mitigated keeps its own date. `reopen`, and `active` on a closed Finding, set its Endpoints (or Locations) open again, as reopening it by hand does. A preview changes nothing.
+
 ### Copy Status from Matched Finding
 
 `finding.copy_matched_status`
@@ -364,6 +406,8 @@ Gives the Finding the status of the Finding deduplication matched it to in anoth
 
 A status is read in this order: false positive, out of scope, risk accepted, mitigated, and otherwise open. A risk acceptance is carried as a new acceptance on the Finding's own engagement, with the same expiration date, so either one can later be extended or revoked on its own. If the Asset only allows simple risk acceptance, the Finding is accepted the simple way, which has no expiration. The rule owner must be able to see the Finding the status comes from (the note names it) and edit the Finding it goes to, and to add a risk acceptance for that status; anything else is left alone, and so are duplicates. It does nothing after **On Dedupe Match** in **Mark as Duplicate** mode, because the new Finding is then a duplicate. A Finding already closed for a different reason takes the new status in place of the old one, so the two Findings end up with the same status.
 
+Carrying `False Positive`, `Out of Scope` or `Mitigated` also mitigates the Finding's open Endpoints (or, with Locations on, sets its Locations to Mitigated), as closing it by hand does, and carrying `Reopened` sets them open again.
+
 ### Apply Status to Linked Findings
 
 `finding.apply_status_to_linked`
@@ -375,6 +419,33 @@ Gives every Finding linked to this one by **On Dedupe Match** the same status, a
 | **Statuses** | `False Positive`, `Out of Scope`, `Risk Accepted` | Which statuses to carry, as for **Copy Status from Matched Finding**, with the same reason for leaving `Mitigated` and `Reopened` off. |
 
 The items themselves are not changed, and pass through unchanged. A rule never runs again inside the cascade it started, so two linked Findings cannot pass a status back and forth.
+
+A Finding the rule runs on is never also a target. So **Run Now** of a rule ending in this node over a scope that covers both Assets carries nothing between two linked Findings that are both in the run. Scope such a run to the Asset whose statuses should be carried, so the Findings in the other Asset are only targets.
+
+### Merge Findings
+
+`finding.merge`
+
+Merges the active Findings that reach the node and share a key, per Asset, into one Finding, the same merge the Findings list's **Merge** action and `POST /api/v2/findings/merge/` make. The Finding that is kept gets a note listing the Findings merged into it. With **Set Inactive**, each merged Finding also gets a note naming the one it was merged into.
+
+Only the Findings that reach the node are grouped. A rule on **On Finding Event** (for example after an import) merges that event's Findings among themselves, never into the Asset's existing Findings. To merge an Asset's existing Findings, sweep it with **Manual Run** or **On a Schedule**.
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| **Group By** | Hash Code | Findings that reach the node from one Asset with the same value here are merged: Hash Code, Title, Vulnerability ID or Unique ID From Tool. A Finding with no value is left alone. |
+| **Keep** | Oldest Finding | Which Finding of each group the others merge into: Oldest Finding, Newest Finding, or Highest Severity (the oldest among equals). |
+| **Add Endpoints** | on | Copy the merged Findings' Endpoints (or Locations) onto the Finding that is kept. |
+| **Append Descriptions** | off | Append the merged Findings' descriptions. |
+| **Append References** | off | Append the merged Findings' references. |
+| **Append Vulnerability IDs** | on | Add the merged Findings' vulnerability IDs. |
+| **Append Tags** | off | Add the merged Findings' tags. |
+| **Merged Findings** | Set Inactive | Set Inactive, or Delete Permanently. Delete Permanently is offered only while the **Archive** feature flag is on (see [Archive](/asset_modelling/pro__archive/)), needs the rule owner to be allowed to delete those Findings, and asks you to confirm. |
+
+Findings of different Assets are never merged, and neither are inactive Findings. A merged Finding is inactive afterwards, so running the rule again finds nothing more to merge.
+
+The rule owner needs edit permission on every Finding a merge touches. A Finding the owner can only see is neither kept nor merged, and the run trace counts it as not edited. With **Delete Permanently**, a merged Finding the owner may edit but not delete is left in place, and the run trace counts it as not deleted.
+
+The run trace lists which Findings merged into which (the first 50 merges, with a count of the rest), so a dry run shows the merges before you enable the rule. A sweep that runs over many Findings works through them in chunks, and a group can arrive over several of them: the Finding kept is still the one **Keep** names across the whole sweep. Up to 100,000 groups are followed from chunk to chunk this way; past that, a group first reached in a later chunk merges within its chunk, and the run trace counts those groups.
 
 ### Add Tags
 
@@ -418,7 +489,7 @@ Closes, reopens, false-positives or risk accepts each Finding to match its linke
 
 A close reason only ever classifies a closed state: false positive first, then accepted risk, then plain mitigation. A reopened ticket that still carries its old resolution reopens. Findings already in the target state are left alone.
 
-An accepted risk works the way the classic Jira webhook does: it creates a full risk acceptance where the Finding's product allows one, a simple risk acceptance where only that is allowed, and otherwise closes the Finding as mitigated. Reopening or false-positiving a risk-accepted Finding removes its risk acceptance first. A status change is only made on a Finding the rule owner may edit (and, for a risk acceptance, may accept risk on).
+An accepted risk works the way the classic Jira webhook does: it creates a full risk acceptance where the Finding's product allows one, a simple risk acceptance where only that is allowed, and otherwise closes the Finding as mitigated. Reopening or false-positiving a risk-accepted Finding removes its risk acceptance first. Closing a Finding mitigates its open Endpoints (or Locations), and reopening it sets them open again, as closing and reopening it by hand do. A status change is only made on a Finding the rule owner may edit (and, for a risk acceptance, may accept risk on).
 
 ### Add a Ticket Comment as a Note
 
@@ -445,6 +516,8 @@ Makes a group responsible for the Finding.
 |---------|-------|
 | **Group** | The group that owns these Findings. |
 
+In a group's rule, the group named must be one the group's automation identity can see. A run that meets a group it cannot see fails with an error naming it.
+
 ### Set Reviewers
 
 `finding.set_reviewers`
@@ -454,6 +527,8 @@ Puts the Finding under review by the selected users.
 | Setting | Notes |
 |---------|-------|
 | **Reviewers** | One or more users who should review these Findings. |
+
+In a group's rule, every reviewer must be a user the group's automation identity can see. A run that meets one it cannot see fails with an error naming the user.
 
 ### Accept Risk
 
@@ -465,7 +540,7 @@ Simple risk accepts the Finding, or adds it to a risk acceptance record.
 |---------|---------|-------|
 | **How** | `simple` | `simple` sets simple risk acceptance on the Finding. `acceptance` adds it to a risk acceptance record. |
 | **Accepted** | on | Shown for `simple`. Turn off to un-accept the risk. |
-| **Risk Acceptance** | none | Shown for `acceptance`. Which risk acceptance to add these Findings to. |
+| **Risk Acceptance** | none | Shown for `acceptance`. Which risk acceptance to add these Findings to. It must be active: see below. |
 | **Accept Without Review Up To** | No limit | The most severe Finding this rule may accept on its own. Anything more severe is **not** accepted. |
 
 #### Limiting what a rule may accept on its own
@@ -473,17 +548,43 @@ Simple risk accepts the Finding, or adds it to a risk acceptance record.
 A rule that can accept risk can accept a Critical, and by default nothing says otherwise. *Accept
 Without Review Up To* draws that line.
 
-Findings over the limit are not dropped — the rule matched them for a reason. With
+Findings over the limit are not dropped: the rule matched them for a reason. With
 [Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled they
 are put into a Risk Acceptance **awaiting review**, named for the rule that asked and carrying why,
-so a person decides. They stay active and counted the whole time. With that feature off there is no
-review state to use, so they are simply left alone — never accepted, which is the point of the
-limit. A rule preview creates nothing, as with every other action.
+so a person decides. They stay active and counted the whole time. A Finding already waiting on a
+decision, or already in another Risk Acceptance, is not asked about again. With that feature off
+there is no review state to use, so they are simply left alone (never accepted, which is the point
+of the limit).
+
+A rule preview creates nothing, as with every other action, but it lists each Finding over the limit
+with `workflow_state` going to `proposed`, so you can see what the rule would send for review before
+it runs. The node reports how many Findings were over the severity limit and, with Risk Acceptances
+2.0 enabled, how many were proposed for review.
 
 Two behaviors worth knowing: a severity the rule cannot recognize counts as *over* the limit (if it
 cannot be ranked it cannot be called safe), while a *limit* that cannot be recognized is ignored
 rather than blocking everything, because a rule that silently stops working is harder to notice than
 one that keeps going.
+
+#### What `acceptance` mode changes on each Finding
+
+Adding a Finding to a Risk Acceptance also makes it inactive: the Finding becomes risk accepted and
+inactive. Its record on the Finding, in the run and in a preview, names what changed (risk accepted,
+and inactive when it was active) along with the Risk Acceptance it joined. A Finding that is a
+duplicate and is not risk accepted yet is left as it was, as adding it to a Risk Acceptance by hand
+leaves it. It gets the note saying it was added to the Risk Acceptance, but it does not become a member
+of it, so the node counts it as unchanged and records no change for it.
+
+#### Only an active Risk Acceptance takes Findings from a rule
+
+In `acceptance` mode a rule adds Findings only to a Risk Acceptance that is in force. A rule never
+stands in for the approval: with Risk Acceptances 2.0 enabled, a Risk Acceptance that is proposed,
+under review, approved but not yet activated, rejected or expired takes nothing from the rule. An expired Risk Acceptance is refused
+with that feature off too, because nothing would ever expire a Finding added to it after its
+expiration. The rule changes nothing then, and its run says why: the node reports how many Findings
+it did not add because the Risk Acceptance is not active, and the run's trace names the Risk
+Acceptance's state. A preview shows the same. Activate the Risk Acceptance (approve it, then activate
+it), or reinstate an expired one, and the next run that matches the Findings adds them.
 
 ### Set Mitigation Policy
 
@@ -547,8 +648,9 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 
 | Setting | Notes |
 |---------|-------|
-| **Field** | Which custom field to write. |
-| **Value** | Typed to the field: text takes a template with `{{finding.title}}` style placeholders, numbers take a number, dates take a `YYYY-MM-DD` date, booleans take true or false, and the select types offer the field's own options. |
+| **Write To** | `This Finding` by default, or a record the Finding belongs to: its Test, Engagement, Asset or Organization. |
+| **Field** | Which custom field to write, from the fields defined for the record chosen in **Write To**. |
+| **Value** | Typed to the field: text takes a template with `{{finding.title}}` style placeholders, Integer and Decimal fields take a number or a [formula](#formulas), dates take a `YYYY-MM-DD` date, booleans take true or false, and the select types offer the field's own options. |
 
 The value is checked against the field's current definition when the rule is saved and again on every run, so a rule can never write a value the field's data type refuses. A text template that renders empty for a Finding leaves that Finding untouched (removal is the Clear node's job), setting a multi-select replaces the whole stored list, and Findings already holding the value are left alone.
 
@@ -557,6 +659,7 @@ Three behaviors worth knowing:
 * **Scope is the boundary.** Like every Findings node, the write applies to every Finding the trigger produced under the rule owner's visibility.
 * **A custom field write is not a Finding save.** Nothing that follows a Finding save runs: no SLA recomputation, no deduplication, no re-prioritization. A custom field edited by hand on a Finding's page does not wake **On Finding Event** rules either. A write made by a rule does cascade: other rules see it as an `updated` event, and later nodes in the same run read the new value.
 * **The field must still exist.** If the field is deleted after the rule was saved, the run errors naming it. If Custom Fields is switched off entirely, the node skips with the reason on its trace instead, so a saved rule never starts erroring over a feature flag.
+* **Writing to a record the Finding belongs to.** Many Findings share one Test, Engagement, Asset or Organization, so that record is written once, from the first of its Findings in the run, and its change appears once on that Finding's provenance timeline. The rule owner needs edit on the record itself; records they cannot edit are counted as `skipped_unauthorized`. A [computed](/asset_modelling/pro__custom_fields/#computed-fields) field is never offered: the instance fills it in.
 
 ### Clear a Custom Field
 
@@ -566,7 +669,38 @@ Removes one custom field's value from the Finding. The value it held is recorded
 
 | Setting | Notes |
 |---------|-------|
+| **Write To** | `This Finding`, or its Test, Engagement, Asset or Organization, as on **Set a Custom Field**. |
 | **Field** | Which custom field to clear. |
+
+### Formulas
+
+An Integer or Decimal custom field's value can be a formula over the numbers the item carries, evaluated per item when the rule runs. A plain number is a formula too, so a rule saved with a fixed number reads the same. For example, a health score that weighs each active Finding by its priority band:
+
+```
+100 * (1 - div(10 * product.findings.active.risk.urgent + 5 * product.findings.active.risk.needs_action
+  + 2 * product.findings.active.risk.medium + product.findings.active.risk.low,
+  10 * product.findings.active.total, 0))
+```
+
+* **Numbers.** A formula reads a path, written bare or in `{{ }}`: the item's number fields, its number custom fields, and the Finding counts below. **Insert Field** beside the formula lists exactly the paths a formula can read.
+* **Operators.** `+ - * /` and parentheses; the comparisons `< <= > >= == !=`, `and`, `or` and `not`, which give 1 or 0.
+* **Functions.** `min`, `max`, `abs`, `round(x)` or `round(x, places)`, `div(a, b, if_zero)` (`a / b`, or `if_zero` when `b` is 0), `coalesce(a, b, ...)` (the first that has a value) and `if(test, a, b)`.
+* **Results.** An Integer field rounds half away from zero; a Decimal field keeps up to four decimal places.
+* **Skipped items.** An item whose formula reads a number the item does not have, divides by zero with `/`, or overflows is skipped: nothing is written, the field keeps its previous value, and the node trace counts it as `skipped_missing_input`, `skipped_division_by_zero` or `skipped_not_finite`.
+* **Writing to a parent record.** A formula writing a Test's, Engagement's, Asset's or Organization's field may read only that record and the records above it, so every Finding of the record computes the same value. The save refuses a formula that reads anything else.
+
+#### Finding counts
+
+The Test, Engagement, Asset and Organization of an item each carry `findings`, the counts of the Findings beneath them that the rule owner can see. An Asset graph's items carry the Asset's and the Organization's. Each count is a number in conditions and templates too.
+
+| Path | Counts |
+|------|--------|
+| `<record>.findings.active.total` | Active Findings (the number the lists' Active Findings column shows). |
+| `<record>.findings.active.risk.<band>` | Active Findings in a priority band: `urgent`, `needs_action`, `medium`, `low`, or `unscored` for Findings not yet prioritized. |
+| `<record>.findings.active.severity.<severity>` | Active Findings of a severity: `critical`, `high`, `medium`, `low`, `info`. |
+| `<record>.findings.open.*` | The same counts over open Findings: active, and not a duplicate, false positive, out of scope, risk accepted or mitigated. |
+
+`<record>` is `test`, `engagement`, `product` (or `asset`) or `product_type` (or `organization`).
 
 ## Assets
 
@@ -583,9 +717,9 @@ Sets a field on the Asset. Assets already holding the value are left alone, and 
 | Setting | Default | Notes |
 |---------|---------|-------|
 | **Field** | none | One of: `description`, `business_criticality`, `platform`, `lifecycle`, `origin`, `user_records`, `revenue`, `external_audience`, `internet_accessible`, `asset_type`. |
-| **Value** | none | The control follows the field: a template for description (with `{{product.name}}` style placeholders), a picker for the choice fields, a number or a toggle for the rest. |
+| **Value** | none | The control follows the field: a template for description (with `{{product.name}}` style placeholders), a picker for the choice fields, a number or a toggle for the rest. The `platform`, `lifecycle`, `origin` and `asset_type` pickers list the options configured on the instance, with their current names. |
 
-For `asset_type`, the value is a type's code (`host`, `repository`, `service`, ...). The picker lists the types DefectDojo ships; a saved rule may name a type you added, and a code that names no type fails the node. A type a rule sets counts as chosen by a person, so connectors do not overwrite it. In conditions, the Asset's type is `product.kind`.
+For `asset_type`, the value is a type's code (`host`, `repository`, `service`, ...). The picker lists every type on the instance, the ones you added included, under their current labels and in their display order. A code that names no type fails the node. A type a rule sets counts as chosen by a person, so connectors do not overwrite it. In conditions, the Asset's type is `product.kind`.
 
 Two fields are deliberately not offered: `name` (it is unique, so one rendered value written across a sweep cannot work) and the SLA configuration (it drives an asynchronous recalculation with its own write lock, and belongs to a dedicated flow).
 
@@ -665,8 +799,9 @@ Writes one of this instance's [Custom Fields](/asset_modelling/pro__custom_field
 
 | Setting | Notes |
 |---------|-------|
-| **Field** | Which custom field to write. One entry per Asset custom field defined on the instance. |
-| **Value** | Typed to the field. |
+| **Write To** | `This Asset` by default, or its Organization. |
+| **Field** | Which custom field to write. One entry per custom field defined for the record chosen in **Write To**. |
+| **Value** | Typed to the field. Integer and Decimal fields take a number or a [formula](#formulas) over the Asset's numbers and Finding counts. |
 
 Two behaviors of its own: Assets the rule owner may not edit are counted on the node trace as `skipped_unauthorized` rather than touched, and the write lands on the custom field value rather than the Asset row itself, so nothing that follows an Asset edit runs. A custom field edited by hand does not wake **On Asset Event** rules; a write made by a rule still cascades as an `updated` event.
 
@@ -674,10 +809,11 @@ Two behaviors of its own: Assets the rule owner may not edit are counted on the 
 
 `asset.clear_custom_field`
 
-Removes one custom field's value from the Asset, recording what it held on the Asset's provenance.
+Removes one custom field's value from the Asset, or from its Organization, recording what it held on the Asset's provenance.
 
 | Setting | Notes |
 |---------|-------|
+| **Write To** | `This Asset`, or its Organization. |
 | **Field** | Which custom field to clear. |
 
 ### Naming a configuration or engine the rule owner cannot see
@@ -792,6 +928,8 @@ When account names do not encode the OU, map account ids instead: read `AWS_ACCO
 
 Egress nodes are the nodes that leave DefectDojo. Every one of them records a [Delivery](../deliveries/) before anything is sent, and every one of them honours the rule's **Simulate** or **Live** mode.
 
+Most egress nodes belong to a node family with its own permission: **Call a Webhook** needs **Webhook Nodes**; Slack, Microsoft Teams, email and Amazon SNS need **Messaging Nodes**; the ticket nodes need **Ticket Nodes**; and **Generate a Report** needs **Report Nodes**. **Raise an In-App Alert** belongs to no family. See [Node family permissions](../building_rules/#node-family-permissions).
+
 The notification nodes (Slack, Teams, email, SNS, webhook, in-app alert) work in Finding and Asset rules alike: in an Asset rule the default message line becomes the Asset's name and organization, digests count by business criticality instead of severity, and a webhook body carries an `assets` list plus an `entity` key (its `findings` list stays present and empty, so existing receivers never meet a missing key). The ticket nodes and the report node stay Finding-only: tickets and reports track Findings.
 
 Several of them offer the same **One Message per Item** choice. Off, the node sends one message describing the whole batch, with a breakdown and a capped list of items. On, it sends one message per item.
@@ -889,6 +1027,12 @@ Emails a fixed list of addresses over a Messaging Connector. The recipients are 
 | **One Message per Finding** | off | Off sends one email about the batch. |
 | **Findings Listed in the Body** | `25` | How many Findings `{{ctx.findings_html}}` lists before it says how many more there were. |
 
+#### Restricting recipients to DefectDojo users
+
+The **Restrict Triage Engine Emails to DefectDojo Users** feature flag, under **Settings > Feature Flags**, is on by default. It keeps rule emails inside DefectDojo's access control. While it is on, every recipient must be the email address of an active DefectDojo user, so what reaches a mailbox is decided by that user's own access. Saving a rule that names any other address fails, and the rule's problems name the node and the address. Each recipient then gets only what they can see (an email about an import, an import group or a missed scan lists its Asset). An email about a batch whose items some recipients can see only part of is sent in parts: each recipient gets an email listing just the Findings, Assets or alerts they can see, with a count that matches, and each part is a delivery of its own that records who it went to and what it listed. A recipient who can see none of the batch gets nothing, and the delivery records who was left out and why. A batch larger than 500 items is not split: it goes only to the recipients who can see everything it lists. A one-email-per-item send goes to the recipients who can see that item. A rule that already names another address keeps running, and each send leaves that address out. To reach a team list, give the list's address a DefectDojo user of its own, with the access the team should have. A [service user](/admin/user_management/pro__service_users/) has no email address, so it cannot stand in for one.
+
+An instance whose rules need to email addresses outside DefectDojo can turn the flag off. The Feature Flags page asks for confirmation first, because while it is off a rule emails any address in its Recipients, including people outside the organization, and sends them what the rule lists whatever their access.
+
 ### Call a Webhook
 
 `notify.webhook`
@@ -937,6 +1081,8 @@ Creates an in-app alert about the batch.
 
 Recipients still control this through their own **Rules Engine Match** notification setting, so an alert cannot bypass a user's notification preferences.
 
+In a group's rule, every recipient must be a user the group's automation identity can see. A run that meets one it cannot see fails with an error naming the user.
+
 A template rendered once for the whole batch (this node's **Title** and **Description**, and **Send an Email**'s **Subject** and **Body** with **One Message per Finding** off) has no single item to read from, so a Finding's or a webhook's own fields render empty there. It can use the run's facts (`{{ctx.rule_name}}`, `{{ctx.rule_id}}`, `{{ctx.run_id}}`, `{{ctx.count}}`), a scan group's `{{ctx.import_summary}}`, and `{{ctx.lookup_values}}`: the values a **Find Findings by a Value** lookup could not match, the first ten and then how many more.
 
 ### Generate a Report
@@ -947,11 +1093,11 @@ Generates a report from a template, scoped to the Findings that reached this nod
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Report Template** | none | Which template to generate from. Required. |
+| **Report Template** | none | Which template to generate from. Required. Only templates the rule owner can see are offered: for a group's rule, the group's own templates, templates shared with the group or with everyone, and Instance templates it may read. |
 | **Format** | `pdf` | `pdf`, `html`, `csv`, `xlsx` (Excel) or `json`. The data formats (`csv`, `xlsx`, `json`) carry only the template's Tabular and Detail blocks: a cover page, a chart or a widget has nothing to put in a cell and is left out. They are what a scheduled rule hands to a downstream system rather than to a reader. If the template has no Tabular or Detail block at all, the delivery fails with that reason in its error and no report is created, so look in the rule's deliveries rather than in Generated Reports. See [the Report Builder](/metrics_reports/reports/report-builder/). |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. `trigger_tests` (Findings of the Triggering Imports) is for rules that start from **When a Scan Has Landed** or **When a Group of Scans Has Landed**: every Finding of the tests those imports wrote. `each_finding` (One Report per Finding) and `each_asset` (One Report per Asset) generate a separate report for each Finding, or for each Asset the Findings belong to. |
 | **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. Naming one needs the global Integration View permission, for whoever saves the rule and for its owner, and a send fails while the owner lacks it. Taking ownership of a rule without that permission leaves the connection empty. |
-| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
+| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. With [Restrict Triage Engine Emails to DefectDojo Users](#restricting-recipients-to-defectdojo-users) on, the addresses of an Email connection must be DefectDojo users, and a per-item report is announced only to the users who can see its Finding or Asset. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link; `{{ctx.import_summary}}` is the scan group's one-line account when the rule started from a group of scans, and empty otherwise. With a per-item scope, `{{ctx.finding_title}}` or `{{ctx.asset_name}}` names what the report is about. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.

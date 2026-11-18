@@ -1,17 +1,16 @@
 import contextlib
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.auditlog.helpers import get_delete_event_user
 from dojo.file_uploads.helper import delete_related_files
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
-from dojo.pghistory_models import DojoEvents
 
 
 @receiver(post_delete, sender=Test)
@@ -20,24 +19,10 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
     with contextlib.suppress(sender.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
         if instance == origin:
             description = _('The test "%(name)s" was deleted') % {"name": str(instance)}
-            user = None
 
             if settings.ENABLE_AUDITLOG:
                 # Find deletion author in pghistory events
-                # Look for delete events for this specific test instance
-                pghistory_delete_events = DojoEvents.objects.filter(
-                    pgh_obj_model="dojo.Test",
-                    pgh_obj_id=instance.id,
-                    pgh_label="delete",
-                ).order_by("-pgh_created_at")
-
-                if pghistory_delete_events.exists():
-                    latest_delete = pghistory_delete_events.first()
-                    # Extract user from pghistory context
-                    if latest_delete.user:
-                        User = get_user_model()
-                        with contextlib.suppress(User.DoesNotExist):
-                            user = User.objects.get(id=latest_delete.user)
+                user = get_delete_event_user(instance)
 
                 # Update description with user if found
                 if user:

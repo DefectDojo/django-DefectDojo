@@ -134,6 +134,16 @@ class Product(BaseModel):
 
     # Read and written only by plugins; open source never sets them.
     archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    # Set when Delete Duplicates must stop removing this asset's duplicates (by a plugin's guard),
+    # and cleared only by an administrator: a hold that lifted itself on a timer or a cache flush
+    # would resume the deletion it was set to stop. Delete Duplicates leaves held assets out.
+    dupe_delete_held_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        editable=False,
+        help_text=_("When Delete Duplicates was held for this asset. While set, none of its duplicates are deleted."),
+        verbose_name=_("Delete Duplicates held at"),
+    )
     archive_batch = models.UUIDField(null=True, blank=True, editable=False)
 
     # objects is declared first, so it is the default manager; see dojo.query_hooks.

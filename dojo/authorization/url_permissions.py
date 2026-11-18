@@ -135,7 +135,7 @@ URL_PERMISSIONS = {
     "finding_group_unlink_jira": [("object", Finding_Group, "edit", "fgid")],
 
     # -----------------------------------------------------------------------
-    # Endpoint (dojo/endpoint/views.py  ->  dojo/endpoint/urls.py)
+    # Endpoint (dojo/endpoint/ui/views.py  ->  dojo/endpoint/ui/urls.py)
     # -----------------------------------------------------------------------
     "view_endpoint": [("object", Endpoint, "view", "eid")],
     "view_endpoint_host": [("object", Endpoint, "view", "eid")],

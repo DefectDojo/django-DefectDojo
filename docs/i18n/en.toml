@@ -75,8 +75,17 @@ other = "Reach out to Support"
 [cta_support_text]
 other = "Need some help? Pro users can send an email to support@defectdojo.com"
 
-[cta_trial_link]
-other = "Sign up for a trial"
+[cta_demo_heading]
+other = "Thinking about Pro?"
+
+[cta_demo_compare_link]
+other = "Compare the editions"
+
+[cta_demo_book_link]
+other = "book a demo"
+
+[header_book_demo]
+other = "Book a demo"
 
 [footer_tagline]
 other = "Security's secret weapon - unify & automate AppSec. Open-source vulnerability management & DevSecOps."
@@ -177,11 +186,8 @@ other = "Official documentation for DefectDojo Pro and Open-Source editions, mai
 [cta_community_text]
 other = "Check out live events, upcoming features and connect with other security professionals on our {{ .link }}."
 
-[cta_trial_text]
-other = "Ready to go Pro? Request a quote from the DefectDojo, Inc. team {{ .link }}."
-
-[cta_trial_link_text]
-other = "here"
+[cta_demo_text]
+other = "{{ .compare }}, or {{ .demo }} with our team."
 
 [whats_new]
 other = "What's new in {{ .release }}"

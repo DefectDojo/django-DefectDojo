@@ -12,6 +12,7 @@ RELEASE_DATES = {
     "3.4.0": date(2026, 10, 5),
     "3.5.0": date(2026, 11, 2),
     "3.6.0": date(2026, 12, 7),
+    "3.7.0": date(2027, 1, 4),
 }
 
 _MINOR_RELEASE = re.compile(r"\d+\.\d+\.0")

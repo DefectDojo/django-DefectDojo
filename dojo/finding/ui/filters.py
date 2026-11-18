@@ -906,6 +906,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
         label=labels.ORG_FILTERS_LABEL)
     test__engagement__product__lifecycle = MultipleChoiceFilter(field_name="test__engagement__product__lifecycle__value", choices=lifecycle_value_choices, label=labels.ASSET_LIFECYCLE_LABEL)
     test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
+    test = ModelChoiceFilter(queryset=Test.objects.none(), label="Test")
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
 
     def __init__(self, *args, **kwargs):
@@ -944,6 +945,8 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
                 "test__engagement__product"].queryset = get_authorized_products("view")
         if "test__engagement" in self.form.fields:
             self.form.fields["test__engagement"].queryset = get_authorized_engagements("view")
+        if "test" in self.form.fields:
+            self.form.fields["test"].queryset = get_authorized_tests("view").prefetch_related("test_type").order_by("id")
 
 
 class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):

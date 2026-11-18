@@ -124,7 +124,7 @@ If you leave this field blank, it will default to **Jira\_full.**
 ​
 7. Select one or more Jira Resolution types which will change the status of a Finding to False Positive (when the Resolution is triggered on the Issue). If you don't wish to use this automation, you can leave the field blank.
 ​
-8. Decide whether you wish to send SLA Notifications as a comment on a Jira issue.
+8. Decide whether you wish to send SLA Notifications as a comment on a Jira issue. Each Asset's Jira settings can override this choice (see [Send SLA Notifications As Comments](#send-sla-notifications-as-comments)).
 ​
 9. Decide whether you wish to automatically sync Findings with Jira. If this is enabled, Jira Issues will automatically be kept in sync with the related Findings. If this is not enabled, you will need to manually push any changes made to a Finding after the Issue has been created in Jira.
 ​
@@ -261,7 +261,13 @@ If enabled, Jira comments will populate on the associated Finding in DefectDojo,
 
 #### Send SLA Notifications As Comments
 
-If enabled, any Issue which breaches DefectDojo's Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
+Decides whether Issues that approach or breach DefectDojo's Service Level Agreement rules get comments added to the Jira issue indicating this. These comments are posted daily until the Issue is resolved. The setting has three choices:
+
+* **Inherit from Jira instance** (the default): follows the Jira instance's **Globally send SLA notifications as comment?** setting.
+* **Always send**: posts the comments for this Asset, even when the Jira instance setting is off.
+* **Never send**: posts no comments for this Asset, even when the Jira instance setting is on. Email, in-app and other SLA notifications are still sent.
+
+Through the API (`/api/v2/jira_projects/`) the setting is two booleans. `product_jira_sla_notification: true` is **Always send** and `suppress_sla_notification_comments: true` is **Never send**. With both `false` the project follows the Jira instance. They cannot both be `true`. Existing projects and API clients that do not send `suppress_sla_notification_comments` keep working as before: the field defaults to `false`.
 
 Service Level Agreements can be configured under **Configuration \> SLA Configuration** in DefectDojo and assigned to each Asset.
 

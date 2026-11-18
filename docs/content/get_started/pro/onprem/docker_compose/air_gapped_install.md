@@ -10,6 +10,8 @@ aliases:
 
 This page is a supplement to the installation instructions supplied with your DefectDojo Pro license. It covers only what changes when the target host has no route to the internet. Everything else, including the host prerequisites and the PostgreSQL setup, follows the standard instructions.
 
+> **Legacy:** `dojo-compose-cli` is now a legacy command. It keeps working, and every step on this page still applies. Going forward, `dojo-deploy` replaces it and runs the same commands as `dojo-deploy compose`. To get `dojo-deploy` onto an air-gapped host, download it from [cloud.defectdojo.com/tools](https://cloud.defectdojo.com/tools) on a connected machine and copy it over. See [Moving to dojo-deploy](/get_started/pro/onprem/dojo_deploy/) for each legacy command's `dojo-deploy` equivalent.
+
 The approach uses two hosts. A staging host with normal internet access downloads the deployment artifacts and container images. You then move those artifacts into the air-gapped network by whatever transfer process your environment allows, and complete the install on the target host with no network access to DefectDojo.
 
 Plan for the staging host to be reachable again later. Every upgrade starts there, so it is worth keeping.

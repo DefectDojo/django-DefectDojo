@@ -9,6 +9,11 @@ A service user is a DefectDojo user meant for automation: a CI/CD pipeline, a sc
 
 Service users are kept apart from people. They are managed on their own pages, not on the Users pages or in the Members tabs of Assets, Organizations and groups. They are not offered when work is assigned or a reviewer is chosen, they are not managed by SCIM, SSO or LDAP, they are never added to the default group, they receive no email, and they do not count toward the licensed user total.
 
+There are two kinds of service user:
+
+* **Token** service users, which an administrator creates for a pipeline or scanner. Most of this page is about them.
+* **Group Automation** service users, which DefectDojo creates for a group. See [Group automation identities](#group-automation-identities).
+
 ## Turn on Service Users
 
 Service Users is an opt-in feature. A superuser turns it on under **Settings > Feature Flags > Service Users**.
@@ -63,7 +68,7 @@ A client that supports the OAuth 2.0 client credentials grant can exchange the t
       -d client_id=svc-gitlab-payments \
       -d client_secret=ddsu_<token>
 
-The response carries `access_token`, `token_type` (`Bearer`) and `expires_in` (seconds). Send the access token as `Authorization: Bearer <access_token>`, and request a new one when it expires. Disabling the service user, or turning the feature off, stops its access tokens at once. Regenerating its token does not end access tokens already issued; they expire within the hour.
+The response carries `access_token`, `token_type` (`Bearer`) and `expires_in` (seconds). Send the access token as `Authorization: Bearer <access_token>`, and request a new one when it expires. An access token stops working at once when the service user is disabled, when the feature is turned off, and when the token it was exchanged from is regenerated, revoked or expires.
 
 ## Manage service users
 
@@ -71,7 +76,7 @@ Select a service user's name to open its page. Each row's menu on the Service Us
 
 * **View Service User**: the service user's page.
 * **Edit Service User**: change the label, description, global role and token expiry. The username cannot be changed.
-* **Regenerate Token**: issue a new token and show it once. The current token stops working immediately. OAuth access tokens already issued from it keep working until they expire, within the hour.
+* **Regenerate Token**: issue a new token and show it once. The current token, and every OAuth access token already exchanged from it, stops working immediately.
 * **Disable Service User** and **Enable Service User**: a disabled service user keeps its token, but the token is refused until the service user is enabled again.
 * **Delete Service User**: remove the service user, its token, its memberships, its groups and its global role. A service user that is recorded on findings or other records, for example as the reporter of findings it imported, cannot be deleted: disable it instead.
 
@@ -80,6 +85,19 @@ Editing, regenerating or deleting a service user needs the right to grant every 
 The list shows each token's first characters, when it expires, when it was last used and its status: Active, Expiring Soon (within 14 days), Expired or Disabled.
 
 A service user authenticates only with its own token. It is never given a regular API token, so features that create one for the person asking, such as generating a token for a Sensei workflow, refuse a service user. The Users page's **Force Token Reset** and **Reset API Tokens** never rotate a service user's token: rotate it from the Service Users page or the API, where the new token is shown.
+
+## Group automation identities
+
+A group that owns Triage Engine rules or report schedules gets one service user of the **Group Automation** kind, named `svc-group-<group name>`, and every rule and report schedule the group owns runs as it. DefectDojo creates it the first time the group owns a rule or a schedule, and removes it when the group is deleted. See [the group's automation identity](../create_user_group/#the-groups-automation-identity).
+
+On the Service Users page it is marked with a **Group Automation** chip, and the **Group** column (shown while Group Ownership is on) links to its group. It is read-only:
+
+* It has no password and no token, and none can be issued, so it can never authenticate to the API or the UI.
+* Its access is exactly its group's: the group's Organization and Asset Roles and its Global Roles. Its access cards say the access is set at the group level, and it cannot be given a Global Role, a membership or a group of its own.
+* Its menu offers only **View Service User**. It cannot be edited, disabled, given a new token or deleted here, and the Users API refuses to deactivate it. Change its access by changing the group's, and remove it by deleting the group. Its API token, when the **Group API Tokens** flag is on, is issued and revoked on the group's page: see [the group's API token](../create_user_group/#the-groups-api-token).
+* Its name and description follow the group's current name.
+
+Group Automation identities do not count toward the licensed user total, the same as any service user.
 
 ## Automate with the API
 
@@ -92,6 +110,8 @@ The same operations are available at `/api/v2/service_users/` with an API token,
 | Change | `PATCH /api/v2/service_users/<id>/` with any of `label`, `description`, `expires_in_days`, `is_active`, `global_role_id` |
 | Regenerate the token | `POST /api/v2/service_users/<id>/regenerate_token/`. The response includes the new `token`, once. |
 | Delete | `DELETE /api/v2/service_users/<id>/` |
+
+Each service user in a response carries `kind` (`token` or `group_automation`) and `group` (the `id` and `name` of the group a Group Automation identity belongs to, otherwise `null`). Changing, deleting or regenerating the token of a Group Automation identity answers `403`: its access is set on the group, and it is removed with the group.
 
 Give a service user access with the same endpoints used for any user, with its `user_id` from the service user's record: `POST /api/v2/product_members/`, `POST /api/v2/product_type_members/` and `POST /api/v2/dojo_group_members/`. Those endpoints list service users' memberships along with everyone else's.
 

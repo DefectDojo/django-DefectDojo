@@ -18,7 +18,7 @@ My Work gathers everything that needs you into one list and sorts it by deadline
 | **Assigned to Me** | An active Finding assigned to you personally. |
 | **Review Requested** | A Finding where you were asked to review and nobody has claimed the review yet. |
 | **Review Claimed** | A Finding whose review you claimed. |
-| **Acceptance Expiring** | A Risk Acceptance you own or are assigned to that expires within the next 30 days, or that has expired and nobody has handled yet. An expired one stays in **Overdue** until it is handled. |
+| **Acceptance Expiring** | A Risk Acceptance you own, are assigned to, or approved (you made its latest approval or reinstatement) that expires within the expiration warning window, or whose expiration date has passed and that the expiration job (every three hours) has not expired yet. The window is the **Default Risk Acceptance Expiration Days** setting on the System Settings page, the same number of days ahead that the expiration warning is sent; when it is 0 or blank, only acceptances already past their date are listed. One past its date stays in **Overdue** until the job expires it. |
 | **Remediation Action** | An open remediation action assigned to you. Shown when Remediation Center is enabled. |
 
 Each item shows its reason as a tag. A Finding that is both assigned to you and waiting on your review appears once, with its review reason.

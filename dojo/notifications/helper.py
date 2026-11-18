@@ -38,6 +38,7 @@ from dojo.models import (
 )
 from dojo.notifications.models import Alerts, Notification_Webhooks, Notifications
 from dojo.notifications.render_cache import NotificationRenderCache
+from dojo.notifications.ticket_comments import dispatch_ticket_comments, ticket_link_filter
 from dojo.user.queries import (
     get_authorized_users_for_product_and_product_type,
     get_authorized_users_for_product_type,
@@ -1479,6 +1480,8 @@ def sla_compute_and_notify(*args, **kwargs):
                     # can not supply references to local objects as
                     # create_notification() arguments
                     findings_list = []
+                    # each finding's comment for the other ticket systems, sent once per batch below
+                    ticket_comments = {}
 
                     for n in comb_notif_kind:
                         findings_list.append(n.finding)
@@ -1499,6 +1502,8 @@ def sla_compute_and_notify(*args, **kwargs):
                         except Exception:
                             logger.exception("SLA notification failed for Finding %s, continuing with the next one", n.finding.id)
                         batch.flush_alerts()
+                        if title:
+                            ticket_comments[n.finding.id] = title
 
                         # kept apart, so a JIRA failure does not undo the notification above
                         if n.do_jira_sla_comment and title:
@@ -1507,6 +1512,15 @@ def sla_compute_and_notify(*args, **kwargs):
                                 jira_services.add_simple_comment(n.jira_instance, n.jira_issue, title)
                             except Exception:
                                 logger.exception("JIRA SLA comment failed for Finding %s, continuing with the next one", n.finding.id)
+
+                    # the same comments on the findings' tickets in other systems, apart from the
+                    # notifications and the JIRA comments above (a failure there is only logged)
+                    if ticket_comments:
+                        dispatch_ticket_comments(
+                            f"sla_{kind}",
+                            [n.finding for n in comb_notif_kind if n.finding.id in ticket_comments],
+                            ticket_comments,
+                        )
 
                     # producing a "combined" SLA breach notification
                     try:
@@ -1547,7 +1561,11 @@ def sla_compute_and_notify(*args, **kwargs):
 
             if system_settings.enable_notify_sla_jira_only:
                 logger.debug("Ignoring findings that are not linked to a JIRA issue")
-                query &= Q(jira_issue__isnull=False)
+                linked = Q(jira_issue__isnull=False)
+                # a finding tracked in another ticket system counts as linked too
+                if (other_tickets := ticket_link_filter()) is not None:
+                    linked |= other_tickets
+                query &= linked
 
             # Only a finding whose SLA ends between SLA_NOTIFY_POST_BREACH days ago and
             # SLA_NOTIFY_PRE_BREACH days from now can be notified, so leave the rest in the
@@ -1644,18 +1662,24 @@ def sla_compute_and_notify(*args, **kwargs):
                                 jira_instance = jira_services.get_instance(finding)
                                 if jira_instance is not None:
                                     logger.debug("JIRA config for finding is %s", jira_instance)
-                                    # global config or product config set, product level takes precedence
+                                    # comment when the global config or the JIRA project config asks for it, unless the
+                                    # JIRA project suppresses SLA comments, which overrides both
                                     product_jira_sla_comment_enabled = False
+                                    product_jira_sla_comment_suppressed = False
                                     try:
                                         # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                                        product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
+                                        jira_project = jira_services.get_project(finding)
+                                        product_jira_sla_comment_enabled = jira_project.product_jira_sla_notification
+                                        product_jira_sla_comment_suppressed = jira_project.suppress_sla_notification_comments
                                     except Exception as e:
                                         logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
                                         logger.error("Error is: %s", e)
 
                                     jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
-                                    if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                                    if product_jira_sla_comment_suppressed:
+                                        logger.debug("SLA notifications as JIRA comments are suppressed for this JIRA project")
+                                    elif jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
                                         logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
                                         do_jira_sla_comment = True
                                         logger.debug(f"JIRA issue is {jira_issue.jira_key}")

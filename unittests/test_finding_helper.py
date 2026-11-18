@@ -12,13 +12,24 @@ from rest_framework.test import APIClient
 
 from dojo.finding.helper import (
     POST_PROCESS_BATCH_MAX_CONFLICT_RETRIES,
+    close_finding,
     deleted_finding_ids,
     post_process_findings_batch,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
 )
-from dojo.models import Finding, Finding_Template, Test
-from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
+from dojo.models import (
+    Dojo_User,
+    Endpoint,
+    Endpoint_Status,
+    Finding,
+    Finding_Template,
+    Risk_Acceptance,
+    Test,
+    Test_Type,
+)
+from dojo.risk_acceptance import helper as ra_helper
+from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, skip_unless_v2, versioned_fixtures
 
 logger = logging.getLogger(__name__)
 
@@ -507,3 +518,59 @@ class TestPostProcessFindingsBatchDeadlockRetry(DojoTestCase):
 
         self.assertEqual(mock_dedupe.call_count, 1)
         mock_sleep.assert_not_called()
+
+
+# Regression: closing a risk-accepted finding by hand reopened its endpoint statuses
+@skip_unless_v2
+class TestCloseFindingEndpointStatuses(DojoTestCase):
+
+    def setUp(self):
+        self.user = Dojo_User.objects.create(username="close-endpoint-statuses")
+        product = self.create_product("Close Endpoint Statuses", prod_type=self.create_product_type("Close Endpoint Statuses"))
+        engagement = self.create_engagement("Close Endpoint Statuses", product)
+        Test_Type.objects.get_or_create(name="Close Endpoint Statuses Scan")
+        test = self.create_test(engagement=engagement, scan_type="Close Endpoint Statuses Scan", title="Close")
+        self.finding = Finding.objects.create(
+            test=test, title="Close Endpoint Statuses", severity="High", reporter=self.user, active=True, verified=True,
+        )
+        for host in ("one.example.com", "two.example.com"):
+            endpoint = Endpoint.objects.create(product=product, host=host)
+            Endpoint_Status.objects.create(finding=self.finding, endpoint=endpoint, mitigated=False)
+
+    def _close(self):
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=None,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+
+    def _assert_statuses_mitigated(self):
+        persisted = list(Endpoint_Status.objects.filter(finding=self.finding).order_by("id").values("mitigated", "risk_accepted"))
+        self.assertEqual(2, len(persisted))
+        for status in persisted:
+            self.assertTrue(status["mitigated"], msg=f"expected mitigated=True, persisted={persisted}")
+            self.assertFalse(status["risk_accepted"], msg=f"expected risk_accepted=False, persisted={persisted}")
+
+    def test_close_mitigates_the_endpoint_statuses(self):
+        self._close()
+
+        self._assert_statuses_mitigated()
+
+    def test_close_of_a_risk_accepted_finding_leaves_its_endpoint_statuses_mitigated(self):
+        risk_acceptance = Risk_Acceptance.objects.create(name="Close Endpoint Statuses", owner=self.user)
+        ra_helper.add_findings_to_risk_acceptance(self.user, risk_acceptance, [self.finding])
+        self.assertTrue(Endpoint_Status.objects.filter(finding=self.finding, risk_accepted=True).exists())
+
+        self._close()
+
+        self.finding.refresh_from_db()
+        self.assertTrue(self.finding.is_mitigated)
+        self.assertFalse(self.finding.active)
+        self.assertFalse(self.finding.risk_accepted)
+        self.assertFalse(risk_acceptance.accepted_findings.filter(id=self.finding.id).exists())
+        self._assert_statuses_mitigated()

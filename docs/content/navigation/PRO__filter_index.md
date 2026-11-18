@@ -15,7 +15,7 @@ Every filter below can be set from a column's header or from the filter bar abov
 
 ## How date filters are evaluated
 
-Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — offer five operators:
+Filters that take a date (**Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below) offer six operators:
 
 | Operator | Matches |
 | --- | --- |
@@ -24,14 +24,17 @@ Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last S
 | **After** | Everything past the start of the named day — so the named day **is** included. |
 | **During** | A start day through an end day, both **inclusive**. |
 | **Within** | A rolling window ending now: Past 7, 14, 30, 90 or 180 Days, or Past Year. |
+| **Full Months** | Whole calendar months before the current one: Last Full Month, or Last 3, 6 or 12 Full Months. The current month is not included, so the window starts on the first day of a month and ends on the last day of the previous month. |
 
 Note that **Before** and **After** are deliberately not mirror images of each other: *Before 8 August* excludes 8 August, while *After 8 August* includes it.
 
 ### Day boundaries and your timezone
 
-**On**, **Before**, **After** and **During** resolve their day boundaries in **your own timezone**, detected from your browser. A date range therefore covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can see slightly different results from the same filter for Findings falling close to a day boundary.
+**On**, **Before**, **After**, **During** and **Full Months** resolve their day boundaries in **your own timezone**, detected from your browser. A date range therefore covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can see slightly different results from the same filter for Findings falling close to a day boundary.
 
 **Within** is unaffected — it is a rolling window measured back from the current moment, so it has no day boundary to resolve.
+
+**Within** or **Full Months**? A rolling window such as Past 180 Days usually starts partway through a month, so a chart grouped by month shows a short first month that reads like a drop. **Full Months** always covers complete months, which suits monthly charts and management reports. On 15 July, for example, Last 6 Full Months covers 1 January through 30 June.
 
 > **Where this does not apply.** Only requests from the Pro UI carry your timezone. Anything that runs without a browser — the `/api/v2` REST API, scheduled reports, and the Rules Engine — falls back to the server's configured timezone (`DD_TIME_ZONE`, `UTC` unless your administrator changed it). If your browser timezone differs from the server's, a scheduled report and an on-screen filter using the same date can return slightly different rows. Exports started from a filtered table in the UI are not affected — they use your timezone, matching what you were looking at.
 
@@ -58,6 +61,12 @@ Text filters such as **Title**, **Component Name** and **File Path** offer **In 
 - **Not in List** keeps Findings that have no value in that field.
 - A list with no values left applies no filter, the same as an empty text box.
 - The list is saved in the table's address and in a saved table preference, so it is still there after a reload or when you return to the table.
+
+### Exact (Case Sensitive) on Component Name
+
+**Component Name** also offers **Exact (Case Sensitive)**, which matches the whole name with its case and spaces as written: `PYPI:DJANGO` matches only `PYPI:DJANGO`, while **Exact** also matches `pypi:django`. The chip reads **is exactly**.
+
+**All Components** and the **Components** widget on an Asset list a name once for each way it is spelled, so `pypi:django` and `PYPI:DJANGO` are two rows with their own counts. Selecting a count opens the Findings list with **Exact (Case Sensitive)** on that name, so the list holds the same Findings the count does.
 
 ### Include and Exclude on multi-select filters
 
@@ -86,12 +95,13 @@ Numeric filters — including **Age** and **SLA** — offer a match operator alo
 
 ## SLA filters
 
-Three filters cover SLA, and they answer different questions:
+Four filters cover SLA, and they answer different questions:
 
 | Filter | Type | What it matches |
 | --- | --- | --- |
 | **SLA Expiration Date** | Date, with the operators above | The date the Finding's SLA runs out. |
-| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline, and `Less Than 7` finds what is due within the week. |
+| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline. `Less Than or Equal To 7` finds what is due within the week **and** everything already overdue; add **SLA Status** to leave the overdue ones out. |
+| **SLA Status** | Breached / Within SLA | Whether the Finding has breached its SLA, the same verdict as the icon in the **SLA** column. **Breached** matches Findings that are not Mitigated and are past their SLA Expiration Date (Risk Accepted, False Positive and Out of Scope Findings included), and Mitigated Findings that were Mitigated after it. **Within SLA** matches the rest, including a Finding due today. Findings with no SLA match neither value. |
 | **Mitigated Within SLA** | True / False | Whether a Finding that **has been mitigated** was mitigated before its SLA expired. |
 
 **Mitigated Within SLA is narrower than it sounds, and this catches people out.** Both values only ever match Findings that are **already mitigated** and are **not Info severity**:
@@ -100,6 +110,16 @@ Three filters cover SLA, and they answer different questions:
 * **False** — mitigated after the SLA expiration date.
 
 An **open** Finding that is already overdue matches **neither** value, because it has not been mitigated yet. To find those, use **SLA** `Less Than 0` instead. Info-severity Findings are excluded from both sides.
+
+### Findings due soon, without the overdue ones
+
+The **SLA** filter holds one condition, so it cannot say "between 0 and 7 days" on its own. Combine it with **SLA Status**:
+
+1. Add **Status** with `Active`.
+2. Add **SLA** with **Less Than or Equal To** `7`.
+3. Add **SLA Status** with **Within SLA**.
+
+The list then shows active Findings due today or within the next 7 days, and none that have already breached. Without **Status** `Active`, it also lists Mitigated Findings that were closed up to 7 days before their SLA date.
 
 > If a Finding's SLA configuration has **Cap SLA by CISA KEV Due Date** enabled, both **SLA** and **SLA Expiration Date** reflect the tightened, KEV-capped deadline rather than the plain severity-based window. There is no separate indicator for this in the filters — see [EPSS / KEV](/triage_findings/finding_scoring/epss_kev/).
 
@@ -126,6 +146,7 @@ These Filters are assigned at the time of issue creation, and cannot be directly
 * Age (Finding age in days)
 * SLA (days remaining on the SLA clock — negative means overdue; see [SLA filters](#sla-filters))
 * SLA Expiration Date (see [SLA filters](#sla-filters))
+* SLA Status (Breached or Within SLA; see [SLA filters](#sla-filters))
 * Mitigated Within SLA (True or False — note this only matches Findings that have already been Mitigated; see [SLA filters](#sla-filters))
 * Reporter (user or service who created the Finding)
 * Found by (refers to the Tool)

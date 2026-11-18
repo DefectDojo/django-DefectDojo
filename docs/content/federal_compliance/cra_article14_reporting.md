@@ -19,7 +19,7 @@ An Asset is in scope for the Cyber Resilience Act when its [regulatory profile](
 
 Every way to start a report opens the same short form.
 
-**From an Asset.** When an in-scope Asset has an open finding marked as known exploited, the **Regulatory** section of the Asset page shows a **CRA Article 14 Early Warning Check** message listing those findings. Each one has a **Start CRA Report** button that fills in the Asset and the finding's vulnerability ID. Once a report names that ID, a link to the report takes the button's place.
+**From an Asset.** When an in-scope Asset has an open finding marked as known exploited, the **Regulatory** card on the Asset page is tagged **Early Warning Check**, and an **Article 14 Early Warning** row at the top of its CRA group lists those findings. Each one has a **Start CRA Report** button that fills in the Asset and the finding's vulnerability ID. Once a report names that ID, a link to the report takes the button's place, and once every listed finding has one the tag reads **Reports Started**.
 
 **From a finding.** The same finding shows a **CRA Early Warning Check** tag next to its title, or a link to its report once one exists. For anyone who can edit the Asset, the finding's menu has a **Start CRA Report** action that fills in the Asset and the finding's primary vulnerability ID, whether or not the finding is known exploited.
 
@@ -56,6 +56,12 @@ After you submit a stage on the reporting platform, record it on the stage: ente
 Recording a submission also adds a note to each finding the report concerns, and to the engagements those findings belong to, stating the regime, the stage, the submission time and the reference. The findings are the ones on the report's Asset that carry a vulnerability ID named in **Advisory Reference** (separate several IDs with commas or semicolons), plus, where the report was started from a PSIRT advisory, the findings that advisory produced. Duplicates are skipped. The notes are a record only. A submission never changes a finding's status.
 
 Submitting a severe incident's notification arms its final report, anchored on that submission.
+
+## The audit trail
+
+Every statutory fact the report records is kept in its audit trail: the report being started (with the awareness time, and the reason when that time was set earlier than now), each stage being armed with its deadline, every change to the awareness time or the corrective-measure time (the value before, the value after, the reason, and each pending deadline the change moved, from its old time to its new one, plus the final report's deadline when a corrective measure arms it), and each recorded submission (the stage, the submission time, the reporting-platform reference, the reason for an earlier submission time, and whether it was late).
+
+The **Audit Trail** section at the bottom of an open report lists these events oldest first, each with its time and the user who caused it (**System** when no user did). It is read-only: an event cannot be edited or removed. It updates as soon as you edit the awareness time, record a corrective measure or record a submission, without reloading the page. The same events are in each stage's **JSON** export as `audit_trail`, and through the API at `/api/v2/regulatory_reports/<id>/audit-events/`. That endpoint is paginated (25 events per page by default): pass `limit` and follow `next` until it is empty, or a long trail is cut short.
 
 ## The reports page
 

@@ -31,7 +31,7 @@ The examples use one product throughout: an **IoT Gateway** Asset whose release 
 | --- | --- | --- |
 | **DefectDojo Pro 3.4.201 or later** | Earlier releases do not check Article 14 deadlines on a standard licence, and do not compute VH-5, VH-6 or the RP requirements | The version in the page footer, or ask DefectDojo Support |
 | A superuser account | Feature flags, SLA configurations and dashboards are instance settings | **Settings > Feature Flags** is in your left menu |
-| Edit permission on each product's Asset | The Regulatory card, SBOM imports, Article 14 reports and assessments are per Asset | The **Regulatory** card on the Asset shows an active **Submit** button |
+| Edit permission on each product's Asset | The Regulatory card, SBOM imports, Article 14 reports and assessments are per Asset | The **Regulatory** card on the Asset shows **Edit Profile** (or **Set Up Profile**) |
 | Each product as an Asset | Everything in this guide is recorded per Asset | **Explore > Assets** in the left menu |
 | Background task processing (self-hosted only) | SBOM import, enrichment, deadline checks and evidence packs run as background tasks | Ask your administrator to confirm the workers are running |
 
@@ -89,6 +89,7 @@ which component. Without it, every SBOM lands on the Asset as a whole.
 | Expected | Where |
 | --- | --- |
 | A **Version** field in the **Import SBOM** dialog | Step 10 |
+| An **SBOMs** widget for the Asset page, listing each release's SBOMs | Step 10 |
 
 ### Step 3 — Turn on known-exploited and EPSS enrichment
 
@@ -142,28 +143,34 @@ You assign it to products in Step 8.
 
 ### Step 5 — Put CRA on a dashboard
 
+From DefectDojo Pro 3.5.300, DefectDojo ships an **EU CRA** layout with both CRA widgets already
+placed and configured. It is offered once **Regulatory Profile** is on (Step 1). On an earlier
+release, build the layout by hand as described below the steps.
+
 In the left menu, go to **Overview > Dashboards**.
 
-1. Select **New Layout** (the **+** beside the layout name), type a **Layout Name** such as
-   *EU CRA*, and select **Submit**. A separate layout keeps the CRA widgets off your default
-   dashboard.
-2. The new layout is empty. Select the **Add Widget** button in the middle of the page. On the
-   **By Type** tab, select **CRA Article 14 Deadlines**. Adding a widget turns on edit mode.
-3. Select **Add Widget** again, now the orange **+** at the right of the toolbar, and select
-   **Regulatory Scope**.
-4. To show only the CRA on **Regulatory Scope**, select the widget's gear (**Edit Widget**), type
-   `CRA` in **Regulations**, and save. The gear shows only in edit mode, which adding a widget turns
-   on; otherwise select **Edit Layout** (the grid icon at the right of the toolbar) first.
-5. Select **Done Editing** (the check mark) to leave edit mode.
+1. Select **Manage Layouts** (the gear on the toolbar). Under **Shared Templates**, find **EU CRA**
+   in the **Compliance** group and select **Use Layout**.
+2. Type a **Layout Name** for your copy, such as *EU CRA*, and select **Submit**. Your copy opens,
+   and is separate from your default dashboard.
+
+The layout has two rows: **Regulatory Scope** set to the CRA only, with its support-period column
+on, and **CRA Article 14 Deadlines** below it. Your copy is yours to change: add, move or remove
+widgets as on any layout. To build the same layout by hand instead, add the **Regulatory Scope**
+and **CRA Article 14 Deadlines** widgets to a new layout, and type `CRA` in **Regulations** on
+**Regulatory Scope** (**Edit Widget**).
 
 ![The Regulatory Scope and CRA Article 14 Deadlines widgets on an EU CRA layout](images/40-cra-dashboard-widgets.png)
 
 **Regulatory Scope** lists every regulation on your Assets, one row each: the Assets in scope,
-their open findings by severity, findings past their deadline, and Assets whose support period has
-ended or ends within 90 days. In 3.4.201 and 3.4.202 the per-severity columns undercount (they can
-read 1 where there are several findings); rely on the **Assets**, **Past SLA** and **Support**
-columns, and on each Asset's own finding counts. It counts an Asset under the CRA from the Asset's **Regulations** (Step 7), not
-from its Regulatory card.
+their open findings by severity, findings past their deadline, open findings in the CISA KEV catalog
+(**CISA KEV**: findings marked **Known Exploited**, Step 3), and Assets whose support period has
+ended or ends within 90 days. A **Known Exploited** finding on a CRA Asset is what raises the
+Article 14 early-warning prompt (Part 4). A scanner's own report that a vulnerability is exploited
+is not counted there. In 3.4.201 and 3.4.202
+the per-severity columns undercount (they can read 1 where there are several findings); rely on the
+**Assets**, **Past SLA** and **Support** columns, and on each Asset's own finding counts. It counts
+an Asset under the CRA from the Asset's **Regulations** (Step 7), not from its Regulatory card.
 
 **CRA Article 14 Deadlines** counts the open stages of your Article 14 reports as **Breached**,
 **Overdue**, **Due Soon** and **On Track**, and lists the most urgent.
@@ -180,8 +187,9 @@ Repeat Steps 6 to 9 for each product. For many products, use the API (see the en
 
 In the left menu, go to **Explore > Assets** and select the product's Asset. The **Regulatory**
 card is on the Asset page below the Details row, after the Open Finding Severity meter, the Asset
-Overview tabs and the Organization Memberships and Asset Identity cards. Fill it in and select
-**Submit**:
+Overview tabs and the Organization Memberships and Asset Identity cards. Select **Set Up Profile**
+(or **Edit Profile** once the profile exists), fill in the **Edit Regulatory Profile** dialog, and
+select **Submit**:
 
 | Field | Example | What it records |
 | --- | --- | --- |
@@ -195,14 +203,14 @@ Overview tabs and the Organization Memberships and Asset Identity cards. Fill it
 The empty **Security Contact** and **Disclosure Policy URL** boxes show grey example text. It is a
 hint, not a value: type your own.
 
-![The Regulatory card, filled in](images/41-cra-regulatory-card.png)
+![The Regulatory card after the profile is saved: the CRA facts, four of four set, and DORA and SLA](images/41-cra-regulatory-card.png)
 
 **Supports a Critical or Important Function** is a DORA field; leave it unless DORA applies to you.
 Every field is described on [Regulatory Profile](../regulatory_profile/#fields).
 
 | Expected | Where |
 | --- | --- |
-| The values are still there after you reload the page | The **Regulatory** card |
+| The values are still there after you reload the page, and the CRA group reads **4 of 4 set** | The **Regulatory** card |
 
 ### Step 7 — Add the CRA regulation
 
@@ -298,10 +306,11 @@ curl -X POST "$DD_URL/api/v2/sbom-import/" -H "Authorization: Token $DD_TOKEN" \
 | --- | --- |
 | **SBOM Imported** with the number of dependencies processed | A message at the top right |
 | The count on the **Locations** tile goes up | The Asset page |
-| The release's components | `GET /api/v2/sbom/<asset id>/?spec=cyclonedx&version=4.1`. A version never imported answers *No version '…' for this asset* |
+| The release's components | `GET /api/v2/sbom/<asset id>/?spec=cyclonedx&version=4.1`. A version never imported answers *No version '…' for this asset*. It is built from the release's newest upload of any format, so when a release has both a CycloneDX and an SPDX upload, download the one you need from the **SBOMs** widget instead |
+| The release's SBOM, with any earlier upload for it | The **SBOMs** widget on the Asset page. Add it from **Page Layout → Edit Layout → Add Widget → Data Table**, record set `SBOMs`. See [The SBOMs widget](/asset_modelling/engagements_tests/pro__assets/#the-sboms-widget) |
 
-**Export SBOM and VEX**, on the same **Locations** menu, exports the Asset as a whole; a single
-release is exported through the API as above.
+**Export SBOM and VEX**, on the same **Locations** menu, exports the Asset as a whole. A single
+release's SBOM downloads from its line in the **SBOMs** widget, or through the API as above.
 
 ### Step 11 — Import the release's scan results
 
@@ -336,15 +345,17 @@ ENISA's Single Reporting Platform.
 ### Step 12 — Start and track an Article 14 report
 
 **When DefectDojo prompts you.** When an Asset whose **CRA Product Class** is not **Not
-Applicable** has an open finding marked **Known Exploited**, the Regulatory card shows **CRA Article
-14 Early Warning Check**, listing each such finding with a **Start CRA Report** button. The finding
-itself shows a **CRA Early Warning Check** tag beside its title until a report names its CVE.
+Applicable** has an open finding marked **Known Exploited**, the Regulatory card is tagged **Early
+Warning Check** and its CRA group opens with an **Article 14 Early Warning** row saying how many
+findings are still to report. Each such finding is listed under it with a **Start CRA Report**
+button, or a link to the report once one names it. The finding itself shows a **CRA Early Warning
+Check** tag beside its title until a report names its CVE.
 
 ![The early-warning prompt on an in-scope Asset: one finding already has a report, the other offers Start CRA Report](images/45-cra-early-warning-due.png)
 
-The prompt appears for any finding on the CISA KEV list, so it says a known exploited
-vulnerability affects the product, and that the early warning is due only if it is actively
-exploited in this product. It is a prompt to decide whether you are aware of active exploitation
+The prompt appears for any finding on the CISA KEV list, so the warning mark on the row explains
+that a known exploited vulnerability affects the product, and that the early warning is due only if
+it is actively exploited in this product. It is a prompt to decide whether you are aware of active exploitation
 affecting this product, not a determination. DefectDojo records when the prompt first appeared, because a regulator may ask.
 
 **Start a report only for a real awareness event.** A report cannot be deleted, its clocks cannot
@@ -509,6 +520,7 @@ and keep the downloads with your technical documentation. See
 | No **Regulatory** card, or no **CRA Article 14 Reports** in the left menu | **Regulatory Profile** is off | Step 1 |
 | No **EU Evidence** tab | **EU Evidence Packs** or **Compliance** is off | Step 1 |
 | No **Dashboards** layouts or **Add Widget** button, or no **CRA Article 14 Deadlines** in **Add Widget** | **Dashboards 2.0** is off, or (for the deadlines widget) **Regulatory Profile** is off | Step 1 |
+| No **EU CRA** under **Shared Templates** | **Regulatory Profile** is off | Step 1 |
 | No **Version** field in **Import SBOM** | Per-release SBOMs are not enabled | Step 2 |
 | The SLA form will not save | The day counts are placeholders, not values | Type a number in each box (Step 4) |
 | CRA is missing from the **Regulations** list | The list shows only the first few until you search | Type `CRA` in its search box (Step 7) |
@@ -534,9 +546,6 @@ and keep the downloads with your technical documentation. See
 
 So nobody spends time hunting for these:
 
-* **No screen lists per-release SBOMs.** They are stored per version and exported through the API.
-* **The Article 14 report's audit trail has no screen.** The awareness reason is in each stage's
-  **JSON** download.
 * **No dashboard widget or report reads assessment states or CRA classes.** They are on the EU
   Evidence tab and in the evidence pack.
 * **SP-2, VH-4 and RP-7 are not computed.** SP-1 reads **Support Period End** from the

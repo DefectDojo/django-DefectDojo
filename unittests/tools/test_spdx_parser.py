@@ -1,6 +1,6 @@
 from dojo.models import Finding, Test
 from dojo.tools.spdx.parser import SpdxParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2, skip_unless_v3
 
 
 class TestSpdxParser(DojoTestCase):
@@ -148,6 +148,63 @@ class TestSpdxParser(DojoTestCase):
             ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
             hashed[0].data["artifact_hashes"]["sha256"],
         )
+
+    @staticmethod
+    def _cpe_locations(filename):
+        """Parse a fixture and return {vuln_id_from_tool: [cpe values]} and the product-level location types."""
+        test = Test()
+        with (get_unit_tests_scans_path("spdx") / filename).open(encoding="utf-8") as file:
+            findings = list(SpdxParser().get_findings(file, test))
+        per_finding = {
+            finding.vuln_id_from_tool: [
+                location.data["cpe"]
+                for location in getattr(finding, "unsaved_locations", [])
+                if location.type == "cpe"
+            ]
+            for finding in findings
+        }
+        return per_finding, {location.type for location in test.unsaved_metadata}
+
+    @skip_unless_v3
+    def test_findings_carry_their_package_cpes(self):
+        # Each CPE reference once, in report order and as spelled (a 2.2 URI stays a URI); a package
+        # with no CPE gives its finding none; inventory packages add no CPE locations.
+        per_finding, product_types = self._cpe_locations("spdx_cpe_locations.json")
+        self.assertEqual(
+            {
+                "CVE-2099-2001": [
+                    "cpe:/a:example_vendor:example_lib:1.2.3",
+                    "cpe:2.3:a:example_vendor:example-lib:1.2.3:*:*:*:*:*:*:*",
+                ],
+                "CVE-2099-2002": [],
+            },
+            per_finding,
+        )
+        self.assertEqual({"dependency"}, product_types)
+
+    @skip_unless_v3
+    def test_tag_value_findings_carry_their_package_cpes(self):
+        per_finding, _product_types = self._cpe_locations("spdx_one_vuln.spdx")
+        json_per_finding, _ = self._cpe_locations("spdx_one_vuln.json")
+        self.assertEqual(
+            {"CVE-2024-10001": ["cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.1.2-r0:*:*:*:*:*:*:*"]},
+            per_finding,
+        )
+        self.assertEqual(
+            {
+                "CVE-2024-10001": [
+                    "cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.1.2-r0:*:*:*:*:*:*:*",
+                    "cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.1.2-r0:*:*:*:*:*:*:*",
+                ],
+            },
+            json_per_finding,
+        )
+
+    @skip_unless_v2
+    def test_package_cpes_add_no_locations_with_locations_off(self):
+        per_finding, product_types = self._cpe_locations("spdx_cpe_locations.json")
+        self.assertEqual({"CVE-2099-2001": [], "CVE-2099-2002": []}, per_finding)
+        self.assertEqual(set(), product_types)
 
     def test_tag_value_matches_json(self):
         """

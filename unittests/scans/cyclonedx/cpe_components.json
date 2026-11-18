@@ -1,0 +1,43 @@
+{
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.6",
+    "serialNumber": "urn:uuid:4c1e6a2b-8d3f-4b7a-9e15-6a2c8f0d3b71",
+    "version": 1,
+    "components": [
+        {
+            "bom-ref": "with-cpe23",
+            "type": "library",
+            "name": "example-lib",
+            "version": "1.2.3",
+            "purl": "pkg:generic/example-lib@1.2.3",
+            "cpe": "cpe:2.3:a:example_vendor:example_lib:1.2.3:*:*:*:*:*:*:*"
+        },
+        {
+            "bom-ref": "with-cpe22",
+            "type": "application",
+            "name": "example-app",
+            "version": "4.5",
+            "cpe": "cpe:/a:example_vendor:example_app:4.5"
+        },
+        {
+            "bom-ref": "no-cpe",
+            "type": "library",
+            "name": "other-lib",
+            "version": "0.1",
+            "purl": "pkg:generic/other-lib@0.1"
+        },
+        {
+            "bom-ref": "unaffected-with-cpe",
+            "type": "library",
+            "name": "idle-lib",
+            "version": "9.9",
+            "purl": "pkg:generic/idle-lib@9.9",
+            "cpe": "cpe:2.3:a:example_vendor:idle_lib:9.9:*:*:*:*:*:*:*"
+        }
+    ],
+    "vulnerabilities": [
+        {"id": "CVE-2099-1001", "ratings": [{"severity": "high"}], "affects": [{"ref": "with-cpe23"}]},
+        {"id": "CVE-2099-1002", "ratings": [{"severity": "medium"}], "affects": [{"ref": "with-cpe22"}]},
+        {"id": "CVE-2099-1003", "ratings": [{"severity": "low"}], "affects": [{"ref": "no-cpe"}]}
+    ]
+}

@@ -14,7 +14,8 @@ Cada hallazgo con un CVE se compara, cada noche, con un feed de inteligencia cur
 
 * una insignia de **madurez del exploit** — *Ninguna → PoC → Armado → Activo en el mundo real*
 * una **puntuación de amenaza** (0–100)
-* **chips de evidencia que enlazan con la fuente** — la entrada en KEV (con su fecha de inclusión),
+* el **ID de vulnerabilidad de mayor amenaza**, que abre la página de esa vulnerabilidad
+* **chips de evidencia que enlazan con la fuente** — la entrada en KEV (con su fecha de inclusión, que abre la página de la vulnerabilidad),
   uso en ransomware, un módulo de Metasploit, una entrada en Exploit-DB, una plantilla de Nuclei y
   repositorios públicos de prueba de concepto
 * una línea en lenguaje sencillo que explica **por qué** aumentó la prioridad del hallazgo
@@ -29,6 +30,41 @@ Más allá de la tarjeta, esta inteligencia es una superficie funcional en toda 
 * un **evento de notificación** (`threat_intel_alert`) cuando el CVE de un hallazgo existente obtiene
   nueva evidencia de exploit, como su inclusión en CISA KEV o la aparición de un módulo de Metasploit.
   Solo se notifican mejoras — que la evidencia caduque silenciosamente nunca genera una notificación.
+
+## La página de la vulnerabilidad
+
+Cada ID de vulnerabilidad tiene su propia página en Vulnerability Explorer (**Act > Vulnerability
+Explorer** y, a continuación, seleccione un ID). Con la inteligencia de amenazas habilitada, la
+página muestra lo que el feed de inteligencia sabe sobre el ID, incluso cuando ningún Hallazgo que
+usted pueda ver lo contiene:
+
+* un resumen de **Inteligencia de amenazas**: madurez del exploit, puntuación de amenaza, la fecha
+  de inclusión en CISA KEV, cuándo se vio explotación por última vez, EPSS, uso en ransomware y
+  actores de amenazas conocidos
+* una **Evidence Timeline**: una fila por cada fuente en la que se basa la calificación, con el tipo
+  de evidencia (explotado en el mundo real, armado, prueba de concepto), un enlace a la fuente, la
+  fecha cuando la fuente la indica y la calificación de la fuente
+* **Proof of Concept Exploits**: código de exploit público por fuente, con un recuento cuando la
+  fuente lo indica. Esta sección aparece en cuanto el feed incluye una fuente de código de exploit.
+
+Cuando al menos un Hallazgo que usted puede ver contiene el ID, la página también muestra los
+Hallazgos, Activos y parsers involucrados. Cuando ninguno lo contiene, la página lo indica y muestra
+solo la inteligencia de amenazas. Un ID que es alias de otro (por ejemplo, un GHSA vinculado a un
+CVE, en el feed o en los identificadores vinculados de su instancia) muestra la inteligencia de
+amenazas de esa vulnerabilidad e indica el ID del que procede. Un ID que no está ni en sus Hallazgos
+ni en el feed de inteligencia muestra "Vulnerability Not Found".
+
+Puede llegar a la página desde:
+
+* la tarjeta de Inteligencia de amenazas de un Hallazgo (el ID de mayor amenaza y el chip de CISA
+  KEV)
+* la columna **Known Exploited** de la lista de Hallazgos, donde la marca de verificación de un
+  Hallazgo incluido en el catálogo muestra el ID que figura en la lista de CISA y abre su página
+* el cuadro de búsqueda: escriba un ID de vulnerabilidad como `CVE-2021-44228` y el primer resultado
+  abre su página, cuando sus Hallazgos o el feed de inteligencia conocen el ID
+
+La inteligencia de amenazas de esta página está formada por datos públicos del feed. Es la misma
+para todos los usuarios y no indica qué Activos contienen el ID.
 
 ## Cómo cambia la puntuación
 

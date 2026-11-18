@@ -1121,13 +1121,9 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             findings = obj.findings.all()
 
         for find in findings:
-            for pic in get_file_images(find):
-                # It doesn't look like the celery cotainer has anything in the media
-                # folder. Has this feature ever worked?
+            for image in get_file_images(find, return_objects=True):
                 try:
-                    jira_attachment(
-                        find, jira, new_issue,
-                        settings.MEDIA_ROOT + "/" + pic)
+                    jira_attachment(find, jira, new_issue, image.file)
                 except FileNotFoundError as e:
                     logger.info(e)
     except Exception as e:
@@ -1272,13 +1268,9 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             findings = obj.findings.all()
 
         for find in findings:
-            for pic in get_file_images(find):
-                # It doesn't look like the celery container has anything in the media
-                # folder. Has this feature ever worked?
+            for image in get_file_images(find, return_objects=True):
                 try:
-                    jira_attachment(
-                        find, jira, issue,
-                        settings.MEDIA_ROOT + "/" + pic)
+                    jira_attachment(find, jira, issue, image.file)
                 except FileNotFoundError as e:
                     logger.info(e)
     except Exception as e:
@@ -1548,9 +1540,15 @@ def is_jira_project_valid(jira_project):
 
 
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
+    """
+    Attach a file to a Jira issue.
+
+    ``file`` is a ``FieldFile`` (for example ``FileUpload.file``); it is read through
+    its storage backend rather than from a path on the local filesystem.
+    """
     basename = file
     if jira_filename is None:
-        basename = Path(file).name
+        basename = Path(file.name).name
 
     # Check to see if the file has been uploaded to Jira
     # TODO: JIRA: check for local existince of attachment as it currently crashes if local attachment doesn't exist
@@ -1563,8 +1561,8 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                     issue=issue, attachment=attachment, filename=jira_filename)
             else:
                 # read and upload a file
-                with Path(file).open("rb") as f:
-                    jira.add_attachment(issue=issue, attachment=f)
+                with file.open("rb") as f:
+                    jira.add_attachment(issue=issue, attachment=f, filename=basename)
         except JIRAError as e:
             logger.exception("Unable to add attachment")
             log_jira_alert("Attachment: " + e.text, finding)

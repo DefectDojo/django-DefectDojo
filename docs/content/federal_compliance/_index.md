@@ -23,6 +23,22 @@ Level 2 self-assessments, and shows which NIST 800-53 controls your scanners act
 
 Everything described in this section lives on the **Compliance** tab of an Asset.
 
+The tab leads with **Needs Attention**: POA&M items past their scheduled completion date, last
+month's ConMon snapshot when it has not been generated, and CMMC requirements that are not met.
+Each item links to the page that resolves it, and **All caught up** shows when nothing is
+outstanding. **All Pages** lists the Compliance Profile, POA&M Items, POA&M Snapshots, CMMC
+Assessment and Control Coverage pages, each with its count: open POA&M items, the latest
+snapshot month, the SPRS score and the controls with open findings. A tag beside the heading
+shows the FedRAMP impact level from the Compliance Profile, or **Tracking Off** when the
+profile is disabled. On an Asset with no profile yet, the tab offers **Set Up Compliance
+Profile** to users who can edit the Asset.
+
+![The Compliance tab on an Asset](images/25-asset-compliance-tab.png)
+
+The Compliance tab is also a widget: in an Asset page layout it can sit in its own tile, where
+it arranges itself to the tile's size and folds the page list into a **Compliance Pages** menu
+when the tile is small.
+
 ## Enabling the feature
 
 Federal Compliance ships behind the **Compliance** feature flag, which is in beta and off by

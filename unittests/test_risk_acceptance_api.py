@@ -554,6 +554,24 @@ class TestRiskAcceptanceApi(APITestCase):
         expected = ra_helper.default_expiration_date()
         self.assertEqual(risk_acceptance.expiration_date.date(), expected.date())
 
+    def test_reinstate_action_leaves_out_a_finding_mitigated_since_the_expiry(self):
+        # Regression: reinstating kept a member closed since the expiry, so the next expiry reopened it.
+        risk_acceptance = self.make_risk_acceptance(expired=True)
+        self.finding_a1.active = False
+        self.finding_a1.is_mitigated = True
+        self.finding_a1.mitigated = datetime.datetime.now(datetime.UTC)
+        self.finding_a1.save()
+
+        response = self.client.post(f"{self.url}{risk_acceptance.id}/reinstate/", {}, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        members = list(risk_acceptance.accepted_findings.values_list("id", flat=True))
+        self.assertEqual([], members)
+        ra_helper.expire_now(risk_acceptance)
+        self.finding_a1.refresh_from_db()
+        self.assertFalse(self.finding_a1.active, "the next expiry must not reopen the mitigated finding")
+        self.assertTrue(self.finding_a1.is_mitigated, f"is_mitigated={self.finding_a1.is_mitigated}")
+
     def test_reinstate_action_rejects_a_live_risk_acceptance(self):
         risk_acceptance = self.make_risk_acceptance()
 

@@ -38,6 +38,11 @@ class DojoAppConfig(AppConfig):
         # Load any signals here that will be ready for runtime
         # Importing the signals file is good enough if using the receiver decorator
         import dojo.announcement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+
+        # Register the audit-log proxy models (DojoEvents) while the app registry is still loading. A model
+        # first imported after ready() makes Django expire every model's manager cache, and the rebuilt
+        # managers lose tagulous's TaggedManager enhancement (Finding.objects.create() and the rest).
+        import dojo.auditlog.models  # noqa: PLC0415, F401
         import dojo.authorization.query_registrations  # noqa: PLC0415, F401
         import dojo.benchmark.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
 

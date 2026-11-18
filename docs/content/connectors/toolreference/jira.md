@@ -116,7 +116,7 @@ The form warns when an outbound status would come back as the opposite change, f
 You can map additional Jira fields — for example a required `resolution` on close, or `labels` — in the mapping's **Custom Fields** step. Each custom-field mapping has four parts:
 
 - **Source** — where the value comes from: an attribute of the **Finding**, **Test**, **Engagement**, or **Asset** being pushed, or a **Static value**.
-- **Value** — for an object source, the specific attribute to read, chosen from a list of that object's fields with human-readable labels (for example *Severity*, *CVE*, *Mitigation*). For a **Static value** source this is a free-text box you type the literal value into.
+- **Value** — for an object source, the specific attribute to read, chosen from a list of that object's fields with human-readable labels (for example *Severity*, *CVE*, *Mitigation*), grouped under the same headings as that object's list page uses for **Add Filter** when it offers at least twelve attributes (a Finding); the shorter Test, Engagement and Asset lists are one flat list. For a **Static value** source this is a free-text box you type the literal value into.
 - **Vendor Field** — the Jira field to write to. Because DefectDojo can read Jira's field catalog, this is a searchable picker that lists each field by its **display name** and resolves it to the internal id for you — so you select *DD Close Justification* and DefectDojo stores `customfield_10255`. The picker is populated from the connection, so it works once the connection is saved and validated.
 - **Application point** — *when* to send the field: on **ticket creation**, on **every update**, or as part of a specific status **transition** (Active / Closed / False Positive / Risk Accepted). A transition-scoped field is sent as part of that transition's edit — this is how you supply a value Jira only accepts on a transition screen, most commonly a `resolution` your workflow requires when an issue is resolved.
 
@@ -126,7 +126,9 @@ For a Jira select list, type the option name as a static value, for example `Hig
 
 ### Ticket Templates (optional)
 
-By default Jira issues use DefectDojo's built-in title and body. To customize them, attach a **Ticket Template** to the mapping in its **Ticket Template** step. A template defines four independently-optional pieces — the **Finding** summary and description, and the **Finding Group** summary and description. Any piece left blank falls back to the built-in default, so you can override just the title, just the body, or all four. Use **Test render** in the template editor to preview the rendered output against sample data — catching mistakes such as unknown placeholders or values that exceed a field's length limit — before saving. If a template is later deleted, the mappings that used it revert to the built-in defaults automatically.
+By default Jira issues use DefectDojo's built-in title and body. To customize them, attach a **Ticket Template** to the mapping in its **Ticket Template** step. A template defines four independently-optional pieces — the **Finding** summary and description, and the **Finding Group** summary and description. Any piece left blank falls back to the built-in default, so you can override just the title, just the body, or all four. Use **Test render** in the template editor to preview the rendered output against sample data — catching mistakes such as unknown placeholders or values that exceed a field's length limit — before saving. If a template is later deleted, the mappings that used it revert automatically to the connector's default template (below), or to the built-in defaults when the connector has none.
+
+To give every mapping on a connector the same template, set **Default Ticket Template** on the connector itself (**Edit Connector** in the connector's menu). A mapping with no template of its own uses the connector's default, and a mapping that has its own template uses only that one: a piece left blank in the mapping's template is the built-in default, not the connector default's piece. The default covers Finding Group tickets as well as Finding tickets. If the default template is deleted, the connector goes back to the built-in defaults.
 
 ### Push notes as comments (optional)
 
@@ -140,6 +142,17 @@ Turn on **Push Notes as Comments** on the mapping to post new notes on a linked 
 - A Finding with no issue yet gets no comment: a note never creates an issue.
 - Notes added by Triage Engine rules, including the ones two-way sync adds from Jira comments, are never sent back.
 - Editing or deleting a note does not change the comment.
+
+### Post SLA notifications and risk acceptance changes as comments (optional)
+
+Two more toggles on the mapping post the comments the classic Jira integration posts on its own. Like **Push Notes as Comments**, they are only offered for a connection that accepts comments, and each comment is made by the connection's account.
+
+- **Post SLA Notifications as Comments**: the daily SLA job comments on the issue of each Finding it notifies about, with the notification's title, for example `Finding 123 - SLA pre-breach warning - 3 day(s) left`, `Finding 123 - SLA is breaching today` or `Finding 123 - SLA breached by 2 days! Overdue notice`. The same System Settings that decide the SLA notifications decide the comments, including exponential backoff and the post-breach limit.
+- **Post Risk Acceptance Changes as Comments**: a comment when a Finding is added to a risk acceptance, removed from it, or reinstated with it, and when its risk acceptance is about to expire. When the risk acceptance expires, a comment is posted only if **Reactivate Findings on Expiration** is checked on it, as with classic Jira: an expiry that leaves the Findings risk accepted posts nothing. The text names the risk acceptance and links to it, for example `Risk acceptance [(Accepted for Q3)|https://defectdojo.example.com/...] with 4 findings has expired`. A Finding risk accepted on its own gets `Finding has been risk accepted` or `Finding is no longer risk accepted`.
+
+The text is the one the classic Jira integration posts. A comment only goes to an issue that already exists: these toggles never create an issue. A grouped Finding's comment goes to its Finding Group's issue, and the same text is posted there once within ten minutes, so a risk acceptance covering five members of one group adds one comment. Two-way sync recognizes these comments as DefectDojo's own when they come back from Jira, so they never become notes.
+
+If **Enable SLA Breach Notifications for Jira Findings** is on in System Settings (only Findings linked to a Jira issue are notified), a Finding whose only ticket is on a mapping with **Post SLA Notifications as Comments** on also counts as having an issue, so it is notified and commented.
 
 With classic scopes, posting comments needs no scope beyond `write:jira-work`. With granular scopes, Atlassian's reference for the Add comment operation lists `write:comment:jira` together with the read scopes `read:comment:jira`, `read:comment.property:jira`, `read:group:jira`, `read:project:jira`, `read:project-role:jira`, `read:user:jira` and `read:avatar:jira`. Atlassian changes these lists from time to time, so check its [REST API reference](https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issue-comments/#api-rest-api-2-issue-issueidorkey-comment-post) if a comment fails with a `403` naming a scope.
 
@@ -160,7 +173,7 @@ If Jira changes do not arrive, see [two-way sync troubleshooting](/connectors/do
 ### How it works
 
 - **Create / Update / Delete:** creating pushes a new issue and records the link on the Finding; updating edits the existing issue; deleting a Finding force-closes its issue (nothing is deleted in Jira). Pushes can be manual (**Push to Connector**) or automatic per the Issue Tracker Assignment. A manual push only sends when an Issue Tracker Assignment covers the Finding's (or Finding Group's) Engagement or Asset; otherwise nothing is sent, and DefectDojo says that no connector is assigned.
-- **Comment:** with **Push Notes as Comments** on, a new note on a Finding is added to its issue as a comment.
+- **Comment:** with **Push Notes as Comments** on, a new note on a Finding is added to its issue as a comment. With **Post SLA Notifications as Comments** or **Post Risk Acceptance Changes as Comments** on, the SLA job's notices and risk acceptance changes are added the same way.
 - **Status reconciliation:** after creating (and on every update) DefectDojo reads the issue's current status and, if it differs from the mapped target, finds a single workflow transition that reaches it and applies it. If no such transition exists, the mapping records an error rather than failing silently. Any transition-scoped custom fields are sent with that transition.
 - **Ticket link:** the link surfaced on the Finding is `https://your-site.atlassian.net/browse/{ISSUE-KEY}` — always your public site URL, never the internal gateway.
 - **Token lifecycle (OAuth):** DefectDojo owns the whole flow — it performs the authorization-code exchange, stores the access and refresh tokens, and refreshes on demand before a push, persisting the new refresh token each time (Atlassian rotates it on every refresh).

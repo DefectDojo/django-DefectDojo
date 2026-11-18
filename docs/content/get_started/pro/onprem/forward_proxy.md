@@ -42,6 +42,28 @@ PSIRT feed fetches honour `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` from 3.4.10
 
 After updating the proxy variables, restart the stack so the new environment is picked up by every container.
 
+### Where dojo-compose-cli reads the proxy
+
+`dojo-compose-cli` has no proxy flag or setting of its own. It reads the same three variables from the environment it runs in, and uses them in two places:
+
+- **Its own requests.** Calls the CLI makes itself, such as looking up the available releases in the container registry, go through the proxy in its environment.
+- **The containers.** The CLI hands `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY` to Docker Compose, which passes them to the containers listed above. A value stored with `dojo-compose-cli environment add` takes precedence over the CLI's environment here. A proxy set only in lower case (`https_proxy`) is passed on under the upper-case name.
+
+Downloads are the exception. `deploy download`, `app pull-images` and upgrades fetch the deployment files and images with `docker pull`, so the Docker daemon makes those requests, not the CLI. The daemon needs the proxy as well: set it in `/etc/docker/daemon.json` (`"proxies"`) or in a systemd drop-in for `docker.service`, then restart Docker.
+
+#### Keep the proxy when you run the CLI with sudo
+
+`sudo` resets the environment by default, which drops the proxy variables. A command such as `sudo ./dojo-compose-cli register` then runs without the proxy and fails with name resolution or connection errors, even though the same proxy works from your shell. Export the variables, then keep them with `sudo -E`:
+
+```bash
+export HTTPS_PROXY=http://proxy.example.com:3128
+export HTTP_PROXY=http://proxy.example.com:3128
+export NO_PROXY=.corp.example.com
+sudo -E ./dojo-compose-cli register
+```
+
+Use `sudo -E` for every `sudo` step in the install and upgrade. It also keeps `DOJO_CLI_KEY`. To keep only these variables, use `sudo --preserve-env=DOJO_CLI_KEY,HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy`.
+
 ### NO_PROXY: the internal names the bundle adds for you
 
 The containers call each other by service name: the application calls `connectors` and `ddorch`, and the MCP server, the Sensei engine and the webhook gateway call back into `nginx` on its internal listener. If those names went to the proxy, the proxy could not resolve them and every one of those calls would fail. From 3.4.100 the compose bundle therefore always starts `NO_PROXY` with the stack's own names and network:
@@ -77,6 +99,8 @@ For the application side, install the proxy's CA (one or more PEM certificates) 
 Once a request goes through the proxy, the proxy resolves the destination name itself, so DefectDojo's own outbound checks (such as `DD_OUTBOUND_BLOCK_PRIVATE_NETWORKS` and `DD_OUTBOUND_DENIED_CIDRS`) can only check the name as DefectDojo resolves it. A name only the proxy can resolve, or one it resolves differently, is passed through. If you rely on blocking internal or metadata addresses, enforce the same egress rules on the proxy.
 
 ## Verifying the proxy is in use
+
+On Docker Compose, start with `sudo -E dojo-compose-cli doctor`. Its Proxy check compares the proxy DefectDojo will use with the Docker daemon's, and warns when the daemon has none, when they differ, or when `sudo` dropped the variables from the CLI's environment. `doctor` ships in the next `dojo-compose-cli` release after 2.1.5. See [Checking a Deployment with doctor and certs](/get_started/pro/onprem/docker_compose/checking_a_deployment/).
 
 Once the stack is restarted:
 

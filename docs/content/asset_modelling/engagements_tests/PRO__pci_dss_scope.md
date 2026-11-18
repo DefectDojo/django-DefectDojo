@@ -24,6 +24,22 @@ The profile also records when scope was last confirmed and by whom. Use **Confir
 
 The profile is created the first time it is saved for an Asset, so an Asset that has never been assessed simply reads as not assessed.
 
+## The PCI DSS Scope widget
+
+The **PCI DSS Scope** widget can be added to the Asset page from the Add Widget catalog. Its header shows the Asset's scope as a tag (gray when the Asset is out of scope), and the help icon beside the title explains what the widget covers.
+
+The widget leads with what needs attention, most urgent first. Each item opens the page where it is resolved:
+
+- **Scope confirmation**: overdue once 12 months have passed since the last confirmation (6 months for a service provider), due soon in the 30 days before that, or never confirmed. These open the Asset's PCI DSS scope page.
+- **This quarter's scans** (Requirement 11.3): an internal scan or a passing ASV scan not recorded yet, with the days left in the quarter; scans not known to be authenticated; high and critical findings still unresolved; fixes no rescan has confirmed; and significant changes with no scan for them.
+- **Penetration and segmentation tests** (Requirement 11.4): a test not recorded in the last 12 months (or 6 for a service provider's segmentation test), exploitable findings from a penetration test still open, and fixes with no retest. When two or more tests are missing they are counted on one line.
+
+Scan and test items open the **PCI Scan Evidence** page with the Asset already chosen. Only an Asset in the cardholder data environment or connected to it has scan and test items; an out-of-scope Asset still owes its scope confirmation. When nothing is due, the widget says when the next confirmation falls.
+
+Beside the list, the widget shows the component kind, whether the Asset is a public-facing web application (and whether that was derived), the current quarter of the assessment year, and the date scope was last confirmed, followed by links to both PCI pages. A smaller tile shows fewer items and counts the rest, and the smallest tile shows a single line with a menu of the pages.
+
+An Asset whose scope has never been assessed shows a **Set PCI DSS Scope** button to users who can edit the Asset. The widget appears only while the **PCI DSS** feature flag is on.
+
 ## Entity type
 
 The instance records whether the organization is assessed under PCI DSS as a merchant, a service provider, both, or unspecified. This setting lives in the system settings. Service providers confirm scope and test network segmentation every six months rather than annually, so several PCI cadence checks read this value.

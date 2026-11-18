@@ -17,6 +17,8 @@ The Calendar page includes filters at the top and a monthly calendar below. The 
 - Engagement Type (e.g., Interactive or CI/CD)
 - Test Type (e.g., Pen Test, Acunetix Scan, Tenable Scan, etc.) 
 
+By default, the Calendar shows **Interactive** Engagements only. Interactive Engagements represent scheduled, human-driven testing with meaningful start and end dates. CI/CD Engagements receive new Tests whenever a pipeline or scheduled scan runs, so their start and end dates are generally a default window rather than a schedule. To see CI/CD Engagement windows on the Calendar, add CI/CD to the Engagement Type filter; clearing the filters returns to the Interactive default. Tests are not affected by this default: Tests from both Engagement types appear whenever the Test checkbox is enabled.
+
 ![image](images/calendar1.png)
  
 Once filtered, results can be exported and shared as an ICS file. 

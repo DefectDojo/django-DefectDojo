@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from dojo.jira import services as jira_services
+from dojo.jira.models import sla_notification_conflict, sla_notification_conflict_message
 from dojo.jira.queries import get_authorized_jira_projects
 from dojo.models import (
     JIRA_Instance,
@@ -104,6 +105,14 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
                     data[json_field] = json.loads(data[json_field])
                 except json.JSONDecodeError as e:
                     raise serializers.ValidationError({json_field: f"Invalid JSON: {e}"}) from e
+
+        # A field the request leaves out keeps its stored value (or its default on create).
+        send, suppress = (
+            data.get(field, getattr(self.instance, field, False))
+            for field in ("product_jira_sla_notification", "suppress_sla_notification_comments")
+        )
+        if sla_notification_conflict(send, suppress):
+            raise serializers.ValidationError({"suppress_sla_notification_comments": sla_notification_conflict_message()})
 
         return data
 
