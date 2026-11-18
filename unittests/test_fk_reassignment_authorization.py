@@ -23,6 +23,7 @@ from dojo.authorization.models import (
     Product_Type_Member,
     Role,
 )
+from dojo.finding.ui.forms import AddFindingForm, AdHocFindingForm, PromoteFindingForm
 from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
@@ -564,3 +565,33 @@ class TestFKReassignmentAuthorization(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertFalse(
             Finding.objects.filter(test=self.test_src, sonarqube_issue=issue).exists(),
         )
+
+    def test_finding_create_forms_drop_sonarqube_issue(self):
+        for form in (AddFindingForm, AdHocFindingForm, PromoteFindingForm):
+            with self.subTest(form=form.__name__):
+                self.assertNotIn("sonarqube_issue", form.base_fields)
+
+    def test_ui_finding_create_with_unauthorized_sonarqube_issue_blocked(self):
+        issue = self._foreign_sonarqube_issue()
+        self.client.force_login(self.user)
+        payload = {
+            "title": "FK Reassign UI Sonar Carrier",
+            "date": "2024-06-01",
+            "severity": "High",
+            "description": "carrier",
+            "active": "on",
+            "verified": "on",
+            "sonarqube_issue": issue.id,
+            "_Finished": "Finished",
+        }
+        for url in (
+            reverse("add_findings", args=(self.test_src.id,)),
+            reverse("ad_hoc_finding", args=(self.product_src.id,)),
+        ):
+            with self.subTest(url=url):
+                r = self.client.post(url, payload)
+                self.assertEqual(r.status_code, 302, r.content[:500])
+        self.assertEqual(
+            Finding.objects.filter(title="FK Reassign UI Sonar Carrier", test__engagement__product=self.product_src).count(), 2,
+        )
+        self.assertEqual(list(Finding.objects.filter(sonarqube_issue=issue)), [self.finding_outside])
