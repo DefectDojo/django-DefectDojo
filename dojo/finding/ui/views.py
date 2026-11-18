@@ -3304,22 +3304,54 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
             return ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE
 
     # The finding itself, and the cluster root it currently points at, both end up under new_original.
-    for moved in (finding, finding.duplicate_finding if finding.duplicate else None):
+    old_root = finding.duplicate_finding if finding.duplicate else None
+    for moved in (finding, old_root):
         if moved is not None and moved != new_original and manual_duplicate_hides_open_finding(moved, new_original):
             return duplicate_onto_mitigated_message(moved, new_original)
+
+    # The old root and the cluster's other duplicates move under new_original too, so the engagement rule applies to
+    # each of them as it does to the finding: none may move under an original in another engagement while either
+    # engagement has deduplication_on_engagement. The members take one query, the first one that crosses named.
+    if old_root is not None and old_root != new_original and is_deduplication_on_engagement_mismatch(old_root, new_original):
+        return _(
+            "Finding %(root)s, the original of finding %(finding)s, is not in the same engagement as finding "
+            "%(new_original)s, and deduplication on engagement is enabled for at least one of them, so finding "
+            "%(new_original)s cannot become its original. Use Reset Duplicate Status on finding %(finding)s first.",
+        ) % {"root": old_root.id, "finding": finding.id, "new_original": new_original.id}
+    crossing = ~Q(test__engagement=new_original.test.engagement)
+    if not new_original.test.engagement.deduplication_on_engagement:
+        crossing &= Q(test__engagement__deduplication_on_engagement=True)
+    crossing_member_id = (
+        finding.duplicate_finding_set()
+        .filter(crossing, test__engagement__product=finding.test.engagement.product)
+        .exclude(pk__in=(finding.pk, new_original.pk))
+        .order_by("id")
+        .values_list("id", flat=True)
+        .first()
+    )
+    if crossing_member_id is not None:
+        return _(
+            "Finding %(member)s, a duplicate of finding %(root)s, is not in the same engagement as finding "
+            "%(new_original)s, and deduplication on engagement is enabled for at least one of them, so finding "
+            "%(new_original)s cannot become its original. Use Reset Duplicate Status on finding %(member)s first.",
+        ) % {"member": crossing_member_id, "root": (old_root or finding).id, "new_original": new_original.id}
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
 
-        if finding.duplicate and finding.duplicate_finding:
+        if old_root is not None and old_root != new_original:
             logger.debug(
                 "setting old original %i as duplicate of %i",
-                finding.duplicate_finding.id,
+                old_root.id,
                 new_original.id,
             )
-            finding.duplicate_finding.duplicate_finding = new_original
-            finding.duplicate_finding.duplicate = True
-            finding.duplicate_finding.save(dedupe_option=False)
+            # The old root becomes a duplicate like every other member: inactive, so it no longer shows as open
+            # beside its new original.
+            old_root.duplicate_finding = new_original
+            old_root.duplicate = True
+            old_root.active = False
+            old_root.verified = False
+            old_root.save(dedupe_option=False)
 
         for cluster_member in finding.duplicate_finding_set().filter(test__engagement__product=finding.test.engagement.product):
             if cluster_member != new_original:
@@ -3334,7 +3366,10 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
         logger.debug(
             "setting new original for old root %i to %i", finding.id, new_original.id,
         )
+        # From the root's own page the finding is the old root, so it closes the same way.
         finding.duplicate = True
+        finding.active = False
+        finding.verified = False
         finding.duplicate_finding = new_original
         finding.save(dedupe_option=False)
 
