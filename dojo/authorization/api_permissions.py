@@ -1154,7 +1154,7 @@ class UserHasEngagementPresetPermission(permissions.BasePermission):
                 obj.product,
                 "view",
                 "edit",
-                "Engagement_Delete",
+                "delete",
                 "edit",
             )
             and check_update_permission(
