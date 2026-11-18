@@ -98,6 +98,25 @@ class FindingTemplatesViewSet(
         return Finding_Template.objects.all().order_by("id")
 
 
+def related_fields_jira_prefetches(request) -> tuple[str, ...]:
+    """
+    The JIRA rows ``related_fields`` reads to render each issue's url, for a request that asks for it.
+
+    The url comes from the issue's project's instance, or, for an issue with no project (older records), from the
+    project ``get_jira_project`` falls back to: the engagement's, then the product's. Unloaded, each costs a query
+    per issue. Nothing is loaded while JIRA is disabled, because the url is then never read.
+    """
+    if request is None or request.query_params.get("related_fields", "false") != "true":
+        return ()
+    if not jira_services.is_enabled():
+        return ()
+    return (
+        "jira_issue__jira_project__jira_instance",
+        "test__engagement__jira_project__jira_instance",
+        "test__engagement__product__jira_project_set__jira_instance",
+    )
+
+
 # Authorization: object-based
 @extend_schema_view(
     list=extend_schema(
@@ -269,7 +288,7 @@ class FindingViewSet(
         # ordering by to-many fields aggregates via MultivaluedOrderingFilter. The tag filters are
         # Exists()-based as well (TagNameFilter and friends). A query-wide DISTINCT over the full wide-row finding
         # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
-        return findings
+        return findings.prefetch_related(*related_fields_jira_prefetches(getattr(self, "request", None)))
 
     def filter_queryset(self, queryset):
         # The list is paged by a plain ORDER BY ... LIMIT now that tag filters add no DISTINCT: end
