@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models, transaction
-from django.db.models import Case, F, IntegerField, Q, QuerySet, Value, When
+from django.db.models import Case, F, IntegerField, Min, Q, QuerySet, Value, When
 from django.db.models.functions import Coalesce, ExtractDay, Length, TruncDate
 from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
@@ -3281,6 +3281,62 @@ def reset_finding_duplicate_status(request, duplicate_id):
     )
 
 
+def _set_as_original_moves(finding):
+    """
+    The engagements of what Set as Original moves from ``finding``'s page besides ``finding`` itself.
+
+    Returns ``(old_root, members)``: ``old_root`` is ``(id, engagement_id, deduplication_on_engagement)`` of the
+    cluster root ``finding`` points at, or None when ``finding`` is the root; ``members`` holds one
+    ``(engagement_id, deduplication_on_engagement, lowest finding id)`` per engagement of the cluster's other
+    duplicates in ``finding``'s product. One grouped query, cached on ``finding`` so a page that checks every
+    similar-finding row reads it once.
+    """
+    cached = getattr(finding, "_set_as_original_moves", None)
+    if cached is not None:
+        return cached
+    old_root = None
+    if finding.duplicate and finding.duplicate_finding is not None:
+        root = finding.duplicate_finding
+        old_root = (root.id, root.test.engagement_id, root.test.engagement.deduplication_on_engagement)
+    members = list(
+        finding.duplicate_finding_set()
+        .filter(test__engagement__product=finding.test.engagement.product)
+        .exclude(pk=finding.pk)
+        .order_by()
+        .values_list("test__engagement_id", "test__engagement__deduplication_on_engagement")
+        .annotate(first_id=Min("id")),
+    )
+    finding._set_as_original_moves = (old_root, members)
+    return finding._set_as_original_moves
+
+
+def set_as_original_crossing(finding, new_original):
+    """
+    The first finding Set as Original would move across an engagement boundary under engagement deduplication.
+
+    Setting ``new_original`` as the original from ``finding``'s page moves the whole cluster under it: ``finding``
+    (the caller compares it), its old root and the cluster's other duplicates. None of them may land under an
+    original in another engagement while either engagement has deduplication_on_engagement, the rule a manual Mark
+    as Duplicate applies to the members it moves. Returns ``(finding id, True when it is the old root)``, the old
+    root first and then the lowest crossing duplicate, or None. When ``new_original`` already is the old root
+    nothing moves, so nothing is refused.
+    """
+    old_root, members = _set_as_original_moves(finding)
+    if old_root is not None and old_root[0] == new_original.id:
+        return None
+    target = new_original.test.engagement
+    target_dedupe = target.deduplication_on_engagement
+
+    def crosses(engagement_id, dedupe):
+        return engagement_id != target.id and (dedupe or target_dedupe)
+
+    if old_root is not None and crosses(old_root[1], old_root[2]):
+        return old_root[0], True
+    # new_original's own row, when it is one of the duplicates, shares its engagement and so never crosses.
+    first = min((first_id for engagement_id, dedupe, first_id in members if crosses(engagement_id, dedupe)), default=None)
+    return (first, False) if first is not None else None
+
+
 def set_finding_as_original_internal(user, finding_id, new_original_id):
     """Make ``new_original`` the original of ``finding``'s cluster. True on success, False when refused."""
     return set_finding_as_original_with_reason(user, finding_id, new_original_id) is None
@@ -3309,32 +3365,19 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
         if moved is not None and moved != new_original and manual_duplicate_hides_open_finding(moved, new_original):
             return duplicate_onto_mitigated_message(moved, new_original)
 
-    # The old root and the cluster's other duplicates move under new_original too, so the engagement rule applies to
-    # each of them as it does to the finding: none may move under an original in another engagement while either
-    # engagement has deduplication_on_engagement. The members take one query, the first one that crosses named.
-    if old_root is not None and old_root != new_original and is_deduplication_on_engagement_mismatch(old_root, new_original):
+    crossing = set_as_original_crossing(finding, new_original)
+    if crossing is not None and crossing[1]:
         return _(
             "Finding %(root)s, the original of finding %(finding)s, is not in the same engagement as finding "
             "%(new_original)s, and deduplication on engagement is enabled for at least one of them, so finding "
             "%(new_original)s cannot become its original. Use Reset Duplicate Status on finding %(finding)s first.",
-        ) % {"root": old_root.id, "finding": finding.id, "new_original": new_original.id}
-    crossing = ~Q(test__engagement=new_original.test.engagement)
-    if not new_original.test.engagement.deduplication_on_engagement:
-        crossing &= Q(test__engagement__deduplication_on_engagement=True)
-    crossing_member_id = (
-        finding.duplicate_finding_set()
-        .filter(crossing, test__engagement__product=finding.test.engagement.product)
-        .exclude(pk__in=(finding.pk, new_original.pk))
-        .order_by("id")
-        .values_list("id", flat=True)
-        .first()
-    )
-    if crossing_member_id is not None:
+        ) % {"root": crossing[0], "finding": finding.id, "new_original": new_original.id}
+    if crossing is not None:
         return _(
             "Finding %(member)s, a duplicate of finding %(root)s, is not in the same engagement as finding "
             "%(new_original)s, and deduplication on engagement is enabled for at least one of them, so finding "
             "%(new_original)s cannot become its original. Use Reset Duplicate Status on finding %(member)s first.",
-        ) % {"member": crossing_member_id, "root": (old_root or finding).id, "new_original": new_original.id}
+        ) % {"member": crossing[0], "root": (old_root or finding).id, "new_original": new_original.id}
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
@@ -3516,8 +3559,9 @@ def calculate_possible_related_actions_for_similar_finding(
                    "for one of them."),
     }
     # Each action is offered only where its route accepts it. Set as Original compares the similar finding with
-    # the finding on the page. Mark as Duplicate lands the similar finding under the page finding's cluster root,
-    # so it compares with that root. Reset Duplicate Status compares no engagements.
+    # the finding on the page, and with every finding it moves along (the old root and the cluster's other
+    # duplicates, checked below once an action list offers it). Mark as Duplicate lands the similar finding under
+    # the page finding's cluster root, so it compares with that root. Reset Duplicate Status compares no engagements.
     root = cluster_root(finding)
     page_separated = is_deduplication_on_engagement_mismatch(similar_finding, finding)
     root_separated = page_separated if root is finding else is_deduplication_on_engagement_mismatch(similar_finding, root)
@@ -3607,5 +3651,17 @@ def calculate_possible_related_actions_for_similar_finding(
             },
         ))
 
+    if "set_finding_as_original" not in blocked and any(action["action"] == "set_finding_as_original" for action in actions):
+        crossing = set_as_original_crossing(finding, similar_finding)
+        if crossing is not None:
+            blocked.add("set_finding_as_original")
+            # The row itself may share the page's engagement: name the finding that would cross instead.
+            engagement_mismatch = {
+                "action": "None",
+                "reason": _(
+                    "Setting this finding as the original would move finding %(moved)s, which is in a different "
+                    "engagement, and deduplication on engagement is enabled for one of them.",
+                ) % {"moved": crossing[0]},
+            }
     allowed = [action for action in actions if action["action"] not in blocked]
     return allowed or [engagement_mismatch]

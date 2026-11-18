@@ -6,12 +6,16 @@ the Pro Similar Findings menu call) moves the page finding's whole cluster under
 and that root's other duplicates, not only the page finding. Each of them may not move under an original in
 another engagement while either engagement has deduplication_on_engagement, the same rule a manual Mark as
 Duplicate applies to the members it moves. The old root ends up an inactive duplicate like every other member.
-Each test posts to the real route and reloads the rows.
+The Similar Findings menu offers Set as Original only on the rows the route accepts. Each route test posts to the
+real route and reloads the rows.
 """
-from django.test import override_settings
+from django.db import connection
+from django.test import RequestFactory, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.utils.timezone import now
 from rest_framework.test import APIClient
 
+from dojo.finding.ui.views import calculate_possible_related_actions_for_similar_finding
 from dojo.models import Dojo_User, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from unittests.dojo_test_case import DojoAPITestCase
 
@@ -146,3 +150,65 @@ class SetFindingAsOriginalEngagementTest(DojoAPITestCase):
         self.assertEqual(state[new_original][:2], (False, None))
         for finding_id in (self.root, self.members[0], self.members[2], self.members[3]):
             self.assertEqual(state[finding_id][:3], (True, new_original, False), finding_id)
+
+    def test_setting_the_current_root_as_original_moves_nothing_and_is_not_refused(self):
+        # From a duplicate's page the row's own root is the new original: the cluster already sits under it, so a
+        # duplicate that already crosses an engagement is not a reason to refuse.
+        self._engagements(home_dedupe=True, away_dedupe=True)
+        self._move_away(self.members[1])
+        before = self._state()
+        response = self._set_original(self.members[0], self.root)
+        self.assertEqual(response.status_code, 204, response.content)
+        self.assertEqual(self._state(), before)
+
+    # The Similar Findings menu (classic page, and the Pro menu through the same helper)
+
+    def _actions(self, page_id, similar_id):
+        request = RequestFactory().get(f"/finding/{page_id}")
+        request.user = self.user
+        return calculate_possible_related_actions_for_similar_finding(
+            request, Finding.objects.get(pk=page_id), Finding.objects.get(pk=similar_id),
+        )
+
+    def test_the_menu_hides_set_as_original_where_a_duplicate_would_cross(self):
+        # The row and the root share the page's engagement, so Mark as Duplicate stays; Set as Original would move
+        # the duplicate in the other engagement, so the route refuses it and the menu does not offer it.
+        self._engagements(home_dedupe=True, away_dedupe=False)
+        self._move_away(self.members[1])
+        self.assertEqual([a["action"] for a in self._actions(self.members[0], self.other)], ["mark_finding_duplicate"])
+        self.assertEqual(self._set_original(self.members[0], self.other).status_code, 400)
+
+    def test_the_menu_names_the_finding_that_would_cross_when_nothing_is_left(self):
+        # The root in the other engagement blocks both actions on a row in the page's engagement: the row says
+        # which finding Set as Original would move across.
+        self._engagements(home_dedupe=True, away_dedupe=False)
+        self._move_away(self.root)
+        actions = self._actions(self.members[0], self.other)
+        self.assertEqual([a["action"] for a in actions], ["None"])
+        self.assertIn(f"would move finding {self.root}", actions[0]["reason"])
+
+    def test_the_menu_offers_set_as_original_where_the_route_accepts_it(self):
+        self._engagements(home_dedupe=False, away_dedupe=False)
+        self._move_away(self.root, self.members[1])
+        self.assertEqual(
+            [a["action"] for a in self._actions(self.members[0], self.other)],
+            ["mark_finding_duplicate", "set_finding_as_original"],
+        )
+        self.assertEqual(self._set_original(self.members[0], self.other).status_code, 204)
+
+    def test_the_menu_reads_the_cluster_once_per_page(self):
+        # Every similar-finding row of one page shares the cluster's engagements: one grouped query on the first row
+        # that offers Set as Original, none on the rows after it.
+        page = Finding.objects.get(pk=self.root)
+        request = RequestFactory().get(f"/finding/{page.id}")
+        request.user = self.user
+
+        def cluster_reads():
+            with CaptureQueriesContext(connection) as queries:
+                calculate_possible_related_actions_for_similar_finding(
+                    request, page, Finding.objects.get(pk=self.other),
+                )
+            return sum('MIN("dojo_finding"."id")' in query["sql"] for query in queries.captured_queries)
+
+        self.assertEqual(cluster_reads(), 1)
+        self.assertEqual(cluster_reads(), 0)
