@@ -25,18 +25,18 @@ Reports from `analyze_repo` and `analyze_org` use the same format. The report ha
 | the rule's documentation page and the rule's `refs` | References |
 | repository of a remote `purl` (such as `pkg:github/owner/repo`) | Service |
 
-The description starts with the rule's description and lists the finding's details, location, repository purl, job, step, advisory, event triggers, injection sources, referenced secrets and living-off-the-pipeline tool and targets when poutine reports them, followed by the link to the rule's documentation page (`https://boostsecurityio.github.io/poutine/rules/<rule_id>`), which explains how to remediate it. The JSON report carries no remediation text of its own, so Mitigation is left empty.
+The description starts with the rule's description and lists the finding's details, location, repository purl, job, step, advisory, event triggers, injection sources, referenced secrets and living-off-the-pipeline tool, action and targets when poutine reports them, followed by the link to the rule's documentation page (`https://boostsecurityio.github.io/poutine/rules/<rule_id>`), which explains how to remediate it. The JSON report carries no remediation text of its own, so Mitigation is left empty.
 
 All findings are static findings.
 
 ### Severity
-poutine rules carry a SARIF level rather than a severity. It maps as follows:
+poutine rules carry a SARIF level rather than a severity. It maps the same way as DefectDojo's SARIF parser maps levels:
 
 | poutine level | DefectDojo severity |
 | --- | --- |
 | `error` | High |
 | `warning` | Medium |
-| `note` | Low |
+| `note` | Info |
 | `none` | Info |
 
 A level outside this table, or a finding whose rule is missing from the report, is imported as Info.

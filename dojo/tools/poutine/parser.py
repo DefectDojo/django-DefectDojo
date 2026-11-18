@@ -7,11 +7,11 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-# poutine rules carry a SARIF-style level
+# poutine rules carry a SARIF-style level; mapped the same way as the SARIF parser maps levels
 SEVERITY_MAPPING = {
     "error": "High",
     "warning": "Medium",
-    "note": "Low",
+    "note": "Info",
     "none": "Info",
 }
 
@@ -114,18 +114,22 @@ class PoutineParser:
         lines.append(f"**Location:** {location}")
         if item.get("purl"):
             lines.append(f"**Repository:** {item['purl']}")
-        for key, label in (("job", "Job"), ("step", "Step"), ("osv_id", "Advisory"), ("lotp_tool", "Living-off-the-pipeline tool")):
-            if meta.get(key) not in {None, ""}:
-                lines.append(f"**{label}:** {meta[key]}")
         for key, label in (
+            ("job", "Job"),
+            ("step", "Step"),
+            ("osv_id", "Advisory"),
             ("event_triggers", "Event triggers"),
             ("injection_sources", "Injection sources"),
             ("referenced_secrets", "Referenced secrets"),
+            ("lotp_tool", "Living-off-the-pipeline tool"),
+            ("lotp_action", "Living-off-the-pipeline action"),
             ("lotp_targets", "Living-off-the-pipeline targets"),
         ):
-            values = meta.get(key) or []
-            if values:
-                lines.append(f"**{label}:** {', '.join(str(value) for value in values)}")
+            value = meta.get(key)
+            if isinstance(value, list):
+                value = ", ".join(str(entry) for entry in value)
+            if value not in {None, ""}:
+                lines.append(f"**{label}:** {value}")
         if documentation_url:
             lines.append(f"**Documentation and remediation:** {documentation_url}")
         return "\n".join(lines)

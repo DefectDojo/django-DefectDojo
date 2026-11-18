@@ -24,7 +24,7 @@ class TestPoutineParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Unverified Script Execution", finding.title)
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Info", finding.severity)  # rule level "note"
         self.assertEqual("unverified_script_exec", finding.vuln_id_from_tool)
         self.assertEqual(".github/workflows/build.yml", finding.file_path)
         self.assertEqual(12, finding.line)
@@ -51,8 +51,8 @@ class TestPoutineParser(DojoTestCase):
                 self.assertTrue(finding.vuln_id_from_tool)
                 self.assertTrue(finding.file_path.startswith(".github/workflows/"))
         self.assertEqual(
-            {"Low": 3, "Medium": 8, "High": 2},
-            {severity: sum(1 for f in findings if f.severity == severity) for severity in ("Low", "Medium", "High")},
+            {"Info": 3, "Medium": 8, "High": 2},
+            {severity: sum(1 for f in findings if f.severity == severity) for severity in ("Info", "Medium", "High")},
         )
         # every finding in the report has its own deduplication key
         self.assertEqual(13, len({(f.vuln_id_from_tool, f.file_path, f.line) for f in findings}))
@@ -111,6 +111,18 @@ class TestPoutineParser(DojoTestCase):
         self.assertEqual(1, len(findings))
         self.assertEqual("example-org/example-repo", findings[0].service)
         self.assertIn("**Repository:** pkg:github/example-org/example-repo", findings[0].description)
+
+    def test_parse_lotp_action(self):
+        # untrusted_checkout_exec names the living-off-the-pipeline action when the code runs through one
+        with (get_unit_tests_scans_path("poutine") / "many_vulns.json").open(encoding="utf-8") as testfile:
+            report = json.load(testfile)
+        finding = report["findings"][2]
+        del finding["meta"]["lotp_tool"]
+        finding["meta"]["lotp_action"] = "pre-commit/action"
+        report["findings"] = [finding]
+        findings = PoutineParser().get_findings(io.StringIO(json.dumps(report)), Test())
+        self.assertIn("**Living-off-the-pipeline action:** pre-commit/action", findings[0].description)
+        self.assertNotIn("**Living-off-the-pipeline tool:**", findings[0].description)
 
     def test_parse_unknown_rule(self):
         # a finding whose rule is missing from the rules section still imports, with the rule id as title
