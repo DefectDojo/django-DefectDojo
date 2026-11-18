@@ -1556,6 +1556,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # is what every result family assigns to "title" as well.
     "Checkmarx One Scan": ["unique_id_from_tool"],
     "OPF Scan": ["title", "cwe", "severity", "description"],
+    # Neither tool emits a fingerprint in its JSON output. The rule id, the workflow file and
+    # the line identify a finding (the zizmor parser merges results that share all three, as
+    # zizmor reports one per flagged expression); severity is left out because both tools
+    # retune their rules' severities between releases.
+    "zizmor Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "poutine Scan": ["vuln_id_from_tool", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -2020,6 +2026,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # The parser builds a stable unique_id_from_tool for every finding (detector, kind, target, path and the
     # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
     "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "zizmor Scan": DEDUPE_ALGO_HASH_CODE,
+    "poutine Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
