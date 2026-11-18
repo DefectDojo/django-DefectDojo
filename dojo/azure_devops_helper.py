@@ -129,47 +129,72 @@ class AzureDevOpsSprintHelper:
         return iterations
 
 class AzureDevOpsWorkItemHelper:
-    organization_url = GeneralSettings.get_value(
-        "AZURE_DEVOPS_ORGANIZATION_URL",
-        "https://test.azure.com/GrupoTest",
-    )
-    project = GeneralSettings.get_value(
-        "AZURE_DEVOPS_PROJECT",
-        "project name",
-    )
-    team_name = GeneralSettings.get_value(
-        "AZURE_DEVOPS_TEAM_NAME",
-        "team name",
-    )
-    id_parent = GeneralSettings.get_value("AZURE_DEVOPS_ID_PARENT", None)
-    impact_team = GeneralSettings.get_value(
-        "AZURE_DEVOPS_IMPACT_TEAM",
-        "impact team name",
-    )
-    work_item_type = GeneralSettings.get_value(
-        "AZURE_DEVOPS_WORK_ITEM_TYPE",
-        "item type",
-    )
 
-    @classmethod
+    def __init__(self):
+        self._organization_url = self._organization_url()
+        self._project = self._project()
+        self._team_name = self._team_name()
+        self._impact_team = self._impact_team()
+        self._work_item_type = self._work_item_type()
+
+   
+    @property
+    def _organization_url(cls):
+        organization_url = GeneralSettings.get_value(
+            "AZURE_DEVOPS_ORGANIZATION_URL",
+            "https://test.azure.com/GrupoTest",
+        )
+        return organization_url
+
+    @property
+    def _project(cls):
+        project = GeneralSettings.get_value(
+                "AZURE_DEVOPS_PROJECT",
+                "project name",
+            )
+        return project
+
+    @property
+    def _team_name(cls):
+        team_name = GeneralSettings.get_value(
+            "AZURE_DEVOPS_TEAM_NAME",
+            "team name",
+        )
+        return team_name
+
+    @property
+    def _impact_team(cls):
+        impact_team = GeneralSettings.get_value(
+                "AZURE_DEVOPS_IMPACT_TEAM",
+                "impact team name",
+            )
+        return impact_team
+
+    @property
+    def _work_item_type(cls):
+        work_item_type = GeneralSettings.get_value(
+            "AZURE_DEVOPS_WORK_ITEM_TYPE",
+            "item type",
+        )
+        return work_item_type
+
+
     def _get_connection(cls):
         credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
-        return Connection(base_url=cls.organization_url.rstrip("/"), creds=credentials)
+        return Connection(base_url=cls._organization_url.rstrip("/"), creds=credentials)
 
-    @classmethod
     def _get_profile_connection(cls):
-        parsed = urlparse(cls.organization_url.rstrip("/"))
+        parsed = urlparse(cls._organization_url.rstrip("/"))
         org = parsed.path.strip("/") if parsed.netloc.endswith("dev.azure.com") else parsed.netloc
         if parsed.netloc.endswith("dev.azure.com"):
             profile_base = f"https://vssps.dev.azure.com/{org}/"
         else:
-            profile_base = cls.organization_url.rstrip("/")
+            profile_base = cls._organization_url.rstrip("/")
         return Connection(
             base_url=profile_base,
             creds=BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN),
         )
 
-    @classmethod
     def _get_allowed_values_for_field(cls, wit_client, field_name, project, work_item_type):
         field_name = (field_name or "").strip()
         if not field_name:
@@ -206,7 +231,6 @@ class AzureDevOpsWorkItemHelper:
                 return values
         return []
 
-    @classmethod
     def get_or_create_work_item(
         cls,
         title,
@@ -345,7 +369,7 @@ def create_azure_work_item_task(
 ):
     try:
         user_obj = Dojo_User.objects.get(username=user)
-        work_item_id = AzureDevOpsWorkItemHelper.get_or_create_work_item(
+        work_item_id = AzureDevOpsWorkItemHelper().get_or_create_work_item(
             title,
             description,
             user=user_obj,
