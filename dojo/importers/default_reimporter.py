@@ -1407,10 +1407,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             "Reimport found no existing match; will create a new finding: "
             f"{finding.title} ({finding.component_name} - {finding.component_version})",
         )
-        # Manage the finding grouping selection
+        # Manage the finding grouping selection. The finding is saved later, so its group is
+        # named from the title save() will store, the name the import gave the group.
         finding_will_be_grouped = self.process_finding_groups(
             unsaved_finding,
             self.group_names_to_findings_dict,
+            unsaved=True,
         )
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)

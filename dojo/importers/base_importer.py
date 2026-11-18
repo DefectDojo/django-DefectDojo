@@ -1211,17 +1211,22 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         group_names_to_findings_dict: dict,
+        *,
+        unsaved: bool = False,
     ) -> bool:
         """
         Determines how to handle an incoming finding with respect to grouping
         if finding groups are enabled, use the supplied grouping mechanism to
         store a reference of how the finding should be grouped.
 
+        unsaved: the finding has not been saved yet, so its group is named from the
+        values save() will store (see get_group_by_group_name).
+
         Returns True if the finding was added to a group, False otherwise.
         """
         if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
-            name = finding_helper.get_group_by_group_name(finding, self.group_by)
+            name = finding_helper.get_group_by_group_name(finding, self.group_by, unsaved=unsaved)
             if name is not None:
                 if name in group_names_to_findings_dict:
                     group_names_to_findings_dict[name].append(finding)

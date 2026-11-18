@@ -2,6 +2,7 @@ import logging
 from collections import defaultdict
 from contextlib import suppress
 from datetime import datetime
+from functools import lru_cache
 from itertools import batched
 from time import sleep, strftime
 from types import SimpleNamespace
@@ -325,7 +326,21 @@ def update_finding_group(finding, finding_group):
         finding.finding_group.findings.remove(finding)
 
 
-def get_group_by_group_name(finding, finding_group_by_option):
+@lru_cache(maxsize=4096)
+def _persisted_title(title):
+    # titlecase() costs about a third of a millisecond, and a reimport grouped by title
+    # names many new findings that share each title: transform each title once.
+    return Finding.persisted_title(title)
+
+
+def get_group_by_group_name(finding, finding_group_by_option, *, unsaved=False):
+    """
+    Return the name of the auto group a finding belongs to, or None.
+
+    The import names a group from a saved finding, whose title save() has already
+    title-cased and truncated. A reimport names a new finding's group before it is saved:
+    unsaved=True gives the title the stored row will carry, so both name the group alike.
+    """
     group_name = None
 
     if finding_group_by_option == "component_name":
@@ -337,7 +352,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
     elif finding_group_by_option == "finding_title":
-        group_name = finding.title
+        group_name = _persisted_title(finding.title) if unsaved else finding.title
     elif finding_group_by_option == "vuln_id_from_tool":
         if finding.vuln_id_from_tool:
             group_name = f"Vulnerability ID {finding.vuln_id_from_tool}" if finding.vuln_id_from_tool else "None"
