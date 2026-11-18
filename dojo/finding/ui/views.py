@@ -33,9 +33,11 @@ from dojo.authorization.authorization import user_has_global_permission_or_403, 
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
+    cluster_root,
     do_false_positive_history_batch,
     finding_mitigated,
     finding_not_human_set_status,
+    is_deduplication_on_engagement_mismatch,
     manual_duplicate_hides_open_finding,
     match_finding_to_existing_findings,
 )
@@ -3107,7 +3109,7 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
 
     # The mark points the duplicate at the original's cluster root, so the engagement check compares against
     # that root, the finding the duplicate ends up under, not the original it was posted with.
-    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+    root = cluster_root(original)
 
     if root.test.engagement != duplicate.test.engagement:
         if (root.test.engagement.deduplication_on_engagement
@@ -3432,34 +3434,27 @@ def duplicate_cluster(request, finding):
 # and we assign this dictionary to the finding so it can be accessed in the template.
 # these actions are always calculated in the context of the finding the user is viewing
 # because this determines which actions are possible
-def _engagement_deduplication_separates(finding, other):
-    """True when the two findings sit in different engagements and either engagement deduplicates on its own."""
-    return finding.test.engagement != other.test.engagement and (
-        finding.test.engagement.deduplication_on_engagement
-        or other.test.engagement.deduplication_on_engagement
-    )
-
-
 def calculate_possible_related_actions_for_similar_finding(
     request, finding, similar_finding,
 ):
     engagement_mismatch = {
         "action": "None",
-        "reason": ("This finding is in a different engagement and deduplication_inside_engagment "
-                   "is enabled here or in that finding"),
+        "reason": ("This finding is in a different engagement, and deduplication on engagement is enabled "
+                   "for one of them."),
     }
-    # Set as Original and Reset Duplicate Status compare the similar finding with the finding on the page, as their
-    # routes do. Mark as Duplicate lands the similar finding under the page finding's cluster root, so it is
-    # compared with that root, as the mark route does.
-    root = finding.duplicate_finding if finding.duplicate and finding.duplicate_finding else finding
-    page_separated = _engagement_deduplication_separates(similar_finding, finding)
-    root_separated = page_separated if root is finding else _engagement_deduplication_separates(similar_finding, root)
+    # Each action is offered only where its route accepts it. Set as Original compares the similar finding with
+    # the finding on the page. Mark as Duplicate lands the similar finding under the page finding's cluster root,
+    # so it compares with that root. Reset Duplicate Status compares no engagements.
+    root = cluster_root(finding)
+    page_separated = is_deduplication_on_engagement_mismatch(similar_finding, finding)
+    root_separated = page_separated if root is finding else is_deduplication_on_engagement_mismatch(similar_finding, root)
     blocked = set()
     if page_separated:
-        blocked.update(("set_finding_as_original", "reset_finding_duplicate_status"))
+        blocked.add("set_finding_as_original")
     if root_separated:
         blocked.add("mark_finding_duplicate")
-    if len(blocked) == 3:
+    if len(blocked) == 2 and not similar_finding.duplicate_finding:
+        # Without a duplicate_finding the row can only offer those two actions, so skip the per-row checks.
         return [engagement_mismatch]
 
     actions = []
