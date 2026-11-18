@@ -269,6 +269,11 @@ class FindingViewSet(
         # ordering by to-many fields aggregates via MultivaluedOrderingFilter. The tag filters are
         # Exists()-based as well (TagNameFilter and friends). A query-wide DISTINCT over the full wide-row finding
         # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
+        request = getattr(self, "request", None)
+        if request is not None and request.query_params.get("related_fields", "false") == "true":
+            # related_fields renders each JIRA issue's url from its project's instance: a query each per issue
+            # unless they are loaded with the page.
+            findings = findings.prefetch_related("jira_issue__jira_project__jira_instance")
         return findings
 
     def filter_queryset(self, queryset):
