@@ -1,0 +1,3365 @@
+[
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "Medium",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "default permissions used due to no permissions: block",
+          "route": {
+            "route": []
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 0,
+              "column": 0
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 0,
+              "end": 296
+            }
+          },
+          "feature": "name: comment\non:\n  issue_comment:\n    types: [created]\njobs:\n  respond:\n    if: contains(github.event.comment.body, '/run')\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/github-script@v7\n        with:\n          script: |\n            console.log(\"${{ github.event.comment.body }}\")\n",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 64,
+              "end": 296
+            }
+          },
+          "feature": "  respond:\n    if: contains(github.event.comment.body, '/run')\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/github-script@v7\n        with:\n          script: |\n            console.log(\"${{ github.event.comment.body }}\")\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "default permissions used due to no permissions: block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 64,
+              "end": 296
+            }
+          },
+          "feature": "  respond:\n    if: contains(github.event.comment.body, '/run')\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/github-script@v7\n        with:\n          script: |\n            console.log(\"${{ github.event.comment.body }}\")\n",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "dangerous-triggers",
+    "desc": "use of fundamentally insecure workflow trigger",
+    "url": "https://docs.zizmor.sh/audits/#dangerous-triggers",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "this workflow",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 20
+            },
+            "offset_span": {
+              "start": 14,
+              "end": 55
+            }
+          },
+          "feature": "on:\n  issue_comment:\n    types: [created]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "issue_comment is almost always used insecurely",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              },
+              {
+                "Key": "issue_comment"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 2,
+              "column": 2
+            },
+            "end_point": {
+              "row": 2,
+              "column": 15
+            },
+            "offset_span": {
+              "start": 20,
+              "end": 33
+            }
+          },
+          "feature": "issue_comment",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 8
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 171,
+              "end": 296
+            }
+          },
+          "feature": "uses: actions/github-script@v7\n        with:\n          script: |\n            console.log(\"${{ github.event.comment.body }}\")\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "with"
+              },
+              {
+                "Key": "script"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 14,
+              "fragment": {
+                "Raw": "github.event.comment.body"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 29
+            },
+            "end_point": {
+              "row": 12,
+              "column": 54
+            },
+            "offset_span": {
+              "start": 265,
+              "end": 290
+            }
+          },
+          "feature": "|\n            console.log(\"${{ github.event.comment.body }}\")\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "action accepts arbitrary code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 8
+            },
+            "end_point": {
+              "row": 9,
+              "column": 38
+            },
+            "offset_span": {
+              "start": 171,
+              "end": 201
+            }
+          },
+          "feature": "uses: actions/github-script@v7",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "via this input",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "with"
+              },
+              {
+                "Key": "script"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 10
+            },
+            "end_point": {
+              "row": 11,
+              "column": 16
+            },
+            "offset_span": {
+              "start": 226,
+              "end": 232
+            }
+          },
+          "feature": "script",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "unpinned-uses",
+    "desc": "unpinned action reference",
+    "url": "https://docs.zizmor.sh/audits/#unpinned-uses",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 8
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 171,
+              "end": 296
+            }
+          },
+          "feature": "uses: actions/github-script@v7\n        with:\n          script: |\n            console.log(\"${{ github.event.comment.body }}\")\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "action is not pinned to a hash (required by blanket policy)",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 0,
+              "fragment": {
+                "Raw": "actions/github-script@v7"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 14
+            },
+            "end_point": {
+              "row": 9,
+              "column": 38
+            },
+            "offset_span": {
+              "start": 177,
+              "end": 201
+            }
+          },
+          "feature": "actions/github-script@v7",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "anonymous-definition",
+    "desc": "workflow or action definition without a name",
+    "url": "https://docs.zizmor.sh/audits/#anonymous-definition",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Informational",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 5,
+              "column": 9
+            },
+            "offset_span": {
+              "start": 64,
+              "end": 71
+            }
+          },
+          "feature": "respond",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "concurrency-limits",
+    "desc": "insufficient job-level concurrency limits",
+    "url": "https://docs.zizmor.sh/audits/#concurrency-limits",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "workflow is missing concurrency setting",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 20
+            },
+            "offset_span": {
+              "start": 14,
+              "end": 55
+            }
+          },
+          "feature": "on:\n  issue_comment:\n    types: [created]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/comment.yml"
+            }
+          },
+          "annotation": "job affected by missing workflow concurrency",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "respond"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 5,
+              "column": 9
+            },
+            "offset_span": {
+              "start": 64,
+              "end": 71
+            }
+          },
+          "feature": "respond",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "Medium",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "default permissions used due to no permissions: block",
+          "route": {
+            "route": []
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 0,
+              "column": 0
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 0,
+              "end": 314
+            }
+          },
+          "feature": "name: lint\non:\n  pull_request:\njobs:\n  lint:\n    runs-on: [self-hosted, linux]\n    if: ${{ github.event_name == 'pull_request' }} || true\n    env:\n      ACTIONS_STEP_DEBUG: true\n    steps:\n      - uses: tj-actions/changed-files@v35\n      - name: Dump secrets\n        run: echo \"${{ toJSON(secrets) }}\" > /dev/null\n",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 314
+            }
+          },
+          "feature": "  lint:\n    runs-on: [self-hosted, linux]\n    if: ${{ github.event_name == 'pull_request' }} || true\n    env:\n      ACTIONS_STEP_DEBUG: true\n    steps:\n      - uses: tj-actions/changed-files@v35\n      - name: Dump secrets\n        run: echo \"${{ toJSON(secrets) }}\" > /dev/null\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "default permissions used due to no permissions: block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 314
+            }
+          },
+          "feature": "  lint:\n    runs-on: [self-hosted, linux]\n    if: ${{ github.event_name == 'pull_request' }} || true\n    env:\n      ACTIONS_STEP_DEBUG: true\n    steps:\n      - uses: tj-actions/changed-files@v35\n      - name: Dump secrets\n        run: echo \"${{ toJSON(secrets) }}\" > /dev/null\n",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 240,
+              "end": 314
+            }
+          },
+          "feature": "name: Dump secrets\n        run: echo \"${{ toJSON(secrets) }}\" > /dev/null\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 6,
+              "fragment": {
+                "Raw": "toJSON(secrets)"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 23
+            },
+            "end_point": {
+              "row": 12,
+              "column": 38
+            },
+            "offset_span": {
+              "start": 282,
+              "end": 297
+            }
+          },
+          "feature": "echo \"${{ toJSON(secrets) }}\" > /dev/null",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 8
+            },
+            "end_point": {
+              "row": 12,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 267,
+              "end": 270
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "self-hosted-runner",
+    "desc": "runs on a self-hosted runner",
+    "url": "https://docs.zizmor.sh/audits/#self-hosted-runner",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Auditor"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "self-hosted runner used here",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "runs-on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 4
+            },
+            "end_point": {
+              "row": 5,
+              "column": 33
+            },
+            "offset_span": {
+              "start": 49,
+              "end": 78
+            }
+          },
+          "feature": "    runs-on: [self-hosted, linux]",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "unpinned-uses",
+    "desc": "unpinned action reference",
+    "url": "https://docs.zizmor.sh/audits/#unpinned-uses",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 10,
+              "column": 42
+            },
+            "offset_span": {
+              "start": 197,
+              "end": 231
+            }
+          },
+          "feature": "uses: tj-actions/changed-files@v35",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "action is not pinned to a hash (required by blanket policy)",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 0,
+              "fragment": {
+                "Raw": "tj-actions/changed-files@v35"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 14
+            },
+            "end_point": {
+              "row": 10,
+              "column": 42
+            },
+            "offset_span": {
+              "start": 203,
+              "end": 231
+            }
+          },
+          "feature": "tj-actions/changed-files@v35",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "overprovisioned-secrets",
+    "desc": "excessively provisioned secrets",
+    "url": "https://docs.zizmor.sh/audits/#overprovisioned-secrets",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "injects the entire secrets context into the runner",
+          "route": {
+            "route": []
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 19
+            },
+            "end_point": {
+              "row": 12,
+              "column": 41
+            },
+            "offset_span": {
+              "start": 278,
+              "end": 300
+            }
+          },
+          "feature": "${{ toJSON(secrets) }}",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "anonymous-definition",
+    "desc": "workflow or action definition without a name",
+    "url": "https://docs.zizmor.sh/audits/#anonymous-definition",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Informational",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 4,
+              "column": 6
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 43
+            }
+          },
+          "feature": "lint",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "unsound-condition",
+    "desc": "unsound conditional expression",
+    "url": "https://docs.zizmor.sh/audits/#unsound-condition",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 314
+            }
+          },
+          "feature": "  lint:\n    runs-on: [self-hosted, linux]\n    if: ${{ github.event_name == 'pull_request' }} || true\n    env:\n      ACTIONS_STEP_DEBUG: true\n    steps:\n      - uses: tj-actions/changed-files@v35\n      - name: Dump secrets\n        run: echo \"${{ toJSON(secrets) }}\" > /dev/null\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "condition always evaluates to true",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              },
+              {
+                "Key": "if"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 4
+            },
+            "end_point": {
+              "row": 6,
+              "column": 58
+            },
+            "offset_span": {
+              "start": 83,
+              "end": 137
+            }
+          },
+          "feature": "    if: ${{ github.event_name == 'pull_request' }} || true",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "concurrency-limits",
+    "desc": "insufficient job-level concurrency limits",
+    "url": "https://docs.zizmor.sh/audits/#concurrency-limits",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "workflow is missing concurrency setting",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 2,
+              "column": 15
+            },
+            "offset_span": {
+              "start": 11,
+              "end": 30
+            }
+          },
+          "feature": "on:\n  pull_request:",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "job affected by missing workflow concurrency",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 4,
+              "column": 6
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 43
+            }
+          },
+          "feature": "lint",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "secrets-outside-env",
+    "desc": "secrets referenced without a dedicated environment",
+    "url": "https://docs.zizmor.sh/audits/#secrets-outside-env",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Auditor"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 13,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 314
+            }
+          },
+          "feature": "  lint:\n    runs-on: [self-hosted, linux]\n    if: ${{ github.event_name == 'pull_request' }} || true\n    env:\n      ACTIONS_STEP_DEBUG: true\n    steps:\n      - uses: tj-actions/changed-files@v35\n      - name: Dump secrets\n        run: echo \"${{ toJSON(secrets) }}\" > /dev/null\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 2
+            },
+            "end_point": {
+              "row": 4,
+              "column": 6
+            },
+            "offset_span": {
+              "start": 39,
+              "end": 43
+            }
+          },
+          "feature": "lint",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/lint.yml"
+            }
+          },
+          "annotation": "secret is accessed outside of a dedicated environment",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "lint"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 30
+            },
+            "end_point": {
+              "row": 12,
+              "column": 37
+            },
+            "offset_span": {
+              "start": 289,
+              "end": 296
+            }
+          },
+          "feature": "secrets",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "artipacked",
+    "desc": "credential persistence through GitHub Actions artifacts",
+    "url": "https://docs.zizmor.sh/audits/#artipacked",
+    "determinations": {
+      "confidence": "Low",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "does not set persist-credentials: false",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 8,
+              "column": 8
+            },
+            "end_point": {
+              "row": 10,
+              "column": 56
+            },
+            "offset_span": {
+              "start": 131,
+              "end": 227
+            }
+          },
+          "feature": "uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "set persist-credentials: false",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/pr-title.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "Medium",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "default permissions used due to no permissions: block",
+          "route": {
+            "route": []
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 0,
+              "column": 0
+            },
+            "end_point": {
+              "row": 14,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 0,
+              "end": 344
+            }
+          },
+          "feature": "name: pr-title\non:\n  pull_request_target:\n    types: [opened, edited]\njobs:\n  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}\n      - name: Echo title\n        run: echo \"Title is ${{ github.event.pull_request.title }}\"\n      - run: make lint\n",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 14,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 78,
+              "end": 344
+            }
+          },
+          "feature": "  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}\n      - name: Echo title\n        run: echo \"Title is ${{ github.event.pull_request.title }}\"\n      - run: make lint\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "default permissions used due to no permissions: block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 14,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 78,
+              "end": 344
+            }
+          },
+          "feature": "  check:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}\n      - name: Echo title\n        run: echo \"Title is ${{ github.event.pull_request.title }}\"\n      - run: make lint\n",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "dangerous-triggers",
+    "desc": "use of fundamentally insecure workflow trigger",
+    "url": "https://docs.zizmor.sh/audits/#dangerous-triggers",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "this workflow",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 27
+            },
+            "offset_span": {
+              "start": 15,
+              "end": 69
+            }
+          },
+          "feature": "on:\n  pull_request_target:\n    types: [opened, edited]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "pull_request_target is almost always used insecurely",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              },
+              {
+                "Key": "pull_request_target"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 2,
+              "column": 2
+            },
+            "end_point": {
+              "row": 2,
+              "column": 21
+            },
+            "offset_span": {
+              "start": 21,
+              "end": 40
+            }
+          },
+          "feature": "pull_request_target",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 12,
+              "column": 67
+            },
+            "offset_span": {
+              "start": 236,
+              "end": 320
+            }
+          },
+          "feature": "name: Echo title\n        run: echo \"Title is ${{ github.event.pull_request.title }}\"",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 16,
+              "fragment": {
+                "Raw": "github.event.pull_request.title"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 32
+            },
+            "end_point": {
+              "row": 12,
+              "column": 63
+            },
+            "offset_span": {
+              "start": 285,
+              "end": 316
+            }
+          },
+          "feature": "echo \"Title is ${{ github.event.pull_request.title }}\"",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 8
+            },
+            "end_point": {
+              "row": 12,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 261,
+              "end": 264
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "replace expression with environment variable",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/pr-title.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "unpinned-uses",
+    "desc": "unpinned action reference",
+    "url": "https://docs.zizmor.sh/audits/#unpinned-uses",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 8,
+              "column": 8
+            },
+            "end_point": {
+              "row": 10,
+              "column": 56
+            },
+            "offset_span": {
+              "start": 131,
+              "end": 227
+            }
+          },
+          "feature": "uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "action is not pinned to a hash (required by blanket policy)",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 0,
+              "fragment": {
+                "Raw": "actions/checkout@v4"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 8,
+              "column": 14
+            },
+            "end_point": {
+              "row": 8,
+              "column": 33
+            },
+            "offset_span": {
+              "start": 137,
+              "end": 156
+            }
+          },
+          "feature": "actions/checkout@v4",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "anonymous-definition",
+    "desc": "workflow or action definition without a name",
+    "url": "https://docs.zizmor.sh/audits/#anonymous-definition",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Informational",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 5,
+              "column": 7
+            },
+            "offset_span": {
+              "start": 78,
+              "end": 83
+            }
+          },
+          "feature": "check",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "concurrency-limits",
+    "desc": "insufficient job-level concurrency limits",
+    "url": "https://docs.zizmor.sh/audits/#concurrency-limits",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "workflow is missing concurrency setting",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 27
+            },
+            "offset_span": {
+              "start": 15,
+              "end": 69
+            }
+          },
+          "feature": "on:\n  pull_request_target:\n    types: [opened, edited]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/pr-title.yml"
+            }
+          },
+          "annotation": "job affected by missing workflow concurrency",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "check"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 5,
+              "column": 2
+            },
+            "end_point": {
+              "row": 5,
+              "column": 7
+            },
+            "offset_span": {
+              "start": 78,
+              "end": 83
+            }
+          },
+          "feature": "check",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "artipacked",
+    "desc": "credential persistence through GitHub Actions artifacts",
+    "url": "https://docs.zizmor.sh/audits/#artipacked",
+    "determinations": {
+      "confidence": "Low",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "does not set persist-credentials: false",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 8
+            },
+            "end_point": {
+              "row": 9,
+              "column": 33
+            },
+            "offset_span": {
+              "start": 127,
+              "end": 152
+            }
+          },
+          "feature": "uses: actions/checkout@v4",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "set persist-credentials: false",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/release.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "excessive-permissions",
+    "desc": "overly broad permissions",
+    "url": "https://docs.zizmor.sh/audits/#excessive-permissions",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "uses write-all permissions",
+          "route": {
+            "route": [
+              {
+                "Key": "permissions"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 4,
+              "column": 0
+            },
+            "end_point": {
+              "row": 4,
+              "column": 22
+            },
+            "offset_span": {
+              "start": 43,
+              "end": 65
+            }
+          },
+          "feature": "permissions: write-all",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 2
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 14,
+              "column": 8
+            },
+            "end_point": {
+              "row": 20,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 279,
+              "end": 484
+            }
+          },
+          "feature": "name: Build\n        run: |\n          curl -sSL https://example.com/install.sh | bash\n          echo \"BRANCH=${{ github.head_ref }}\" >> $GITHUB_ENV\n        env:\n          TOKEN: ${{ secrets.DEPLOY_TOKEN }}\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 2
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 62,
+              "fragment": {
+                "Raw": "github.head_ref"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 17,
+              "column": 27
+            },
+            "end_point": {
+              "row": 17,
+              "column": 42
+            },
+            "offset_span": {
+              "start": 391,
+              "end": 406
+            }
+          },
+          "feature": "|\n          curl -sSL https://example.com/install.sh | bash\n          echo \"BRANCH=${{ github.head_ref }}\" >> $GITHUB_ENV",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 2
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 15,
+              "column": 8
+            },
+            "end_point": {
+              "row": 15,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 299,
+              "end": 302
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "self-hosted-runner",
+    "desc": "runs on a self-hosted runner",
+    "url": "https://docs.zizmor.sh/audits/#self-hosted-runner",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Auditor"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "self-hosted runner used here",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "runs-on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 7,
+              "column": 4
+            },
+            "end_point": {
+              "row": 7,
+              "column": 24
+            },
+            "offset_span": {
+              "start": 87,
+              "end": 107
+            }
+          },
+          "feature": "    runs-on: self-hosted",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "unpinned-uses",
+    "desc": "unpinned action reference",
+    "url": "https://docs.zizmor.sh/audits/#unpinned-uses",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 8
+            },
+            "end_point": {
+              "row": 9,
+              "column": 33
+            },
+            "offset_span": {
+              "start": 127,
+              "end": 152
+            }
+          },
+          "feature": "uses: actions/checkout@v4",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "action is not pinned to a hash (required by blanket policy)",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 0,
+              "fragment": {
+                "Raw": "actions/checkout@v4"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 14
+            },
+            "end_point": {
+              "row": 9,
+              "column": 33
+            },
+            "offset_span": {
+              "start": 133,
+              "end": 152
+            }
+          },
+          "feature": "actions/checkout@v4",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "unpinned-uses",
+    "desc": "unpinned action reference",
+    "url": "https://docs.zizmor.sh/audits/#unpinned-uses",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 13,
+              "column": 47
+            },
+            "offset_span": {
+              "start": 161,
+              "end": 270
+            }
+          },
+          "feature": "uses: actions/cache@v4\n        with:\n          path: ~/.cache\n          key: deps-${{ hashFiles('**/lock') }}",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "action is not pinned to a hash (required by blanket policy)",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 0,
+              "fragment": {
+                "Raw": "actions/cache@v4"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 14
+            },
+            "end_point": {
+              "row": 10,
+              "column": 30
+            },
+            "offset_span": {
+              "start": 167,
+              "end": 183
+            }
+          },
+          "feature": "actions/cache@v4",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "cache-poisoning",
+    "desc": "runtime artifacts potentially vulnerable to a cache poisoning attack",
+    "url": "https://docs.zizmor.sh/audits/#cache-poisoning",
+    "determinations": {
+      "confidence": "Low",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "generally used when publishing artifacts generated at runtime",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 16
+            },
+            "offset_span": {
+              "start": 14,
+              "end": 42
+            }
+          },
+          "feature": "on:\n  push:\n    tags: [\"v*\"]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "omitting `lookup-only` enables caching",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "uses"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 10,
+              "column": 30
+            },
+            "offset_span": {
+              "start": 161,
+              "end": 183
+            }
+          },
+          "feature": "uses: actions/cache@v4",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 13,
+              "column": 47
+            },
+            "offset_span": {
+              "start": 161,
+              "end": 270
+            }
+          },
+          "feature": "uses: actions/cache@v4\n        with:\n          path: ~/.cache\n          key: deps-${{ hashFiles('**/lock') }}",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "Set lookup-only: true to disable caching",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/release.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "anonymous-definition",
+    "desc": "workflow or action definition without a name",
+    "url": "https://docs.zizmor.sh/audits/#anonymous-definition",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Informational",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 2
+            },
+            "end_point": {
+              "row": 6,
+              "column": 9
+            },
+            "offset_span": {
+              "start": 74,
+              "end": 81
+            }
+          },
+          "feature": "publish",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "concurrency-limits",
+    "desc": "insufficient job-level concurrency limits",
+    "url": "https://docs.zizmor.sh/audits/#concurrency-limits",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "workflow is missing concurrency setting",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 16
+            },
+            "offset_span": {
+              "start": 14,
+              "end": 42
+            }
+          },
+          "feature": "on:\n  push:\n    tags: [\"v*\"]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "job affected by missing workflow concurrency",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 2
+            },
+            "end_point": {
+              "row": 6,
+              "column": 9
+            },
+            "offset_span": {
+              "start": 74,
+              "end": 81
+            }
+          },
+          "feature": "publish",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "secrets-outside-env",
+    "desc": "secrets referenced without a dedicated environment",
+    "url": "https://docs.zizmor.sh/audits/#secrets-outside-env",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Auditor"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 2
+            },
+            "end_point": {
+              "row": 20,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 74,
+              "end": 484
+            }
+          },
+          "feature": "  publish:\n    runs-on: self-hosted\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/cache@v4\n        with:\n          path: ~/.cache\n          key: deps-${{ hashFiles('**/lock') }}\n      - name: Build\n        run: |\n          curl -sSL https://example.com/install.sh | bash\n          echo \"BRANCH=${{ github.head_ref }}\" >> $GITHUB_ENV\n        env:\n          TOKEN: ${{ secrets.DEPLOY_TOKEN }}\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 2
+            },
+            "end_point": {
+              "row": 6,
+              "column": 9
+            },
+            "offset_span": {
+              "start": 74,
+              "end": 81
+            }
+          },
+          "feature": "publish",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/release.yml"
+            }
+          },
+          "annotation": "secret is accessed outside of a dedicated environment",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "publish"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 19,
+              "column": 21
+            },
+            "end_point": {
+              "row": 19,
+              "column": 41
+            },
+            "offset_span": {
+              "start": 460,
+              "end": 480
+            }
+          },
+          "feature": "secrets.DEPLOY_TOKEN",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  }
+]
