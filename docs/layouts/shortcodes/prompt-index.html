@@ -1,0 +1,19 @@
+{{- /*
+  {{% prompt-index %}} lists every prompt in content/prompts/, in weight
+  order, each with a link to the page that embeds it (its "page" front
+  matter). Used on the Prompt Recipes page. It returns Markdown and is called
+  with {{% %}}, so its headings are part of the page and appear, with their
+  anchors, in the "On this page" list.
+*/ -}}
+{{- $s := site.GetPage "/prompts" -}}
+{{- if not $s }}{{ $s = hugo.Sites.Default.GetPage "/prompts" }}{{ end -}}
+{{- range $s.Pages.ByWeight }}
+  {{- $home := site.GetPage .Params.page }}
+  {{- if not $home }}{{ errorf "prompt %q: page %q not found; fix its \"page\" front matter" .File.Path .Params.page }}{{ end }}
+## {{ .Title }}
+
+From [{{ $home.Title }}]({{ $home.RelPermalink }})
+
+{{ strings.TrimSpace .RawContent }}
+
+{{ end -}}

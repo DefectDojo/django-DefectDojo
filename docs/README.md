@@ -86,3 +86,7 @@ Rules:
   `content/metrics_reports/dashboards/PRO__custom_dashboards_api.md`: *"The Vue UI calls an
   internal mirror of these endpoints under `/api/vue/dashboard_v2/`. Always automate against
   the stable, customer-facing `/api/v2/dashboards/` paths documented here."*
+
+## AI assistant prompts
+
+A prompt for an AI assistant (the "... with an AI assistant" sections) lives in its own file under `content/prompts/`, never in the page that shows it. The page embeds it with `{{< prompt "<name>" >}}`, and the [Prompt Recipes](content/automation/api/prompt_recipes.md) page lists every prompt automatically. To add one, create `content/prompts/<name>.md` with a `title`, a `weight` and a `page` (the path of the page that embeds it), then add the shortcode to that page. The build fails if the shortcode names a prompt that does not exist, or if a prompt's `page` does not.
