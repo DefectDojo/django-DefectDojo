@@ -109,7 +109,7 @@ class TestFindingCreateFoundByLockOrder(TestCase):
 class TestFindingFoundByWritersLockOrder(TestCase):
 
     """
-    The other writers of an existing finding's found_by take the same lock first (dojo-pro#7979).
+    The other API writers of an existing finding's found_by take the same lock first.
 
     The v3 create (``services.create_finding``), the v3 update (``services.update_finding``) and the v2 update
     (``FindingSerializer.update``) each replace found_by with ``set()`` in its own transaction, so each deadlocked

@@ -1178,7 +1178,8 @@ def set_found_by_locking_finding_first(finding, found_by):
     """
     ``finding.found_by.set(found_by)``, in one transaction that locks the finding before any found_by row.
 
-    Every writer that replaces a finding's found_by (the v2 and v3 create, the v2 and v3 update) goes through here.
+    The API writers that replace a finding's found_by go through here: the v2 and v3 create and the v2 and v3
+    update. Other ``found_by.set()`` callers (copying a cluster's found_by to a new original, for one) do not.
     ``set()`` deletes the rows that were not requested (on a create, the one ``Finding.save()`` added for the test's
     type) and inserts the requested rows. Both stay locked until COMMIT, where Postgres checks the new rows'
     deferred foreign key with FOR KEY SHARE on the finding. The chunked bulk delete (the excess-duplicate delete,
