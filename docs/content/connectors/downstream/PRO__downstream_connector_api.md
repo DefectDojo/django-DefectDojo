@@ -24,6 +24,7 @@ All paths on this page start with `/api/v2/downstream/`. The full request and re
 Permissions:
 
 - To read these objects, your user needs the global **Integration View** permission. To create, change or delete them, your user needs the global **Integration Edit** permission.
+- Connectors and Ticket Templates can belong to a group. For one that a group owns, the same permission through your role in that group is enough. One that no group owns still needs the global permission.
 - To assign a mapping to an Asset or an Engagement, you also need edit rights on that Asset or Engagement.
 
 > **⚠️ Security Notice:** Your API token grants access to your DefectDojo data. Never paste it into a chat, screenshot, ticket, or committed file. Read it from an environment variable, and rotate it if it is ever exposed.
