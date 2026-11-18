@@ -295,8 +295,10 @@ class HistoryLookupIndexBuildCommitTest(SimpleTestCase):
         lock_holder = psycopg.connect(**params, autocommit=True)
         self.addCleanup(lock_holder.close)  # also releases the lock if the test fails early
         lock_holder.execute("SELECT pg_advisory_lock(%s)", [HELD_LOCK_KEY])
+        # A run killed before its cleanups leaves both in a kept test database: clear them first.
+        _execute(f"DROP EVENT TRIGGER IF EXISTS {HELD_FUNCTION}")
         _execute(
-            f"CREATE FUNCTION {HELD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$"
+            f"CREATE OR REPLACE FUNCTION {HELD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$"
             f" BEGIN IF current_setting('application_name') = '{HELD_BUILDER_APPLICATION_NAME}' THEN"
             f" PERFORM pg_advisory_xact_lock({HELD_LOCK_KEY}); END IF; END $$",
         )
