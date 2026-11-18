@@ -75,6 +75,7 @@ Key facts:
 - [Import Scan form (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/os__import_scan_ui/)
 - [Import from GitHub Actions](https://docs.defectdojo.com/import_data/import_scan_files/github_actions/): Import scan results from a GitHub Actions workflow with the official DefectDojo action
 - [Endpoint Meta Importer (Open Source)](https://docs.defectdojo.com/import_data/import_scan_files/endpoint_meta_importer/): Bulk-apply tags and custom fields to endpoints via CSV
+- [Scan with Early Light](https://docs.defectdojo.com/import_data/import_scan_files/earlylight/): Find newly disclosed vulnerabilities with DefectDojo's open source Early Light scanner, then import the results
 - [Import from API](https://docs.defectdojo.com/import_data/import_scan_files/api_pipeline_modelling/)
 - [Universal Parser (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/universal_parser/)
 - [Universal Importer & DefectDojo-CLI (Pro)](https://docs.defectdojo.com/import_data/pro/specialized_import/external_tools/): Import files to DefectDojo from the command line
