@@ -60,7 +60,7 @@ If you have edit permission on a Finding, the **Action** column offers a dropdow
 
 ![The Similar Findings row action menu](images/similar_findings_actions.png)
 
-- **Mark as duplicate**: link the similar Finding into the current Finding's duplicate cluster, as a duplicate of the cluster's original. With Engagement-level deduplication enabled, it is offered only when the similar Finding is in the same Engagement as that original.
+- **Mark as duplicate**: link the similar Finding into the current Finding's duplicate cluster, as a duplicate of the cluster's original. With Engagement-level deduplication enabled, it is offered only when the similar Finding is in the same Engagement as that original. It is not offered while the cluster's original is itself marked as a duplicate, for example of a Finding outside the cluster: use **Reset duplicate status** on that original first.
 - **Set as original**: promote a Finding to be the original (cluster root).
 - **Reset finding duplicate status**: remove a Finding from its cluster.
 

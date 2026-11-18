@@ -3489,7 +3489,9 @@ def calculate_possible_related_actions_for_similar_finding(
     blocked = set()
     if page_separated:
         blocked.add("set_finding_as_original")
-    if root_separated:
+    # The mark route also refuses the page finding or its root as the duplicate, and a root that is itself a
+    # duplicate (a chain, or an orphan whose original is gone).
+    if root_separated or root.duplicate or similar_finding.id in {finding.id, root.id}:
         blocked.add("mark_finding_duplicate")
     if len(blocked) == 2 and not similar_finding.duplicate_finding:
         # Without a duplicate_finding the row can only offer those two actions, so skip the per-row checks.
