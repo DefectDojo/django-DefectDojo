@@ -42,7 +42,14 @@ switch is set, and none of its pages are reachable. Settings → Feature Flags
 says so on the PSIRT row (&ldquo;Requires Locations to be enabled&rdquo;). Enable Locations
 first; it is environment-sourced, so it needs a restart to take effect.</p><p>If the entries are visible but locked, that is the other gate: the licence.
 PSIRT needs the <strong>PSIRT Advisory Engine</strong> entitlement, and a locked entry
-explains what to ask for.</p><h2 id=who-can-use-psirt>Who can use PSIRT</h2><p>Three things admit a user, and only one of them needs to be true:</p><ul><li>the <strong>PSIRT</strong> configuration permission,</li><li>a global <strong>Maintainer</strong> or <strong>Owner</strong> role, or</li><li>superuser.</li></ul><p><strong>Prefer the configuration permission.</strong> A global Maintainer role is write access
+explains what to ask for. Settings → Feature Flags shows &ldquo;Not included in the
+current license.&rdquo; on the PSIRT row while the license lacks it. The flag can
+still be turned on ahead of the license.</p><h3 id=after-a-license-update>After a license update</h3><p>A license that adds PSIRT unlocks it without a restart:</p><ul><li><strong>Uploaded on the License page:</strong> at once, on the next page load.</li><li><strong>Helm:</strong> the chart mounts the license Secret as a file and also passes it
+as <code>DD_LICENSE</code>. After the Secret changes, Kubernetes refreshes the file in
+the running pods (usually within a minute or two), but not the environment
+variable. DefectDojo takes the file when it was issued after the
+<code>DD_LICENSE</code> value, at its next license check: within five minutes, or
+straight away when an administrator opens the License page.</li></ul><h2 id=who-can-use-psirt>Who can use PSIRT</h2><p>Three things admit a user, and only one of them needs to be true:</p><ul><li>the <strong>PSIRT</strong> configuration permission,</li><li>a global <strong>Maintainer</strong> or <strong>Owner</strong> role, or</li><li>superuser.</li></ul><p><strong>Prefer the configuration permission.</strong> A global Maintainer role is write access
 to every asset in the instance, so granting it to give somebody PSIRT hands them
 the rest of the product as well. The PSIRT permission grants PSIRT and nothing
 else.</p><p>It comes in two halves, assignable separately from <strong>Settings → User Management</strong>

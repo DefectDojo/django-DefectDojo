@@ -172,6 +172,7 @@ Key facts:
 - [Supply Chain Security (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__supply_chain_security/): Flag components named by the OSSF malicious-packages feed, enforce license policies, analyze npm and PyPI packages for risky behavior, and check packages before they land
 - [Exporting an AIBOM (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__exporting_an_aibom/): Export an Asset's AI inventory as a CycloneDX 1.6 AI bill of materials, with evidence and authorization decisions
 - [Domain, IP Address and Certificate Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__attack_surface_locations/): Domain, IP address and certificate locations describe an organization's internet-facing attack surface: the DNS names, addresses and TLS certificates that parsers and connectors report
+- [CPE Locations (Pro)](https://docs.defectdojo.com/asset_modelling/locations/pro__cpe_locations/): CPE locations record the platforms a finding affects, named by CPE vendor, product and version
 - [Knowledge Check (Pro)](https://docs.defectdojo.com/asset_modelling/locations/quiz/): Test what you know about Locations with 19 multiple-choice questions
 - [Components (Pro)](https://docs.defectdojo.com/asset_modelling/components/pro__components/): Tracking third-party libraries and software components in DefectDojo Pro
 - [Services](https://docs.defectdojo.com/asset_modelling/components/services/): Tracking Microservices
