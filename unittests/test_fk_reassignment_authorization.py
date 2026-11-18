@@ -521,9 +521,11 @@ class TestFKReassignmentAuthorization(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertIsNone(self.test_src.api_scan_configuration_id)
 
     # ────────────────────────────────────────────────────────────────────
-    # FindingSerializer.sonarqube_issue: the model is superuser-only, so the
-    # relation is not assignable from the public finding API at all. The
-    # field is read-only, so DRF answers 200/201 and drops the value.
+    # sonarqube_issue: the model is superuser-only, so the relation is not
+    # assignable from the finding API or the classic create forms. The API
+    # field is read-only, so DRF answers 200/201 and drops the value. The
+    # create forms leave the field out, so the view redirects (302) and
+    # ignores the posted value.
     # ────────────────────────────────────────────────────────────────────
     def _foreign_sonarqube_issue(self):
         issue = Sonarqube_Issue.objects.create(
