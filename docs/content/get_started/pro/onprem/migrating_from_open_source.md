@@ -307,7 +307,7 @@ Discover also fills the connection's migration page with the [preflight report](
 * **Warnings** names each test type that DefectDojo Pro already has with other settings. DefectDojo Pro keeps its own settings for it. It also warns when audit retention is on and audit events cross.
 * **Products** shows the totals and the counts of each Product. Keep them to check the result of the Sync. The totals include the imports, import actions, audit events and legacy audit entries that the Sync copies. They also count the endpoints. The **Tracking Files**, **Benchmarks**, **Answered Questionnaires** and **Jira Links** totals show only for a source on 3.5.200 or later.
 * **To Be Created** lists the users and the reference data that the Sync creates.
-* **Not Migrated** lists what stays on the source. It names the secrets, and the settings and feature areas that you set up in DefectDojo Pro yourself. It names Audit History and Import History when the source sends no such history. It also names them when you turned the field off. For a source before 3.5.200, it also names endpoints with no finding, endpoint metadata, questionnaires, benchmarks and tracking files.
+* **Things to Note** lists the steps to do by hand after the migration. Start with the users: activate them so they can set a password. It also names what stays on the source, for an older source or a history field that you turned off.
 * **Estimated Duration** tells you how long the first Sync takes.
 
 ### Step 3: Sync
