@@ -1213,6 +1213,7 @@ class BaseImporter(ImporterOptions):
         group_names_to_findings_dict: dict,
         *,
         unsaved: bool = False,
+        legacy_group_names: dict | None = None,
     ) -> bool:
         """
         Determines how to handle an incoming finding with respect to grouping
@@ -1222,12 +1223,20 @@ class BaseImporter(ImporterOptions):
         unsaved: the finding has not been saved yet, so its group is named from the
         values save() will store (see get_group_by_group_name).
 
+        legacy_group_names: when given, records per group name the name the group got from the
+        finding's unsaved values before groups were named from the stored ones, where the two
+        differ (see add_findings_to_auto_groups).
+
         Returns True if the finding was added to a group, False otherwise.
         """
         if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
             name = finding_helper.get_group_by_group_name(finding, self.group_by, unsaved=unsaved)
             if name is not None:
+                if legacy_group_names is not None:
+                    legacy = finding_helper.get_group_by_group_name(finding, self.group_by)
+                    if legacy is not None and legacy != name:
+                        legacy_group_names.setdefault(name, {})[legacy] = None
                 if name in group_names_to_findings_dict:
                     group_names_to_findings_dict[name].append(finding)
                 else:

@@ -352,7 +352,7 @@ def get_group_by_group_name(finding, finding_group_by_option, *, unsaved=False):
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
     elif finding_group_by_option == "finding_title":
-        group_name = _persisted_title(finding.title) if unsaved else finding.title
+        group_name = _persisted_title(finding.title) if unsaved and finding.title else finding.title
     elif finding_group_by_option == "vuln_id_from_tool":
         if finding.vuln_id_from_tool:
             group_name = f"Vulnerability ID {finding.vuln_id_from_tool}" if finding.vuln_id_from_tool else "None"
@@ -417,7 +417,7 @@ def _test_finding_ids_by_group_name(test_id, group_by, names):
     return by_name
 
 
-def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
+def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, legacy_names=None, **kwargs):
     """
     Put the findings of one (re)import into their auto groups, all names at once.
 
@@ -427,6 +427,11 @@ def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_fin
     with the same name. The cost does not grow with the number of groups: existing groups
     are read in one query, the test's findings once (and only when some name has no group
     yet), and new groups and memberships are written in bulk.
+
+    legacy_names maps a name to other names the same group may carry: a reimport named a new
+    finding's finding_title group from the report's raw title before it named it from the stored
+    one. A name with no group of its own joins the oldest group under one of those names (the
+    group its JIRA issue hangs off) instead of starting a second group beside it.
 
     bulk_create sends no post_save, so it is replayed once per new group with
     ``bulk_created_instances`` set to the whole batch: a receiver keeps working one group at
@@ -438,9 +443,16 @@ def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_fin
     test_id = next(iter(group_names_to_findings.values()))[0].test_id
 
     # Groups are one per (test, name[:255]); the oldest wins where duplicates exist.
+    legacy_names = legacy_names or {}
+    lookup = {name[:255] for name in group_names_to_findings}
+    lookup.update(legacy[:255] for name in group_names_to_findings for legacy in legacy_names.get(name, ()))
     groups = {}
-    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in={name[:255] for name in group_names_to_findings}).order_by("id"):
+    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in=lookup).order_by("id"):
         groups.setdefault(finding_group.name, finding_group)
+    for name in group_names_to_findings:
+        legacy_groups = [groups[legacy[:255]] for legacy in legacy_names.get(name, ()) if legacy[:255] in groups]
+        if name[:255] not in groups and legacy_groups:
+            groups[name[:255]] = min(legacy_groups, key=lambda finding_group: finding_group.id)
     # A name without a group needs the test's other findings of that name: they decide
     # whether a lone finding forms a group, and a new group takes them in.
     missing = {name for name in group_names_to_findings if name[:255] not in groups}

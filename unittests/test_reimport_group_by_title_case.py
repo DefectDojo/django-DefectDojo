@@ -8,6 +8,7 @@ from unittest.mock import patch
 from django.test import override_settings
 from django.utils import timezone
 
+from dojo.finding.helper import get_group_by_group_name
 from dojo.models import (
     Development_Environment,
     Engagement,
@@ -92,3 +93,42 @@ class TestReimportGroupByTitleCase(DojoAPITestCase):
         # keep-in-sync pushes each group with its new finding to that group's JIRA issue
         pushed_groups = {call.args[0] for call in push.call_args_list if isinstance(call.args[0], Finding_Group)}
         self.assertEqual(set(groups.values()), pushed_groups)
+
+    def test_reimport_new_findings_join_a_group_an_earlier_reimport_named_from_the_raw_title(self):
+        # Before reimports named a new finding's group from the stored title, they named it from the
+        # report's raw title, and that group is the one JIRA holds. A later reimport must keep using it
+        # rather than start a title-cased group beside it.
+        test_id = self.import_scan_with_params(self.report, scan_type=SCAN_TYPE, engagement=self.engagement.id, verified=True)["test"]
+        self.assertEqual({}, self._groups(test_id))
+        legacy = {}
+        for title in TITLES:
+            group = Finding_Group.objects.create(test_id=test_id, name=f"Findings in: {title.lower()}", creator=self.get_test_admin())
+            group.findings.add(*Finding.objects.filter(test_id=test_id, title=title))
+            JIRA_Issue.objects.create(jira_project=self.jira_project, jira_id=group.name, jira_key=f"GTC-{group.id}", finding_group=group)
+            legacy[title] = group
+
+        with patch("dojo.jira.helper.push_to_jira") as push:
+            self.reimport_scan_with_params(
+                test_id, self.report_with_new, scan_type=SCAN_TYPE, engagement=self.engagement.id, group_by="finding_title", verified=True,
+            )
+
+        self.assertEqual(
+            {
+                f"Findings in: {title.lower()}": [(title, f"first finding of {title[-6:].lower()}"), (title, f"second finding of {title[-6:].lower()}")]
+                for title in TITLES
+            },
+            self._groups(test_id),
+        )
+        pushed_groups = {call.args[0] for call in push.call_args_list if isinstance(call.args[0], Finding_Group)}
+        self.assertEqual(set(legacy.values()), pushed_groups)
+
+    def test_unsaved_finding_without_a_title_has_no_title_group(self):
+        # A missing title names no group, saved or not: the reimport leaves such a finding ungrouped.
+        for title in (None, ""):
+            with self.subTest(title=title):
+                finding = Finding(title=title)
+                self.assertEqual(
+                    get_group_by_group_name(finding, "finding_title"),
+                    get_group_by_group_name(finding, "finding_title", unsaved=True),
+                )
+        self.assertIsNone(get_group_by_group_name(Finding(title=None), "finding_title", unsaved=True))
