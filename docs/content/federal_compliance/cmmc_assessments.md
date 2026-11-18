@@ -61,6 +61,12 @@ A requirement with no result yet counts as not met: it is deducted at its full w
 assessment cannot be final until every requirement in the catalog has a result. A requirement the
 catalog no longer includes is not required, and is scored only if it already has a result.
 
+The scorecard says how many requirements have no result. **Populate Requirements** (next to
+**Recompute**, for users who can edit the Asset) adds each of them to the requirements table as
+**Not met**, ready to assess, and recomputes the score. Through the API,
+`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` does the same, and the assessment's `summary`
+reports the count as `missing_requirements`.
+
 Requirement 3.12.4 (the System Security Plan requirement) scores as not applicable, per the
 methodology.
 
@@ -68,7 +74,8 @@ An assessment with no requirement results (created through the API without popul
 requirements, or one whose requirements could not be populated) has no score: the scorecard and the
 Asset's Compliance summary say **Not scored**, the assessment is not eligible for conditional
 status, and it stays in progress. The API reports its `sprs_score` as `null`.
-`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` populates the requirements from the catalog.
+`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` populates the requirements from the catalog,
+on an assessment with no results or with only some of them.
 
 ### Whether a conditional status is possible
 
