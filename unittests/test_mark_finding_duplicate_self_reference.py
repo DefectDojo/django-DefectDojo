@@ -237,7 +237,11 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         # actions are refused, but resetting its duplicate status stays available.
         self._move_member_of_other_to_another_engagement(member_dedupe=True, root_dedupe=True)
         self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
-        self.assertEqual(self._actions(ROOT, MEMBERS[1]), ["None", "reset_finding_duplicate_status"])
+        self.assertEqual(self._actions(ROOT, MEMBERS[1]), ["reset_finding_duplicate_status"])
+        # The row template shows None alone when the first action is None, so the reset must come first to render.
+        response = self.client.get(f"/finding/{ROOT}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(f"/finding/{MEMBERS[1]}/duplicate/reset", response.content.decode())
 
     def test_a_row_in_another_engagement_that_is_not_a_duplicate_offers_nothing(self):
         Engagement.objects.filter(pk__in=(1, 4)).update(deduplication_on_engagement=True)

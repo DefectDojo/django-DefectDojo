@@ -33,9 +33,11 @@ from dojo.authorization.authorization import user_has_global_permission_or_403, 
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.deduplication import (
     _fetch_fp_candidates_for_batch,
+    cluster_root,
     do_false_positive_history_batch,
     finding_mitigated,
     finding_not_human_set_status,
+    is_deduplication_on_engagement_mismatch,
     manual_duplicate_hides_open_finding,
     match_finding_to_existing_findings,
 )
@@ -3107,7 +3109,7 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
 
     # The mark points the duplicate at the original's cluster root, so the engagement check compares against
     # that root, the finding the duplicate ends up under, not the original it was posted with.
-    root = original.duplicate_finding if original.duplicate and original.duplicate_finding else original
+    root = cluster_root(original)
     # The root is where the duplicate lands, so it must sit in the duplicate's product, as the original must.
     if root.test.engagement.product_id != duplicate.test.engagement.product_id:
         raise Http404
@@ -3473,30 +3475,28 @@ def duplicate_cluster(request, finding):
 def calculate_possible_related_actions_for_similar_finding(
     request, finding, similar_finding,
 ):
+    engagement_mismatch = {
+        "action": "None",
+        "reason": ("This finding is in a different engagement, and deduplication on engagement is enabled "
+                   "for one of them."),
+    }
+    # Each action is offered only where its route accepts it. Set as Original compares the similar finding with
+    # the finding on the page. Mark as Duplicate lands the similar finding under the page finding's cluster root,
+    # so it compares with that root. Reset Duplicate Status compares no engagements.
+    root = cluster_root(finding)
+    page_separated = is_deduplication_on_engagement_mismatch(similar_finding, finding)
+    root_separated = page_separated if root is finding else is_deduplication_on_engagement_mismatch(similar_finding, root)
+    blocked = set()
+    if page_separated:
+        blocked.add("set_finding_as_original")
+    if root_separated:
+        blocked.add("mark_finding_duplicate")
+    if len(blocked) == 2 and not similar_finding.duplicate_finding:
+        # Without a duplicate_finding the row can only offer those two actions, so skip the per-row checks.
+        return [engagement_mismatch]
+
     actions = []
-    if similar_finding.test.engagement != finding.test.engagement and (
-        similar_finding.test.engagement.deduplication_on_engagement
-        or finding.test.engagement.deduplication_on_engagement
-    ):
-        actions.append(
-            {
-                "action": "None",
-                "reason": ("This finding is in a different engagement and deduplication_inside_engagment "
-                           "is enabled here or in that finding"),
-            },
-        )
-        # Resetting a duplicate only takes it out of its cluster, which is valid whatever its engagement, and it is
-        # the remedy a refused Mark as Duplicate names for a duplicate in another engagement.
-        if similar_finding.duplicate and similar_finding.duplicate_finding_id:
-            actions.append(
-                {
-                    "action": "reset_finding_duplicate_status",
-                    "reason": ("This will remove the finding from the cluster, "
-                               "effectively marking it no longer as duplicate. "
-                               "Will not trigger deduplication logic after saving."),
-                },
-            )
-    elif finding.duplicate_finding == similar_finding:
+    if finding.duplicate_finding == similar_finding:
         actions.append(
             {
                 "action": "None",
@@ -3572,4 +3572,5 @@ def calculate_possible_related_actions_for_similar_finding(
             },
         ))
 
-    return actions
+    allowed = [action for action in actions if action["action"] not in blocked]
+    return allowed or [engagement_mismatch]
