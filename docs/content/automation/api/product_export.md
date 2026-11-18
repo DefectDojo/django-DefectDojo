@@ -24,7 +24,7 @@ Private notes cross. A product id that does not exist gets a 404.
 
 The export does not take a snapshot of the database.
 If a user changes the product during the stream, the change can show in one line and not in another.
-If the instance has a read-only mode (DefectDojo 3.4.300 or later), turn it on first so the export is consistent.
+If the instance has a read-only mode (DefectDojo 3.5.100 or later), turn it on first so the export is consistent.
 
 ## The manifest: `GET /api/v2/export/manifest/`
 
