@@ -3,7 +3,7 @@ annotated-types==0.8.0
 anyio==4.16.0
 appdirs==1.4.4
 argon2-cffi==25.1.0
-argon2-cffi-bindings==26.1.0
+argon2-cffi-bindings==26.2.0
 asgiref==3.13.0
 asteval==1.0.10
 attrs==26.1.0
