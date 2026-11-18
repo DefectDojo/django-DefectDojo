@@ -247,3 +247,106 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         Engagement.objects.filter(pk__in=(1, 4)).update(deduplication_on_engagement=True)
         Finding.objects.filter(pk=OTHER).update(test=Test.objects.get(pk=4))
         self.assertEqual(self._actions(ROOT, OTHER), ["None"])
+
+    # Regression: the similar-findings menu offered Mark as Duplicate when the page finding's cluster root is itself a
+    # duplicate (a chain, or an orphan whose original is gone), and the route refused it. The menu offers what the
+    # route accepts: Mark as Duplicate goes, Set as Original and Reset Duplicate Status stay.
+    def _chain_root(self):
+        # Finding 2, the root of finding 3's cluster, is itself a duplicate of finding 124.
+        Finding.objects.filter(pk=ROOT).update(duplicate=True, duplicate_finding=124, active=False)
+        return ROOT
+
+    def _orphan_page(self):
+        # Finding 3 is a duplicate of nothing, so it heads its own cluster.
+        Finding.objects.filter(pk=MEMBERS[0]).update(duplicate_finding=None)
+        return MEMBERS[0]
+
+    def _assert_menu_matches_route(self, root, expected_actions):
+        page = MEMBERS[0]
+        self.assertEqual(self._actions(page, OTHER), expected_actions)
+        self._assert_refused(OTHER, page, f"Finding {root} is itself a duplicate")
+
+    def test_a_row_under_a_root_that_is_a_duplicate_offers_no_mark(self):
+        root = self._chain_root()
+        self._assert_menu_matches_route(root, ["set_finding_as_original"])
+
+    def test_a_row_under_an_orphaned_page_finding_offers_no_mark(self):
+        root = self._orphan_page()
+        self._assert_menu_matches_route(root, ["set_finding_as_original"])
+
+    def test_a_duplicate_row_under_a_root_that_is_a_duplicate_offers_only_the_reset(self):
+        root = self._chain_root()
+        Finding.objects.filter(pk=OTHER).update(duplicate=True, duplicate_finding=124)
+        self._assert_menu_matches_route(root, ["reset_finding_duplicate_status"])
+
+    def test_a_duplicate_row_under_an_orphaned_page_finding_offers_only_the_reset(self):
+        root = self._orphan_page()
+        Finding.objects.filter(pk=OTHER).update(duplicate=True, duplicate_finding=124)
+        self._assert_menu_matches_route(root, ["reset_finding_duplicate_status"])
+
+    def test_set_as_original_stays_offered_because_the_route_accepts_it_under_a_duplicate_root(self):
+        self._chain_root()
+        page = MEMBERS[0]
+        response = self.client.post(f"/finding/{page}/original/{OTHER}")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual([str(m) for m in get_messages(response.wsgi_request)], [])
+        # The old root and its members, finding 3 among them, now sit one level under finding 7.
+        self.assertEqual(
+            self._state(ROOT, *MEMBERS, OTHER),
+            {**dict.fromkeys((ROOT, *MEMBERS), (True, OTHER, False)), OTHER: (False, None, False)},
+        )
+
+    def test_a_row_under_a_root_that_is_an_original_still_offers_the_mark(self):
+        # Control: under an ordinary cluster root the menu keeps both actions, and the route accepts the mark.
+        self.assertEqual(self._actions(MEMBERS[0], OTHER), ["mark_finding_duplicate", "set_finding_as_original"])
+        self.assertEqual(self._mark(OTHER, MEMBERS[0]), [])
+        self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})
+
+    def test_the_view_finding_page_hides_the_mark_under_a_root_that_is_a_duplicate(self):
+        self._chain_root()
+        page = MEMBERS[0]
+        response = self.client.get(f"/finding/{page}")
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        # Finding 7's row is on the page and offers Set as Original, but not the mark the route would refuse.
+        self.assertIn(f"/finding/{page}/original/{OTHER}", content)
+        self.assertNotIn(f"/finding/{OTHER}/duplicate/{page}", content)
+
+    def _reasons(self, page_id, row_id):
+        page, row = Finding.objects.get(pk=page_id), Finding.objects.get(pk=row_id)
+        return [entry["reason"] for entry in calculate_possible_related_actions_for_similar_finding(None, page, row)]
+
+    def _move_page_to_another_engagement(self):
+        # Finding 3 moves to test 4 (engagement 4) while its root, finding 2, stays in engagement 1, with deduplication
+        # on engagement in both, so Set as Original is refused between finding 3 and the root's row.
+        Engagement.objects.filter(pk__in=(1, 4)).update(deduplication_on_engagement=True)
+        Finding.objects.filter(pk=MEMBERS[0]).update(test=Test.objects.get(pk=4))
+
+    def test_the_root_row_names_the_root_when_the_page_is_in_another_engagement(self):
+        self._move_page_to_another_engagement()
+        reasons = self._reasons(MEMBERS[0], ROOT)
+        self.assertEqual(len(reasons), 1, reasons)
+        self.assertTrue(reasons[0].startswith("This finding is the root of the cluster"), reasons)
+
+    def test_the_root_row_names_the_root_when_it_is_a_duplicate_and_the_page_is_in_another_engagement(self):
+        self._chain_root()
+        self._move_page_to_another_engagement()
+        reasons = self._reasons(MEMBERS[0], ROOT)
+        self.assertEqual(len(reasons), 1, reasons)
+        self.assertTrue(reasons[0].startswith("This finding is the root of the cluster"), reasons)
+
+    def test_set_as_original_stays_offered_because_the_route_accepts_it_under_an_orphaned_page_finding(self):
+        page = self._orphan_page()
+        response = self.client.post(f"/finding/{page}/original/{OTHER}")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual([str(m) for m in get_messages(response.wsgi_request)], [])
+        # Finding 3 now sits under finding 7; the other members keep their original, finding 2.
+        self.assertEqual(
+            self._state(ROOT, *MEMBERS, OTHER),
+            {
+                ROOT: (False, None, True),
+                page: (True, OTHER, False),
+                **dict.fromkeys(MEMBERS[1:], (True, ROOT, False)),
+                OTHER: (False, None, False),
+            },
+        )

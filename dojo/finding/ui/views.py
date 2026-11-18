@@ -3140,7 +3140,8 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     elif root.duplicate:
         refusal = _(
             "Finding %(root)s is itself a duplicate, so finding %(duplicate)s cannot be marked as its duplicate. "
-            "Use Reset Duplicate Status on finding %(root)s first.",
+            "Use Set as Original on finding %(duplicate)s instead, or uncheck Duplicate on finding %(root)s's Edit "
+            "Finding page first.",
         ) % {"root": root.id, "duplicate": duplicate.id}
     if refusal:
         messages.add_message(request, messages.ERROR, refusal, extra_tags="alert-danger")
@@ -3568,7 +3569,8 @@ def calculate_possible_related_actions_for_similar_finding(
     blocked = set()
     if page_separated:
         blocked.add("set_finding_as_original")
-    if root_separated:
+    # The mark route also refuses a root that is itself a duplicate (a chain, or an orphan whose original is gone).
+    if root_separated or root.duplicate:
         blocked.add("mark_finding_duplicate")
     if len(blocked) == 2 and not similar_finding.duplicate_finding:
         # Without a duplicate_finding the row can only offer those two actions, so skip the per-row checks.
