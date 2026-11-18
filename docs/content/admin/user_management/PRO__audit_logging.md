@@ -108,7 +108,7 @@ This API returns 31 days of audit logs.
 * Parameter `window_month` which will take a month and year in the format MM-YYYY and provide the audit logs for that month.
 * You can set the `window_start` parameter to limit these logs to a shorter window, rather than returning the entire month. It takes a date in the format YYYY-MM-DD and returns up to 31 days of logs from that date.
 * Date filters such as `timestamp_after` and `timestamp_before` take a date (YYYY-MM-DD), not a date and time.
-* A parameter value the endpoint cannot read, such as `window_start=2024-13-01`, is answered with a 400 response that names the parameter, rather than being ignored.
+* A malformed date in `window_start`, `timestamp_after` or `timestamp_before` (such as `window_start=2024-13-01`), or a non-numeric object ID, is answered with a 400 response that names the parameter, rather than being ignored.
 
 ### Paging Through Results
 
