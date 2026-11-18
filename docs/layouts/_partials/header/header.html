@@ -212,7 +212,7 @@
                 {{ if and (ne $.Lang .Lang) (not (in $.Params.skipTranslations .Lang)) -}}
                 {{ $isTranslated := in $translatedLangs .Lang -}}
                 <li><a class="dropdown-item {{ if not $isTranslated }}untranslated{{ end }}" rel="alternate"
-                    href="{{ if $isTranslated }}{{ (index (where $.Translations " Lang" .Lang) 0).RelPermalink }}{{ else
+                    href="{{ if $isTranslated }}{{ (index (where $.Translations "Lang" .Lang) 0).RelPermalink }}{{ else
                     }}{{ .Lang | relURL }}{{ end }}" hreflang="{{ .Lang }}" lang="{{ .Lang }}">{{ .LanguageName
                     }}</a>
                 </li>

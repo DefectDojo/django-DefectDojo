@@ -20,6 +20,7 @@ from dojo.api_v2.views import (
 )
 from dojo.authorization import api_permissions as permissions
 from dojo.models import Endpoint, Finding, Product, Product_API_Scan_Configuration
+from dojo.product.api.dupe_delete_hold import ClearDupeDeleteHoldMixin
 from dojo.product.api.filters import ApiProductFilter
 from dojo.product.api.serializer import (
     ProductAPIScanConfigurationSerializer,
@@ -64,6 +65,7 @@ class ProductAPIScanConfigurationViewSet(
 
 @extend_schema_view(**schema_with_prefetch())
 class ProductViewSet(
+    ClearDupeDeleteHoldMixin,
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     mixins.CreateModelMixin,

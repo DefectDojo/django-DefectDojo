@@ -28,6 +28,10 @@ The Command Center is one composed screen that answers, in fixed zones, **what's
 
 Every number on the screen carries a delta against the previous equivalent window, and every number is a door. Every delta names its window. A number the ledgers cannot support is a dash, never a zero.
 
+### On a phone
+
+On a phone or another narrow screen, the scene stacks its zones one under the other instead of setting them side by side. **Top Sources** comes first, one row per source with the tool's name on one side and its volume over its change on the other (a long name wraps onto a second line). The rings follow, with the score, its band and its component captions on the ring, and the three counts (processed, unique and actionable) in a row of their own under it, each with its name and its plain words. The receipts come next, and then the **Active** and **Mitigated** boxes, one under the other, each with its severity tags at its foot. The ribbons are left out, since there is no room between the zones for them to run. The type follows the width of the screen down to a floor that keeps every count and name legible, and nothing runs past the edge of the screen. Every number is still a door: tapping a source, an arc, a count or an outcome opens its list, and tapping the score opens the breakdown. The TV view stacks the same way when it is opened on a phone, and scrolls.
+
 ### Every number is a door
 
 Clicking a number lands on the matching list with the filter chips visible, so what you see is exactly what the number counted. Hovering (or focusing with the keyboard) shows how a number is made up; the parts are doors too. The rings are one keyboard group: up and down move between them, Enter opens.

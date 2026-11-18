@@ -6,6 +6,7 @@ import logging
 import six
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import connection, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
@@ -753,6 +754,33 @@ class FindingSerializer(serializers.ModelSerializer):
         return serialized_burps.data
 
 
+def set_found_by_locking_finding_first(finding, found_by):
+    """
+    ``finding.found_by.set(found_by)``, in one transaction that locks the finding before any found_by row.
+
+    For a finding just saved, ``set()`` deletes the found_by row ``Finding.save()`` added for the test's type
+    (unless it was requested) and inserts the requested rows. Both stay locked until COMMIT, where Postgres
+    checks the new rows' deferred foreign key with FOR KEY SHARE on the finding. The chunked bulk delete (the
+    excess-duplicate delete, a test or engagement delete) takes the same two locks the other way round: the
+    finding FOR UPDATE first (lock_findings_for_delete), then its found_by rows (bulk_clear_finding_m2m). Each
+    then waited for the other and Postgres aborted one of them with "deadlock detected" (40P01), which failed
+    the create.
+
+    Taking FOR KEY SHARE on the finding first puts both in the same order. Whichever gets the finding first
+    finishes, and the other waits for it rather than deadlocking: a delete that is first removes the finding,
+    and the deferred foreign key then rejects this set() at COMMIT as for any other write to a deleted finding.
+    FOR KEY SHARE is the lock the foreign-key check takes anyway, so it blocks nothing that check did not.
+    """
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"SELECT id FROM {connection.ops.quote_name(Finding._meta.db_table)} "
+                "WHERE id = %s FOR KEY SHARE",
+                [finding.id],
+            )
+        finding.found_by.set(found_by)
+
+
 class FindingCreateSerializer(serializers.ModelSerializer):
     mitigated = serializers.DateTimeField(required=False, allow_null=True)
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
@@ -834,7 +862,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if notes:
             new_finding.notes.set(notes)
         if found_by:
-            new_finding.found_by.set(found_by)
+            set_found_by_locking_finding_first(new_finding, found_by)
         if reviewers:
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
@@ -1036,7 +1064,8 @@ class FindingToFilesSerializer(serializers.Serializer):
 
 
 class FindingCloseSerializer(serializers.ModelSerializer):
-    is_mitigated = serializers.BooleanField(required=False)
+    # Closing without saying how closes the finding as mitigated, for JSON and form bodies alike.
+    is_mitigated = serializers.BooleanField(required=False, default=True)
     mitigated = serializers.DateTimeField(required=False)
     false_p = serializers.BooleanField(required=False)
     out_of_scope = serializers.BooleanField(required=False)
