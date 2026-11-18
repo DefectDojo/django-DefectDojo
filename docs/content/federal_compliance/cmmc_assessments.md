@@ -57,6 +57,10 @@ Automation can read the same evidence from `GET /api/v2/cmmc_assessments/{id}/po
 110 minus the deduction for every requirement that is not met or merely planned. Weights are 1, 3,
 or 5 points, so scores range from 110 down to -203.
 
+A requirement with no result yet counts as not met: it is deducted at its full weight, and the
+assessment cannot be final until every requirement in the catalog has a result. A requirement the
+catalog no longer includes is not required, and is scored only if it already has a result.
+
 Requirement 3.12.4 (the System Security Plan requirement) scores as not applicable, per the
 methodology.
 
@@ -81,7 +85,8 @@ expired if the clock lapses.
 
 ## Statuses
 
-Statuses move from **in progress** to **conditional** or **final**. Conditional assessments show
-the days remaining on their closeout clock.
+Statuses move from **in progress** to **conditional** or **final**. An assessment is final when
+every requirement has a result and none is not met or planned. Conditional assessments show the days
+remaining on their closeout clock.
 
 Assessments are under audit history: every change records who, what, and when.
