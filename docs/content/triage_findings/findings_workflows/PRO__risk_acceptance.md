@@ -69,7 +69,7 @@ Each Full Risk Acceptance adds additional context to Risk Acceptance, such as:
     - Whether the Finding’s status will return to “Active” upon expiration.
     - Whether the SLA will restart upon expiration.
 
-Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. When a Risk Acceptance expires, its Findings are set back to Active only if **Reactivate Findings on Expiration** is checked on it (it is by default). With that option unchecked, the Findings stay Risk Accepted after the expiration date.
+Expiration is unique to Full Risk Acceptance objects, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. When a Risk Acceptance expires, its Findings are set back to Active only if **Reactivate Findings on Expiration** is checked on it (it is by default). With that option unchecked, the Findings stay Risk Accepted after the expiration date. A Finding that was already a duplicate when it was added was never Risk Accepted, so an expiration leaves it inactive either way.
 
 A new Risk Acceptance starts with its **Expiration Date** filled in: today plus the **Default Risk Acceptance Days** setting on the System Settings page (180 unless changed, and 180 when the field is left empty). The date sits in the main part of the form, so you can see it, change it, or clear it before submitting. A Risk Acceptance with no expiration date never expires. If the setting is 0, new Risk Acceptances start with no date.
 
@@ -128,7 +128,7 @@ Findings can also be added and removed from the object using the same menu. Alte
 
 Closing a risk-accepted Finding for another reason also takes it out of its Risk Acceptance, on any Asset: **Close Finding**, a **Bulk Edit** **Status** of False Positive, Out of Scope or Mitigated, a Triage Engine rule that sets one of those, and an API update (`PATCH /api/v2/findings/{id}/`) that sets `false_p`, `out_of_scope` or `is_mitigated` to `true`. The Finding stays closed, its Endpoint statuses stay mitigated, and a note on it records the removal. A later expiration of that Risk Acceptance does not reopen it. A request that both risk accepts a Finding and closes it is refused, for example an API update that sends `risk_accepted: true` with `out_of_scope: true` for a Finding that is not yet accepted.
 
-Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.” A Finding that was closed for another reason after the Risk Acceptance expired (Mitigated, False Positive or Out of Scope) is the exception: deleting the object, or removing that Finding from it, leaves it closed.
+Finally, if you add any Findings to a Full Risk Acceptance object and then subsequently delete that object, the Findings within will have their status automatically reverted to “Active.” A Finding that was closed for another reason after the Risk Acceptance expired (Mitigated, False Positive or Out of Scope) is the exception: deleting the object, or removing that Finding from it, leaves it closed. A Finding that was already a duplicate when it was added, and so was never Risk Accepted, keeps its status too: it stays inactive.
 
 ### Simple Risk Acceptances
 
@@ -188,7 +188,7 @@ The expiration job runs every three hours. Each run sends one notification per A
 The gear menu on a Risk Acceptance — in the table or on its detail page — offers whichever of these applies:
 
 - **Expire Risk Acceptance**, on one that is still live.  It expires immediately rather than waiting for its expiration date, and its Findings are reactivated according to its **Reactivate Expired Findings** and **Restart SLA Expired** settings.
-- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.  A Finding closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate), or Risk Accepted again somewhere else, is removed from it instead.
+- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.  A Finding closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate), or Risk Accepted again somewhere else, is removed from it instead. A duplicate the Risk Acceptance never accepted is removed the same way and stays inactive.
 
 Both require the same permission as editing the Risk Acceptance, and both ask for confirmation first.  To reinstate for a specific length of time instead of the default window, edit the expiration date rather than using the Reinstate action — see below.
 
@@ -211,7 +211,7 @@ If the Risk Acceptance has **already expired** — meaning the periodic job has 
 - The Risk Acceptance is reinstated and is no longer in the expired state.
 - Every Finding that was linked to the Risk Acceptance and is currently Active is re-accepted (set back to Risk Accepted / Inactive).
 - A Finding that has been Risk Accepted again since the expiry, through another Risk Acceptance or a Simple Risk Acceptance, stays where it is: it is removed from the reinstated Risk Acceptance, so it is never held by two at once.
-- A Finding that has been closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate) stays closed: it is removed from the reinstated Risk Acceptance, so a later expiry cannot reopen it.
+- A Finding that has been closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate) stays closed: it is removed from the reinstated Risk Acceptance, so a later expiry cannot reopen it. A duplicate the Risk Acceptance never accepted is removed the same way and stays inactive.
 - Endpoint statuses on those Findings are updated to reflect the re-acceptance.
 - A comment is posted to any linked Jira issues recording the reinstate.
 

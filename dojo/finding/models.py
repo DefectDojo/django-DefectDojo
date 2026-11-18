@@ -3,7 +3,7 @@ import hashlib
 import logging
 import re
 from contextlib import suppress
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 import dateutil
@@ -1228,7 +1228,11 @@ class Finding(BaseModel):
 
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
-            self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)
+            try:
+                self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)
+            except OverflowError:
+                # Past the last (or before the first) representable date: clamp to it so the save succeeds.
+                self.sla_expiration_date = date.max if sla_period > 0 else date.min
         else:
             self.sla_expiration_date = None
 

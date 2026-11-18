@@ -169,6 +169,8 @@ class SpdxJSONParser:
             location = self._location_for(package)
             if location:
                 finding.unsaved_locations.append(location)
+            # One CPE location per identifier the package names, in report order without repeats.
+            finding.unsaved_locations.extend(LocationData.cpe(cpe=cpe) for cpe in dict.fromkeys(package_cpes(package)))
 
         return finding
 
