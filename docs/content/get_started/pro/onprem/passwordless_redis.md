@@ -10,7 +10,7 @@ DefectDojo Pro can sign in to a managed Redis with a short-lived token issued to
 
 Every DefectDojo process that talks to Redis does this: the web application (its cache), the Celery workers and beat (the task broker and, if you use one, a Redis result backend), the orchestrator's workers, the Go API service and its job worker, and the initializer.
 
-Unlike a database, Redis checks a token again after the connection is open: Azure closes a connection whose token has expired unless the client sent a new one first, and ElastiCache closes an IAM connection 12 hours after its last sign-in. So each process also renews its sign-in before that happens. The Python processes send a fresh `AUTH` on the open connection, so a Celery worker keeps its connection to the broker. The Go services retire each connection after ten minutes and open the next one with a fresh token. A connection that is subscribed to a channel cannot send `AUTH`; the server closes it when its token lapses, and the process reconnects and subscribes again.
+Unlike a database, Redis checks a token again after the connection is open: Azure closes a connection whose token has expired unless the client sent a new one first, and ElastiCache closes an IAM connection 12 hours after its last sign-in. So each process also renews its sign-in before that happens. The Python processes send a fresh `AUTH` on the open connection, so a Celery worker keeps its connection to the broker. That includes a worker's subscription to the broker's broadcast channels, which renews alongside its periodic health check; it needs the RESP3 protocol, which Azure Managed Redis, ElastiCache for Valkey and Redis OSS 7 and later, and Memorystore all support. The Go services retire each connection after ten minutes and open the next one with a token that outlives it by at least five minutes.
 
 | Cloud | Redis | Setting |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ Unlike a database, Redis checks a token again after the connection is open: Azur
 
 The Celery broker needs a single Redis endpoint that does not require the cluster protocol: on Azure Managed Redis, the **Enterprise** clustering policy; on ElastiCache and Memorystore for Valkey, cluster mode disabled.
 
-The token is a bearer credential, so it only travels over TLS: the broker and cache URLs must be `rediss://`. Not supported together with passwordless Redis authentication: the Redis container the Helm chart can deploy, and any Redis password.
+The token is a bearer credential, so it only travels over TLS with the server's certificate checked: the broker and cache URLs must be `rediss://`, and DefectDojo refuses `ssl_cert_reqs=none` and `ssl_check_hostname=false` in a passwordless mode. Trust the server's certificate authority instead. Not supported together with passwordless Redis authentication: the Redis container the Helm chart can deploy, and any Redis password.
 
 ## Kubernetes (Helm)
 
@@ -56,10 +56,10 @@ The same settings are environment variables. Put no password in `DD_CELERY_BROKE
 | Variable | Value |
 | --- | --- |
 | `DD_REDIS_AUTH_MODE` | `password` (the default), `azure`, `aws` or `gcp` |
-| `DD_REDIS_AUTH_USERNAME` | Azure, optional: the identity's object (principal) ID; unset, it is read from the token. AWS: the ElastiCache user ID. Google Cloud: leave unset |
+| `DD_REDIS_AUTH_USERNAME` | Azure, optional: the identity's object (principal) ID; unset, it is read from the token. AWS: the ElastiCache user ID. Google Cloud: leave unset (a user name is refused) |
 | `DD_REDIS_AUTH_AZURE_CLIENT_ID` | Azure, optional: the client ID of a user-assigned managed identity |
 | `DD_REDIS_AUTH_AZURE_SCOPE` | Azure, optional: the token scope; only sovereign clouds need anything but `https://redis.azure.com/.default` |
-| `DD_REDIS_AUTH_AWS_REGION` | AWS, optional: the region the token is signed for; defaults to `AWS_REGION` |
+| `DD_REDIS_AUTH_AWS_REGION` | AWS: the region the token is signed for; defaults to `AWS_REGION` or the SDK's configured region, and startup is refused when there is none |
 | `DD_REDIS_AUTH_AWS_CACHE_NAME` | AWS: the replication group ID, or the serverless cache name |
 | `DD_REDIS_AUTH_AWS_SERVERLESS` | AWS: `true` for an ElastiCache Serverless cache |
 
@@ -93,7 +93,7 @@ Redis takes the identity's object (principal) ID as the user name. DefectDojo re
 
 1. Create the instance with IAM authentication and in-transit encryption enabled.
 2. Grant the application's Google service account `roles/memorystore.dbConnectionUser` (Memorystore for Valkey) or `roles/redis.dbConnectionUser` (Memorystore for Redis Cluster), bind it to the release's ServiceAccount with `roles/iam.workloadIdentityUser`, and annotate the ServiceAccount with `iam.gke.io/gcp-service-account`.
-3. Leave `redis.auth.username` empty: Memorystore signs in the token as its `default` user.
+3. Leave `redis.auth.username` empty: Memorystore signs in the token as its `default` user, and DefectDojo refuses a user name in this mode.
 
 Memorystore signs its server certificates with the instance's own certificate authority. Download it from the instance and add it to the pods' trusted certificate authorities, so the connection to Redis is verified.
 
