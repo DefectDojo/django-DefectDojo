@@ -1512,28 +1512,18 @@ imports get an error instead of hanging. The pod still has to be replaced.
 **Detect it.** From release 3.5.300:
 
 - Imports and reimports answer `503 Service Unavailable` with a `Retry-After`
-  header when a write to the media volume fails or does not finish within
-  10 seconds, instead of hanging. Clients should retry later.
+  header when the media volume is hung, instead of hanging. Clients should
+  retry later.
 - The light health check, `GET /api/v2/health_check/light/`, has a `media`
   field: `ok`, `unavailable` (the check did not finish in time: the mount looks
   hung), `error` (the volume answered with an error), `skipped` (media is not
-  on a local filesystem), or `checking` (a check is still running). The
-  status code still reflects only the database, so load balancers and probes
-  that read this endpoint behave as before. Poll it from your monitoring and
-  alert when `media` is `unavailable` or `error`. Each answer comes from the
-  web pod that served the request.
-- `/media-health.sh` checks one pod by hand, including the import and Celery
-  pods, which serve no health check. It exits `0` when a small file can be
-  written and removed, `1` when the write fails, and `2` when it does not
-  finish within 5 seconds:
-
-  ```bash
-  kubectl -n $NAMESPACE exec deploy/dojopro-django-import -- /media-health.sh
-  ```
-
-  Do not run it as a liveness probe. For the reason above, the restart it
-  causes does not bring the mount back, and on the web pods it would stop the
-  pages that still work.
+  on a local filesystem), or `checking` (a check is still running). Its HTTP
+  status still reflects only the database, so load balancers and probes that
+  read this endpoint behave as before: alert on the field, not on the status
+  code. Poll it from your monitoring and alert when `media` is `unavailable` or
+  `error`. Each answer comes from the web pod that served the request.
+- The full health check, `POST /api/v2/health_check/full/`, returns `media`
+  with `status`, `detail` and `duration_ms`.
 
 ### Rotating TLS Certificates
 
