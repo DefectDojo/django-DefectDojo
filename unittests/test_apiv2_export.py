@@ -1505,6 +1505,30 @@ class TestExportJira(DojoAPITestCase):
         self.assertNotIn("password", row)
         self.assertNotIn("s3cret", json.dumps(manifest))
 
+    def test_jira_instances_and_projects_send_exactly_the_pinned_fields(self):
+        instance = self.manifest(jira="true")["reference"]["jira_instances"][0]
+        self.assertEqual(
+            [
+                "id", "configuration_name", "url", "username", "default_issue_type", "issue_template_dir", "epic_name_id",
+                "open_status_key", "close_status_key", "info_mapping_severity", "low_mapping_severity",
+                "medium_mapping_severity", "high_mapping_severity", "critical_mapping_severity", "finding_text",
+                "accepted_mapping_resolution", "false_positive_mapping_resolution", "global_jira_sla_notification",
+                "finding_jira_sync",
+            ],
+            list(instance),
+        )
+        project = self.export(jira="true")[0]["jira_projects"][0]
+        self.assertEqual(
+            [
+                "id", "project_key", "issue_template_dir", "component", "custom_fields", "close_transition_fields",
+                "reopen_transition_fields", "default_assignee", "jira_labels", "add_vulnerability_id_to_jira_label",
+                "push_all_issues", "enable_engagement_epic_mapping", "epic_issue_type_name", "push_notes",
+                "product_jira_sla_notification", "risk_acceptance_expiration_notification", "enabled", "jira_instance",
+                "product", "engagement",
+            ],
+            list(project),
+        )
+
     def test_jira_lines(self):
         lines = self.export(jira="true")
         projects = lines[0]["jira_projects"]
