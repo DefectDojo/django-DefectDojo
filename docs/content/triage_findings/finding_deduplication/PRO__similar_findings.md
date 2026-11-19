@@ -53,7 +53,7 @@ Open the action menu (the **⋮** button at the start of a row) to manage the du
 On a similar Finding:
 
 - **Mark as Duplicate**: link the similar Finding into the current Finding's duplicate cluster. It moves into the cluster tree.
-- **Set as Original Finding**: make the similar Finding the original of the current Finding's cluster.
+- **Set as Original Finding**: make the similar Finding the original of the current Finding's cluster. The previous original becomes an inactive duplicate, and the new original takes over its status (open and verified, or mitigated). A Finding that is a duplicate in another cluster cannot be set as the original: reset its duplicate status first.
 - **Reset Duplicate Status**: take a Finding that is a duplicate of another cluster out of that cluster.
 
 These actions manipulate the same duplicate relationships that automatic deduplication uses, so a Finding you link here behaves exactly like an automatically detected duplicate.
