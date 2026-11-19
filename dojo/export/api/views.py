@@ -131,7 +131,7 @@ AUDIT_HISTORY_COUNT_KEYS = ("audit_events", "legacy_audit_entries")
 PRODUCT_EXTRAS_COUNT_KEYS = ("tracking_files", "benchmarks", "answered_surveys")
 JIRA_COUNT_KEYS = ("jira_projects", "jira_issues")
 EXTERNAL_ISSUES_COUNT_KEYS = ("github_projects", "github_issues", "sonarqube_issues")
-HISTORY_FEATURES = ("import_history", "audit_history")
+EXPORT_FLAGS = ("import_history", "audit_history", "product_extras", "jira", "external_issues")
 AUDIT_MODELS = (Product, Engagement, Test, Finding, Finding_Group, Risk_Acceptance)
 # From an audited object to its product id. A risk acceptance has two paths: see risk_acceptance_in.
 AUDIT_PRODUCT_PATHS = {
@@ -200,6 +200,10 @@ def export_params(request, serializer_class=ExportParamsSerializer) -> dict:
     params = serializer_class(data=request.query_params)
     params.is_valid(raise_exception=True)
     return params.validated_data
+
+
+def export_flags(params: dict) -> dict[str, bool]:
+    return {flag: params[flag] for flag in EXPORT_FLAGS}
 
 
 def finding_queryset(product: Product, *, external_issues: bool = False) -> QuerySet:
@@ -613,14 +617,8 @@ def add_benchmark_counts(counts: dict) -> None:
         counts[product_id]["benchmarks"] += len(found)
 
 
-def product_counts(
-    max_file_bytes: int, *, file_counts: bool, import_history: bool, audit_history: bool, product_extras: bool,
-    jira: bool = False, external_issues: bool = False,
-) -> dict[int, dict[str, int | None]]:
-    keys = count_keys(
-        import_history=import_history, audit_history=audit_history, product_extras=product_extras, jira=jira,
-        external_issues=external_issues,
-    )
+def product_counts(max_file_bytes: int, *, file_counts: bool, **flags: bool) -> dict[int, dict[str, int | None]]:
+    keys = count_keys(**flags)
     counts = defaultdict(lambda: {**dict.fromkeys(keys, 0), "files_over_cap": 0 if file_counts else None})
     sources = (
         ("engagements", Engagement, "product_id"),
@@ -633,12 +631,12 @@ def product_counts(
         ("notes", Finding.notes.through, "finding__test__engagement__product_id"),
         ("finding_groups", Finding_Group, "test__engagement__product_id"),
     )
-    if product_extras:
+    if flags["product_extras"]:
         sources += (
             ("tracking_files", Objects_Product, "product_id"),
             ("answered_surveys", Answered_Survey, "engagement__product_id"),
         )
-    if jira:
+    if flags["jira"]:
         sources += (
             ("jira_projects", JIRA_Project.objects.filter(engagement=None), "product_id"),
             ("jira_projects", JIRA_Project, "engagement__product_id"),
@@ -646,13 +644,13 @@ def product_counts(
             ("jira_issues", JIRA_Issue, "finding_group__test__engagement__product_id"),
             ("jira_issues", JIRA_Issue, "engagement__product_id"),
         )
-    if external_issues:
+    if flags["external_issues"]:
         sources += (
             ("github_projects", GITHUB_PKey, "product_id"),
             ("github_issues", GITHUB_Issue, "finding__test__engagement__product_id"),
             ("sonarqube_issues", Finding.objects.filter(sonarqube_issue__isnull=False), "test__engagement__product_id"),
         )
-    if import_history:
+    if flags["import_history"]:
         sources += (
             ("test_imports", Test_Import, "test__engagement__product_id"),
             ("test_import_actions", Test_Import_Finding_Action, "test_import__test__engagement__product_id"),
@@ -668,9 +666,9 @@ def product_counts(
     for key, model, prefix in (("risk_acceptances", Risk_Acceptance, ""), ("notes", Risk_Acceptance.notes.through, "risk_acceptance__")):
         for product_id, found in ids_by_product(model, prefix).items():
             counts[product_id][key] += len(found)
-    if product_extras:
+    if flags["product_extras"]:
         add_benchmark_counts(counts)
-    if audit_history:
+    if flags["audit_history"]:
         add_audit_history_counts(counts)
     storage = FileUpload._meta.get_field("file").storage
 
@@ -706,16 +704,10 @@ def add_threat_model_counts(counts: dict, max_file_bytes: int, *, file_counts: b
             counts[engagement.product_id]["files_over_cap"] += 1
 
 
-def _summed(
-    products: list[dict], *, file_counts: bool, import_history: bool, audit_history: bool, product_extras: bool,
-    jira: bool = False, external_issues: bool = False,
-) -> dict[str, int | None]:
+def _summed(products: list[dict], *, file_counts: bool, **flags: bool) -> dict[str, int | None]:
     return {
         key: None if key == "files_over_cap" and not file_counts else sum(product["counts"][key] for product in products)
-        for key in count_keys(
-            import_history=import_history, audit_history=audit_history, product_extras=product_extras, jira=jira,
-            external_issues=external_issues,
-        )
+        for key in count_keys(**flags)
     }
 
 
@@ -775,21 +767,9 @@ def build_manifest(
     max_file_bytes: int,
     *,
     file_counts: bool,
-    import_history: bool = False,
-    audit_history: bool = False,
-    product_extras: bool = False,
-    jira: bool = False,
-    external_issues: bool = False,
+    **flags: bool,
 ) -> dict:
-    counts = product_counts(
-        max_file_bytes,
-        file_counts=file_counts,
-        import_history=import_history,
-        audit_history=audit_history,
-        product_extras=product_extras,
-        jira=jira,
-        external_issues=external_issues,
-    )
+    counts = product_counts(max_file_bytes, file_counts=file_counts, **flags)
     products = [
         {
             "id": product.id,
@@ -818,15 +798,7 @@ def build_manifest(
             "name": name,
             "counts": {
                 "products": len(members[pk]),
-                **_summed(
-                    members[pk],
-                    file_counts=file_counts,
-                    import_history=import_history,
-                    audit_history=audit_history,
-                    product_extras=product_extras,
-                    jira=jira,
-                    external_issues=external_issues,
-                ),
+                **_summed(members[pk], file_counts=file_counts, **flags),
             },
         }
         for pk, name in Product_Type.objects.order_by("id").values_list("id", "name")
@@ -851,7 +823,7 @@ def build_manifest(
             "is_superuser": request.user.is_superuser,
             "expires_at": token_expires_at(request.auth) if isinstance(request.auth, Token) else None,
         },
-        "features": ["check_lists", *HISTORY_FEATURES, "product_extras", "jira", "external_issues"],
+        "features": ["check_lists", *EXPORT_FLAGS],
         "deduplication": deduplication_rules(),
         "announcement": single_row(ExportAnnouncementSerializer),
         "login_banner": single_row(ExportLoginBannerSerializer),
@@ -870,11 +842,11 @@ def build_manifest(
             "configuration_permissions": sorted(permission_names),
             **(
                 {"github_configurations": ExportGithubConfigurationSerializer(GITHUB_Conf.objects.order_by("id"), many=True).data}
-                if external_issues else {}
+                if flags["external_issues"] else {}
             ),
             **(
                 {"jira_instances": ExportJiraInstanceSerializer(JIRA_Instance.objects.order_by("id"), many=True).data}
-                if jira else {}
+                if flags["jira"] else {}
             ),
         },
         "product_types": product_types,
@@ -882,15 +854,7 @@ def build_manifest(
         "totals": {
             "product_types": len(product_types),
             "products": len(products),
-            **_summed(
-                products,
-                file_counts=file_counts,
-                import_history=import_history,
-                audit_history=audit_history,
-                product_extras=product_extras,
-                jira=jira,
-                external_issues=external_issues,
-            ),
+            **_summed(products, file_counts=file_counts, **flags),
         },
     }
 
@@ -915,11 +879,7 @@ class ProductExportView(APIView):
                 product,
                 request,
                 params["max_file_bytes"],
-                import_history=params["import_history"],
-                audit_history=params["audit_history"],
-                product_extras=params["product_extras"],
-                jira=params["jira"],
-                external_issues=params["external_issues"],
+                **export_flags(params),
             ),
             content_type="application/x-ndjson",
             headers={
@@ -948,10 +908,6 @@ class ExportManifestView(APIView):
                 request,
                 params["max_file_bytes"],
                 file_counts=params["file_counts"],
-                import_history=params["import_history"],
-                audit_history=params["audit_history"],
-                product_extras=params["product_extras"],
-                jira=params["jira"],
-                external_issues=params["external_issues"],
+                **export_flags(params),
             ),
         )
