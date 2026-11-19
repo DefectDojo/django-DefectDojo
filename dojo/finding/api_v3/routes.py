@@ -54,7 +54,6 @@ from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.api_v3.writes import bind_payload, split_extras
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.db_utils import is_foreign_key_conflict, is_vanished_row_error
 from dojo.finding.api_v3.schemas import (
     FindingDetail,
     FindingReplace,
@@ -63,7 +62,13 @@ from dojo.finding.api_v3.schemas import (
     FindingWrite,
 )
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.services import create_finding, delete_finding, update_finding
+from dojo.finding.services import (
+    FindingDeletedDuringCreateError,
+    create_finding,
+    delete_finding,
+    finding_deleted_mid_write,
+    update_finding,
+)
 from dojo.jira import services as jira_services
 from dojo.models import Finding, Test
 from dojo.utils import get_object_or_none, get_system_setting
@@ -131,23 +136,21 @@ _DELETED_MID_UPDATE = "This finding was deleted while the update was being proce
 
 
 @contextmanager
-def _answer_404_if_deleted_mid_write(finding_id: int, detail: str) -> Generator[None]:
+def _raise_if_deleted_mid_write(finding_id: int, error: Exception) -> Generator[None]:
     """
-    Answer 404 when a concurrent delete of the finding makes this write fail (v2 parity).
+    Raise ``error`` when a concurrent delete of the finding makes this write fail (v2 parity).
 
-    A write is not one transaction, so a delete that commits between the finding's save and its
-    child writes (found_by, vulnerability ids, tags, a downstream ``on_write`` companion) fails the
-    write with a foreign-key violation on that child row, or with Django's forced-update miss on
-    the finding's own save. The resource the client wrote to no longer exists: answer 404, as
-    ``FindingViewSet.perform_update`` does, instead of the 500 an unhandled ``IntegrityError``
-    becomes. The same errors on a finding that is still there are a defect and are re-raised.
+    Covers the service call and a downstream ``on_write`` companion write alike: either can fail on
+    a finding deleted mid-request (``finding_deleted_mid_write``). The resource the client wrote to
+    no longer exists, so the client gets ``error`` (404 on an update, as ``FindingViewSet``
+    answers, 409 on a create) instead of the 500 an unhandled ``IntegrityError`` becomes. The same
+    errors on a finding that is still there are a defect and are re-raised.
     """
     try:
         yield
     except DatabaseError as exc:
-        vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
-        if vanished and not Finding.objects.filter(pk=finding_id).exists():
-            raise not_found_problem(detail) from exc
+        if finding_deleted_mid_write(exc, finding_id):
+            raise error from exc
         raise
 
 
@@ -281,7 +284,8 @@ def build_findings_router(
             push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
         if on_write is not None:
-            on_write(finding, extras, user=request.user, created=True)
+            with _raise_if_deleted_mid_write(finding.pk, FindingDeletedDuringCreateError()):
+                on_write(finding, extras, user=request.user, created=True)
         obj = _detail_object(request, queryset_hook, detail_schema, finding.pk) or finding
         return json_response(serialize(obj, detail_schema, {}), status=201)
 
@@ -304,7 +308,7 @@ def build_findings_router(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        with _answer_404_if_deleted_mid_write(finding_id, _DELETED_MID_UPDATE):
+        with _raise_if_deleted_mid_write(finding_id, not_found_problem(_DELETED_MID_UPDATE)):
             update_finding(
                 finding, changes=changes, user=request.user,
                 push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
@@ -340,7 +344,7 @@ def build_findings_router(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        with _answer_404_if_deleted_mid_write(finding_id, _DELETED_MID_UPDATE):
+        with _raise_if_deleted_mid_write(finding_id, not_found_problem(_DELETED_MID_UPDATE)):
             update_finding(
                 finding, changes=changes, user=request.user,
                 push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
