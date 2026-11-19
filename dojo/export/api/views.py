@@ -2,6 +2,7 @@ import heapq
 import math
 from collections import defaultdict
 from collections.abc import Iterator
+from functools import lru_cache
 from itertools import batched, groupby
 from operator import attrgetter, itemgetter
 
@@ -117,6 +118,8 @@ from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 EXPORT_CHUNK_SIZE = 500
 ACTIONS_PER_LINE = 10000
+# ponytail: a file linked again after this many other files is read from storage again.
+FILE_SIZE_CACHE_SIZE = 10000
 DOCS_URL = "https://docs.defectdojo.com/automation/api/product_export/"
 SCHEMA_VERSION = 1
 COUNT_KEYS = (
@@ -669,7 +672,12 @@ def product_counts(
     if audit_history:
         add_audit_history_counts(counts)
     storage = FileUpload._meta.get_field("file").storage
-    over_cap = {}
+
+    @lru_cache(maxsize=FILE_SIZE_CACHE_SIZE)
+    def over_cap(file_id: int, name: str) -> bool:
+        size = file_size(storage, name)
+        return size is not None and size > max_file_bytes
+
     add_threat_model_counts(counts, max_file_bytes, file_counts=file_counts)
     file_sources = (
         (Engagement.files.through, "engagement__product_id"),
@@ -677,14 +685,10 @@ def product_counts(
         (Finding.files.through, "finding__test__engagement__product_id"),
     )
     for through, product_path in file_sources:
-        for product_id, file_id, name in through.objects.values_list(product_path, "fileupload_id", "fileupload__file"):
+        rows = through.objects.values_list(product_path, "fileupload_id", "fileupload__file")
+        for product_id, file_id, name in rows.iterator(chunk_size=EXPORT_CHUNK_SIZE):
             counts[product_id]["files"] += 1
-            if not file_counts:
-                continue
-            if file_id not in over_cap:
-                size = file_size(storage, name)
-                over_cap[file_id] = size is not None and size > max_file_bytes
-            if over_cap[file_id]:
+            if file_counts and over_cap(file_id, name):
                 counts[product_id]["files_over_cap"] += 1
     return counts
 

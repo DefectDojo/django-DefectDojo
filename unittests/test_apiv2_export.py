@@ -2024,6 +2024,24 @@ class TestExportManifest(DojoAPITestCase):
                 self.assertEqual((len(files), 0), (sizes, exists))
         self.assertEqual(3, self.get_results_by_id(self.manifest["products"], 2)["counts"]["files"])
 
+    def test_a_file_linked_twice_is_read_once_and_counted_per_link(self):
+        shared = make_file(self, "shared.txt")
+        self.finding.files.add(shared)
+        self.finding.test.files.add(shared)
+        files = {
+            file_id
+            for through in (Engagement.files.through, Test.files.through, Finding.files.through)
+            for file_id in through.objects.values_list("fileupload_id", flat=True)
+        }
+        manifest, sizes, _ = self.manifest_with_stat_calls({"max_file_bytes": 4})
+        counts = self.get_results_by_id(manifest["products"], 2)["counts"]
+        self.assertEqual((5, 5), (counts["files"], counts["files_over_cap"]))
+        self.assertEqual(len(files), sizes)
+        # A cache too small to hold the shared file reads it again and counts the same.
+        with mock.patch("dojo.export.api.views.FILE_SIZE_CACHE_SIZE", 1):
+            small, _, _ = self.manifest_with_stat_calls({"max_file_bytes": 4})
+        self.assertEqual(manifest["totals"], small["totals"])
+
     def test_a_file_name_the_server_cannot_encode_does_not_fail_the_manifest(self):
         storage = FileUpload._meta.get_field("file").storage
         refused = UnicodeEncodeError("ascii", "\u00fc", 0, 1, "ordinal not in range(128)")
