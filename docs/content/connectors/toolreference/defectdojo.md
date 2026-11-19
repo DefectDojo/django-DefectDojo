@@ -4,7 +4,7 @@ description: "How to set up the DefectDojo Migration Upstream Connector, which p
 weight: 48
 audience: pro
 ---
-The DefectDojo Migration connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. The source can also be a DefectDojo Pro instance on a release that serves the export API. The connector reads the source over its [export API](/automation/api/product_export/). It changes nothing on the source.
+The DefectDojo Migration connector pulls the data of another DefectDojo instance into DefectDojo Pro. The source is usually an open source DefectDojo instance. The source can also be a DefectDojo Pro instance on a release that serves the export API. The connector reads the source over its [export API](/automation/api/product_export/). It changes only the read-only mode of the source, during each Sync. See [Read-only mode during a Sync](#read-only-mode-during-a-sync).
 
 > The DefectDojo Migration is a **beta** feature and is **off by default**. A superuser turns on **DefectDojo Migration** on the [Feature Flags page](/admin/feature_flags/pro__feature_flags/). While it is off, the connector's tile, its connections, the migration page and **Activate and Invite** do not show.
 
@@ -140,7 +140,7 @@ Each Sync imports every mapped Record. The connector sends:
 
 Endpoints with no finding, endpoint metadata, questionnaires, benchmarks and tracking files always cross. The connector asks for them on its own, and no field turns them off.
 
-History adds time to each Sync. The connectors service writes the history of a Product to a temporary file before it sends it, so it needs free temporary disk space of about twice the size of that history.
+History adds time to each Sync. The connectors service writes the history of a Product to a temporary file before it sends it, so it needs free temporary disk space of about twice the size of that history. It also writes the whole export of a Product to a temporary file while it reads it, with the inline files. The disk must hold the export of the largest Product too. Set `DD_CONNECTORS_DEFECTDOJO_MAX_SPOOL_BYTES` on the connectors service to limit the size of the temporary file of one export. If the file passes the limit, the Sync fails and the source leaves read-only mode. If you do not set it, the size has no limit.
 
 A new user arrives inactive, with no usable password. It is never a superuser, also when it was one on the source. It does not use a license seat until it is activated. An administrator activates it with **Activate and Invite**. The user then sets a new password. If SSO or LDAP sign-in is on, the user signs in with SSO or LDAP instead. [How Migrated Users Sign In](/get_started/pro/onprem/migrating_from_open_source/#how-migrated-users-sign-in) explains the steps. If DefectDojo Pro already has a user with that username, the connector uses it and changes none of its fields. That user can still get the memberships above. The connector adds no user to a group. The default group rule of DefectDojo Pro still applies to a new user. That group can carry a global role. The memberships of a new user are in place before you activate it. The migration summary names the users that were superusers on the source, so you can decide who gets that role.
 
@@ -197,6 +197,7 @@ Run Sync as often as you need until you cut over. Each run updates what an earli
 * A finding keeps its identity through its source id and its hash. A run with no change on the source changes nothing in DefectDojo Pro.
 * A finding that changed on the source updates in DefectDojo Pro.
 * A finding that the source deleted from a test closes in DefectDojo Pro. It is marked mitigated, not deleted. The test must still exist on the source.
+* A finding that the fields now skip closes too. The source can mark a finding as a duplicate while **Include Duplicate Findings** is off. The finding can become inactive while **Include Inactive Findings** is off. It can fall below **Minimum Severity**. In each case, the next run does not send the finding, and DefectDojo Pro marks it mitigated.
 * A note or a file keeps its identity too. A run updates it instead of adding a copy.
 * A run adds only the history that the source made since the last run: imports, import actions, audit events and legacy audit entries. It never adds one a second time.
 * A test that the source deleted closes its findings in DefectDojo Pro, as above. The test itself stays.
@@ -206,7 +207,7 @@ Run Sync as often as you need until you cut over. Each run updates what an earli
 * A run adds the tags of an endpoint or a location, and never removes one. The tags of a tracking file follow the source exactly.
 * A run adds the finding tags that the source added since the last run. It removes the finding tags that the source removed. A tag that a person added in DefectDojo Pro stays. So does a tag that the finding inherits from its Product. A finding can have no record of its source tags yet. Then the run adds the missing source tags and removes none.
 * If the source moves a Product to another Product Type, the next run moves the DefectDojo Pro Product too. A Product Type that the source renames counts as a move to the new name. The Product goes to the Product Type with the new name, which the run creates when it is missing. The run writes the description and the flags of the source type onto that Product Type. A value that a person set there stays. The old Product Type stays. A Product that a person moved in DefectDojo Pro stays where the person put it.
-* A re-run removes no other object that the source deleted. An engagement, test, file, finding group or risk acceptance that the source deleted stays in DefectDojo Pro. A note stays too, except a benchmark note as above. A deleted risk acceptance stays linked to its findings, and the next run marks those findings as not accepted. A member that an administrator removed from a migrated Product comes back on the next run while the user is in the source's Authorized Users list or is an owner of the Product.
+* A re-run removes no other object that the source deleted. An engagement, test, file, finding group or risk acceptance that the source deleted stays in DefectDojo Pro. A note stays too, except a benchmark note as above. A deleted risk acceptance stays linked to its findings, and the next run marks those findings as not accepted. A member that an administrator removed from a migrated Product stays removed, because the connector gives each membership once. Only an owner of the Product comes back.
 
 A Product that was deleted on the source after Discover is skipped with a message in the operation's history. Run Discover again to drop its Record. If a Sync stops in the middle of a Product, the next Sync imports that Product again. The source ids and the hash keep it free of duplicates.
 
