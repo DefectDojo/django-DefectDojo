@@ -370,7 +370,7 @@ class FindingViewSet(
     @extend_schema(
         methods=["POST"],
         request=api_v2_serializers.TagSerializer,
-        responses={status.HTTP_201_CREATED: api_v2_serializers.TagSerializer},
+        responses={status.HTTP_200_OK: api_v2_serializers.TagSerializer},
     )
     @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def tags(self, request, pk=None):
@@ -857,11 +857,10 @@ class FindingViewSet(
         parameters=[
             OpenApiParameter(
                 "name",
-                OpenApiTypes.INT,
+                OpenApiTypes.STR,
                 OpenApiParameter.QUERY,
                 required=True,
-                description="name of the metadata to retrieve. If name is empty, return all the \
-                                    metadata associated with the finding",
+                description="Name of the metadata entry to delete",
             ),
         ],
         responses={
@@ -879,6 +878,15 @@ class FindingViewSet(
     @extend_schema(
         methods=["PUT"],
         request=FindingMetaSerializer,
+        parameters=[
+            OpenApiParameter(
+                "name",
+                OpenApiTypes.STR,
+                OpenApiParameter.QUERY,
+                required=True,
+                description="Name of the metadata entry to edit",
+            ),
+        ],
         responses={
             status.HTTP_200_OK: FindingMetaSerializer,
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
