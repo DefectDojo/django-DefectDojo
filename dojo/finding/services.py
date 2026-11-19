@@ -62,7 +62,12 @@ _UNSET = object()
 _SPECIAL_KEYS = frozenset({"reporter", "mitigated_by", "found_by", "tags", "vulnerability_ids", "cwes", "push_to_jira", "test"})
 
 
-# --- shared validation (ported from FindingSerializer.validate / FindingCreateSerializer.validate) --
+# --- concurrent-delete handling ------------------------------------------------------------------
+
+# The answer to an update of a finding a concurrent delete removed mid-write. One constant for the v2
+# FindingViewSet.perform_update and the v3 PATCH/PUT routes, so the two APIs cannot drift apart.
+FINDING_DELETED_MID_UPDATE_MESSAGE = "This finding was deleted while the update was being processed."
+
 
 class FindingDeletedDuringCreateError(APIException):
 
@@ -90,6 +95,8 @@ def finding_deleted_mid_write(exc: DatabaseError, finding_id: int) -> bool:
     vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
     return vanished and not Finding.objects.filter(pk=finding_id).exists()
 
+
+# --- shared validation (ported from FindingSerializer.validate / FindingCreateSerializer.validate) --
 
 def _validate_severity(severity: str) -> None:
     if severity is not None and severity not in SEVERITIES:

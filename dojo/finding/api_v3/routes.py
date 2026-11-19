@@ -63,6 +63,7 @@ from dojo.finding.api_v3.schemas import (
 )
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.services import (
+    FINDING_DELETED_MID_UPDATE_MESSAGE,
     FindingDeletedDuringCreateError,
     create_finding,
     delete_finding,
@@ -131,8 +132,6 @@ _ALLOWED_INCLUDES = {"counts"}
 # one shape and publishes another (I4). Kept under the same name so the OS spec is unchanged.
 # See ``dojo/api_v3/pagination.py::list_envelope``.
 FindingListResponse = list_envelope(FindingSlim, name="FindingListResponse")
-
-_DELETED_MID_UPDATE = "This finding was deleted while the update was being processed."
 
 
 @contextmanager
@@ -308,7 +307,7 @@ def build_findings_router(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        with _raise_if_deleted_mid_write(finding_id, not_found_problem(_DELETED_MID_UPDATE)):
+        with _raise_if_deleted_mid_write(finding_id, not_found_problem(FINDING_DELETED_MID_UPDATE_MESSAGE)):
             update_finding(
                 finding, changes=changes, user=request.user,
                 push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
@@ -344,7 +343,7 @@ def build_findings_router(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        with _raise_if_deleted_mid_write(finding_id, not_found_problem(_DELETED_MID_UPDATE)):
+        with _raise_if_deleted_mid_write(finding_id, not_found_problem(FINDING_DELETED_MID_UPDATE_MESSAGE)):
             update_finding(
                 finding, changes=changes, user=request.user,
                 push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
