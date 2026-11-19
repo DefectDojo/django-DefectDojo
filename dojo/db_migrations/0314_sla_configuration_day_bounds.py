@@ -3,6 +3,23 @@
 import django.core.validators
 from django.db import migrations, models
 
+# SLA_DAYS_MAX in dojo/models.py, restated as a literal because a migration must not read live code.
+SLA_DAYS_MAX = 36500
+SEVERITY_FIELDS = ("critical", "high", "medium", "low")
+
+
+def clamp_sla_day_counts(apps, schema_editor):
+    """Bring every stored severity day count into 0 to SLA_DAYS_MAX.
+
+    The API used to store any integer, and a row holding a value outside the new range could not be saved again
+    through the API or the form. A value below 0 becomes 0 and one above the maximum becomes the maximum. Queryset
+    updates on the historical model, so no save() side effect (an SLA recalculation) runs from the migration.
+    """
+    sla_configuration = apps.get_model("dojo", "SLA_Configuration")
+    for field in SEVERITY_FIELDS:
+        sla_configuration.objects.filter(**{f"{field}__lt": 0}).update(**{field: 0})
+        sla_configuration.objects.filter(**{f"{field}__gt": SLA_DAYS_MAX}).update(**{field: SLA_DAYS_MAX})
+
 
 class Migration(migrations.Migration):
 
@@ -31,4 +48,6 @@ class Migration(migrations.Migration):
             name="medium",
             field=models.IntegerField(default=90, help_text="The number of days to remediate a medium finding.", validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(36500)], verbose_name="Medium Finding SLA Days"),
         ),
+        # The out-of-range values were never valid periods, so there is nothing to restore.
+        migrations.RunPython(clamp_sla_day_counts, migrations.RunPython.noop),
     ]

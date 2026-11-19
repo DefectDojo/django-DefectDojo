@@ -1,11 +1,16 @@
 # Regression: SLA configurations accepted negative and out-of-range day counts. A negative period put
 # every finding's SLA expiration before its own date; a huge one overflowed the date arithmetic.
+import importlib
+
+from django.apps import apps
+
 from dojo.api_v2.serializers import SLAConfigurationSerializer
 from dojo.forms import SLAConfigForm
 from dojo.models import SLA_Configuration
 from unittests.dojo_test_case import DojoTestCase
 
 DAY_FIELDS = ("critical", "high", "medium", "low")
+migration = importlib.import_module("dojo.db_migrations.0314_sla_configuration_day_bounds")
 # Written out rather than imported, so the test pins the bound itself.
 SLA_DAYS_MAX = 36500
 
@@ -59,3 +64,25 @@ class TestSLAConfigurationDayBounds(DojoTestCase):
                 with self.subTest(field=field, days=days):
                     form = SLAConfigForm(data=_payload(name=f"{field} {days}", **{field: days}))
                     self.assertTrue(form.is_valid(), msg=form.errors)
+
+    def test_migration_brings_stored_days_into_range(self):
+        # Stored the way the unbounded API stored them: straight to the row, no validation.
+        below = SLA_Configuration.objects.create(name="Below range")
+        above = SLA_Configuration.objects.create(name="Above range")
+        kept = SLA_Configuration.objects.create(name="In range")
+        SLA_Configuration.objects.filter(id=below.id).update(**dict.fromkeys(DAY_FIELDS, -7))
+        SLA_Configuration.objects.filter(id=above.id).update(**dict.fromkeys(DAY_FIELDS, 1_000_000_000))
+        SLA_Configuration.objects.filter(id=kept.id).update(critical=0, high=1, medium=SLA_DAYS_MAX, low=120)
+
+        # A row that holds an out-of-range value cannot be saved through the form until it is clamped.
+        self.assertFalse(SLAConfigForm(data=_payload(name="Below range", critical=-7), instance=below).is_valid())
+
+        migration.clamp_sla_day_counts(apps, None)
+        migration.clamp_sla_day_counts(apps, None)  # a second run changes nothing
+
+        rows = SLA_Configuration.objects.in_bulk([below.id, above.id, kept.id])
+        self.assertEqual([getattr(rows[below.id], f) for f in DAY_FIELDS], [0, 0, 0, 0])
+        self.assertEqual([getattr(rows[above.id], f) for f in DAY_FIELDS], [SLA_DAYS_MAX] * 4)
+        self.assertEqual([getattr(rows[kept.id], f) for f in DAY_FIELDS], [0, 1, SLA_DAYS_MAX, 120])
+        stored = {f: getattr(rows[below.id], f) for f in DAY_FIELDS}
+        self.assertTrue(SLAConfigForm(data=_payload(name="Below range", **stored), instance=rows[below.id]).is_valid())

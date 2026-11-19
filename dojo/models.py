@@ -260,8 +260,8 @@ class DojoMeta(models.Model):
             raise ValidationError(msg)
 
 
-# The longest SLA period, in days (about 100 years). A longer one overflows the date arithmetic that
-# sets a finding's SLA expiration; 0 makes a finding due on the day its SLA starts.
+# The longest SLA period, in days (about 100 years): a sane upper bound for a remediation period, well inside the
+# date range a finding's SLA expiration can hold. 0 makes a finding due on the day its SLA starts.
 SLA_DAYS_MAX = 36500
 
 
