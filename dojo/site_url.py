@@ -20,10 +20,23 @@ never clobbers an explicit override, so the wiring does not depend on which
 Unlike ``dojo.location.feature``, a registered resolver that raises is not swallowed.
 Falling back to the setting would quietly build a link to a different address than the
 one the resolver chose, so the error propagates to the caller instead.
+
+A link built while serving a request (an API page's ``next``, for one) uses
+``request_absolute_url()`` instead of ``request.build_absolute_uri()``. With nothing
+registered the two are the same call. A plugin that serves the instance under an address
+the request does not carry (behind a reverse proxy that forwards ``Host`` without the
+public port) replaces it with ``register_request_url_resolver(func, override=True)``.
 """
 
+from __future__ import annotations
+
 import logging
-from collections.abc import Callable
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from django.http import HttpRequest
 
 # The empty-setting warning keeps the logger it was always emitted under
 # (dojo.utils.get_site_url), so log filters and alerts on that name keep matching.
@@ -32,6 +45,9 @@ logger = logging.getLogger("dojo.utils")
 # Single-slot registry, mutated in place so no `global` rebinding is needed. The stored
 # callable returns the base URL; None means "use default_site_url()".
 _RESOLVER: dict[str, Callable[[], str] | None] = {"fn": None}
+# Same shape for request-relative links: the callable takes the request and an absolute path
+# (or None for the request's own) and returns the absolute URL; None means "use request.build_absolute_uri()".
+_REQUEST_RESOLVER: dict[str, Callable[[HttpRequest, str | None], str] | None] = {"fn": None}
 
 
 def register_site_url_resolver(func: Callable[[], str], *, override: bool = False) -> None:
@@ -67,3 +83,28 @@ def site_url() -> str:
 def absolute_url(path: str) -> str:
     """Return ``path`` (as produced by ``reverse()`` or ``get_absolute_url()``) as an absolute URL."""
     return f"{site_url()}{path}"
+
+
+def register_request_url_resolver(func: Callable[[HttpRequest, str | None], str], *, override: bool = False) -> None:
+    """
+    Register the callable that builds an absolute URL for a path within a request.
+
+    It is called as ``func(request, path)``, where ``path`` is an absolute path (query string
+    included) or ``None`` for the request's own full path, exactly as ``build_absolute_uri``
+    takes it. Without ``override`` an existing registration is kept.
+    """
+    if _REQUEST_RESOLVER["fn"] is not None and not override:
+        return
+    _REQUEST_RESOLVER["fn"] = func
+
+
+def request_absolute_url(request: HttpRequest, path: str | None = None) -> str:
+    """
+    Return ``path`` (default: the request's own full path) as an absolute URL for ``request``.
+
+    With nothing registered this is exactly ``request.build_absolute_uri(path)``.
+    """
+    resolver = _REQUEST_RESOLVER["fn"]
+    if resolver is None:
+        return request.build_absolute_uri(path)
+    return resolver(request, path)
