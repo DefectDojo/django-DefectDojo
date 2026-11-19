@@ -1,4 +1,5 @@
 import base64
+import logging
 import mimetypes
 from datetime import datetime
 from operator import attrgetter
@@ -59,6 +60,7 @@ from dojo.tool_config.models import Tool_Configuration
 from dojo.user.api.serializer import UserContactInfoSerializer, UserSerializer
 from dojo.user.utils import get_configuration_permissions_fields
 
+logger = logging.getLogger(__name__)
 MAX_FILE_BYTES_DEFAULT = 10485760
 MAX_FILE_BYTES_LIMIT = 104857600
 MAX_INLINE_BYTES_PER_LINE = 50331648
@@ -134,13 +136,18 @@ class ManifestParamsSerializer(ExportParamsSerializer):
     )
 
 
-def file_size(storage, name: str) -> int | None:
+def log_unreadable(owner: str, error: Exception) -> None:
+    logger.warning("The export cannot read the file of %s and marks it missing: %s", owner, type(error).__name__)
+
+
+def file_size(storage, name: str, owner: str) -> int | None:
     if not name:
         return None
     try:
         return storage.size(name)
-    # uwsgi under an ASCII locale cannot encode a non-ASCII file name.
-    except (FileNotFoundError, UnicodeError):
+    # A storage backend raises its own errors, and uwsgi under an ASCII locale cannot encode a non-ASCII file name.
+    except Exception as error:
+        log_unreadable(owner, error)
         return None
 
 
@@ -157,16 +164,21 @@ class InlineBudget:
 
 
 def _file_payload(field_file, max_file_bytes: int, budget: InlineBudget) -> dict:
-    size = file_size(field_file.storage, field_file.name)
+    owner = f"{field_file.instance._meta.model_name} {field_file.instance.pk}"
+    size = file_size(field_file.storage, field_file.name, owner)
     payload = {"size": size, "content_type": mimetypes.guess_type(field_file.name)[0], "data_base64": None}
-    if size is None:
-        payload["error"] = "missing"
-    elif size <= max_file_bytes:
-        if budget.take(size):
+    if size is not None and size <= max_file_bytes:
+        if not budget.take(size):
+            payload["error"] = "line_cap"
+            return payload
+        try:
             with field_file.open("rb") as handle:
                 payload["data_base64"] = base64.b64encode(handle.read()).decode("ascii")
-        else:
-            payload["error"] = "line_cap"
+        except Exception as error:
+            log_unreadable(owner, error)
+            payload["size"] = None
+    if payload["size"] is None:
+        payload["error"] = "missing"
     return payload
 
 
@@ -193,21 +205,35 @@ def configuration_permission_names() -> set[str]:
     return {name for app_label, codename in rows if (name := f"{app_label}.{codename}") in wanted}
 
 
+def threat_model_size(engagement, resolved: Path | None) -> int | None:
+    if resolved is None:
+        return None
+    try:
+        return resolved.stat().st_size
+    except OSError as error:
+        log_unreadable(f"engagement {engagement.id}", error)
+        return None
+
+
 def export_threat_model(engagement, max_file_bytes: int, budget: InlineBudget) -> dict | None:
     path = threat_model_file(engagement)
     if path is None:
         return None
     payload = {"filename": path.name, "size": None, "content_type": mimetypes.guess_type(path.name)[0], "data_base64": None}
     resolved = readable_threat_model(path)
-    if resolved is None:
-        payload["error"] = "missing"
-        return payload
-    payload["size"] = resolved.stat().st_size
-    if payload["size"] <= max_file_bytes:
-        if budget.take(payload["size"]):
+    size = threat_model_size(engagement, resolved)
+    if size is not None and size <= max_file_bytes:
+        if not budget.take(size):
+            payload.update(size=size, error="line_cap")
+            return payload
+        try:
             payload["data_base64"] = base64.b64encode(resolved.read_bytes()).decode("ascii")
-        else:
-            payload["error"] = "line_cap"
+        except OSError as error:
+            log_unreadable(f"engagement {engagement.id}", error)
+            size = None
+    payload["size"] = size
+    if size is None:
+        payload["error"] = "missing"
     return payload
 
 

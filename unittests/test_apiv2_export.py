@@ -287,6 +287,21 @@ class TestExportSerializers(DojoAPITestCase):
         self.assertIsNone(entry["size"])
         self.assertEqual("missing", entry["error"])
 
+    def test_export_file_marks_a_storage_error_missing_and_logs_the_file_id(self):
+        file_upload = make_file(self, "poc.txt")
+        for method in ("size", "open"):
+            with (
+                self.subTest(method=method),
+                self.assertLogs("dojo.export.api", "WARNING") as logs,
+                mock.patch.object(file_upload.file.storage, method, side_effect=RuntimeError("bucket said no")),
+            ):
+                entry = export_file(file_upload, MAX_FILE_BYTES_DEFAULT)
+                self.assertEqual((None, None, "missing"), (entry["size"], entry["data_base64"], entry["error"]))
+                self.assertEqual(1, len(logs.output))
+                self.assertIn(f"fileupload {file_upload.id}", logs.output[0])
+                self.assertIn("RuntimeError", logs.output[0])
+                self.assertNotIn("bucket said no", logs.output[0])
+
     def test_export_file_marks_an_empty_name_missing(self):
         entry = export_file(FileUpload(title="empty", file=""), MAX_FILE_BYTES_DEFAULT)
         self.assertIsNone(entry["size"])
@@ -689,6 +704,20 @@ class TestProductExportStream(DojoAPITestCase):
         self.assertEqual("line_cap", second["error"])
         self.assertEqual(4, lines[-1]["counts"]["files"])
         self.assertEqual(0, lines[-1]["counts"]["files_over_cap"])
+
+    def test_a_storage_error_marks_the_file_missing_and_the_stream_still_ends(self):
+        storage = FileUpload._meta.get_field("file").storage
+        for method in ("size", "open"):
+            with (
+                self.subTest(method=method),
+                self.assertLogs("dojo.export.api", "WARNING"),
+                mock.patch.object(storage, method, side_effect=RuntimeError("bucket said no")),
+            ):
+                lines = ndjson_lines(self.client.get(self.url))
+                self.assertEqual("end", lines[-1]["type"])
+                self.assertEqual("missing", self.line_data("finding", self.finding.id, lines)["files"][0]["error"])
+                proof = next(line["data"]["proof"] for line in lines if line["type"] == "risk_acceptance")
+                self.assertEqual("missing", proof["error"])
 
     def test_risk_acceptance_linked_only_through_a_finding_crosses(self):
         # Regression: an acceptance with no engagement link got no line while the finding line named its id.
@@ -1664,6 +1693,31 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
                 stream = self.export(max_file_bytes=0)[-1]["counts"]
                 self.assertEqual(stream["files_over_cap"], counts["files_over_cap"])
 
+    def test_a_threat_model_gone_after_the_path_check_is_missing(self):
+        self.put_threat_model()
+        gone = Path(settings.MEDIA_ROOT) / "threat" / f"gone-{uuid.uuid4().hex}.pdf"
+        with (
+            self.assertLogs("dojo.export.api", "WARNING") as logs,
+            mock.patch("dojo.export.api.serializers.readable_threat_model", return_value=gone),
+            mock.patch("dojo.export.api.views.readable_threat_model", return_value=gone),
+        ):
+            lines = self.export(max_file_bytes=0)
+            counts = self.get_results_by_id(self.manifest(max_file_bytes=0)["products"], 2)["counts"]
+        model = self.engagement_line(lines)["threat_model_file"]
+        self.assertEqual((None, None, "missing"), (model["size"], model["data_base64"], model["error"]))
+        self.assertEqual("end", lines[-1]["type"])
+        self.assertEqual(lines[-1]["counts"]["files_over_cap"], counts["files_over_cap"])
+        self.assertTrue(any(f"engagement {self.engagement.id}" in line for line in logs.output), logs.output)
+
+    def test_a_threat_model_the_server_cannot_read_is_missing(self):
+        self.put_threat_model()
+        unreadable = mock.patch.object(Path, "read_bytes", side_effect=PermissionError)
+        with self.assertLogs("dojo.export.api", "WARNING"), unreadable:
+            lines = self.export()
+        model = self.engagement_line(lines)["threat_model_file"]
+        self.assertEqual((None, None, "missing"), (model["size"], model["data_base64"], model["error"]))
+        self.assertEqual("end", lines[-1]["type"])
+
     def test_a_path_with_a_nul_byte_is_unreadable(self):
         self.assertIsNone(readable_threat_model(Path("bad\x00path")))
 
@@ -2046,6 +2100,16 @@ class TestExportManifest(DojoAPITestCase):
         storage = FileUpload._meta.get_field("file").storage
         refused = UnicodeEncodeError("ascii", "\u00fc", 0, 1, "ordinal not in range(128)")
         with mock.patch.object(storage, "size", side_effect=refused):
+            response = self.client.get(self.url, {"max_file_bytes": 4})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.json()["totals"]["files_over_cap"])
+
+    def test_a_storage_error_does_not_fail_the_manifest(self):
+        storage = FileUpload._meta.get_field("file").storage
+        with (
+            self.assertLogs("dojo.export.api", "WARNING"),
+            mock.patch.object(storage, "size", side_effect=RuntimeError("bucket said no")),
+        ):
             response = self.client.get(self.url, {"max_file_bytes": 4})
         self.assertEqual(200, response.status_code)
         self.assertEqual(0, response.json()["totals"]["files_over_cap"])

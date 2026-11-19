@@ -67,6 +67,7 @@ from dojo.export.api.serializers import (
     readable_threat_model,
     render_datetime,
     threat_model_file,
+    threat_model_size,
 )
 from dojo.finding.api.serializer import FindingTemplateSerializer
 from dojo.github.models import GITHUB_Conf, GITHUB_Issue, GITHUB_PKey
@@ -675,7 +676,7 @@ def product_counts(
 
     @lru_cache(maxsize=FILE_SIZE_CACHE_SIZE)
     def over_cap(file_id: int, name: str) -> bool:
-        size = file_size(storage, name)
+        size = file_size(storage, name, f"fileupload {file_id}")
         return size is not None and size > max_file_bytes
 
     add_threat_model_counts(counts, max_file_bytes, file_counts=file_counts)
@@ -698,8 +699,10 @@ def add_threat_model_counts(counts: dict, max_file_bytes: int, *, file_counts: b
         "id", "tmodel_path", "product_id",
     ):
         counts[engagement.product_id]["files"] += 1
-        resolved = readable_threat_model(threat_model_file(engagement)) if file_counts else None
-        if resolved and resolved.stat().st_size > max_file_bytes:
+        if not file_counts:
+            continue
+        size = threat_model_size(engagement, readable_threat_model(threat_model_file(engagement)))
+        if size is not None and size > max_file_bytes:
             counts[engagement.product_id]["files_over_cap"] += 1
 
 
