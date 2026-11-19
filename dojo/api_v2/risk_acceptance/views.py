@@ -24,8 +24,9 @@ from dojo.risk_acceptance.risk_pending import (
     get_user_with_permission_key)
 from dojo.risk_acceptance.notification import Notification as NotificationRiskAcceptance
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
+from dojo.api_v2.risk_acceptance.serializers import RiskAcceptanceToNotesSerializer
 from dojo.api_v2.views import PrefetchDojoModelViewSet
-from dojo.models import Risk_Acceptance
+from dojo.models import Risk_Acceptance, Notes
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.filters import ApiRiskAcceptanceFilter 
@@ -177,7 +178,7 @@ class RiskAcceptanceViewSet(
     )
     @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
-        long_risk_acceptance = self.get_object()
+        risk_acceptance = self.get_object()
         if request.method == "POST":
             new_note = serializers.AddNewNoteOptionSerializer(
                 data=request.data,
@@ -191,7 +192,7 @@ class RiskAcceptanceViewSet(
                     new_note.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            notes = long_risk_acceptance.notes.filter(note_type=note_type).first()
+            notes = risk_acceptance.notes.filter(note_type=note_type).first()
             if notes and note_type and note_type.is_single:
                 return Response("Only one instance of this note_type allowed on an engagement.", status=status.HTTP_400_BAD_REQUEST)
 
@@ -203,7 +204,7 @@ class RiskAcceptanceViewSet(
                 note_type=note_type,
             )
             notes.save()
-            long_risk_acceptance.notes.add(notes)
+            risk_acceptance.notes.add(notes)
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private},
@@ -211,9 +212,9 @@ class RiskAcceptanceViewSet(
             return Response(
                 serialized_note.data, status=status.HTTP_201_CREATED,
             )
-        notes = long_risk_acceptance.notes.all()
+        notes = risk_acceptance.notes.all()
 
-        serialized_notes = serializers.TransferFindingToNotesSerializer(
-            {"engagement_id": long_risk_acceptance, "notes": notes},
+        serialized_notes = RiskAcceptanceToNotesSerializer(
+            {"risk_acceptance": risk_acceptance, "notes": notes},
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
