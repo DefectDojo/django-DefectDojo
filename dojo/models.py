@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Count
 from django.db.models.expressions import Case, When
@@ -259,6 +260,11 @@ class DojoMeta(models.Model):
             raise ValidationError(msg)
 
 
+# The longest SLA period, in days (about 100 years): a sane upper bound for a remediation period, well inside the
+# date range a finding's SLA expiration can hold. 0 makes a finding due on the day its SLA starts.
+SLA_DAYS_MAX = 36500
+
+
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_("Custom SLA Name"),
         help_text=_("A unique name for the set of SLAs."))
@@ -268,6 +274,7 @@ class SLA_Configuration(models.Model):
         blank=True)
     critical = models.IntegerField(
         default=7,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("Critical Finding SLA Days"),
         help_text=_("The number of days to remediate a critical finding."))
     enforce_critical = models.BooleanField(
@@ -276,6 +283,7 @@ class SLA_Configuration(models.Model):
         help_text=_("When enabled, critical findings will be assigned an SLA expiration date based on the critical finding SLA days within this SLA configuration."))
     high = models.IntegerField(
         default=30,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("High Finding SLA Days"),
         help_text=_("The number of days to remediate a high finding."))
     enforce_high = models.BooleanField(
@@ -284,6 +292,7 @@ class SLA_Configuration(models.Model):
         help_text=_("When enabled, high findings will be assigned an SLA expiration date based on the high finding SLA days within this SLA configuration."))
     medium = models.IntegerField(
         default=90,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("Medium Finding SLA Days"),
         help_text=_("The number of days to remediate a medium finding."))
     enforce_medium = models.BooleanField(
@@ -292,6 +301,7 @@ class SLA_Configuration(models.Model):
         help_text=_("When enabled, medium findings will be assigned an SLA expiration date based on the medium finding SLA days within this SLA configuration."))
     low = models.IntegerField(
         default=120,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("Low Finding SLA Days"),
         help_text=_("The number of days to remediate a low finding."))
     enforce_low = models.BooleanField(
@@ -366,14 +376,6 @@ class SLA_Configuration(models.Model):
                 # Mirror that on this in-memory instance so a subsequent save() on the
                 # same instance does not trigger the lock-revert path at line 1058.
                 self.async_updating = False
-
-    def clean(self):
-        sla_days = [self.critical, self.high, self.medium, self.low]
-
-        for sla_day in sla_days:
-            if sla_day < 1:
-                msg = "SLA Days must be at least 1"
-                raise ValidationError(msg)
 
     def delete(self, *args, **kwargs):
         logger.debug("%d sla configuration delete", self.id)
