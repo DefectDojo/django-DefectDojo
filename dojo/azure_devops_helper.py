@@ -226,13 +226,14 @@ class AzureDevOpsWorkItemHelper:
     
     def _get_description_DOR(self, user: Dojo_User, finding: int, description: str):
         """Get the description for Definition of Ready (DOR)."""
-        finding = Finding.objects.get(id=finding)
+        findings = Finding.objects.filter(id__in=finding)
         user_name = f"{user.username} <{user.email}>"
-        evc = get_product(finding).prod_type
+        product = get_product(findings[0])
+        description ="Findings: " + ",\n".join([str(f.id) for f in findings])
         return (
             f"- User requesting the advice:  {user_name} \n" \
-            f"- EVC: {evc.name} \n" \
-            f"- CELULA: {extract_field_from_text_regex(evc.description, 'AREA RESPONSABLE TI')} \n" \
+            f"- EVC: {product.prod_type.name} \n" \
+            f"- CELULA: {extract_field_from_text_regex(product.description, 'AREA RESPONSABLE TI')} \n" \
             f"Problem description: {description}"
         )
 
@@ -385,7 +386,7 @@ def create_azure_work_item_task(
             description,
             user=user_obj,
             evidence_and_image=evidence_and_image,
-            finding=finding_ids[0],
+            finding=finding_ids,
         )
         if finding_ids and work_item_id:
             findings = Finding.objects.filter(id__in=finding_ids)
