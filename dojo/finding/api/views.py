@@ -370,7 +370,12 @@ class FindingViewSet(
     @extend_schema(
         methods=["POST"],
         request=api_v2_serializers.TagSerializer,
-        responses={status.HTTP_200_OK: api_v2_serializers.TagSerializer},
+        responses={
+            status.HTTP_200_OK: api_v2_serializers.TagSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Returned if the tags in the request body are not valid",
+            ),
+        },
     )
     @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def tags(self, request, pk=None):
@@ -884,7 +889,7 @@ class FindingViewSet(
                 OpenApiTypes.STR,
                 OpenApiParameter.QUERY,
                 required=True,
-                description="Name of the metadata entry to edit",
+                description="Name of the metadata entry to edit. If no entry has this name, one is created.",
             ),
         ],
         responses={

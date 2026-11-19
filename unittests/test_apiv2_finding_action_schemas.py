@@ -87,6 +87,11 @@ class FindingActionSchemaTest(APITestCase):
         self.assertEqual(self.client.put(url, body, format="json").status_code, 400)
         self.assertEqual(self.client.put(url + "?name=env", body, format="json").status_code, 200)
         self.assertEqual(DojoMeta.objects.get(finding=self.finding, name="env").value, "staging")
+        # PUT upserts: a name with no entry creates one, as the parameter description says.
+        self.assertIn("created", parameter["description"])
+        created = self.client.put(url + "?name=absent", {"name": "absent", "value": "v"}, format="json")
+        self.assertEqual(created.status_code, 200, created.content)
+        self.assertTrue(DojoMeta.objects.filter(finding=self.finding, name="absent").exists())
 
     def test_metadata_get_and_post_document_no_name_parameter(self):
         for method in ("get", "post"):
@@ -98,8 +103,11 @@ class FindingActionSchemaTest(APITestCase):
         responses = self.paths[TAGS_PATH]["post"]["responses"]
         self.assertIn("200", responses)
         self.assertNotIn("201", responses)
+        self.assertIn("400", responses)
         self.assertEqual(responses["200"]["content"]["application/json"]["schema"]["$ref"], "#/components/schemas/Tag")
 
         url = reverse("finding-tags", args=(self.finding.id,))
         response = self.client.post(url, {"tags": ["schema-check"]}, format="json")
         self.assertEqual(response.status_code, 200, response.content)
+        response = self.client.post(url, {"tags": "not-a-list"}, format="json")
+        self.assertEqual(response.status_code, 400, response.content)
