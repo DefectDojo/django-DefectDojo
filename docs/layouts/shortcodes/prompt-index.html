@@ -6,7 +6,7 @@
   anchors, in the "On this page" list.
 */ -}}
 {{- $s := site.GetPage "/prompts" -}}
-{{- if not $s }}{{ $s = hugo.Sites.Default.GetPage "/prompts" }}{{ end -}}
+{{- if not $s }}{{ $s = .Page.Sites.Default.GetPage "/prompts" }}{{ end -}}
 {{- range $s.Pages.ByWeight }}
   {{- $home := site.GetPage .Params.page }}
   {{- if not $home }}{{ errorf "prompt %q: page %q not found; fix its \"page\" front matter" .File.Path .Params.page }}{{ end }}

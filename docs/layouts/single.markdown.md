@@ -12,7 +12,7 @@
 */ -}}
 {{- $base := strings.TrimSuffix "/" site.BaseURL -}}
 {{- $prompts := site.GetPage "/prompts" -}}
-{{- if not $prompts }}{{ $prompts = hugo.Sites.Default.GetPage "/prompts" }}{{ end -}}
+{{- if not $prompts }}{{ $prompts = .Sites.Default.GetPage "/prompts" }}{{ end -}}
 {{- $md := .RawContent -}}
 {{- $md = replaceRE `(?s)<!--.*?-->\n?` "" $md -}}
 {{- range $m := findRESubmatch `\{\{<\s*prompt\s+"([^"]+)"\s*>\}\}` $md }}

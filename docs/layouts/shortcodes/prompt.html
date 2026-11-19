@@ -8,6 +8,6 @@
 {{- $name := .Get 0 -}}
 {{- $path := printf "/prompts/%s" $name -}}
 {{- $p := site.GetPage $path -}}
-{{- if not $p }}{{ $p = hugo.Sites.Default.GetPage $path }}{{ end -}}
+{{- if not $p }}{{ $p = .Page.Sites.Default.GetPage $path }}{{ end -}}
 {{- if not $p }}{{ errorf "prompt %q not found: add content/prompts/%s.md (%s)" $name $name .Position }}{{ end -}}
 {{ $p.Content }}
