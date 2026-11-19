@@ -569,6 +569,11 @@ policy survive upgrades.
 Editing a policy, or any of its cells, recalculates the findings it governs, in the same way
 that changing the days on an SLA configuration does.
 
+A policy's evaluation and acceptance periods, including the per-authorization-level evaluation
+days, are whole numbers of days from 0 to 36500. A cell's maximum is a whole number of hours from
+0 to 87600, the same limit a framework preset allows. A value outside its range is refused, and the
+error names the field.
+
 The FedRAMP table DefectDojo ships reflects one published version of that standard. Confirm
 which version applies to your own authorization before relying on it, and note that the table
 publishes no deadline for the lowest impact rating, so findings at that rating keep their
