@@ -157,7 +157,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
                 msg = "You are not permitted to add findings from multiple engagements"
                 raise PermissionDenied(msg)
 
-        findings = data.get("accepted_findings", [])
+        # Each finding once, in the order first named: a repeated id is the same finding, and left
+        # in it makes the list longer than the authorized rows counted below, which read as a
+        # finding the caller may not see.
+        findings = list(dict.fromkeys(data.get("accepted_findings", [])))
+        if "accepted_findings" in data:
+            data["accepted_findings"] = findings
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
         authed_findings = get_authorized_findings("edit").filter(id__in=findings_ids)
