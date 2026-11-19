@@ -448,6 +448,35 @@ class BulkApplyParserTagsTest(TestCase):
 
         self.assertEqual(self.tag_model.objects.count(), 20)
 
+    # Regression: a finding that listed one tag twice, or in two cases, got one through row but a
+    # count of 2 (or 3), because each (finding, tag) pair was counted once per name that resolved to it.
+    @parameterized.expand([
+        ("exact_duplicate_new_tag", None, ["owasp", "owasp"]),
+        ("case_variants_new_tag", None, ["Network", "network", "NETWORK"]),
+        ("case_variants_existing_tag", "network", ["Network", "network"]),
+    ])
+    def test_a_tag_listed_twice_for_one_finding_is_counted_once(self, case, existing_name, tag_list):
+        if existing_name:
+            self.tag_model.objects.bulk_create([self.tag_model(name=existing_name, slug=existing_name, count=0, protected=False)])
+        duplicated = self._make_finding("F-dup")
+        other = self._make_finding("F-other")
+
+        bulk_apply_parser_tags([(duplicated, tag_list), (other, [tag_list[0]])])
+
+        tag = self.tag_model.objects.get()
+        self.assertEqual([tag.id], list(duplicated.tags.values_list("id", flat=True)))
+        self.assertEqual([tag.id], list(other.tags.values_list("id", flat=True)))
+        # The stored count matches the through rows: one for each finding.
+        self.assertEqual(2, tag.count, msg=case)
+
+    def test_mapping_returns_one_created_relationship_per_pair(self):
+        finding = self._make_finding("F-dup-mapping")
+
+        created = bulk_add_tag_mapping({"pci": [finding, finding], "PCI": [finding]})
+
+        self.assertEqual(1, created)
+        self.assertEqual(1, self.tag_model.objects.get().count)
+
 
 # Regression: bulk_add_tag_mapping looked tags up by LOWER(name), which no index serves, so every
 # import batch with parser tags read the whole finding tag table.

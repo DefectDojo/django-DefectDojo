@@ -421,18 +421,22 @@ def bulk_add_tag_mapping(
         if tag is None:
             continue
         for instance in instances:
-            if (instance.pk, tag.pk) not in existing_pairs:
+            pair = (instance.pk, tag.pk)
+            if pair not in existing_pairs:
                 new_relationships.append(
                     through_model(**{source_field_name: instance, target_field_name: tag}),
                 )
                 created_per_tag[tag.pk] += 1
+                # One instance can reach the same tag twice in one call (a repeated name, or two case
+                # variants of it): queue and count the pair once.
+                existing_pairs.add(pair)
 
     if not new_relationships:
         return 0
 
     # --- Query 4: bulk-create all new relationships (batched for memory) ---
-    # Use len(new_relationships) for the count: existing pairs were already filtered out above,
-    # so every entry here is new. bulk_create return value is unreliable with ignore_conflicts.
+    # Use len(new_relationships) for the count: existing and already-queued pairs were filtered out
+    # above, so every entry here is new and unique. bulk_create return value is unreliable with ignore_conflicts.
     total_created = len(new_relationships)
     with transaction.atomic():
         for i in range(0, len(new_relationships), batch_size):
