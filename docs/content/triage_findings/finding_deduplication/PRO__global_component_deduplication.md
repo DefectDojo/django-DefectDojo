@@ -57,6 +57,8 @@ A new Finding is marked as a duplicate of an existing Finding when:
 
 Component version matching is exact. A Finding for `timespan@2.3.0` will **not** deduplicate against one for `timespan@2.3.1`.
 
+On an instance that uses the Locations data model, a component's namespace is part of its name when both Findings record one: an npm scope, or a Maven groupId. A Finding for `@angular/core@16.0.0` will **not** deduplicate against one for `@babel/core@16.0.0`, and neither will two Maven artifacts that share an artifactId under different groupIds. Namespaces are compared without regard to case. A Finding whose component records no namespace still matches one that records a namespace.
+
 The Engagement-scoped deduplication setting is ignored for this algorithm. Matching is instance-wide unless the Asset is in a dedupe pool for that matching kind, in which case it is bounded to the pool (see the callout above).
 
 ## Example
