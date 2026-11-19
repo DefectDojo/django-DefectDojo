@@ -1,6 +1,8 @@
 import datetime
 from unittest.mock import patch
 
+from crum import impersonate
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from rest_framework.authtoken.models import Token
 from rest_framework.request import Request
 from rest_framework.reverse import reverse
@@ -13,6 +15,7 @@ from dojo.authorization.models import (
 )
 from dojo.authorization.roles_permissions import Roles
 from dojo.models import (
+    Dojo_User,
     Engagement,
     Finding,
     Product,
@@ -23,6 +26,7 @@ from dojo.models import (
     User,
 )
 from dojo.risk_acceptance import helper as ra_helper
+from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
 
 
 class TestRiskAcceptanceApi(APITestCase):
@@ -227,6 +231,51 @@ class TestRiskAcceptanceApi(APITestCase):
         self.finding_a2.refresh_from_db()
         self.assertTrue(self.finding_a1.risk_accepted)
         self.assertTrue(self.finding_a2.risk_accepted)
+
+    def _validate_accepted_findings(self, findings, user=None):
+        """Run this serializer's own ``validate`` for a POST, as ``user`` (``self.user`` by default)."""
+        user = user or self.user
+        request = Request(APIRequestFactory().post(self.url, {}, format="json"))
+        request.user = user
+        serializer = RiskAcceptanceSerializer(context={"request": request})
+        with impersonate(user):
+            return serializer.validate({"accepted_findings": findings})
+
+    # Regression: a finding id named twice made the list one longer than the distinct findings the
+    # authorization check counts, so the request was refused as a 403.
+    def test_validate_takes_a_repeated_finding_once(self):
+        data = self._validate_accepted_findings([self.finding_a2, self.finding_a1, self.finding_a2])
+        # First occurrence kept, in the order named.
+        self.assertEqual([self.finding_a2, self.finding_a1], data["accepted_findings"])
+
+    def test_validate_with_a_repeated_finding_still_refuses_an_unauthorized_one(self):
+        outsider_product_type = Product_Type.objects.create(name="Validate Outsider Product Type")
+        outsider_product = Product.objects.create(
+            prod_type=outsider_product_type, name="Validate Outsider Product", description="Not the user's",
+            enable_full_risk_acceptance=True,
+        )
+        outsider_engagement = Engagement.objects.create(
+            product=outsider_product,
+            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
+            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+        )
+        outsider_test = Test.objects.create(
+            engagement=outsider_engagement,
+            test_type=self.test_type,
+            target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
+            target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
+        )
+        hidden = Finding.objects.create(
+            test=outsider_test, title="Hidden", severity="High", reporter=self.user, numerical_severity="S1",
+        )
+        # Not staff (staff sees every finding): a member of this product type only, granted the way
+        # each authorization layer reads it.
+        member = Dojo_User.objects.create(username="ra_repeated_member")
+        self.product_type.authorized_users.add(member)
+        Product_Type_Member.objects.create(product_type=self.product_type, user=member, role=Role.objects.get(id=Roles.Owner))
+        self.assertEqual([self.finding_a1], self._validate_accepted_findings([self.finding_a1, self.finding_a1], member)["accepted_findings"])
+        with self.assertRaises(DjangoPermissionDenied):
+            self._validate_accepted_findings([self.finding_a1, self.finding_a1, hidden], member)
 
     def test_create_risk_acceptance_multiple_engagements_fails(self):
         """Test that creating risk acceptance with findings from multiple engagements fails"""
