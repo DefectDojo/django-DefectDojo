@@ -143,6 +143,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # closed_findings by construction, since close_old_findings() no-ops on a finding
         # that is already mitigated by the time it hydrates it.
         closed_finding_ids = [f.id for f in closed_findings] + self.actively_closed_matches
+        # Only their ids are read from here on: the closed findings (loaded, closed and post-processed
+        # by close_old_findings()) need not stay in memory through the import history and notifications.
+        del closed_findings
         # Update the timestamps of the test object by looking at the findings imported
         logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
         # Update the timestamps of the test object by looking at the findings imported
@@ -420,6 +423,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # the id tiebreak is inert here and byte-identical findings keep their relative
         # (immaterial) order via Python's stable sort.
         cleaned_findings.sort(key=deduplication_ordering_key)
+        # The report is consumed from here on, so each batch's findings can be freed once that
+        # batch is matched and post-processed instead of living until the run ends: emptied in
+        # place, because process_scan() and every override of process_findings() above this
+        # frame hold the same list. Nothing reads it after process_findings() returns.
+        if isinstance(parsed_findings, list):
+            parsed_findings.clear()
 
         # Each entry carries the finding's own push_to_jira flag: grouped findings are pushed to
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
@@ -452,6 +461,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         for batch_start in range(0, len(cleaned_findings), match_batch_max_size):
             batch_end = min(batch_start + match_batch_max_size, len(cleaned_findings))
             unsaved_findings_batch = cleaned_findings[batch_start:batch_end]
+            # This batch holds its findings now; the run-long list lets go of them (see the clear above).
+            cleaned_findings[batch_start:batch_end] = [None] * (batch_end - batch_start)
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
