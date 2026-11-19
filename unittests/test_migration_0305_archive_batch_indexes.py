@@ -191,8 +191,10 @@ class TestMigration0305Rerun(SimpleTestCase):
         lock_holder = psycopg.connect(**params, autocommit=True)
         self.addCleanup(lock_holder.close)  # also releases the lock if the test fails early
         lock_holder.execute("SELECT pg_advisory_lock(%s)", [HOLD_LOCK_KEY])
+        # A run killed before its cleanups leaves both in a kept test database: clear them first.
+        _execute(f"DROP EVENT TRIGGER IF EXISTS {HOLD_FUNCTION}")
         _execute(
-            f"CREATE FUNCTION {HOLD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$"
+            f"CREATE OR REPLACE FUNCTION {HOLD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$"
             f" BEGIN IF current_setting('application_name') = '{BUILDER_APPLICATION_NAME}' THEN"
             f" PERFORM pg_advisory_xact_lock({HOLD_LOCK_KEY}); END IF; END $$",
         )
@@ -274,3 +276,23 @@ class TestMigration0305Rerun(SimpleTestCase):
         builder_thread.join(WAIT_TIMEOUT_SECONDS)
         self.assertEqual([], build_error)
         self.assertEqual((in_flight_oid, True, "dojo_test"), _index())
+
+    def test_build_ending_runs_over_what_a_killed_run_left_behind(self):
+        """
+        A run killed before its cleanups leaves the event trigger and its function in a kept test
+        database (a CI timeout, an OOM kill, Ctrl-C). The next --keepdb run must not trip over them.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")
+            if not cursor.fetchone()[0]:
+                self.skipTest("needs a superuser to create an event trigger")
+        # Registered first, so it runs last and clears both even when the test below fails.
+        self.addCleanup(_execute, f"DROP FUNCTION IF EXISTS {HOLD_FUNCTION}()")
+        self.addCleanup(_execute, f"DROP EVENT TRIGGER IF EXISTS {HOLD_FUNCTION}")
+        _execute(f"CREATE FUNCTION {HOLD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$ BEGIN END $$")
+        _execute(
+            f"CREATE EVENT TRIGGER {HOLD_FUNCTION} ON ddl_command_end"
+            f" WHEN TAG IN ('CREATE INDEX') EXECUTE FUNCTION {HOLD_FUNCTION}()",
+        )
+
+        self.test_build_ending_is_waited_for_until_it_commits()
