@@ -57,6 +57,7 @@ from dojo.finding.api.serializer import (
     FindingVerifySerializer,
 )
 from dojo.finding.queries import get_authorized_findings
+from dojo.finding.services import FINDING_DELETED_MID_UPDATE_MESSAGE
 from dojo.finding.ui.views import (
     duplicate_cluster,
     reset_finding_duplicate_status_internal,
@@ -216,8 +217,7 @@ class FindingViewSet(
             # original error.
             vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
             if vanished and not Finding.objects.filter(pk=finding_pk).exists():
-                msg = "This finding was deleted while the update was being processed."
-                raise NotFound(msg) from exc
+                raise NotFound(FINDING_DELETED_MID_UPDATE_MESSAGE) from exc
             raise
 
     def destroy(self, request, *args, **kwargs):
