@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 from django.conf import settings
 from django.db import OperationalError, connection, router, transaction
-from django.db.models import Count
+from django.db.models import Count, Exists, OuterRef
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.db.utils import IntegrityError
@@ -405,12 +405,20 @@ def group_findings_by(finds, finding_group_by_option):
 
 
 def _test_finding_ids_by_group_name(test_id, group_by, names):
-    """Ids of the test's findings per group name, for the given names only, read in one pass."""
+    """
+    Ids of the test's ungrouped findings per group name, for the given names only, read in one pass.
+
+    A finding already in a group (the one finding.finding_group reads) is left out: a finding
+    belongs to one group at most, so a new auto group cannot take it, and it does not count as a
+    peer that makes a lone finding form a group.
+    """
     fields = ("id", "title", "component_name", "component_version", "file_path", "vuln_id_from_tool")
     by_name = {}
+    in_a_group = Exists(Finding_Group.objects.filter(findings=OuterRef("pk")))
     # Plain values, not Finding instances: get_group_by_group_name only reads these attributes, and
     # building a model instance per row is what made a large test expensive to scan.
-    for row in Finding.objects.filter(test_id=test_id).order_by("id").values(*fields).iterator(chunk_size=2000):
+    ungrouped = Finding.objects.filter(test_id=test_id).filter(~in_a_group)
+    for row in ungrouped.order_by("id").values(*fields).iterator(chunk_size=2000):
         group_name = get_group_by_group_name(SimpleNamespace(**row), group_by)
         if group_name in names:
             by_name.setdefault(group_name, []).append(row["id"])
@@ -423,10 +431,10 @@ def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_fin
 
     For each name: reuse the oldest group of that (test, name), else create one (unless
     create_finding_groups_for_all_findings is off and the name has a lone finding no other
-    finding of the test shares). A newly created group also takes the test's other findings
-    with the same name. The cost does not grow with the number of groups: existing groups
-    are read in one query, the test's findings once (and only when some name has no group
-    yet), and new groups and memberships are written in bulk.
+    ungrouped finding of the test shares). A newly created group also takes the test's other
+    findings with the same name that are not in a group yet. The cost does not grow with the
+    number of groups: existing groups are read in one query, the test's findings once (and
+    only when some name has no group yet), and new groups and memberships are written in bulk.
 
     legacy_names maps a name to other names the same group may carry: a reimport named a new
     finding's finding_title group from the report's raw title before it named it from the stored

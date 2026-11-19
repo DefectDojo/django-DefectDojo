@@ -246,6 +246,8 @@ The adjoining **Create Finding Groups for All Findings** checkbox performs two f
 - **Checked**: Creates a Finding Group for every imported Finding, even if that Finding is the only member of the group.
 - **Unchecked**: Creates Finding Groups only when there are actually multiple Findings to group together.
 
+A Finding that is already in a Finding Group stays in that group: Group By never adds it to a second group, and it does not count toward the multiple Findings that an unchecked box needs to create a new group.
+
 ![image](images/profindings_ss2.png)
 
 If an option is not selected from the Group By dropdown menu during import (e.g., **Finding Title** in the screenshot above, etc.), no grouping will occur. 
