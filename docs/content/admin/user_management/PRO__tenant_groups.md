@@ -14,7 +14,7 @@ Everything here appears only on an instance that belongs to a tenant group with 
 A master member holds one of three roles:
 
 * **Admin** reads every tenant of the group, and manages the group's invites and master members.
-* **Writer** and **Reader** read only the tenants where they also hold a role, with the weaker of the two roles.
+* **Writer** and **Reader** read only the tenants where they also hold a role. In the global view they read every one of those tenants as the same built-in role: the weakest among the highest role they hold in each tenant, so they never get more in a tenant than their own role there.
 
 ## Switching tenants
 
@@ -56,9 +56,9 @@ The master members, with their roles. An Admin can **Change Role** or **Remove**
 
 ## Through the API
 
-The same actions are available to automation on `/api/v2/tenancy/`, with a token or a session:
+The same actions are available to automation on `/api/v2/tenancy/`. An API token or a session can read the context and the tenants and manage invites and master members. Entering the global view is for a session only: an API token always reads one tenant, and its request to enter is refused.
 
 * `GET /api/v2/tenancy/context/`: the group, the current tenant (null in the global view), the region and your master role.
 * `GET /api/v2/tenancy/tenants/`: the tenants you can read, for master members.
-* `POST` and `DELETE /api/v2/tenancy/global_mode/`: enter and leave the global view for the session.
+* `POST` and `DELETE /api/v2/tenancy/global_mode/`: enter and leave the global view for the session (session only).
 * `/api/v2/tenancy/invites/` and `/api/v2/tenancy/master_members/`: invites and master members, for Admins. `POST /api/v2/tenancy/invites/accept/` accepts an invite with its token.
