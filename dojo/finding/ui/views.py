@@ -3422,6 +3422,7 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
         logger.debug("marking %i as duplicate of %i", finding.id, new_original.id)
         finding.duplicate = True
         finding.active = False
+        finding.verified = False
         finding.duplicate_finding = new_original
         finding.last_reviewed = timezone.now()
         finding.last_reviewed_by = user
