@@ -114,7 +114,7 @@ The API applies the same rule. `POST /api/v2/risk_acceptance/`, a `PATCH` or `PU
 }
 ```
 
-A request reports it under `findings` instead. Findings a Risk Acceptance already holds can be sent again in an update. A Finding whose Risk Acceptance has expired is no longer Risk Accepted, so it can be accepted again.
+A request, and `POST /api/v2/risk_acceptance/{id}/add_findings/`, report it under `findings` instead. Findings a Risk Acceptance already holds can be sent again in an update. A Finding whose Risk Acceptance has expired is no longer Risk Accepted, so it can be accepted again.
 
 Automations follow the same rule and skip a Finding that is already held rather than adding it to a second Risk Acceptance: standing acceptances (the first one that matches takes the Finding) and the Rules Engine actions that add Findings to, or create, a Risk Acceptance.
 
@@ -125,6 +125,18 @@ Automations follow the same rule and skip a Finding that is already held rather 
 Once a Full Risk Acceptance object has been created, you can edit the details of the object, upload a file with proof of the Risk Acceptance, or delete the object entirely by clicking the gear icon in the top right of the object’s view. 
 
 Findings can also be added and removed from the object using the same menu. Alternatively, remove a single Finding with **Remove Risk Acceptance** in that Finding's gear menu. Selecting Findings in a table, clicking **Bulk Edit**, and choosing **Unaccept Risk** from the **Simple Risk Acceptance Status** dropdown also removes them from their Full Risk Acceptance, but only for Findings whose Asset has Simple Risk Acceptance enabled. Findings on other Assets are skipped, and a warning says how many.
+
+Through the API, `POST /api/v2/risk_acceptance/{id}/add_findings/` and `POST /api/v2/risk_acceptance/{id}/remove_findings/` take the ids of only the Findings to add or remove, which is what **Add Findings** and **Remove Findings** send:
+
+```json
+{"findings": [2300004, 2300005]}
+```
+
+Use them rather than a `PATCH` of `accepted_findings`, which replaces the whole list: on a Risk Acceptance holding about a million Findings that list is larger than the server accepts (`DD_DATA_UPLOAD_MAX_MEMORY_SIZE`, 8 MiB by default), and the update is refused with `413`. Adding checks each Finding as an edit does: you need to be able to see it and to risk accept on its Asset, it cannot be held by another Risk Acceptance, and with Risk Acceptances 2.0 enabled nothing is added before the Risk Acceptance is active. A Finding the Risk Acceptance already holds (when adding), or does not hold (when removing), is left as it is. The response lists the Findings that changed:
+
+```json
+{"id": 17, "name": "Legacy TLS exceptions", "changed_findings": [2300004], "accepted_findings_count": 1100001}
+```
 
 Closing a risk-accepted Finding for another reason also takes it out of its Risk Acceptance, on any Asset: **Close Finding**, a **Bulk Edit** **Status** of False Positive, Out of Scope or Mitigated, a Triage Engine rule that sets one of those, and an API update (`PATCH /api/v2/findings/{id}/`) that sets `false_p`, `out_of_scope` or `is_mitigated` to `true`. The Finding stays closed, its Endpoint statuses stay mitigated, and a note on it records the removal. A later expiration of that Risk Acceptance does not reopen it. A request that both risk accepts a Finding and closes it is refused, for example an API update that sends `risk_accepted: true` with `out_of_scope: true` for a Finding that is not yet accepted.
 

@@ -364,6 +364,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # still count them for update_import_history()/notify_scan_added().
         self.actively_closed_matches: list[int] = []
         self.group_names_to_findings_dict = {}
+        # group name -> {name a reimport gave the same group from the raw title: None}
+        self.legacy_group_names = {}
         # New findings queued by process_finding_that_was_not_matched, drained (persisted
         # via persist_new_findings, then post-processed) once per matching batch -- see
         # _drain_pending_new_findings.
@@ -1407,10 +1409,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             "Reimport found no existing match; will create a new finding: "
             f"{finding.title} ({finding.component_name} - {finding.component_version})",
         )
-        # Manage the finding grouping selection
+        # Manage the finding grouping selection. The finding is saved later, so its group is
+        # named from the title save() will store, the name the import gave the group.
         finding_will_be_grouped = self.process_finding_groups(
             unsaved_finding,
             self.group_names_to_findings_dict,
+            unsaved=True,
+            legacy_group_names=self.legacy_group_names,
         )
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
@@ -1572,6 +1577,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.group_names_to_findings_dict,
             self.group_by,
             create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
+            # set by process_findings; a caller that grouped findings itself recorded none
+            legacy_names=getattr(self, "legacy_group_names", None),
             **kwargs,
         )
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop

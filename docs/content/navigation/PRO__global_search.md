@@ -102,3 +102,4 @@ On the full results page, the columns can be filtered and sorted independently o
 - The full results page is **paginated** (25 rows per page by default).
 - Each object type contributes up to a **maximum number of matches** per search (**100** by default). When more matches exist than are shown, the results are flagged as truncated; narrow your query to see the most relevant hits.
 - The dialog shows a smaller preview (at most 12 rows, and at most four per object type on the All tab) with the total count, so **See All *N* Results** always reflects the true totals.
+- To answer while you type, the dialog ranks only the **most recently created matches** of each object type: the newest 1,000 keyword matches and the newest 1,000 fuzzy matches. For a term that matches more records than that, the dialog's top rows are the best of those recent matches and can differ from the top of the full results page, which ranks every match. The totals are unaffected.

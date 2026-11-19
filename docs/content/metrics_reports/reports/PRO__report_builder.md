@@ -78,6 +78,7 @@ A **Stock** block is configured by choosing one of five stock types, along with 
 - **Test type**
 - **Risk acceptance**
 - **Location** (only when Locations are enabled). A switch under the model choice picks what each row is: **Location** (every location, whatever its type), **URL**, **Dependency**, or **Location per Asset**.
+- **Article 14 Report Stage** (Tabular blocks only, and only when **Regulatory Profile** is enabled). One row per stage of each CRA Article 14 report you can see: its reference, title, Asset, regime, stage, awareness time, statutory deadline, state, **Deadline Status** (**Breached**, **Overdue**, **Due soon**, **On track**, **Submitted on time** or **Submitted late**), and who submitted it, when, with which platform reference. A stage is visible to whoever can view its report's Asset. See [CRA Article 14 Reporting](/federal_compliance/cra_article14_reporting/).
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. You may still encounter the legacy wording in some underlying field and filter names.
 
@@ -88,6 +89,8 @@ Fields render in the order they are listed. Selecting a field adds it to the end
 In a Detail block, a markdown field with content takes the full width of the page, and the other fields sit two to a row. Screenshots in a markdown field, such as those added to a Finding's **Steps to Reproduce**, scale down to fit the page, and code blocks wrap. A record too tall for one page continues on the next page. A Tabular block scales each screenshot to the width of its column, so use a Detail block when readers need to read the screenshots.
 
 On the Asset, Engagement, Test and Finding entities, the **Fields** and **Order By** pickers list their fields under the same headings as that entity's list page uses for **Add Filter**, in the same order: on Finding, for example, Finding, Threat Intel, Asset, Engagement and Test, Dates and People. Risk Acceptance lists its **Fields** under Risk Acceptance, Findings, Dates and People. The URL and Dependency location types list both pickers under Location, Asset, Findings and Dates. A search in the **Fields** picker shows only the headings that still hold a matching field. The headings only arrange the picker: the numbered list under it, and the generated report, keep the order you set. The other entities (Organization, Test Type, Location and Location per Asset) list their fields without headings, as does Risk Acceptance's **Order By**: a picker shows headings only when it offers at least twelve fields under two or more headings; a shorter list is one flat list.
+
+When **Regulatory Profile** is enabled, the Asset entity also offers the CRA facts recorded on each Asset's **Regulatory** card: **CRA Product Class**, **Support Period End**, **Security Contact** and **CVD Policy URL**. An Asset with no regulatory profile reads **Not applicable** with the other three empty.
 
 The records are sorted by the block's **Order By** field, in the **Order Direction** you choose. A block saved with a sort field its entity no longer offers (one renamed since the block was built, say) is generated unsorted rather than failing the report, and the server log names the block and the field.
 
@@ -193,6 +196,17 @@ A **Template** is an ordered list of Blocks bound to a single Theme. The Templat
 Because a Template references Blocks by inclusion, the same Block can appear in a Template more than once. A reusable page-break Block, for instance, can be inserted between several sections of the same report.
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
+
+#### Built-in Templates
+
+DefectDojo ships Templates you can generate as they are, marked **Built-in** on *All Report Templates*. While **Regulatory Profile** is enabled there are two, for the EU Cyber Resilience Act:
+
+| Template | What it covers |
+| --- | --- |
+| **EU CRA Readiness Summary** | Generated for one Asset (it asks for the Asset in **Generate Report**): its CRA profile (product class, support period end, security contact, disclosure policy URL), its open findings by severity over the last 90 days, its open findings listed in CISA KEV, its open Critical and High findings, and the stages of its Article 14 reports. |
+| **EU CRA Article 14 Reporting Log** | Every Article 14 report stage you can see: the pending stages first, nearest deadline first, then the whole log with each submission. |
+
+A Built-in Template can be previewed, generated (from its menu, from **Quick Export** on a findings list, or on a schedule), exported and duplicated, but not edited, deleted, shared or transferred, by anyone, and a Block cannot be added to it. A schedule on the **EU CRA Readiness Summary** names its Asset, as a generated report does. To change one, choose **Duplicate Template** in its menu: the copy is yours, and it gets its own copies of the Built-in's Blocks, so you can edit both the copy and its Blocks without touching the original. Built-in Templates and their Blocks do not appear in *All Report Blocks*. In the API, a Built-in Template has `is_system: true`, and `PATCH`, `PUT`, `DELETE`, `share` and `transfer` on it return `404`.
 
 ### Generated Reports
 
