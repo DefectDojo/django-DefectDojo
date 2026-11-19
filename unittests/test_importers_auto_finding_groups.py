@@ -211,3 +211,36 @@ class TestImportersAutoFindingGroups(DojoTestCase):
             {self._name(prefix)[:255]: sorted([first[0].id, second[0].id])}, membership,
             msg=f"persisted {membership}",
         )
+
+    def test_new_group_leaves_findings_already_in_another_group(self):
+        # A finding belongs to one group at most: a new auto group only pulls in the test's
+        # same-name findings that are not in a group yet, never one a user grouped by hand.
+        grouped = self._findings(["Shared"])[0]
+        manual = Finding_Group.objects.create(test=self.test, name="Manual", creator=self.user)
+        manual.findings.add(grouped)
+        ungrouped = self._findings(["Shared"])[0]
+        new = self._findings(["Shared"])
+
+        self._group({self._name("Shared"): new})
+
+        membership = self._membership()
+        self.assertEqual(
+            {"Manual": [grouped.id], self._name("Shared"): sorted([ungrouped.id, new[0].id])}, membership,
+            msg=f"finding {grouped.id} must stay only in its manual group; persisted {membership}",
+        )
+
+    def test_lone_finding_whose_only_peer_is_grouped_stays_ungrouped(self):
+        # create_finding_groups_for_all_findings=False: a peer that already sits in another group
+        # is not one the new group could take, so it does not make the lone finding form a group.
+        grouped = self._findings(["Paired"])[0]
+        manual = Finding_Group.objects.create(test=self.test, name="Manual", creator=self.user)
+        manual.findings.add(grouped)
+        alone = self._findings(["Paired"])
+
+        self._group({self._name("Paired"): alone}, create_all=False)
+
+        membership = self._membership()
+        self.assertEqual(
+            {"Manual": [grouped.id]}, membership,
+            msg=f"expected no new group for lone finding {alone[0].id}; persisted {membership}",
+        )
