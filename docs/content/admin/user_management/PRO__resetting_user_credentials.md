@@ -42,7 +42,7 @@ Keep in mind what this action does **not** do:
 * It emails a migrated user a link to set a password, if the user has no password. A user that no migration created gets no link.
 * If SSO or LDAP sign-in is on, it sends no link. The users sign in with SSO or LDAP.
 * It sends no link to a user that has no password and signed in before. That user signs in with SSO.
-* It skips service users, and it skips every account that is already active.
+* It skips service users. It skips a user that was inactive on the source while the account is inactive. Activate that user on **Edit User**, then run the action again. It skips every other account that is already active, unless the account has no usable password and never signed in.
 * A Global Owner cannot activate a superuser. The action skips the superuser.
 
 If an email cannot go out, the **Pass On These Links** window lists the user. It shows the link and a copy button. Send each link only to its user, because a link works like a password. [How Migrated Users Sign In](/get_started/pro/onprem/migrating_from_open_source/#how-migrated-users-sign-in) gives the full steps.

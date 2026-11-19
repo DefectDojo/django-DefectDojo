@@ -312,7 +312,7 @@ Discover also fills the connection's migration page with the [preflight report](
 
 ### Step 3: Sync
 
-Click **Begin Migration** on the migration page and confirm. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends. See [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The Sync also imports every endpoint of the Product, with its tags and metadata. This includes an endpoint with no finding. It also sends the questionnaires, the benchmarks and the tracking files of the Product. The run copies the import history and the audit history of these objects, unless you turned those fields off. The run also creates the users and the reference data they refer to. It also brings the finding templates and the tool configurations without their password, SSH key, API key and extras. It brings the engagement presets and API scan configurations of each Product too. A large estate takes a while. **History** on the migration page shows each run.
+Click **Begin Migration** on the migration page and confirm. It runs a [Sync](/connectors/upstream/manage_operations/#sync-operations). The connector turns on read-only mode on the source when the Sync starts, and turns it off when the Sync ends. If the source is already in read-only mode, the Sync does not start. See [Read-only mode during a Sync](/connectors/toolreference/defectdojo/#read-only-mode-during-a-sync). The first run imports every mapped Product: its engagements, its tests and its findings. The findings bring their notes, files, endpoints and metadata. Risk acceptances and finding groups come too. The Sync also imports every endpoint of the Product, with its tags and metadata. This includes an endpoint with no finding. It also sends the questionnaires, the benchmarks and the tracking files of the Product. The run copies the import history and the audit history of these objects, unless you turned those fields off. The run also creates the users and the reference data they refer to. It also brings the finding templates and the tool configurations without their password, SSH key, API key and extras. It brings the engagement presets and API scan configurations of each Product too. A large estate takes a while. **History** on the migration page shows each run.
 
 The operation shows **Success** when the connector has sent the data. DefectDojo Pro then imports the findings in the background, which goes on for some minutes on a large Product. The migration page shows a progress bar during that time, and **Migration Complete** when it ends. If it shows **Migration Stalled**, click **Begin Migration** again to finish the import. A notification then sums up the migration. Before you validate, check the finding count of each Product against the preflight report. The [connector reference](/connectors/toolreference/defectdojo/#check-the-finding-count-after-a-sync) explains which findings it leaves out.
 
@@ -339,7 +339,7 @@ To activate users and send them an invitation:
 2. Open **Settings > Users & Permissions > Users**. The page shows **Active Users** first, so it hides the migrated users. Choose **Inactive Users** in the view list above the table. Then select the users you need. Do not select your own account.
 3. Click **Activate and Invite**, and confirm. Each active user takes a license seat.
 
-Do not use the **Active** box on **Edit User** for this. The box activates a user, but it sends no link, and **Activate and Invite** skips a user that is already active. To send the link to such a user, deactivate it with **Deactivate Users**. Then choose **Inactive Users**, select the user, and click **Activate and Invite**.
+A user that was inactive on the source gets no link while the account is inactive. The action skips it and says so. Activate that user with the **Active** box on **Edit User**, then run **Activate and Invite** again. An active migrated user that has no usable password and never signed in gets the link too. The **Active** box alone sends no link.
 
 For each selected user, DefectDojo Pro does the following:
 
@@ -347,7 +347,7 @@ For each selected user, DefectDojo Pro does the following:
 * It emails a migrated user a link to set a password, if the user has no password. A user that no migration created gets no link.
 * If SSO or LDAP sign-in is on, it sends no link. The users sign in with SSO or LDAP.
 * It sends no link to a user that has no password and signed in before. That user signs in with SSO.
-* It skips service users, and it skips every account that is already active.
+* It skips service users. It skips a user that was inactive on the source while the account is inactive. Activate that user on **Edit User**, then run the action again. It skips every other account that is already active, unless the account has no usable password and never signed in.
 
 The user opens the link and chooses a password. The link stops working when the user sets a password or signs in. It also stops after 3 days, or after the number of seconds you set in `DD_PASSWORD_RESET_TIMEOUT`. To make a new link, deactivate the user with **Deactivate Users**. Then choose **Inactive Users**, select the user, and click **Activate and Invite** again.
 
@@ -371,19 +371,18 @@ A user that signs in only with [SSO](/admin/sso/) does not need a password. Afte
 
 Run Sync again by hand, or on the recurring frequency you set. If the connection deleted itself after the first Sync, add it again: the new connection continues where the old one stopped. Each run updates what changed on the source. It makes no copies: a finding keeps its identity through its source id and its hash. A finding that the source deleted from a test closes in DefectDojo Pro: it is marked mitigated, not deleted. A run with no change on the source changes nothing in Pro. A run adds only the imports and audit events made since the last run.
 
-Each Sync locks the source with read-only mode while it reads, and unlocks it at the end.
+Each Sync locks the source with read-only mode while it reads, and unlocks it at the end. A Sync does not start when the source is already in read-only mode. Do not turn on read-only mode yourself before a Sync. If a Sync stopped in the middle, turn off **Read-only mode** in **System Settings** of the source, then run the Sync again. A Sync fails when it cannot read a reference list or the settings of the source. Run it again.
 
 On cutover day:
 
-1. Optional, for a fully quiet source: go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes.
-2. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync leaves read-only mode as it found it, so a source you locked in step 1 stays locked.
-3. If you skipped step 1, turn read-only mode on now in **System Settings** to keep the source frozen.
-4. Turn on Jira. The migrated Jira projects are off and the migrated instances have no API token. Use one path:
+1. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync turns read-only mode off when it ends.
+2. After the last Sync, go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes. Do not turn on read-only mode before the last Sync, because a Sync does not start on a locked source.
+3. Turn on Jira. The migrated Jira projects are off and the migrated instances have no API token. Use one path:
    * Classic Jira: add the API token on each migrated instance, turn on Jira in **System Settings**, then turn on each project.
    * Downstream Connectors: keep Jira turned off in **System Settings**. With Jira off, a project that you turn on sends nothing to Jira. Through the API, turn on each migrated project that pushed all issues on the source. Send `PATCH /api/v2/jira_projects/<id>/` with `{"enabled": true}`. To find the ids, send `GET /api/v2/jira_projects/?enabled=false&push_all_issues=true&jira_instance=<id>`, with the id of the migrated Jira instance. Without it, the list can include a project that was already off in DefectDojo Pro. The forms that turn a project on show only while Jira is on. The conversion sets up automatic pushes only for a project that is on and pushes all issues. Then run the classic Jira conversion on the **Downstream Connectors** page, and add the API token on the new connection. The conversion works on every classic Jira setup in DefectDojo Pro, not only the migrated ones. It skips engagement epics. See [Migrating to the Jira Downstream Connector](/connectors/downstream/PRO__jira_guide/#migrating-to-the-jira-downstream-connector).
-5. Turn on GitHub. The migrated GitHub configurations have no API key. Add the API key on each migrated GitHub configuration. Then turn on GitHub in **System Settings**.
-6. Point CI jobs, scripts, and integrations at your Pro deployment's `/api/v2/` API. Automate against `/api/v2/` only. Paths under `/api/vue/` belong to the Pro UI and reject API tokens.
-7. Retire the open source instance. If you keep it running, revoke the connector's superuser API key. Read-only mode blocks that change, so revoke the key before step 3. If the source was locked since step 1, unlock it in a quiet moment with CI paused, revoke the key, and lock it again at once.
+4. Turn on GitHub. The migrated GitHub configurations have no API key. Add the API key on each migrated GitHub configuration. Then turn on GitHub in **System Settings**.
+5. Point CI jobs, scripts, and integrations at your Pro deployment's `/api/v2/` API. Automate against `/api/v2/` only. Paths under `/api/vue/` belong to the Pro UI and reject API tokens.
+6. Retire the open source instance. If you keep it running, revoke the connector's superuser API key. Read-only mode blocks that change, so revoke the key before step 2. If the source is already locked, unlock it in a quiet moment with CI paused, revoke the key, and lock it again at once.
 
 While read-only mode is on, DefectDojo rejects every change from the UI and the API, and pauses scheduled background jobs. Superusers can still sign in and change System Settings. To turn it off, clear **Read-only mode** and click **Submit**.
 
@@ -410,7 +409,7 @@ The first Sync copies notification settings and system settings once. A second r
 - Notification channels and tool credentials set up in DefectDojo Pro
 - Users activated with **Activate and Invite**, and given roles
 - Final Sync run, finding counts checked, and validated
-- Read-only mode turned on again in the source
+- Read-only mode turned on in the source after the final Sync
 - Automation pointed at the Pro deployment, and the source retired or its key revoked
 
 ## Questions or support
