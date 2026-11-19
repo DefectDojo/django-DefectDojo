@@ -1,0 +1,138 @@
+{
+  "schema": 3,
+  "version": "synthetic",
+  "timestamp": "2026-08-20T10:00:00Z",
+  "report": {
+    "info": {
+      "file": {
+        "name": "synthetic-installer.exe",
+        "hashes": [
+          [
+            "md5",
+            "00000000000000000000000000000000"
+          ]
+        ]
+      }
+    },
+    "metadata": {
+      "components": {
+        "5b1f8a52-0c3e-5d7a-9e44-2f6b0a1c9d37": {
+          "name": "payload.dll",
+          "path": "synthetic-installer.exe/payload.dll",
+          "hashes": [
+            [
+              "sha256",
+              "1111111111111111111111111111111111111111111111111111111111111111"
+            ]
+          ],
+          "classification": {
+            "result": "Win32.Trojan.Synthetic"
+          },
+          "quality": {
+            "status": "fail"
+          },
+          "identity": {
+            "version": "1.0",
+            "purl": "",
+            "vulnerabilities": {
+              "active": [
+                "CVE-2099-0001"
+              ]
+            },
+            "dependencies": null
+          }
+        },
+        "9d4e7b21-3a8c-5f60-b1d2-6e0c8a4f7b93": {
+          "name": "payload.dll",
+          "path": "synthetic-installer.exe/backup/payload.dll",
+          "hashes": [
+            [
+              "sha256",
+              "1111111111111111111111111111111111111111111111111111111111111111"
+            ]
+          ],
+          "classification": {
+            "result": "Win32.Trojan.Synthetic"
+          },
+          "quality": {
+            "status": "fail"
+          },
+          "identity": {
+            "version": "1.0",
+            "purl": "",
+            "vulnerabilities": {
+              "active": [
+                "CVE-2099-0001"
+              ]
+            },
+            "dependencies": null
+          }
+        }
+      },
+      "dependencies": null,
+      "secrets": null,
+      "vulnerabilities": {
+        "CVE-2099-0001": {
+          "cvss": {
+            "version": "3.1",
+            "baseScore": 9.8
+          },
+          "summary": "Synthetic vulnerability for the unit tests.",
+          "exploit": [
+            "FIXABLE"
+          ]
+        }
+      },
+      "violations": {
+        "a7c4e1d0-6b2f-4f8e-9c31-0d5e8a7b6f42": {
+          "status": "fail",
+          "category": "threats",
+          "rule_id": "SQ30110",
+          "severity": "critical",
+          "description": "Detected presence of malicious files through file reputation or third-party scan.",
+          "references": {
+            "component": [
+              "5b1f8a52-0c3e-5d7a-9e44-2f6b0a1c9d37"
+            ]
+          }
+        },
+        "b2d8f3a6-4c1e-4b7d-a5f0-1e9c6d3b8a27": {
+          "status": "fail",
+          "category": "threats",
+          "rule_id": "SQ30108",
+          "severity": "high",
+          "description": "Detected presence of malicious files by a machine learning algorithm.",
+          "references": {
+            "component": [
+              "5b1f8a52-0c3e-5d7a-9e44-2f6b0a1c9d37"
+            ]
+          }
+        },
+        "e3b9d27a-1f5c-4a6e-8d03-b74c2e9f1a58": {
+          "status": "fail",
+          "category": "secrets",
+          "rule_id": "SQ34304",
+          "severity": "medium",
+          "description": "Detected presence of web service access tokens.",
+          "references": {
+            "component": [
+              "5b1f8a52-0c3e-5d7a-9e44-2f6b0a1c9d37"
+            ]
+          }
+        },
+        "f8a1c5e9-7d3b-4e2a-b6c4-9f0d2e7a1b35": {
+          "status": "fail",
+          "category": "secrets",
+          "rule_id": "SQ34101",
+          "severity": "low",
+          "description": "Detected presence of commonly distributed sensitive data.",
+          "references": {
+            "component": [
+              "5b1f8a52-0c3e-5d7a-9e44-2f6b0a1c9d37"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
