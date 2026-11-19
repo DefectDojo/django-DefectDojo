@@ -342,6 +342,53 @@ class TestRiskAcceptanceApi(APITestCase):
         self.assertIn(self.finding_a1, ra.accepted_findings.all())
         self.assertIn(self.finding_a2, ra.accepted_findings.all())
 
+    # Regression: a repeated finding id was refused as a 403 on the routes a client calls.
+    def test_create_risk_acceptance_takes_a_repeated_finding_once(self):
+        payload = {
+            "name": "Repeated Finding RA",
+            "recommendation": "A",
+            "decision": "A",
+            "accepted_by": "Test User",
+            "owner": self.user.id,
+            "accepted_findings": [self.finding_a1.id, self.finding_a1.id, self.finding_a2.id],
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+        self.assertEqual(201, response.status_code, response.content)
+
+        ra = Risk_Acceptance.objects.get(id=response.data["id"])
+        self.assertEqual(
+            [self.finding_a1.id, self.finding_a2.id],
+            sorted(ra.accepted_findings.values_list("id", flat=True)),
+        )
+        self.finding_a1.refresh_from_db()
+        self.finding_a2.refresh_from_db()
+        self.assertTrue(self.finding_a1.risk_accepted)
+        self.assertTrue(self.finding_a2.risk_accepted)
+
+    def test_partial_update_risk_acceptance_takes_a_repeated_finding_once(self):
+        ra = Risk_Acceptance.objects.create(
+            name="Repeated Finding PATCH RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+        )
+        ra.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(ra)
+
+        payload = {"accepted_findings": [self.finding_a2.id, self.finding_a2.id, self.finding_a1.id]}
+        response = self.client.patch(f"{self.url}{ra.id}/", payload, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        ra.refresh_from_db()
+        self.assertEqual(
+            [self.finding_a1.id, self.finding_a2.id],
+            sorted(ra.accepted_findings.values_list("id", flat=True)),
+        )
+        self.finding_a2.refresh_from_db()
+        self.assertTrue(self.finding_a2.risk_accepted)
+
     def test_update_risk_acceptance_switch_engagement_fails(self):
         """Test that replacing all findings with findings from different engagement fails"""
         # Create risk acceptance with findings from engagement A
