@@ -119,7 +119,7 @@ from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 EXPORT_CHUNK_SIZE = 500
 ACTIONS_PER_LINE = 10000
-# ponytail: a file linked again after this many other files is read from storage again.
+# A file linked again after this many other files is read from storage again.
 FILE_SIZE_CACHE_SIZE = 10000
 DOCS_URL = "https://docs.defectdojo.com/automation/api/product_export/"
 SCHEMA_VERSION = 1
