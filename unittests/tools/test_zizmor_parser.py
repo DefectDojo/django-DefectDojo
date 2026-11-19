@@ -10,7 +10,8 @@ from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tes
 #   no_vuln.json, one_vuln.json:      zizmor --offline --format json .
 #   many_vulns.json, same_line.json:  zizmor --offline --persona=auditor --format json .
 # same_line.json has two template-injection results on one line and an undocumented-permissions result
-# with two primary locations.
+# with two primary locations. expressions.json (zizmor --offline --persona=auditor --format json .) has
+# expressions with whitespace, which zizmor reports as Regex fragments, and one expression used twice on a line.
 
 
 class TestZizmorParser(DojoTestCase):
@@ -129,6 +130,9 @@ class TestZizmorParser(DojoTestCase):
             self.assertIn("**Flagged expression:** `github.event.pull_request.title`", finding.description)
             self.assertIn("**Flagged expression:** `github.event.pull_request.head.ref`", finding.description)
             self.assertEqual(1, finding.description.count("**Documentation and remediation:**"))
+            # both results flag the same run line: its code is shown once
+            self.assertEqual(2, finding.description.count("```"))
+            self.assertIn("**Code:** as shown for an earlier occurrence", finding.description)
         with self.subTest(i=4):
             # every primary location is listed, the first one gives the line
             finding = findings[4]
@@ -138,6 +142,42 @@ class TestZizmorParser(DojoTestCase):
             self.assertIn("**Location:** .github/workflows/greet.yml:7 (permissions.pull-requests)", finding.description)
             self.assertIn("**Location:** .github/workflows/greet.yml:8 (permissions.issues)", finding.description)
             self.assertEqual(2, finding.description.count("**Detail:** needs an explanatory comment"))
+
+    def test_parse_expressions(self):
+        findings = self.parse("expressions.json")
+        # twelve results; the two identical template-injection results on triage.yml line 14 become one finding
+        self.assertEqual(11, len(findings))
+        self.assertEqual(11, len({(f.vuln_id_from_tool, f.file_path, f.line) for f in findings}))
+
+        with self.subTest(i=1):
+            # whitespace inside the expression: zizmor reports a Regex fragment, shown as text
+            finding = findings[1]
+            self.assertEqual("template-injection", finding.vuln_id_from_tool)
+            self.assertEqual(".github/workflows/bot.yml", finding.file_path)
+            self.assertEqual(13, finding.line)
+            self.assertEqual("Low", finding.severity)
+            self.assertIn("**Flagged expression:** `toJSON( secrets )`", finding.description)
+        with self.subTest(i=2):
+            self.assertIn("**Flagged expression:** `github.event.pull_request[ 'title' ]`", findings[2].description)
+        with self.subTest(i=3):
+            finding = findings[3]
+            self.assertEqual("bot-conditions", finding.vuln_id_from_tool)
+            self.assertEqual(10, finding.line)
+            self.assertIn("**Flagged expression:** `github.actor == 'dependabot[bot]'`", finding.description)
+        with self.subTest(i=8):
+            # the same expression twice on one line: two occurrences, rendered once with a count
+            finding = findings[8]
+            self.assertEqual(".github/workflows/triage.yml", finding.file_path)
+            self.assertEqual(14, finding.line)
+            self.assertEqual(2, finding.nb_occurences)
+            self.assertIn("**Occurrences:** 2", finding.description)
+            self.assertIn("**Occurrence 1** (reported 2 times)", finding.description)
+            self.assertNotIn("**Occurrence 2**", finding.description)
+            self.assertEqual(1, finding.description.count("**Flagged expression:** `github.event.issue.body`"))
+            self.assertEqual(2, finding.description.count("```"))
+        with self.subTest(i=7):
+            self.assertEqual(1, findings[7].nb_occurences)
+            self.assertEqual(13, findings[7].line)
 
     def test_merged_occurrences_take_highest_severity_and_confidence(self):
         with (get_unit_tests_scans_path("zizmor") / "same_line.json").open(encoding="utf-8") as testfile:
@@ -158,6 +198,15 @@ class TestZizmorParser(DojoTestCase):
         self.assertIn("run: echo \\`\\`\\`", findings[0].description)
         self.assertEqual(2, findings[0].description.count("```"))
 
+    def test_long_code_is_cut(self):
+        # audits such as excessive-permissions can flag a whole workflow; only its first 20 lines are shown
+        with (get_unit_tests_scans_path("zizmor") / "one_vuln.json").open(encoding="utf-8") as testfile:
+            report = json.load(testfile)
+        report[0]["locations"][0]["concrete"]["feature"] = "\n".join(f"line {number}" for number in range(1, 31))
+        description = ZizmorParser().get_findings(io.StringIO(json.dumps(report)), Test())[0].description
+        self.assertIn("line 20\n... (10 more lines)\n```", description)
+        self.assertNotIn("line 21", description)
+
     def test_parse_remote_input(self):
         # "zizmor owner/repo" audits a repository through the GitHub API, and locations then carry a
         # Remote key. The sample is the real one_vuln.json report with its key swapped for the shape
@@ -173,6 +222,30 @@ class TestZizmorParser(DojoTestCase):
         self.assertEqual(13, findings[0].line)
         self.assertEqual("example-org/example-repo", findings[0].service)
         self.assertIn("**Location:** example-org/example-repo: .github/workflows/ci.yml:13", findings[0].description)
+
+    def test_parse_remote_inputs_from_two_repositories(self):
+        # one remote audit of two repositories: the same audit, path and line in each repository stays a
+        # separate finding (with its own fixes), and only results from the same repository are merged
+        with (get_unit_tests_scans_path("zizmor") / "same_line.json").open(encoding="utf-8") as testfile:
+            report = json.load(testfile)
+        first, second = (item for item in report if item["ident"] == "template-injection")
+        third = json.loads(json.dumps(first))
+        for item, repository, fix in ((first, "repo-a", "fix for a"), (second, "repo-b", "fix for b"), (third, "repo-a", "another fix for a")):
+            key = {"Remote": {"slug": {"owner": "example-org", "repo": repository, "git_ref": None}, "path": ".github/workflows/greet.yml"}}
+            for location in item["locations"]:
+                location["symbolic"]["key"] = key
+            item["fixes"] = [{"title": fix, "key": key, "disposition": "safe"}]
+        findings = ZizmorParser().get_findings(io.StringIO(json.dumps([first, second, third])), Test())
+        self.assertEqual(2, len(findings))
+        repo_a, repo_b = findings
+        self.assertEqual("example-org/repo-a", repo_a.service)
+        self.assertEqual(2, repo_a.nb_occurences)
+        self.assertEqual("- fix for a\n- another fix for a", repo_a.mitigation)
+        self.assertEqual("example-org/repo-b", repo_b.service)
+        self.assertEqual(1, repo_b.nb_occurences)
+        self.assertEqual("- fix for b", repo_b.mitigation)
+        for finding in findings:
+            self.assertEqual((".github/workflows/greet.yml", 18), (finding.file_path, finding.line))
 
     def test_parse_ignored_finding(self):
         # with --no-ignores zizmor also reports findings silenced by an ignore comment, flagged as ignored

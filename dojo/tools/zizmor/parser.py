@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 from dojo.models import Finding
 
@@ -19,6 +20,13 @@ CONFIDENCE_MAPPING = {
     "Medium": 3,
     "Low": 6,
 }
+
+# Some audits flag a whole job or workflow; its code is cut to this many lines in the description
+MAX_CODE_LINES = 20
+
+# A Regex fragment is the escaped expression text with \s+ for each run of whitespace. It is turned back
+# into text by this fixed, linear rewrite; the pattern itself comes from the uploaded file and is never run.
+REGEX_FRAGMENT_TOKEN = re.compile(r"\\s\+|\\(.)", re.DOTALL)
 
 
 class ZizmorParser:
@@ -160,8 +168,16 @@ class ZizmorParser:
         if not isinstance(feature_kind, dict):
             return None
         fragment = (feature_kind.get("Subfeature") or {}).get("fragment") or {}
-        raw = fragment.get("Raw") if isinstance(fragment, dict) else None
-        return raw if isinstance(raw, str) and raw else None
+        if not isinstance(fragment, dict):
+            return None
+        raw = fragment.get("Raw")
+        if isinstance(raw, str) and raw:
+            return raw
+        # zizmor uses a pattern when the expression contains whitespace, e.g. toJSON\(\s+secrets\s+\)
+        pattern = fragment.get("Regex")
+        if isinstance(pattern, str) and pattern:
+            return REGEX_FRAGMENT_TOKEN.sub(lambda match: " " if match.group(1) is None else match.group(1), pattern)
+        return None
 
     def _location_text(self, location):
         path, repository = self._input_path(location)
@@ -176,10 +192,21 @@ class ZizmorParser:
             text += f" ({route})"
         return text
 
+    def _code(self, feature):
+        code_lines = feature.splitlines()
+        code = "\n".join(code_lines[:MAX_CODE_LINES])
+        if len(code_lines) > MAX_CODE_LINES:
+            code += f"\n... ({len(code_lines) - MAX_CODE_LINES} more lines)"
+        return code.replace("```", "\\`\\`\\`")
+
     def _inline_code(self, text):
         return f"`` {text} ``" if "`" in text else f"`{text}`"
 
-    def _occurrence_lines(self, occurrence):
+    def _occurrence_lines(self, occurrence, shown_code=None):
+        """
+        Render one occurrence. When shown_code is a set, code already rendered for an earlier occurrence
+        (results on one line usually share the enclosing step or run block) is not repeated.
+        """
         lines = [
             f"**Severity:** {occurrence['severity']}",
             f"**Confidence:** {occurrence['confidence']}",
@@ -194,8 +221,12 @@ class ZizmorParser:
             if expression:
                 lines.append(f"**Flagged expression:** {self._inline_code(expression)}")
             feature = (location.get("concrete") or {}).get("feature")
-            if feature:
-                lines.extend(["**Code:**", "```", feature.replace("```", "\\`\\`\\`"), "```"])
+            if feature and shown_code is not None and feature in shown_code:
+                lines.append("**Code:** as shown for an earlier occurrence")
+            elif feature:
+                lines.extend(["**Code:**", "```", self._code(feature), "```"])
+                if shown_code is not None:
+                    shown_code.add(feature)
         if occurrence["related"]:
             lines.append("**Related locations:**")
             for location in occurrence["related"]:
@@ -213,9 +244,17 @@ class ZizmorParser:
             lines.extend(self._occurrence_lines(first))
         else:
             lines.append(f"**Occurrences:** {len(occurrences)} (zizmor reported this audit {len(occurrences)} times on this line)")
-            for number, occurrence in enumerate(occurrences, start=1):
-                lines.extend(["", f"**Occurrence {number}**"])
-                lines.extend(self._occurrence_lines(occurrence))
+            # results that render identically (the same expression repeated on the line) are shown once, with a count
+            identical = {}
+            for occurrence in occurrences:
+                identical.setdefault(tuple(self._occurrence_lines(occurrence)), []).append(occurrence)
+            shown_code = set()
+            for number, group in enumerate(identical.values(), start=1):
+                header = f"**Occurrence {number}**"
+                if len(group) > 1:
+                    header += f" (reported {len(group)} times)"
+                lines.extend(["", header])
+                lines.extend(self._occurrence_lines(group[0], shown_code))
             lines.append("")
         if first["url"]:
             lines.append(f"**Documentation and remediation:** {first['url']}")
