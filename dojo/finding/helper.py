@@ -432,9 +432,9 @@ def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_fin
     For each name: reuse the oldest group of that (test, name), else create one (unless
     create_finding_groups_for_all_findings is off and the name has a lone finding no other
     ungrouped finding of the test shares). A newly created group also takes the test's other
-    findings with the same name that are not in a group yet. The cost does not grow with the number of groups: existing groups
-    are read in one query, the test's findings once (and only when some name has no group
-    yet), and new groups and memberships are written in bulk.
+    findings with the same name that are not in a group yet. The cost does not grow with the
+    number of groups: existing groups are read in one query, the test's findings once (and
+    only when some name has no group yet), and new groups and memberships are written in bulk.
 
     legacy_names maps a name to other names the same group may carry: a reimport named a new
     finding's finding_title group from the report's raw title before it named it from the stored
