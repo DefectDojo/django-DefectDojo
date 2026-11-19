@@ -1,9 +1,16 @@
 """Unit tests for ``dojo.site_url``, the helper absolute URLs are built from."""
 
-from django.test import SimpleTestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from dojo import site_url as site_url_module
-from dojo.site_url import absolute_url, default_site_url, register_site_url_resolver, site_url
+from dojo.site_url import (
+    absolute_url,
+    default_site_url,
+    register_request_url_resolver,
+    register_site_url_resolver,
+    request_absolute_url,
+    site_url,
+)
 from dojo.utils import get_full_url, get_site_url
 
 
@@ -11,9 +18,10 @@ class SiteUrlHelperTest(SimpleTestCase):
     def setUp(self):
         # Each test starts with no resolver registered and restores the previous one,
         # so a test cannot leak a resolver into the rest of the suite.
-        saved = site_url_module._RESOLVER["fn"]
-        site_url_module._RESOLVER["fn"] = None
-        self.addCleanup(site_url_module._RESOLVER.__setitem__, "fn", saved)
+        for registry in (site_url_module._RESOLVER, site_url_module._REQUEST_RESOLVER):
+            saved = registry["fn"]
+            registry["fn"] = None
+            self.addCleanup(registry.__setitem__, "fn", saved)
 
     @override_settings(SITE_URL="https://dojo.example.com")
     def test_default_reads_setting_live(self):
@@ -63,6 +71,32 @@ class SiteUrlHelperTest(SimpleTestCase):
         register_site_url_resolver(broken, override=True)
         with self.assertRaisesMessage(RuntimeError, "resolver failed"):
             site_url()
+
+    def test_request_url_without_resolver_is_build_absolute_uri(self):
+        request = RequestFactory().get("/finding/7?a=1", HTTP_HOST="dojo.example.com:8080")
+        self.assertEqual("http://dojo.example.com:8080/finding/7?a=1", request_absolute_url(request))
+        self.assertEqual("http://dojo.example.com:8080/test/3", request_absolute_url(request, "/test/3"))
+
+    def test_request_url_resolver_gets_the_request_and_its_path(self):
+        request = RequestFactory().get("/finding/7?a=1", HTTP_HOST="dojo.example.com")
+        calls = []
+
+        def resolver(req, path):
+            calls.append((req, path))
+            return f"https://registered.example.com:8443{path}"
+
+        register_request_url_resolver(resolver, override=True)
+        self.assertEqual("https://registered.example.com:8443/finding/7?a=1", request_absolute_url(request))
+        self.assertEqual("https://registered.example.com:8443/test/3", request_absolute_url(request, "/test/3"))
+        self.assertEqual([(request, "/finding/7?a=1"), (request, "/test/3")], calls)
+
+    def test_register_request_url_resolver_without_override_keeps_existing(self):
+        request = RequestFactory().get("/x", HTTP_HOST="dojo.example.com")
+        register_request_url_resolver(lambda _req, path: f"https://first.example.com{path}")
+        register_request_url_resolver(lambda _req, path: f"https://second.example.com{path}")
+        self.assertEqual("https://first.example.com/x", request_absolute_url(request))
+        register_request_url_resolver(lambda _req, path: f"https://second.example.com{path}", override=True)
+        self.assertEqual("https://second.example.com/x", request_absolute_url(request))
 
     @override_settings(SITE_URL="https://dojo.example.com")
     def test_legacy_utils_helpers_delegate(self):

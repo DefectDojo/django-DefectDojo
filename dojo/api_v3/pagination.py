@@ -25,6 +25,7 @@ foot-gun (documented on the docs page). A tampered / undecodable / ordering-mism
 400 problem+json (pagination error type). Keyset columns (``id``/``created``/``updated``) are the PK
 and the model's auto timestamps, so they are non-null and the tuple comparison needs no NULL handling.
 """
+
 from __future__ import annotations
 
 import json
@@ -37,6 +38,7 @@ from django.core import signing
 from django.db.models import Q
 
 from dojo.api_v3.errors import pagination_problem
+from dojo.site_url import request_absolute_url
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -119,7 +121,7 @@ def compute_count(count_qs: QuerySet, cap: int | None = None) -> tuple[int, bool
 
 
 def _page_url(request: HttpRequest, limit: int, offset: int) -> str:
-    parsed = urlparse(request.build_absolute_uri())
+    parsed = urlparse(request_absolute_url(request))
     params = {}
     # Preserve every existing query param (filters, expand, include, o, ...) except limit/offset.
     for key in request.GET:
@@ -133,6 +135,7 @@ def _page_url(request: HttpRequest, limit: int, offset: int) -> str:
 
 
 # --- Cursor (keyset) mode ---------------------------------------------------------------------
+
 
 def _keyset_orderings(spec: FilterSpec) -> list[str]:
     """The keyset-safe ordering keys this resource permits (``id`` always; ``created``/``updated`` if declared)."""
@@ -239,7 +242,7 @@ def _keyset_filter(payload: dict, token: str, spec: FilterSpec) -> Q:
 
 
 def _cursor_url(request: HttpRequest, cursor: str) -> str:
-    parsed = urlparse(request.build_absolute_uri())
+    parsed = urlparse(request_absolute_url(request))
     params = {}
     # Preserve filters/expand/include/fields/o/limit/pagination; drop offset + any stale cursor.
     for key in request.GET:
@@ -274,9 +277,9 @@ def _paginate_cursor(
 
     next_url = _cursor_url(request, _encode_cursor(token, rows[-1], spec)) if (has_next and rows) else None
     return {
-        "count": None,      # cursor mode never counts (D4)
+        "count": None,  # cursor mode never counts (D4)
         "next": next_url,
-        "previous": None,   # forward-only, GitLab-style (D4)
+        "previous": None,  # forward-only, GitLab-style (D4)
         "results": results,
     }
 
