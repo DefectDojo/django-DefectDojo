@@ -30,7 +30,11 @@ A tenant in another region is marked **Read-Only**. A tenant that is not active 
 
 In the global view, a banner reads **Viewing All Tenants** with a **Back to This Tenant** button, and every list shows the rows of every tenant you can read, with a **Tenant** column naming each row's tenant.
 
-The global view only reads. A list's own actions, such as **New** or **Import**, and the add action of an empty list, open **Choose a Tenant** instead: pick a tenant, click **Open Tenant**, and the same page opens in that tenant, where the change is made. Only an active tenant that is not Read-Only can be picked.
+The global view only reads. A list's read controls, such as filters, sorting and **Export**, stay available. Changes are made in one tenant:
+
+* A list's own write actions, such as **New** or **Import**, the bulk actions on selected rows, and the add action of an empty list, open **Choose a Tenant**: pick a tenant, click **Open Tenant**, and the same page opens in that tenant, where the change is made. Only an active tenant that is not Read-Only can be picked.
+* A link in a row, such as a record's name, opens that record in its own tenant.
+* A row's menu opens **Choose a Tenant** with the row's tenant already picked.
 
 A list that the global view cannot read yet shows the reason in place of its rows.
 
