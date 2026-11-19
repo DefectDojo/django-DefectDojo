@@ -1463,6 +1463,78 @@ Operational notes:
   CIDR list (`networkPolicy.externalAPIs.allowedCidrs`) must cover those
   endpoints.
 
+### Media storage outages
+
+This applies when the media volume is a network filesystem: `storage.type`
+`efs`, `nfs` or `filestore`, or a `pvc` whose StorageClass is backed by NFS.
+
+**What it looks like.** Every import and reimport hangs until the client gives
+up, scan uploads included, while pages that do not write to the media volume
+keep answering in seconds. The pods stay Running and Ready, and nothing
+restarts them. A common cause is a redeploy or upgrade of the storage's CSI
+node driver (for example an update of the EFS CSI driver add-on). The mounts
+that existing pods hold can stop answering for good, while a new mount of the
+same volume works.
+
+**How to recover.** Replace the pods that mount the media volume:
+
+```bash
+# Drop any Deployment you have turned off (django.uwsgiImport.enabled,
+# celery.importsWorker.enabled, ...). The names assume a release called dojopro.
+kubectl -n $NAMESPACE rollout restart deployment \
+  dojopro-django dojopro-django-import \
+  dojopro-celery-worker dojopro-celery-imports-worker \
+  dojopro-ddorch-workers dojopro-integrators
+```
+
+A restarted container does not help. A container restart (after a failed
+liveness probe, a crash or `kubectl exec ... kill`) keeps the pod, and the pod
+keeps its volume mount, so the new container gets the same hung mount. The
+kubelet may not even be able to start it until the mount answers again. Only a
+new pod mounts the volume again. If the storage itself is down, not just the
+mounts, the new pods wait in `ContainerCreating` until it is back, so fix the
+storage first.
+
+**Plan for it.** Make restarting these Deployments part of every change that
+redeploys or upgrades the storage's CSI driver on the cluster.
+
+**Take hung import pods out of rotation.** Set
+`django.uwsgiImport.readinessProbe.workerCheck: true` (see
+[Scan Import Isolation](#scan-import-isolation)). Readiness and liveness do
+different things: a failing readiness probe only takes the pod out of the
+Service, so new imports go to pods that can still serve them, and the pod
+returns once it answers again. A failing liveness probe restarts the
+container, which for the reason above does not fix a hung mount. With
+`workerCheck` on, an import pod whose workers are all stuck on the volume stops
+receiving imports after about a minute. When every import pod is stuck, new
+imports get an error instead of hanging. The pod still has to be replaced.
+
+**Detect it.** From release 3.5.300:
+
+- Imports and reimports answer `503 Service Unavailable` with a `Retry-After`
+  header when a write to the media volume fails or does not finish within
+  10 seconds, instead of hanging. Clients should retry later.
+- The light health check, `GET /api/v2/health_check/light/`, has a `media`
+  field: `ok`, `unavailable` (the check did not finish in time: the mount looks
+  hung), `error` (the volume answered with an error), `skipped` (media is not
+  on a local filesystem), or `checking` (a check is still running). The
+  status code still reflects only the database, so load balancers and probes
+  that read this endpoint behave as before. Poll it from your monitoring and
+  alert when `media` is `unavailable` or `error`. Each answer comes from the
+  web pod that served the request.
+- `/media-health.sh` checks one pod by hand, including the import and Celery
+  pods, which serve no health check. It exits `0` when a small file can be
+  written and removed, `1` when the write fails, and `2` when it does not
+  finish within 5 seconds:
+
+  ```bash
+  kubectl -n $NAMESPACE exec deploy/dojopro-django-import -- /media-health.sh
+  ```
+
+  Do not run it as a liveness probe. For the reason above, the restart it
+  causes does not bring the mount back, and on the web pods it would stop the
+  pages that still work.
+
 ### Rotating TLS Certificates
 
 The chart uses two categories of TLS certificates, each with a different
