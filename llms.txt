@@ -466,6 +466,7 @@ Key facts:
 - [End User License Agreement (Pro)](https://docs.defectdojo.com/admin/user_management/pro__eula_acceptance/): Each person accepts the DefectDojo Pro End User License Agreement once, after they first sign in
 - [View As User (Pro)](https://docs.defectdojo.com/admin/user_management/pro__view_as_user/): See DefectDojo the way another user sees it, read-only and audited
 - [Custom RBAC Roles (Pro)](https://docs.defectdojo.com/admin/user_management/pro__custom_rbac_roles/): Build your own roles by choosing individual permissions, using the five built-in roles as clonable starting points
+- [Tenant Groups (Pro)](https://docs.defectdojo.com/admin/user_management/pro__tenant_groups/): Switch between the tenants of a tenant group, read them all at once, and manage the group's invites and master members
 - [Diagnostics (Pro)](https://docs.defectdojo.com/admin/diagnostics/pro__diagnostics/): Read the cross-subsystem ledger of integration attempts: what is recorded, how to filter it, how credentials are kept out, and who can see the technical detail
 - [About Notifications & 🔔 Alerts](https://docs.defectdojo.com/admin/notifications/about_notifications/): Learn about notifications, in-app alerts
 - [Set Personal Notifications](https://docs.defectdojo.com/admin/notifications/configure_personal_notifs/): Configure notifications for a personal account
