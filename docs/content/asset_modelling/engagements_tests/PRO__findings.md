@@ -99,7 +99,7 @@ The Finding's Organization, Asset, Engagement and Test are named in the breadcru
 This section includes a table of the Endpoints that the selected Finding affects, along with any relevant metadata.
 
 ### Additional Details 
-- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request. Each pair is listed by its method, URL, status and response body size, opens in place to the raw request and response as plain text, and each side can be copied. The tab shows how many pairs the Finding has and lists the first 100; when there are more, it says how many there are in all. This tab appears once the Finding has a pair; add the first one with **Add Request/Response Pair** in the gear menu at the top of the Finding's page, and further ones from the tab itself.
+- **Request/Response Pairs**: A copy of the message sent by the client and the server's reply to the request. Each pair is listed by its method, URL, status and response body size, opens in place to the raw request and response as plain text, and each side can be copied. The tab shows how many pairs the Finding has and lists the first 100; when there are more, it says how many there are in all. This tab appears once the Finding has a pair; add the first one with **Add Request/Response Pair** in the gear menu at the top of the Finding's page, and further ones from the tab itself. Pairs can also be added, edited and removed in the **Request/Response Pairs** section of the New Finding and Edit Finding forms.
 - **Steps to Reproduce**: Steps for reproducing the Finding.
 - **Severity Justification**: Written description of why a certain Severity rating was associated with the Finding. 
 
@@ -156,6 +156,8 @@ More information about Statuses can be found [here](/triage_findings/findings_wo
 While most Findings are generated automatically through scan imports and integrations, DefectDojo also supports the manual creation of Findings. Manual Findings are useful for tracking vulnerabilities and security concerns identified through penetration testing, architecture reviews, compliance assessments, bug bounty programs, consultant engagements, or other activities that do not produce scanner output. 
 
 Findings can be manually added by either opening a Findings list (**Act > Explore > Findings**) and selecting **New Finding**, or by selecting **Add Finding** within the gear menu of the Test you wish to add the Finding to. 
+
+The New Finding form's **Request/Response Pairs** section takes the requests and responses that show the Finding, so a manual tester can record every pair before saving. Select **Add Request/Response Pair**, paste the raw request and response, and repeat for each pair; the pairs are saved with the Finding when the form is submitted. On the Edit Finding form the same section lists the Finding's pairs, and pairs added, edited or removed there are saved only when the form is submitted, so leaving the form without submitting changes nothing. The form lists the first 100 pairs of a Finding that has more, and the rest stay as they are. Adding, editing and removing a pair on an existing Finding needs the same permissions as on the Finding's page: adding, editing and deleting Findings in its Asset.
 
 ### Editing Findings 
 The ⋮ kebab menu next to Findings contains the following functions: 
