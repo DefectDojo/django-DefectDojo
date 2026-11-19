@@ -19,10 +19,12 @@ live in ``dojo/finding/services.py`` (D7), never in the route:
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db import DatabaseError
 from django.db.models import Count
 from django.http import HttpResponse
 from ninja import Router
@@ -52,6 +54,7 @@ from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.api_v3.writes import bind_payload, split_extras
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.db_utils import is_foreign_key_conflict, is_vanished_row_error
 from dojo.finding.api_v3.schemas import (
     FindingDetail,
     FindingReplace,
@@ -66,7 +69,7 @@ from dojo.models import Finding, Test
 from dojo.utils import get_object_or_none, get_system_setting
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Generator
 
     from django.db.models import QuerySet
     from django.http import HttpRequest
@@ -123,6 +126,29 @@ _ALLOWED_INCLUDES = {"counts"}
 # one shape and publishes another (I4). Kept under the same name so the OS spec is unchanged.
 # See ``dojo/api_v3/pagination.py::list_envelope``.
 FindingListResponse = list_envelope(FindingSlim, name="FindingListResponse")
+
+_DELETED_MID_UPDATE = "This finding was deleted while the update was being processed."
+
+
+@contextmanager
+def _answer_404_if_deleted_mid_write(finding_id: int, detail: str) -> Generator[None]:
+    """
+    Answer 404 when a concurrent delete of the finding makes this write fail (v2 parity).
+
+    A write is not one transaction, so a delete that commits between the finding's save and its
+    child writes (found_by, vulnerability ids, tags, a downstream ``on_write`` companion) fails the
+    write with a foreign-key violation on that child row, or with Django's forced-update miss on
+    the finding's own save. The resource the client wrote to no longer exists: answer 404, as
+    ``FindingViewSet.perform_update`` does, instead of the 500 an unhandled ``IntegrityError``
+    becomes. The same errors on a finding that is still there are a defect and are re-raised.
+    """
+    try:
+        yield
+    except DatabaseError as exc:
+        vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
+        if vanished and not Finding.objects.filter(pk=finding_id).exists():
+            raise not_found_problem(detail) from exc
+        raise
 
 
 def _base_queryset(request: HttpRequest, queryset_hook: Callable | None) -> QuerySet:
@@ -278,12 +304,13 @@ def build_findings_router(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        update_finding(
-            finding, changes=changes, user=request.user,
-            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
-        )
-        if on_write is not None:
-            on_write(finding, extras, user=request.user, created=False)
+        with _answer_404_if_deleted_mid_write(finding_id, _DELETED_MID_UPDATE):
+            update_finding(
+                finding, changes=changes, user=request.user,
+                push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
+            )
+            if on_write is not None:
+                on_write(finding, extras, user=request.user, created=False)
         obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
         return json_response(serialize(obj, detail_schema, {}))
 
@@ -313,12 +340,13 @@ def build_findings_router(
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
-        update_finding(
-            finding, changes=changes, user=request.user,
-            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
-        )
-        if on_write is not None:
-            on_write(finding, extras, user=request.user, created=False)
+        with _answer_404_if_deleted_mid_write(finding_id, _DELETED_MID_UPDATE):
+            update_finding(
+                finding, changes=changes, user=request.user,
+                push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
+            )
+            if on_write is not None:
+                on_write(finding, extras, user=request.user, created=False)
         obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
         return json_response(serialize(obj, detail_schema, {}))
 
