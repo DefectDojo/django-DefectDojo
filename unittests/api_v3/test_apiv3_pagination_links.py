@@ -21,9 +21,9 @@ PATH = "/api/v3/findings/"
 PUBLIC_BASE = "https://team-a.example.test:8443"
 
 
-def _public_address(_request, path):
+def _public_address(request, path):
     # What a plugin serving the instance under another address does: its own base, the request's path.
-    return f"{site_url()}{path}"
+    return f"{site_url()}{request.get_full_path() if path is None else path}"
 
 
 class PaginationLinksTest(SimpleTestCase):
@@ -65,3 +65,13 @@ class PaginationLinksTest(SimpleTestCase):
                 request = self._request("?title=caf%C3%A9&limit=2&offset=4", host=host, secure=secure)
                 self.assertEqual(f"{base}{PATH}?title=caf%C3%A9&limit=2&offset=6", pagination._page_url(request, 2, 6))
                 self.assertEqual(f"{base}{PATH}?title=caf%C3%A9&limit=2&cursor=c", pagination._cursor_url(request, "c"))
+
+    def test_no_resolver_keeps_a_double_slash_path_on_the_request_s_host(self):
+        # A path starting with "//" is the request's own path, not a scheme-relative URL. RequestFactory
+        # would read "//host" as a host, so the path is set as the WSGI handler sets it.
+        request = RequestFactory().get("/?limit=2", HTTP_HOST="dojo.example.test:8080")
+        request.path = request.path_info = "//other.example.test/api/v3/findings/"
+        base = "http://dojo.example.test:8080//other.example.test/api/v3/findings/"
+        self.assertEqual(f"{base}?limit=2", request.build_absolute_uri())
+        self.assertEqual(f"{base}?limit=2&offset=2", pagination._page_url(request, 2, 2))
+        self.assertEqual(f"{base}?limit=2&cursor=c", pagination._cursor_url(request, "c"))

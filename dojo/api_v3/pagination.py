@@ -25,7 +25,6 @@ foot-gun (documented on the docs page). A tampered / undecodable / ordering-mism
 400 problem+json (pagination error type). Keyset columns (``id``/``created``/``updated``) are the PK
 and the model's auto timestamps, so they are non-null and the tuple comparison needs no NULL handling.
 """
-
 from __future__ import annotations
 
 import json
@@ -135,7 +134,6 @@ def _page_url(request: HttpRequest, limit: int, offset: int) -> str:
 
 
 # --- Cursor (keyset) mode ---------------------------------------------------------------------
-
 
 def _keyset_orderings(spec: FilterSpec) -> list[str]:
     """The keyset-safe ordering keys this resource permits (``id`` always; ``created``/``updated`` if declared)."""
@@ -277,9 +275,9 @@ def _paginate_cursor(
 
     next_url = _cursor_url(request, _encode_cursor(token, rows[-1], spec)) if (has_next and rows) else None
     return {
-        "count": None,  # cursor mode never counts (D4)
+        "count": None,      # cursor mode never counts (D4)
         "next": next_url,
-        "previous": None,  # forward-only, GitLab-style (D4)
+        "previous": None,   # forward-only, GitLab-style (D4)
         "results": results,
     }
 

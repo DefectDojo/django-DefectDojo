@@ -46,8 +46,8 @@ logger = logging.getLogger("dojo.utils")
 # callable returns the base URL; None means "use default_site_url()".
 _RESOLVER: dict[str, Callable[[], str] | None] = {"fn": None}
 # Same shape for request-relative links: the callable takes the request and an absolute path
-# and returns the absolute URL; None means "use request.build_absolute_uri()".
-_REQUEST_RESOLVER: dict[str, Callable[[HttpRequest, str], str] | None] = {"fn": None}
+# (or None for the request's own) and returns the absolute URL; None means "use request.build_absolute_uri()".
+_REQUEST_RESOLVER: dict[str, Callable[[HttpRequest, str | None], str] | None] = {"fn": None}
 
 
 def register_site_url_resolver(func: Callable[[], str], *, override: bool = False) -> None:
@@ -85,12 +85,13 @@ def absolute_url(path: str) -> str:
     return f"{site_url()}{path}"
 
 
-def register_request_url_resolver(func: Callable[[HttpRequest, str], str], *, override: bool = False) -> None:
+def register_request_url_resolver(func: Callable[[HttpRequest, str | None], str], *, override: bool = False) -> None:
     """
     Register the callable that builds an absolute URL for a path within a request.
 
-    It is called as ``func(request, path)`` with an absolute path (query string included).
-    Without ``override`` an existing registration is kept.
+    It is called as ``func(request, path)``, where ``path`` is an absolute path (query string
+    included) or ``None`` for the request's own full path, exactly as ``build_absolute_uri``
+    takes it. Without ``override`` an existing registration is kept.
     """
     if _REQUEST_RESOLVER["fn"] is not None and not override:
         return
@@ -106,4 +107,4 @@ def request_absolute_url(request: HttpRequest, path: str | None = None) -> str:
     resolver = _REQUEST_RESOLVER["fn"]
     if resolver is None:
         return request.build_absolute_uri(path)
-    return resolver(request, request.get_full_path() if path is None else path)
+    return resolver(request, path)

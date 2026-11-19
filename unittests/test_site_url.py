@@ -83,19 +83,23 @@ class SiteUrlHelperTest(SimpleTestCase):
 
         def resolver(req, path):
             calls.append((req, path))
-            return f"https://registered.example.com:8443{path}"
+            return f"https://registered.example.com:8443{req.get_full_path() if path is None else path}"
 
         register_request_url_resolver(resolver, override=True)
         self.assertEqual("https://registered.example.com:8443/finding/7?a=1", request_absolute_url(request))
         self.assertEqual("https://registered.example.com:8443/test/3", request_absolute_url(request, "/test/3"))
-        self.assertEqual([(request, "/finding/7?a=1"), (request, "/test/3")], calls)
+        # No path is passed on as None, as build_absolute_uri() takes it, not as the full path.
+        self.assertEqual([(request, None), (request, "/test/3")], calls)
 
     def test_register_request_url_resolver_without_override_keeps_existing(self):
         request = RequestFactory().get("/x", HTTP_HOST="dojo.example.com")
-        register_request_url_resolver(lambda _req, path: f"https://first.example.com{path}")
-        register_request_url_resolver(lambda _req, path: f"https://second.example.com{path}")
+        register_request_url_resolver(lambda req, _path: f"https://first.example.com{req.get_full_path()}")
+        register_request_url_resolver(lambda req, _path: f"https://second.example.com{req.get_full_path()}")
         self.assertEqual("https://first.example.com/x", request_absolute_url(request))
-        register_request_url_resolver(lambda _req, path: f"https://second.example.com{path}", override=True)
+        register_request_url_resolver(
+            lambda req, _path: f"https://second.example.com{req.get_full_path()}",
+            override=True,
+        )
         self.assertEqual("https://second.example.com/x", request_absolute_url(request))
 
     @override_settings(SITE_URL="https://dojo.example.com")
