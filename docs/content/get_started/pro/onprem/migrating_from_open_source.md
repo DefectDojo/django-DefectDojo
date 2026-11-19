@@ -375,8 +375,8 @@ Each Sync locks the source with read-only mode while it reads, and unlocks it at
 
 On cutover day:
 
-1. Run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync turns read-only mode off when it ends.
-2. After the last Sync, go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes. Do not turn on read-only mode before the last Sync, because a Sync does not start on a locked source.
+1. Pause the CI jobs, the scripts and the integrations that write to the source. Then run one last Sync. Check the finding counts as in Step 3, and validate the result. The Sync turns read-only mode off when it ends.
+2. After the last Sync, go to **Configuration > System Settings**, select **Read-only mode**, and click **Submit**. Wait until **Configuration > Celery Status** shows no queued tasks, then run `celery --app=dojo inspect active` in the Celery worker container and wait until it reports `empty` for every worker. A task that started before the lock still writes until it finishes. Do not turn on read-only mode before the last Sync, because a Sync does not start on a locked source. A change that reaches the source between the end of the last Sync and the lock does not migrate. Keep the writers paused until the lock is on.
 3. Turn on Jira. The migrated Jira projects are off and the migrated instances have no API token. Use one path:
    * Classic Jira: add the API token on each migrated instance, turn on Jira in **System Settings**, then turn on each project.
    * Downstream Connectors: keep Jira turned off in **System Settings**. With Jira off, a project that you turn on sends nothing to Jira. Through the API, turn on each migrated project that pushed all issues on the source. Send `PATCH /api/v2/jira_projects/<id>/` with `{"enabled": true}`. To find the ids, send `GET /api/v2/jira_projects/?enabled=false&push_all_issues=true&jira_instance=<id>`, with the id of the migrated Jira instance. Without it, the list can include a project that was already off in DefectDojo Pro. The forms that turn a project on show only while Jira is on. The conversion sets up automatic pushes only for a project that is on and pushes all issues. Then run the classic Jira conversion on the **Downstream Connectors** page, and add the API token on the new connection. The conversion works on every classic Jira setup in DefectDojo Pro, not only the migrated ones. It skips engagement epics. See [Migrating to the Jira Downstream Connector](/connectors/downstream/PRO__jira_guide/#migrating-to-the-jira-downstream-connector).
@@ -408,6 +408,7 @@ The first Sync copies notification settings and system settings once. A second r
 - First Sync run, finding counts checked, and validated
 - Notification channels and tool credentials set up in DefectDojo Pro
 - Users activated with **Activate and Invite**, and given roles
+- CI jobs, scripts and integrations that write to the source paused
 - Final Sync run, finding counts checked, and validated
 - Read-only mode turned on in the source after the final Sync
 - Automation pointed at the Pro deployment, and the source retired or its key revoked
