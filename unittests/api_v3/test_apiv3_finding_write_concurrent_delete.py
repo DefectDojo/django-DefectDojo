@@ -30,7 +30,8 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.db import IntegrityError
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
+from django.urls import include, path
 from psycopg.errors import ForeignKeyViolation
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -45,6 +46,41 @@ _FOUND_BY = "dojo.finding.services.set_found_by_locking_finding_first"
 _REAL_SET_FOUND_BY = services.set_found_by_locking_finding_first
 _DELETED_MESSAGE = "This finding was deleted while the update was being processed."
 _DELETED_ON_CREATE_MESSAGE = "This finding was deleted while it was being created."
+# Under the real v3 prefix, which the login middleware exempts (LOGIN_EXEMPT_URLS), and matched before
+# the real v3 mount, which ``urlpatterns`` below includes after it.
+_ON_WRITE_PREFIX = f"{settings.URL_PREFIX}{settings.API_V3_URL_PREFIX}/on-write-test"
+
+# The ``on_write`` callback a downstream mount passes to ``build_findings_router`` writes its own
+# rows for the finding after the service has, so it can lose the same race. The OS mount passes no
+# callback, so this module mounts a second findings router, with one, in front of the real URLconf
+# (``ROOT_URLCONF`` points here in the on_write tests). Each test sets the callback it needs.
+_ON_WRITE = {"hook": None}
+
+
+def _dispatch_on_write(finding, extras, *, user, created):
+    _ON_WRITE["hook"](finding, extras, user=user, created=created)
+
+
+def _on_write_urlpatterns():
+    if not settings.V3_FEATURE_LOCATIONS:
+        return []
+    from ninja.security import django_auth  # noqa: PLC0415 -- v3 is only importable with the flag on
+
+    from dojo.api_v3.api import V3NinjaAPI  # noqa: PLC0415
+    from dojo.api_v3.auth import TokenAuth  # noqa: PLC0415
+    from dojo.api_v3.errors import register_exception_handlers  # noqa: PLC0415
+    from dojo.finding.api_v3.routes import build_findings_router  # noqa: PLC0415
+
+    api = V3NinjaAPI(
+        title="findings with on_write (test)", version="test", auth=[TokenAuth(), django_auth],
+        urls_namespace="api_v3_on_write_test", docs_url=None, openapi_url=None,
+    )
+    register_exception_handlers(api)
+    api.add_router("", build_findings_router(on_write=_dispatch_on_write))
+    return [path(f"{_ON_WRITE_PREFIX}/", api.urls)]
+
+
+urlpatterns = [*_on_write_urlpatterns(), path("", include("dojo.urls"))]
 
 
 def _deleted_before_found_by_commits(finding, found_by):
@@ -188,3 +224,93 @@ class TestApiV3FindingWriteConcurrentDelete(_CommittedFindingsMixin, SimpleTestC
                     write()
                 self.assertTrue(is_foreign_key_conflict(caught.exception), caught.exception)
                 self.assertTrue(Finding.objects.filter(pk=written["finding"].pk).exists())
+
+
+@skipUnless(settings.V3_FEATURE_LOCATIONS, "API v3 is mounted only when V3_FEATURE_LOCATIONS is enabled (D5)")
+@override_settings(ROOT_URLCONF=__name__)
+class TestApiV3FindingOnWriteConcurrentDelete(_CommittedFindingsMixin, SimpleTestCase):
+
+    """The ``on_write`` callback losing the race answers like the service does: 404 on update, 409 on create."""
+
+    def setUp(self):
+        super().setUp()
+        admin = User.objects.create(username=f"v3_on_write_su_{self.suffix}", is_superuser=True, is_staff=True)
+        token = Token.objects.create(user=admin)
+        # The token's key is a string, outside the mixin's integer high-water sweep: delete it here.
+        self.addCleanup(Token.objects.filter(key=token.key).delete)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        (self.finding,) = self._create_findings(f"v3 on_write races delete {self.suffix}")
+        self.addCleanup(_ON_WRITE.update, hook=None)
+        self.calls = []
+
+    def _hook(self, *, delete):
+        """An on_write that writes a child row of the finding, after deleting it when ``delete``."""
+        def on_write(finding, extras, *, user, created):
+            self.calls.append((finding.pk, created))
+            if delete:
+                Finding.objects.filter(pk=finding.pk).delete()
+            finding.found_by.add(self.test.test_type)
+        return on_write
+
+    def _fk_violation(self, finding, extras, *, user, created):
+        self.calls.append((finding.pk, created))
+        _fk_violation_on_a_present_finding(finding, None)
+
+    def _url(self, finding_id=None):
+        suffix = "findings" if finding_id is None else f"findings/{finding_id}"
+        return f"/{_ON_WRITE_PREFIX}/{suffix}"
+
+    def _patch(self):
+        return self.client.patch(self._url(self.finding.pk), {"title": "patched"}, format="json", secure=True)
+
+    def _put(self):
+        payload = {"title": "replaced", "severity": "High", "description": "x", "active": True, "verified": False}
+        return self.client.put(self._url(self.finding.pk), payload, format="json", secure=True)
+
+    def _post(self):
+        payload = {
+            "test": self.test.id, "title": f"v3 on_write create {self.suffix}", "severity": "High",
+            "description": "x", "active": True, "verified": False,
+        }
+        return self.client.post(self._url(), payload, format="json", secure=True)
+
+    def test_update_on_write_on_a_deleted_finding_answers_404(self):
+        for label, write in (("PATCH", self._patch), ("PUT", self._put)):
+            with self.subTest(method=label):
+                (self.finding,) = self._create_findings(f"v3 on_write {label} {self.suffix}")
+                _ON_WRITE["hook"] = self._hook(delete=True)
+                response = write()
+                self.assertEqual(404, response.status_code, response.content[:1000])
+                body = response.json()
+                self.assertTrue(body["type"].endswith("#error-not-found"), body)
+                self.assertEqual(_DELETED_MESSAGE, body["detail"], body)
+                self.assertEqual((self.finding.pk, False), self.calls[-1])
+                self.assertFalse(Finding.objects.filter(pk=self.finding.pk).exists())
+
+    def test_create_on_write_on_a_deleted_finding_answers_409(self):
+        _ON_WRITE["hook"] = self._hook(delete=True)
+        response = self._post()
+        self.assertEqual(409, response.status_code, response.content[:1000])
+        body = response.json()
+        self.assertTrue(body["type"].endswith("#error-conflict"), body)
+        self.assertEqual(_DELETED_ON_CREATE_MESSAGE, body["detail"], body)
+        created_id, created = self.calls[-1]
+        self.assertTrue(created)
+        self.assertFalse(Finding.objects.filter(pk=created_id).exists())
+
+    def test_on_write_succeeding_is_untouched(self):
+        """Control: an on_write that writes its row on a present finding returns the normal answers."""
+        _ON_WRITE["hook"] = self._hook(delete=False)
+        self.assertEqual(200, self._patch().status_code)
+        self.assertEqual(201, self._post().status_code)
+
+    def test_on_write_foreign_key_violation_on_a_present_finding_is_not_translated(self):
+        """Control: with the finding still there the error is a defect, and keeps its 500."""
+        _ON_WRITE["hook"] = self._fk_violation
+        for label, write in (("PATCH", self._patch), ("PUT", self._put), ("POST", self._post)):
+            with self.subTest(method=label):
+                with self.assertRaises(IntegrityError) as caught:
+                    write()
+                self.assertTrue(is_foreign_key_conflict(caught.exception), caught.exception)
+                self.assertTrue(Finding.objects.filter(pk=self.calls[-1][0]).exists())
