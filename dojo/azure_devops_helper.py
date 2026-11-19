@@ -6,6 +6,7 @@ using the official azure-devops Python SDK.
 
 import logging
 from datetime import date, datetime
+from dojo.utils import get_product, extract_field_from_text_regex
 from typing import Optional
 from urllib.parse import urlparse
 from dojo.celery import app
@@ -129,17 +130,9 @@ class AzureDevOpsSprintHelper:
         return iterations
 
 class AzureDevOpsWorkItemHelper:
-
-    def __init__(self):
-        self._organization_url = self._organization_url()
-        self._project = self._project()
-        self._team_name = self._team_name()
-        self._impact_team = self._impact_team()
-        self._work_item_type = self._work_item_type()
-
    
     @property
-    def _organization_url(cls):
+    def _organization_url(self):
         organization_url = GeneralSettings.get_value(
             "AZURE_DEVOPS_ORGANIZATION_URL",
             "https://test.azure.com/GrupoTest",
@@ -147,7 +140,7 @@ class AzureDevOpsWorkItemHelper:
         return organization_url
 
     @property
-    def _project(cls):
+    def _project(self):
         project = GeneralSettings.get_value(
                 "AZURE_DEVOPS_PROJECT",
                 "project name",
@@ -155,7 +148,7 @@ class AzureDevOpsWorkItemHelper:
         return project
 
     @property
-    def _team_name(cls):
+    def _team_name(self):
         team_name = GeneralSettings.get_value(
             "AZURE_DEVOPS_TEAM_NAME",
             "team name",
@@ -163,7 +156,7 @@ class AzureDevOpsWorkItemHelper:
         return team_name
 
     @property
-    def _impact_team(cls):
+    def _impact_team(self):
         impact_team = GeneralSettings.get_value(
                 "AZURE_DEVOPS_IMPACT_TEAM",
                 "impact team name",
@@ -171,7 +164,7 @@ class AzureDevOpsWorkItemHelper:
         return impact_team
 
     @property
-    def _work_item_type(cls):
+    def _work_item_type(self):
         work_item_type = GeneralSettings.get_value(
             "AZURE_DEVOPS_WORK_ITEM_TYPE",
             "item type",
@@ -179,23 +172,23 @@ class AzureDevOpsWorkItemHelper:
         return work_item_type
 
 
-    def _get_connection(cls):
+    def _get_connection(self):
         credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
-        return Connection(base_url=cls.organization_url.rstrip("/"), creds=credentials)
+        return Connection(base_url=self._organization_url.rstrip("/"), creds=credentials)
 
-    def _get_profile_connection(cls):
-        parsed = urlparse(cls.organization_url.rstrip("/"))
+    def _get_profile_connection(self):
+        parsed = urlparse(self._organization_url.rstrip("/"))
         org = parsed.path.strip("/") if parsed.netloc.endswith("dev.azure.com") else parsed.netloc
         if parsed.netloc.endswith("dev.azure.com"):
             profile_base = f"https://vssps.dev.azure.com/{org}/"
         else:
-            profile_base = cls.organization_url.rstrip("/")
+            profile_base = self._organization_url.rstrip("/")
         return Connection(
             base_url=profile_base,
             creds=BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN),
         )
 
-    def _get_allowed_values_for_field(cls, wit_client, field_name, project, work_item_type):
+    def _get_allowed_values_for_field(wit_client, field_name, project, work_item_type):
         field_name = (field_name or "").strip()
         if not field_name:
             return []
@@ -230,32 +223,47 @@ class AzureDevOpsWorkItemHelper:
                             values.append(value)
                 return values
         return []
+    
+    def _get_description_DOR(self, user: Dojo_User, finding: int, description: str):
+        """Get the description for Definition of Ready (DOR)."""
+        finding = Finding.objects.get(id=finding)
+        user_name = f"{user.username} <{user.email}>"
+        evc = get_product(finding).prod_type
+        return (
+            f"- User requesting the advice:  {user_name} \n" \
+            f"- EVC: {evc.name} \n" \
+            f"- CELULA: {extract_field_from_text_regex(evc.description, 'AREA RESPONSABLE TI')} \n" \
+            f"Problem description: {description}"
+        )
+
 
     def get_or_create_work_item(
-        cls,
+        self,
         title,
         description,
         user,
         evidence_and_image,
+        finding,
 
     ):
-        target_type = cls.work_item_type
+        target_type = self._work_item_type
         evidence_and_image = evidence_and_image if evidence_and_image else "Not file input"
 
-        connection = cls._get_connection()
+        connection = self._get_connection()
         wit_client = connection.clients.get_work_item_tracking_client()
         work_client = connection.clients.get_work_client()
 
         try:
-            profile_connection = cls._get_profile_connection()
+            description = self._get_description_DOR(user, finding, description)
+            profile_connection = self._get_profile_connection()
             profile_client = profile_connection.clients.get_profile_client()
             me = profile_client.get_profile("me")
-            team_context = TeamContext(project=cls.project, team=cls.team_name)
+            team_context = TeamContext(project=self._project, team=self._team_name)
             team_field_values = work_client.get_team_field_values(team_context)
             area_path = getattr(team_field_values, "default_value", None)
 
             if not area_path:
-                logger.warning("No default area path found for team: %s", cls.team_name)
+                logger.warning("No default area path found for team: %s", self._team_name)
                 return None
             iterations = work_client.get_team_iterations(
                 team_context=team_context,
@@ -283,7 +291,7 @@ class AzureDevOpsWorkItemHelper:
 
             if query_result.work_items:
                 work_item_id = query_result.work_items[0].id
-                existing_wi = wit_client.get_work_item(id=work_item_id, project=cls.project)
+                existing_wi = wit_client.get_work_item(id=work_item_id, project=self._project)
 
                 if existing_wi.fields.get("System.State") == "Closed":
                     logger.info("Reactivating existing work item: %s", work_item_id)
@@ -297,7 +305,7 @@ class AzureDevOpsWorkItemHelper:
                     wit_client.update_work_item(
                         document=patch_doc,
                         id=work_item_id,
-                        project=cls.project,
+                        project=self._project,
                     )
                 else:
                     logger.info("Using existing active work item: %s", work_item_id)
@@ -323,7 +331,7 @@ class AzureDevOpsWorkItemHelper:
                 JsonPatchOperation(
                     op="add",
                     path="/fields/Custom.EquipoImpactado",
-                    value=cls.impact_team,
+                    value=self._impact_team,
                 ),
                 JsonPatchOperation(
                     op="add",
@@ -348,7 +356,7 @@ class AzureDevOpsWorkItemHelper:
             ]
             new_wi = wit_client.create_work_item(
                 document=patch_doc,
-                project=cls.project,
+                project=self._project,
                 type=target_type,
             )
             logger.info("Created new %s work item: %s", target_type, new_wi.id)
@@ -369,11 +377,15 @@ def create_azure_work_item_task(
 ):
     try:
         user_obj = Dojo_User.objects.get(username=user)
+        if not finding_ids:
+            raise ValueError("No finding IDs provided")
+
         work_item_id = AzureDevOpsWorkItemHelper().get_or_create_work_item(
             title,
             description,
             user=user_obj,
             evidence_and_image=evidence_and_image,
+            finding=finding_ids[0],
         )
         if finding_ids and work_item_id:
             findings = Finding.objects.filter(id__in=finding_ids)
@@ -383,4 +395,6 @@ def create_azure_work_item_task(
                     author=user_obj
                 )
     except Exception as exc:
+        import traceback
+        print(traceback.format_exc())
         logger.error("Error creating Azure DevOps work item: %s", exc)
