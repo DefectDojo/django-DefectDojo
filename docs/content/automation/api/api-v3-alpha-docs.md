@@ -189,11 +189,11 @@ Unknown filter params, unknown `?fields=`, and unknown/over-budget `?expand=` al
 ```
 
 `401` unauthenticated · `403` forbidden · `404` unknown **or unauthorized** object (existence is
-never leaked; an update of a record another request deletes while the update runs answers this
-too) · `400` validation/expand/filter errors · `409` conflict (a unique field value —
+never leaked; a finding PATCH or PUT that another request deletes mid-write also answers this)
+· `400` validation/expand/filter errors · `409` conflict (a unique field value —
 an organization or asset name, for example — already exists; retrieve or update the existing
-record instead of creating a new one. A create also answers `409` when another request deletes
-the record it just created before the create finishes).
+record instead of creating a new one. A finding create also answers `409` when another request
+deletes the new finding before the create finishes).
 
 ## v2 → v3 mapping
 
