@@ -3370,8 +3370,10 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
     # cluster yet.
     head = old_root or finding
 
-    # A duplicate in another cluster would silently leave that cluster; the Similar Findings menu never offers it.
-    if new_original.duplicate and new_original.duplicate_finding_id not in {None, head.id}:
+    # A duplicate in another cluster would silently leave that cluster. The rows the Similar Findings menu offers are
+    # accepted: a duplicate of the head, a duplicate of the page finding itself (a chain under a member), and an
+    # orphan duplicate whose original is gone.
+    if new_original.duplicate and new_original.duplicate_finding_id not in {None, head.id, finding.id}:
         return _(
             "Finding %(new_original)s is a duplicate of finding %(root)s, which is not in the cluster of finding "
             "%(finding)s, so it cannot become its original. Use Reset Duplicate Status on finding %(new_original)s "
@@ -3397,9 +3399,11 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
 
     # Every duplicate is inactive. When one becomes the original it takes over the open or closed status of the
     # finding it replaces at the head of the cluster, read before that finding closes below, so a cluster that had an
-    # open original still has one.
+    # open original still has one. A head closed by a person's call (false positive, out of scope, risk accepted)
+    # carries a reason the status fields alone cannot hand over, so then the new original keeps its own status.
     inherited = None
-    if new_original.duplicate and not new_original.active:
+    if (new_original.duplicate and not new_original.active
+            and finding_not_human_set_status(head) and not head.risk_accepted):
         inherited = {field: getattr(head, field) for field in SET_AS_ORIGINAL_INHERITED_FIELDS}
 
     if finding.duplicate or finding.original_finding.all():

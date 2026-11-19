@@ -4,7 +4,8 @@ Regression tests: Set as Original on an inactive duplicate leaves the cluster wi
 Every member of a cluster is an inactive duplicate, so promoting one to original used to leave it inactive while the
 old original closed: nothing in the cluster was open any more. The new original takes over the open or closed status
 (``active``, ``verified`` and the mitigation fields) of the finding it replaces as the head of the cluster. A target
-that is a duplicate in another cluster is refused, as the Similar Findings menu never offers it. Each test posts to
+that is a duplicate in another cluster is refused. A head closed by a person's call (false positive, out of scope,
+risk accepted) hands over nothing. Each test posts to
 the real API v2 route (or the classic view the Set as Original button calls) and reloads every row.
 """
 import datetime
@@ -123,6 +124,29 @@ class SetFindingAsOriginalClusterStatusTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 204, response.content)
         self._assert_promoted(orphan, (page,))
 
+    def test_a_duplicate_of_a_member_takes_over_from_the_member_page(self):
+        # A chain: C is a duplicate of member M1, not of the root. The Similar Findings menu offers Set as Original on
+        # C's row from M1's page, so the route accepts it, and C takes over the open root's status.
+        chained = self._finding("chained", duplicate=True, duplicate_finding=self.m1)
+        response = self._post(self.m1, chained)
+        self.assertEqual(response.status_code, 204, response.content)
+        self._assert_promoted(chained, (self.root, self.m1, self.m2))
+
+    def test_a_head_closed_by_a_person_hands_over_nothing(self):
+        # A false positive, out of scope or risk accepted original was closed for a reason the status fields cannot
+        # carry, so the new original keeps its own status rather than reading as Mitigated or as closed for no reason.
+        for reason in ("false_p", "out_of_scope", "risk_accepted"):
+            with self.subTest(reason=reason):
+                root = self._finding(f"{reason} root", verified=True, **{reason: True})
+                member = self._finding(f"{reason} member", duplicate=True, duplicate_finding=root)
+                response = self._post(root, member)
+                self.assertEqual(response.status_code, 204, response.content)
+                self._assert_promoted(member, (root,), active=False, verified=False)
+                self.assertEqual(
+                    Finding.objects.filter(pk=member.pk).values_list(reason, flat=True).get(), False,
+                    msg=f"{reason} must not be copied onto the new original",
+                )
+
     def test_an_open_new_original_keeps_its_own_status(self):
         # Control: a target that is no duplicate is already open, so nothing is copied onto it.
         target = self._finding("target", active=True, verified=False)
@@ -146,3 +170,20 @@ class SetFindingAsOriginalClusterStatusTest(DojoAPITestCase):
                     f"Status on finding {other_member.id} first.",
                 )
                 self.assertEqual(self._state(self.root, self.m1, self.m2, other_root, other_member, page), before)
+        with self.subTest(view="classic"):
+            before = self._state(self.root, self.m1, self.m2, other_root, other_member, page)
+            request = RequestFactory().post(f"/finding/{page.id}/original/{other_member.id}")
+            request.user = self.user
+            request.session = {}
+            request._messages = FallbackStorage(request)
+            response = set_finding_as_original(request, page.id, other_member.id)
+            self.assertEqual(response.status_code, 302, response.content[:500])
+            self.assertEqual(
+                [str(m) for m in request._messages],
+                [(
+                    f"Finding {other_member.id} is a duplicate of finding {other_root.id}, which is not in the "
+                    f"cluster of finding {page.id}, so it cannot become its original. Use Reset Duplicate Status on "
+                    f"finding {other_member.id} first."
+                )],
+            )
+            self.assertEqual(self._state(self.root, self.m1, self.m2, other_root, other_member, page), before)
