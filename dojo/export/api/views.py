@@ -250,23 +250,27 @@ def import_history_lines(product: Product, counts: dict, render) -> Iterator[byt
     actions = (
         Test_Import_Finding_Action.objects.filter(test_import__test__engagement__product=product)
         .order_by("test_import__test_id", "test_import_id", "id")
-        .values_list("test_import_id", "finding_id", "action", "created", "modified")
+        .values_list("test_import__test_id", "test_import_id", "finding_id", "action", "created", "modified")
     )
     # Start the actions query before the imports query. An import made in between then has no group of actions,
     # instead of a group of actions with no import.
-    by_import = groupby(actions.iterator(chunk_size=EXPORT_CHUNK_SIZE), key=itemgetter(0))
+    by_import = groupby(actions.iterator(chunk_size=EXPORT_CHUNK_SIZE), key=itemgetter(0, 1))
     pending = next(by_import, None)
     serializer = ExportTestImportSerializer()
     for test_import in imports.iterator(chunk_size=EXPORT_CHUNK_SIZE):
         counts["test_imports"] += 1
         yield render({"type": "test_import", "data": serializer.to_representation(test_import)})
-        if pending is None or pending[0] != test_import.id:
+        key = (test_import.test_id, test_import.id)
+        # A group that sorts before this import belongs to an import deleted after the actions query started.
+        while pending is not None and pending[0] < key:
+            pending = next(by_import, None)
+        if pending is None or pending[0] != key:
             continue
         for batch in batched(pending[1], ACTIONS_PER_LINE, strict=False):
             counts["test_import_actions"] += len(batch)
             rows = [
                 [finding_id, action, render_datetime(created), render_datetime(modified)]
-                for _, finding_id, action, created, modified in batch
+                for _, _, finding_id, action, created, modified in batch
             ]
             yield render({"type": "test_import_actions", "data": {"test_import": test_import.id, "actions": rows}})
         pending = next(by_import, None)

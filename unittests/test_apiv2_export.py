@@ -806,6 +806,23 @@ class TestExportImportHistory(DojoAPITestCase):
         self.assertEqual({import_id: self.expected_actions(import_id) for import_id in with_actions}, actions)
         self.assertEqual(4, len(actions[self.reimport.id]))
 
+    def test_an_import_deleted_between_the_two_queries_does_not_drop_the_later_actions(self):
+        # The actions query still holds the group of import 6829, and the imports query no longer sees it.
+        filter_imports = Test_Import.objects.filter
+
+        def without_6829(*args, **kwargs):
+            return filter_imports(*args, **kwargs).exclude(id=6829)
+
+        with mock.patch.object(Test_Import.objects, "filter", side_effect=without_6829):
+            lines = self.export(import_history="true")
+        sent = {}
+        for line in lines:
+            if line["type"] == "test_import_actions":
+                sent.setdefault(line["data"]["test_import"], []).extend(line["data"]["actions"])
+        self.assertTrue(self.expected_actions(6829))
+        self.assertEqual({import_id: self.expected_actions(import_id) for import_id in (self.reimport.id, 6830)}, sent)
+        self.assertEqual(sum(len(actions) for actions in sent.values()), lines[-1]["counts"]["test_import_actions"])
+
     def test_an_import_with_more_actions_than_one_line_spans_lines(self):
         self.assertEqual(10000, ACTIONS_PER_LINE)
         with mock.patch("dojo.export.api.views.ACTIONS_PER_LINE", 3):
