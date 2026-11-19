@@ -71,6 +71,12 @@ class TestMigration0305Rerun(SimpleTestCase):
         with connection.schema_editor(atomic=False) as editor:
             self.operation.database_forwards("dojo", editor, self.state, self.state)
 
+    def _skip_unless_superuser(self):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")
+            if not cursor.fetchone()[0]:
+                self.skipTest("needs a superuser to create an event trigger")
+
     def _leave_invalid_index(self):
         """Leave an INVALID index named INDEX, as an interrupted build does, without superuser rights."""
         _execute(f"DROP INDEX IF EXISTS {INDEX}")
@@ -99,7 +105,7 @@ class TestMigration0305Rerun(SimpleTestCase):
         self.assertEqual((oid_before, True, "dojo_test"), _index())
 
     def test_missing_index_is_built(self):
-        _execute(f"DROP INDEX {INDEX}")
+        _execute(f"DROP INDEX IF EXISTS {INDEX}")
 
         self._run_operation()
 
@@ -113,7 +119,7 @@ class TestMigration0305Rerun(SimpleTestCase):
         concurrent index build has to wait out, and the snapshot is released while the
         operation is polling.
         """
-        _execute(f"DROP INDEX {INDEX}")
+        _execute(f"DROP INDEX IF EXISTS {INDEX}")
         params = connection.get_connection_params()
         build_error = []
 
@@ -180,11 +186,8 @@ class TestMigration0305Rerun(SimpleTestCase):
         ddl_command_end event trigger runs in that window, so one that waits on an advisory lock
         holds the real build there for as long as the test needs, with no timing involved.
         """
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")
-            if not cursor.fetchone()[0]:
-                self.skipTest("needs a superuser to create an event trigger")
-        _execute(f"DROP INDEX {INDEX}")
+        self._skip_unless_superuser()
+        _execute(f"DROP INDEX IF EXISTS {INDEX}")
         params = connection.get_connection_params()
         build_error = []
 
@@ -282,14 +285,12 @@ class TestMigration0305Rerun(SimpleTestCase):
         A run killed before its cleanups leaves the event trigger and its function in a kept test
         database (a CI timeout, an OOM kill, Ctrl-C). The next --keepdb run must not trip over them.
         """
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")
-            if not cursor.fetchone()[0]:
-                self.skipTest("needs a superuser to create an event trigger")
+        self._skip_unless_superuser()
         # Registered first, so it runs last and clears both even when the test below fails.
         self.addCleanup(_execute, f"DROP FUNCTION IF EXISTS {HOLD_FUNCTION}()")
         self.addCleanup(_execute, f"DROP EVENT TRIGGER IF EXISTS {HOLD_FUNCTION}")
-        _execute(f"CREATE FUNCTION {HOLD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$ BEGIN END $$")
+        _execute(f"DROP EVENT TRIGGER IF EXISTS {HOLD_FUNCTION}")
+        _execute(f"CREATE OR REPLACE FUNCTION {HOLD_FUNCTION}() RETURNS event_trigger LANGUAGE plpgsql AS $$ BEGIN END $$")
         _execute(
             f"CREATE EVENT TRIGGER {HOLD_FUNCTION} ON ddl_command_end"
             f" WHEN TAG IN ('CREATE INDEX') EXECUTE FUNCTION {HOLD_FUNCTION}()",
