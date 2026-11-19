@@ -18,7 +18,7 @@ A master member holds one of three roles:
 
 ## Switching tenants
 
-The **Switch Tenant** control sits in the sidebar rail, under the Production and Sandbox switch. It shows where you are: the name of the current tenant, or **All Tenants** in the global view. Open it to:
+The **Switch Tenant** control sits at the foot of the sidebar, above your user menu. It shows where you are: the name of the current tenant, or **All Tenants** in the global view. Open it to:
 
 * choose **All Tenants** to read every tenant you can reach at once (see [The global view](#the-global-view)),
 * choose a tenant to open it on its own address,
@@ -30,7 +30,7 @@ A tenant in another region is marked **Read-Only**. A tenant that is not active 
 
 In the global view, a banner reads **Viewing All Tenants** with a **Back to This Tenant** button, and every list shows the rows of every tenant you can read, with a **Tenant** column naming each row's tenant.
 
-The global view only reads. A list's own actions, such as **New** or **Import**, and the add action of an empty list, open **Select a Tenant** instead: choose a tenant and the same page opens in that tenant, where the change is made. Only active tenants that are not Read-Only are offered.
+The global view only reads. A list's own actions, such as **New** or **Import**, and the add action of an empty list, open **Choose a Tenant** instead: pick a tenant, click **Open Tenant**, and the same page opens in that tenant, where the change is made. Only an active tenant that is not Read-Only can be picked.
 
 A list that the global view cannot read yet shows the reason in place of its rows.
 
