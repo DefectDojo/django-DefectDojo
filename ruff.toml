@@ -130,7 +130,8 @@ preview = true
     "A003",  # ruff upgrade to 0.13.3
 ]
 "scripts/docs_live_link_stubs.py" = [
-    "T201",  # print statements are fine for console output scripts
+    "T201",    # print statements are fine for console output scripts
+    "INP001",  # a standalone script the docs CI runs, not a package
 ]
 "scripts/check_migration_leaves.py" = [
     "T201",   # print statements are fine for console output scripts
