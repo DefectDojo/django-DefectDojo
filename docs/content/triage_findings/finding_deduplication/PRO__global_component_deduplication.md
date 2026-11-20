@@ -9,7 +9,7 @@ Global Component Deduplication is a DefectDojo Pro algorithm that identifies dup
 
 Unlike the other deduplication algorithms, Global Component matching is **not scoped to a single Asset or Engagement**. A Finding imported into Asset B can be marked as a duplicate of an older Finding in Asset A, even if the two Assets are unrelated.
 
-> **Global Component vs. Global Locations:** Global Component matches only on component name and version. If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor: it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Assets. See that page's comparison table for which to choose.
+> **Global Component vs. Global Locations:** Global Component matches only on component name and version (and, with Locations, the package type and namespace). If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor: it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Assets. See that page's comparison table for which to choose.
 
 ## Enabling the Global Component Algorithm
 
@@ -57,7 +57,7 @@ A new Finding is marked as a duplicate of an existing Finding when:
 
 Component version matching is exact. A Finding for `timespan@2.3.0` will **not** deduplicate against one for `timespan@2.3.1`.
 
-On an instance that uses the Locations data model, a component's namespace is part of its name when both Findings record one: an npm scope, or a Maven groupId. A Finding for `@angular/core@16.0.0` will **not** deduplicate against one for `@babel/core@16.0.0`, and neither will two Maven artifacts that share an artifactId under different groupIds. Namespaces are compared without regard to case. A Finding whose component records no namespace still matches one that records a namespace.
+On an instance that uses the Locations data model, two package locations name the same component only when their package type and namespace (an npm scope, a Maven groupId) also match. Namespaces are compared without regard to case. A Finding for `@angular/core@16.0.0` will **not** deduplicate against one for `@babel/core@16.0.0` or for the unscoped npm package `core@16.0.0`, an npm package will not deduplicate against a PyPI package with the same name and version, and neither will two Maven artifacts that share an artifactId under different groupIds. A package recorded as `pkg:generic/<name>@<version>`, with no namespace, still matches a typed package with the same name and version.
 
 The Engagement-scoped deduplication setting is ignored for this algorithm. Matching is instance-wide unless the Asset is in a dedupe pool for that matching kind, in which case it is bounded to the pool (see the callout above).
 
