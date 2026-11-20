@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.urls import reverse
 
 from dojo.location.models import Location
-from dojo.models import Product
+from dojo.models import Finding, Finding_Group, Product, Test
 from dojo.utils import parse_ids
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v3, versioned_fixtures
 
@@ -53,4 +53,19 @@ class NonNumericIdFilterTest(DojoTestCase):
             with self.subTest(url_name):
                 response = self.get(reverse(url_name), "product=abc&engagement=abc")
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(len(response.context["finding_groups"]), 0)
+
+    def test_finding_group_list_drops_non_numeric_ids(self):
+        test = Test.objects.get(pk=3)
+        group = Finding_Group.objects.create(name="Group A", test=test, creator=self.get_test_admin())
+        group.findings.add(Finding.objects.get(pk=2))
+        product_id = test.engagement.product_id
+        for query, expected in (
+            ("product=abc", []),
+            ("engagement=abc", []),
+            (f"product={product_id}&product=abc", [group.id]),
+            (f"engagement={test.engagement_id}&engagement=abc", [group.id]),
+        ):
+            with self.subTest(query):
+                response = self.get(reverse("all_finding_groups"), query)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual([fg.id for fg in response.context["finding_groups"]], expected)
