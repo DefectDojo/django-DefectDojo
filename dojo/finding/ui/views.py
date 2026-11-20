@@ -3343,6 +3343,10 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     return set_finding_as_original_with_reason(user, finding_id, new_original_id) is None
 
 
+# The open or closed status a duplicate promoted by Set as Original takes over from the head of its cluster.
+SET_AS_ORIGINAL_INHERITED_FIELDS = ("active", "verified", "is_mitigated", "mitigated", "mitigated_by_id")
+
+
 def set_finding_as_original_with_reason(user, finding_id, new_original_id):
     """
     Make ``new_original`` the original of ``finding``'s cluster.
@@ -3362,6 +3366,19 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
 
     # The finding itself, and the cluster root it currently points at, both end up under new_original.
     old_root = finding.duplicate_finding if finding.duplicate else None
+    # The finding that heads the cluster until now: the old root, or the page finding when it is the root or in no
+    # cluster yet.
+    head = old_root or finding
+
+    # A duplicate in another cluster would silently leave that cluster. The rows the Similar Findings menu offers are
+    # accepted: a duplicate of the head, a duplicate of the page finding itself (a chain under a member), and an
+    # orphan duplicate whose original is gone.
+    if new_original.duplicate and new_original.duplicate_finding_id not in {None, head.id, finding.id}:
+        return _(
+            "Finding %(new_original)s is a duplicate of finding %(root)s, which is not in the cluster of finding "
+            "%(finding)s, so it cannot become its original. Use Reset Duplicate Status on finding %(new_original)s "
+            "first.",
+        ) % {"new_original": new_original.id, "root": new_original.duplicate_finding_id, "finding": finding.id}
     for moved in (finding, old_root):
         if moved is not None and moved != new_original and manual_duplicate_hides_open_finding(moved, new_original):
             return duplicate_onto_mitigated_message(moved, new_original)
@@ -3379,6 +3396,15 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
             "%(new_original)s, and deduplication on engagement is enabled for at least one of them, so finding "
             "%(new_original)s cannot become its original. Use Reset Duplicate Status on finding %(member)s first.",
         ) % {"member": crossing[0], "root": (old_root or finding).id, "new_original": new_original.id}
+
+    # Every duplicate is inactive. When one becomes the original it takes over the open or closed status of the
+    # finding it replaces at the head of the cluster, read before that finding closes below, so a cluster that had an
+    # open original still has one. A head closed by a person's call (false positive, out of scope, risk accepted)
+    # carries a reason the status fields alone cannot hand over, so then the new original keeps its own status.
+    inherited = None
+    if (new_original.duplicate and not new_original.active
+            and finding_not_human_set_status(head) and not head.risk_accepted):
+        inherited = {field: getattr(head, field) for field in SET_AS_ORIGINAL_INHERITED_FIELDS}
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
@@ -3431,6 +3457,9 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
     logger.debug("marking new original %i as not duplicate", new_original.id)
     new_original.duplicate = False
     new_original.duplicate_finding = None
+    if inherited is not None:
+        for field, value in inherited.items():
+            setattr(new_original, field, value)
     new_original.save(dedupe_option=False)
 
     return None
