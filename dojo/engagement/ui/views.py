@@ -1,10 +1,9 @@
 import logging
 import mimetypes
-import operator
 import re
 import time
 from datetime import datetime, timedelta
-from functools import partial, reduce
+from functools import partial
 from tempfile import NamedTemporaryFile
 from time import strftime
 
@@ -121,6 +120,7 @@ from dojo.utils import (
     async_delete,
     generate_file_response_from_file_path,
     get_cal_event,
+    get_lead_filter,
     get_page_items,
     get_return_url,
     get_setting,
@@ -140,16 +140,9 @@ def engagement_calendar(request):
     if not get_system_setting("enable_calendar"):
         raise Resolver404
 
-    if "lead" not in request.GET or "0" in request.GET.getlist("lead"):
-        engagements = get_authorized_engagements("view")
-    else:
-        filters = []
-        leads = request.GET.getlist("lead", "")
-        if "-1" in request.GET.getlist("lead"):
-            leads.remove("-1")
-            filters.append(Q(lead__isnull=True))
-        filters.append(Q(lead__in=leads))
-        engagements = get_authorized_engagements("view").filter(reduce(operator.or_, filters))
+    engagements = get_authorized_engagements("view")
+    if (lead_filter := get_lead_filter(request.GET.getlist("lead"))) is not None:
+        engagements = engagements.filter(lead_filter)
 
     engagements = engagements.select_related("lead")
     engagements = engagements.prefetch_related("product")
