@@ -58,6 +58,8 @@ Die Priority-Engine kombinierte bisher bereits Schweregrad, Geschäftskontext un
 
 Der externe Score eines Befunds ist der **höhere** Wert aus seinem EPSS-abgeleiteten Wert und der höchsten der oben genannten Untergrenzen – Threat Intelligence kann einen Score also nur *anheben*, niemals senken, und ein Befund, dessen EPSS-Wert die Untergrenze bereits übersteigt, bleibt unverändert. Der vertraute, produkttypbezogene **Skalierungsfaktor für den externen Score** in Ihren Prioritization-Engine-Einstellungen skaliert diesen Beitrag genau wie bisher bei EPSS/KEV.
 
+Die nächste Version dieser Tabelle, die von den Analysten von DefectDojo geprüfte Nachweise einer Ausnutzung ergänzt, ist unter [Nachweisbasierte Bewertung (Rubric v2), noch nicht verfügbar](../threat_intelligence_rubric_v2/) beschrieben. Bis zu ihrer Veröffentlichung wird jeder Befund mit der obigen Tabelle bewertet.
+
 ### Die Risikountergrenze für aktiv ausgenutzte Schwachstellen
 
 Die obige Tabelle erhöht die **Priorität**, jedoch proportional zum Basis-Schweregrad eines Befunds. Das hat eine Konsequenz, die man klar benennen sollte: Ein Befund mit Schweregrad Niedrig, dessen CVE in freier Wildbahn ausgenutzt wird, erhält nur einen kleinen absoluten Anstieg und könnte dennoch in einer niedrigen **Risiko**-Kategorie verbleiben. Die meisten Teams halten das für falsch – „aktiv ausgenutzt" sollte niemals unter Niedrig einsortiert werden.

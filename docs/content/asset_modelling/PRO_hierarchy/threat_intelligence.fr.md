@@ -94,6 +94,8 @@ baisser, et une constatation dont l'EPSS dépasse déjà le plancher n'est pas a
 habituel, par type de produit, dans les paramètres de votre Moteur de priorisation, met à l'échelle cette contribution
 exactement comme il l'a toujours fait pour l'EPSS/KEV.
 
+La prochaine version de ce tableau, qui ajoute les preuves d'exploitation examinées par les analystes de DefectDojo, est décrite dans [Score fondé sur les preuves (Rubric v2), pas encore disponible](../threat_intelligence_rubric_v2/). Jusqu'à sa publication, chaque constatation est notée avec le tableau ci-dessus.
+
 ### Le plancher de Risque pour exploitation active
 
 Le tableau ci-dessus augmente la **Priorité**, mais proportionnellement à la sévérité de base d'une constatation. Cela

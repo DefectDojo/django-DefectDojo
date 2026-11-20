@@ -87,6 +87,8 @@ exceda o piso não é afetado. O já conhecido **escalar de pontuação externa*
 configurações do seu Mecanismo de Priorização, dimensiona essa contribuição exatamente como sempre
 dimensionou o EPSS/KEV.
 
+A próxima versão desta tabela, que acrescenta evidências de exploração revisadas pelos analistas da DefectDojo, está descrita em [Pontuação baseada em evidências (Rubric v2), ainda não disponível](../threat_intelligence_rubric_v2/). Até o seu lançamento, todo achado é pontuado com a tabela acima.
+
 ### O piso de Risco de exploração ativa
 
 A tabela acima aumenta a **Prioridade**, mas proporcionalmente à severidade base de um achado. Isso tem

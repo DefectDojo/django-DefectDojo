@@ -14,3 +14,5 @@ As ações administrativas permitem gerenciar aspectos essenciais do DefectDojo,
 autenticação, acesso de usuários, configurações globais e integrações. Desde a configuração inicial até a
 manutenção contínua, esses controles definem como o DefectDojo se comporta e como os usuários interagem com
 ele.
+
+Alguns recursos do DefectDojo Pro são documentados nesta seção antes de poderem ser ativados. O [Compartilhamento de telemetria de sensores, ainda não disponível](../../pro__sensor_telemetry/), vai permitir que um superusuário compartilhe com a DefectDojo eventos anonimizados de detecção de sensores pela página **System Settings**.
