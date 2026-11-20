@@ -294,12 +294,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
+                preserve_sla_expiration_date = bool(matched_findings)
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 if self.findings_groups_enabled and self.group_by:
-                    finding.save()
+                    finding.save(preserve_sla_expiration_date=preserve_sla_expiration_date)
                 else:
-                    finding.save(push_to_jira=self.push_to_jira)
+                    finding.save(
+                        push_to_jira=self.push_to_jira,
+                        preserve_sla_expiration_date=preserve_sla_expiration_date,
+                    )
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
