@@ -356,3 +356,42 @@ window.ddOffcanvas = Offcanvas;
     replay() { fields.forEach((f) => { f.seed(); f.resolve(); }); },
   };
 })();
+
+
+// "Copy page as Markdown" (layouts/_partials/main/page-actions.html): fetch the
+// page's Markdown copy and put it on the clipboard. The fetch result is handed
+// to ClipboardItem as a promise so Safari still counts the write as part of the
+// click; browsers without ClipboardItem fall back to writeText.
+(() => {
+  "use strict";
+
+  document.querySelectorAll('[data-dd-copy-markdown]').forEach((button) => {
+    const status = button.parentElement.querySelector('.dd-page-actions-status');
+    let clearTimer = null;
+
+    const say = (text) => {
+      if (!status) return;
+      status.textContent = text;
+      clearTimeout(clearTimer);
+      clearTimer = setTimeout(() => { status.textContent = ''; }, 4000);
+    };
+
+    button.addEventListener('click', async () => {
+      const text = fetch(button.dataset.ddCopyMarkdown).then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      });
+      try {
+        if (window.ClipboardItem && navigator.clipboard.write) {
+          const blob = text.then((t) => new Blob([t], { type: 'text/plain' }));
+          await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })]);
+        } else {
+          await navigator.clipboard.writeText(await text);
+        }
+        say(button.dataset.ddCopied);
+      } catch (e) {
+        say(button.dataset.ddFailed);
+      }
+    });
+  });
+})();

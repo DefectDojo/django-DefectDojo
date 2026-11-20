@@ -1972,3 +1972,26 @@ body.home .site-footer {
 .bg-dots {
   background-image: none !important;
 }
+
+// "Copy page as Markdown" row under the page title (page-actions.html)
+.dd-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  margin: -0.5rem 0 1.5rem;
+
+  // The theme's secondary teal is too dark to read on the dark background
+  .btn-outline-secondary {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--bs-tertiary-bg);
+    --bs-btn-hover-border-color: var(--bs-body-color);
+  }
+}
+
+.dd-page-actions-status {
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+}

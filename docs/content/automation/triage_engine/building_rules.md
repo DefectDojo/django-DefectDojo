@@ -500,3 +500,8 @@ The recommended order for a rule that sends anything:
 Simulate is not a partial run. Every Finding or Asset edit in the graph happens for real in simulate mode. Only the outbound sends are held back. **Preview** is the only way to run a graph without changing anything.
 
 To carry a tested rule to another instance, or to go back to an earlier version of a rule, see [Sharing and Versions](../sharing_and_versions/).
+
+## Build a rule with an AI assistant
+
+<!-- The prompt lives in content/prompts/triage-engine-rule.md. Edit it there: the Prompt Recipes page shows it too. -->
+{{< prompt "triage-engine-rule" >}}

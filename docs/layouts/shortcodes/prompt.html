@@ -1,0 +1,13 @@
+{{- /*
+  {{< prompt "<name>" >}} shows the AI-assistant prompt kept in
+  content/prompts/<name>.md. The Prompt Recipes page lists the same files
+  (prompt-index.html), and layouts/single.markdown.md expands the shortcode
+  in each page's Markdown copy. A translated page without its own prompt file
+  shows the English one.
+*/ -}}
+{{- $name := .Get 0 -}}
+{{- $path := printf "/prompts/%s" $name -}}
+{{- $p := site.GetPage $path -}}
+{{- if not $p }}{{ $p = .Page.Sites.Default.GetPage $path }}{{ end -}}
+{{- if not $p }}{{ errorf "prompt %q not found: add content/prompts/%s.md (%s)" $name $name .Position }}{{ end -}}
+{{ $p.Content }}

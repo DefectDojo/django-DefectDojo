@@ -18,6 +18,7 @@
   # with that one.
   [en.outputs]
     home = ["HTML", "RSS", "searchIndex", "SITEMAP", "llmstxt"]
+    page = ["HTML", "markdown"]
     section = ["HTML", "RSS", "SITEMAP"]
 
 [de]

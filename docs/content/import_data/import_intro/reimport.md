@@ -175,3 +175,8 @@ Note that the /reimport API endpoint can both **extend an existing Test** (apply
 When a `/reimport-scan` call also creates the Engagement (with `auto_create_context`), `deduplication_on_engagement` sets that new Engagement's deduplication scope. It never changes an existing Engagement, which is why the Reimport form does not offer it. To change the scope of an existing Engagement, edit **Deduplication on Engagement** on the Engagement itself.
 
 To learn more about creating an automated CI/CD pipeline using DefectDojo, see our guide [here](/automation/api/api-v2-docs/).
+
+## Build a pipeline with an AI assistant
+
+<!-- The prompt lives in content/prompts/ci-reimport.md. Edit it there: the Prompt Recipes page shows it too. -->
+{{< prompt "ci-reimport" >}}

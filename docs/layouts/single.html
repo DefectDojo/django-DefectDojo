@@ -28,6 +28,7 @@
 				</nav>
 			{{ end }}
 			<h1>{{ .Title }}{{ with .Params.audience }}{{ if eq . "opensource" }} (Open Source){{ else if eq . "pro" }} (Pro){{ end }}{{ end }}</h1>
+			{{ partial "main/page-actions.html" . }}
 			<!-- <p class="lead">{{ .Params.lead | safeHTML }}</p> -->
 			{{ if ne .Params.toc false -}}
 			<nav class="toc-mobile d-xl-none" aria-label="Quaternary navigation">

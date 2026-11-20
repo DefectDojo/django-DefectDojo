@@ -1,0 +1,12 @@
+{{- /*
+  "Copy page as Markdown" and "View as Markdown" under the page title. Both
+  use the page's Markdown copy (layouts/single.markdown.md); the copy click
+  is wired in assets/js/custom.js. Rendered only for pages that have one.
+*/ -}}
+{{- with .OutputFormats.Get "markdown" }}
+<div class="dd-page-actions">
+  <button type="button" class="btn btn-sm btn-outline-secondary" data-dd-copy-markdown="{{ .RelPermalink }}" data-dd-copied="{{ i18n "dd_copy_markdown_done" }}" data-dd-failed="{{ i18n "dd_copy_markdown_failed" }}">{{ i18n "dd_copy_markdown" }}</button>
+  <a class="btn btn-sm btn-link" href="{{ .RelPermalink }}" type="text/markdown">{{ i18n "dd_view_markdown" }}</a>
+  <span class="dd-page-actions-status" role="status" aria-live="polite"></span>
+</div>
+{{- end }}

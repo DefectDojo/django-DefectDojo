@@ -405,6 +405,13 @@ audience goals, theme branding, and my preferred output format.
 
 > **⚠️** The download endpoint (`/api/v2/generated_reports/{id}/download/`) returns 404 until the run reaches `completed`. Always poll to completion before downloading.
 
+## Create a simple report with an LLM
+
+This is not a feature of DefectDojo or of the Report Builder. It is a prompt for a simpler job. When you only need the data, not a designed report, an AI assistant can write a script that pulls it from the API without using the Report Builder. You set up no Themes, Blocks or Templates, and the script works in both DefectDojo Pro and the open-source edition.
+
+<!-- The prompt lives in content/prompts/simple-report.md. Edit it there: the Prompt Recipes page shows it too. -->
+{{< prompt "simple-report" >}}
+
 ## Next steps
 
 - [Report Builder (UI)](../report-builder/) — design and run reports interactively in the DefectDojo Pro interface.
