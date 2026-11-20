@@ -349,7 +349,7 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     Async task to update watson search indexes for a specific model type.
 
     Args:
-        model_key: Model identifier like 'dojo.finding'
+        model_name: Model identifier like 'dojo.finding'
         pk_list: List of primary keys for instances of this model type. it's advised to chunk the list into batches of 1000 or less.
 
     """
