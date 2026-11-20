@@ -916,6 +916,56 @@ universal-importer interactive
 * show help
 
 
+## Import manifest
+
+The `import` and `reimport` commands of both DefectDojo-CLI and Universal Importer can write a JSON manifest of what
+the scan touched, for a later pipeline step to report on. Pass the file to write with `--manifest-path`:
+
+`--manifest-path value, -m value`
+* After a successful import, write a JSON manifest to this path. Cannot be combined with `--background-import`. `[$DD_CLI_MANIFEST_PATH]` for DefectDojo-CLI, `[$DD_IMPORTER_MANIFEST_PATH]` for Universal Importer, `manifest-path` in a configuration file.
+
+```
+defectdojo-cli reimport --config ./reimport_config.toml --manifest-path ./manifest.json
+```
+
+The manifest looks like this:
+
+```json
+{
+  "timestamp": "2026-01-01T12:00:00.000000-05:00",
+  "product_type_id": 1,
+  "product_id": 1,
+  "engagement_id": 1,
+  "test_id": 1,
+  "test_import_id": 1,
+  "finding_ids": {
+    "new": [11, 12],
+    "closed": [14],
+    "reactivated": [],
+    "untouched": [15]
+  },
+  "metadata": {
+    "action": "reimport",
+    "app_name": "defectdojo-cli",
+    "app_version": "v0.0.21"
+  }
+}
+```
+
+* `product_type_id` is the Organization ID and `product_id` the Asset ID.
+* `finding_ids` lists the Findings the run created (`new`), closed, reactivated and left untouched, each sorted in
+  ascending order. All four lists are always present, as `[]` when empty.
+* The Finding IDs come from the Test Import record the run created, which DefectDojo names in the `test_import_id` of
+  the import response. A DefectDojo version that does not return `test_import_id` gets the newest Test Import of the
+  Test instead, and the tool prints a warning: if another import ran against the same Test at the same time, that can
+  be the wrong record. With import history tracking turned off there is no Test Import, so the manifest has no
+  `test_import_id` and empty lists, and the tool prints a warning.
+* `--manifest-path` cannot be combined with `--background-import`, because a background import returns before its
+  Findings exist. When a manifest is requested, the tool asks DefectDojo for a synchronous import even if your instance
+  runs imports in the background by default.
+* If the manifest cannot be written, the command reports that the scan itself was imported successfully, and exits
+  with status 1.
+
 ## Troubleshooting
 
 If you encounter any issues with these tools, please check the following:
