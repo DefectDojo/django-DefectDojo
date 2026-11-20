@@ -5,7 +5,8 @@ Regression: the menu gated Mark as Duplicate on the finding on the page, while t
 similar finding with the page finding's cluster root (the finding it lands under). On a duplicate's page whose
 root sits in another engagement with deduplication_on_engagement on, the menu offered a mark the route refuses
 and hid one it accepts. Each action is now offered where its route accepts it: Set as Original compares with
-the page finding, and Reset Duplicate Status compares no engagements.
+the page finding and with every finding it moves along (the old root and the cluster's other duplicates), and Reset
+Duplicate Status compares no engagements.
 """
 from django.contrib.auth.models import User
 from django.test import RequestFactory, override_settings
@@ -65,8 +66,8 @@ class SimilarFindingRelatedActionsTest(DojoTestCase):
         self._split_root_from_page(dedupe_on_engagement=True)
         actions = self._actions(PAGE, SAME_ENGAGEMENT_AS_PAGE)
         self.assertNotIn("mark_finding_duplicate", actions)
-        # Set as Original compares the similar finding with the page finding, which shares its engagement.
-        self.assertEqual(actions, ["set_finding_as_original"])
+        # The page finding shares the row's engagement, but Set as Original would move the root, which does not.
+        self.assertEqual(actions, ["None"])
         # The route refuses the mark the menu used to offer.
         self.assertEqual(self._mark(SAME_ENGAGEMENT_AS_PAGE, PAGE), (False, None))
 
@@ -83,10 +84,11 @@ class SimilarFindingRelatedActionsTest(DojoTestCase):
         for row in (SAME_ENGAGEMENT_AS_PAGE, similar_id):
             self.assertEqual(self._actions(PAGE, row), ["mark_finding_duplicate", "set_finding_as_original"], row)
 
-    def test_offers_both_actions_from_the_root_page(self):
-        # On the root's own page the root is the finding on the page, so both gates agree.
+    def test_offers_only_the_mark_from_the_root_page(self):
+        # On the root's own page the root is the finding on the page, so the mark gates agree. Set as Original would
+        # move the root's duplicates, which sit in the other engagement, so it is not offered.
         similar_id = self._split_root_from_page(dedupe_on_engagement=True)
-        self.assertEqual(self._actions(ROOT, similar_id), ["mark_finding_duplicate", "set_finding_as_original"])
+        self.assertEqual(self._actions(ROOT, similar_id), ["mark_finding_duplicate"])
         self.assertEqual(self._actions(ROOT, SAME_ENGAGEMENT_AS_PAGE), ["None"])
 
     def _make_duplicate_of_another_cluster(self, finding_id):
@@ -125,8 +127,8 @@ class SimilarFindingRelatedActionsTest(DojoTestCase):
         response = self.client.get(f"/finding/{PAGE}")
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
-        # The row in the page finding's engagement offers Set as Original only.
-        self.assertIn(f"/finding/{PAGE}/original/{SAME_ENGAGEMENT_AS_PAGE}", content)
+        # The row in the page finding's engagement offers neither: Set as Original would move the root across.
+        self.assertNotIn(f"/finding/{PAGE}/original/{SAME_ENGAGEMENT_AS_PAGE}", content)
         self.assertNotIn(f"/finding/{SAME_ENGAGEMENT_AS_PAGE}/duplicate/{PAGE}", content)
         # The row in the root's engagement offers Mark as Duplicate only.
         self.assertIn(f"/finding/{similar_id}/duplicate/{PAGE}", content)

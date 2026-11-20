@@ -57,6 +57,7 @@ from dojo.finding.api.serializer import (
     FindingVerifySerializer,
 )
 from dojo.finding.queries import get_authorized_findings
+from dojo.finding.services import FINDING_DELETED_MID_UPDATE_MESSAGE
 from dojo.finding.ui.views import (
     duplicate_cluster,
     reset_finding_duplicate_status_internal,
@@ -96,6 +97,25 @@ class FindingTemplatesViewSet(
 
     def get_queryset(self):
         return Finding_Template.objects.all().order_by("id")
+
+
+def related_fields_jira_prefetches(request) -> tuple[str, ...]:
+    """
+    The JIRA rows ``related_fields`` reads to render each issue's url, for a request that asks for it.
+
+    The url comes from the issue's project's instance, or, for an issue with no project (older records), from the
+    project ``get_jira_project`` falls back to: the engagement's, then the product's. Unloaded, each costs a query
+    per issue. Nothing is loaded while JIRA is disabled, because the url is then never read.
+    """
+    if request is None or request.query_params.get("related_fields", "false") != "true":
+        return ()
+    if not jira_services.is_enabled():
+        return ()
+    return (
+        "jira_issue__jira_project__jira_instance",
+        "test__engagement__jira_project__jira_instance",
+        "test__engagement__product__jira_project_set__jira_instance",
+    )
 
 
 # Authorization: object-based
@@ -197,8 +217,7 @@ class FindingViewSet(
             # original error.
             vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
             if vanished and not Finding.objects.filter(pk=finding_pk).exists():
-                msg = "This finding was deleted while the update was being processed."
-                raise NotFound(msg) from exc
+                raise NotFound(FINDING_DELETED_MID_UPDATE_MESSAGE) from exc
             raise
 
     def destroy(self, request, *args, **kwargs):
@@ -269,7 +288,7 @@ class FindingViewSet(
         # ordering by to-many fields aggregates via MultivaluedOrderingFilter. The tag filters are
         # Exists()-based as well (TagNameFilter and friends). A query-wide DISTINCT over the full wide-row finding
         # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
-        return findings
+        return findings.prefetch_related(*related_fields_jira_prefetches(getattr(self, "request", None)))
 
     def filter_queryset(self, queryset):
         # The list is paged by a plain ORDER BY ... LIMIT now that tag filters add no DISTINCT: end
@@ -351,7 +370,12 @@ class FindingViewSet(
     @extend_schema(
         methods=["POST"],
         request=api_v2_serializers.TagSerializer,
-        responses={status.HTTP_201_CREATED: api_v2_serializers.TagSerializer},
+        responses={
+            status.HTTP_200_OK: api_v2_serializers.TagSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Returned if the tags in the request body are not valid",
+            ),
+        },
     )
     @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def tags(self, request, pk=None):
@@ -838,11 +862,10 @@ class FindingViewSet(
         parameters=[
             OpenApiParameter(
                 "name",
-                OpenApiTypes.INT,
+                OpenApiTypes.STR,
                 OpenApiParameter.QUERY,
                 required=True,
-                description="name of the metadata to retrieve. If name is empty, return all the \
-                                    metadata associated with the finding",
+                description="Name of the metadata entry to delete",
             ),
         ],
         responses={
@@ -860,6 +883,15 @@ class FindingViewSet(
     @extend_schema(
         methods=["PUT"],
         request=FindingMetaSerializer,
+        parameters=[
+            OpenApiParameter(
+                "name",
+                OpenApiTypes.STR,
+                OpenApiParameter.QUERY,
+                required=True,
+                description="Name of the metadata entry to edit. If no entry has this name, one is created.",
+            ),
+        ],
         responses={
             status.HTTP_200_OK: FindingMetaSerializer,
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
