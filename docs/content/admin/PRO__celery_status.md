@@ -80,7 +80,7 @@ Only superusers see the purge actions, and each one asks you to confirm first. B
 
 ### Purge Queue
 
-**Purge Queue** under **Queue Actions** removes every waiting task from the queue, whatever its name. The confirmation reads "Purge all pending tasks from the queue? This cannot be undone." On success, a message reports how many tasks were purged, and the page reloads the status and, if open, the queue details.
+**Purge Queue** under **Queue Actions** removes every waiting task from the default `celery` queue, whatever its name. Tasks waiting in other queues, such as `imports`, stay. The confirmation reads "Purge all pending tasks from the celery queue? Tasks waiting in other queues are not purged. This cannot be undone." On success, a message reports how many tasks were purged, and the page reloads the status and, if open, the queue details.
 
 ### Purge one task name
 
@@ -104,7 +104,7 @@ Purged imports also need to be run again. Re-upload the scan file, or wait for t
 
 The same readings are available to a superuser's API token while the **Celery Status** flag is on:
 
-* `GET /api/v2/celery/status/` returns `worker_status`, `broker_status` and `queue_length` (any worker answering, and the default queue), the task limits, and `queues`: one entry per queue with its `name`, whether it is the `default` queue, its `length`, whether a live worker `consumed` it, and the `workers` consuming it. `length` is `null` when the broker cannot be read, and `consumed` and `workers` are `null` when the workers could not be asked. Read `queues` to judge a routed queue such as `imports`: the top-level fields do not describe it.
+* `GET /api/v2/celery/status/` returns `worker_status`, `broker_status` and `queue_length` (any worker answering, and the default queue), the task limits, and `queues`: one entry per queue with its `name`, whether it is the `default` queue, its `length`, `consumed` (whether at least one live worker consumes it), and the `workers` consuming it. `length` is `null` when the broker cannot be read, and `consumed` and `workers` are `null` when the workers could not be asked. Read `queues` to judge a routed queue such as `imports`: the top-level fields do not describe it.
 * `GET /api/v2/celery/queue/details/` returns the per-task breakdown, with the `queue` of each row.
 
 ## When to use it
