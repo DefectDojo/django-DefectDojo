@@ -51,8 +51,7 @@ class DalfoxParser:
 
     def get_findings(self, file, test):
         data = json.load(file)
-        is_v3 = isinstance(data, dict)
-        if is_v3:
+        if isinstance(data, dict):
             data = data.get("findings")
         if not isinstance(data, list):
             msg = "Expected a Dalfox JSON array or an object with a findings list."
@@ -62,22 +61,20 @@ class DalfoxParser:
             # Skip the v2 trailing empty object and malformed non-object entries.
             if not isinstance(result, dict) or not result:
                 continue
-            findings.append(self._to_finding(result, test, is_v3=is_v3))
+            findings.append(self._to_finding(result, test))
         return findings
 
-    def _to_finding(self, result, test, *, is_v3=False):
+    def _to_finding(self, result, test):
         result_type = result.get("type") or ""
         parameter = result.get("param") or ""
         inject_type = result.get("inject_type") or ""
         poc_url = result.get("data") or ""
 
         title = result.get("message_str") or f"XSS in parameter {parameter}"
-        if is_v3 and result_type == "I" and not result.get("message_str"):
-            title = "Informational finding"
         if parameter:
             title = f"{parameter}: {title}"
         component = parameter or None
-        if is_v3 and result_type == "I" and not parameter:
+        if result_type == "I" and not parameter:
             # Library advisories have no parameter; keep different libraries apart during deduplication.
             component = title
 
@@ -85,10 +82,7 @@ class DalfoxParser:
         if result.get("message_str"):
             description.append(result["message_str"])
         if result_type:
-            type_label = self.TYPE_LABELS.get(result_type, "unknown")
-            if is_v3 and result_type == "V":
-                type_label = "Vulnerable — input is exploitable"
-            type_label = result.get("type_description") or type_label
+            type_label = result.get("type_description") or self.TYPE_LABELS.get(result_type, "unknown")
             description.append(f"**Result type:** {result_type} ({type_label})")
         if parameter:
             description.append(f"**Parameter:** {parameter}")

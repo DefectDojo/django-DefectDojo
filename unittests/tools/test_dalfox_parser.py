@@ -136,7 +136,6 @@ class TestDalfoxParser(DojoTestCase):
 
     def test_v3_type_labels_without_description(self):
         for result_type, label in (
-            ("V", "Vulnerable — input is exploitable"),
             ("R", "Reflected — payload echoed but not verified"),
             ("A", "AST-detected DOM XSS — static JavaScript analysis"),
             ("I", "Informational — outdated or known-vulnerable component"),
@@ -175,9 +174,3 @@ class TestDalfoxParser(DojoTestCase):
         findings = DalfoxParser().get_findings(io.StringIO(json.dumps(report)), Test())
         self.assertEqual(2, len(findings))
         self.assertNotEqual(findings[0].component_name, findings[1].component_name)
-
-    def test_v3_informational_title_without_message(self):
-        report = {"findings": [{"type": "I", "inject_type": "OutdatedComponent"}]}
-        finding = DalfoxParser().get_findings(io.StringIO(json.dumps(report)), Test())[0]
-        self.assertEqual("Informational finding", finding.title)
-        self.assertIsNone(finding.param)
