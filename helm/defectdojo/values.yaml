@@ -315,6 +315,7 @@ celery:
     # -- Configure pod disruption budgets for Celery worker ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
     podDisruptionBudget:
       enabled: false
+      # @schema type:[string, number]
       minAvailable: 50%
       unhealthyPodEvictionPolicy: AlwaysAllow
     # -- Pod security context for the Celery worker pods.
@@ -407,6 +408,7 @@ django:
   # -- Configure pod disruption budgets for django ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#specifying-a-poddisruptionbudget
   podDisruptionBudget:
     enabled: false
+    # @schema type:[string, number]
     minAvailable: 50%
     unhealthyPodEvictionPolicy: AlwaysAllow
   replicas: 1
