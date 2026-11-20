@@ -54,13 +54,14 @@ Because rows are keyed on the record that produced them, re-saving an origin rec
 | **Correlation ID** | Ties together rows from one logical operation |
 | **Reported Detail** and **Context** | The full technical detail (restricted, see [Who sees what](#who-sees-what)) |
 
-## The four views
+## The views
 
 The tabs above the table are saved starting points, not filters you have to rebuild:
 
 * **Errors** — failures and timeouts. The one to open first.
 * **Successes** — proof that a working integration is working, useful when someone reports "nothing is syncing".
 * **Never Completed** — attempts still `Queued` or `Running` well past when they should have finished. These are the silent ones: nothing failed, so nothing was reported, but nothing arrived either.
+* **Stuck Imports** — tests whose import has shown `Processing` for longer than you choose (see [Stuck imports](#stuck-imports)).
 * **All Events** — everything, unfiltered.
 
 ![All events, showing every source](images/diagnostics_all_events.png)
@@ -80,6 +81,47 @@ The active view is part of the page URL, so a view is linkable and survives a re
 Click the magnifier at the start of a row to open the whole attempt:
 
 ![A single event, including the redaction notice](images/diagnostics_detail.png)
+
+## Stuck imports
+
+A background import sets its test to `Processing` when the request is accepted, and only the worker that runs it records the result. If that worker stops before it can (it was restarted, it ran out of memory, or the queued job was lost), the test would read `Processing` forever, and a client that waits for a test to finish would hold back every later scan of it.
+
+DefectDojo Pro records when each import must have ended and marks the test `Failed` once that time has passed, without anyone acting. The test's error then says the import did not finish and the scan should be submitted again. The time allowed is:
+
+| While the import | Allowed | Setting |
+| --- | --- | --- |
+| waits in the queue for a worker | 24 hours from the request | `DD_IMPORT_PROCESSING_QUEUE_ALLOWANCE_HOURS` |
+| runs on a worker | the worker time limit plus 5 minutes (12 hours 5 minutes by default) | `DD_CELERY_TASK_TIME_LIMIT` |
+
+The check runs every 10 minutes. Setting either value to `0` turns off the automatic failure for that stage; stuck imports can then only be cleared by hand.
+
+### Clearing stuck imports by hand
+
+Open the **Stuck Imports** view to see every import you can view that has been in progress for longer than 1 hour, 6 hours, 24 hours or 3 days, oldest first, with when it started and when it is due to fail on its own. Choose **Mark Failed** from a test's menu, select tests and choose **Mark Selected Failed**, or choose **Mark All Failed** for every listed import you can edit. You need permission to edit a test to mark its import failed. Findings that were already imported are not changed.
+
+Self-hosted administrators can do the same from the command line. Without `--apply` the command only lists:
+
+```bash
+# List imports in progress for over 24 hours (the default)
+python3 manage.py fail_stuck_imports
+
+# A shorter window, or particular tests only
+python3 manage.py fail_stuck_imports --older-than-hours 6
+python3 manage.py fail_stuck_imports --test 12 --test 34
+
+# Mark the listed imports Failed
+python3 manage.py fail_stuck_imports --older-than-hours 6 --apply
+```
+
+Run it wherever you run other `manage.py` commands for the instance (the uwsgi or celery worker container).
+
+The same is available over the API. Listing needs permission to view the tests; marking an import failed needs permission to edit its test, and a request that names any test you cannot edit changes nothing:
+
+| Endpoint | Does |
+| --- | --- |
+| `GET /api/v2/stuck_imports/?older_than_hours=24` | Lists the imports in progress for longer than the given hours |
+| `POST /api/v2/stuck_imports/fail/` with `{"test_ids": [12, 34]}` | Marks those tests' imports `Failed` |
+| `POST /api/v2/stuck_imports/fail/` with `{"all_matching": true, "older_than_hours": 24}` | Marks every listed import you can edit `Failed` |
 
 ## Credentials are removed before the row is written
 
