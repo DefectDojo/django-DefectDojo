@@ -312,7 +312,7 @@ def bulk_add_tag_mapping(
     2. Bulk-create any missing tag objects (one INSERT + one re-fetch if needed).
     3. Fetch all pre-existing through-model rows for these (instance, tag) pairs in one query.
     4. Bulk-create all new relationships in one query (batched by ``batch_size``).
-    5. Update all tag counts in one ``UPDATE … CASE WHEN …`` query.
+    5. Update all tag counts in one ``UPDATE`` query, which locks the tag rows in id order.
 
     Args:
         tag_to_instances: mapping of tag_name -> list of instances that should receive
