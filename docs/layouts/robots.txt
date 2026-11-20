@@ -1,6 +1,0 @@
-User-agent: *
-Disallow:
-{{- /* The root sitemap lists English pages only; each translation has its own. */ -}}
-{{ range site.Languages }}
-Sitemap: {{ printf "%ssitemap.xml" (cond (eq .Lang "en") "/" (printf "/%s/" .Lang)) | absURL }}
-{{- end }}

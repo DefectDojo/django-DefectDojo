@@ -129,6 +129,9 @@ preview = true
 "dojo/filters.py" = [
     "A003",  # ruff upgrade to 0.13.3
 ]
+"scripts/docs_live_link_stubs.py" = [
+    "T201",  # print statements are fine for console output scripts
+]
 "scripts/check_migration_leaves.py" = [
     "T201",   # print statements are fine for console output scripts
     "EXE001", # git won't commit the executable flag I don't know why
