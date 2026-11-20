@@ -148,12 +148,16 @@ def _expire_now(risk_acceptance, user=None, reason=None, run=None):
         logger.info("Risk acceptance %i:%s was expired while this expiry waited, nothing to do", risk_acceptance.id, risk_acceptance)
         return None
     prefetch_related_objects([risk_acceptance], *EXPIRATION_PREFETCH)
-    logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+    logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, risk_acceptance.accepted_findings.count())
 
     reactivated_findings = []
     if risk_acceptance.reactivate_expired:
         for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active:  # not sure why this is important
+            if finding.duplicate and not finding.risk_accepted:
+                # A duplicate the acceptance never accepted (see not_held): it was not inactive because of the
+                # acceptance, so its expiry has nothing to give back.
+                logger.debug("%i:%s: duplicate never accepted, no changes made.", finding.id, finding)
+            elif not finding.active:  # not sure why this is important
                 logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
                 finding.active = True
                 finding.risk_accepted = False
@@ -215,14 +219,16 @@ def findings_accepted_elsewhere(risk_acceptance):
 
 def findings_closed_since_expiry(risk_acceptance):
     """
-    The members of an expired risk acceptance that have been closed since it expired.
+    The members of an expired risk acceptance that have been closed since it expired, or that it never accepted.
 
     An acceptance that reactivates its findings clears their ``risk_accepted`` flag on expiry but keeps them as
     members. Closing one of them afterwards (mitigated, false positive, out of scope, or marked as an inactive
     duplicate) leaves it listed, and reinstating does not accept it again because it is not active. Kept as a
     member, the next expiry would set it active again: its save would clear a mitigation, and a duplicate would
-    read active while still a duplicate. Without reactivation the expiry reopens nothing and the members keep
-    their flag, so none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
+    read active while still a duplicate. A duplicate the acceptance never accepted is counted the same way: the
+    expiry left it inactive (see not_held), so it reads exactly like a held member marked a duplicate since, and
+    reinstating leaves it out. Without reactivation the expiry reopens nothing and the members keep their flag, so
+    none counts: a member this acceptance never accepted (a duplicate it skipped) stays listed.
     """
     if not risk_acceptance.reactivate_expired:
         return risk_acceptance.accepted_findings.none()
@@ -256,16 +262,16 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
                 len(accepted_elsewhere),
             )
             risk_acceptance.accepted_findings.remove(*accepted_elsewhere)
-        # A member closed since the expiry stays closed and leaves too: the next expiry would otherwise reopen it.
+        # A member closed since the expiry, or a duplicate the acceptance never accepted, stays as it is and leaves too.
         if closed_since := list(findings_closed_since_expiry(risk_acceptance)):
             logger.info(
-                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired",
+                "Reinstating risk acceptance %i:%s leaves out %i findings closed since it expired or never accepted",
                 risk_acceptance.id,
                 risk_acceptance,
                 len(closed_since),
             )
             risk_acceptance.accepted_findings.remove(*closed_since)
-        logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+        logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, risk_acceptance.accepted_findings.count())
 
         # The "Reinstate" button has no date to offer and passes the expiration date
         # unchanged, so fall back to the configured default for it. The edit form and
@@ -311,16 +317,30 @@ def closed_for_another_reason(finding: Finding) -> bool:
     return bool(finding.is_mitigated or finding.mitigated or finding.false_p or finding.out_of_scope)
 
 
+def not_held(finding: Finding) -> bool:
+    """
+    Whether a member is inactive on its own account rather than because its acceptance holds it.
+
+    That is a member closed for another reason (see closed_for_another_reason), or a duplicate the acceptance never
+    accepted: add_findings_to_risk_acceptance leaves a duplicate that is not risk accepted as it is while it stays a
+    member. Neither comes back active when it leaves the acceptance or the acceptance expires. Read it before the
+    finding's risk accepted flag is cleared.
+    """
+    return closed_for_another_reason(finding) or (finding.duplicate and not finding.risk_accepted)
+
+
 def release_finding(finding: Finding) -> None:
     """
     Take a risk acceptance off a finding that leaves it, without saving.
 
-    A finding the acceptance held comes back active, and its endpoint statuses with it. A finding closed for another
-    reason (see closed_for_another_reason) stays closed with its close fields, and its endpoint statuses only lose
-    their risk accepted flag: setting it active would make its save clear the close.
+    A finding the acceptance held comes back active, and its endpoint statuses with it. A member it does not hold (see
+    not_held) keeps its active value: one closed for another reason stays closed with its close fields (setting it
+    active would make its save clear the close), and a duplicate the acceptance never accepted stays inactive. Its
+    endpoint statuses only lose their risk accepted flag.
     """
+    held = not not_held(finding)
     finding.risk_accepted = False
-    if not closed_for_another_reason(finding):
+    if held:
         finding.active = True
         update_endpoint_statuses(finding, accept_risk=False)
         return
@@ -449,11 +469,11 @@ def expiration_handler(*args, **kwargs):
             try:
                 for risk_acceptance in risk_acceptances:
                     with warned.handling(risk_acceptance):
-                        logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+                        logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, risk_acceptance.accepted_findings.count())
 
                         engagement = engagement_to_notify_about(risk_acceptance)
                         if engagement is not None:
-                            notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
+                            notification_title = "Risk acceptance with " + str(risk_acceptance.accepted_findings.count()) + " accepted findings will expire on " + \
                                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                                 str(engagement.product) + ": " + str(engagement.name)
 
@@ -493,21 +513,21 @@ def expiration_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has expired".format(
         jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()))
+        risk_acceptance.accepted_findings.count())
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
         jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()), heads_up_days)
+        risk_acceptance.accepted_findings.count(), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
         jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+        risk_acceptance.accepted_findings.count(), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
 
 def accepted_message_creator(risk_acceptance, heads_up_days=0):
@@ -515,7 +535,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
         return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
             jira_services.escape_text(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-            len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+            risk_acceptance.accepted_findings.count(), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     return "Finding has been risk accepted"
 
 

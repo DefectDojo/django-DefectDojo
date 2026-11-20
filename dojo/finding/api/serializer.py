@@ -2,6 +2,7 @@ import base64
 import collections
 import json
 import logging
+from functools import cached_property
 
 import six
 from django.conf import settings
@@ -23,6 +24,7 @@ from dojo.finding.helper import (
     save_endpoints_template,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
+    set_found_by_locking_finding_first,
 )
 from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
@@ -285,18 +287,26 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
     test = serializers.SerializerMethodField()
     jira = serializers.SerializerMethodField()
 
+    # One nested serializer per instance, reused for every row: building one builds its whole field tree
+    # (three levels under the test), and nothing in that tree depends on the row being serialized.
+    @cached_property
+    def _test_serializer(self):
+        return FindingTestSerializer(read_only=True)
+
+    @cached_property
+    def _jira_serializer(self):
+        return JIRAIssueSerializer(read_only=True)
+
     @extend_schema_field(FindingTestSerializer)
     def get_test(self, obj):
-        return FindingTestSerializer(read_only=True).to_representation(
-            obj.test,
-        )
+        return self._test_serializer.to_representation(obj.test)
 
     @extend_schema_field(JIRAIssueSerializer)
     def get_jira(self, obj):
         issue = jira_services.get_issue(obj)
         if issue is None:
             return None
-        return JIRAIssueSerializer(read_only=True).to_representation(issue)
+        return self._jira_serializer.to_representation(issue)
 
 
 class VulnerabilityIdSerializer(serializers.ModelSerializer):
@@ -574,10 +584,14 @@ class FindingSerializer(serializers.ModelSerializer):
 
         query_params = request.query_params
         if query_params.get("related_fields", "false") == "true":
-            return FindingRelatedFieldsSerializer(
-                required=False,
-            ).to_representation(obj)
+            return self._related_fields_serializer.to_representation(obj)
         return None
+
+    @cached_property
+    def _related_fields_serializer(self):
+        # Built on the first row that asks for it and reused for the rest: a list page serializes every row
+        # with one FindingSerializer, so the page builds this (and its nested serializers) once, not per row.
+        return FindingRelatedFieldsSerializer(required=False)
 
     def get_display_status(self, obj) -> str:
         return obj.status()
@@ -633,7 +647,7 @@ class FindingSerializer(serializers.ModelSerializer):
         found_by = validated_data.pop("found_by", None)
         # Handle updates to found_by data
         if found_by:
-            instance.found_by.set(found_by)
+            set_found_by_locking_finding_first(instance, found_by)
         # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
         # Findings still maintain original found_by value associated with their test
         # In the event the user does not supply the found_by field at all, we do not modify it
@@ -834,7 +848,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if notes:
             new_finding.notes.set(notes)
         if found_by:
-            new_finding.found_by.set(found_by)
+            set_found_by_locking_finding_first(new_finding, found_by)
         if reviewers:
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:

@@ -35,25 +35,26 @@ This card loads when you open the page. Use the **Refresh** button in the card h
 | Field | What it shows |
 | --- | --- |
 | **Redis Broker** | **Reachable** (green) if DefectDojo could read the queue on the broker. **Unreachable** (red) if it could not. |
-| **Celery Worker** | **Running** (green) if at least one Celery worker answered a ping within 3 seconds. **Not Running** (red) if none did. The ping uses Celery's control channel instead of the task queue, so it still answers when the queue is backed up. |
-| **Queue** | The number of tasks waiting to be processed, for example "42 tasks waiting to be processed." If the broker cannot be read, it says "It is not possible to identify the number of waiting tasks." |
+| **Celery Worker** | **Running** (green) if at least one Celery worker answered within 3 seconds. **Not Running** (red) if none did. The question goes over Celery's control channel instead of the task queue, so it still answers when the queue is backed up. A worker answering does not mean every queue has one: see **Queues**. |
+| **Queues** | One line per queue: the default `celery` queue first, then each queue tasks are routed to, such as `imports`. Each line shows the queue name, whether a live worker consumes it, and how many tasks are waiting, for example "42 tasks waiting to be processed." **Consumed** (green) is followed by the number of workers on that queue. **No Worker** (red) means no worker that answered consumes the queue, so its tasks wait and never run. **Unknown** (gray) means the workers could not be asked. If the broker cannot be read, the line says "It is not possible to identify the number of waiting tasks." |
 | **Queue Actions** | The **Purge Queue** and **View Details** buttons. Both are disabled, with the hint "Broker unreachable", when the queue length cannot be read. |
 
-A waiting count that stays high or keeps growing while **Celery Worker** shows **Running** means the workers cannot keep up, or one kind of task is flooding the queue. A count that grows while the worker shows **Not Running** means nothing is processing the queue at all. Check that your worker containers or pods are up.
+A waiting count that stays high or keeps growing on a queue marked **Consumed** means its workers cannot keep up, or one kind of task is flooding the queue. A count that grows on a queue marked **No Worker** means nothing is processing that queue at all. Background imports and chunked connector reimports go to the `imports` queue, which a deployment often runs as its own worker pool: if that pool is scaled to zero or down, `imports` shows **No Worker** even while **Celery Worker** shows **Running**. Check that the worker containers or pods for that queue are up.
 
 ## Queue Details
 
 The per-task breakdown is not loaded automatically, because building it reads every message in the queue and can be slow on a large queue. Click **View Details** under **Queue Actions** to load it, and **Hide Details** to close it. While the details are open, the refresh button in the **Queue Details** header (**Refresh queue details**) reloads them.
 
-Each row is one task name, in queue order by its oldest message. If the queue has nothing in it, the table shows "Queue is empty."
+The breakdown covers every queue listed under **Queues**. Each row is one task name in one queue, grouped by queue and in queue order by its oldest message. If no queue has anything in it, the table shows "Queue is empty."
 
 | Column | What it means |
 | --- | --- |
-| Gear menu | Holds the **Purge** action for that task name (see [Purging tasks](#purging-tasks)). |
+| Gear menu | Holds the **Purge** action for that task name (see [Purging tasks](#purging-tasks)). Rows from a routed queue such as `imports` have no **Purge**. |
 | **#** | The row number. |
+| **Queue** | The queue the messages are waiting in, for example `celery` or `imports`. |
 | **Task Name** | The Celery task name, for example `dojo.tasks.example_task`. |
 | **Count** | How many messages with this task name are waiting. |
-| **Oldest (Queue Pos.)** | The queue position of the oldest waiting message for this task. Position 1 is the oldest message in the whole queue. If the message has a scheduled run time (ETA), it is shown in parentheses. |
+| **Oldest (Queue Pos.)** | The queue position of the oldest waiting message for this task. Positions count within each queue. If the message has a scheduled run time (ETA), it is shown in parentheses. |
 | **Newest (Queue Pos.)** | The queue position of the newest waiting message for this task, with its ETA in parentheses when set. |
 | **Expires** | When the waiting messages for this task expire. **Oldest:** is the earliest expiry and **Newest:** is the latest. Each shows the time left (for example "2h 15m Left"), or a red **Expired** tag if that time has passed. |
 
@@ -75,11 +76,11 @@ Each value is shown as a duration with the raw number of seconds in parentheses,
 
 Purging deletes waiting tasks from the queue. **The work those tasks would have done is discarded and is not retried.** A purged import never finishes processing, a purged deduplication task never runs, and a purged notification is never sent. A purge cannot be undone. Tasks that a worker is already running are not affected.
 
-Only superusers see the purge actions, and each one asks you to confirm first.
+Only superusers see the purge actions, and each one asks you to confirm first. Both purge actions act on the default `celery` queue only. Tasks waiting in a routed queue such as `imports` are not purged from this page.
 
 ### Purge Queue
 
-**Purge Queue** under **Queue Actions** removes every waiting task from the queue, whatever its name. The confirmation reads "Purge all pending tasks from the queue? This cannot be undone." On success, a message reports how many tasks were purged, and the page reloads the status and, if open, the queue details.
+**Purge Queue** under **Queue Actions** removes every waiting task from the default `celery` queue, whatever its name. Tasks waiting in other queues, such as `imports`, stay. The confirmation reads "Purge all pending tasks from the celery queue? Tasks waiting in other queues are not purged. This cannot be undone." On success, a message reports how many tasks were purged, and the page reloads the status and, if open, the queue details.
 
 ### Purge one task name
 
@@ -99,9 +100,16 @@ On DefectDojo Cloud, contact [DefectDojo Support](mailto:support@defectdojo.com)
 
 Purged imports also need to be run again. Re-upload the scan file, or wait for the next scheduled import or connector sync.
 
+## From the API
+
+The same readings are available to a superuser's API token while the **Celery Status** flag is on:
+
+* `GET /api/v2/celery/status/` returns `worker_status`, `broker_status` and `queue_length` (any worker answering, and the default queue), the task limits, and `queues`: one entry per queue with its `name`, whether it is the `default` queue, its `length`, `consumed` (whether at least one live worker consumes it), and the `workers` consuming it. `length` is `null` when the broker cannot be read, and `consumed` and `workers` are `null` when the workers could not be asked. Read `queues` to judge a routed queue such as `imports`: the top-level fields do not describe it.
+* `GET /api/v2/celery/queue/details/` returns the per-task breakdown, with the `queue` of each row.
+
 ## When to use it
 
-* **Imports stay in progress.** Check whether **Celery Worker** shows **Running** and whether the queue is growing. If the workers are down, restart them. Do not purge.
+* **Imports stay in progress.** Check the `imports` line under **Queues**: whether it shows **Consumed** and whether its waiting count is growing. If it shows **No Worker**, start or scale up the workers that consume `imports`. Do not purge.
 * **Duplicates are not being marked.** Open **Queue Details** and look for a large count of deduplication tasks, or an **Expired** tag on them.
 * **Notifications are late or missing.** Look for a backlog of notification tasks behind other work.
 * **One task type is flooding the queue.** Purge that task name only, then start the discarded work again. Use **Purge Queue** only when you accept losing everything that is waiting.

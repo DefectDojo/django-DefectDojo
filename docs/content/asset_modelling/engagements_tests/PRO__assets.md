@@ -471,6 +471,8 @@ one when no version has a release date. It shows its name, its release date, and
 many BOM snapshots it has, and how many Findings are recorded as **Found In** it or **Fixed In** it.
 The rest list under **Earlier Versions**, below it or beside it on a wide widget, one line each with
 their release date and their Found In and Fixed In counts. A long list scrolls inside the widget.
+A long release history loads its newest 200 versions first, and **Show More**, after the last line,
+loads the rest; the header and Earlier Versions counts always cover every version on the Asset.
 Versions are ordered by release date, newest first, and versions without a release date follow the
 dated ones, the most recently declared first, so an SBOM import newer than every dated release is
 listed after them. On a small widget only the leading version shows, with the number of the rest.
@@ -532,7 +534,8 @@ Layout → Add Widget → Data Table**, record set `Affected Versions`.
 
 Each row names the version, whether the claim is Found In or Fixed In, and where it came from —
 an import or a person — so it is clear whether a scanner said it or someone recorded it. Use
-**Record Claim** to add one, and the row action to withdraw one. Claims are added and withdrawn
+**Record Claim** to add one, and the row action to withdraw one. Its **Version** list searches
+the Asset's versions as you type and loads more as you scroll, so every version can be claimed. Claims are added and withdrawn
 rather than edited, and nothing is inferred between them: a Finding found in 5.0.0 and fixed in
 5.2.0 says nothing on its own about 5.1.3.
 

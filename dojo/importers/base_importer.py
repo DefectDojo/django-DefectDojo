@@ -30,7 +30,7 @@ from django.utils.timezone import make_aware
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict, is_vanished_row_error
 from dojo.finding.cwe import finding_cwe_labels
 from dojo.importers.import_lock import (
     lock_tests_under_import,
@@ -913,14 +913,9 @@ class BaseImporter(ImporterOptions):
         """
         Return True when `exception` is Django reporting that a forced UPDATE matched no rows.
 
-        Model.save_base raises a bare DatabaseError for this; every genuine database
-        failure arrives as a subclass (IntegrityError, OperationalError, DataError, ...),
-        so the exact class is the discriminator and the message only a second opinion.
-        Classifying on the exception rather than with a follow-up query matters: a real
-        failure can leave the connection in an aborted transaction, where the query would
-        raise in turn and bury the error that actually needs reporting.
+        Kept as a method for subclasses and callers; the predicate is dojo.db_utils.is_vanished_row_error.
         """
-        return type(exception) is DatabaseError and "did not affect any rows" in str(exception)
+        return is_vanished_row_error(exception)
 
     @contextmanager
     def import_lock_scope(self):
@@ -1216,18 +1211,32 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         group_names_to_findings_dict: dict,
+        *,
+        unsaved: bool = False,
+        legacy_group_names: dict | None = None,
     ) -> bool:
         """
         Determines how to handle an incoming finding with respect to grouping
         if finding groups are enabled, use the supplied grouping mechanism to
         store a reference of how the finding should be grouped.
 
+        unsaved: the finding has not been saved yet, so its group is named from the
+        values save() will store (see get_group_by_group_name).
+
+        legacy_group_names: when given, records per group name the name the group got from the
+        finding's unsaved values before groups were named from the stored ones, where the two
+        differ (see add_findings_to_auto_groups).
+
         Returns True if the finding was added to a group, False otherwise.
         """
         if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
-            name = finding_helper.get_group_by_group_name(finding, self.group_by)
+            name = finding_helper.get_group_by_group_name(finding, self.group_by, unsaved=unsaved)
             if name is not None:
+                if legacy_group_names is not None:
+                    legacy = finding_helper.get_group_by_group_name(finding, self.group_by)
+                    if legacy is not None and legacy != name:
+                        legacy_group_names.setdefault(name, {})[legacy] = None
                 if name in group_names_to_findings_dict:
                     group_names_to_findings_dict[name].append(finding)
                 else:

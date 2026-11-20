@@ -57,6 +57,16 @@ Automation can read the same evidence from `GET /api/v2/cmmc_assessments/{id}/po
 110 minus the deduction for every requirement that is not met or merely planned. Weights are 1, 3,
 or 5 points, so scores range from 110 down to -203.
 
+A requirement with no result yet counts as not met: it is deducted at its full weight, and the
+assessment cannot be final until every requirement in the catalog has a result. A requirement the
+catalog no longer includes is not required, and is scored only if it already has a result.
+
+The scorecard says how many requirements have no result. **Populate Requirements** (next to
+**Recompute**, for users who can edit the Asset) adds each of them to the requirements table as
+**Not met**, ready to assess, and recomputes the score. Through the API,
+`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` does the same, and the assessment's `summary`
+reports the count as `missing_requirements`.
+
 Requirement 3.12.4 (the System Security Plan requirement) scores as not applicable, per the
 methodology.
 
@@ -64,7 +74,8 @@ An assessment with no requirement results (created through the API without popul
 requirements, or one whose requirements could not be populated) has no score: the scorecard and the
 Asset's Compliance summary say **Not scored**, the assessment is not eligible for conditional
 status, and it stays in progress. The API reports its `sprs_score` as `null`.
-`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` populates the requirements from the catalog.
+`POST /api/v2/cmmc_assessments/{id}/seed_requirements/` populates the requirements from the catalog,
+on an assessment with no results or with only some of them.
 
 ### Whether a conditional status is possible
 
@@ -81,7 +92,8 @@ expired if the clock lapses.
 
 ## Statuses
 
-Statuses move from **in progress** to **conditional** or **final**. Conditional assessments show
-the days remaining on their closeout clock.
+Statuses move from **in progress** to **conditional** or **final**. An assessment is final when
+every requirement has a result and none is not met or planned. Conditional assessments show the days
+remaining on their closeout clock.
 
 Assessments are under audit history: every change records who, what, and when.

@@ -1,0 +1,36 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "cpe-locations",
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://example.com/spdx/cpe-locations-1.0",
+  "creationInfo": {
+    "creators": ["Tool: example-tool-1.0"],
+    "created": "2026-07-29T00:00:00Z"
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-with-cpes",
+      "name": "example-lib",
+      "versionInfo": "1.2.3",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {"referenceCategory": "SECURITY", "referenceType": "cpe22Type", "referenceLocator": "cpe:/a:example_vendor:example_lib:1.2.3"},
+        {"referenceCategory": "SECURITY", "referenceType": "cpe23Type", "referenceLocator": "cpe:2.3:a:example_vendor:example-lib:1.2.3:*:*:*:*:*:*:*"},
+        {"referenceCategory": "SECURITY", "referenceType": "cpe22Type", "referenceLocator": "cpe:/a:example_vendor:example_lib:1.2.3"},
+        {"referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/example-lib@1.2.3"},
+        {"referenceCategory": "SECURITY", "referenceType": "advisory", "referenceLocator": "https://example.com/advisories/CVE-2099-2001"}
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-without-cpe",
+      "name": "other-lib",
+      "versionInfo": "0.1",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {"referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/other-lib@0.1"},
+        {"referenceCategory": "SECURITY", "referenceType": "advisory", "referenceLocator": "https://example.com/advisories/CVE-2099-2002"}
+      ]
+    }
+  ]
+}

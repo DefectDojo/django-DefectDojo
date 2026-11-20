@@ -77,8 +77,8 @@ With the **Group API Tokens** feature flag on, a Group's automation identity can
 The **Automation Identity** card on the Group's **Overview** tab shows the token's first characters, who issued it and when, and when it expires. A superuser, or a member whose Role in the Group carries **Service User Edit**, manages it there:
 
 * **Issue Token** creates the token, with an expiry of 30, 60, 90 or 180 days or none. The token is shown once; DefectDojo keeps only a hash of it. Issuing creates the automation identity if the Group has none yet.
-* **Replace Token** issues a new token; the old one stops working at once. OAuth access tokens already exchanged from it keep working until they expire, within the hour.
-* **Revoke Token** ends the token at once (OAuth access tokens already exchanged from it expire within the hour). Revoking works even while the feature flag is off.
+* **Replace Token** issues a new token; the old one, and every OAuth access token already exchanged from it, stops working at once.
+* **Revoke Token** ends the token, and every OAuth access token already exchanged from it, at once. Revoking works even while the feature flag is off.
 
 When the Group holds a Global Role, its token reaches everything that Role grants, so only a superuser may issue it; the card still offers its other managers **Revoke Token**. The token is used like any [service user](../pro__service_users/#use-the-token) token, in the `Authorization` header with the `Token` keyword. Group API Tokens needs Service Users on: a group token is a service user token. Turning the **Group API Tokens** flag (or **Service Users**) off refuses every group token, and every OAuth access token exchanged from one, until it is turned on again.
 

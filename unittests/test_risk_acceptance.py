@@ -86,7 +86,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data["accepted_findings"] = [2, 3]
+        # Two findings the acceptance holds. Finding 3 would be a member it never accepts (a duplicate), which an
+        # expiry leaves inactive: see the unaccepted duplicate tests below.
+        ra_data["accepted_findings"] = [2, 7]
         response = self.add_risk_acceptance(1, ra_data)
         self.assertEqual("/engagement/1", response.url)
         ra = Risk_Acceptance.objects.last()
@@ -154,7 +156,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         response = self.client.post(reverse("edit_risk_acceptance", args=(1, ra.id)), data)
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(id=2))
-        self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=3))
+        self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=7))
 
     def test_remove_risk_acceptance_findings_active(self):
         self.test_add_risk_acceptance_multiple_findings_accepted()
@@ -570,6 +572,104 @@ class RiskAcceptanceTestUI(DojoTestCase):
         status.refresh_from_db()
         self.assertFalse(status.mitigated)
         self.assertFalse(status.risk_accepted)
+
+    # Regression: removing a duplicate the acceptance never accepted, deleting its acceptance, or expiring an
+    # acceptance that reactivates its findings set the duplicate active.
+    def _with_an_unaccepted_duplicate(self):
+        """An acceptance holding two findings, plus a member that is a duplicate it never accepted."""
+        risk_acceptance = self._accepted(name="Accept: unaccepted duplicate")
+        held = list(risk_acceptance.accepted_findings.order_by("id"))
+        original = held[0]
+        # As deduplication leaves it: inactive, pointing at the original.
+        duplicate = Finding.objects.create(
+            title="Unaccepted duplicate", test=original.test, severity="High", reporter=self.get_test_admin(),
+            active=False, duplicate=True, duplicate_finding=original,
+        )
+        # The form and the serializer write the membership before the helper runs, and the helper leaves a duplicate
+        # that is not risk accepted as it is.
+        risk_acceptance.accepted_findings.add(duplicate)
+        ra_helper.add_findings_to_risk_acceptance(self.get_test_admin(), risk_acceptance, [duplicate])
+        duplicate.refresh_from_db()
+        self.assertEqual((False, False, True), (duplicate.active, duplicate.risk_accepted, duplicate.duplicate))
+        status = self._endpoint_status(duplicate, "unaccepted-duplicate.example.com", mitigated=True)
+        return risk_acceptance, held, duplicate, status
+
+    def _assert_duplicate_untouched(self, duplicate, status):
+        duplicate.refresh_from_db()
+        self.assertFalse(duplicate.active, msg=f"the unaccepted duplicate was reactivated, active={duplicate.active}")
+        self.assertTrue(duplicate.duplicate, msg=f"duplicate={duplicate.duplicate}")
+        self.assertFalse(duplicate.risk_accepted, msg=f"risk_accepted={duplicate.risk_accepted}")
+        if status is None:
+            return
+        status.refresh_from_db()
+        self.assertTrue(status.mitigated, msg=f"its endpoint status was unmitigated, mitigated={status.mitigated}")
+        self.assertFalse(status.risk_accepted, msg=f"endpoint status risk_accepted={status.risk_accepted}")
+
+    def _assert_reopened(self, findings):
+        for finding in Finding.objects.filter(id__in=[f.id for f in findings]):
+            self.assertTrue(finding.active, msg=f"held member {finding.id} active={finding.active}")
+            self.assertFalse(finding.risk_accepted, msg=f"held member {finding.id} risk_accepted={finding.risk_accepted}")
+
+    def test_remove_keeps_an_unaccepted_duplicate_inactive(self):
+        risk_acceptance, held, duplicate, status = self._with_an_unaccepted_duplicate()
+
+        ra_helper.remove_finding_from_risk_acceptance(self.get_test_admin(), risk_acceptance, duplicate)
+
+        self.assertFalse(risk_acceptance.accepted_findings.filter(id=duplicate.id).exists())
+        self._assert_duplicate_untouched(duplicate, status)
+        self.assertTrue(duplicate.notes.filter(entry__contains="removed this finding from the risk acceptance").exists())
+        self.assertEqual({f.id for f in held}, set(risk_acceptance.accepted_findings.values_list("id", flat=True)))
+
+    def test_delete_keeps_an_unaccepted_duplicate_inactive(self):
+        risk_acceptance, held, duplicate, status = self._with_an_unaccepted_duplicate()
+
+        ra_helper.delete(risk_acceptance.engagement, risk_acceptance)
+
+        self.assertFalse(Risk_Acceptance.objects.filter(id=risk_acceptance.id).exists())
+        self._assert_duplicate_untouched(duplicate, status)
+        self._assert_reopened(held)
+
+    @patch("dojo.risk_acceptance.helper.create_notification")
+    def test_expire_keeps_an_unaccepted_duplicate_inactive(self, notify):
+        risk_acceptance, held, duplicate, status = self._with_an_unaccepted_duplicate()
+
+        ra_helper.expire_now(risk_acceptance)
+
+        self._assert_duplicate_untouched(duplicate, status)
+        self._assert_reopened(held)
+        self.assertTrue(risk_acceptance.accepted_findings.filter(id=duplicate.id).exists(), "it stays a member")
+        reactivated = notify.call_args.kwargs["reactivated_findings"]
+        self.assertEqual({f.id for f in held}, {f.id for f in reactivated})
+
+    def test_reinstate_leaves_out_an_unaccepted_duplicate_the_expiry_left_inactive(self):
+        """
+        Reinstating leaves out a duplicate the acceptance never accepted, as it leaves out a member closed since.
+
+        The expiry left the duplicate inactive, so it is not accepted again: it leaves the acceptance and keeps its
+        status, while the held members are accepted again.
+        """
+        risk_acceptance, held, duplicate, status = self._with_an_unaccepted_duplicate()
+        ra_helper.expire_now(risk_acceptance)
+
+        ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
+
+        members = set(risk_acceptance.accepted_findings.values_list("id", flat=True))
+        self.assertEqual({f.id for f in held}, members, f"only the held members are reinstated, members={members}")
+        self._assert_duplicate_untouched(duplicate, status)
+        for finding in Finding.objects.filter(id__in=members):
+            self.assertFalse(finding.active, msg=f"held member {finding.id} active={finding.active}")
+            self.assertTrue(finding.risk_accepted, msg=f"held member {finding.id} risk_accepted={finding.risk_accepted}")
+
+    def test_remove_reopens_a_duplicate_the_acceptance_accepted(self):
+        """The control: a finding accepted and then marked a duplicate is held by the acceptance, so it comes back."""
+        risk_acceptance = self._accepted(name="Accept: accepted duplicate")
+        member, original = risk_acceptance.accepted_findings.order_by("-id")[:2]
+        Finding.objects.filter(id=member.id).update(duplicate=True, duplicate_finding=original)
+        member.refresh_from_db()
+
+        ra_helper.remove_finding_from_risk_acceptance(self.get_test_admin(), risk_acceptance, member)
+
+        self._assert_reopened([member])
 
     def test_reinstate_locks_the_members_before_deciding_which_to_leave_out(self):
         """

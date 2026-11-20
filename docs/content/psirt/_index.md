@@ -56,7 +56,21 @@ first; it is environment-sourced, so it needs a restart to take effect.
 
 If the entries are visible but locked, that is the other gate: the licence.
 PSIRT needs the **PSIRT Advisory Engine** entitlement, and a locked entry
-explains what to ask for.
+explains what to ask for. Settings → Feature Flags shows "Not included in the
+current license." on the PSIRT row while the license lacks it. The flag can
+still be turned on ahead of the license.
+
+### After a license update
+
+A license that adds PSIRT unlocks it without a restart:
+
+- **Uploaded on the License page:** at once, on the next page load.
+- **Helm:** the chart mounts the license Secret as a file and also passes it
+  as `DD_LICENSE`. After the Secret changes, Kubernetes refreshes the file in
+  the running pods (usually within a minute or two), but not the environment
+  variable. DefectDojo takes the file when it was issued after the
+  `DD_LICENSE` value, at its next license check: within five minutes, or
+  straight away when an administrator opens the License page.
 
 ## Who can use PSIRT
 

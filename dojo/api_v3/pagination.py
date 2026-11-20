@@ -37,6 +37,7 @@ from django.core import signing
 from django.db.models import Q
 
 from dojo.api_v3.errors import pagination_problem
+from dojo.site_url import request_absolute_url
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -119,7 +120,7 @@ def compute_count(count_qs: QuerySet, cap: int | None = None) -> tuple[int, bool
 
 
 def _page_url(request: HttpRequest, limit: int, offset: int) -> str:
-    parsed = urlparse(request.build_absolute_uri())
+    parsed = urlparse(request_absolute_url(request))
     params = {}
     # Preserve every existing query param (filters, expand, include, o, ...) except limit/offset.
     for key in request.GET:
@@ -239,7 +240,7 @@ def _keyset_filter(payload: dict, token: str, spec: FilterSpec) -> Q:
 
 
 def _cursor_url(request: HttpRequest, cursor: str) -> str:
-    parsed = urlparse(request.build_absolute_uri())
+    parsed = urlparse(request_absolute_url(request))
     params = {}
     # Preserve filters/expand/include/fields/o/limit/pagination; drop offset + any stale cursor.
     for key in request.GET:

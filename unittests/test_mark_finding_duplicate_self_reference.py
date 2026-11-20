@@ -6,14 +6,20 @@ cluster root. Without guards, a POST could mark a finding as a duplicate of itse
 root as a duplicate of one of its own members (the root then points at itself and the cluster has
 no active original), mark a finding under an orphaned duplicate (it was saved as a duplicate of
 nothing), or mark a cluster's root under another original while its members kept pointing at it
-(a two-level chain). Each test posts to the real route and reloads the rows.
+(a two-level chain). The marked finding's own duplicates move onto the root with it, so the engagement
+deduplication rule applies to each of them too, and a root or a member outside the marked finding's product is
+refused. The refusal names resetting the member's duplicate status as the remedy, so its similar-finding row offers it.
+Each test posts to the real route and reloads the rows.
 """
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.test import override_settings
 from django.utils import timezone
 
-from dojo.finding.ui.views import ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE
+from dojo.finding.ui.views import (
+    ENGAGEMENT_DEDUPLICATION_MISMATCH_MESSAGE,
+    calculate_possible_related_actions_for_similar_finding,
+)
 from dojo.models import Engagement, Finding, Test, Test_Type
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
@@ -159,3 +165,188 @@ class MarkFindingDuplicateSelfReferenceTest(DojoTestCase):
         Finding.objects.filter(pk=MEMBERS[0]).update(test=other_test)
         self._mark(OTHER, MEMBERS[0])
         self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})
+
+    # A member of the marked finding moves onto the root with it, so the engagement rule applies to each
+    # member as it does to the marked finding.
+    def _move_member_of_other_to_another_engagement(self, *, member_dedupe, root_dedupe):
+        # Finding 4 becomes a duplicate of finding 7 and moves to engagement 4 (test 4), in the same product
+        # as engagement 1, which holds the root (finding 2) and finding 7.
+        Engagement.objects.filter(pk=1).update(deduplication_on_engagement=root_dedupe)
+        Engagement.objects.filter(pk=4).update(deduplication_on_engagement=member_dedupe)
+        Finding.objects.filter(pk=MEMBERS[1]).update(duplicate_finding=OTHER, test=Test.objects.get(pk=4))
+
+    def test_refuses_moving_a_member_into_another_engagement_with_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=True, root_dedupe=True)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+
+    def test_refuses_moving_a_member_whose_engagement_alone_has_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=True, root_dedupe=False)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+
+    def test_refuses_moving_a_member_when_the_root_engagement_alone_has_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=False, root_dedupe=True)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+
+    def test_moves_a_member_in_another_engagement_without_engagement_deduplication(self):
+        self._move_member_of_other_to_another_engagement(member_dedupe=False, root_dedupe=False)
+        self._mark(OTHER, MEMBERS[0])
+        self.assertEqual(
+            self._state(OTHER, MEMBERS[1]), {MEMBERS[1]: (True, ROOT, False), OTHER: (True, ROOT, False)},
+        )
+
+    def test_refuses_a_mark_under_a_root_in_another_product(self):
+        # Only reachable with inconsistent data: the root (finding 2) sits in test 13, engagement 2, product 1,
+        # while its member 3 and finding 7 stay in product 2. Engagement deduplication is off everywhere.
+        Engagement.objects.all().update(deduplication_on_engagement=False)
+        Finding.objects.filter(pk=ROOT).update(test=Test.objects.get(pk=13))
+        ids = (ROOT, *MEMBERS, OTHER)
+        before = self._state(*ids)
+        response = self.client.post(f"/finding/{OTHER}/duplicate/{MEMBERS[0]}")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(self._state(*ids), before)
+
+    def _move_member_of_other_to_another_product(self, *, dedupe_on_engagement):
+        # Finding 4 becomes a duplicate of finding 7 and moves to test 13 (engagement 2, product 1), while finding 7,
+        # its root 2 and finding 3 stay in product 2. Only reachable with inconsistent data.
+        Engagement.objects.all().update(deduplication_on_engagement=dedupe_on_engagement)
+        Finding.objects.filter(pk=MEMBERS[1]).update(duplicate_finding=OTHER, test=Test.objects.get(pk=13))
+
+    def test_refuses_moving_a_member_in_another_product(self):
+        self._move_member_of_other_to_another_product(dedupe_on_engagement=False)
+        ids = (ROOT, *MEMBERS, OTHER)
+        before = self._state(*ids)
+        response = self.client.post(f"/finding/{OTHER}/duplicate/{MEMBERS[0]}")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(self._state(*ids), before)
+
+    def test_refuses_moving_a_member_in_another_product_with_engagement_deduplication(self):
+        # The product refusal comes first, so engagement deduplication does not turn it into the engagement message.
+        self._move_member_of_other_to_another_product(dedupe_on_engagement=True)
+        ids = (ROOT, *MEMBERS, OTHER)
+        before = self._state(*ids)
+        response = self.client.post(f"/finding/{OTHER}/duplicate/{MEMBERS[0]}")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(self._state(*ids), before)
+
+    def _actions(self, page_id, row_id):
+        page, row = Finding.objects.get(pk=page_id), Finding.objects.get(pk=row_id)
+        return [entry["action"] for entry in calculate_possible_related_actions_for_similar_finding(None, page, row)]
+
+    def test_a_duplicate_row_in_another_engagement_offers_the_reset_the_refusal_names(self):
+        # The refused mark names finding 4: on the root's page its row is in another engagement, so the linking
+        # actions are refused, but resetting its duplicate status stays available.
+        self._move_member_of_other_to_another_engagement(member_dedupe=True, root_dedupe=True)
+        self._assert_refused(OTHER, MEMBERS[0], f"Finding {MEMBERS[1]}, a duplicate of finding {OTHER}")
+        self.assertEqual(self._actions(ROOT, MEMBERS[1]), ["reset_finding_duplicate_status"])
+        # The row template shows None alone when the first action is None, so the reset must come first to render.
+        response = self.client.get(f"/finding/{ROOT}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(f"/finding/{MEMBERS[1]}/duplicate/reset", response.content.decode())
+
+    def test_a_row_in_another_engagement_that_is_not_a_duplicate_offers_nothing(self):
+        Engagement.objects.filter(pk__in=(1, 4)).update(deduplication_on_engagement=True)
+        Finding.objects.filter(pk=OTHER).update(test=Test.objects.get(pk=4))
+        self.assertEqual(self._actions(ROOT, OTHER), ["None"])
+
+    # Regression: the similar-findings menu offered Mark as Duplicate when the page finding's cluster root is itself a
+    # duplicate (a chain, or an orphan whose original is gone), and the route refused it. The menu offers what the
+    # route accepts: Mark as Duplicate goes, Set as Original and Reset Duplicate Status stay.
+    def _chain_root(self):
+        # Finding 2, the root of finding 3's cluster, is itself a duplicate of finding 124.
+        Finding.objects.filter(pk=ROOT).update(duplicate=True, duplicate_finding=124, active=False)
+        return ROOT
+
+    def _orphan_page(self):
+        # Finding 3 is a duplicate of nothing, so it heads its own cluster.
+        Finding.objects.filter(pk=MEMBERS[0]).update(duplicate_finding=None)
+        return MEMBERS[0]
+
+    def _assert_menu_matches_route(self, root, expected_actions):
+        page = MEMBERS[0]
+        self.assertEqual(self._actions(page, OTHER), expected_actions)
+        self._assert_refused(OTHER, page, f"Finding {root} is itself a duplicate")
+
+    def test_a_row_under_a_root_that_is_a_duplicate_offers_no_mark(self):
+        root = self._chain_root()
+        self._assert_menu_matches_route(root, ["set_finding_as_original"])
+
+    def test_a_row_under_an_orphaned_page_finding_offers_no_mark(self):
+        root = self._orphan_page()
+        self._assert_menu_matches_route(root, ["set_finding_as_original"])
+
+    def test_a_duplicate_row_under_a_root_that_is_a_duplicate_offers_only_the_reset(self):
+        root = self._chain_root()
+        Finding.objects.filter(pk=OTHER).update(duplicate=True, duplicate_finding=124)
+        self._assert_menu_matches_route(root, ["reset_finding_duplicate_status"])
+
+    def test_a_duplicate_row_under_an_orphaned_page_finding_offers_only_the_reset(self):
+        root = self._orphan_page()
+        Finding.objects.filter(pk=OTHER).update(duplicate=True, duplicate_finding=124)
+        self._assert_menu_matches_route(root, ["reset_finding_duplicate_status"])
+
+    def test_set_as_original_stays_offered_because_the_route_accepts_it_under_a_duplicate_root(self):
+        self._chain_root()
+        page = MEMBERS[0]
+        response = self.client.post(f"/finding/{page}/original/{OTHER}")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual([str(m) for m in get_messages(response.wsgi_request)], [])
+        # The old root and its members, finding 3 among them, now sit one level under finding 7.
+        self.assertEqual(
+            self._state(ROOT, *MEMBERS, OTHER),
+            {**dict.fromkeys((ROOT, *MEMBERS), (True, OTHER, False)), OTHER: (False, None, False)},
+        )
+
+    def test_a_row_under_a_root_that_is_an_original_still_offers_the_mark(self):
+        # Control: under an ordinary cluster root the menu keeps both actions, and the route accepts the mark.
+        self.assertEqual(self._actions(MEMBERS[0], OTHER), ["mark_finding_duplicate", "set_finding_as_original"])
+        self.assertEqual(self._mark(OTHER, MEMBERS[0]), [])
+        self.assertEqual(self._state(OTHER), {OTHER: (True, ROOT, False)})
+
+    def test_the_view_finding_page_hides_the_mark_under_a_root_that_is_a_duplicate(self):
+        self._chain_root()
+        page = MEMBERS[0]
+        response = self.client.get(f"/finding/{page}")
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        # Finding 7's row is on the page and offers Set as Original, but not the mark the route would refuse.
+        self.assertIn(f"/finding/{page}/original/{OTHER}", content)
+        self.assertNotIn(f"/finding/{OTHER}/duplicate/{page}", content)
+
+    def _reasons(self, page_id, row_id):
+        page, row = Finding.objects.get(pk=page_id), Finding.objects.get(pk=row_id)
+        return [entry["reason"] for entry in calculate_possible_related_actions_for_similar_finding(None, page, row)]
+
+    def _move_page_to_another_engagement(self):
+        # Finding 3 moves to test 4 (engagement 4) while its root, finding 2, stays in engagement 1, with deduplication
+        # on engagement in both, so Set as Original is refused between finding 3 and the root's row.
+        Engagement.objects.filter(pk__in=(1, 4)).update(deduplication_on_engagement=True)
+        Finding.objects.filter(pk=MEMBERS[0]).update(test=Test.objects.get(pk=4))
+
+    def test_the_root_row_names_the_root_when_the_page_is_in_another_engagement(self):
+        self._move_page_to_another_engagement()
+        reasons = self._reasons(MEMBERS[0], ROOT)
+        self.assertEqual(len(reasons), 1, reasons)
+        self.assertTrue(reasons[0].startswith("This finding is the root of the cluster"), reasons)
+
+    def test_the_root_row_names_the_root_when_it_is_a_duplicate_and_the_page_is_in_another_engagement(self):
+        self._chain_root()
+        self._move_page_to_another_engagement()
+        reasons = self._reasons(MEMBERS[0], ROOT)
+        self.assertEqual(len(reasons), 1, reasons)
+        self.assertTrue(reasons[0].startswith("This finding is the root of the cluster"), reasons)
+
+    def test_set_as_original_stays_offered_because_the_route_accepts_it_under_an_orphaned_page_finding(self):
+        page = self._orphan_page()
+        response = self.client.post(f"/finding/{page}/original/{OTHER}")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual([str(m) for m in get_messages(response.wsgi_request)], [])
+        # Finding 3 now sits under finding 7; the other members keep their original, finding 2.
+        self.assertEqual(
+            self._state(ROOT, *MEMBERS, OTHER),
+            {
+                ROOT: (False, None, True),
+                page: (True, OTHER, False),
+                **dict.fromkeys(MEMBERS[1:], (True, ROOT, False)),
+                OTHER: (False, None, False),
+            },
+        )

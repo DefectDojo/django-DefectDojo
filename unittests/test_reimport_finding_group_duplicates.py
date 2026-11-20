@@ -46,7 +46,9 @@ class TestReimportFindingGroupDuplicates(DojoAPITestCase):
             titles = [finding.title for finding in TrivyParser().get_findings(scan, self.test)]
         self.assertEqual(1, len(titles), msg=f"fixture scan must hold one finding, parsed {titles}")
         self.title = titles[0]
-        self.group_name = f"Findings in: {self.title}"
+        # The import names a group from the stored title, which Finding.save() title-cases; a
+        # reimport names a new finding's group the same way, so both share one group.
+        self.group_name = f"Findings in: {Finding.persisted_title(self.title)}"
 
     def _reimport(self, *, create_finding_groups_for_all_findings):
         with SCAN_FILE.open(encoding="utf-8") as scan:
@@ -72,7 +74,7 @@ class TestReimportFindingGroupDuplicates(DojoAPITestCase):
             msg=f"expected {expected_group_count} group(s) named {self.group_name!r}, persisted {[(g.id, g.creator.username) for g in groups]}",
         )
         findings = list(Finding.objects.filter(test=self.test))
-        # The group name comes from the parsed title; Finding.save() title-cases the stored one.
+        # Finding.save() title-cases the stored title, so compare case-insensitively.
         self.assertEqual(
             [self.title.lower()], [finding.title.lower() for finding in findings],
             msg=f"expected the one reimported finding in test {self.test.id}",

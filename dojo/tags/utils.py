@@ -15,7 +15,7 @@ import logging
 from collections.abc import Iterable
 
 from django.conf import settings
-from django.db import models, transaction
+from django.db import connection, models, transaction
 from django_tagulous.utils import parse_tags
 
 from dojo.models import Product  # local import to avoid circulars at import time
@@ -328,7 +328,6 @@ def bulk_add_tag_mapping(
     from collections import defaultdict  # noqa: PLC0415
 
     from django.db.models import Case, IntegerField, When  # noqa: PLC0415
-    from django.db.models.functions import Lower  # noqa: PLC0415
 
     if not tag_to_instances:
         return 0
@@ -371,25 +370,26 @@ def bulk_add_tag_mapping(
 
     all_tag_names = list(tag_to_instances.keys())
 
-    def _key(name: str) -> str:
-        return name if case_sensitive else name.lower()
-
-    # --- Query 1: fetch existing tag objects ---
+    # --- Query 1: fetch existing tag objects, keyed by the name as requested ---
+    existing_tags: dict[str, object] = {}
     if case_sensitive:
-        existing_tags: dict[str, object] = {
-            t.name: t
-            for t in tag_model.objects.filter(name__in=all_tag_names)
-        }
-        missing_names = [n for n in all_tag_names if n not in existing_tags]
+        existing_tags.update((t.name, t) for t in tag_model.objects.filter(name__in=all_tag_names))
     else:
-        # Annotate with lowercased name for a case-insensitive IN lookup
-        existing_tags = {
-            t.name_lower: t
-            for t in tag_model.objects.annotate(name_lower=Lower("name")).filter(
-                name_lower__in=[n.lower() for n in all_tag_names],
-            )
-        }
-        missing_names = [n for n in all_tag_names if n.lower() not in existing_tags]
+        # Match each name the way tagulous does (name__iexact: UPPER("name"::text) = UPPER(%s)), which
+        # the UPPER(name) index serves; LOWER(name) is served by no index and reads the whole tag table.
+        # PostgreSQL upper-cases both sides: Python's str.upper() differs from it for some letters
+        # ("ß", and letters newer than the database's Unicode tables), and would match other tags.
+        # Where several stored tags differ only in case, a name resolves to the oldest of them.
+        for t in tag_model.objects.raw(
+            "SELECT t.*, requested.name AS requested_name"
+            " FROM unnest(%s::text[]) AS requested(name)"
+            f" JOIN {connection.ops.quote_name(tag_model._meta.db_table)} t"
+            ' ON UPPER(t."name"::text) = UPPER(requested.name)'
+            " ORDER BY t.id",
+            [all_tag_names],
+        ):
+            existing_tags.setdefault(t.requested_name, t)
+    missing_names = [n for n in all_tag_names if n not in existing_tags]
 
     # --- Query 2: create missing tag objects ---
     # Use get_or_create to call model.save(), which lets tagulous generate the slug field.
@@ -400,7 +400,7 @@ def bulk_add_tag_mapping(
                 tag, _ = tag_model.objects.get_or_create(name=n, defaults={"protected": False})
             else:
                 tag, _ = tag_model.objects.get_or_create(name__iexact=n, defaults={"name": n, "protected": False})
-            existing_tags[_key(n)] = tag
+            existing_tags[n] = tag
 
     # --- Query 3: fetch all pre-existing (instance, tag) through-model rows ---
     all_instance_ids = {inst.pk for inst in all_instances}
@@ -417,22 +417,26 @@ def bulk_add_tag_mapping(
     created_per_tag: dict[int, int] = defaultdict(int)
 
     for tag_name, instances in tag_to_instances.items():
-        tag = existing_tags.get(_key(tag_name))
+        tag = existing_tags.get(tag_name)
         if tag is None:
             continue
         for instance in instances:
-            if (instance.pk, tag.pk) not in existing_pairs:
+            pair = (instance.pk, tag.pk)
+            if pair not in existing_pairs:
                 new_relationships.append(
                     through_model(**{source_field_name: instance, target_field_name: tag}),
                 )
                 created_per_tag[tag.pk] += 1
+                # One instance can reach the same tag twice in one call (a repeated name, or two case
+                # variants of it): queue and count the pair once.
+                existing_pairs.add(pair)
 
     if not new_relationships:
         return 0
 
     # --- Query 4: bulk-create all new relationships (batched for memory) ---
-    # Use len(new_relationships) for the count: existing pairs were already filtered out above,
-    # so every entry here is new. bulk_create return value is unreliable with ignore_conflicts.
+    # Use len(new_relationships) for the count: existing and already-queued pairs were filtered out
+    # above, so every entry here is new and unique. bulk_create return value is unreliable with ignore_conflicts.
     total_created = len(new_relationships)
     with transaction.atomic():
         for i in range(0, len(new_relationships), batch_size):

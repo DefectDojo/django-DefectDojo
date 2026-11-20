@@ -2,13 +2,14 @@ import logging
 from collections import defaultdict
 from contextlib import suppress
 from datetime import datetime
+from functools import lru_cache
 from itertools import batched
 from time import sleep, strftime
 from types import SimpleNamespace
 
 from django.conf import settings
-from django.db import OperationalError, router, transaction
-from django.db.models import Count
+from django.db import OperationalError, connection, router, transaction
+from django.db.models import Count, Exists, OuterRef
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.db.utils import IntegrityError
@@ -325,7 +326,21 @@ def update_finding_group(finding, finding_group):
         finding.finding_group.findings.remove(finding)
 
 
-def get_group_by_group_name(finding, finding_group_by_option):
+@lru_cache(maxsize=4096)
+def _persisted_title(title):
+    # titlecase() costs about a third of a millisecond, and a reimport grouped by title
+    # names many new findings that share each title: transform each title once.
+    return Finding.persisted_title(title)
+
+
+def get_group_by_group_name(finding, finding_group_by_option, *, unsaved=False):
+    """
+    Return the name of the auto group a finding belongs to, or None.
+
+    The import names a group from a saved finding, whose title save() has already
+    title-cased and truncated. A reimport names a new finding's group before it is saved:
+    unsaved=True gives the title the stored row will carry, so both name the group alike.
+    """
     group_name = None
 
     if finding_group_by_option == "component_name":
@@ -337,7 +352,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
     elif finding_group_by_option == "finding_title":
-        group_name = finding.title
+        group_name = _persisted_title(finding.title) if unsaved and finding.title else finding.title
     elif finding_group_by_option == "vuln_id_from_tool":
         if finding.vuln_id_from_tool:
             group_name = f"Vulnerability ID {finding.vuln_id_from_tool}" if finding.vuln_id_from_tool else "None"
@@ -390,28 +405,41 @@ def group_findings_by(finds, finding_group_by_option):
 
 
 def _test_finding_ids_by_group_name(test_id, group_by, names):
-    """Ids of the test's findings per group name, for the given names only, read in one pass."""
+    """
+    Ids of the test's ungrouped findings per group name, for the given names only, read in one pass.
+
+    A finding already in a group (the one finding.finding_group reads) is left out: a finding
+    belongs to one group at most, so a new auto group cannot take it, and it does not count as a
+    peer that makes a lone finding form a group.
+    """
     fields = ("id", "title", "component_name", "component_version", "file_path", "vuln_id_from_tool")
     by_name = {}
+    in_a_group = Exists(Finding_Group.objects.filter(findings=OuterRef("pk")))
     # Plain values, not Finding instances: get_group_by_group_name only reads these attributes, and
     # building a model instance per row is what made a large test expensive to scan.
-    for row in Finding.objects.filter(test_id=test_id).order_by("id").values(*fields).iterator(chunk_size=2000):
+    ungrouped = Finding.objects.filter(test_id=test_id).filter(~in_a_group)
+    for row in ungrouped.order_by("id").values(*fields).iterator(chunk_size=2000):
         group_name = get_group_by_group_name(SimpleNamespace(**row), group_by)
         if group_name in names:
             by_name.setdefault(group_name, []).append(row["id"])
     return by_name
 
 
-def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
+def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, legacy_names=None, **kwargs):
     """
     Put the findings of one (re)import into their auto groups, all names at once.
 
     For each name: reuse the oldest group of that (test, name), else create one (unless
     create_finding_groups_for_all_findings is off and the name has a lone finding no other
-    finding of the test shares). A newly created group also takes the test's other findings
-    with the same name. The cost does not grow with the number of groups: existing groups
-    are read in one query, the test's findings once (and only when some name has no group
-    yet), and new groups and memberships are written in bulk.
+    ungrouped finding of the test shares). A newly created group also takes the test's other
+    findings with the same name that are not in a group yet. The cost does not grow with the
+    number of groups: existing groups are read in one query, the test's findings once (and
+    only when some name has no group yet), and new groups and memberships are written in bulk.
+
+    legacy_names maps a name to other names the same group may carry: a reimport named a new
+    finding's finding_title group from the report's raw title before it named it from the stored
+    one. A name with no group of its own joins the oldest group under one of those names (the
+    group its JIRA issue hangs off) instead of starting a second group beside it.
 
     bulk_create sends no post_save, so it is replayed once per new group with
     ``bulk_created_instances`` set to the whole batch: a receiver keeps working one group at
@@ -423,9 +451,16 @@ def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_fin
     test_id = next(iter(group_names_to_findings.values()))[0].test_id
 
     # Groups are one per (test, name[:255]); the oldest wins where duplicates exist.
+    legacy_names = legacy_names or {}
+    lookup = {name[:255] for name in group_names_to_findings}
+    lookup.update(legacy[:255] for name in group_names_to_findings for legacy in legacy_names.get(name, ()))
     groups = {}
-    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in={name[:255] for name in group_names_to_findings}).order_by("id"):
+    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in=lookup).order_by("id"):
         groups.setdefault(finding_group.name, finding_group)
+    for name in group_names_to_findings:
+        legacy_groups = [groups[legacy[:255]] for legacy in legacy_names.get(name, ()) if legacy[:255] in groups]
+        if name[:255] not in groups and legacy_groups:
+            groups[name[:255]] = min(legacy_groups, key=lambda finding_group: finding_group.id)
     # A name without a group needs the test's other findings of that name: they decide
     # whether a lone finding forms a group, and a new group takes them in.
     missing = {name for name in group_names_to_findings if name[:255] not in groups}
@@ -1172,6 +1207,37 @@ def lock_findings_for_delete(finding_ids):
         .order_by("id")
         .values_list("id", flat=True),
     )
+
+
+def set_found_by_locking_finding_first(finding, found_by):
+    """
+    ``finding.found_by.set(found_by)``, in one transaction that locks the finding before any found_by row.
+
+    The API writers that replace a finding's found_by go through here: the v2 and v3 create and the v2 and v3
+    update. Other ``found_by.set()`` callers (copying a cluster's found_by to a new original, for one) do not.
+    ``set()`` deletes the rows that were not requested (on a create, the one ``Finding.save()`` added for the test's
+    type) and inserts the requested rows. Both stay locked until COMMIT, where Postgres checks the new rows'
+    deferred foreign key with FOR KEY SHARE on the finding. The chunked bulk delete (the excess-duplicate delete,
+    a test or engagement delete) takes the same two locks the other way round: the finding FOR UPDATE first
+    (lock_findings_for_delete), then its found_by rows (bulk_clear_finding_m2m). Each then waited for the other
+    and Postgres aborted one of them with "deadlock detected" (40P01), which failed the write.
+
+    Taking FOR KEY SHARE on the finding first puts both in the same order. Whichever gets the finding first
+    finishes, and the other waits for it rather than deadlocking: a delete that is first removes the finding,
+    and the deferred foreign key then rejects this set() at COMMIT as for any other write to a deleted finding.
+    FOR KEY SHARE is the lock the foreign-key check takes anyway, so it blocks nothing that check did not.
+
+    ``clear()`` needs no lock: it only deletes rows, so its COMMIT checks no foreign key and never waits on the
+    finding, and a delete waiting for its rows simply follows it.
+    """
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"SELECT id FROM {connection.ops.quote_name(Finding._meta.db_table)} "
+                "WHERE id = %s FOR KEY SHARE",
+                [finding.id],
+            )
+        finding.found_by.set(found_by)
 
 
 def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
