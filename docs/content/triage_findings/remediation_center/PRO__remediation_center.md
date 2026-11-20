@@ -74,6 +74,13 @@ Set Update 40069954"), even when the scanner titles each Finding by its own CVE.
 that names two different patches does not say which one applies, so those Findings are not grouped
 by patch.
 
+Some remediation text names neither a version nor a patch in a form the Remediation Center can
+read, such as "Upgrade ASP.NET Core Runtime 10.0 to later". Findings on one host are still one
+action when their titles name the same product before the first colon ("Microsoft ASP.NET:
+CVE-...") and their remediation text is identical. The action is titled with the first line of
+that text. Text that differs in any word or version, short text, and placeholders such as "N/A"
+keep their Findings apart.
+
 Each action also carries a **Grouping Rationale** that shows why its Findings
 were grouped together, marked as an **Exact Match**, a **Heuristic Match**, or **Grouped by
 Hand**.
