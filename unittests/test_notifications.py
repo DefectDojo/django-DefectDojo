@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 from unittest import skip
 from unittest.mock import Mock, patch
@@ -1590,6 +1591,62 @@ class TestReviewRequestedWebhookTemplate(DojoTestCase):
         )
         self.assertNotEqual(rendered.strip(), fallback.strip())
         self.assertNotIn("finding:", fallback)
+
+
+@versioned_fixtures
+class TestSlaBreachCombinedTemplates(DojoTestCase):
+
+    """
+    Slack and MS Teams need their own sla_breach_combined template.
+
+    Without one they fall back to other.tpl, and the channel only gets
+    "Event sla_breach_combined has occurred." - no product, no findings.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _render(self, channel, event="sla_breach_combined", findings=None):
+        product = Product.objects.first()
+        findings = list(Finding.objects.all()[:2]) if findings is None else findings
+        message = NotificationManagerHelpers()._create_notification_message(
+            event=event,
+            user=None,
+            notification_type=channel,
+            kwargs={
+                "title": f"SLA alert (breached): {product.name}",
+                "product": product,
+                "findings": findings,
+                "breach_kind": "breached",
+                "url": None,
+            },
+        )
+        return message, product, findings
+
+    def test_slack_lists_the_product_and_its_findings(self):
+        rendered, product, findings = self._render("slack")
+        self.assertNotIn("has occurred", rendered)
+        self.assertIn(product.name, rendered)
+        self.assertIn("have breached their SLA", rendered)
+        for finding in findings:
+            self.assertIn(reverse("view_finding", args=(finding.id,)), rendered)
+
+    def test_msteams_is_a_valid_card_listing_the_findings(self):
+        rendered, product, findings = self._render("msteams")
+        self.assertNotIn("has occurred", rendered)
+        card = json.loads(rendered)
+        body = card["attachments"][0]["content"]["body"]
+        texts = " ".join(block.get("text", "") for block in body)
+        self.assertIn(product.name, texts)
+        for finding in findings:
+            self.assertIn(reverse("view_finding", args=(finding.id,)), texts)
+
+    def test_long_lists_are_truncated(self):
+        finding = Finding.objects.first()
+        for channel in ("slack", "msteams"):
+            with self.subTest(channel=channel):
+                rendered, _, _ = self._render(channel, findings=[finding] * 60)
+                self.assertEqual(rendered.count(reverse("view_finding", args=(finding.id,))), 50)
+                self.assertIn("and 10 more", rendered)
 
 
 @versioned_fixtures
