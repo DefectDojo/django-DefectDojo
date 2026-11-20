@@ -108,6 +108,7 @@ ctx.rule_name
 |-------|--------|
 | 标识 | `id`, `title`, `hash_code`, `unique_id_from_tool` |
 | 严重程度与评分 | `severity`, `numerical_severity`, `cvssv3`, `cvssv3_score`, `epss_score`, `epss_percentile`, `priority`, `risk`, `risk_score` |
+| 利用证据 | `known_exploited`, `ransomware_used`, `kev_date`, `kev_due_date`, `vendor_exploited`, `vendor_ransomware_used`, `vendor_exploited_source`, `exploit_maturity`, `exploit_maturity_label`, `threat_score`, `threat_ladder_rung`, `dominant_intel_key`, `vex_state` |
 | 文本 | `description`, `mitigation`, `impact` |
 | 状态 | `active`, `verified`, `false_p`, `duplicate`, `is_mitigated`, `out_of_scope`, `risk_accepted`, `under_review` |
 | 日期 | `date`, `mitigated`, `last_status_update`, `sla_expiration_date` |
@@ -119,6 +120,8 @@ ctx.rule_name
 日期是 ISO-8601 字符串。这是刻意为之的：这意味着 `gt` 和 `lt` 作为文本比较时也能正确排序，因此 `2026-07-28` 会被正确判定为大于 `2026-01-01`。
 
 `priority`、`risk` 和 `risk_score` 来自 Pro 的优先级排序功能。尚未被评分的发现项不会携带这些值。
+
+`vendor_exploited` 和 `vendor_ransomware_used` 保存扫描器、连接器或某个人在 CISA 目录之外报告的内容，`vendor_exploited_source` 则指明报告者（扫描器的测试类型名称、连接器的名称、`manual` 或 `pre-upgrade`）。需要对任一来源作出反应的规则应同时读取这两类字段。在条件构建器中，KEV 字段显示为 **KEV: Known Exploited**、**KEV: Ransomware Used**、**KEV: Date Added** 和 **KEV: Remediation Due**，Vendor Reported 字段显示为 **Vendor Reported Exploited**、**Vendor Reported Ransomware** 和 **Vendor Reported Source**。参见[发现项](/asset_modelling/engagements_tests/pro__findings/#metadata)。
 
 ### 条件
 

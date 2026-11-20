@@ -350,6 +350,8 @@ O enriquecimento de EPSS e KEV é uma exceção que vale a pena configurar, porq
 
 O espelho precisa servir os mesmos arquivos no mesmo formato que as fontes públicas. As consultas buscam um arquivo específico na URL fornecida, em vez de descobrir o que está disponível ali, então um espelho que reempacota ou reorganiza os dados não funcionará. Atualize suas cópias na frequência que for adequada para você, já que a implantação só lê o que o seu espelho fornece.
 
+Talvez você nem precise de um espelho. Com a inteligência de ameaças ativada e as consultas de EPSS e KEV desativadas, que é o padrão, todo pacote de inteligência de ameaças que você carrega também preenche os valores de CISA KEV e EPSS nos seus achados. Carregue o pacote conforme descrito em [Carregando a inteligência de ameaças offline](/get_started/pro/onprem/airgapped/#loading-threat-intelligence-offline) e, em seguida, verifique o card **Intelligence Sources** em **Settings > System Settings** para confirmar qual pacote está carregado e o quão atualizada está cada fonte. Uma consulta que você ativar substitui o pacote para aquela fonte. Veja [KEV e EPSS a partir do pacote](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+
 ## Dúvidas ou suporte
 
 Para obter ajuda com uma instalação ou atualização isolada, entre em contato com seu representante de conta ou com [support@defectdojo.com](mailto:support@defectdojo.com).

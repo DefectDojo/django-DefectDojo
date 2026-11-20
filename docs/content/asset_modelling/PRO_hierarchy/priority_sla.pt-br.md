@@ -63,7 +63,8 @@ Os Achados dentro de um Produto podem ter metadados adicionais que ajustam ainda
 * Se o Achado tem ou não uma **Pontuação EPSS** - isso é adicionado automaticamente aos Achados e mantido atualizado para usuários Pro. A **Pontuação EPSS** é o campo que contribui para a Pontuação de Prioridade — o **Percentil EPSS** é registrado no Achado apenas para referência, mas não alimenta diretamente o cálculo.
 * Quantos Endpoints do Produto são afetados por este Achado
 * Se um Achado está ou não Em Revisão
-* Se o Achado está ou não na base KEV (Known Exploited Vulnerabilities), verificada pelo DefectDojo regularmente
+* Se o Achado está ou não na base KEV (Known Exploited Vulnerabilities), verificada pelo DefectDojo regularmente.  Em uma instância self-hosted com a consulta de KEV desativada, essa informação vem do [pacote de inteligência de ameaças](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle).
+* Se um scanner, um conector ou uma pessoa reportou o Achado como explorado em ambiente real (**Vendor Reported Exploited**) ou como usado em ransomware (**Vendor Reported Ransomware**).  A Prioridade trata um Achado como explorado quando o CISA KEV ou o relato do fornecedor indica isso, de modo que o alerta de um scanner ainda eleva a Prioridade quando a CISA não lista o CVE.  Veja [Achados](/asset_modelling/engagements_tests/pro__findings/#metadata).
 * A Severidade reportada pela ferramenta para um Achado (Informativa, Baixo, Médio, Alto, Crítica)
 
 #### Pontuação EPSS vs. Percentil EPSS
@@ -212,6 +213,8 @@ As configurações de SLA contêm os dias atribuídos a cada valor de **Severida
 Cada Acordo de Nível de Serviço pode ter um nome exclusivo, além de uma descrição opcional.
 
 **Reiniciar SLA na Reativação do Achado**: se habilitada, essa opção reiniciará o SLA do zero quando um Achado for Reaberto. Caso contrário, o SLA será baseado na data em que o Achado foi criado.
+
+**Cap SLA by CISA KEV Due Date**: se habilitada, o prazo de SLA de um Achado listado no KEV é antecipado para a data de vencimento definida pela CISA para aquele CVE.  Em uma instância self-hosted com a consulta de KEV desativada, a data de vencimento vem do [pacote de inteligência de ameaças](/asset_modelling/pro_hierarchy/threat_intelligence/#kev-and-epss-from-the-bundle), então o limite se aplica sem que seja preciso ativar a consulta.  O limite considera apenas a listagem no CISA KEV: uma alegação **Vendor Reported Exploited** não antecipa o prazo.  A maioria das datas de vencimento da CISA já passou, então, com essa opção ativada, muitos Achados listados no KEV podem aparecer em violação de SLA logo após o primeiro carregamento do pacote que se segue a uma atualização.
 
 Ao editar um SLA, você pode escolher se esse SLA usará **Severidade** ou **Risco** como referência para atribuir os Dias para Remediação. Isso é feito selecionando a opção correspondente na seção **Tipo de Configuração de Nível de Serviço** do formulário.
 
