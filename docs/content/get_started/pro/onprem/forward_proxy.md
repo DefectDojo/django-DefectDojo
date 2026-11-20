@@ -64,6 +64,22 @@ sudo -E ./dojo-compose-cli register
 
 Use `sudo -E` for every `sudo` step in the install and upgrade. It also keeps `DOJO_CLI_KEY`. To keep only these variables, use `sudo --preserve-env=DOJO_CLI_KEY,HTTP_PROXY,HTTPS_PROXY,NO_PROXY,http_proxy,https_proxy,no_proxy`.
 
+### Slow image pulls through the proxy
+
+A full set of DefectDojo images is several GB, and a proxy that inspects TLS can make pulling it slow. `dojo-compose-cli` stops an image pull that runs past a time limit. The limit covers the image pull of an online install, `app start` (including the one the systemd unit runs), `app pull-images` and upgrades, the settings image pull, and the pulls in `bundle create`.
+
+From `dojo-compose-cli` 2.2.0 the limit is 30 minutes by default, and you can change it. Earlier releases stopped the image pull after a fixed 5 minutes and the settings pull after 90 seconds, and reported the stopped pull as an unreachable registry ("could not reach the DefectDojo Pro registry", with advice to check DNS and the firewall) even though the registry was reachable. If you see that error behind a proxy that does reach the registry, update `dojo-compose-cli` with `update-binary`.
+
+To raise the limit, set it once. The value is stored in `compose.config`, so every later command, and the systemd unit's `app start`, uses it:
+
+```bash
+sudo -E ./dojo-compose-cli config set --image-pull-timeout 2h
+```
+
+The value is a duration such as `45m` or `2h`. `0` removes the limit, and any other value must be at least `1m`. `config print` shows the current limit as "Image Pull Timeout", and `config print --filter image-pull-timeout` prints it on its own. The flag is not listed in `config set --help`.
+
+While the images are pulled, the CLI prints a line every 30 seconds with the time spent and the limit, for example "Still pulling the DefectDojo images (12m3s elapsed of 30m0s).". Under the systemd unit these lines go to the journal (`journalctl -u defectdojo-compose`), so a slow pull does not look stuck. A pull stopped at the limit is reported as a timeout that names the limit and the `config set --image-pull-timeout` command to raise it. A pull that fails before the limit is reported as before, so an unreachable-registry error then does point at DNS, the firewall or the proxy.
+
 ### NO_PROXY: the internal names the bundle adds for you
 
 The containers call each other by service name: the application calls `connectors` and `ddorch`, and the MCP server, the Sensei engine and the webhook gateway call back into `nginx` on its internal listener. If those names went to the proxy, the proxy could not resolve them and every one of those calls would fail. From 3.4.100 the compose bundle therefore always starts `NO_PROXY` with the stack's own names and network:
