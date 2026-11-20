@@ -97,7 +97,7 @@ The check runs every 10 minutes. Setting either value to `0` turns off the autom
 
 ### Clearing stuck imports by hand
 
-Open the **Stuck Imports** view to see every import you can view that has been in progress for longer than 1 hour, 6 hours, 24 hours or 3 days, oldest first, with when it started and when it is due to fail on its own. Select tests and choose **Mark Failed**, or choose **Mark All Failed** for every listed import you can edit. You need permission to edit a test to mark its import failed. Findings that were already imported are not changed.
+Open the **Stuck Imports** view to see every import you can view that has been in progress for longer than 1 hour, 6 hours, 24 hours or 3 days, oldest first, with when it started and when it is due to fail on its own. Choose **Mark Failed** from a test's menu, select tests and choose **Mark Selected Failed**, or choose **Mark All Failed** for every listed import you can edit. You need permission to edit a test to mark its import failed. Findings that were already imported are not changed.
 
 Self-hosted administrators can do the same from the command line. Without `--apply` the command only lists:
 
@@ -115,7 +115,7 @@ python3 manage.py fail_stuck_imports --older-than-hours 6 --apply
 
 Run it wherever you run other `manage.py` commands for the instance (the uwsgi or celery worker container).
 
-The same is available over the API to users with the edit permission:
+The same is available over the API. Listing needs permission to view the tests; marking an import failed needs permission to edit its test, and a request that names any test you cannot edit changes nothing:
 
 | Endpoint | Does |
 | --- | --- |
