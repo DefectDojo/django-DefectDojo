@@ -444,15 +444,30 @@ def bulk_add_tag_mapping(
             through_model.objects.bulk_create(batch, ignore_conflicts=True)
 
     # --- Query 5: update all tag counts in one UPDATE … CASE WHEN … ---
-    tag_model.objects.filter(pk__in=list(created_per_tag.keys())).update(
-        count=Case(
-            *[
-                When(pk=pk, then=models.F("count") + delta)
-                for pk, delta in created_per_tag.items()
-            ],
-            output_field=IntegerField(),
-        ),
-    )
+    # The UPDATE locks the rows in the order its plan reads them: id order for an index scan, but
+    # physical order for a sequential or bitmap heap scan, and every count update moves a row. Another
+    # count writer takes the same rows in ascending id order (bulk_add_tags_to_instances,
+    # bulk_remove_all_tags, the importer's test tag write), so two imports sharing tags could each hold
+    # a row the other needed and deadlock (Postgres 40P01). Locking the rows in id order first, in the
+    # same transaction, makes the UPDATE's own order irrelevant. FOR NO KEY UPDATE is the lock the
+    # UPDATE takes anyway, so this changes only when the locks are taken, not which.
+    tag_pks = sorted(created_per_tag)
+    with transaction.atomic():
+        list(
+            tag_model.objects.select_for_update(no_key=True)
+            .filter(pk__in=tag_pks)
+            .order_by("pk")
+            .values_list("pk", flat=True),
+        )
+        tag_model.objects.filter(pk__in=tag_pks).update(
+            count=Case(
+                *[
+                    When(pk=pk, then=models.F("count") + delta)
+                    for pk, delta in created_per_tag.items()
+                ],
+                output_field=IntegerField(),
+            ),
+        )
 
     for instance in all_instances:
         prefetch_cache = getattr(instance, "_prefetched_objects_cache", None)
