@@ -39,6 +39,8 @@ class OpenVASFindingAuxData:
     qod: str = ""
     openvas_result: str = ""
     fallback_cvss_score: float | None = None
+    ip_address: str = ""
+    hostname: str = ""
 
 
 def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
@@ -96,6 +98,8 @@ def postprocess_finding(finding: Finding, aux_info: OpenVASFindingAuxData):
         finding.description += f"\n**Summary**: {cleanup_openvas_text(aux_info.summary)}"
     if aux_info.qod:
         finding.description += f"\n**QoD**: {aux_info.qod}"
+    if aux_info.ip_address and aux_info.hostname and aux_info.ip_address != aux_info.hostname:
+        finding.description += f"\n**IP Address**: {aux_info.ip_address}"
     if len(aux_info.references) > 0:
         finding.references = "\n".join(["- " + ref for ref in aux_info.references])
     # fallback in case no cvss version is detected
