@@ -1,0 +1,103 @@
+{
+  "findings": [
+    {
+      "cwe": "CWE-1104",
+      "data": "http://127.0.0.1:18765/reflect?q=test",
+      "detection_method": "library",
+      "evidence": "jQuery 1.7.2 is known-vulnerable (CVE-2012-6708, CVE-2015-9251, CVE-2019-11358, CVE-2020-11022, CVE-2020-11023); upgrade to >= 3.5.0",
+      "inject_type": "OutdatedComponent",
+      "message_id": 1104,
+      "message_str": "Outdated JavaScript library: jQuery 1.7.2",
+      "method": "GET",
+      "param": "",
+      "payload": "",
+      "severity": "Medium",
+      "type": "I",
+      "type_description": "Informational - outdated or known-vulnerable component, not an exploitable XSS"
+    },
+    {
+      "confidence": "high",
+      "confidence_reason": "URL-carried source; sink executes script directly",
+      "cwe": "CWE-79",
+      "data": "http://127.0.0.1:18765/reflect?q=test#%3Cimg%20src=x%20onerror=alert(1)%20class=dlxe4fd8a8c%3E",
+      "detection_method": "ast",
+      "evidence": "http://127.0.0.1:18765/reflect?q=test:1:1 - DOM-based XSS via location.hash to document.write (Source: location.hash, Sink: document.write)",
+      "inject_type": "DOM-XSS",
+      "location": "Query",
+      "message_id": 0,
+      "message_str": "DOM-based XSS via location.hash to document.write [light check: confirmed] [marker-reflected]",
+      "method": "GET",
+      "param": "q",
+      "payload": "#<img src=x onerror=alert(1) class=dlxe4fd8a8c>",
+      "severity": "High",
+      "type": "V",
+      "type_description": "Vulnerable - dalfox asserts this input is exploitable; act on it"
+    },
+    {
+      "confidence": "high",
+      "confidence_reason": "payload reached an executable position in the parsed response",
+      "cwe": "CWE-79",
+      "data": "http://127.0.0.1:18765/reflect?q=%3Csvg%20onload%3Dalert%281%29%20class%3Ddlxe4fd8a8c%3E",
+      "detection_method": "reflection",
+      "evidence": "DOM verification successful for param q (DOM marker)",
+      "filter": {
+        "allowed": [
+          "\"",
+          "$",
+          "'",
+          "(",
+          ")",
+          "+",
+          ",",
+          "-",
+          ".",
+          "/",
+          ":",
+          ";",
+          "<",
+          "=",
+          ">",
+          "[",
+          "\\",
+          "]",
+          "`",
+          "{",
+          "|",
+          "}"
+        ],
+        "blocked": []
+      },
+      "inject_type": "inHTML",
+      "location": "Query",
+      "message_id": 606,
+      "message_str": "Triggered XSS Payload (DOM marker): q=<svg onload=alert(1) class=dlxe4fd8a8c>",
+      "method": "GET",
+      "param": "q",
+      "payload": "<svg onload=alert(1) class=dlxe4fd8a8c>",
+      "severity": "High",
+      "type": "V",
+      "type_description": "Vulnerable - dalfox asserts this input is exploitable; act on it"
+    }
+  ],
+  "meta": {
+    "dalfox_version": "3.3.0",
+    "dedup_mode": "exact",
+    "failed_requests": 0,
+    "findings_count": 3,
+    "incomplete": false,
+    "scan_duration_ms": 27,
+    "target_summary": [
+      {
+        "findings_count": 3,
+        "method": "GET",
+        "status": "findings",
+        "target": "http://127.0.0.1:18765/reflect?q=test"
+      }
+    ],
+    "targets": [
+      "http://127.0.0.1:18765/reflect?q=test"
+    ],
+    "targets_deduplicated": 0,
+    "total_requests": 22
+  }
+}
