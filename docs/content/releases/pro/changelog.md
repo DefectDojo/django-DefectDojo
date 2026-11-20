@@ -22,6 +22,45 @@ For features that are deprecated, scheduled for removal or already removed, see 
 
 ## November 2026: v3.5
 
+### November 20, 2026: v3.5.202
+
+New features:
+* **(Reporting)** The Report Builder ships two built-in templates for the EU Cyber Resilience Act while **Regulatory Profile** is on: **EU CRA Readiness Summary**, generated for one Asset, and **EU CRA Article 14 Reporting Log**. A built-in template can be previewed, generated, scheduled, exported and duplicated, but not edited. See [Built-in Templates](/metrics_reports/reports/report-builder/#built-in-templates).
+
+Enhancements:
+* **(Findings)** Root Cause Correlation fills in Root Causes for Findings imported before it was turned on. Turning the flag on starts a background backfill, and a superuser can run it again with **Recompute Root Causes** on the **Root Causes** page and follow its progress there. Requires the **Root Cause Correlation** feature flag, off by default. See [Backfilling existing Findings](/triage_findings/finding_correlation/pro__root_cause_correlation/#backfilling-existing-findings).
+* **(Importers)** A System Settings field, **Keep Untouched Findings in Import History for the Last N Imports**, removes the import history rows for Findings that older imports left unchanged. Each Finding keeps its most recent row. The default, 0, keeps everything.
+* **(Connectors)** On self-hosted instances, `manage.py delete_empty_connector_assets --connector-id <id>` removes the Assets a connector connection created that hold no Findings. It runs as a dry run and writes a CSV of what it would delete until you add `--execute`, deletes in batches, and records every delete in the audit log.
+* **(API)** The API schema describes the Pro response of risk acceptance expire, Finding metadata `name` as a string, and the open-source descriptions on actions Pro redefines. See [API v2 Docs](/automation/api/api-v2-docs/).
+* **(Performance)** Quick search, the Findings list, sorting Assets by Findings count, reimport, connector syncs and their deduplication, risk acceptances with many Findings, and the last-run status of scheduled automation are faster.
+
+Bug fixes:
+* **(Deduplication)** **Mark as Duplicate** is not offered under a cluster original that is itself a duplicate. **Set as Original** checks the Engagement of every Finding it moves, and a Finding it makes a duplicate outside a cluster is no longer verified. With Locations on, `global_component` deduplication matches Findings that report a component name and version but no Dependency Location. The Tests API reports the deduplication algorithm and hash fields a Test actually uses. See [Similar Findings](/triage_findings/finding_deduplication/pro__similar_findings/#actions) and [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/).
+* **(Importers)** The import preview compares a report's Finding with every original that shares its hash, leaves a stored Finding's duplicates out of the report's originals, counts a Finding the parser marked as a duplicate, and predicts no duplicates within the report while deduplication is off. Smart Upload shows one message when an import is refused. See [Deduplication](/triage_findings/finding_deduplication/about_deduplication/) and [Smart Upload](/import_data/pro/specialized_import/smart_upload/).
+* **(Findings)** A reimport names a new Finding Group after the Finding's stored title, and a Finding already in a group stays out of a new automatic group. A bulk tag add counts a tag once when it is listed twice for one Finding, and a Finding merge takes a repeated Finding ID once. See [Risk Acceptance, Finding Group, Merge, and Delete](/triage_findings/findings_workflows/pro__bulk_edit_findings/#risk-acceptance-finding-group-merge-and-delete).
+* **(Risk Acceptance)** An edit that waits for another no longer overwrites what the other saved. An invalid Finding ID is refused with a validation error. See [Risk Acceptance](/triage_findings/findings_workflows/pro__risk_acceptance/).
+* **(Jira)** Notes converted from Jira wiki text end a `{quote}` block at a closing tag inside a line, drop an empty `{quote}`, keep an escaped `\{quote}` inside a one-line quote, and start a new paragraph after a `bq.` line. The Jira Downstream Connector migration leaves a template field unconverted when the connector data lacks it. New Findings from a connector are pushed to Jira when the project has **Push All Issues** on. See [Migrating to the Jira Downstream Connector](/connectors/downstream/pro__jira_guide/#migrating-to-the-jira-downstream-connector) and [Push All Issues](/connectors/downstream/pro__jira_guide/#push-all-issues).
+* **(Dashboards)** **Manage Layouts** says so in place when a request gets no response, and keeps the shared templates when reading them again gets no response. The **Regulatory Scope** and **Coverage Freshness** widgets answer a malformed request with a validation error. On Priority Insights, **Average Finding Age by Risk Category** averages the age of every Finding at each Risk. The **Findings Fixed** and **Tests Performed** charts on Executive and Program Insights work for dates that fall before year 1 in the viewer's timezone. See [Sharing, cloning, and defaults](/metrics_reports/dashboards/custom-dashboards/#sharing-cloning-and-defaults), [Priority Insights](/metrics_reports/pro_metrics/pro__priority_insights/), [Executive Insights](/metrics_reports/pro_metrics/pro__executive_insights/) and [Program Insights](/metrics_reports/pro_metrics/pro__program_insights/).
+* **(Sensei)** Sensei keeps up with bursts of runs instead of losing some of them. When a PR scan cannot build the base branch baseline, the check is neutral and says the PR was not compared, instead of reporting no new Findings. A dynamic scan fails when its target stops answering partway through. See [Configure a repository](/sensei/setup_sensei/#configure-a-repository) and [Dynamic Scanning](/sensei/dynamic_scanning/).
+* **(Locations)** Supply Chain Security's package analysis raises fewer false High alerts on npm packages, and flags two files that Windows would unpack as one. See [Package analysis](/asset_modelling/locations/pro__supply_chain_security/#package-analysis).
+* **(Compliance)** A CMMC requirement with no result counts as not met. See [Recording results](/federal_compliance/cmmc_assessments/#recording-results).
+* **(Reporting)** Compliance, PCI, cadence and Report Builder XLSX exports drop the characters Excel cannot open.
+* **(Settings)** Audit log search covers the legacy audit log and matches a term that holds a quote or backslash. An empty timestamp or window keeps the default 31-day window. See [Filtering Audit Logs](/admin/user_management/pro__audit_logging/#filtering-audit-logs).
+* **(Engagements)** Questionnaires refuse a malformed answer or an invalid ID with a validation error, in the user's language. See [Questionnaires](/asset_modelling/os_questionnaires/os__questionnaires/).
+* **(API)** On Cloud, pagination `next` and `previous` links keep the instance's address, scheme and port. An API v3 Finding write answers 404 or 409, not a server error, when the Finding is deleted while it is being written. See [API v2 Docs](/automation/api/api-v2-docs/).
+* **(Licensing)** The license usage headline shows the percentage of the limit that sets its level.
+* **(UI)** Date filters refuse an **On** date they cannot read and a **Full Months** count below 1. See [How date filters are evaluated](/navigation/pro__filter_index/#how-date-filters-are-evaluated).
+
+Security fixes:
+* **(Authentication)** Editing a service user no longer restores a token that was regenerated or revoked at the same time, and **Last Used** records only the token the service user holds now. See [Manage service users](/admin/user_management/pro__service_users/#manage-service-users).
+* **(Hardening)** The application images and the Helm chart's Kubernetes utility image include the latest security fixes. Dynamic scans no longer read scanner settings stored in the repository being scanned. See [FIPS Mode](/get_started/pro/onprem/fips_mode/) and [Dynamic Scanning](/sensei/dynamic_scanning/).
+
+Behavior changes:
+* **(Settings)** SLA configuration day counts must be between 0 and 36,500. See [Configuring SLA](/asset_modelling/pro_hierarchy/priority_sla/#configuring-sla).
+
+Upgrade notes:
+* **(Deployment)** If an upgrade stops while a migration builds an index, running the migrations again finishes it. See [DefectDojo Pro Upgrade Guide](/get_started/pro/onprem/upgrading/) and [DefectDojo Pro Upgrade Guide (Kubernetes / Helm)](/get_started/pro/onprem/kubernetes/upgrading_on_kubernetes/).
+
 ### November 18, 2026: v3.5.201
 
 New features:
