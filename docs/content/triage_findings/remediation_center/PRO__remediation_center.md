@@ -77,9 +77,10 @@ by patch.
 Some remediation text names neither a version nor a patch in a form the Remediation Center can
 read, such as "Upgrade ASP.NET Core Runtime 10.0 to later". Findings on one host are still one
 action when their titles name the same product before the first colon ("Microsoft ASP.NET:
-CVE-...") and their remediation text is identical. The action is titled with the first line of
-that text. Text that differs in any word or version, short text, and placeholders such as "N/A"
-keep their Findings apart.
+CVE-...") and their remediation text is identical and names that product. The action is titled
+with the first line of that text. Text that differs in any word or version, short text,
+placeholders such as "N/A", and general sentences a scanner writes on every Finding ("See the
+solutions listed for this vulnerability ...") keep their Findings apart.
 
 Each action also carries a **Grouping Rationale** that shows why its Findings
 were grouped together, marked as an **Exact Match**, a **Heuristic Match**, or **Grouped by
