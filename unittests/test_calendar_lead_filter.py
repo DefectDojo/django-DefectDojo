@@ -58,6 +58,11 @@ class CalendarLeadFilterTest(DojoTestCase):
             with self.subTest(url_name):
                 self.assertEqual(self.get_calendar(url_name, "lead=99999999999999999999").status_code, 200)
 
+    def test_huge_digit_string_lead_returns_200(self):
+        for url_name, _ in CALENDARS:
+            with self.subTest(url_name):
+                self.assertEqual(self.get_calendar(url_name, "lead=" + "1" * 4301).status_code, 200)
+
     def test_mixed_leads_keep_valid_ids(self):
         for url_name, context_key in CALENDARS:
             with self.subTest(url_name):

@@ -1142,7 +1142,7 @@ def get_system_setting(setting, default=None):
 def get_lead_filter(lead_values: list[str]) -> Q | None:
     if not lead_values or "0" in lead_values:
         return None
-    lead_filter = Q(lead__in=[int(value) for value in lead_values if value.isdecimal()])
+    lead_filter = Q(lead__in=[int(value) for value in lead_values if value.isdecimal() and len(value) <= 19])
     if "-1" in lead_values:
         return Q(lead__isnull=True) | lead_filter
     return lead_filter
