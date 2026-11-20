@@ -53,11 +53,6 @@ class CalendarLeadFilterTest(DojoTestCase):
             with self.subTest(url_name):
                 self.assertEqual(self.get_calendar(url_name, "lead=%C2%B2").status_code, 200)
 
-    def test_overflow_lead_returns_200(self):
-        for url_name, _ in CALENDARS:
-            with self.subTest(url_name):
-                self.assertEqual(self.get_calendar(url_name, "lead=99999999999999999999").status_code, 200)
-
     def test_huge_digit_string_lead_returns_200(self):
         for url_name, _ in CALENDARS:
             with self.subTest(url_name):
