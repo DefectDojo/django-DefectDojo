@@ -1,10 +1,15 @@
 
+import tempfile
 from unittest.mock import patch
+
+from django.core.files.base import ContentFile
+from django.test import override_settings
 
 from dojo.engagement.services import copy_engagement, reassign_engagement_product_endpoints
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import ProductLocationStatus
-from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Risk_Acceptance, Test, User
+from dojo.risk_acceptance import helper as ra_helper
 from dojo.test.services import copy_test
 from dojo.url.models import URL
 
@@ -391,6 +396,47 @@ class TestCopyEngagementModel(DojoTestCase):
         self.assertQuerySetEqual(engagement.notes.all(), engagement_copy.notes.all())
         # Do the tags match
         self.assertEqual(engagement.tags, engagement_copy.tags)
+
+
+class TestCopyRiskAcceptanceProof(DojoTestCase):
+
+    def setUp(self):
+        media = tempfile.TemporaryDirectory()
+        self.addCleanup(media.cleanup)
+        media_settings = override_settings(MEDIA_ROOT=media.name)
+        media_settings.enable()
+        self.addCleanup(media_settings.disable)
+        self.user, _ = User.objects.get_or_create(username="admin")
+        product = self.create_product("ra_proof_product", prod_type=self.create_product_type("ra_proof_type"))
+        self.engagement = self.create_engagement("ra_proof_eng", product)
+        self.risk_acceptance = Risk_Acceptance.objects.create(name="ra", owner=self.user)
+        self.risk_acceptance.path.save("proof.pdf", ContentFile(b"original proof"))
+        self.engagement.risk_acceptance.add(self.risk_acceptance)
+
+    def read(self, risk_acceptance):
+        with risk_acceptance.path.open("rb") as proof:
+            return proof.read()
+
+    def test_copy_stores_its_own_proof_file(self):
+        engagement_copy = self.engagement.copy()
+        copied = engagement_copy.risk_acceptance.get()
+        self.assertNotEqual(self.risk_acceptance.path.name, copied.path.name)
+        self.assertEqual(b"original proof", self.read(copied))
+
+        ra_helper.delete(engagement_copy, copied)
+        self.assertTrue(self.risk_acceptance.path.storage.exists(self.risk_acceptance.path.name))
+        self.assertEqual(b"original proof", self.read(self.risk_acceptance))
+
+    def test_delete_keeps_a_proof_file_another_acceptance_names(self):
+        shared = Risk_Acceptance.objects.create(name="shared", owner=self.user, path=self.risk_acceptance.path.name)
+        self.engagement.risk_acceptance.add(shared)
+
+        ra_helper.delete(self.engagement, shared)
+        self.assertEqual(b"original proof", self.read(self.risk_acceptance))
+
+        name = self.risk_acceptance.path.name
+        ra_helper.delete(self.engagement, self.risk_acceptance)
+        self.assertFalse(self.risk_acceptance.path.storage.exists(name))
 
 
 class TestCopyEngagementService(DojoTestCase):

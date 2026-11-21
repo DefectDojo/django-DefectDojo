@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from django.core.files.base import ContentFile
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -102,7 +103,10 @@ class Risk_Acceptance(models.Model):
 
     def copy(self, engagement=None):
         from dojo.models import Finding  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        copy = copy_model_util(self)
+        copy = copy_model_util(self, exclude_fields=["path"])
+        if self.path and self.path.storage.exists(self.path.name):
+            with self.path.open("rb") as proof:
+                copy.path = ContentFile(proof.read(), name=Path(self.path.name).name)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
