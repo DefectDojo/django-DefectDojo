@@ -70,6 +70,26 @@ milestone invented at PR time is a release that does not exist. If the query ret
 `null`, the schedule has not been extended that far: say so and leave the PR
 unmilestoned.
 
+### When the merge queue removes a PR, find out why before enqueueing it again
+
+`dev` lands pull requests through a merge queue (squash, ALLGREEN grouping). A pull
+request runs the light test tier; the queue runs the full tier on the speculative merge
+commit, which also carries every entry queued ahead, so a PR that was green on its own
+can still be removed. Read the failed run before putting it back. Its branch is
+`gh-readonly-queue/dev/pr-<N>-<sha>`: `gh run list --event merge_group --limit 100`
+lists the queue runs (gh shows only 20 without `--limit`), and
+`gh run view <run-id> --log-failed` shows the failure. Then:
+
+- **The change failed it:** fix it, push, and enqueue again only once the PR's own checks
+  are green on the new commit.
+- **Another entry failed it** (other queue runs fail the same way without this change):
+  wait until that PR has left the queue, then enqueue once.
+- **A runner or network fault** (a timeout pulling an image or a package, a runner lost
+  mid-job): enqueue again once.
+
+Never put the same commit back in a loop, and never script a retry around enqueueing. Each
+queue run is the full suite, and an entry that keeps failing holds up every PR behind it.
+
 ## Skills
 
 Repo-scoped skills live under `.claude/skills/<name>/SKILL.md` (each with helper scripts
