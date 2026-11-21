@@ -2273,6 +2273,7 @@ VULNERABILITY_URLS = {
     "GO-": "https://pkg.go.dev/vuln/",  # e.g. https://pkg.go.dev/vuln/GO-2025-3703
     "GSD-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/gsd-2021-34715
     "ICSA-": "https://cvepremium.circl.lu/recent/",  # e.g. https://cvepremium.circl.lu/vuln/ICSA-25-317-01
+    "ISTIO-SECURITY-": "https://istio.io/latest/news/security/",  # e.g. https://istio.io/latest/news/security/istio-security-2026-008/
     "JSDSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/JSDSERVER-14872
     "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
