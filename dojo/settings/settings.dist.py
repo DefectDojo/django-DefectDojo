@@ -6,6 +6,7 @@
 #########################################################################################################
 
 # Django settings for DefectDojo
+import copy
 import json
 import logging
 import os
@@ -1557,6 +1558,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Checkmarx One Scan": ["unique_id_from_tool"],
     "OPF Scan": ["title", "cwe", "severity", "description"],
 }
+HASHCODE_FIELDS_PER_SCANNER_SHIPPED = copy.deepcopy(HASHCODE_FIELDS_PER_SCANNER)
 
 # Override the hardcoded settings here via the env var
 if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
@@ -1640,6 +1642,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "OpenReports": True,
     "OPF Scan": True,
 }
+HASHCODE_ALLOWS_NULL_CWE_SHIPPED = copy.deepcopy(HASHCODE_ALLOWS_NULL_CWE)
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners). If `V3_FEATURE_LOCATIONS` is True, Dojo uses locations (URLs) instead.
@@ -2021,6 +2024,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
     "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
+DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED = copy.deepcopy(DEDUPLICATION_ALGORITHM_PER_PARSER)
 
 # Override the hardcoded settings here via the env var
 if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
