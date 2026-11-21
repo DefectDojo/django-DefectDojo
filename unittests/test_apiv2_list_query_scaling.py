@@ -17,6 +17,7 @@ from collections import Counter
 from unittest.mock import patch
 
 from crum import impersonate
+from django.core.files.base import ContentFile
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework import serializers
@@ -27,6 +28,7 @@ from dojo.api_v2.prefetch.prefetcher import _Prefetcher  # noqa: PLC2701 -- the 
 from dojo.models import (
     Dojo_User,
     Engagement,
+    FileUpload,
     Finding,
     Notes,
     Product,
@@ -124,6 +126,26 @@ class ListQueryScalingTest(DojoAPITestCase):
             product=self.product, name=f"list-scaling-eng-{idx}", lead=lead, target_start=START, target_end=END,
         )
 
+    def _add_finding_with_distinct_test(self, idx):
+        test = Test.objects.create(
+            engagement=self.engagement,
+            test_type=self.test.test_type,
+            title=f"list-scaling-test-{idx}",
+            target_start=TEST_START,
+            target_end=TEST_END,
+        )
+        test.tags.add(f"list-scaling-{idx}")
+        test.files.add(
+            FileUpload.objects.create(
+                title=f"list-scaling-{idx}.txt",
+                file=ContentFile(f"test {idx}".encode(), name=f"list-scaling-{idx}.txt"),
+            ),
+        )
+        return Finding.objects.create(
+            title=f"list-scaling-finding-{idx}", test=test, reporter=self.admin,
+            severity="High", numerical_severity="S1",
+        )
+
     def test_findings_list_is_flat_for_a_member_with_notes(self):
         payload = self._assert_flat(self.member, "/api/v2/findings/", {"limit": 100}, self._add_finding)
         # The member still sees only the public note of each finding.
@@ -135,6 +157,12 @@ class ListQueryScalingTest(DojoAPITestCase):
             self.member, "/api/v2/findings/", {"limit": 100, "prefetch": "test"}, self._add_finding,
         )
         self.assertEqual([str(self.test.id)], list(payload["prefetch"]["test"]))
+
+    def test_findings_list_prefetch_test_is_flat_across_distinct_tests(self):
+        payload = self._assert_flat(
+            self.admin, "/api/v2/findings/", {"limit": 100, "prefetch": "test"}, self._add_finding_with_distinct_test,
+        )
+        self.assertEqual(6, len(payload["prefetch"]["test"]))
 
     def test_findings_list_prefetch_notes_is_flat_for_a_member(self):
         payload = self._assert_flat(
