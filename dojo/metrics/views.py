@@ -44,6 +44,7 @@ from dojo.utils import (
     get_punchcard_data,
     get_system_setting,
     opened_in_period,
+    parse_ids,
     queryset_check,
 )
 
@@ -90,7 +91,7 @@ def metrics(request, mtype):
         page_name = _("%(product_type)s Metrics") % {"product_type": mtype}
         prod_type = pt
     elif "test__engagement__product__prod_type" in request.GET:
-        prod_type = Product_Type.objects.filter(id__in=request.GET.getlist("test__engagement__product__prod_type", []))
+        prod_type = Product_Type.objects.filter(id__in=parse_ids(request.GET.getlist("test__engagement__product__prod_type")))
     else:
         prod_type = get_authorized_product_types("view")
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch

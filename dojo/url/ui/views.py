@@ -48,6 +48,7 @@ from dojo.utils import (
     get_period_counts,
     get_setting,
     is_scan_file_too_large,
+    parse_ids,
     redirect,
 )
 
@@ -212,16 +213,14 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
     paged_findings = get_page_items(request, active_findings, 25)
     # Add the product tab if we are filtering by a single product
     product_tab = None
-    if "product" in request.GET:
-        product = request.GET.getlist("product", [])
-        if len(product) == 1:
-            # If a single product is selected, get the product and check permissions
-            product = get_object_or_404(Product, id=product[0])
-            user_has_permission_or_403(request.user, product, "view")
-            # Create the product tab for the view
-            product_tab = Product_Tab(product, "Host" if host_view else "Endpoint", tab="endpoints")
-            # Get the status of the location for the selected product
-            status = location.status_from_product(product)
+    if len(product_ids := parse_ids(request.GET.getlist("product"))) == 1:
+        # If a single product is selected, get the product and check permissions
+        product = get_object_or_404(Product, id=product_ids[0])
+        user_has_permission_or_403(request.user, product, "view")
+        # Create the product tab for the view
+        product_tab = Product_Tab(product, "Host" if host_view else "Endpoint", tab="endpoints")
+        # Get the status of the location for the selected product
+        status = location.status_from_product(product)
 
     return render(
         request,
@@ -307,14 +306,12 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     add_breadcrumb(title=view_name, top_level=not len(request.GET), request=request)
     # Add the product tab if we are filtering by a single product
     product_tab = None
-    if "product" in request.GET:
-        products = request.GET.getlist("product", [])
-        if len(products) == 1:
-            # If a single product is selected, get the product and check permissions
-            product = get_object_or_404(Product, id=products[0])
-            user_has_permission_or_403(request.user, product, "view")
-            # Create the product tab for the view
-            product_tab = Product_Tab(product, view_name, tab="endpoints")
+    if len(product_ids := parse_ids(request.GET.getlist("product"))) == 1:
+        # If a single product is selected, get the product and check permissions
+        product = get_object_or_404(Product, id=product_ids[0])
+        user_has_permission_or_403(request.user, product, "view")
+        # Create the product tab for the view
+        product_tab = Product_Tab(product, view_name, tab="endpoints")
 
     return render(
         request,

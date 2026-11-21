@@ -1137,6 +1137,19 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
+def parse_ids(values: list[str]) -> list[int]:
+    return [int(value) for value in values if value.isdecimal() and len(value) <= 19]
+
+
+def get_lead_filter(lead_values: list[str]) -> Q | None:
+    if not lead_values or "0" in lead_values:
+        return None
+    lead_filter = Q(lead__in=parse_ids(lead_values))
+    if "-1" in lead_values:
+        return Q(lead__isnull=True) | lead_filter
+    return lead_filter
+
+
 def get_setting(setting):
     return getattr(settings, setting)
 
