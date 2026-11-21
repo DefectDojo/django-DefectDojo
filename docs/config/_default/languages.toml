@@ -13,11 +13,8 @@
   [en.params]
     languageISO = "EN"
     languageTag = "en-US"
-  # English also gets /llms.txt (layouts/home.llmstxt.txt). This table
-  # replaces [outputs] from hugo.toml for English, so keep both keys in step
-  # with that one.
   [en.outputs]
-    home = ["HTML", "RSS", "searchIndex", "SITEMAP", "llmstxt"]
+    home = ["HTML", "RSS", "searchIndex", "SITEMAP"]
     section = ["HTML", "RSS", "SITEMAP"]
 
 [de]
