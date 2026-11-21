@@ -124,14 +124,19 @@ def api_v2_key(request):
                 reset_token_for_user(acting_user=request.user, target_user=request.user, allow_self_reset=True)
             except (RFPermissionDenied, RFValidationError) as e:
                 messages.add_message(request,
-                                    messages.ERROR,
-                                    _("API Key generation failed: %s") % str(e),
-                                    extra_tags="alert-danger")
+                                     messages.ERROR,
+                                     _("API Key generation failed: %s") % str(e),
+                                     extra_tags="alert-danger")
             else:
                 messages.add_message(request,
-                                    messages.SUCCESS,
-                                    _("API Key generated successfully."),
-                                    extra_tags="alert-success")
+                                     messages.SUCCESS,
+                                     _("API Key generated successfully."),
+                                     extra_tags="alert-success")
+            # Always redirect after a validated POST (even when the reset failed, the
+            # flash message above carries the reason): the follow-up GET loads and
+            # displays the token that was just written, and a browser refresh repeats
+            # a harmless GET instead of generating yet another key (#14933).
+            return HttpResponseRedirect(reverse("api_v2_key"))
         else:
             raise PermissionDenied
     else:
