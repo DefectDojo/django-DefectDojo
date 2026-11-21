@@ -40,7 +40,12 @@ class NmapParser:
         for host in root.findall("host"):
             host_info = "### Host\n\n"
 
-            ip = host.find("address[@addrtype='ipv4']").attrib["addr"]
+            ip_elem = host.find("address[@addrtype='ipv4']")
+            if ip_elem is None:
+                ip_elem = host.find("address[@addrtype='ipv6']")
+            if ip_elem is None:
+                ip_elem = host.find("address")
+            ip = ip_elem.attrib.get("addr") if ip_elem is not None else None
             if ip is not None:
                 host_info += f"**IP Address:** {ip}\n"
 
@@ -49,8 +54,10 @@ class NmapParser:
                 if host.find("hostnames/hostname[@type='PTR']") is not None
                 else None
             )
-            for hosts in host.find("hostnames"):
-                host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
+            hostnames = host.find("hostnames")
+            if hostnames is not None:
+                for hosts in hostnames:
+                    host_info += "**" + hosts.attrib["type"] + ":** " + hosts.attrib["name"] + "\n"
 
             host_info += "\n\n"
             for os in host.iter("os"):
