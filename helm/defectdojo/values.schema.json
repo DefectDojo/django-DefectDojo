@@ -711,6 +711,10 @@
                         "appSettings": {
                             "type": "object",
                             "properties": {
+                                "http": {
+                                    "description": "uWSGI HTTP bind for Kubernetes liveness probes (DD_UWSGI_HTTP). Use \"[::]:8081\" on IPv6-only / dual-stack clusters so kubelet can reach the probe listener.",
+                                    "type": "string"
+                                },
                                 "maxFd": {
                                     "description": "Use this value to set the maximum number of file descriptors. If set to 0 will be detected by uwsgi e.g. 102400",
                                     "type": "integer"
