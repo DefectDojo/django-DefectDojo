@@ -774,6 +774,26 @@ class FindingViewSet(
 
         return report_generate_response(request, findings, options)
 
+    @staticmethod
+    def _raise_if_metadata_finding_vanished(finding, exc):
+        """
+        Answer 404 when a metadata write lost a race with a delete of its finding.
+
+        The metadata action is not wrapped in a single transaction (ATOMIC_REQUESTS is
+        False), so a concurrent delete of the finding can remove the dojo_finding row
+        between get_object() and the dojo_dojometa insert, which then fails with a
+        foreign-key violation. The finding the caller wrote to no longer exists, so this
+        is a 404, matching perform_update. An FK violation while the finding is still
+        present is a genuine defect and is re-raised unchanged. Any other IntegrityError
+        returns, so the caller keeps its own handling (the unique-name answer).
+        """
+        if not is_foreign_key_conflict(exc):
+            return
+        if not Finding.objects.filter(pk=finding.pk).exists():
+            msg = "This finding was deleted while the request was being processed."
+            raise NotFound(msg) from exc
+        raise exc
+
     def _get_metadata(self, request, finding):
         metadata = DojoMeta.objects.filter(finding=finding)
         serializer = FindingMetaSerializer(
@@ -805,7 +825,8 @@ class FindingViewSet(
             )
 
             return Response(data=metadata_data.data, status=status.HTTP_200_OK)
-        except IntegrityError:
+        except IntegrityError as exc:
+            self._raise_if_metadata_finding_vanished(finding, exc)
             return Response(
                 "Update failed because the new name already exists",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -822,6 +843,9 @@ class FindingViewSet(
             try:
                 metadata.validate_unique()
                 metadata.save()
+            except IntegrityError as exc:
+                self._raise_if_metadata_finding_vanished(finding, exc)
+                raise
             except ValidationError:
                 return Response(
                     "Create failed probably because the name of the metadata already exists",
