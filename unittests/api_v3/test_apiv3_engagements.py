@@ -14,7 +14,7 @@ from dojo.models import Dojo_User, Engagement, Product, User
 from .base import ApiV3TestCase
 
 _SLIM_KEYS = {
-    "id", "name", "asset", "organization", "lead", "status", "engagement_type",
+    "id", "name", "engagement_number", "asset", "organization", "lead", "status", "engagement_type",
     "target_start", "target_end", "active", "tags", "created", "updated",
 }
 
@@ -149,6 +149,19 @@ class TestApiV3EngagementsQueryCount(ApiV3TestCase):
 
 
 class TestApiV3EngagementsWrite(ApiV3TestCase):
+
+    def test_create_returns_product_number(self):
+        product = Product.objects.first()
+        product.engagement_number_format = "ENG-{number:04d}"
+        product.save()
+        response = self.client.post(
+            self.v3_url("engagements"),
+            {"name": "numbered v3 engagement", "asset": product.id,
+             "target_start": "2024-01-01", "target_end": "2024-02-01"},
+            format="json",
+        )
+        self.assertEqual(201, response.status_code, response.content[:500])
+        self.assertEqual("ENG-0001", response.json()["engagement_number"])
 
     def test_create_happy_path(self):
         product = Product.objects.first()

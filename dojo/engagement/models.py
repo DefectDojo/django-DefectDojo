@@ -11,6 +11,7 @@ from django.utils.translation import gettext as _
 from django_tagulous.models import TagField
 
 from dojo.base_models.base import BaseManager, BaseModel
+from dojo.product.numbering import format_engagement_number
 from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ class Engagement(BaseModel):
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey("dojo.Report_Type", null=True, blank=True, on_delete=models.CASCADE)
     product = models.ForeignKey("dojo.Product", on_delete=models.CASCADE)
+    engagement_number = models.CharField(max_length=80, null=True, blank=True, editable=False)
     active = models.BooleanField(default=True, editable=False)
     tracker = models.URLField(max_length=200, help_text=_("Link to epic or ticket system with changes to version."), editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
@@ -113,6 +115,7 @@ class Engagement(BaseModel):
 
     class Meta:
         ordering = ["-target_start"]
+        constraints = [models.UniqueConstraint(fields=["product", "engagement_number"], name="dojo_engagement_product_number_uniq")]
         indexes = [
             models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_engagement_archive_batch"),
             models.Index(fields=["product", "active"]),
@@ -132,6 +135,31 @@ class Engagement(BaseModel):
 
     def get_absolute_url(self):
         return reverse("view_engagement", args=[str(self.id)])
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        engagement = super().from_db(db, field_names, values)
+        if "product_id" in field_names:
+            engagement._numbering_original_product_id = engagement.product_id
+        return engagement
+
+    def refresh_from_db(self, using=None, fields=None, from_queryset=None):
+        super().refresh_from_db(using=using, fields=fields, from_queryset=from_queryset)
+        if fields is None or {"product", "product_id"} & set(fields):
+            self._numbering_original_product_id = self.product_id
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        product_is_saved = update_fields is None or bool({"product", "product_id"} & set(update_fields))
+        if update_fields and product_is_saved:
+            kwargs["update_fields"] = set(update_fields) | {"engagement_number"}
+        self._numbering_product_is_saved = product_is_saved
+        try:
+            super().save(*args, **kwargs)
+        finally:
+            del self._numbering_product_is_saved
+        if product_is_saved:
+            self._numbering_original_product_id = self.product_id
 
     def pre_save_logic(self) -> None:
         """
@@ -153,6 +181,27 @@ class Engagement(BaseModel):
         for field_name in ("status", "engagement_type"):
             if not getattr(self, field_name):
                 setattr(self, field_name, self._meta.get_field(field_name).get_default())
+
+        if not getattr(self, "_numbering_product_is_saved", True):
+            return
+        if self._state.adding:
+            product_changed = True
+        elif hasattr(self, "_numbering_original_product_id"):
+            product_changed = self._numbering_original_product_id != self.product_id
+        else:
+            old_product_id = type(self).unfiltered.filter(pk=self.pk).values_list("product_id", flat=True).first()
+            product_changed = old_product_id != self.product_id
+        if not product_changed:
+            return
+
+        from dojo.product.models import Product  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        product = Product.unfiltered.select_for_update().only("engagement_number_format", "engagement_number_counter").get(pk=self.product_id)
+        self.engagement_number = None
+        if product.engagement_number_format:
+            next_number = product.engagement_number_counter + 1
+            self.engagement_number = format_engagement_number(product.engagement_number_format, next_number)
+            Product.unfiltered.filter(pk=product.pk).update(engagement_number_counter=next_number)
 
     def copy(self):
         from dojo.models import Test, copy_model_util  # noqa: PLC0415 -- lazy import, avoids circular dependency

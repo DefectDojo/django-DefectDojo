@@ -40,6 +40,7 @@ class EngagementSlim(Schema):
 
     id: int
     name: str | None
+    engagement_number: str | None
     asset: Ref
     organization: Ref
     lead: Ref | None

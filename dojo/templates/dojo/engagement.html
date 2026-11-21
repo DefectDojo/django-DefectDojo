@@ -146,7 +146,7 @@
                                             </ul>
                                 </td>
                                 <td style="white-space: normal">
-                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.name %}{{ e.name }}{% endif %}</a>
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}">{% if e.engagement_number %}{{ e.engagement_number }} · {% endif %}{% if e.name %}{{ e.name }}{% endif %}</a>
                                     <div>
                                         {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                     </div>
