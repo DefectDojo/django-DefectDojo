@@ -167,3 +167,11 @@ class TestProductEndpointReportScoping(DojoTestCase):
         body = response.content.decode()
         self.assertIn("a.example.com", body)
         self.assertNotIn("b.example.com", body)
+
+    def test_product_endpoint_report_finding_choices_are_limited_to_authorized_findings(self):
+        restricted_client = Client()
+        restricted_client.force_login(self.restricted_user)
+        response = restricted_client.get(f"/asset/{self.product_a.id}/endpoint/report")
+        self.assertEqual(response.status_code, 200, response.content[:500])
+        self.assertContains(response, f'<option value="{self.finding_a.id}">{self.finding_a.title}</option>', html=True)
+        self.assertNotContains(response, "Finding for B")

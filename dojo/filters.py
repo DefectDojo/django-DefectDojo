@@ -40,6 +40,7 @@ from dojo.finding.helper import (
     VERIFIED_FINDINGS_QUERY,
     WAS_ACCEPTED_FINDINGS_QUERY,
 )
+from dojo.finding.queries import get_authorized_findings
 from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
 from dojo.models import (
@@ -1565,6 +1566,10 @@ class EndpointReportFilter(DojoFilter):
     )
 
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form.fields["findings"].queryset = get_authorized_findings("view")
 
     class Meta:
         model = Endpoint
