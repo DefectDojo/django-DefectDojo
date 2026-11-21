@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 **Slack us first!**
-The easiest and fastest way to help you is via Slack. There's a free and easy signup to join our #defectdojo channel in the OWASP Slack workspace: [Get Access.](https://owasp.org/slack/invite)
+The easiest and fastest way to help you is via Slack. There's a free and easy signup to join our `#02-help` channel in the DefectDojo Community Slack: [Get Access.](https://defectdojocommunity.slack.com/join/shared_invite/zt-3l9028wlf-ezDB29D_MIh9ShXdesCHZA#/shared-invite/email)
 If you're confident you've found a bug, or are allergic to Slack, you can submit an issue anyway.
 
 **Be informative**

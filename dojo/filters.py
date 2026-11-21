@@ -1,4 +1,5 @@
 import collections
+import csv
 import decimal
 import logging
 from datetime import datetime, timedelta
@@ -6,10 +7,11 @@ from datetime import datetime, timedelta
 import django_tagulous as tagulous
 import six
 from django.apps import apps
-from django.db.models import Count, Exists, Min, OuterRef, Q
+from django.db.models import Count, Exists, ForeignObjectRel, Min, OuterRef, Q
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     DateFilter,
     FilterSet,
@@ -20,6 +22,7 @@ from django_filters import (
     RangeFilter,
 )
 from django_filters import rest_framework as filters
+from django_filters.constants import EMPTY_VALUES
 from django_filters.filters import ChoiceFilter
 
 # from tagulous.forms import TagWidget
@@ -71,6 +74,14 @@ def custom_filter(queryset, name, value):
     return queryset.filter(Q(**{cust_filter: values}))
 
 
+def quoted_list_filter(queryset, name, value):
+    # custom_filter for values that may hold a comma (an Asset attribute option's value): such a
+    # value travels in double quotes, CSV-style (``"beta, ga",production``). A list without quotes
+    # splits on every comma exactly as custom_filter does.
+    values = next(csv.reader([value]), [])
+    return queryset.filter(Q(**{f"{name}__in": values}))
+
+
 def custom_vulnerability_id_filter(queryset, name, value):
     values = value.split(",")
     return queryset.filter(id__in=finding_ids_with_vulnerability_ids(values, lookup="in"))
@@ -101,6 +112,131 @@ class CharFieldFilterANDExpression(CharFieldInFilter):
             .annotate(object_count=Count(self.field_name))
             .filter(object_count=len(objects))
         )
+
+
+def tag_exists(model, field_name, lookup, value):
+    """
+    Exists() over a tags through table, for a filter on ``[<relation>__]tags__name``.
+
+    A JOIN-based lookup on ``tags__name`` emits one row per matching tag, so the filter
+    needed a query-wide DISTINCT over the whole wide finding row, and its exclude form
+    became a NOT EXISTS that re-joined the base table to itself. This tests membership
+    directly on ``<model>_tags`` instead: one indexed probe per outer row, and the
+    outer row count never changes, so no DISTINCT is needed.
+
+    For a related model's tags (``test__engagement__tags__name``) the subquery runs on
+    that model's through table and correlates on the relation's id.
+
+    The matching tags are resolved to their ids first (one indexed read of the tag table),
+    and the subquery tests the through table against those ids. Matching the name through
+    a join instead hides which tag the query is about: the planner then assumes the
+    average number of rows per tag, so for a tag carried by most rows it expected hundreds
+    where there were hundreds of thousands, and chose a plan that probed every one of them
+    (20 s instead of 2.5 s for one COUNT over 400k tagged findings). A lookup that matches
+    more than TAG_ID_LITERAL_LIMIT tags (a short ``icontains`` value) keeps the join.
+    """
+    path, tags_field = _tags_field(model, field_name)
+    name_lookup = "name" if lookup == "exact" else f"name__{lookup}"
+    tag_ids = list(tags_field.related_model.objects.filter(**{name_lookup: value}).values_list("pk", flat=True)[
+        :TAG_ID_LITERAL_LIMIT + 1])
+    if len(tag_ids) > TAG_ID_LITERAL_LIMIT:
+        return _tags_exist(path, tags_field, {f"{tags_field.m2m_reverse_field_name()}__{name_lookup}": value})
+    return _tags_exist(path, tags_field, {f"{tags_field.m2m_reverse_field_name()}__in": tag_ids})
+
+
+# How many tag ids tag_exists writes into the query as literals before it matches by name instead.
+TAG_ID_LITERAL_LIMIT = 1000
+
+
+def _tags_field(model, field_name):
+    """The relation path to the tagged model and its tags field, for a ``[<relation>__]tags__name`` field."""
+    *path, tags_field_name, name = field_name.split("__")
+    if name != "name":
+        msg = f"tag_exists expects a <path>__tags__name field, got {field_name}"
+        raise ValueError(msg)
+    tagged_model = model
+    for part in path:
+        tagged_model = tagged_model._meta.get_field(part).related_model
+    return path, tagged_model._meta.get_field(tags_field_name)
+
+
+def _tags_exist(path, tags_field, tag_condition):
+    outer = "__".join([*path, "pk"]) if path else "pk"
+    return Exists(tags_field.remote_field.through.objects.filter(
+        **{tags_field.m2m_field_name(): OuterRef(outer), **tag_condition},
+    ))
+
+
+class TagExistsFilterMixin:
+
+    """
+    Tag filter that matches through tag_exists() rather than a JOIN.
+
+    Same matches as the JOIN form (``exclude`` still means "has no tag that matches"),
+    but the base rows are never multiplied, so DojoFilter.filter_queryset skips its
+    DISTINCT for these filters (``multiplies_rows``).
+    """
+
+    multiplies_rows = False
+
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        condition = tag_exists(qs.model, self.field_name, self.lookup_expr, value)
+        return qs.filter(~condition if self.exclude else condition)
+
+
+class TagNameFilter(TagExistsFilterMixin, CharFilter):
+    pass
+
+
+class TagNameInFilter(TagExistsFilterMixin, CharFieldInFilter):
+    pass
+
+
+class TagNameANDFilter(CharFieldFilterANDExpression):
+
+    """
+    Every listed tag must be present: one Exists() per tag instead of GROUP BY ... HAVING COUNT.
+
+    The listed names are resolved to tag ids in one read (see tag_exists for why the subqueries name
+    ids). A name that is no tag cannot be present, so the whole filter matches nothing.
+    """
+
+    multiplies_rows = False
+
+    def filter(self, queryset, value):
+        if not value:
+            return queryset
+        names = set(value.split(","))
+        path, tags_field = _tags_field(queryset.model, self.field_name)
+        tag_ids = dict(tags_field.related_model.objects.filter(name__in=names).values_list("name", "pk"))
+        if len(tag_ids) < len(names):
+            return queryset.none()
+        for tag_id in tag_ids.values():
+            queryset = queryset.filter(
+                _tags_exist(path, tags_field, {f"{tags_field.m2m_reverse_field_name()}__in": [tag_id]}))
+        return queryset
+
+
+class HasTagsFilter(BooleanFilter):
+
+    """``has_tags=true|false`` as Exists() on the through table, not a self-joined ``tags IS NULL`` test."""
+
+    multiplies_rows = False
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("field_name", "tags")
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        tags_field = qs.model._meta.get_field(self.field_name)
+        condition = Exists(tags_field.remote_field.through.objects.filter(
+            **{tags_field.m2m_field_name(): OuterRef("pk")},
+        ))
+        return qs.filter(condition if value else ~condition)
 
 
 class FindingStatusFilter(ChoiceFilter):
@@ -287,6 +423,48 @@ def cwe_options(queryset):
     return list(cwe.items())
 
 
+def query_has_multivalued_join(query):
+    """
+    Whether the outer query joins a to-many relation, so one base row can come back several times.
+
+    A reverse foreign key or a many-to-many hop is a Join whose ``join_field`` is the reverse
+    side of a non-unique field (Django's PathInfo marks the same hop ``m2m``). Subqueries such as
+    Exists() keep their joins in their own query, and a GROUP BY already returns one row per group.
+    """
+    if query.distinct or query.group_by is not None:
+        return False
+    for alias, join in query.alias_map.items():
+        join_field = getattr(join, "join_field", None)
+        if not query.alias_refcount.get(alias) or not isinstance(join_field, ForeignObjectRel):
+            continue
+        if not join_field.field.unique:
+            return True
+    return False
+
+
+def order_with_pk_tiebreak(queryset):
+    """
+    End a list queryset's ordering on the primary key (ascending) unless a term already is the pk.
+
+    LIMIT/OFFSET over a sort key that repeats (title, severity, date, an aggregated reviewer) leaves the
+    order of tied rows to Postgres. A plain ``ORDER BY ... LIMIT`` is a top-N sort, and two pages of it
+    can disagree on where the ties fall, so a row can appear on both or on neither; with no ORDER BY at
+    all (``o=`` clears the ordering) every page is a separate unordered scan. The pk makes every page
+    boundary stable, so an empty ordering becomes pk order.
+
+    Apply this where a list is paginated, not inside a filterset: filtersets also feed ``.values()``
+    aggregations, and an explicit ORDER BY column joins their GROUP BY.
+    """
+    query = queryset.query
+    ordering = list(query.order_by) or (list(queryset.model._meta.ordering or ()) if query.default_ordering else [])
+    pk_names = {"pk", queryset.model._meta.pk.name, queryset.model._meta.pk.attname}
+    for term in ordering:
+        name = term.lstrip("-") if isinstance(term, str) else getattr(getattr(term, "expression", term), "name", None)
+        if name in pk_names:
+            return queryset
+    return queryset.order_by(*ordering, "pk")
+
+
 class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -314,6 +492,14 @@ class DojoFilter(FilterSet):
         qs = super().filter_queryset(queryset)
         if hasattr(self, "form") and hasattr(self.form, "cleaned_data"):
             for name, f in self.filters.items():
+                if not getattr(f, "multiplies_rows", True):
+                    # Exists()-based tag filters (TagExistsFilterMixin) never duplicate base rows
+                    # themselves. They used to bring a DISTINCT along with them, though, and that
+                    # DISTINCT also covered any other to-many join in the query, so keep it in
+                    # exactly that case.
+                    if self.form.cleaned_data.get(name) not in EMPTY_VALUES and query_has_multivalued_join(qs.query):
+                        return qs.distinct()
+                    continue
                 field_name = getattr(f, "field_name", "") or ""
                 # Only apply distinct for tag lookups that can duplicate base rows
                 if "tags__name" in field_name:
@@ -1441,8 +1627,6 @@ import importlib  # noqa: E402
 # classes (DojoFilter, ...) at import time, so eagerly importing them back here
 # creates circular imports. Instead expose them lazily via PEP 562 __getattr__,
 # which only resolves the target module when the name is actually accessed.
-from django_filters import BooleanFilter  # noqa: E402, F401 -- backward compat re-export
-
 from dojo.auditlog.filters import LogEntryFilter, PgHistoryFilter  # noqa: E402, F401 -- backward compat
 from dojo.models import Product_API_Scan_Configuration  # noqa: E402, F401 -- backward compat re-export
 

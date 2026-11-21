@@ -10,11 +10,11 @@ different languages, and neither setting affects the other.
 
 ## Choosing a language
 
-Open the **language** button and pick from the list. Where that button is depends on which
-interface you are in:
+Where you choose depends on which interface you are in:
 
-- **DefectDojo Pro**: the globe icon in the sidebar, between your account button and the alerts
-  bell. The interface switches as soon as you choose, with no reload.
+- **DefectDojo Pro**: open the account menu from your username at the bottom of the sidebar,
+  choose **Language** (the language in use is shown beside it), and pick from the list. The interface switches as soon as you choose,
+  with no reload.
 - **DefectDojo (open source)**: the **Language** field on your profile page, saved with the rest
   of the form.
 
@@ -43,6 +43,10 @@ separately from the open source ones.
 
 **Translated**: menus, buttons, headings, form labels, help text, confirmation dialogs, table
 column headers and the messages DefectDojo shows you.
+
+In DefectDojo Pro, a dashboard tile keeps its default title until someone types another, and that
+default is shown in the language of whoever is looking, so one shared dashboard reads in each
+viewer's language. A title someone typed is their own text and stays exactly as written.
 
 Notifications are translated too, and in **your** language rather than the language of whoever
 caused them. If a colleague reading DefectDojo in German does something that notifies you, the

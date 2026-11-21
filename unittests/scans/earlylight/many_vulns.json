@@ -1,0 +1,264 @@
+{
+  "tool": "earlylight",
+  "version": "v0.3.2-0.20261103043243-19c2e2404ae6",
+  "detectors": [
+    {
+      "id": "brotli",
+      "title": "Brotli decoder vulnerable to CVE-2026-111497",
+      "cves": [
+        "CVE-2026-111497"
+      ],
+      "advisories": [
+        "https://github.com/advisories/GHSA-9v8h-qqgm-4m35",
+        "https://github.com/google/brotli/releases/tag/v1.2.1",
+        "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+        "https://github.com/dotnet/announcements/issues/494"
+      ],
+      "data": "Brotli decoder error-code tables (google/brotli 1.0.0 to 1.2.1) and the fixed Node.js, .NET and Bun releases"
+    },
+    {
+      "id": "emudhra",
+      "title": "Trust in the compromised eMudhra intermediate CA keys",
+      "cves": [
+        "CVE-2026-111943"
+      ],
+      "advisories": [
+        "https://bugzilla.mozilla.org/show_bug.cgi?id=2083449"
+      ],
+      "data": "eight compromised intermediates and four path roots (Mozilla bug 2083449)"
+    },
+    {
+      "id": "php2shell",
+      "title": "PHP2Shell: PHP vulnerable to CVE-2026-109618 and CVE-2026-109619",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "advisories": [
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+      ],
+      "data": "distribution fix data from 2026-10-21T16:25:30Z"
+    }
+  ],
+  "targets": [
+    {
+      "target": "php:8.3.0-cli",
+      "type": "image",
+      "digest": "sha256:33b1f2a2edaa92c73b41cbb078e8c1abce9b4ebe41af870415c6361830667da7",
+      "platform": "linux/amd64",
+      "files_scanned": 8854,
+      "files_read": 8854,
+      "findings": [
+        {
+          "detector": "brotli",
+          "kind": "decoder-library",
+          "path": "/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.0.9",
+          "verdict": "vulnerable",
+          "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added",
+          "message": "Brotli decoder without the CVE-2026-111497 fix (libbrotlidec)",
+          "method": "brotli-error-table",
+          "facts": {
+            "block_switch": "no",
+            "distance": "yes",
+            "error_table": "bare",
+            "product": "libbrotlidec"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-111497",
+              "verdict": "vulnerable",
+              "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added"
+            }
+          ],
+          "fix": "Update the system Brotli package (libbrotli1, brotli-libs, libbrotli or brotli) to your vendor's fixed build, or build Brotli 1.0.10, 1.1.1 or 1.2.1, then restart the programs that load it.",
+          "details": {
+            "kind": "decoder-library",
+            "path": "/usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.0.9",
+            "status": "vulnerable",
+            "reason": "the decoder's error table has DISTANCE (Brotli 1.0.3 and later) but not BLOCK_SWITCH, the error code the fix added",
+            "message": "Brotli decoder without the CVE-2026-111497 fix (libbrotlidec)",
+            "method": "brotli-error-table",
+            "product": "libbrotlidec",
+            "fix": "Update the system Brotli package (libbrotli1, brotli-libs, libbrotli or brotli) to your vendor's fixed build, or build Brotli 1.0.10, 1.1.1 or 1.2.1, then restart the programs that load it.",
+            "table": "bare",
+            "block_switch": false,
+            "distance": true
+          }
+        },
+        {
+          "detector": "emudhra",
+          "kind": "path-root",
+          "path": "/etc/ssl/certs/ca-certificates.crt",
+          "verdict": "vulnerable",
+          "message": "contains CA \"AAA Certificate Services\", which issued or cross-signed the compromised eMudhra intermediates",
+          "method": "pem",
+          "facts": {
+            "cert_sha256": "D7A7A0FB5D7E2731D771E9484EBCDEF71D5F0C3E0A2948782BC83EE0EA699EF4",
+            "spki_sha256": "BD153ED7B0434F6886B17BCE8BBE84ED340C7132D702A8F4FA318F756ECBD6F3",
+            "subject": "AAA Certificate Services"
+          },
+          "details": {
+            "kind": "path-root",
+            "path": "/etc/ssl/certs/ca-certificates.crt",
+            "subject": "AAA Certificate Services",
+            "spki_sha256": "BD153ED7B0434F6886B17BCE8BBE84ED340C7132D702A8F4FA318F756ECBD6F3",
+            "cert_sha256": "D7A7A0FB5D7E2731D771E9484EBCDEF71D5F0C3E0A2948782BC83EE0EA699EF4",
+            "method": "pem",
+            "detail": "contains CA \"AAA Certificate Services\", which issued or cross-signed the compromised eMudhra intermediates"
+          }
+        },
+        {
+          "detector": "emudhra",
+          "kind": "path-root",
+          "path": "/etc/ssl/certs/ca-certificates.crt",
+          "verdict": "vulnerable",
+          "message": "contains CA \"emSign ECC Root CA - G3\", which issued or cross-signed the compromised eMudhra intermediates",
+          "method": "pem",
+          "facts": {
+            "cert_sha256": "86A1ECBA089C4A8D3BBE2734C612BA341D813E043CF9E8A862CD5C57A36BBE6B",
+            "spki_sha256": "8D417DB2DD8BF5E3084D1E3F196D583849D81BDD4C00C70B9D39369E96B8C782",
+            "subject": "emSign ECC Root CA - G3"
+          },
+          "details": {
+            "kind": "path-root",
+            "path": "/etc/ssl/certs/ca-certificates.crt",
+            "subject": "emSign ECC Root CA - G3",
+            "spki_sha256": "8D417DB2DD8BF5E3084D1E3F196D583849D81BDD4C00C70B9D39369E96B8C782",
+            "cert_sha256": "86A1ECBA089C4A8D3BBE2734C612BA341D813E043CF9E8A862CD5C57A36BBE6B",
+            "method": "pem",
+            "detail": "contains CA \"emSign ECC Root CA - G3\", which issued or cross-signed the compromised eMudhra intermediates"
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-cli",
+          "path": "/usr/local/bin/php",
+          "verdict": "vulnerable",
+          "reason": "PHP 8.3.0 is below the fixed release 8.3.36; no package manager installed this file, so no vendor backport applies",
+          "message": "PHP 8.3.0 (cli)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.0",
+            "sapi": "cli"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "vulnerable",
+              "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "vulnerable",
+              "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+            }
+          ],
+          "fix": "Rebuild on PHP 8.3.36 or later (for the official Docker image, a php:8.3.36 tag), then redeploy.",
+          "severity": "high",
+          "details": {
+            "path": "/usr/local/bin/php",
+            "php_version": "8.3.0",
+            "sapi": "cli",
+            "web_facing": false,
+            "status": "vulnerable",
+            "severity": "high",
+            "reason": "PHP 8.3.0 is below the fixed release 8.3.36; no package manager installed this file, so no vendor backport applies",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "vulnerable",
+                "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "vulnerable",
+                "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "12",
+              "codename": "bookworm",
+              "pretty_name": "Debian GNU/Linux 12 (bookworm)"
+            },
+            "fix": "Rebuild on PHP 8.3.36 or later (for the official Docker image, a php:8.3.36 tag), then redeploy."
+          }
+        },
+        {
+          "detector": "php2shell",
+          "kind": "php-runtime-web",
+          "path": "/usr/local/bin/php-cgi",
+          "verdict": "vulnerable",
+          "reason": "PHP 8.3.0 is below the fixed release 8.3.36; no package manager installed this file, so no vendor backport applies",
+          "message": "PHP 8.3.0 (cgi-fcgi)",
+          "method": "elf-strings",
+          "facts": {
+            "php_version": "8.3.0",
+            "sapi": "cgi-fcgi"
+          },
+          "cves": [
+            {
+              "id": "CVE-2026-109618",
+              "verdict": "vulnerable",
+              "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+            },
+            {
+              "id": "CVE-2026-109619",
+              "verdict": "vulnerable",
+              "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+            }
+          ],
+          "fix": "Rebuild on PHP 8.3.36 or later (for the official Docker image, a php:8.3.36 tag), then redeploy.",
+          "severity": "critical",
+          "details": {
+            "path": "/usr/local/bin/php-cgi",
+            "php_version": "8.3.0",
+            "sapi": "cgi-fcgi",
+            "web_facing": true,
+            "status": "vulnerable",
+            "severity": "critical",
+            "reason": "PHP 8.3.0 is below the fixed release 8.3.36; no package manager installed this file, so no vendor backport applies",
+            "cves": [
+              {
+                "id": "CVE-2026-109618",
+                "status": "vulnerable",
+                "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+              },
+              {
+                "id": "CVE-2026-109619",
+                "status": "vulnerable",
+                "reason": "PHP 8.3.0 is below the fixed release 8.3.36"
+              }
+            ],
+            "os": {
+              "id": "debian",
+              "version_id": "12",
+              "codename": "bookworm",
+              "pretty_name": "Debian GNU/Linux 12 (bookworm)"
+            },
+            "fix": "Rebuild on PHP 8.3.36 or later (for the official Docker image, a php:8.3.36 tag), then redeploy."
+          }
+        }
+      ],
+      "skipped": [
+        {
+          "path": "/usr/src/php.tar.xz!/php-8.3.0/ext/bz2/tests/004_2.txt.bz2",
+          "reason": "bzip2: bzip2 data invalid: block checksum mismatch"
+        },
+        {
+          "path": "/usr/src/php.tar.xz!/php-8.3.0/ext/bz2/tests/72613.bz2",
+          "reason": "bzip2: bzip2 data invalid: block checksum mismatch"
+        }
+      ],
+      "annotations": {
+        "os": {
+          "id": "debian",
+          "version_id": "12",
+          "codename": "bookworm",
+          "pretty_name": "Debian GNU/Linux 12 (bookworm)"
+        }
+      }
+    }
+  ]
+}

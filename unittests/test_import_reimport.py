@@ -1538,7 +1538,8 @@ class ImportReimportMixin:
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(0, active_findings_before)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=1):
+        # Zap1, Zap2 and Zap3 are still in the report, so all three are untouched (none is closed).
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=3):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         self.assertEqual(reimport0["test"], test_id)
@@ -3108,6 +3109,17 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         if not settings.V3_FEATURE_LOCATIONS:
             return super().db_endpoint_status_count(mitigated=mitigated)
         return self.db_location_status_count(mitigated)
+
+    # Regression: a Generic Findings Import whose component_name exceeded the Finding
+    # column width answered 500 (DataError: value too long for type character varying(500))
+    # instead of a 400 naming the field.
+    def test_import_generic_json_field_longer_than_model_max_length_returns_400(self):
+        fixture = get_unit_tests_scans_path("generic") / "generic_component_name_too_long.json"
+        result = self.import_scan_with_params(fixture, scan_type=self.scan_type_generic, expected_http_status_code=400)
+        message = str(result)
+        self.assertIn("component_name", message, msg=f"expected the field name in the 400 body, got: {message}")
+        persisted = Finding.objects.filter(title="Polyfill Detected").count()
+        self.assertEqual(0, persisted, msg=f"expected no finding persisted from a rejected import, persisted={persisted}")
 
 
 @versioned_fixtures

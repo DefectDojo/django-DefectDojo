@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Count
 from django.db.models.expressions import Case, When
@@ -45,27 +46,42 @@ def _get_annotations_for_statistics():
 
 
 def _get_statistics_for_queryset(qs, annotation_factory):
+    return _get_statistics_by_group(qs, annotation_factory)[None]
+
+
+def _get_statistics_by_group(qs, annotation_factory, group_field=None, groups=(None,)):
+    """
+    Per-severity statistics of ``qs``, one query for all of ``groups``.
+
+    Without ``group_field`` the result is ``{None: stats}``. With it, the rows are also grouped by that
+    field and the result maps each value in ``groups`` to its own stats (the defaults when it has no rows).
+    """
+    annotations = annotation_factory()
+    group_by = ["sev"] if group_field is None else [group_field, "sev"]
     # order by to get rid of default ordering that would mess with group_by
     # group by severity (lowercase)
-    values = qs.annotate(sev=Lower("severity")).values("sev").order_by()
+    values = qs.annotate(sev=Lower("severity")).values(*group_by).order_by()
     # add annotation for each status field
-    values = values.annotate(**annotation_factory())
+    values = values.annotate(**annotations)
     # make sure sev and total are included
-    stat_fields = ["sev", "total", *STATS_FIELDS]
-    # go for it
-    values = values.values(*stat_fields)
+    values = values.values(*group_by, "total", *STATS_FIELDS)
 
-    # not sure if there's a smarter way to convert a list of dicts into a dict of dicts
     # need to copy the DEFAULT_STATS otherwise it gets overwritten
-    stats = copy.copy(DEFAULT_STATS)
+    result = {group: copy.copy(DEFAULT_STATS) for group in groups}
+    totals = {group: dict.fromkeys(annotations, 0) for group in groups}
     for row in values:
+        group = row.pop(group_field) if group_field is not None else None
+        if group not in result:
+            continue
         sev = row.pop("sev")
-        stats[sev] = row
-
-    values_total = qs.values()
-    values_total = values_total.aggregate(**annotation_factory())
-    stats["total"] = values_total
-    return stats
+        result[group][sev] = row
+        # Every annotation is a count, so the per-severity rows add up to what aggregating
+        # the whole queryset returns, without a second query.
+        for key in annotations:
+            totals[group][key] += row[key]
+    for group, stats in result.items():
+        stats["total"] = totals[group]
+    return result
 
 
 def _sync_inherited_tags(obj, incoming_inherited_tags):
@@ -158,6 +174,7 @@ from dojo.product.models import (  # noqa: E402 -- re-export; class-body FKs bel
     Product_Line,  # noqa: F401 -- re-export
 )
 from dojo.product_type.models import Product_Type  # noqa: E402, F401 -- re-export
+from dojo.query_hooks import HookedManager, UnfilteredManager  # noqa: E402
 from dojo.reports.models import Report_Type  # noqa: E402, F401 -- re-export
 from dojo.test.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     IMPORT_ACTIONS,  # noqa: F401 -- re-export
@@ -203,6 +220,14 @@ class DojoMeta(models.Model):
                                  editable=False,
                                  related_name="location_meta_scope")
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         unique_together = (("product", "name"),
                            ("endpoint", "name"),
@@ -235,6 +260,11 @@ class DojoMeta(models.Model):
             raise ValidationError(msg)
 
 
+# The longest SLA period, in days (about 100 years): a sane upper bound for a remediation period, well inside the
+# date range a finding's SLA expiration can hold. 0 makes a finding due on the day its SLA starts.
+SLA_DAYS_MAX = 36500
+
+
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_("Custom SLA Name"),
         help_text=_("A unique name for the set of SLAs."))
@@ -244,6 +274,7 @@ class SLA_Configuration(models.Model):
         blank=True)
     critical = models.IntegerField(
         default=7,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("Critical Finding SLA Days"),
         help_text=_("The number of days to remediate a critical finding."))
     enforce_critical = models.BooleanField(
@@ -252,6 +283,7 @@ class SLA_Configuration(models.Model):
         help_text=_("When enabled, critical findings will be assigned an SLA expiration date based on the critical finding SLA days within this SLA configuration."))
     high = models.IntegerField(
         default=30,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("High Finding SLA Days"),
         help_text=_("The number of days to remediate a high finding."))
     enforce_high = models.BooleanField(
@@ -260,6 +292,7 @@ class SLA_Configuration(models.Model):
         help_text=_("When enabled, high findings will be assigned an SLA expiration date based on the high finding SLA days within this SLA configuration."))
     medium = models.IntegerField(
         default=90,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("Medium Finding SLA Days"),
         help_text=_("The number of days to remediate a medium finding."))
     enforce_medium = models.BooleanField(
@@ -268,6 +301,7 @@ class SLA_Configuration(models.Model):
         help_text=_("When enabled, medium findings will be assigned an SLA expiration date based on the medium finding SLA days within this SLA configuration."))
     low = models.IntegerField(
         default=120,
+        validators=[MinValueValidator(0), MaxValueValidator(SLA_DAYS_MAX)],
         verbose_name=_("Low Finding SLA Days"),
         help_text=_("The number of days to remediate a low finding."))
     enforce_low = models.BooleanField(
@@ -342,14 +376,6 @@ class SLA_Configuration(models.Model):
                 # Mirror that on this in-memory instance so a subsequent save() on the
                 # same instance does not trigger the lock-revert path at line 1058.
                 self.async_updating = False
-
-    def clean(self):
-        sla_days = [self.critical, self.high, self.medium, self.low]
-
-        for sla_day in sla_days:
-            if sla_day < 1:
-                msg = "SLA Days must be at least 1"
-                raise ValidationError(msg)
 
     def delete(self, *args, **kwargs):
         logger.debug("%d sla configuration delete", self.id)
@@ -530,6 +556,14 @@ class Languages(models.Model):
     code = models.IntegerField(blank=True, null=True, verbose_name=_("Number of code lines"))
     created = models.DateTimeField(auto_now_add=True, null=False)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         unique_together = [("language", "product")]
 
@@ -549,6 +583,14 @@ class App_Analysis(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         indexes = [

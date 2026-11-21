@@ -3,8 +3,11 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
+from parameterized import parameterized
 
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
@@ -444,6 +447,144 @@ class BulkApplyParserTagsTest(TestCase):
             self.assertEqual([t.name for t in f.tags.all()], [f"resource-{i}"])
 
         self.assertEqual(self.tag_model.objects.count(), 20)
+
+    # Regression: a finding that listed one tag twice, or in two cases, got one through row but a
+    # count of 2 (or 3), because each (finding, tag) pair was counted once per name that resolved to it.
+    @parameterized.expand([
+        ("exact_duplicate_new_tag", None, ["owasp", "owasp"]),
+        ("case_variants_new_tag", None, ["Network", "network", "NETWORK"]),
+        ("case_variants_existing_tag", "network", ["Network", "network"]),
+    ])
+    def test_a_tag_listed_twice_for_one_finding_is_counted_once(self, case, existing_name, tag_list):
+        if existing_name:
+            self.tag_model.objects.bulk_create([self.tag_model(name=existing_name, slug=existing_name, count=0, protected=False)])
+        duplicated = self._make_finding("F-dup")
+        other = self._make_finding("F-other")
+
+        bulk_apply_parser_tags([(duplicated, tag_list), (other, [tag_list[0]])])
+
+        tag = self.tag_model.objects.get()
+        self.assertEqual([tag.id], list(duplicated.tags.values_list("id", flat=True)))
+        self.assertEqual([tag.id], list(other.tags.values_list("id", flat=True)))
+        # The stored count matches the through rows: one for each finding.
+        self.assertEqual(2, tag.count, msg=case)
+
+    def test_mapping_returns_one_created_relationship_per_pair(self):
+        finding = self._make_finding("F-dup-mapping")
+
+        created = bulk_add_tag_mapping({"pci": [finding, finding], "PCI": [finding]})
+
+        self.assertEqual(1, created)
+        self.assertEqual(1, self.tag_model.objects.get().count)
+
+
+# Regression: bulk_add_tag_mapping looked tags up by LOWER(name), which no index serves, so every
+# import batch with parser tags read the whole finding tag table.
+class BulkTagMappingNameLookupTest(TestCase):
+
+    """
+    The tag lookup of an import is served by the UPPER(name) index, and matches names the way tagulous does.
+
+    Tag fields are case-insensitive, so tagulous resolves a tag with ``name__iexact``
+    (``UPPER("name"::text) = UPPER(%s)``), which ``dojo.0308``'s ``UPPER(name)`` index serves.
+    """
+
+    def setUp(self):
+        self.tag_model = Finding.tags.tag_model
+        self.tag_table = self.tag_model._meta.db_table
+        reporter = User.objects.create_user(username="name-lookup-user")
+        product = Product.objects.create(
+            name="Name Lookup Product", description="x", prod_type=Product_Type.objects.create(name="PT-Name-Lookup"),
+        )
+        engagement = Engagement.objects.create(
+            name="E-Name-Lookup", product=product, target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test = Test.objects.create(
+            title="T-Name-Lookup", engagement=engagement, test_type=Test_Type.objects.create(name="Name Lookup Type"),
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        self.finding = Finding.objects.create(title="F-Name-Lookup", severity="Low", test=test, reporter=reporter)
+
+    def _existing_tag(self, name):
+        # bulk_create keeps the name as written (save() would apply the field's force_lowercase).
+        return self.tag_model.objects.bulk_create([self.tag_model(name=name, slug=name, count=0, protected=False)])[0]
+
+    def _name_lookups(self, queries):
+        """The statements that read the tag table by name (the bulk lookup and any per-name fallback)."""
+        table = f'"{self.tag_table}"'
+        return [q["sql"] for q in queries if q["sql"].startswith("SELECT") and table in q["sql"] and '"name"' in q["sql"]]
+
+    def test_the_tag_lookup_uses_the_upper_name_index(self):
+        # On the few rows of a test database the planner may read the whole table regardless, so the
+        # table first gets 5,000 tags and fresh statistics (both rolled back with the test's transaction).
+        self.tag_model.objects.bulk_create(
+            self.tag_model(name=f"lookup-filler-{n}", slug=f"lookup-filler-{n}", count=0, protected=False)
+            for n in range(5000)
+        )
+        self._existing_tag("shared-01")
+        with connection.cursor() as cursor:
+            cursor.execute(f'ANALYZE "{self.tag_table}"')
+
+        with CaptureQueriesContext(connection) as ctx:
+            bulk_apply_parser_tags([(self.finding, ["Shared-01", "pr-new-1", "run-new-1"])])
+
+        lookup = self._name_lookups(ctx.captured_queries)[0]
+        with connection.cursor() as cursor:
+            cursor.execute(f"EXPLAIN {lookup}")
+            plan = "\n".join(row[0] for row in cursor.fetchall())
+        self.assertIn(f"using idx_{self.tag_table.removeprefix('dojo_')}_upper_name", plan, msg=f"{lookup}\n{plan}")
+        self.assertNotIn("Seq Scan", plan, msg=f"{lookup}\n{plan}")
+        self.assertCountEqual(["shared-01", "pr-new-1", "run-new-1"], [t.name for t in self.finding.tags.all()])
+
+    @parameterized.expand([
+        # LOWER and UPPER disagree on the dotless i (U+0131): its UPPER is "I", its LOWER is itself.
+        ("dotless_i", "\u0131d-tag", "ID-TAG"),
+        # Python upper-cases "ß" to "SS" and PostgreSQL leaves it, so tagulous keeps "straße" apart from "strasse".
+        ("sharp_s", "strasse", "straße"),
+        ("ascii_case_variant", "Mixed-Case", "mixed-CASE"),
+        # U+019B is newer than the database's Unicode tables: Python upper-cases it to U+A7DC, PostgreSQL leaves it.
+        ("letter_newer_than_the_database", "\ua7dc-tag", "\u019b-tag"),
+    ])
+    def test_a_name_resolves_to_the_tag_tagulous_resolves_it_to(self, case, existing_name, requested):
+        self._existing_tag(existing_name)
+        tagulous_match = list(self.tag_model.objects.filter(name__iexact=requested).values_list("id", flat=True))
+
+        with CaptureQueriesContext(connection) as ctx:
+            bulk_apply_parser_tags([(self.finding, [requested])])
+
+        applied = list(self.finding.tags.values_list("id", "name"))
+        self.assertEqual(1, len(applied), msg=f"tags applied: {applied}")
+        if tagulous_match:
+            self.assertEqual(tagulous_match, [applied[0][0]], msg=f"{case}: tagulous resolves {requested!r} to {tagulous_match}, applied {applied}")
+            # The tag was found by the bulk lookup itself, not by a per-name get_or_create fallback.
+            self.assertEqual(1, len(self._name_lookups(ctx.captured_queries)), msg=ctx.captured_queries)
+        else:
+            self.assertEqual(2, self.tag_model.objects.count(), msg=f"{case}: tags applied: {applied}")
+            self.assertNotEqual(existing_name, applied[0][1])
+
+    def test_stored_case_variants_resolve_to_the_oldest_tag(self):
+        # The case-sensitive unique index on name allows rows that differ only in case (older data).
+        oldest = self._existing_tag("network")
+        self._existing_tag("Network")
+        self._existing_tag("NETWORK")
+
+        bulk_apply_parser_tags([(self.finding, ["Network"])])
+
+        self.assertEqual([oldest.id], list(self.finding.tags.values_list("id", flat=True)))
+        self.assertEqual(1, self.tag_model.objects.get(id=oldest.id).count)
+
+    def test_case_variants_in_one_batch_share_the_existing_tag(self):
+        existing = self._existing_tag("network")
+        other = Finding.objects.create(title="F-Name-Lookup-2", severity="Low", test=self.finding.test, reporter=self.finding.reporter)
+
+        with CaptureQueriesContext(connection) as ctx:
+            bulk_apply_parser_tags([(self.finding, ["Network"]), (other, ["NETWORK"])])
+
+        for finding in (self.finding, other):
+            self.assertEqual([existing.id], list(finding.tags.values_list("id", flat=True)))
+        self.assertEqual(1, self.tag_model.objects.count())
+        self.assertEqual(2, self.tag_model.objects.get(id=existing.id).count)
+        self.assertEqual(1, len(self._name_lookups(ctx.captured_queries)), msg=ctx.captured_queries)
 
 
 @versioned_fixtures

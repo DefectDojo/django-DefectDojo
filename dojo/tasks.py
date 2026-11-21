@@ -1,24 +1,105 @@
 import logging
+from datetime import timedelta
+from itertools import batched
 
 import pghistory
 from celery import Task
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
 from django.core.management import call_command
+from django.db import transaction
 from django.db.models import Count, IntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.finding.helper import bulk_delete_findings, fix_loop_duplicates
+from dojo.importers.import_lock import tests_under_import_now, tests_with_import_lock_held
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
-from dojo.models import Finding, System_Settings
+from dojo.models import Finding, System_Settings, Test
 from dojo.utils import schedule_product_grade
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# Findings locked and re-checked per transaction by _delete_excess_duplicates.
+DUPE_DELETE_CHUNK_SIZE = 1000
+
+# A plugin may set excess duplicates aside instead of deleting them. The handler gets each
+# chunk's queryset inside the chunk's transaction, with the rows already locked, and returns
+# True when it has dealt with them. It must leave them out of Finding.objects, or the next run
+# selects them again. With no handler, or one that returns False, the chunk is deleted.
+_excess_duplicate_handler = None
+
+
+def register_excess_duplicate_handler(func):
+    global _excess_duplicate_handler  # noqa: PLW0603
+    _excess_duplicate_handler = func
+
+
+# A plugin may keep duplicates out of the selection itself, before the per-run cap applies. Each
+# registered callable takes no arguments and returns a Q on Finding naming the duplicates to leave
+# out this run, or None to leave out nothing. Setting them aside later (in the handler above, or by
+# wrapping the deletion step) is too late: they would already hold places under the cap, and enough
+# of them would stop the task for every asset. Registering the same callable again is a no-op.
+_dupe_delete_excludes = []
+
+
+def register_dupe_delete_exclude(func):
+    if func not in _dupe_delete_excludes:
+        _dupe_delete_excludes.append(func)
+
+
+# A plugin may also decide how many of the selected duplicates go now. Each registered callable
+# gets the selected ids (already capped, never empty) and returns the ids to delete; the rest stay
+# and are selected again by a later run. This is where a per-asset budget belongs: it sees what
+# this run would delete, and can hold an asset (Product.dupe_delete_held_at) so later runs leave
+# it out of the selection. Registering the same callable again is a no-op.
+_dupe_delete_limits = []
+
+
+def register_dupe_delete_limit(func):
+    if func not in _dupe_delete_limits:
+        _dupe_delete_limits.append(func)
+
+
+# A plugin that budgets deletions needs to know what was actually deleted, not only what it let
+# through: the deletion step still leaves out duplicates an import is writing or that were saved
+# since the selection. Each registered callable gets the ids deleted this run (possibly none)
+# whenever the run selected anything. Registering the same callable again is a no-op.
+_dupe_delete_done = []
+
+
+def register_dupe_delete_done(func):
+    if func not in _dupe_delete_done:
+        _dupe_delete_done.append(func)
+
+
+def _excluded_duplicates():
+    """The duplicates to leave out of this run's selection, as a Q on Finding (empty when none)."""
+    excluded = Q()
+    # An asset whose hold is set loses no duplicates until an administrator clears it. Its tests are
+    # named by id so the filter sits on the finding row itself: the scan drops a held asset's rows
+    # before the per-row excess count runs. Joining to the product to read the hold instead made
+    # that count run on every held row first (about 0.9 s a run with 10 of 100 assets held).
+    if held_tests := list(
+        Test.objects.filter(engagement__product__dupe_delete_held_at__isnull=False).values_list("id", flat=True),
+    ):
+        excluded |= Q(test_id__in=held_tests)
+    for exclude in _dupe_delete_excludes:
+        if (q := exclude()) is not None:
+            excluded |= q
+    return excluded
+
+
+def _remove_excess_duplicates(findings):
+    if _excess_duplicate_handler is not None and _excess_duplicate_handler(findings):
+        return
+    bulk_delete_findings(findings, order_desc=True)
 
 
 from dojo.notifications.tasks import (  # noqa: E402, F401  -- backward compat
@@ -33,11 +114,39 @@ def flush_auditlog(*args, **kwargs):
     run_flush_auditlog()
 
 
+# Only one excess-duplicate deletion may run at a time. The beat schedule fires this task
+# every 60s (CELERY_BEAT_SCHEDULE "dedupe-delete"), but on a large instance a single run --
+# deleting up to settings.DUPE_DELETE_MAX_PER_RUN findings and cascading each into its child
+# rows -- can take longer than that interval. The beat `expires` option only drops a run that
+# was never *started* in time; it does nothing once a run is executing. Without a guard the
+# next scheduled run begins while the previous one is still deleting, and the two select
+# overlapping excess-duplicate sets whose cascades touch shared child rows (notably
+# dojo_test_import_finding_action), which deadlocks in Postgres. The per-chunk transient-conflict
+# retry in _bulk_delete_findings_internal then has to absorb that self-inflicted contention on
+# top of any real concurrent import, and under sustained load its retry budget is exhausted and
+# the deadlock surfaces as a task failure. Serializing the task to one run at a time removes the
+# self-collision entirely and leaves the per-chunk retry to cover only genuine external writers.
+DUPE_DELETE_LOCK_KEY = "dojo:async_dupe_delete:running"
+
+
 @app.task(bind=True)
 def async_dupe_delete(*args, **kwargs):
-    # Wrap with pghistory context for audit trail
-    with pghistory.context(source="dupe_delete_task"):
-        _async_dupe_delete_impl()
+    # cache.add is atomic (an NX set on the shared cache), so the first run takes the marker and
+    # any overlapping run exits immediately -- mirroring the cache.add coalescing in
+    # dojo.utils.schedule_product_grade. The timeout bounds the marker so a worker that dies
+    # mid-run (and never reaches the finally) cannot block deletion forever: it expires and the
+    # next cycle proceeds. It is set well above a normal run's duration so it never releases the
+    # lock out from under an in-flight run. With the LocMem cache (no DD_CACHE_URL) the marker is
+    # per process, which is harmless: that configuration is single-process and cannot overlap.
+    if not cache.add(DUPE_DELETE_LOCK_KEY, value=True, timeout=settings.DUPE_DELETE_LOCK_EXPIRE):
+        logger.info("async_dupe_delete: a previous run is still in progress; skipping this cycle")
+        return
+    try:
+        # Wrap with pghistory context for audit trail
+        with pghistory.context(source="dupe_delete_task"):
+            _async_dupe_delete_impl()
+    finally:
+        cache.delete(DUPE_DELETE_LOCK_KEY)
 
 
 def _async_dupe_delete_impl():
@@ -91,12 +200,29 @@ def _async_dupe_delete_impl():
         output_field=IntegerField(),
     )
 
+    # A finding is still being written for a while after deduplication marks it duplicate: the
+    # import or the create request that produced or matched it goes on to write its child rows
+    # (found_by, cwe, tags, locations, vulnerability ids, companions). Those FKs are DEFERRABLE
+    # INITIALLY DEFERRED, so the writer takes no lock on the finding that a delete would wait
+    # for; it only fails at its COMMIT, losing the whole import. So a duplicate is a candidate
+    # only once it has settled: the finding has not been saved for the grace period. An import
+    # also holds a lock on its test for as long as it runs, and the delete skips that test's
+    # duplicates until it ends (see dojo.importers.import_lock).
+    settled = _settled_duplicates()
+    # Leave the tests under import out of the selection too, before the per-run cap applies: their
+    # duplicates would only be skipped below, and enough of them would use up every run.
+    if busy_tests := tests_with_import_lock_held():
+        settled &= ~Q(test_id__in=busy_tests)
+    # Held assets and whatever a plugin excludes are left out here for the same reason.
+    if excluded := _excluded_duplicates():
+        settled &= ~excluded
+
     # Single query: excess (oldest) duplicates, newest-first within each original group.
     # select_related avoids N+1 queries when collecting affected products below.
     # only() limits Finding columns fetched; test_id is required for the select_related join.
     excess_dupes = (
         Finding.objects
-        .filter(duplicate=True, duplicate_finding__in=originals_with_excess)
+        .filter(settled, duplicate=True, duplicate_finding__in=originals_with_excess)
         .annotate(newer_cnt=Coalesce(newer_siblings_subq, 0))
         .filter(newer_cnt__gte=dupe_max)
         .select_related("test__engagement__product")
@@ -105,23 +231,29 @@ def _async_dupe_delete_impl():
         [:total_duplicate_delete_count_max_per_run]
     )
 
-    ids_to_delete = []
-    affected_products = set()
-    for finding in excess_dupes:
-        ids_to_delete.append(finding.id)
-        affected_products.add(finding.test.engagement.product)
+    product_by_finding = {finding.id: finding.test.engagement.product for finding in excess_dupes}
+    ids_to_delete = list(product_by_finding)
+    for limit in _dupe_delete_limits:
+        if not ids_to_delete:
+            break
+        ids_to_delete = list(limit(ids_to_delete))
 
     logger.info("total number of excess duplicates to delete: %s", len(ids_to_delete))
 
-    if ids_to_delete:
-        # Inbound duplicate_finding references from surviving findings are resolved inside
-        # each chunk's transaction by bulk_delete_findings itself -- see
-        # resolve_inbound_duplicate_references.
-        # order_desc=True deletes higher ids before lower ids, consistent with how
-        # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
-        bulk_delete_findings(Finding.objects.filter(id__in=ids_to_delete), order_desc=True)
+    # Inbound duplicate_finding references from surviving findings are resolved inside
+    # each chunk's transaction by bulk_delete_findings itself -- see
+    # resolve_inbound_duplicate_references.
+    # order_desc=True deletes higher ids before lower ids, consistent with how
+    # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
+    deleted_ids = _delete_excess_duplicates(ids_to_delete)
+    if product_by_finding:
+        for done in _dupe_delete_done:
+            done(list(deleted_ids))
 
-    logger.info("total number of excess duplicates deleted: %s", len(ids_to_delete))
+    logger.info("total number of excess duplicates deleted: %s", len(deleted_ids))
+
+    # Grade only the products that lost a duplicate: a skipped one changed nothing.
+    affected_products = {product_by_finding[finding_id] for finding_id in deleted_ids}
 
     # Batch product grading for all affected products
     if affected_products:
@@ -130,6 +262,45 @@ def _async_dupe_delete_impl():
             logger.info("performing batch product grading for %s products", len(affected_products))
             for product in affected_products:
                 schedule_product_grade(product.id)
+
+
+def _settled_duplicates():
+    """The duplicates that have not been saved for the grace period, as a Q on Finding."""
+    if (grace_minutes := settings.DUPE_DELETE_GRACE_MINUTES) <= 0:
+        return Q()
+    cutoff = timezone.now() - timedelta(minutes=grace_minutes)
+    return Q(updated__lt=cutoff) | Q(updated__isnull=True)
+
+
+def _delete_excess_duplicates(ids_to_delete):
+    """
+    Delete the selected duplicates, except those an import is writing or a save has just touched.
+
+    The selection ran without locks, so each chunk checks again inside its transaction. It first
+    takes the import lock on the chunk's tests that are free (tests_under_import_now), which never
+    waits; an import that starts on one of them now waits for the chunk to commit, when these rows
+    are gone and cannot be matched. Only then does it row-lock findings, and only those of the free
+    tests, so a test under import has none of its rows locked by the delete and its import never
+    waits on it. A finding saved since the selection is left for a later run too.
+
+    Returns the ids of the findings deleted.
+    """
+    deleted_ids = []
+    for chunk in batched(sorted(ids_to_delete), DUPE_DELETE_CHUNK_SIZE, strict=False):
+        with transaction.atomic():
+            test_by_finding = dict(Finding.objects.filter(id__in=chunk).values_list("id", "test_id"))
+            busy_tests = tests_under_import_now(set(test_by_finding.values()))
+            free = [finding_id for finding_id, test_id in test_by_finding.items() if test_id not in busy_tests]
+            candidates = Finding.objects.filter(id__in=free)
+            if settings.DUPE_DELETE_GRACE_MINUTES > 0:
+                candidates = candidates.filter(_settled_duplicates())
+            still_settled = list(candidates.order_by("id").select_for_update().values_list("id", flat=True)) if free else []
+            if skipped := len(chunk) - len(still_settled):
+                logger.info("skipping %s excess duplicates that an import is writing, or that were saved or deleted since they were selected", skipped)
+            if still_settled:
+                _remove_excess_duplicates(Finding.objects.filter(id__in=still_settled))
+                deleted_ids.extend(still_settled)
+    return deleted_ids
 
 
 @app.task(ignore_result=False, base=Task)

@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from dojo.location.models import AbstractLocation, LocationFindingReference
+from dojo.location.status import rollup_finding_location_status
 from dojo.models import Finding
 from dojo.url.models import URL
 from dojo.url.validators import DEFAULT_PORTS
@@ -17,21 +18,27 @@ def copy_location_references(source_finding: Finding, destination_finding: Findi
 
     Used when consolidating findings, so the destination ends up covering every location the
     source findings did. Locations the destination already references are skipped: its own
-    status and relationship data win, and the unique (location, finding) constraint holds.
-    The source finding keeps its references; they are copied, not moved.
+    status and relationship data win. The source finding keeps its references; they are
+    copied, not moved.
+
+    A location the source holds a row for from several tests is copied once, onto the
+    destination's own test, carrying the row whose status the rows roll up to.
 
     Returns the number of references created.
     """
     already_referenced = LocationFindingReference.objects.filter(
         finding=destination_finding,
     ).values_list("location_id", flat=True)
-    references_to_copy = LocationFindingReference.objects.filter(
+    references_by_location: dict[int, list[LocationFindingReference]] = {}
+    for reference in LocationFindingReference.objects.filter(
         finding=source_finding,
-    ).exclude(location_id__in=already_referenced)
+    ).exclude(location_id__in=already_referenced).order_by("id"):
+        references_by_location.setdefault(reference.location_id, []).append(reference)
 
     copied = 0
-    for reference in references_to_copy:
-        reference.copy(destination_finding)
+    for references in references_by_location.values():
+        status = rollup_finding_location_status(reference.status for reference in references)
+        next(reference for reference in references if reference.status == status).copy(destination_finding)
         copied += 1
     return copied
 

@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import gettext as _
 from django_tagulous.models import TagField
 
+from dojo.query_hooks import HookedManager, UnfilteredManager
+
 
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -24,6 +26,14 @@ class Objects_Product(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add."))
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     def __str__(self):
         name = None

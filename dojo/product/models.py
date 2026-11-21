@@ -11,7 +11,8 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django_tagulous.models import TagField
 
-from dojo.base_models.base import BaseModel
+from dojo.base_models.base import BaseManager, BaseModel
+from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 
 
 class Product_Line(models.Model):
@@ -131,9 +132,28 @@ class Product(BaseModel):
     async_updating = models.BooleanField(default=False,
                                             help_text=_("Findings under this Product or SLA configuration are asynchronously being updated"))
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    # Set when Delete Duplicates must stop removing this asset's duplicates (by a plugin's guard),
+    # and cleared only by an administrator: a hold that lifted itself on a timer or a cache flush
+    # would resume the deletion it was set to stop. Delete Duplicates leaves held assets out.
+    dupe_delete_held_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        editable=False,
+        help_text=_("When Delete Duplicates was held for this asset. While set, none of its duplicates are deleted."),
+        verbose_name=_("Delete Duplicates held at"),
+    )
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedBaseManager()
+    unfiltered = BaseManager()
+
     class Meta:
         ordering = ("name",)
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_product_archive_batch"),
             # Serves the case-insensitive product-name lookup
             # (WHERE UPPER(name) = UPPER(%s)) used when filtering findings by
             # product name; the plain unique btree on name can't (Sentry DJANGO-D2M).
@@ -306,6 +326,14 @@ class Product_API_Scan_Configuration(models.Model):
     service_key_1 = models.CharField(max_length=200, null=True, blank=True)
     service_key_2 = models.CharField(max_length=200, null=True, blank=True)
     service_key_3 = models.CharField(max_length=200, null=True, blank=True)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     def __str__(self):
         name = self.tool_configuration.name

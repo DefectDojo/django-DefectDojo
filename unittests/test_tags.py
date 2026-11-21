@@ -239,6 +239,36 @@ class TagTests(DojoAPITestCase):
         tags = ["'one-two'"]
         self.create_finding_with_tags(tags, expected_status_code=400)
 
+    # Regression: "tags": "" (a tag list in string form) answered a 500 instead of clearing the tags
+    def test_finding_patch_tags_empty_string_clears_tags(self):
+        finding = Finding.objects.all().first()
+        url = reverse("finding-detail", args=(finding.id,))
+        for submitted in ("", "   "):
+            with self.subTest(submitted=submitted):
+                finding.tags = ["tag1", "tag2"]
+                finding.save()
+                response = self.client.patch(url, {"tags": submitted}, format="json")
+                self.assertEqual(200, response.status_code, response.content[:1000])
+                persisted = sorted(tag.name for tag in Finding.objects.get(id=finding.id).tags.all())
+                self.assertEqual([], persisted, msg=f"expected no tags, persisted={persisted}")
+
+    def test_finding_patch_tags_string_form(self):
+        finding = Finding.objects.all().first()
+        url = reverse("finding-detail", args=(finding.id,))
+        cases = [
+            ('["tag3", "tag4"]', 200, None),
+            ("not json", 400, "Invalid json list"),
+            ("{}", 400, "Expected a list of items"),
+        ]
+        for submitted, status_code, message in cases:
+            with self.subTest(submitted=submitted):
+                response = self.client.patch(url, {"tags": submitted}, format="json")
+                self.assertEqual(status_code, response.status_code, response.content[:1000])
+                if message:
+                    self.assertIn(message, str(response.data["tags"]))
+        persisted = sorted(tag.name for tag in Finding.objects.get(id=finding.id).tags.all())
+        self.assertEqual(["tag3", "tag4"], persisted, msg=f"persisted={persisted}")
+
     def test_finding_create_tags_with_slashes(self):
         tags = ["a/b/c"]
         finding_id = self.create_finding_with_tags(tags)

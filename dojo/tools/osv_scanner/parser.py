@@ -156,8 +156,14 @@ class OSVScannerParser:
                     if mitigation_text:
                         finding.mitigation = mitigation_text
 
-                    if vulnerabilityid:
-                        finding.unsaved_vulnerability_ids = [vulnerabilityid]
+                    # The OSV id first, then its aliases: a GHSA-keyed advisory names its CVE only there
+                    aliases = vulnerability.get("aliases") or []
+                    if not isinstance(aliases, list):
+                        aliases = []
+                    vulnerability_ids = [vulnerabilityid, *aliases]
+                    vulnerability_ids = list(dict.fromkeys(x.strip() for x in vulnerability_ids if isinstance(x, str) and x.strip()))
+                    if vulnerability_ids:
+                        finding.unsaved_vulnerability_ids = vulnerability_ids
                     if unsaved_cwes:
                         finding.unsaved_cwes = unsaved_cwes
                     if locations_enabled() and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):

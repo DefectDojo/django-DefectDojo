@@ -1,7 +1,5 @@
 import mimetypes
-from pathlib import Path
 
-from django.conf import settings
 from django.http import FileResponse
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -208,15 +206,14 @@ class RiskAcceptanceViewSet(
                 {"error": "Proof has not provided to this risk acceptance..."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        # Open the file through its storage backend rather than a path under MEDIA_ROOT
         # NOTE: FileResponse takes ownership of closing the file handle when the response is closed.
         # Explicitly register the closer to avoid potential resource leaks and satisfy static analyzers.
-        file_handle = file_path.open("rb")
+        file_handle = file_object.storage.open(file_object.name, "rb")
         # send file
         response = FileResponse(
             file_handle,
-            content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
+            content_type=mimetypes.guess_type(file_object.name)[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
         if hasattr(response, "_resource_closers"):

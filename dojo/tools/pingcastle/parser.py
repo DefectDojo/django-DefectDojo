@@ -11,6 +11,9 @@ from dojo.tools.locations import LocationData
 
 
 class PingCastleParser:
+    # Merging repeated entries keeps every location, so the importer can split a merged finding
+    # back into one finding per location.
+    SPLITTABLE_PER_LOCATION = True
 
     CVE_REGEX = re.compile(r"(CVE-\d{4}-\d{4,7})", re.IGNORECASE)
 

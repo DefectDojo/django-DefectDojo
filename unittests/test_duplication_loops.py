@@ -380,6 +380,10 @@ class TestDuplicationLoops(DojoTestCase):
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
 
     # Test that Delete Duplicate Findings & Maximum Duplicate is correctly deleting olding finding first based off of finding date value
+    # These tests are about which duplicates are excess, not about when they become eligible:
+    # they save their findings just before the delete, so the grace window is switched off
+    # (see test_dedupe_delete_commit_race.TestDupeDeleteRacesInFlightWriter for the window).
+    @override_settings(DUPE_DELETE_GRACE_MINUTES=0)
     def test_delete_duplicate_order(self):
         # Turn on delete duplicates and set the maximum dedupe value to 1
         system_settings = System_Settings.objects.get(no_cache=True)
@@ -411,6 +415,7 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_a.refresh_from_db()
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
 
+    @override_settings(DUPE_DELETE_GRACE_MINUTES=0)
     def test_delete_duplicate_excess_with_chained_reference(self):
         """
         A surviving finding that points at an excess duplicate (a chained duplicate, from past
@@ -471,6 +476,7 @@ class TestDuplicationLoops(DojoTestCase):
             if finding_x.id and Finding.objects.filter(id=finding_x.id).exists():
                 finding_x.delete()
 
+    @override_settings(DUPE_DELETE_GRACE_MINUTES=0)
     def test_delete_duplicate_order_same_date_tiebreak_by_id(self):
         """When duplicate findings share the same date, excess deletes use id as tie-break (oldest id first)."""
         system_settings = System_Settings.objects.get(no_cache=True)

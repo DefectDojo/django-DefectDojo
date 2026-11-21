@@ -1,7 +1,10 @@
 import base64
 import binascii
 import logging
+import re
 import time
+from contextlib import contextmanager
+from functools import wraps
 from itertools import batched
 from pathlib import Path
 
@@ -27,9 +30,20 @@ from django.utils.timezone import make_aware
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.db_utils import is_transient_db_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_transient_db_conflict, is_vanished_row_error
 from dojo.finding.cwe import finding_cwe_labels
+from dojo.importers.import_lock import (
+    lock_tests_under_import,
+    release_test_import_turns,
+    unlock_tests_under_import,
+    wait_for_test_import_turn,
+)
 from dojo.importers.options import ImporterOptions
+from dojo.importers.test_type_names import (
+    accepted_test_type_names,
+    dynamic_test_type_name,
+    legacy_dynamic_test_type_name,
+)
 from dojo.jira import services as jira_services
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.feature import locations_enabled
@@ -63,10 +77,84 @@ from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools import tool_issue_updater
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
+from dojo.tools.utils import drop_ambiguous_repeated_unique_ids
 from dojo.utils import max_safe
 from dojo.vulnerability.manager import VulnerabilityIdManager
 
 logger = logging.getLogger(__name__)
+
+
+def deleted_target_message(instance) -> str:
+    return (
+        f"The {instance._meta.verbose_name} this scan was being imported into "
+        f"(id {instance.pk}) was deleted while the scan was being processed, so "
+        f"the import could not be completed. Nothing was imported. Re-run the "
+        f"import against a {instance._meta.verbose_name} that still exists."
+    )
+
+
+# PostgreSQL's DETAIL for a foreign-key violation on insert/update names the missing row.
+_MISSING_REFERENCED_ROW = re.compile(
+    r'Key \((?P<column>[^)]+)\)=\((?P<value>[^)]*)\) is not present in table "(?P<table>[^"]+)"',
+)
+
+
+def _missing_referenced_row(exception):
+    """Return (table, key) of the row a foreign-key violation says is missing, or None."""
+    detail = getattr(getattr(exception.__cause__, "diag", None), "message_detail", None) or str(exception)
+    match = _MISSING_REFERENCED_ROW.search(detail)
+    return (match["table"], match["value"]) if match else None
+
+
+def findings_deleted_message(test) -> str:
+    return (
+        f"Findings this scan was writing were deleted while the scan was being processed (for "
+        f"example because test {test.pk}, or its engagement or product, is being deleted), so the "
+        f"import could not be completed. Re-run the import once the delete has finished."
+    )
+
+
+def reports_a_deleted_target(process_scan):
+    """
+    Turn the foreign-key failure an import hits when its test is deleted mid-run into a clear error.
+
+    An import writes a batch's child rows (endpoint or location statuses, tags, vulnerability ids,
+    finding groups) well after it created or matched the findings they belong to. A delete in
+    between -- of the test by a user, cascading from its engagement or product, or the API's
+    asynchronous delete, which removes a test's findings in chunks and the test row last -- removes
+    those findings, and the next of those writes fails on its foreign key with a PostgreSQL
+    constraint name that says nothing about why. The import cannot complete: report that, the way
+    save_without_resurrecting does for the test itself.
+
+    Only a violation naming a finding or test that no longer exists is translated; one naming a row
+    that is still there is a genuine bug and is re-raised unchanged. Only the failure path pays for
+    the existence check.
+    """
+
+    @wraps(process_scan)
+    def wrapper(self, *args, **kwargs):
+        try:
+            with self.import_lock_scope():
+                return process_scan(self, *args, **kwargs)
+        except IntegrityError as exception:
+            test = getattr(self, "test", None)
+            missing = _missing_referenced_row(exception) if is_foreign_key_conflict(exception) else None
+            models_by_table = {Finding._meta.db_table: Finding, Test._meta.db_table: Test}
+            if test is None or test.pk is None or missing is None or missing[0] not in models_by_table:
+                raise
+            try:
+                referenced_row_exists = models_by_table[missing[0]].objects.filter(pk=missing[1]).exists()
+                test_exists = Test.objects.filter(pk=test.pk).exists()
+            except DatabaseError:
+                # An aborted enclosing transaction cannot answer; the original error is the report.
+                raise exception from None
+            if referenced_row_exists:
+                raise
+            message = findings_deleted_message(test) if test_exists else deleted_target_message(test)
+            raise ValidationError(message) from exception
+
+    return wrapper
+
 
 # Number of times update_test_tags() re-runs Test.tags.set() when it loses a race against
 # tagulous' cleanup of unused tag rows (see set_test_tags_safe for the full explanation).
@@ -310,10 +398,34 @@ class BaseImporter(ImporterOptions):
             msg = "A test must be supplied to parse the file"
             raise ValidationError(msg)
         try:
-            return parser.get_findings(scan, self.test)
+            findings = parser.get_findings(scan, self.test)
         except ValueError as e:
             logger.warning(e)
             raise ValidationError(e)
+        return self.finalize_parsed_findings(findings)
+
+    def group_parsed_findings(self, findings: list[Finding]) -> list[Finding]:
+        """
+        Regroup one report's parsed findings before anything else reads them. Override seam.
+
+        Runs once per parsed report (per test, for parsers that return several), before
+        hashing and before repeated tool ids are dropped. Open source keeps the parser's own
+        grouping, so this returns ``findings`` unchanged.
+        """
+        return findings
+
+    def finalize_parsed_findings(self, findings: list[Finding] | None) -> list[Finding] | None:
+        """
+        Apply the importer's rules to one report's parsed findings: regroup, then drop repeated tool ids.
+
+        A parser whose reports can carry one tool id on several findings (SARIF reports a result's
+        id at each of its locations) marks the findings it emits, and an id that still repeats
+        after regrouping cannot identify one finding, so it is cleared on every finding that
+        carries it (``dojo.tools.utils.drop_ambiguous_repeated_unique_ids``).
+        """
+        if findings is None:
+            return findings
+        return drop_ambiguous_repeated_unique_ids(self.group_parsed_findings(findings))
 
     def parse_dynamic_test_type_tests(
         self,
@@ -368,8 +480,7 @@ class BaseImporter(ImporterOptions):
             # identity to conflict with. The historical name is kept rather than rewritten, as it
             # is for the legacy name above.
             expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
-            legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
-            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name, self.scan_type}:
+            if self.test.test_type.name not in accepted_test_type_names(test_raw.type, self.scan_type):
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "
@@ -384,7 +495,7 @@ class BaseImporter(ImporterOptions):
         # Aggregate all of the findings into a single place
         parsed_findings = []
         for test_raw in tests:
-            parsed_findings.extend(test_raw.findings)
+            parsed_findings.extend(self.finalize_parsed_findings(test_raw.findings) or [])
         return parsed_findings
 
     def parse_findings_dynamic_test_type(
@@ -802,14 +913,95 @@ class BaseImporter(ImporterOptions):
         """
         Return True when `exception` is Django reporting that a forced UPDATE matched no rows.
 
-        Model.save_base raises a bare DatabaseError for this; every genuine database
-        failure arrives as a subclass (IntegrityError, OperationalError, DataError, ...),
-        so the exact class is the discriminator and the message only a second opinion.
-        Classifying on the exception rather than with a follow-up query matters: a real
-        failure can leave the connection in an aborted transaction, where the query would
-        raise in turn and bury the error that actually needs reporting.
+        Kept as a method for subclasses and callers; the predicate is dojo.db_utils.is_vanished_row_error.
         """
-        return type(exception) is DatabaseError and "did not affect any rows" in str(exception)
+        return is_vanished_row_error(exception)
+
+    @contextmanager
+    def import_lock_scope(self):
+        """
+        Hold the import lock taken by lock_test_under_import until the outermost scope exits.
+
+        process_scan opens one; a caller that goes on writing this import's findings after
+        process_scan returns opens its own around the call, and the lock is held until that one
+        exits. The same goes for the lock that lets one import at a time into the test. See
+        dojo.importers.import_lock.
+        """
+        depth = getattr(self, "_import_lock_depth", 0)
+        self._import_lock_depth = depth + 1
+        try:
+            yield
+        finally:
+            self._import_lock_depth = depth
+            if depth == 0:
+                try:
+                    unlock_tests_under_import(getattr(self, "_import_locked_tests", []))
+                finally:
+                    self._import_locked_tests = []
+                    self._import_turn_checked = []
+                    release_test_import_turns(getattr(self, "_import_turn_tests", []))
+                    self._import_turn_tests = []
+
+    def lock_test_under_import(self, test: Test, *, wait_seconds: int | None = None) -> None:
+        """
+        Tell the excess-duplicate delete this test is being imported, until the import ends.
+
+        Call before the first finding is created or matched. Waits first for any other import into
+        this test to finish (raising TestImportInProgress, a 409, if that takes longer than
+        DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS, or ``wait_seconds`` when given), then if a delete is
+        removing this test's duplicates right now, so the import starts from what both left.
+
+        The test's turn is asked for once per scope: a caller that took it up front (a background
+        import trying without waiting) is not made to wait again by process_scan, and neither is one
+        that was let through because the lock is off or was left behind.
+        """
+        if getattr(self, "_import_lock_depth", 0) == 0:
+            msg = "lock_test_under_import must run inside import_lock_scope"
+            raise RuntimeError(msg)
+        if test is None or test.pk is None:
+            return
+        checked = getattr(self, "_import_turn_checked", [])
+        if test.pk not in checked:
+            # Recorded for release by wait_for_test_import_turn itself, the moment the lock is taken.
+            self._import_turn_tests = getattr(self, "_import_turn_tests", [])
+            wait_for_test_import_turn(test.pk, wait_seconds=wait_seconds, on_taken=self._import_turn_tests.append)
+            self._import_turn_checked = [*checked, test.pk]
+        locked = getattr(self, "_import_locked_tests", [])
+        if test.pk in locked:
+            return
+        self._import_locked_tests = locked + lock_tests_under_import([test.pk])
+
+    def save_matched_finding(self, finding: Finding, *, no_options: bool = False) -> bool:
+        """
+        Save a finding this import matched earlier in the run, unless it has been deleted since.
+
+        A reimport matches report rows against findings it loaded at the start of a batch, and a
+        report can carry several rows for one finding (one per CVE for the same package, say), each
+        of which saves it again. If the finding is deleted in between -- by a user or client
+        deleting it through the API, a test or engagement delete, or the excess-duplicate delete --
+        a plain save() finds no row to UPDATE and falls back to an INSERT that re-creates it from the
+        stale in-memory copy, and a companion saved first (or a deferred field read on the way)
+        fails instead. force_update=True turns that into an error the vanished-row check
+        recognises, from the same statement, so nothing is re-created.
+
+        Returns False when the finding is gone: the caller skips the rest of its handling for that
+        finding and the import carries on with the others.
+        """
+        save = finding.save_no_options if no_options else finding.save
+        try:
+            save(force_update=True)
+        except type(finding).DoesNotExist:
+            pass  # a deferred field read found the row gone before the UPDATE ran
+        except DatabaseError as exception:
+            if not self._is_vanished_row_error(exception):
+                raise
+        else:
+            return True
+        using = finding._state.db or DEFAULT_DB_ALIAS
+        if connections[using].in_atomic_block:
+            transaction.set_rollback(False, using=using)
+        logger.info("Finding %s was deleted while this import was processing it; leaving it deleted", finding.pk)
+        return False
 
     def save_without_resurrecting(self, instance: Engagement | Test) -> None:
         """
@@ -859,13 +1051,7 @@ class BaseImporter(ImporterOptions):
             using = instance._state.db or DEFAULT_DB_ALIAS
             if connections[using].in_atomic_block:
                 transaction.set_rollback(False, using=using)
-            msg = (
-                f"The {instance._meta.verbose_name} this scan was being imported into "
-                f"(id {instance.pk}) was deleted while the scan was being processed, so "
-                f"the import could not be completed. Nothing was imported. Re-run the "
-                f"import against a {instance._meta.verbose_name} that still exists."
-            )
-            raise ValidationError(msg) from exception
+            raise ValidationError(deleted_target_message(instance)) from exception
 
     def update_test_progress(
         self,
@@ -880,40 +1066,12 @@ class BaseImporter(ImporterOptions):
         self.save_without_resurrecting(self.test)
 
     def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
-        """
-        Compute the Test_Type name for a dynamic-test-type report (e.g. Generic, SARIF).
-
-        - No type, or type already equals the scan type -> use the scan type as-is.
-        - Type already carries the scan-type suffix (e.g. "Prisma Cloud (Generic Findings
-          Import)") -> use it verbatim. This keeps the composition idempotent and prevents
-          doubled names like "X (scan_type) Scan (scan_type)".
-        - Type plus a " Scan" suffix already equals the scan type (e.g. type "Horusec" with
-          scan_type "Horusec Scan") -> use the scan type as-is. This preserves the behavior of
-          dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security Hub,
-          Rusty Hog, ...) so their Test_Type name is not doubled into "Horusec Scan (Horusec Scan)".
-        - Otherwise -> the intentional "{type} Scan ({scan_type})" format (also used by SARIF,
-          so a report labeled 'CodeScanner' becomes 'CodeScanner Scan (SARIF)').
-        """
-        if not raw_type or raw_type == self.scan_type:
-            return self.scan_type
-        if raw_type.endswith(f" ({self.scan_type})"):
-            return raw_type
-        if f"{raw_type} Scan" == self.scan_type:
-            return self.scan_type
-        return f"{raw_type} Scan ({self.scan_type})"
+        """The Test_Type name for a dynamic-test-type report (``dojo.importers.test_type_names``)."""
+        return dynamic_test_type_name(raw_type, self.scan_type)
 
     def legacy_dynamic_test_type_name(self, raw_type: str | None) -> str:
-        """
-        Reproduce the name the pre-idempotency code produced. Used only for the reimport
-        compatibility check so reimports into existing (pre-patch) tests whose test_type
-        already has a doubled suffix keep working instead of raising a mismatch error.
-        """
-        if not raw_type or raw_type == self.scan_type:
-            return self.scan_type
-        name = f"{raw_type} Scan"
-        if name != self.scan_type:
-            name = f"{name} ({self.scan_type})"
-        return name
+        """The pre-idempotency Test_Type name, accepted on reimport (``dojo.importers.test_type_names``)."""
+        return legacy_dynamic_test_type_name(raw_type, self.scan_type)
 
     def get_or_create_test_type(
         self,
@@ -1053,18 +1211,32 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         group_names_to_findings_dict: dict,
+        *,
+        unsaved: bool = False,
+        legacy_group_names: dict | None = None,
     ) -> bool:
         """
         Determines how to handle an incoming finding with respect to grouping
         if finding groups are enabled, use the supplied grouping mechanism to
         store a reference of how the finding should be grouped.
 
+        unsaved: the finding has not been saved yet, so its group is named from the
+        values save() will store (see get_group_by_group_name).
+
+        legacy_group_names: when given, records per group name the name the group got from the
+        finding's unsaved values before groups were named from the stored ones, where the two
+        differ (see add_findings_to_auto_groups).
+
         Returns True if the finding was added to a group, False otherwise.
         """
         if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
-            name = finding_helper.get_group_by_group_name(finding, self.group_by)
+            name = finding_helper.get_group_by_group_name(finding, self.group_by, unsaved=unsaved)
             if name is not None:
+                if legacy_group_names is not None:
+                    legacy = finding_helper.get_group_by_group_name(finding, self.group_by)
+                    if legacy is not None and legacy != name:
+                        legacy_group_names.setdefault(name, {})[legacy] = None
                 if name in group_names_to_findings_dict:
                     group_names_to_findings_dict[name].append(finding)
                 else:
@@ -1186,7 +1358,15 @@ class BaseImporter(ImporterOptions):
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
         if finding.unsaved_vulnerability_ids:
-            finding.unsaved_vulnerability_ids = [x for x in finding.unsaved_vulnerability_ids if x.strip()]
+            # A vulnerability id is expected to be a string. A parser (notably
+            # Generic Findings Import, which passes "vulnerability_ids" through
+            # unchanged) can supply a non-string entry such as a dict; drop those
+            # instead of raising AttributeError on .strip().
+            finding.unsaved_vulnerability_ids = [
+                vulnerability_id
+                for vulnerability_id in finding.unsaved_vulnerability_ids
+                if isinstance(vulnerability_id, str) and vulnerability_id.strip()
+            ]
 
     def process_cve(
         self,
@@ -1198,6 +1378,12 @@ class BaseImporter(ImporterOptions):
         # the cve field is not needed anymore and can be removed.
         # Remove undisired vulnerability ids
         self.sanitize_vulnerability_ids(finding)
+        # A cve that is not a non-empty string is malformed input (same rule as
+        # sanitize_vulnerability_ids). Normalize it to None so it is not re-added to
+        # unsaved_vulnerability_ids below, where a non-string value would otherwise
+        # crash the dedup hash and the reimport reconciler.
+        if not (isinstance(finding.cve, str) and finding.cve.strip()):
+            finding.cve = None
         if finding.unsaved_vulnerability_ids and finding.cve:
             # Make sure the first entry of the list is the value of the cve field
             finding.unsaved_vulnerability_ids.insert(0, finding.cve)

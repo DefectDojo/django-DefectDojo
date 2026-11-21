@@ -13,6 +13,10 @@ DefectDojo uses five main data classes to organize your work: **Organizations, A
 
 DefectDojo is made to be flexible to conform to your team, rather than making your team conform to the tool. You'll be able to design a robust, adaptable workspace once you understand how these data classes can be used to organize your work.
 
+An Organization groups related Assets, for example by business domain or by team. An Asset is a project, program or application that you are testing, and it holds all of the testing history for it. An Engagement is a testing effort on an Asset, either Interactive or CI/CD, and contains one or more Tests. A Test holds the results of one testing activity, such as an imported scan, and each flaw it reports is a Finding.
+
+Access control is applied to Organizations and Assets, not to Engagements, and deduplication only applies within a single Asset. When you plan your structure, start with [What can an Organization represent?](#what-can-an-organization-represent) and [What can an Asset represent?](#what-can-an-asset-represent), then read [What can an Engagement represent?](#what-can-an-engagement-represent) for examples of grouping Tests.
+
 ### Asset Hierarchy Diagram
 ![image](images/Asset_Hierarchy_Full.png)
 

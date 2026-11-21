@@ -46,7 +46,9 @@ Each Full Risk Acceptance adds additional context, such as:
     - Whether the Finding’s status will return to “Active” upon expiration.
     - Whether the SLA will restart upon expiration.
 
-Expiration is unique to Full Risk Acceptances, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. Once a Full Risk Acceptance expires, any Findings will be set to Active again. If you don’t specify a date, the Default Risk Acceptance / Default Risk Acceptance Expiration date will be used from the System Settings page.
+Expiration is unique to Full Risk Acceptances, and allows any Findings that have been Risk Accepted to be re-examined at an appropriate time. Once a Full Risk Acceptance expires, any Findings will be set to Active again, except a Finding that was already a duplicate when it was added (the Risk Acceptance never accepted it), which stays inactive. If you don’t specify a date, the Default Risk Acceptance / Default Risk Acceptance Expiration date will be used from the System Settings page.
+
+The API uses the same default. A `POST /api/v2/risk_acceptance/` that leaves out `expiration_date`, and each Risk Acceptance the `accept_risks` actions create (`POST /api/v2/findings/accept_risks/`, `/api/v2/engagements/{id}/accept_risks/` and `/api/v2/tests/{id}/accept_risks/`), expires after the **Risk Acceptance Form Default Days** setting (180 when the setting is empty; no expiration when it is 0). Send `"expiration_date": null` for a Risk Acceptance that never expires, or a date to choose one. Each `accept_risks` entry takes an optional `expiration_date` too.
 
 Importantly, as Full Risk Acceptances are restricted to individual Engagements, there is no single section in which to view all Full Risk Acceptances. They can only be viewed within the respective Engagement that includes the Findings that the Full Risk Acceptance contains.
 
@@ -57,6 +59,8 @@ In order to create a Full Risk Acceptance, navigate to the Engagement view and c
 ![image](images/OS_RA_image3.png)
 
 From there, fill out the details of the Full Risk Acceptance and select the Findings to be included. **Accepted Findings** contains a dropdown list of all available Findings to be added to the Risk Acceptance. The list of Findings within the Engagement will appear in descending order of severity (Critical Findings at the top, Low Findings at the bottom). If a Finding has been previously Risk Accepted, it will not appear in the dropdown list. 
+
+A Finding belongs to one Risk Acceptance at a time. The API refuses a Finding that is already Risk Accepted, through another Full Risk Acceptance or a Simple Risk Acceptance: `POST /api/v2/risk_acceptance/`, or an update that adds Findings, returns `400` and names each such Finding under `accepted_findings`. Findings a Risk Acceptance already holds can be sent again in an update, and a Finding whose Risk Acceptance has expired can be accepted again.
 
 Once completed, the Full Risk Acceptance will appear within the Risk Acceptance box in the Engagement view. 
 
@@ -76,7 +80,7 @@ The Full Risk Acceptance's view also includes a table at the bottom for all othe
 
 Additionally, there is a Notes function that allows Users to include additional context to the Full Risk Acceptance. All public notes will appear in any Reports that are generated for the Full Risk Acceptance. Notes toggled as **Private** are visible only to their author and to superusers, and are left out of reports. 
 
-Importantly, if a Full Risk Acceptance is deleted entirely, the Findings within will have their status automatically reverted to “Active.”
+Importantly, if a Full Risk Acceptance is deleted entirely, the Findings within will have their status automatically reverted to “Active.” A Finding that was closed for another reason after the Risk Acceptance expired (Mitigated, False Positive or Out of Scope) is the exception: deleting the Risk Acceptance, or removing that Finding from it, leaves it closed. A Finding that was already a duplicate when it was added, and so was never Risk Accepted, keeps its status too: it stays inactive.
 
 ### Simple Risk Acceptances
 
@@ -115,6 +119,8 @@ If the Risk Acceptance has **already expired** — meaning the periodic expirati
 
 - The Risk Acceptance is reinstated and is no longer in the expired state.
 - Every Finding linked to the Risk Acceptance that is currently Active is re-accepted (set back to Risk Accepted / Inactive).
+- A Finding that has been Risk Accepted again since the expiry, through another Risk Acceptance or a Simple Risk Acceptance, stays where it is: it is removed from the reinstated Risk Acceptance, so it is never held by two at once.
+- A Finding that has been closed since the expiry (Mitigated, False Positive, Out of Scope, or marked as a duplicate) stays closed: it is removed from the reinstated Risk Acceptance, so a later expiry cannot reopen it. A duplicate the Risk Acceptance never accepted is removed the same way and stays inactive.
 - A comment is posted to any linked Jira issues recording the reinstate.
 
 The date you enter is the date that is saved.  The system setting **Risk Acceptance Form Default Days** (default: 180) is only used when you did not ask for a particular date — for example when you use the **Reinstate** action, which reinstates the Risk Acceptance without editing its expiration date, and therefore sets it to today + N days.

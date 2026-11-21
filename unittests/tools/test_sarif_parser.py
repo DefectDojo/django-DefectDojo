@@ -1,7 +1,8 @@
 import datetime
 
 from dojo.models import Finding, Test
-from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes
+from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes, vulnerability_id_from_tag
+from dojo.tools.utils import AMBIGUOUS_WHEN_REPEATED, drop_repeated_unique_ids
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -163,7 +164,8 @@ add_core(ptr, offset, val);
     def test_example_report_scanlift_bash(self):
         with (get_unit_tests_scans_path("sarif") / "bash-report.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
-            findings = parser.get_findings(testfile, Test())
+            # The importer drops tool ids that repeat in one report; apply the same rule here.
+            findings = drop_repeated_unique_ids(parser.get_findings(testfile, Test()))
             self.assertEqual(27, len(findings))
             # finding 0
             item = findings[0]
@@ -366,7 +368,8 @@ add_core(ptr, offset, val);
     def test_flawfinder(self):
         with (get_unit_tests_scans_path("sarif") / "flawfinder.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
-            findings = parser.get_findings(testfile, Test())
+            # The importer drops tool ids that repeat in one report; apply the same rule here.
+            findings = drop_repeated_unique_ids(parser.get_findings(testfile, Test()))
             self.assertEqual(53, len(findings))
             for finding in findings:
                 self.common_checks(finding)
@@ -637,6 +640,23 @@ add_core(ptr, offset, val);
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(77, len(findings))
 
+    def test_repeated_fingerprints_are_reported_and_flagged(self):
+        """
+        The parser reports every fingerprint it reads and flags that a repeated one is ambiguous.
+
+        Dropping a repeated id is the importer's job (see test_importer_unique_id_rules), so the
+        parser hands the shared fingerprint over and marks its findings so the importer drops it.
+        """
+        for label, read in (
+            ("get_findings", lambda handle: SarifParser().get_findings(handle, Test())),
+            ("get_tests", lambda handle: [f for t in SarifParser().get_tests("SARIF", handle) for f in t.findings]),
+        ):
+            with self.subTest(label), (get_unit_tests_scans_path("sarif") / "sentinel_fingerprints.sarif").open(encoding="utf-8") as testfile:
+                findings = read(testfile)
+                self.assertEqual(4, len(findings))
+                self.assertTrue(all(getattr(f, AMBIGUOUS_WHEN_REPEATED, False) for f in findings))
+                self.assertTrue(all(finding.unique_id_from_tool for finding in findings))
+
     def test_repeated_fingerprints_are_dropped(self):
         """
         A fingerprint carried by several findings in one report is not an identity.
@@ -645,11 +665,12 @@ add_core(ptr, offset, val);
         fingerprint, and unique-id deduplication merged unrelated findings (SQL injection,
         committed credentials, disabled TLS verification) into one cluster. A value that
         repeats inside its own report is dropped so those findings deduplicate by hash code;
-        a fingerprint that is genuinely unique in the report is kept.
+        a fingerprint that is genuinely unique in the report is kept. The importer applies the
+        drop; this applies the same rule to the parser's output.
         """
         with (get_unit_tests_scans_path("sarif") / "sentinel_fingerprints.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
-            findings = parser.get_findings(testfile, Test())
+            findings = drop_repeated_unique_ids(parser.get_findings(testfile, Test()))
         self.assertEqual(4, len(findings))
         sentinel_carriers = [f for f in findings if f.unique_id_from_tool is None]
         self.assertEqual(3, len(sentinel_carriers))
@@ -659,3 +680,55 @@ add_core(ptr, offset, val);
             "5c1f36e0a9de13c3c96c26fa9a1a02a5d5be0c4a3ad9d0f27b3c4d2f8f4a91aa",
             keeper[0].unique_id_from_tool,
         )
+
+    # Regression: CVE/GHSA ids carried in rule or result tags were kept only as tags, never as
+    # vulnerability ids, so a finding keyed by a non-CVE rule id (a GHSA, a RUSTSEC) had no CVE.
+    def test_vulnerability_ids_from_tags(self):
+        with (get_unit_tests_scans_path("sarif") / "vulnerability_ids_in_tags.sarif").open(encoding="utf-8") as testfile:
+            findings = SarifParser().get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+        by_rule = {finding.vuln_id_from_tool: finding for finding in findings}
+        expected = {
+            # GHSA rule id, CVE in the rule tags: the CVE first, then the rule's own GHSA
+            "GHSA-jfh8-c2jp-5v3q": ["CVE-2021-44228", "GHSA-jfh8-c2jp-5v3q"],
+            # rule and result tags combine; a lower-case CVE is normalized; CVEs come first
+            "RUSTSEC-2021-0078": ["CVE-2021-32715", "CVE-2021-32714", "GHSA-f3pg-qwvg-p99c"],
+            # a CVE rule id that is repeated in the tags is not listed twice
+            "CVE-2022-42003": ["CVE-2022-42003", "GHSA-jjjh-jjxp-wpff"],
+            # control: no tag is an id ("CVE-check" is not one), so nothing changes
+            "java.lang.security.audit.sqli.jdbc-sqli": None,
+        }
+        for rule_id, vulnerability_ids in expected.items():
+            with self.subTest(rule_id=rule_id):
+                finding = by_rule[rule_id]
+                self.assertEqual(
+                    vulnerability_ids, finding.unsaved_vulnerability_ids,
+                    msg=f"rule {rule_id}: expected {vulnerability_ids}, parsed {finding.unsaved_vulnerability_ids}",
+                )
+                self.common_checks(finding)
+        with self.subTest("ids stay in the tags too"):
+            self.assertIn("CVE-2021-44228", by_rule["GHSA-jfh8-c2jp-5v3q"].unsaved_tags)
+
+    def test_vulnerability_id_from_tag(self):
+        cases = {
+            "CVE-2021-44228": "CVE-2021-44228",
+            "cve-2021-44228": "CVE-2021-44228",
+            " CVE-2021-44228 ": "CVE-2021-44228",
+            "GHSA-JFH8-C2JP-5V3Q": "GHSA-jfh8-c2jp-5v3q",
+            "ghsa-jfh8-c2jp-5v3q": "GHSA-jfh8-c2jp-5v3q",
+            # not ids: other text, an id inside a longer tag, a short segment
+            "CVE-check": None,
+            "fix CVE-2021-44228 now": None,
+            "GHSA-jfh8-c2jp-5v3": None,
+            # non-ASCII digits and letters that only look like an id
+            "CVE-\uff12\uff10\uff12\uff11-\uff14\uff14\uff12\uff12\uff18": None,
+            "CVE-\u0662\u0660\u0662\u0661-\u0664\u0664\u0662\u0662\u0668": None,
+            "GHSA-\u212aaaa-bbbb-cccc": None,
+            "GHSA-\u0130aaa-bbbb-cccc": None,
+            # not a string at all
+            None: None,
+            42: None,
+        }
+        for tag, expected in cases.items():
+            with self.subTest(tag=tag):
+                self.assertEqual(expected, vulnerability_id_from_tag(tag))

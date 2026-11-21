@@ -3,6 +3,7 @@ from html.parser import HTMLParser
 
 from crum import impersonate
 from django.utils.timezone import is_naive, now
+from parameterized import parameterized
 
 from dojo.finding.helper import close_finding
 from dojo.location.status import FindingLocationStatus
@@ -446,6 +447,31 @@ class TestFindingModelMixin:
         finding.references = "URL: [https://www.example.com](https://www.example.com)"
         self.assertEqual("URL: [https://www.example.com](https://www.example.com)", finding.get_references_with_links())
 
+    def test_duplicate_finding_set_orphaned_duplicate_is_filterable(self):
+        # A finding flagged as a duplicate whose duplicate_finding link is null
+        # (an orphaned duplicate) must still return a QuerySet, not a plain list.
+        # Callers such as set_finding_as_original_internal chain .filter() on the
+        # result, which raised "AttributeError: 'list' object has no attribute
+        # 'filter'" when a list was returned.
+        self.finding.duplicate = True
+        self.finding.duplicate_finding = None
+
+        cluster = self.finding.duplicate_finding_set()
+
+        # The crashing call site chained .filter(...) on the return value.
+        filtered = cluster.filter(test__engagement__product=self.finding.test.engagement.product)
+        self.assertEqual(list(filtered), [])
+
+    def test_duplicate_finding_set_non_duplicate_is_filterable(self):
+        # The non-duplicate branch already returns a QuerySet; pin that contract
+        # so both branches stay filterable.
+        self.finding.duplicate = False
+
+        cluster = self.finding.duplicate_finding_set()
+
+        filtered = cluster.filter(test__engagement__product=self.finding.test.engagement.product)
+        self.assertEqual(list(filtered), [])
+
     # See https://github.com/DefectDojo/django-DefectDojo/issues/8264
     # Capturing current behavior which might not be the desired one yet
     # This test saves vectors without any validation. This is capturing current behavior.
@@ -794,3 +820,39 @@ class TestFindingSLAExpiration(DojoTestCase):
         self.assertEqual(finding.sla_expiration_date, None)
         self.assertEqual(finding.sla_days_remaining(), None)
         self.assertEqual(finding.sla_deadline(), None)
+
+
+# Regression: saving a finding dated near 9999-12-31 raised OverflowError from the SLA expiration date
+class TestFindingSLAExpirationBounds(DojoTestCase):
+
+    """Builds its own data (no fixture), so it also runs where the testdata fixture cannot load."""
+
+    @parameterized.expand([
+        ("past_last_date", date(9999, 12, 31), 7, date(9999, 12, 31)),
+        ("period_larger_than_timedelta", date(2024, 1, 1), 1_000_000_000, date(9999, 12, 31)),
+        ("before_first_date", date(1, 1, 1), -7, date(1, 1, 1)),
+        ("in_range_control", date(9999, 12, 1), 7, date(9999, 12, 8)),
+    ])
+    def test_sla_expiration_date_clamped_to_representable_range(self, case, finding_date, sla_days, expected):
+        user = User.objects.create(username="sla-bounds", is_superuser=True)
+        Test_Type.objects.get_or_create(name="ZAP Scan")
+        product_type = self.create_product_type("test_product_type")
+        sla_config = self.create_sla_configuration(name="test_sla_config", critical=sla_days)
+        product = self.create_product(name="test_product", prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement("test_eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan", title="test_test")
+        with impersonate(user):
+            finding = Finding.objects.create(
+                test=test,
+                reporter=user,
+                title="test_finding",
+                severity="Critical",
+                date=finding_date)
+
+        persisted = Finding.objects.get(id=finding.id).sla_expiration_date
+        self.assertEqual(
+            persisted, expected,
+            msg=f"{case}: expected sla_expiration_date={expected}, persisted={persisted}",
+        )

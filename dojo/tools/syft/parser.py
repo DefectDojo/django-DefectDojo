@@ -1,6 +1,8 @@
 import json
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.tools.locations import LocationData, cpe_strings
 
 
 class SyftParser:
@@ -52,7 +54,7 @@ class SyftParser:
             if source:
                 description.append(f"**Source:** {source}")
 
-            findings.append(Finding(
+            finding = Finding(
                 title=f"{name}:{version}" if version else name,
                 test=test,
                 description="\n".join(description),
@@ -65,7 +67,15 @@ class SyftParser:
                 unique_id_from_tool=artifact.get("id"),
                 static_finding=True,
                 dynamic_finding=False,
-            ))
+            )
+            if locations_enabled() and purl:
+                paths = [location["path"] for location in artifact.get("locations") or [] if location.get("path")]
+                finding.unsaved_locations.append(
+                    LocationData.dependency(
+                        purl=purl, file_path=paths[0] if paths else "", cpes=cpe_strings(artifact.get("cpes")),
+                    ),
+                )
+            findings.append(finding)
         return findings
 
     def _licenses(self, artifact):

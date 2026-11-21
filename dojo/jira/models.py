@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
 
+from dojo.query_hooks import HookedManager, UnfilteredManager
+
 
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
@@ -42,7 +44,7 @@ class JIRA_Instance(models.Model):
     finding_text = models.TextField(null=True, blank=True, help_text=_("Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information."))
     accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_('JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. The expiration time for this Risk Acceptance will be determined by the "Risk acceptance form default days" in "System Settings". This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution.'))
     false_positive_mapping_resolution = models.CharField(null=True, blank=True, verbose_name="False Positive resolution mapping", max_length=300, help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding being marked as False Positive Defect Dojo. This mapping is not used when Findings are pushed to JIRA. In that case the Finding is closed in JIRA and JIRA sets the default resolution."))
-    global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
+    global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("Each Jira project configuration can override this: 'Send SLA notifications as comment?' sends them even when this is off, and 'Never send SLA notifications as comment' stops them even when this is on."))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
     class Meta:
@@ -132,12 +134,25 @@ class JIRA_Project(models.Model):
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
+    # Unchecked, product_jira_sla_notification follows the JIRA instance's global_jira_sla_notification; this turns the
+    # comments off for this JIRA project whatever the instance says. The two cannot both be set (see clean()).
+    # db_default keeps an INSERT that does not name the column (a writer older than it) working.
+    suppress_sla_notification_comments = models.BooleanField(default=False, db_default=False, blank=True, verbose_name=_("Never send SLA notifications as comment"),
+        help_text=_("Overrides the Jira instance's 'Globally send SLA notifications as comment?' setting: no SLA notification is posted as a Jira comment for this Jira project. Email, in-app and other SLA notifications are still sent."))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
     enabled = models.BooleanField(
         verbose_name=_("Enable Connection With Jira Project"),
         help_text=_("When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously."),
         default=True,
         blank=True)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         app_label = "dojo"
@@ -152,6 +167,17 @@ class JIRA_Project(models.Model):
         if not self.jira_instance:
             msg = "Cannot save JIRA Project Configuration without JIRA Instance"
             raise ValidationError(msg)
+        if sla_notification_conflict(self.product_jira_sla_notification, self.suppress_sla_notification_comments):
+            raise ValidationError({"suppress_sla_notification_comments": sla_notification_conflict_message()})
+
+
+def sla_notification_conflict(send, suppress):
+    """A JIRA project cannot both send SLA notifications as comments and never send them."""
+    return bool(send and suppress)
+
+
+def sla_notification_conflict_message():
+    return _("Choose either 'Send SLA notifications as comment?' or 'Never send SLA notifications as comment', not both.")
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally
@@ -197,7 +223,18 @@ class JIRA_Issue(models.Model):
                                        verbose_name=_("Jira last update"),
                                        help_text=_("The date the linked Jira issue was last modified."))
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
+        indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_jiraissue_archive_batch"),
+        ]
         app_label = "dojo"
 
     def __str__(self):

@@ -31,6 +31,12 @@ Each entry on the Operations Page's table is a record of an operation event, wit
 * **Trigger** describes how the event was triggered \- was it a **Scheduled** operation which ran automatically, or a **Manual** operation which was triggered by a DefectDojo user?
 * The **Start \& End Time** of each operation is recorded here, along with the **Duration**.
 
+## When the next run is scheduled
+
+The Connector's tile on the **Upstream Connectors** page and its **Manage Records and Operations** page show when the next Discover and Sync are scheduled, in your browser's time zone: **Next discovery scheduled for** and **Next sync scheduled for** on the tile, and each one under the card it updates (Sync under **Mapped Records**, Discover under **Unmapped Records**).
+
+The time comes from the Connector's schedule, so it says when the run is scheduled, not that it has started. A scheduled run can start a little later than that while other Connectors' runs finish. While the tile shows **Sync Stalled** or **Discovery Stalled**, the next run is not shown, because the schedule cannot promise it. If you would rather not wait for the next scheduled run, use [Run Discover Manually](#run-discover-manually) or run a Sync from the **Mapped Records** card.
+
 ## When a Connector runs but imports nothing
 
 An operation that succeeds is not the same as an operation that found something. If the account
@@ -54,6 +60,30 @@ Both warnings clear on their own. Once the tool reports the data again, the next
 restores the records to **Good**, your existing mappings are reused, and Sync resumes importing.
 You do not need to recreate the Connector. To check a fix immediately rather than waiting for the
 next scheduled run, use [Run Discover Manually](#run-discover-manually).
+
+### Zero Results
+
+A Connector can also keep its records and keep syncing successfully while every Sync imports
+nothing. The tile shows an orange **Zero Results: *n* Runs** chip when every actively mapped
+record has returned zero Findings for at least two Syncs in a row, after importing Findings at
+some point in the previous 30 days. Hover the chip to see when the run of empty Syncs began.
+
+A few things keep the chip honest:
+
+* Each scan type of a record is counted on its own, because each one syncs separately. A scan
+  type that has not imported anything in the last 30 days is treated as a clean project, not a
+  failure, and does not count toward the chip.
+* One record, or one scan type, that still imports Findings is enough to keep the chip off: an
+  empty project among busy ones is normal.
+* A single empty Sync is not reported. Two in a row is.
+
+The chip clears on the next Sync that imports anything. The usual causes are the same as for
+missing records: a credential whose scope was narrowed, or a filter in the tool that now excludes
+everything.
+
+With the **Ingestion Health** feature turned on, a Connector that has a baseline shows how many
+Findings it usually returns in place of the chip, and the quiet period can be acknowledged with a
+reason. See [Ingestion Health](/connectors/upstream/ingestion_health/).
 
 ## Discover Operations
 
@@ -117,6 +147,6 @@ If DefectDojo cannot start a manual Discover or Sync, a message says why. The tw
 
 ## Getting told when a Connector stops working
 
-The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing and when its tool stops returning the records it used to return.
+The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing, when its tool stops returning the records it used to return, and when its Syncs start returning zero results.
 
 Set it on your notification settings page, under **Connections**. See [Connector Health Notifications](/admin/notifications/about_notifications/#connector-health-notifications-pro) for what each message covers and how often it arrives.

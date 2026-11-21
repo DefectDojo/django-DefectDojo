@@ -11,6 +11,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
+from dojo.announcement.github_star import GITHUB_REPO_URL, GITHUB_STAR_PROMPT_KEY, github_star_prompt_state
 from dojo.announcement.models import Announcement, UserAnnouncement
 from dojo.announcement.os_message import OS_MESSAGE_DISMISSED_KEY
 from dojo.announcement.ui.forms import AnnouncementCreateForm, AnnouncementRemoveForm
@@ -112,6 +113,38 @@ def dismiss_os_message(request):
                 contact.save(update_fields=["user_state_details"])
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return HttpResponse(status=204)
+    referer = request.META.get("HTTP_REFERER")
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure(),
+    ):
+        return HttpResponseRedirect(referer)
+    return HttpResponseRedirect("/")
+
+
+@require_POST
+def github_star_prompt(request):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+    choice = request.POST.get("choice", "")
+    new_state = github_star_prompt_state(choice)
+    if new_state is not None:
+        # Same row-locked read-modify-write as dismiss_os_message: other keys share this blob.
+        # Saving the choice is best effort: if it fails the prompt just shows again later,
+        # and "star" still sends the user on to GitHub.
+        try:
+            with transaction.atomic():
+                contact, _ = UserContactInfo.objects.get_or_create(user=request.user)
+                contact = UserContactInfo.objects.select_for_update().get(pk=contact.pk)
+                state = contact.user_state_details or {}
+                state[GITHUB_STAR_PROMPT_KEY] = new_state
+                contact.user_state_details = state
+                contact.save(update_fields=["user_state_details"])
+        except Exception:
+            logger.debug("github_star_prompt: saving choice failed", exc_info=True)
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return HttpResponse(status=204)
+    if choice == "star":
+        return HttpResponseRedirect(GITHUB_REPO_URL)
     referer = request.META.get("HTTP_REFERER")
     if referer and url_has_allowed_host_and_scheme(
         referer, allowed_hosts={request.get_host()}, require_https=request.is_secure(),

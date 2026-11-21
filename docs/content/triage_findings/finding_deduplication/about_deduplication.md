@@ -170,6 +170,36 @@ For example, let’s say that you had your Maximum Duplicates field set to ‘1�
 2. **Later, you import Test 2 contains the same vulnerability. This will be recorded as Finding B, and Finding B will be marked as a duplicate of Finding A.**
 3. Later still, you import **Test 3** which also contains that vulnerability. This will be recorded as Finding C, which will be marked as a duplicate of Finding A. At this time, Finding B will be deleted from DefectDojo as the threshold for maximum duplicates has been crossed.
 
+### When duplicates are deleted
+
+Excess duplicates are deleted by a background task that runs every minute. Two kinds of duplicate wait for a later run:
+
+- Duplicates in a Test that an import or reimport is working on right now. The import holds a database lock on its Test until it finishes, and the task skips that Test's duplicates while the lock is held. The next run after the import ends deletes them, so a Test that is reimported every few minutes is still cleaned up between reimports.
+- A Finding saved in the last minute, so a request that is still writing it (for example a Finding created through the API) can finish first.
+
+Every other excess duplicate is deleted on the next run, as before.
+
+Self-hosted instances can tune this with three environment variables:
+
+- `DD_DUPE_DELETE_GRACE_MINUTES` (default `1`) sets how long after its last save a duplicate waits. `0` turns the wait off.
+- `DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT` (default `True`) turns the import lock on. Set it to `False` only if DefectDojo reaches PostgreSQL through a connection pooler in transaction mode (such as PgBouncer with `pool_mode = transaction`), where the lock cannot be held across an import. Without the lock, an import can fail if the task deletes Findings it is still writing.
+- `DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES` (default `30`) is a safety valve. If every connection holding a Test's import lock has been idle for this long, no import is running, so the task deletes that Test's duplicates anyway and logs a warning naming the database connections involved. `0` turns the valve off.
+
+### When an Asset is held
+
+An Asset can be **held**: while it is, the task deletes none of that Asset's duplicates, and it goes on deleting every other Asset's as usual. A held Asset never uses up a run's deletions, so one held Asset does not slow down the clean-up of the others.
+
+In DefectDojo Pro, Delete Duplicates holds an Asset by itself when it was about to delete more of that Asset's duplicates than the Asset's own imports created recently. Deleting duplicates is normally about as much as importing adds, so a run that would remove more usually means deduplication matched Findings that are not the same, and deleting them would lose real Findings. DefectDojo Pro also leaves out a duplicate whose identity no longer matches its original's: it shares neither the same-tool hash, the cross-tool hash, nor the tool's own ID. A duplicate found by the **Legacy** algorithm is never left out for that reason, because Legacy matches share no hash by design. When an Asset is held, DefectDojo Pro sends one notification that names the Asset and links to it.
+
+A hold stays in place until a superuser clears it. It does not lift after a time, or when a cache is cleared or a server restarts. To clear it:
+
+- In DefectDojo Pro, open the Asset: its page shows **Delete Duplicates Paused**, with a **Resume Delete Duplicates** button for superusers.
+- Through the API, send `POST /api/v2/assets/{id}/clear_dupe_delete_hold/` (or `POST /api/v2/products/{id}/clear_dupe_delete_hold/`). The `dupe_delete_held_at` field on the Asset shows when it was held, and is empty when it is not.
+
+Review the Asset's duplicates before you resume. Once the hold is cleared, the duplicates that were held are deleted by the next runs.
+
+Turning **Delete Deduplicate Findings** on, or lowering **Maximum Duplicates**, can hold every Asset whose backlog of excess duplicates is larger than its recent imports: that backlog is deleted all at once, which is what a hold is there to catch. To find the held Assets, list them through the API with `GET /api/v2/assets/?dupe_delete_held=true` (or `GET /api/v2/products/?dupe_delete_held=true`), then resume each one once you have checked it.
+
 ### Applying this setting
 
 Applying **Delete Deduplicate Findings** will begin a deletion process immediately. This setting can be applied on the **System Settings** page. See Enabling Deduplication for more information.

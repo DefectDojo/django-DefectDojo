@@ -76,3 +76,11 @@ class TestApiV3Auth(ApiV3TestCase):
         """With API tokens disabled, v3 refuses tokens as v2 does; session auth still works."""
         self.assertEqual(401, self.token_client().get(self.v3_url("findings")).status_code)
         self.assertEqual(200, self.session_client().get(self.v3_url("findings")).status_code)
+
+    def test_token_is_401_while_a_forced_password_reset_is_pending(self):
+        """A token is refused while its owner owes a forced password reset, as on v2."""
+        uci, _ = UserContactInfo.objects.get_or_create(user=self.admin)
+        uci.force_password_reset = True
+        uci.save(update_fields=["force_password_reset"])
+        response = self.token_client().get(self.v3_url("findings"))
+        self.assertEqual(401, response.status_code, response.content[:500])

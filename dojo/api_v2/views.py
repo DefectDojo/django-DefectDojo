@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime, time
 
 import pghistory
@@ -99,6 +100,9 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
+# anything a version string does not need, see DojoSpectacularAPIView._get_filename
+SCHEMA_FILENAME_VERSION_UNSAFE_CHARS = re.compile(r"[^A-Za-z0-9._+-]")
+
 
 labels = get_labels()
 
@@ -149,6 +153,21 @@ class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
 class DojoSpectacularAPIView(SpectacularAPIView):
     renderer_classes = [DojoOpenApiJsonRenderer, *SpectacularAPIView.renderer_classes]
 
+    def _get_filename(self, request, version):
+        # The schema download filename is interpolated into the Content-Disposition response
+        # header, and `version` is attacker-controlled (the ?version= query parameter).
+        # drf-spectacular does not sanitize it, so a CR/LF in ?version= makes Django's
+        # HttpResponse raise BadHeaderError: an unauthenticated 500 (and an error report) on
+        # every probe. The header injection never actually succeeds because Django rejects
+        # header values containing CR/LF, but other characters still break the header: a NUL,
+        # or a U+2028/U+0085 that Django MIME-folds onto a new line, makes nginx reject the
+        # response with a 502, and a quote or backslash breaks the quoted filename. Keep only
+        # the characters a real version string uses, so the header is always plain ASCII and
+        # well formed, whatever `version` (or a DRF versioning scheme) produced.
+        if version:
+            version = SCHEMA_FILENAME_VERSION_UNSAFE_CHARS.sub("", str(version))
+        return super()._get_filename(request, version)
+
 
 class DojoModelViewSet(
     viewsets.ModelViewSet,
@@ -197,14 +216,6 @@ class AppAnalysisViewSet(
 
     def get_queryset(self):
         return get_authorized_app_analysis("view")
-
-
-# Authorization: configuration
-from dojo.jira.api.views import (  # noqa: E402, F401 backward compat
-    JiraInstanceViewSet,
-    JiraIssuesViewSet,
-    JiraProjectViewSet,
-)
 
 
 # Authorization: superuser
@@ -375,7 +386,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
 
     def perform_create(self, serializer):
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(self.request)
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
@@ -500,7 +511,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         return get_authorized_tests("import")
 
     def perform_create(self, serializer):
-        auto_create = AutoCreateContextManager()
+        auto_create = AutoCreateContextManager.for_request(self.request)
         # Process the context to make an conversions needed. Catch any exceptions
         # in this case and wrap them in a DRF exception
         try:
@@ -538,10 +549,6 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # Update test_id if it wasn't available before save
         if test_id_from_response := serializer.data.get("test"):
             pghistory.context(test_id=test_id_from_response)
-
-
-from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401
-from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401
 
 
 def _report_url_location_refs(product, user=None):
@@ -1033,7 +1040,10 @@ class SLAConfigurationViewset(
 # moved into per-module api/views packages, and those modules import base
 # classes back from dojo.api_v2.views at import time. Eagerly importing them
 # here would create entry-order-dependent circular imports, so expose them
-# lazily via PEP 562 __getattr__ instead.
+# lazily via PEP 562 __getattr__ instead. __dir__ lists them, so dir() and
+# inspect.getmembers() still see them. A star import does not: the module has no
+# __all__, so "from dojo.api_v2.views import *" only copies names already bound
+# here. Import these names explicitly.
 import importlib  # noqa: E402
 
 _LAZY_VIEWSET_EXPORTS = {
@@ -1046,6 +1056,11 @@ _LAZY_VIEWSET_EXPORTS = {
     "BurpRawRequestResponseViewSet":      "dojo.finding.api.views",
     "FindingViewSet":                     "dojo.finding.api.views",
     "FindingTemplatesViewSet":            "dojo.finding.api.views",
+    "JiraInstanceViewSet":                "dojo.jira.api.views",
+    "JiraIssuesViewSet":                  "dojo.jira.api.views",
+    "JiraProjectViewSet":                 "dojo.jira.api.views",
+    "NoteTypeViewSet":                    "dojo.note_type.api.views",
+    "NotesViewSet":                       "dojo.notes.api.views",
     "ProductAPIScanConfigurationViewSet": "dojo.product.api.views",
     "ProductTypeViewSet":                 "dojo.product_type.api.views",
     "RiskAcceptanceViewSet":              "dojo.risk_acceptance.api.views",
@@ -1070,3 +1085,7 @@ def __getattr__(name):
         msg = f"module 'dojo.api_v2.views' has no attribute {name!r}"
         raise AttributeError(msg)
     return getattr(importlib.import_module(module_path), name)
+
+
+def __dir__():
+    return sorted(set(globals()) | set(_LAZY_VIEWSET_EXPORTS))

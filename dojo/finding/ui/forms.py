@@ -314,7 +314,8 @@ class AddFindingForm(CweFormMixin, forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date")
+                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
+                   "sonarqube_issue")
 
 
 class AdHocFindingForm(CweFormMixin, forms.ModelForm):
@@ -421,7 +422,7 @@ class AdHocFindingForm(CweFormMixin, forms.ModelForm):
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
-                   "sla_expiration_date")
+                   "sla_expiration_date", "sonarqube_issue")
 
 
 class PromoteFindingForm(CweFormMixin, forms.ModelForm):
@@ -504,7 +505,8 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "cwe", "inherited_tags",
-                   "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing")
+                   "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing",
+                   "sonarqube_issue")
 
 
 class FindingForm(CweFormMixin, forms.ModelForm):
@@ -893,7 +895,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     finding_group_by_option = forms.CharField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
-    # unlink_from_jira = forms.BooleanField(required=False)
+    unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by("name"))
     notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={"class": "form-control"}))

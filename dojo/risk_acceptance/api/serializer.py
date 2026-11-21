@@ -1,5 +1,6 @@
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -43,6 +44,16 @@ class RiskAcceptanceToNotesSerializer(serializers.Serializer):
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
     path = serializers.SerializerMethodField()
+
+    def to_internal_value(self, data):
+        # A new acceptance with no expiration_date in the request gets the configured window
+        # (risk_acceptance_form_default_days, the same default the classic form and reinstate use),
+        # so one created over the API does not silently live forever. Only an omitted key is
+        # defaulted: an explicit null is how a caller asks for an acceptance that never expires.
+        validated = super().to_internal_value(data)
+        if self.instance is None and "expiration_date" not in validated and ra_helper.expiration_days() > 0:
+            validated["expiration_date"] = ra_helper.default_expiration_date()
+        return validated
 
     def create(self, validated_data):
         instance = super().create(validated_data)
@@ -90,13 +101,35 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
         return instance
 
+    def validate_findings_not_accepted_elsewhere(self, findings_ids):
+        """
+        Refuse a finding that is already risk accepted, through another acceptance or a simple risk acceptance.
+
+        A finding belongs to one acceptance: removing it from one, or expiring one, clears the finding's
+        single risk_accepted flag, so a second acceptance would be left holding an active finding. Keyed on
+        the flag rather than on membership, so a finding an expired acceptance kept may be accepted again.
+        Findings this acceptance already holds are not checked.
+        """
+        added_ids = set(findings_ids)
+        if self.instance is not None:
+            added_ids -= set(self.instance.accepted_findings.values_list("id", flat=True))
+        held = Finding.objects.filter(id__in=added_ids, risk_accepted=True).order_by("id").values_list("id", "title")
+        if messages := [
+            _('Finding "%(title)s" (%(id)s) is already risk accepted. A finding can be in only one risk acceptance.')
+            % {"title": title, "id": finding_id}
+            for finding_id, title in held
+        ]:
+            raise serializers.ValidationError({"accepted_findings": messages})
+
     @extend_schema_field(serializers.CharField())
     def get_path(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
         path = "No proof has been supplied"
-        if engagement and obj.filename() is not None:
+        if obj.filename() is None:
+            return path
+        # Read through the relation, so a prefetched engagement_set serves it with no query. Same row as
+        # Engagement.objects.filter(risk_acceptance=obj).first(): Engagement's manager orders by id, prefetched or not.
+        engagement = next(iter(obj.engagement_set.all()), None)
+        if engagement:
             path = reverse(
                 "download_risk_acceptance", args=(engagement.id, obj.id),
             )
@@ -124,13 +157,19 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
                 msg = "You are not permitted to add findings from multiple engagements"
                 raise PermissionDenied(msg)
 
-        findings = data.get("accepted_findings", [])
+        # Each finding once, in the order first named: a repeated id is the same finding, and left
+        # in it makes the list longer than the authorized rows counted below, which read as a
+        # finding the caller may not see.
+        findings = list(dict.fromkeys(data.get("accepted_findings", [])))
+        if "accepted_findings" in data:
+            data["accepted_findings"] = findings
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
         authed_findings = get_authorized_findings("edit").filter(id__in=findings_ids)
         if len(findings) != len(authed_findings):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
+        self.validate_findings_not_accepted_elsewhere(findings_ids)
         if self.context["request"].method == "POST":
             validate_findings_have_same_engagement(finding_objects)
 

@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.14.8-alpine3.23@sha256:e7cff362a12454395f8dc99607c21a602ea880cdce03538877b90c2ba932b16f AS base
+FROM python:3.14.10-alpine3.23@sha256:f6a7dec95e6205059dccfcb07faca3ca38729ea35df01231caf1d127bacedec8 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -57,6 +57,13 @@ RUN \
     && \
     rm -rf /var/cache/apk/* && \
   true
+# Upgrade the system trust store and shared libraries in their own layer. Release
+# builds reuse the layer above from the build cache, so an OS update to these
+# packages (ca-certificates here after the eMudhra key compromise, 2026-10-20)
+# would otherwise never reach the image.
+# Bump OS_REFRESH to force this layer to rebuild for the next package update.
+ARG OS_REFRESH=2026-10-28
+RUN echo "OS package refresh ${OS_REFRESH}" && apk upgrade --no-cache ca-certificates-bundle ca-certificates brotli-libs brotli brotli-dev
 RUN \
   --mount=from=build,src=/tmp/wheels,target=/tmp/wheels \
   --mount=from=build,src=/app/requirements.txt,target=/app/requirements.txt \
@@ -65,6 +72,9 @@ RUN \
 	--no-index \
   --find-links=/tmp/wheels \
   -r ./requirements.txt
+# Fail the build if either trust store still carries the root distrusted after the
+# eMudhra key compromise (2026-10-20), so a cached or stale layer can't ship it.
+RUN python3 -c "import ssl, sys, certifi; bad = [f for f in ('/etc/ssl/certs/ca-certificates.crt', certifi.where()) if (lambda ctx: ctx.load_verify_locations(cafile=f) or any(dict(x[0] for x in c['subject']).get('commonName') == 'emSign ECC Root CA - G3' for c in ctx.get_ca_certs()))(ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT))]; sys.exit('distrusted root emSign ECC Root CA - G3 still in: ' + ', '.join(bad) if bad else 0)"
 
 COPY \
   docker/entrypoint-celery-beat.sh \

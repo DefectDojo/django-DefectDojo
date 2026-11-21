@@ -269,8 +269,6 @@ class ImportScanForm(forms.Form):
     verified = forms.ChoiceField(required=True, choices=active_verified_choices,
                                help_text=_("Force findings to be verified/not verified, or default to the original tool"))
 
-    # help_do_not_reactivate = 'Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs.'
-    # do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by("name"))
@@ -418,7 +416,10 @@ class ReImportScanForm(forms.Form):
     verified = forms.ChoiceField(required=True, choices=active_verified_choices,
                              help_text=_("Force findings to be verified/not verified, or default to the original tool"))
 
-    help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
+    help_do_not_reactivate = _(
+        "Keep closed findings closed when they appear in the report again, instead of reactivating them. "
+        "New findings are still created, and open findings are processed as usual.",
+    )
     do_not_reactivate = forms.BooleanField(help_text=help_do_not_reactivate, required=False)
     endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label=_("Systems / Endpoints"))
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "

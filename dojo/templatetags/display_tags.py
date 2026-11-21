@@ -854,6 +854,8 @@ def vulnerability_url(vulnerability_id):
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
             if key == "SSA-" and not re.findall(r"SSA-\d{4}-", vulnerability_id):
                 return "https://cert-portal.siemens.com/productcert/html/" + str(vulnerability_id.lower()) + ".html"
+            if key == "SSB-":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower()) + ".html"
             if key in {"AVD", "KHV", "C-", "ELA-", "MFSA"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":

@@ -24,7 +24,7 @@ You can also edit an existing Connector under the **Configured Connectors** head
 
 4. You will need an accessible **Location URL** for the tool, along with an API **Secret** key. The location of the API key will depend on the tool you are trying to configure. See our [Tool\-Specific Reference](../../toolreference/upstream/) for more details.  
 ​
-5. Set a **Label** for this connection to help you identify it in DefectDojo.  
+5. Set a **Label** for this connection to help you identify it in DefectDojo. The label is cosmetic: you can rename it later from **Edit Configuration** without affecting the Records, Engagements or Tests the connector has already created. Each connector type can only use a given label once.  
 ​
 6. Schedule the Connector's automatic discovery and sync under the **Discovery Configuration** and **Synchronization Configuration** sections. For each, pick a **Frequency** (every 6, 12, or 24 hours) and a **Time**. At *Every 24 hours* the connector runs once a day at that time; at *Every 6 hours* or *Every 12 hours* the time sets when the first run of the day happens, and the connector repeats from there. Times are shown in your browser's local timezone. You can change any of this later.  
 ​
@@ -37,6 +37,10 @@ You can also edit an existing Connector under the **Configured Connectors** head
 ## Checking that the connector can see your data
 
 When you submit, DefectDojo asks the tool what those credentials can actually see, and tells you the answer. If the account you connected has not been granted access to any projects, hosts, or repositories, or otherwise reports no data for your credentials, DefectDojo saves the connector and shows a No Data Visible warning. A new account that is actually empty is a valid setup, and the connector will start importing as soon as data appears. If data is present but fails to be recognized, check your tool's account permissions.
+
+## If the connector changed while you were editing it
+
+**Edit Configuration** saves every setting on the page together. If the connector was changed after you opened it, your save is refused with **This connection was changed since the page loaded**. That happens when someone else saved the same connector, when you saved it from another browser tab, or when a hierarchy suggestion was applied to it (Advisor > Hierarchy can change where the connector places its Assets). Nothing you entered is written, so the other change is not overwritten. Reload the page to see the connector as it is now, make your change again, and click **Submit**.
 
 ## Next Steps
 

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 from dojo.importers.base_location_manager import BaseLocationManager
@@ -32,6 +33,19 @@ class StatusUpdateEntry(NamedTuple):
     existing_finding: Finding
     new_finding: Finding
     user: Dojo_User
+
+
+def new_finding_ref_status(finding: Finding) -> str:
+    """
+    The status of a finding ref an import creates: Mitigated when the report marks the finding mitigated.
+
+    Every other finding (inactive, unverified, duplicate, false positive, out of scope, risk accepted) gets an Active
+    ref, as imports always have. A false positive or out of scope finding is saved with is_mitigated set, so those
+    are excluded explicitly.
+    """
+    if finding.is_mitigated and not (finding.false_p or finding.out_of_scope or finding.risk_accepted):
+        return FindingLocationStatus.Mitigated
+    return FindingLocationStatus.Active
 
 
 class LocationManager(BaseLocationManager):
@@ -190,57 +204,79 @@ class LocationManager(BaseLocationManager):
         # List of all location IDs, for querying existing refs
         all_location_ids = [loc.location_id for loc in saved]
 
-        # Determine necessary product refs to create
-        existing_product_refs: set[int] = set(
-            LocationProductReference.objects.filter(
-                location_id__in=all_location_ids,
-                product=self._product,
-            ).values_list("location_id", flat=True),
-        )
-        for location in saved:
-            if location.location_id not in existing_product_refs:
-                assoc = location.get_association_data()
-                all_product_refs.append(LocationProductReference(
-                    location_id=location.location_id,
-                    product=self._product,
-                    status=ProductLocationStatus.Active,
-                    relationship=assoc.relationship_type,
-                    relationship_data=assoc.relationship_data,
-                ))
-                existing_product_refs.add(location.location_id)
-
-        # Determine necessary finding refs to create
+        # Determine necessary finding refs to create. A finding the report already marks mitigated gets a Mitigated
+        # ref, so it does not leave an Active ref behind (see new_finding_ref_status).
         if self._locations_by_finding:
             all_finding_ids = [finding.id for finding, _ in self._locations_by_finding]
             # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
             # than scoped per-finding), but more straightforward than constructing a per-finding lookup. We won't create
             # any unwanted associations below anyway.
-            existing_finding_ref_keys: set[tuple[int, int]] = set(
+            existing_finding_ref_keys: set[tuple[int, int, int]] = set(
                 LocationFindingReference.objects.filter(
                     location_id__in=all_location_ids,
                     finding_id__in=all_finding_ids,
-                ).values_list("finding_id", "location_id"),
+                ).values_list("finding_id", "location_id", "test_id"),
             )
 
             for finding, cleaned_locations in self._locations_by_finding:
+                test_id = self.attribution_test_id(finding)
+                status = new_finding_ref_status(finding)
                 # Locations were already cleaned at record time — identity_hash is set, so we can
                 # look up the persisted location directly.
                 for location in cleaned_locations:
                     saved_loc = saved_by_key[type(location), location.identity_hash]
-                    finding_ref_key = (finding.id, saved_loc.location_id)
+                    finding_ref_key = (finding.id, saved_loc.location_id, test_id)
                     if finding_ref_key not in existing_finding_ref_keys:
                         assoc = saved_loc.get_association_data()
                         all_finding_refs.append(LocationFindingReference(
                             location_id=saved_loc.location_id,
                             finding=finding,
-                            status=FindingLocationStatus.Active,
+                            test_id=test_id,
+                            status=status,
                             relationship=assoc.relationship_type,
                             relationship_data=assoc.relationship_data,
                         ))
                         existing_finding_ref_keys.add(finding_ref_key)
+        all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
+
+        # Determine necessary product refs to create. A product ref is Active unless every new finding ref to its
+        # location is Mitigated; a location recorded for the product alone stays Active, as before.
+        new_ref_statuses: dict[int, set[str]] = {}
+        for ref in all_finding_refs:
+            new_ref_statuses.setdefault(ref.location_id, set()).add(ref.status)
+        newly_active = {
+            location_id for location_id, statuses in new_ref_statuses.items()
+            if FindingLocationStatus.Active in statuses
+        }
+        existing_product_refs: dict[int, str] = dict(
+            LocationProductReference.objects.filter(
+                location_id__in=all_location_ids,
+                product=self._product,
+            ).values_list("location_id", "status"),
+        )
+        for location in saved:
+            if location.location_id not in existing_product_refs:
+                assoc = location.get_association_data()
+                status = (
+                    ProductLocationStatus.Mitigated
+                    if location.location_id in new_ref_statuses and location.location_id not in newly_active
+                    else ProductLocationStatus.Active
+                )
+                all_product_refs.append(LocationProductReference(
+                    location_id=location.location_id,
+                    product=self._product,
+                    status=status,
+                    relationship=assoc.relationship_type,
+                    relationship_data=assoc.relationship_data,
+                ))
+                existing_product_refs[location.location_id] = status
+        # A new Active finding ref makes its location Active on the product again.
+        product_refs_to_reactivate = {
+            location_id for location_id in newly_active
+            if existing_product_refs.get(location_id) == ProductLocationStatus.Mitigated
+        }
 
         # Bulk create references
-        all_finding_refs = self._drop_finding_refs_for_missing_findings(all_finding_refs)
         if all_finding_refs:
             LocationFindingReference.objects.bulk_create(
                 all_finding_refs, batch_size=1000, ignore_conflicts=True,
@@ -249,6 +285,12 @@ class LocationManager(BaseLocationManager):
             LocationProductReference.objects.bulk_create(
                 all_product_refs, batch_size=1000, ignore_conflicts=True,
             )
+        if product_refs_to_reactivate:
+            LocationProductReference.objects.filter(
+                location_id__in=product_refs_to_reactivate,
+                product=self._product,
+                status=ProductLocationStatus.Mitigated,
+            ).update(status=ProductLocationStatus.Active)
 
         # Trigger bulk tag inheritance only when the Location's product
         # membership actually changed. New product refs are the only thing
@@ -337,6 +379,9 @@ class LocationManager(BaseLocationManager):
 
         Finally, product associations are updated: if any location associated with a finding on this product is Active,
         the LocationProductReference object is set to Active; otherwise, it is set to Mitigated.
+
+        Every change is limited to the rows attributed to the test being (re)imported (see attribution_test_id), so a
+        reimport never mitigates a location that another test still reports on the same finding.
         """
         # Short-circuit if nothing to do
         if not (self._status_updates or self._refs_to_reactivate or self._refs_to_mitigate):
@@ -357,15 +402,18 @@ class LocationManager(BaseLocationManager):
         # Process status updates determined by comparing existing/new findings
         if self._status_updates:
             # Look up all the existing LocationFindingReference objects and store per-Finding
-            existing_finding_ids = {upd.existing_finding.id for upd in self._status_updates}
+            test_by_finding = {
+                upd.existing_finding.id: self.attribution_test_id(upd.existing_finding) for upd in self._status_updates
+            }
             refs_by_finding: dict[int, list[LocationFindingReference]] = {}
             for ref in (
                 LocationFindingReference.objects
-                .filter(finding_id__in=existing_finding_ids)
+                .filter(finding_id__in=test_by_finding.keys())
                 .exclude(status__in=special_statuses)
                 .select_related("location")
             ):
-                refs_by_finding.setdefault(ref.finding_id, []).append(ref)
+                if ref.test_id == test_by_finding[ref.finding_id]:
+                    refs_by_finding.setdefault(ref.finding_id, []).append(ref)
 
             # Next: for each StatusUpdateEntry, determine what we should do with the existing refs
             for existing_finding, new_finding, user in self._status_updates:
@@ -388,9 +436,11 @@ class LocationManager(BaseLocationManager):
         # Update the "reactivate set" with the IDs of existing LocationFindingReference objects we need to reactivate
         if self._refs_to_reactivate:
             ref_ids_to_reactivate.update(
-                LocationFindingReference.objects.filter(
-                    finding_id__in=self._refs_to_reactivate,
-                    status=FindingLocationStatus.Mitigated,
+                self._scope_to_attributed_test(
+                    LocationFindingReference.objects.filter(
+                        finding_id__in=self._refs_to_reactivate,
+                        status=FindingLocationStatus.Mitigated,
+                    ),
                 ).values_list("id", flat=True),
             )
 
@@ -399,8 +449,10 @@ class LocationManager(BaseLocationManager):
         if self._refs_to_mitigate:
             ref_ids_to_mitigate.update({
                 ref_id: self._refs_to_mitigate[finding_id]
-                for ref_id, finding_id in LocationFindingReference.objects.filter(
-                    finding_id__in=self._refs_to_mitigate.keys(),
+                for ref_id, finding_id in self._scope_to_attributed_test(
+                    LocationFindingReference.objects.filter(
+                        finding_id__in=self._refs_to_mitigate.keys(),
+                    ),
                 ).exclude(status__in=special_statuses).values_list("id", "finding_id")
             })
 
@@ -487,6 +539,12 @@ class LocationManager(BaseLocationManager):
         self._refs_to_reactivate.clear()
         self._refs_to_mitigate.clear()
 
+    def _scope_to_attributed_test(self, refs):
+        """Limit ``refs`` to the rows attributed to the test being imported (each finding's own test if unset)."""
+        if self._test_id is not None:
+            return refs.filter(test_id=self._test_id)
+        return refs.filter(test_id=F("finding__test_id"))
+
     # ------------------------------------------------------------------
     # Type registry
     # ------------------------------------------------------------------
@@ -527,8 +585,22 @@ class LocationManager(BaseLocationManager):
         """
         Convert locations represented as LocationData dataclasses to the appropriate AbstractLocation type, then clean
         them. For any endpoints that fail this validation process, log a message that broken locations are being stored.
+
+        Of two equal locations (the same type and value, but possibly different descriptive fields such as a
+        dependency's component type) the LAST one reported is kept, as _persist_locations does across calls. The
+        result is in last-reported order.
         """
-        locations = list(set(cls.make_abstract_locations(locations)))
+        # Walk backwards so the first copy seen is the last one reported. The key is what AbstractLocation equality
+        # compares (type and rendered value), rendered once per location rather than on every hash and comparison.
+        seen: set[tuple[type, str]] = set()
+        deduplicated: list[AbstractLocation] = []
+        for location in reversed(cls.make_abstract_locations(locations)):
+            key = (type(location), str(location))
+            if key not in seen:
+                seen.add(key)
+                deduplicated.append(location)
+        deduplicated.reverse()
+        locations = deduplicated
         for location in locations:
             try:
                 location.clean()

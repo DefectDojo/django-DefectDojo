@@ -13,6 +13,10 @@ class QualysHackerGuardianParser:
 
     """Parser for Qualys HackerGuardian"""
 
+    # Merging repeated entries keeps every location, so the importer can split a merged finding
+    # back into one finding per location.
+    SPLITTABLE_PER_LOCATION = True
+
     def get_fields(self) -> list[str]:
         """
         Return the list of fields used in the Qualys Hacker Guardian Parser.

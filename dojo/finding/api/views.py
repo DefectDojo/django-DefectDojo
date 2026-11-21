@@ -4,7 +4,7 @@ import logging
 import django_tagulous as tagulous
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -40,7 +40,8 @@ from dojo.api_v2.views import (
     report_generate_response,
 )
 from dojo.authorization import api_permissions as permissions
-from dojo.db_utils import is_foreign_key_conflict
+from dojo.db_utils import is_foreign_key_conflict, is_vanished_row_error
+from dojo.filters import order_with_pk_tiebreak
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
     BurpRawRequestResponseMultiSerializer,
@@ -56,10 +57,11 @@ from dojo.finding.api.serializer import (
     FindingVerifySerializer,
 )
 from dojo.finding.queries import get_authorized_findings
+from dojo.finding.services import FINDING_DELETED_MID_UPDATE_MESSAGE
 from dojo.finding.ui.views import (
     duplicate_cluster,
     reset_finding_duplicate_status_internal,
-    set_finding_as_original_internal,
+    set_finding_as_original_with_reason,
 )
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
@@ -95,6 +97,25 @@ class FindingTemplatesViewSet(
 
     def get_queryset(self):
         return Finding_Template.objects.all().order_by("id")
+
+
+def related_fields_jira_prefetches(request) -> tuple[str, ...]:
+    """
+    The JIRA rows ``related_fields`` reads to render each issue's url, for a request that asks for it.
+
+    The url comes from the issue's project's instance, or, for an issue with no project (older records), from the
+    project ``get_jira_project`` falls back to: the engagement's, then the product's. Unloaded, each costs a query
+    per issue. Nothing is loaded while JIRA is disabled, because the url is then never read.
+    """
+    if request is None or request.query_params.get("related_fields", "false") != "true":
+        return ()
+    if not jira_services.is_enabled():
+        return ()
+    return (
+        "jira_issue__jira_project__jira_instance",
+        "test__engagement__jira_project__jira_instance",
+        "test__engagement__product__jira_project_set__jira_instance",
+    )
 
 
 # Authorization: object-based
@@ -180,7 +201,7 @@ class FindingViewSet(
         finding_pk = serializer.instance.pk
         try:
             serializer.save(push_to_jira=push_to_jira)
-        except IntegrityError as exc:
+        except DatabaseError as exc:
             # A finding PATCH is not wrapped in a single transaction
             # (ATOMIC_REQUESTS is False), so a concurrent delete of this finding --
             # a reimport close_old_findings, a bulk delete, or another pipeline step --
@@ -189,11 +210,14 @@ class FindingViewSet(
             # violation: the dojo_finding_tags through-row, and on Pro the
             # pro_enhanced_finding companion. That is not a server defect -- the
             # resource the client PATCHed no longer exists -- so answer 404 rather than
-            # letting a bare FK violation fall through to a 500. A genuine FK defect
-            # (the finding is still present) keeps surfacing as the original error.
-            if is_foreign_key_conflict(exc) and not Finding.objects.filter(pk=finding_pk).exists():
-                msg = "This finding was deleted while the update was being processed."
-                raise NotFound(msg) from exc
+            # letting a bare FK violation fall through to a 500. The finding row's own
+            # save is a forced UPDATE (Finding.save), so a delete landing before it is a
+            # forced-update miss rather than a silent re-insert, and is answered the same
+            # way. A genuine defect (the finding is still present) keeps surfacing as the
+            # original error.
+            vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
+            if vanished and not Finding.objects.filter(pk=finding_pk).exists():
+                raise NotFound(FINDING_DELETED_MID_UPDATE_MESSAGE) from exc
             raise
 
     def destroy(self, request, *args, **kwargs):
@@ -228,6 +252,8 @@ class FindingViewSet(
                 "test__environment",
                 "test__engagement__product",
                 "test__engagement__product__prod_type",
+                # cwes is serialized on every row; unprefetched it costs a query per finding
+                "finding_cwe_set",
             )
         else:
             # TODO: Delete this after the move to Locations
@@ -252,15 +278,22 @@ class FindingViewSet(
                 "test__environment",
                 "test__engagement__product",
                 "test__engagement__product__prod_type",
+                # cwes is serialized on every row; unprefetched it costs a query per finding
+                "finding_cwe_set",
             )
 
         # No blanket .distinct(): get_authorized_findings filters by a scalar product-id IN (no row
         # multiplication), the prefetches above don't join, and ApiFindingFilter rewrites its to-many
         # value filters (endpoints/found_by/reviewers/finding_group/risk_acceptance) as Exists() while
-        # ordering by to-many fields aggregates via MultivaluedOrderingFilter. Tag filters still apply
-        # DojoFilter.qs's tag-conditional distinct. A query-wide DISTINCT over the full wide-row finding
+        # ordering by to-many fields aggregates via MultivaluedOrderingFilter. The tag filters are
+        # Exists()-based as well (TagNameFilter and friends). A query-wide DISTINCT over the full wide-row finding
         # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
-        return findings
+        return findings.prefetch_related(*related_fields_jira_prefetches(getattr(self, "request", None)))
+
+    def filter_queryset(self, queryset):
+        # The list is paged by a plain ORDER BY ... LIMIT now that tag filters add no DISTINCT: end
+        # every ordering (an empty o= included) on the pk so pages never repeat or skip a finding.
+        return order_with_pk_tiebreak(super().filter_queryset(queryset))
 
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
@@ -337,7 +370,12 @@ class FindingViewSet(
     @extend_schema(
         methods=["POST"],
         request=api_v2_serializers.TagSerializer,
-        responses={status.HTTP_201_CREATED: api_v2_serializers.TagSerializer},
+        responses={
+            status.HTTP_200_OK: api_v2_serializers.TagSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Returned if the tags in the request body are not valid",
+            ),
+        },
     )
     @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def tags(self, request, pk=None):
@@ -685,16 +723,16 @@ class FindingViewSet(
                 "new_fid", OpenApiTypes.INT, OpenApiParameter.PATH,
             ),
         ],
-        responses={status.HTTP_204_NO_CONTENT: ""},
+        responses={status.HTTP_204_NO_CONTENT: "", status.HTTP_400_BAD_REQUEST: OpenApiTypes.OBJECT},
     )
     @action(
         detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def set_finding_as_original(self, request, pk, new_fid):
         self.get_object()
-        success = set_finding_as_original_internal(request.user, pk, new_fid)
-        if not success:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        refusal = set_finding_as_original_with_reason(request.user, pk, new_fid)
+        if refusal:
+            return Response({"detail": refusal}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
@@ -824,11 +862,10 @@ class FindingViewSet(
         parameters=[
             OpenApiParameter(
                 "name",
-                OpenApiTypes.INT,
+                OpenApiTypes.STR,
                 OpenApiParameter.QUERY,
                 required=True,
-                description="name of the metadata to retrieve. If name is empty, return all the \
-                                    metadata associated with the finding",
+                description="Name of the metadata entry to delete",
             ),
         ],
         responses={
@@ -846,6 +883,15 @@ class FindingViewSet(
     @extend_schema(
         methods=["PUT"],
         request=FindingMetaSerializer,
+        parameters=[
+            OpenApiParameter(
+                "name",
+                OpenApiTypes.STR,
+                OpenApiParameter.QUERY,
+                required=True,
+                description="Name of the metadata entry to edit. If no entry has this name, one is created.",
+            ),
+        ],
         responses={
             status.HTTP_200_OK: FindingMetaSerializer,
             status.HTTP_404_NOT_FOUND: OpenApiResponse(

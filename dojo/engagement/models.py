@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django_tagulous.models import TagField
 
-from dojo.base_models.base import BaseModel
+from dojo.base_models.base import BaseManager, BaseModel
+from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,14 @@ class Engagement_Presets(models.Model):
     scope = models.CharField(max_length=800, help_text=_("Scope of Engagement testing, IP's/Resources/URL's)"), default=None, blank=True)
     product = models.ForeignKey("dojo.Product", on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         ordering = ["title"]
@@ -94,9 +103,18 @@ class Engagement(BaseModel):
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedBaseManager()
+    unfiltered = BaseManager()
+
     class Meta:
         ordering = ["-target_start"]
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_engagement_archive_batch"),
             models.Index(fields=["product", "active"]),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(

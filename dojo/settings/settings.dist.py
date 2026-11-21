@@ -159,6 +159,8 @@ env = environ.FileAwareEnv(
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, "defectdojo"),
     DD_SECRET_KEY=(str, ""),
+    # Older secret keys, comma separated, kept readable while DD_SECRET_KEY changes
+    DD_SECRET_KEY_FALLBACKS=(list, []),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_DATA_UPLOAD_MAX_NUMBER_FIELDS=(int, 10240),  # Max number of GET/POST parameters in a request
@@ -170,6 +172,7 @@ env = environ.FileAwareEnv(
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
     DD_OS_MESSAGE_ENABLED=(bool, True),  # show the open-source "Upgrade to Pro" / OS message promo banner
+    DD_GITHUB_STAR_PROMPT_ENABLED=(bool, True),  # occasionally ask established users to star DefectDojo on GitHub
     # Some security policies require allowing users to have only one active session
     DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -219,6 +222,30 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # Seconds the async_dupe_delete singleton marker is held. A run holds it for its whole
+    # duration and releases it when it finishes; this timeout is only the ceiling for a worker
+    # that dies mid-run without releasing it. It must comfortably exceed a normal run so the
+    # lock is never released out from under an in-flight run (default 30 minutes).
+    DD_DUPE_DELETE_LOCK_EXPIRE=(int, 1800),
+    # Minutes since a duplicate was last saved before the excess-duplicate delete may remove it,
+    # which covers a create request still writing the finding's child rows. 0 turns the wait off.
+    DD_DUPE_DELETE_GRACE_MINUTES=(int, 1),
+    # The excess-duplicate delete skips the duplicates of a test while an import is writing it
+    # (a PostgreSQL advisory lock the import holds until it ends; see dojo/importers/import_lock.py).
+    # Turn off behind a connection pooler in transaction mode, where session locks do not hold.
+    DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT=(bool, True),
+    # An import lock whose every holder has been idle this many minutes is treated as abandoned (left
+    # behind by a host that died, or by a pooler) and no longer holds the delete back. 0 never does.
+    DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES=(int, 30),
+    # Imports and reimports into one test run one at a time: a second one waits for the first to
+    # finish (a PostgreSQL advisory lock; see dojo/importers/import_lock.py). Turn off behind a
+    # connection pooler in transaction mode, where session locks do not hold.
+    DD_SERIALIZE_TEST_IMPORTS=(bool, True),
+    # How long an import or reimport waits for another one into the same test to finish before it
+    # gives up and fails with HTTP 409 Conflict (default 10 minutes). 0 fails at once instead of waiting.
+    # A synchronous request that waits still has to import afterwards within the web server's and
+    # proxy's request timeouts (30 minutes on the stock deployments), so keep it well below those.
+    DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS=(int, 600),
     # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
     # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
     # because backdating a mitigation can distort SLA-compliance metrics. Changing this
@@ -292,6 +319,12 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
+    # When enabled, the Trufflehog Scan parser reports one finding per secret per file in a report, however
+    # many commits the secret appears in (the commit and the line leave the in-report fold key). Off by
+    # default: the parser then reports one finding per commit, as it always has, so existing findings keep
+    # their identity. Turn it on together with the "Unique ID from tool" deduplication algorithm for the
+    # scan type, which matches on the stable unique_id_from_tool the parser sets.
+    DD_TRUFFLEHOG_FOLD_COMMITS=(bool, False),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     # For HTTP requests, how long connection is open before timeout
@@ -366,6 +399,7 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
+SECRET_KEY_FALLBACKS = env("DD_SECRET_KEY_FALLBACKS")
 
 # Default cache backend (django.core.cache). Redis when DD_CACHE_URL is set,
 # else per-process LocMemCache. General framework caching only; the singleton
@@ -581,6 +615,7 @@ REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 OS_MESSAGE_ENABLED = env("DD_OS_MESSAGE_ENABLED")
+GITHUB_STAR_PROMPT_ENABLED = env("DD_GITHUB_STAR_PROMPT_ENABLED")
 
 DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 
@@ -612,6 +647,30 @@ LOGIN_EXEMPT_URLS = (
     rf"^{URL_PREFIX}forgot_username",
     rf"^{URL_PREFIX}reset/",
 )
+
+# Unsafe requests that still pass while read-only mode is on: sign-in and System Settings,
+# so a superuser can always turn the mode off again.
+READ_ONLY_MODE_EXEMPT_URLS = (
+    rf"^{URL_PREFIX}login$",
+    rf"^{URL_PREFIX}logout$",
+    r"complete/",
+    r"oauth2/idpresponse",
+    rf"^{URL_PREFIX}password_reset/",
+    rf"^{URL_PREFIX}reset/",
+    rf"^{URL_PREFIX}forgot_username",
+    rf"^{URL_PREFIX}change_password$",
+    rf"^{URL_PREFIX}api/v2/api-token-auth/",
+    rf"^{URL_PREFIX}system_settings$",
+    rf"^{URL_PREFIX}api/v2/system_settings/",
+)
+
+# Inbound webhooks blocked by read-only mode get a 503 with Retry-After instead of a redirect.
+# A sender reads a redirect as delivered and drops the event, but it retries a 503.
+READ_ONLY_MODE_RETRY_URLS = (
+    rf"^{URL_PREFIX}webhook/",
+    rf"^{URL_PREFIX}jira/webhook/",
+)
+READ_ONLY_MODE_RETRY_AFTER_SECONDS = 300
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -934,6 +993,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
+    "dojo.middleware.ReadOnlyModeMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "crum.CurrentRequestUserMiddleware",
     "dojo.authorization.middleware.AuthorizationMiddleware",
@@ -1957,6 +2017,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
     "OPF Scan": DEDUPE_ALGO_HASH_CODE,
+    # The parser builds a stable unique_id_from_tool for every finding (detector, kind, target, path and the
+    # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
+    "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1974,6 +2037,12 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
+DUPE_DELETE_LOCK_EXPIRE = env("DD_DUPE_DELETE_LOCK_EXPIRE")
+DUPE_DELETE_GRACE_MINUTES = env("DD_DUPE_DELETE_GRACE_MINUTES")
+DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT = env("DD_DUPE_DELETE_SKIP_TESTS_UNDER_IMPORT")
+DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES = env("DD_DUPE_DELETE_ABANDONED_IMPORT_LOCK_MINUTES")
+SERIALIZE_TEST_IMPORTS = env("DD_SERIALIZE_TEST_IMPORTS")
+SERIALIZE_TEST_IMPORTS_WAIT_SECONDS = env("DD_SERIALIZE_TEST_IMPORTS_WAIT_SECONDS")
 
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
@@ -2237,6 +2306,7 @@ VULNERABILITY_URLS = {
     "SOPHOS-SA-": "https://www.sophos.com/en-us/security-advisories/",  # e.g. https://www.sophos.com/en-us/security-advisories/sophos-sa-20250411-taegis-agent-lpe
     "SSA:": "https://vulners.com/slackware/",  # e.g. https://www.tenable.com/plugins/nessus/240171 --> https://vulners.com/slackware/SSA-2025-169-02
     "SSA-": "https://vulners.com/slackware/",  # e.g. https://vulners.com/slackware/SSA-2025-074-01
+    "SSB-": "https://productcert.siemens.com/productcert/html/",  # e.g. https://productcert.siemens.com/productcert/html/ssb-091449.html
     "SP-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SP-CAAANR7
     "SUSE-SU-": "https://www.suse.com/support/update/announcement/",  # e.g. https://www.suse.com/support/update/announcement/2024/suse-su-20244196-1
     "SVD-": "https://advisory.splunk.com/advisories/",  # e.g. https://advisory.splunk.com/advisories/SVD-2025-0103
@@ -2267,6 +2337,7 @@ AUDITLOG_FLUSH_MAX_BATCHES = env("DD_AUDITLOG_FLUSH_MAX_BATCHES")
 
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
+TRUFFLEHOG_FOLD_COMMITS = env("DD_TRUFFLEHOG_FOLD_COMMITS")
 MASS_HASH_CODE_USE_SQL_WRITER = env("DD_MASS_HASH_CODE_USE_SQL_WRITER")
 
 # ------------------------------------------------------------------------------

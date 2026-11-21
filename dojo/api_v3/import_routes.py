@@ -19,6 +19,7 @@ from datetime import date  # noqa: TC003 -- runtime import: ninja resolves the F
 from typing import TYPE_CHECKING
 
 from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError as DjangoValidationError
 from ninja import File, Form, Router, Schema
 from ninja.constants import NOT_SET
 from ninja.files import UploadedFile  # noqa: TC002 -- runtime import: ninja resolves the File() param type
@@ -134,14 +135,17 @@ def _resolve_test_for_reimport(request: HttpRequest, test_id: int) -> Test:
     return test
 
 
-def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object | None:
+def _check_auto_permission(request: HttpRequest, payload: ImportForm, scan_file: UploadedFile | None) -> object | None:
     """
     Mirror UserHasReimportPermission: resolve target and check, else check auto-create.
 
     Returns the resolved JIRA driver (``test or engagement or product``, mirroring the v2 reimport
     viewset) so the caller can OR ``push_to_jira`` with the project's ``push_all_issues``.
+
+    The manager is the request's, which ``auto_import_scan`` then resolves the target on too, so
+    the report is read for its tool once per request.
     """
-    auto = AutoCreateContextManager()
+    auto = AutoCreateContextManager.for_request(request)
     context = {
         "scan_type": payload.scan_type,
         # The auto branch dispatches on this id, so the check has to resolve the target the same
@@ -152,11 +156,18 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object 
         "product_type_name": payload.organization_name,
         "test_title": payload.test_title,
         "auto_create_context": payload.auto_create_context,
+        # A report's tool picks between tests that share a title (get_target_test_if_exists).
+        "scan": scan_file,
     }
     auto.process_import_meta_data_from_dict(context)
     context["product_type"] = auto.get_target_product_type_if_exists(**context)
     context["product"] = auto.get_target_product_if_exists(**context)
     context["engagement"] = auto.get_target_engagement_if_exists(**context)
+    # The title lookup reads the report for its tool. Refuse a user who may not import into the
+    # engagement before it does: every test it can match is in this engagement and takes its
+    # product's permission, so the test check below would refuse them all the same.
+    if context["engagement"] is not None and context.get("test_title"):
+        _require_permission(allowed=user_has_permission(request.user, context["engagement"], "import"))
     target_test = auto.get_target_test_if_exists(**context)
     if target_test is not None:
         _require_permission(allowed=user_has_permission(request.user, target_test, "import"))
@@ -227,7 +238,7 @@ def build_import_router(*, auth=NOT_SET) -> Router:
                 )
             else:
                 # mode == "auto", or reimport without an explicit test id -> resolve/auto-create.
-                jira_driver = _check_auto_permission(request, payload)
+                jira_driver = _check_auto_permission(request, payload, file)
                 common["push_to_jira"] = _resolve_push_to_jira(payload, jira_driver)
                 result = auto_import_scan(
                     engagement=get_object_or_none(Engagement, pk=payload.engagement) if payload.engagement else None,
@@ -241,6 +252,11 @@ def build_import_router(*, auth=NOT_SET) -> Router:
             raise
         except ProblemDetail:
             raise
+        except DjangoValidationError as exc:
+            # The importer turns a parser ValueError into a Django ValidationError
+            # (base_importer.parse_findings / parse_dynamic_test_type_tests); that is a bad
+            # report, so answer 400 as v2 does rather than letting it escape as a 500.
+            raise validation_problem({"non_field_errors": list(exc.messages)}) from exc
         except (ValueError, TypeError) as exc:
             msg = str(exc)
             raise validation_problem({"non_field_errors": [msg]}) from exc

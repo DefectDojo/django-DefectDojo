@@ -3,9 +3,16 @@
 <script type="application/javascript">
     $(function () {
         $(function () {
-            $('.similar-filters select[multiple]').not('[data-tagulous]').each(function () {
-                $(this).select2();
-            })
+            // Select2 is only available when a tagulous widget pulled it in via form.media,
+            // so leave the native multiselect in place when it is not loaded.
+            if ($.fn.select2) {
+                $('.dojo-filter-set select[multiple], .similar-filters select[multiple]')
+                    .not('[data-tagulous]')
+                    .not('.select2-hidden-accessible')
+                    .each(function () {
+                        $(this).select2();
+                    })
+            }
             $('input[data-tagulous]').each(function () {
                 Tagulous.select2($(this))
             })

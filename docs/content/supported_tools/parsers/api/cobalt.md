@@ -3,9 +3,9 @@ title: "Cobalt.io API Import
 "
 toc_hide: true
 ---
-> **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
+> **⚠️ Deprecated: to be removed in DefectDojo 3.6.0.**
 >
-> The **Cobalt.io API Import** pull parser, and the **Tool Configuration** setup described below, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
+> The **Cobalt.io API Import** pull parser, and the **Tool Configuration** setup described below, are deprecated as of **3.2.0** and will be **removed in 3.6.0 (December 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
 >
 > **Migrate to:** the [Cobalt.io connector](/connectors/toolreference/cobalt_io/) (DefectDojo Pro), or import a Cobalt.io report as a [file](../../file/cobalt) — file import is not affected by this deprecation.
 

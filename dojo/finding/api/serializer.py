@@ -2,6 +2,7 @@ import base64
 import collections
 import json
 import logging
+from functools import cached_property
 
 import six
 from django.conf import settings
@@ -11,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.fields import DictField
+from rest_framework.relations import MANY_RELATION_KWARGS
 
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission
@@ -22,6 +24,7 @@ from dojo.finding.helper import (
     save_endpoints_template,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
+    set_found_by_locking_finding_first,
 )
 from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
@@ -284,18 +287,26 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
     test = serializers.SerializerMethodField()
     jira = serializers.SerializerMethodField()
 
+    # One nested serializer per instance, reused for every row: building one builds its whole field tree
+    # (three levels under the test), and nothing in that tree depends on the row being serialized.
+    @cached_property
+    def _test_serializer(self):
+        return FindingTestSerializer(read_only=True)
+
+    @cached_property
+    def _jira_serializer(self):
+        return JIRAIssueSerializer(read_only=True)
+
     @extend_schema_field(FindingTestSerializer)
     def get_test(self, obj):
-        return FindingTestSerializer(read_only=True).to_representation(
-            obj.test,
-        )
+        return self._test_serializer.to_representation(obj.test)
 
     @extend_schema_field(JIRAIssueSerializer)
     def get_jira(self, obj):
         issue = jira_services.get_issue(obj)
         if issue is None:
             return None
-        return JIRAIssueSerializer(read_only=True).to_representation(issue)
+        return self._jira_serializer.to_representation(issue)
 
 
 class VulnerabilityIdSerializer(serializers.ModelSerializer):
@@ -382,6 +393,78 @@ class FindingCweSerializer(serializers.ModelSerializer):
         fields = ["cwe"]
 
 
+def _bulk_key(field, data):
+    """The primary key ``data`` names, as the bulk load keys it; None when only DRF's own lookup can judge it."""
+    if field.pk_field is not None or isinstance(data, bool):
+        return None
+    try:
+        return field.get_queryset().model._meta.pk.get_prep_value(data)
+    except (TypeError, ValueError, ValidationError):
+        return None
+
+
+class _BulkManyRelatedField(serializers.ManyRelatedField):
+
+    """Loads every id in the list with one query before the child resolves each item against what it found."""
+
+    def to_internal_value(self, data):
+        keys = []
+        if not isinstance(data, str) and hasattr(data, "__iter__"):
+            keys = [key for key in (_bulk_key(self.child_relation, item) for item in data) if key is not None]
+        self.child_relation.loaded = (
+            {obj.pk: obj for obj in self.child_relation.get_queryset().filter(pk__in=keys)} if keys else {}
+        )
+        try:
+            return super().to_internal_value(data)
+        finally:
+            self.child_relation.loaded = {}
+
+
+class BulkPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+
+    """
+    ``PrimaryKeyRelatedField`` that, with ``many=True``, resolves the whole list with one query.
+
+    DRF's runs a ``queryset.get(pk=...)`` per id, so a finding written back with a hundred endpoints cost a hundred
+    queries. An id the bulk load found resolves to that row. One it did not find (or could not read as a key) goes
+    through DRF's own lookup, so the errors are DRF's, word for word.
+    """
+
+    # What the list field loaded for the call in progress: replaced per call, never mutated.
+    loaded: dict = {}
+
+    @classmethod
+    def many_init(cls, *args, **kwargs):
+        # DRF's many_init, with the list field above
+        list_kwargs = {"child_relation": cls(*args, **kwargs)}
+        list_kwargs.update({key: value for key, value in kwargs.items() if key in MANY_RELATION_KWARGS})
+        return _BulkManyRelatedField(**list_kwargs)
+
+    def to_internal_value(self, data):
+        key = _bulk_key(self, data) if self.loaded else None
+        if key is not None and key in self.loaded:
+            return self.loaded[key]
+        return super().to_internal_value(data)
+
+
+def sync_finding_locations(finding, location_refs):
+    """
+    Point ``finding`` at the locations of ``location_refs``, the references an ``endpoints`` write submitted.
+
+    A reference to a location the write left out is removed and one to a new location is associated. A reference
+    the finding already has to a submitted location stays as it is, with its status, audit and test, as an edit
+    in the UI and a legacy endpoint write leave theirs.
+    """
+    submitted = {ref.location_id: ref for ref in location_refs}
+    current = dict(LocationFindingReference.objects.filter(finding=finding).values_list("pk", "location_id"))
+    if dropped := [pk for pk, location_id in current.items() if location_id not in submitted]:
+        LocationFindingReference.objects.filter(pk__in=dropped).delete()
+    linked = set(current.values())
+    for location_id, ref in submitted.items():
+        if location_id not in linked:
+            ref.location.associate_with_finding(finding)
+
+
 class FindingSerializer(serializers.ModelSerializer):
     mitigated = serializers.DateTimeField(required=False, allow_null=True)
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
@@ -453,27 +536,33 @@ class FindingSerializer(serializers.ModelSerializer):
         # an empty queryset instead of raising on the AnonymousUser instance.
         if user is not None and not user.is_authenticated:
             user = None
+        # A subclass may have dropped the field (e.g. a response-fields filter); adding it back would
+        # serialize, and query, a relation the response does not ask for.
+        if "endpoints" not in self.fields:
+            return
         if not locations_enabled():
-            self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
+            self.fields["endpoints"] = BulkPrimaryKeyRelatedField(
                 many=True, required=False,
                 queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
             )
         else:
-            self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
+            self.fields["endpoints"] = BulkPrimaryKeyRelatedField(
                 source="locations", many=True, required=False,
                 queryset=get_authorized_location_finding_reference("view", user=user)
                 if user else LocationFindingReference.objects.none(),
             )
+
+    def shows_accepted_risks(self, obj) -> bool:
+        """Whether accepted_risks lists obj's risk acceptances: only for a requester who may edit the finding."""
+        request = self.context.get("request")
+        return request is not None and user_has_permission(request.user, obj, "edit")
 
     def get_accepted_risks(self, obj):
         from dojo.api_v2.serializers import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
             RiskAcceptanceSerializer,
         )
         # schema annotation applied lazily at module bottom (avoids circular import)
-        request = self.context.get("request")
-        if request is None:
-            return []
-        if not user_has_permission(request.user, obj, "edit"):
+        if not self.shows_accepted_risks(obj):
             return []
         return RiskAcceptanceSerializer(
             obj.risk_acceptance_set.all(), many=True,
@@ -495,10 +584,14 @@ class FindingSerializer(serializers.ModelSerializer):
 
         query_params = request.query_params
         if query_params.get("related_fields", "false") == "true":
-            return FindingRelatedFieldsSerializer(
-                required=False,
-            ).to_representation(obj)
+            return self._related_fields_serializer.to_representation(obj)
         return None
+
+    @cached_property
+    def _related_fields_serializer(self):
+        # Built on the first row that asks for it and reused for the rest: a list page serializes every row
+        # with one FindingSerializer, so the page builds this (and its nested serializers) once, not per row.
+        return FindingRelatedFieldsSerializer(required=False)
 
     def get_display_status(self, obj) -> str:
         return obj.status()
@@ -554,7 +647,7 @@ class FindingSerializer(serializers.ModelSerializer):
         found_by = validated_data.pop("found_by", None)
         # Handle updates to found_by data
         if found_by:
-            instance.found_by.set(found_by)
+            set_found_by_locking_finding_first(instance, found_by)
         # If there is no argument entered for found_by, the user would like to clear out the values on the Finding's found_by field
         # Findings still maintain original found_by value associated with their test
         # In the event the user does not supply the found_by field at all, we do not modify it
@@ -578,10 +671,7 @@ class FindingSerializer(serializers.ModelSerializer):
             save_cwes(instance)
 
         if locations_enabled() and locations is not None:
-            for location_ref in instance.locations.all():
-                location_ref.location.disassociate_from_finding(instance)
-            for location_ref in locations:
-                location_ref.location.associate_with_finding(instance)
+            sync_finding_locations(instance, locations)
 
         if push_to_jira or jira_services.is_keep_in_sync(instance):
             # Push synchronously so that we can see jira errors in real time
@@ -758,7 +848,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if notes:
             new_finding.notes.set(notes)
         if found_by:
-            new_finding.found_by.set(found_by)
+            set_found_by_locking_finding_first(new_finding, found_by)
         if reviewers:
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
@@ -960,7 +1050,8 @@ class FindingToFilesSerializer(serializers.Serializer):
 
 
 class FindingCloseSerializer(serializers.ModelSerializer):
-    is_mitigated = serializers.BooleanField(required=False)
+    # Closing without saying how closes the finding as mitigated, for JSON and form bodies alike.
+    is_mitigated = serializers.BooleanField(required=False, default=True)
     mitigated = serializers.DateTimeField(required=False)
     false_p = serializers.BooleanField(required=False)
     out_of_scope = serializers.BooleanField(required=False)

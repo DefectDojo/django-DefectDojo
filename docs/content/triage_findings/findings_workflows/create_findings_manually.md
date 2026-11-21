@@ -4,6 +4,8 @@ description: "Track vulnerability information without using a scan tool"
 weight: 2
 aliases:
   - /en/working_with_findings/findings_workflows/create_findings_manually
+  - /import_data/import_scan_files/os__create_findings_manually
+  - /import_data/import_scan_files/pro__create_findings_manually
 ---
 Normally, most of the Findings in your environment will be imported from other security tools. If you wish, you can add manual Finding entries as well, if you have vulnerabilities or work you wish to manage that was not created from a scan tool.
 

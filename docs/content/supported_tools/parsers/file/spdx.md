@@ -40,6 +40,8 @@ category alone as a weakness signal would turn every inventoried package into a 
 references are recorded in the finding description for identification and never create findings of
 their own.
 
+With Locations enabled, the findings for a package also carry one [CPE location](/asset_modelling/locations/pro__cpe_locations/) for each CPE the package names (Pro). Packages without a finding do not get one.
+
 #### Licenses
 
 `licenseConcluded` (preferred) or `licenseDeclared` is carried on the component's dependency location as

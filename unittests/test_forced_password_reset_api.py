@@ -1,4 +1,7 @@
 import base64
+import time
+from types import SimpleNamespace
+from unittest import mock
 
 from django.contrib.auth.tokens import default_token_generator
 from django.core.cache import cache
@@ -90,6 +93,20 @@ class ForcedPasswordResetApiTest(TestCase):
 
         self.assertEqual(client.get(reverse("user_profile")).status_code, 403)
 
+    def test_a_token_from_before_the_flag_is_refused_while_the_reset_is_pending(self):
+        key = Token.objects.create(user=self.user).key
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f"Token {key}")
+        self.assertEqual(client.get(reverse("user_profile")).status_code, 200)
+
+        self.set_forced_reset(value=True)
+
+        self.assertEqual(client.get(reverse("user_profile")).status_code, 403)
+
+        self.set_forced_reset(value=False)
+
+        self.assertEqual(client.get(reverse("user_profile")).status_code, 200)
+
     def test_disable_force_password_reset_is_a_no_op_when_the_flag_was_never_set(self):
         key = Token.objects.create(user=self.user).key
         self.set_forced_reset(value=False)
@@ -105,6 +122,12 @@ class BasicAuthAccountRulesTest(TestCase):
 
     def setUp(self):
         cache.clear()
+        # django-ratelimit counts in fixed windows, and the window is part of the cache key.
+        # Pin the clock it reads so a test cannot straddle a window edge and see its count reset.
+        now = time.time()
+        clock = mock.patch("django_ratelimit.core.time", SimpleNamespace(time=lambda: now))
+        clock.start()
+        self.addCleanup(clock.stop)
         self.user = User.objects.create_user(username="basic-auth-user", password=OLD_PASSWORD)
         self.contact_info = UserContactInfo.objects.create(user=self.user)
 

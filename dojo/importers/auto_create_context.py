@@ -2,17 +2,20 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
+from django.core.files import File
 from django.db import transaction
 from django.http.request import QueryDict
 from django.utils import timezone
 
+from dojo.importers.test_type_names import accepted_test_type_names
 from dojo.models import (
     Engagement,
     Product,
     Product_Type,
     Test,
 )
-from dojo.utils import get_current_user, get_last_object_or_none, get_object_or_none
+from dojo.tools.factory import get_parser
+from dojo.utils import get_current_user, get_last_object_or_none, get_object_or_none, is_scan_file_too_large
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -27,7 +30,40 @@ class AutoCreateContextManager:
     - Products
     - Engagements
     - Tests
+
+    One request resolves the same target in the permission check, the view and the
+    serializer. ``for_request`` hands all three the same manager, which remembers the
+    rows it found so each lookup runs once per request. A miss is never remembered:
+    the creators look again before they create, as they always have.
     """
+
+    _REQUEST_ATTRIBUTE = "_dojo_auto_create_context_manager"
+
+    def __init__(self) -> None:
+        self._found: dict[tuple, Any] = {}
+        # (report file, the test type names it accepts): the permission check and the serializer
+        # (v2) or auto_import_scan (v3) resolve the same upload, so the report is read for its tool
+        # once per request.
+        self._report_test_types: list[tuple[Any, frozenset[str] | None]] = []
+
+    @classmethod
+    def for_request(cls, request) -> "AutoCreateContextManager":
+        """The manager shared by everything that handles ``request`` (a new one without a request)."""
+        if request is None:
+            return cls()
+        manager = getattr(request, cls._REQUEST_ATTRIBUTE, None)
+        if manager is None:
+            manager = cls()
+            setattr(request, cls._REQUEST_ATTRIBUTE, manager)
+        return manager
+
+    def _remembered(self, key: tuple, lookup):
+        """``lookup()``, run once per ``key`` while it finds something."""
+        if (found := self._found.get(key)) is not None:
+            return found
+        if (found := lookup()) is not None:
+            self._found[key] = found
+        return found
 
     """
     ===================================
@@ -119,7 +155,10 @@ class AutoCreateContextManager:
         """
         # Look for an existing object
         if product_type_name:
-            return get_object_or_none(Product_Type, name=product_type_name)
+            return self._remembered(
+                ("product_type", product_type_name),
+                lambda: get_object_or_none(Product_Type, name=product_type_name),
+            )
         return None
 
     def get_target_product_if_exists(
@@ -136,7 +175,10 @@ class AutoCreateContextManager:
         If a match is not found, return None
         """
         # Look for an existing object
-        if product_name and (product := get_object_or_none(Product, name=product_name)):
+        if product_name and (product := self._remembered(
+            ("product", product_name),
+            lambda: get_object_or_none(Product.objects.select_related("prod_type"), name=product_name),
+        )):
             # product type name must match if provided
             if product_type_name and product.prod_type.name != product_type_name:
                 msg = (
@@ -174,7 +216,10 @@ class AutoCreateContextManager:
 
         If a match is not found, and a product is not supplied, return None
         """
-        if engagement := get_object_or_none(Engagement, pk=engagement_id):
+        if engagement_id and (engagement := self._remembered(
+            ("engagement", engagement_id),
+            lambda: get_object_or_none(Engagement.objects.select_related("product__prod_type"), pk=engagement_id),
+        )):
             logger.debug("Using existing engagement by id: %s", engagement_id)
             if product is not None and engagement.product_id != product.id:
                 msg = "The provided identifiers are inconsistent — the engagement does not belong to the specified product."
@@ -184,7 +229,10 @@ class AutoCreateContextManager:
         if product is None:
             return None
         # engagement name is not unique unfortunately
-        return get_last_object_or_none(Engagement, product=product, name=engagement_name)
+        return self._remembered(
+            ("engagement", product.pk, engagement_name),
+            lambda: get_last_object_or_none(Engagement.objects.select_related("product__prod_type"), product=product, name=engagement_name),
+        )
 
     def get_target_test_if_exists(
         self,
@@ -197,9 +245,14 @@ class AutoCreateContextManager:
         """
         Retrieves the target test to reimport. This can be as simple as looking up the test via the `test_id` parameter.
         If there is no `test_id` provided, we lookup the latest test inside the provided engagement that satisfies
-        the provided scan_type and test_title.
+        the provided scan_type and test_title. When the report is passed (``scan``, or ``file`` as the
+        API request names it) and its parser names the test type from the report, a title lookup only
+        matches a test of that report's tool (``report_test_type_names``).
         """
-        if test := get_object_or_none(Test, pk=test_id):
+        if test_id and (test := self._remembered(
+            ("test", test_id),
+            lambda: get_object_or_none(Test.objects.select_related("engagement__product__prod_type"), pk=test_id),
+        )):
             logger.debug("Using existing Test by id: %s", test_id)
             if engagement is not None and test.engagement_id != engagement.id:
                 msg = "The provided identifiers are inconsistent — the test does not belong to the specified engagement."
@@ -210,9 +263,78 @@ class AutoCreateContextManager:
             return None
         # Check for a custom test title
         if test_title:
-            return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
+            tests = Test.objects.select_related("engagement__product__prod_type").filter(engagement=engagement, title=test_title, scan_type=scan_type)
+            title_key = ("test", engagement.pk, scan_type, test_title)
+            # One scan type can carry reports from several tools (GitLab SAST, SARIF, Generic), each
+            # imported into a test of its own tool's type. Narrow to the report's tool, or a second
+            # tool sharing the title would reimport into the first tool's test.
+            if (scan := kwargs.get("scan") or kwargs.get("file")) is not None:
+                # A later resolution in the request (the serializer or auto_import_scan, after the
+                # permission check) reuses what the first one found, so it runs no query.
+                known, test_type_names = self._known_report_test_type_names(scan)
+                if not known:
+                    # No test has the title, so there is nothing to narrow and the report is not read.
+                    if not tests.exists():
+                        return None
+                    test_type_names = self.report_test_type_names(scan_type, scan)
+                if test_type_names is not None:
+                    return self._remembered(
+                        (*title_key, test_type_names),
+                        lambda: get_last_object_or_none(tests, test_type__name__in=test_type_names),
+                    )
+            return self._remembered(title_key, lambda: get_last_object_or_none(tests))
         # Otherwise use the last test by scan type
-        return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)
+        return self._remembered(
+            ("test", engagement.pk, scan_type),
+            lambda: get_last_object_or_none(Test.objects.select_related("engagement__product__prod_type"), engagement=engagement, scan_type=scan_type),
+        )
+
+    def report_test_type_names(self, scan_type: str | None, scan: Any) -> frozenset[str] | None:
+        """
+        The Test_Type names a test may carry to take a reimport of ``scan``, or None when any test may.
+
+        Only a parser that names the test type from the report (``get_tests``) has a tool to match;
+        a report that describes no test, or that the parser cannot read, is left to the importer,
+        which reports the error. The file is rewound, so the importer reads it from the start.
+
+        Nothing is read when ``scan`` is not a file (a client sent ``file`` as a text field: the
+        serializer reports that), or when it is over ``SCAN_FILE_MAX_SIZE`` (the serializer refuses
+        it, and it is not parsed in full before that).
+        """
+        known, names = self._known_report_test_type_names(scan)
+        if known:
+            return names
+        names = None
+        if isinstance(scan, File) and not is_scan_file_too_large(scan):
+            names = self._read_report_test_type_names(scan_type, scan)
+        self._report_test_types.append((scan, names))
+        return names
+
+    def _known_report_test_type_names(self, scan: Any) -> tuple[bool, frozenset[str] | None]:
+        """(True, names) when ``scan`` was already read in this request, else (False, None)."""
+        for seen, names in self._report_test_types:
+            if seen is scan:
+                return True, names
+        return False, None
+
+    @staticmethod
+    def _read_report_test_type_names(scan_type: str | None, scan: Any) -> frozenset[str] | None:
+        try:
+            parser = get_parser(scan_type)
+        except ValueError:
+            return None
+        if not hasattr(parser, "get_tests"):
+            return None
+        try:
+            tests = parser.get_tests(scan_type, scan)
+        except Exception:  # any parser error is the importer's to report, with its own handling
+            logger.debug("Could not read the test type of a %s report before resolving its test", scan_type, exc_info=True)
+            return None
+        finally:
+            scan.seek(0)
+        if not tests:
+            return None
+        return frozenset(accepted_test_type_names(tests[0].type, scan_type))
 
     """
     ===================================
@@ -362,5 +484,10 @@ class AutoCreateContextManager:
                     copy[key] = value if len(value) > 1 else value[0]
                 else:
                     copy[key] = value
+        # Trim names the way the serializers' CharFields do, so a permission check
+        # resolves the same objects the import later uses
+        for key in ("product_type_name", "product_name", "engagement_name", "test_title"):
+            if isinstance(copy.get(key), str):
+                copy[key] = copy[key].strip()
         # Convert to a regular dict
         return copy

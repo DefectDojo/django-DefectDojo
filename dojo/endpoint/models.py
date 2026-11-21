@@ -20,6 +20,7 @@ from django_tagulous.models import TagField
 # before the re-export that loads this module — resolves despite partial circular load.
 # Must keep their dojo.models.* path for Django migration serialization.
 from dojo.models import copy_model_util, get_current_date, get_current_datetime
+from dojo.query_hooks import HookedManager, UnfilteredManager
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +45,17 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey("dojo.Endpoint", null=False, blank=False, on_delete=models.CASCADE, related_name="status_endpoint")
     finding = models.ForeignKey("dojo.Finding", null=False, blank=False, on_delete=models.CASCADE, related_name="status_finding")
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_endpstatus_archive_batch"),
             models.Index(fields=["finding", "mitigated"]),
             models.Index(fields=["endpoint", "mitigated"]),
             # Optimize frequent lookups of "active" statuses (mitigated/flags all False)
@@ -140,6 +150,14 @@ class Endpoint(models.Model):
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         ordering = ["product", "host", "protocol", "port", "userinfo", "path", "query", "fragment"]

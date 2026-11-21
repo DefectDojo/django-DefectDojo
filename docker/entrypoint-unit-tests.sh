@@ -115,6 +115,10 @@ EOF
     exit 1
 }
 
+# An image that carries a release's schema snapshot (CI's do) loads it into an empty database, so
+# the migrate below applies only what is newer than that release. A no-op on a database that has
+# tables, and on an image without a snapshot. See dojo/management/commands/schema_snapshot.py.
+python3 manage.py schema_snapshot --load
 python3 manage.py migrate
 fi  # DD_TEST_DB_MODE != reuse
 

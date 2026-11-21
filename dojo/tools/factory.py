@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import re
@@ -31,7 +32,7 @@ def register_parser(scan_type, parser):
 
 
 def get_parser(scan_type):
-    """Return a parser by the scan type"""
+    """Return a fresh copy of the parser for the scan type"""
     if scan_type not in PARSERS:
         msg = f"Parser '{scan_type}' does not exist"
         raise ValueError(msg)
@@ -39,10 +40,22 @@ def get_parser(scan_type):
     # update DB dynamically
     test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
     if test_type.active:
-        return PARSERS[scan_type]
+        return copy.deepcopy(PARSERS[scan_type])
 
     msg = f"Parser {scan_type} is not active"
     raise ValueError(msg)
+
+
+def is_splittable_per_location(scan_type: str) -> bool:
+    """
+    Return whether the parser for ``scan_type`` declares that its findings can be split per location.
+
+    Such a parser only merges repeated report entries by adding their locations to the first
+    finding, so one finding per location can be rebuilt from its output. Parsers that count,
+    append or skip repeats lose those locations and are not splittable. Unknown scan types are not.
+    """
+    parser = PARSERS.get(scan_type)
+    return bool(getattr(parser, "SPLITTABLE_PER_LOCATION", False))
 
 
 def get_inactive_test_types():

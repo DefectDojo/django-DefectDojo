@@ -55,12 +55,15 @@ def token_is_expired(token: Token) -> bool:
 
 class ExpiringTokenAuthentication(TokenAuthentication):
 
-    """Token auth that additionally rejects tokens past their effective expiry."""
+    """Token auth that also rejects expired tokens and accounts that owe a forced password reset."""
 
     def authenticate_credentials(self, key):
         user, token = super().authenticate_credentials(key)
         if token_is_expired(token):
             msg = "API token has expired."
+            raise AuthenticationFailed(msg)
+        if Dojo_User.force_password_reset(user):
+            msg = "A password reset is required before this account can use the API."
             raise AuthenticationFailed(msg)
         return user, token
 

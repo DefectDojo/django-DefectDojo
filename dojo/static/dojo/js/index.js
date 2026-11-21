@@ -119,6 +119,30 @@ document.addEventListener('submit', function (e) {
     });
 });
 
+/* ---- GitHub star prompt ----
+   Record the user's answer and hide the prompt. "Star on GitHub" lets the form
+   submit normally into a new tab (the view records it and redirects to GitHub);
+   "Later" / close is sent in the background. Degrades to plain POSTs without JS.
+*/
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest('.github-star-prompt-form');
+    if (!form) return;
+    var prompt = document.getElementById('github-star-prompt');
+    if (prompt) {
+        // Hide now, remove later: a form detached during its own submit event is not submitted.
+        prompt.style.display = 'none';
+        setTimeout(function () { prompt.remove(); }, 0);
+    }
+    if (form.classList.contains('github-star-prompt-star-form')) return;
+    e.preventDefault();
+    fetch(form.getAttribute('action'), {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+    }).catch(function () {});  // best effort: the prompt simply shows again later
+});
+
 /* ---- Collapse shim ----
    Handles [data-toggle="collapse"] by toggling .in on the target element.
    CSS in tailwind.css:  .collapse { display:none }  .collapse.in { display:block }
@@ -345,6 +369,9 @@ document.addEventListener('click', function (e) {
                             'position:absolute;z-index:1070;background:#fff;border:1px solid #ccc;' +
                             'border-radius:4px;padding:6px 10px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.15);' +
                             'white-space:nowrap;pointer-events:none;';
+                        if (el.getAttribute('data-html') === 'true') {
+                            pop.style.whiteSpace = 'pre';
+                        }
                         document.body.appendChild(pop);
                         el._ddPopover = pop;
                     }
@@ -390,6 +417,21 @@ document.addEventListener('click', function (e) {
    Vanilla JS initialization (no jQuery dependency)
    ============================================================ */
 document.addEventListener('DOMContentLoaded', function () {
+
+    // ---- Popovers written with data-html="true" ----
+    // The CSS tooltip and the popover shim both show data-content as plain
+    // text. Turn the <br> of these popovers into line breaks and drop their
+    // <b> tags; anything else, such as markup in an endpoint or a title,
+    // stays literal text.
+    document.querySelectorAll('.has-popover[data-html="true"][data-content]').forEach(function (el) {
+        var text = el.getAttribute('data-content')
+            .replace(/<\/?b>/gi, '')
+            .split(/<br\s*\/?>/i)
+            .map(function (line) { return line.replace(/\s+/g, ' ').trim(); })
+            .filter(Boolean)
+            .join('\n');
+        el.setAttribute('data-content', text);
+    });
 
     // ---- Accessibility: make .has-popover help icons keyboard-focusable ----
     document.querySelectorAll('.has-popover[data-content]').forEach(function (el) {

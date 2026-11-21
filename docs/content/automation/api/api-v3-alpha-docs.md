@@ -189,9 +189,11 @@ Unknown filter params, unknown `?fields=`, and unknown/over-budget `?expand=` al
 ```
 
 `401` unauthenticated · `403` forbidden · `404` unknown **or unauthorized** object (existence is
-never leaked) · `400` validation/expand/filter errors · `409` conflict (a unique field value —
+never leaked; a finding PATCH or PUT that another request deletes mid-write also answers this)
+· `400` validation/expand/filter errors · `409` conflict (a unique field value —
 an organization or asset name, for example — already exists; retrieve or update the existing
-record instead of creating a new one).
+record instead of creating a new one. A finding create also answers `409` when another request
+deletes the new finding before the create finishes).
 
 ## v2 → v3 mapping
 
@@ -327,11 +329,13 @@ deliberate** gaps — several exist so the alpha stayed additive and reviewable:
 
 ## Platform limitations (not v3 gaps)
 
-- **Locations are URL-only.** Only the `URL` location subtype has a persistable model in the
-  codebase today; `Code` and `Dependency` location data is dropped on import until their models
-  land. This is a limitation of the underlying Location subsystem, not of the v3 API — v3 simply
-  refuses to advertise location types the backend cannot store. Locations are **read-only** in the
-  alpha (lifecycle is import-driven).
+- **Only URL locations carry detail fields.** `/api/v3/locations` lists every location the
+  instance stores, whatever its type, and `?type=` filters by it. Open source stores `url`
+  locations; DefectDojo Pro adds further types, such as `dependency`, `code`, `image` and
+  `cloud`. Every location returns `id`, `name`, `type` and `tags`, but the detail fields
+  (`protocol`, `host`, `port`, `path`, `query`, `fragment`, returned on retrieve) are filled in only for a `url`
+  location and are `null` for every other type. Locations are **read-only** in the alpha
+  (lifecycle is import-driven).
 
 ## Design decisions to be aware of
 

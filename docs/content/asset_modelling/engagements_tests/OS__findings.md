@@ -28,6 +28,8 @@ Overall, Findings are designed to work with the Asset Hierarchy to standardize y
 
 Findings are accessible via the sidebar. The submenu provides access to Open and Closed Findings, All Findings (regardless of Open or Closed status), [Risk Accepted Findings](/triage_findings/findings_workflows/os__risk_acceptance/), as well as Findings Templates. Individual Findings are also accessible from within the Test that contains them. 
 
+Through the API, `/api/v2/findings/?engagement=<id>` lists the Findings of one Engagement, `?product=<id>` those of one Asset and `?prod_type=<id>` those of one Organization. Each takes a comma-separated list of ids and combines with every other filter. The longer `test__engagement`, `test__engagement__product` and `test__engagement__product__prod_type` names do the same.
+
 ![image](images/osfindings_ss1.png)
 
 ### Permissions
@@ -251,6 +253,8 @@ When importing a scan, the “Group By” feature can automatically create Findi
 The adjoining **Create Finding Groups for all Findings** checkbox performs two functions: 
 - **Checked**: Creates a Finding Group for every imported Finding, even if that Finding is the only member of the group.
 - **Unchecked**: Creates Finding Groups only when there are actually multiple Findings to group together.
+
+A Finding that is already in a Finding Group stays in that group: Group By never adds it to a second group, and it does not count toward the multiple Findings that an unchecked box needs to create a new group.
 
 ![image](images/osfindings_ss5.png)
 

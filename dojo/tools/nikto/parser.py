@@ -15,6 +15,10 @@ class NiktoParser:
     See: https://github.com/sullo/nikto
     """
 
+    # Merging repeated entries keeps every location, so the importer can split a merged finding
+    # back into one finding per location.
+    SPLITTABLE_PER_LOCATION = True
+
     def get_scan_types(self):
         return ["Nikto Scan"]
 

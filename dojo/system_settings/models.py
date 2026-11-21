@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -347,6 +349,20 @@ class System_Settings(models.Model):
             "When turned on, all filter operations in the UI will require string matches rather than ID. "
             "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
+    read_only_mode = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Read-only mode"),
+        help_text=_(
+            "Rejects all changes from the UI and the API, and pauses scheduled background jobs. "
+            "Superusers can still change System Settings, so they can turn this off. "
+            "Turn it on to freeze this instance before a migration.",
+        ))
+    install_id = models.UUIDField(
+        default=uuid4,
+        editable=False,
+        verbose_name=_("Install id"),
+        help_text=_("A random id that identifies this instance. Exports carry it so a migration tool can tell two instances apart."))
 
     from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()

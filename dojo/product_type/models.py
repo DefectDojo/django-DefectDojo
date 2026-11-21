@@ -4,7 +4,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from dojo.base_models.base import BaseModel
+from dojo.base_models.base import BaseManager, BaseModel
+from dojo.query_hooks import HookedBaseManager
 
 
 class Product_Type(BaseModel):
@@ -25,9 +26,18 @@ class Product_Type(BaseModel):
     key_product = models.BooleanField(default=False)
     authorized_users = models.ManyToManyField("dojo.Dojo_User", related_name="authorized_product_types", blank=True)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedBaseManager()
+    unfiltered = BaseManager()
+
     class Meta:
         ordering = ("name",)
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_prod_type_archive_batch"),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("name", weight="A", config="english")

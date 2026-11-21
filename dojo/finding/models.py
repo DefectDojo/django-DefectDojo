@@ -3,17 +3,17 @@ import hashlib
 import logging
 import re
 from contextlib import suppress
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 import dateutil
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.functions import Upper
 from django.urls import reverse
 from django.utils import timezone
@@ -24,7 +24,7 @@ from django_extensions.db.models import TimeStampedModel
 from django_tagulous.models import TagField
 from titlecase import titlecase
 
-from dojo.base_models.base import BaseModel
+from dojo.base_models.base import BaseManager, BaseModel
 from dojo.finding.cwe import cwe_label, finding_cwe_labels
 from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
@@ -32,6 +32,7 @@ from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 # re-export that loads this module — so this resolves despite the partial circular load, and
 # keeps their dojo.models.* path for Django migration serialization (used as field defaults).
 from dojo.models import copy_model_util, get_current_date, tomorrow
+from dojo.query_hooks import HookedBaseManager, HookedManager, UnfilteredManager
 from dojo.validators import cvss3_validator, cvss4_validator
 
 if TYPE_CHECKING:
@@ -454,9 +455,18 @@ class Finding(BaseModel):
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedBaseManager()
+    unfiltered = BaseManager()
+
     class Meta:
         ordering = ("numerical_severity", "-date", "title", "epss_score", "epss_percentile")
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_finding_archive_batch"),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("title", weight="A", config="english")
@@ -510,6 +520,22 @@ class Finding(BaseModel):
             models.Index(
                 fields=["test", "date"],
                 name="idx_finding_testid_date",
+            ),
+            # A test's findings ordered by numerical_severity with an id tiebreaker
+            # running the same direction (both ascending, or both descending) as an
+            # index walk + LIMIT, instead of sorting every finding in the test or
+            # walking the severity-only index.
+            models.Index(
+                fields=["test", "numerical_severity", "id"],
+                name="idx_finding_test_numsev",
+            ),
+            # Case-insensitive title filters (iexact, __in over upper-cased values,
+            # istartswith) compile to UPPER("title"::text), which neither the plain
+            # title index nor the trigram one can serve. text_pattern_ops also serves
+            # the LIKE 'prefix%' an istartswith renders.
+            models.Index(
+                OpClass(Upper("title"), name="text_pattern_ops"),
+                name="idx_finding_upper_title",
             ),
             models.Index(
                 fields=["sla_expiration_date", "test"],
@@ -702,8 +728,18 @@ class Finding(BaseModel):
         self.set_sla_expiration_date()
 
         logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        save_kwargs = kwargs
+        if not is_new_finding and not self._state.adding and not kwargs.get("force_insert") and not kwargs.get("update_fields"):
+            # An update must never INSERT. When a concurrent delete removed the row after this
+            # instance was loaded, a plain save's UPDATE matches nothing and Django falls back to an
+            # INSERT under the same pk, re-creating the finding from the stale copy without the
+            # tags, found_by and notes the delete cascaded away. Forcing the UPDATE makes that miss
+            # raise "Forced update did not affect any rows" instead, which the API answers with a
+            # 404 and the importers' vanished-row check skips. Only the row write gets the flag:
+            # kwargs also reach post_process_finding_save below.
+            save_kwargs = {"force_update": True, **kwargs}
         # We cannot run the full_clean method here without issue, so we specify skip_validation
-        super().save(*args, **kwargs, skip_validation=True)
+        super().save(*args, **save_kwargs, skip_validation=True)
 
         # Only add to found_by for newly-created findings (avoid doing this on every update)
         if is_new_finding:
@@ -741,9 +777,11 @@ class Finding(BaseModel):
         for files in old_files:
             copy.files.add(files.copy())
         if locations_enabled():
-            old_location_refs = self.locations.all()
-            for location_ref in old_location_refs:
-                location_ref.copy(copy)
+            # One row per location: a location several tests reported is copied once, onto the
+            # copy's own test (see copy_location_references).
+            from dojo.location.utils import copy_location_references  # noqa: PLC0415 -- circular import
+
+            copy_location_references(self, copy)
         else:
             # TODO: Delete this after the move to Locations
             # Copy the endpoint_status
@@ -786,8 +824,18 @@ class Finding(BaseModel):
         # cannot form. It also clears the through rows, so the tagulous pre_delete handler
         # then finds nothing left to decrement (no double counting).
         from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
-        super().delete(*args, **kwargs)
+        with transaction.atomic():
+            # Lock this finding's row before the cascade touches any child row, the order the
+            # bulk delete uses (lock_findings_for_delete). The cascade otherwise deleted the
+            # child rows (Test_Import_Finding_Action, ...) first and reached the finding row
+            # last, so against a bulk delete holding the finding and waiting on those children
+            # the two deadlocked (Postgres 40P01, "while deleting tuple ... in relation
+            # dojo_test_import_finding_action"). Now this delete waits for the bulk delete to
+            # commit; if that removed the finding, there is nothing left to delete.
+            if not finding_helper.lock_findings_for_delete([self.pk]):
+                return
+            bulk_remove_all_tags(Finding, Finding.objects.filter(pk=self.pk))
+            super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
                 Engagement,
@@ -1043,7 +1091,10 @@ class Finding(BaseModel):
             if self.duplicate_finding is not None:
                 return Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by("title")
-            return []
+            # Orphaned duplicate (flagged duplicate with no duplicate_finding link):
+            # return an empty QuerySet rather than a list so callers can chain
+            # QuerySet methods such as .filter() without crashing.
+            return Finding.objects.none()
         return self.original_finding.all().order_by("title")
 
     def get_scanner_confidence_text(self):
@@ -1177,7 +1228,11 @@ class Finding(BaseModel):
 
         sla_period, enforce_period = self.get_sla_period()
         if sla_period is not None and enforce_period:
-            self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)
+            try:
+                self.sla_expiration_date = sla_start_date + relativedelta(days=sla_period)
+            except OverflowError:
+                # Past the last (or before the first) representable date: clamp to it so the save succeeds.
+                self.sla_expiration_date = date.max if sla_period > 0 else date.min
         else:
             self.sla_expiration_date = None
 
@@ -1531,11 +1586,20 @@ class Vulnerability_Id(models.Model):
     # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
     vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
 
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
         ]
         indexes = [
+            models.Index(fields=["archive_batch"], condition=models.Q(archive_batch__isnull=False), name="dojo_vulnid_archive_batch"),
             # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
             # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
             models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
@@ -1603,6 +1667,14 @@ class Finding_Group(TimeStampedModel):
     test = models.ForeignKey("dojo.Test", on_delete=models.CASCADE)
     findings = models.ManyToManyField("dojo.Finding")
     creator = models.ForeignKey("dojo.Dojo_User", on_delete=models.RESTRICT)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     def __str__(self):
         return self.name

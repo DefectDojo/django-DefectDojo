@@ -27,10 +27,20 @@ from typing import TYPE_CHECKING, ClassVar
 
 from ninja import Schema
 
+from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Product_Type
+from dojo.product_type.queries import get_authorized_product_types
+from dojo.request_cache import cache_for_request_or_task
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from dojo.api_v3.expand import ExpandRel
+
+
+@cache_for_request_or_task
+def _authorized_organization_ids() -> set[int]:
+    return set(get_authorized_product_types(Permissions.Product_Type_View).values_list("id", flat=True))
 
 
 class OrganizationSlim(Schema):
@@ -38,6 +48,7 @@ class OrganizationSlim(Schema):
     SELECT_RELATED: ClassVar[tuple] = ()
     PREFETCH_RELATED: ClassVar[tuple] = ()
     EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
+    AUTHORIZED_IDS: ClassVar[Callable[[], set[int]]] = staticmethod(_authorized_organization_ids)
 
     id: int
     name: str

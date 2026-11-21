@@ -60,6 +60,8 @@ When editing an SLA, you can choose whether that SLA will use **Severity** or **
 
 From here, you can set the number of days allowed for each **Severity** or **Risk** level.  You can also selectively enforce SLAs; by unchecking the **Enforce ___ Finding Days** you can ignore SLA calculation for those levels of Severity or Risk.
 
+Each number of days is a whole number from 0 to 36500 (about 100 years). A value of 0 makes a Finding due on the day its SLA starts. Risk levels (Pro) need at least 1 day. A value outside that range is refused when the SLA is saved, in the form and through the API.
+
 ## Apply an SLA Configuration to an Asset (Pro)
 
 Newly created Assets in DefectDojo will always apply the **Default SLA Configuration**, which can be set to different values if you wish.

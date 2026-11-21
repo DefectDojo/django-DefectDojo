@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
+from dojo.query_hooks import HookedManager, UnfilteredManager
+
 
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)
@@ -12,6 +14,14 @@ class Tool_Product_Settings(models.Model):
                                            related_name="tool_configuration", on_delete=models.CASCADE)
     tool_project_id = models.CharField(max_length=200, null=True, blank=True)
     notes = models.ManyToManyField("dojo.Notes", blank=True, editable=False)
+
+    # Read and written only by plugins; open source never sets them.
+    archived_at = models.DateTimeField(null=True, blank=True, editable=False)
+    archive_batch = models.UUIDField(null=True, blank=True, editable=False)
+
+    # objects is declared first, so it is the default manager; see dojo.query_hooks.
+    objects = HookedManager()
+    unfiltered = UnfilteredManager()
 
     class Meta:
         ordering = ["name"]

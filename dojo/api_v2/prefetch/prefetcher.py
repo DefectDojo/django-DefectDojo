@@ -1,6 +1,9 @@
 import inspect
 import sys
+from collections import defaultdict
 
+from django.db.models import prefetch_related_objects
+from django.db.models.fields import related
 from rest_framework.serializers import ModelSerializer
 
 from dojo.api_v2.prefetch import (
@@ -15,13 +18,128 @@ from dojo.location.api.serializers import (
 )
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.models import FileUpload, Finding
+from dojo.models import Endpoint, FileUpload, Finding, Notes, Test
+from dojo.notes.helper import notes_prefetch
+from dojo.vulnerability.queries import vulnerability_id_prefetch
+
+
+def _finding_prefetch_related():
+    """
+    The relations FindingSerializer reads, so the findings a page prefetches (``?prefetch=duplicate_finding``)
+    load each one once for the page rather than once per finding. Built per call: under V3 ``endpoints`` reads
+    the finding's ``locations``, and the notes and vulnerability id lookups are ``Prefetch`` objects.
+    """
+    return (
+        "locations" if locations_enabled() else "endpoints",
+        "tags",
+        "reviewers",
+        "found_by",
+        "files",
+        "finding_meta",
+        "burprawrequestresponse_set",
+        "finding_cwe_set",
+        notes_prefetch(),
+        vulnerability_id_prefetch(),
+        "jira_issue__jira_project__jira_instance",
+        "finding_group_set__jira_issue__jira_project__jira_instance",
+        # test_type_name, and the product the accepted_risks permission check walks to
+        "test__test_type",
+        "test__engagement__product__prod_type",
+    )
+
 
 # Related objects that a prefetched model's serializer reads, so they are fetched in the same query
 _PREFETCH_SELECT_RELATED = {
     LocationFindingReference: ("location",),
     LocationProductReference: ("location",),
+    Notes: ("author", "editor", "note_type"),
 }
+# Relations a prefetched model's serializer reads, batched over every object the page prefetches. A callable is
+# called each time, for lookups that depend on runtime state.
+_PREFETCH_PREFETCH_RELATED = {
+    Endpoint: ("endpoint_params", "findings", "tags"),
+    Finding: _finding_prefetch_related,
+    Notes: ("history__current_editor", "history__note_type"),
+    # TestSerializer nests every finding group in the test with its JIRA issue and that issue's url, and every note
+    Test: (
+        "finding_group_set__jira_issue__jira_project__jira_instance",
+        "notes__author",
+        "notes__editor",
+        "notes__note_type",
+        "notes__history__current_editor",
+        "notes__history__note_type",
+    ),
+}
+
+
+def _prefetch_related_for(model):
+    """The ``prefetch_related`` lookups for a prefetched ``model``'s serializer, empty when it needs none."""
+    lookups = _PREFETCH_PREFETCH_RELATED.get(model, ())
+    return lookups() if callable(lookups) else lookups
+
+
+class _AcceptedFindingId:
+
+    """An accepted finding reduced to its primary key: all ``RiskAcceptanceSerializer.accepted_findings`` (a pk list) reads."""
+
+    __slots__ = ("pk",)
+
+    def __init__(self, pk):
+        self.pk = pk
+
+
+def _load_accepted_risks(findings):
+    """
+    Load what accepted_risks reads for ``findings``: each acceptance's notes, engagements and accepted findings.
+
+    An acceptance's accepted findings are rendered as their ids, and an acceptance can hold a very large number of
+    them, so they are read as (acceptance, finding id) pairs, in the relation's own rows and order (Finding's manager
+    filters and orders by id), rather than as whole finding rows. Prefetched whole, 100,001 accepted findings were
+    100,001 model instances built to print their ids, and over several acceptances at once the query merge-joined
+    along dojo_finding's primary key (612 ms of SQL against 225 ms for one acceptance read on its own).
+    """
+    prefetch_related_objects(findings, "risk_acceptance_set__notes", "risk_acceptance_set__engagement_set")
+    acceptances = [acceptance for finding in findings for acceptance in finding.risk_acceptance_set.all()]
+    if not acceptances:
+        return
+    ids_by_acceptance = defaultdict(list)
+    pairs = (
+        Finding.objects.filter(risk_acceptance__in={acceptance.pk for acceptance in acceptances})
+        .order_by("risk_acceptance", "id")
+        .values_list("risk_acceptance", "id")
+    )
+    for acceptance_id, finding_id in pairs:
+        ids_by_acceptance[acceptance_id].append(_AcceptedFindingId(finding_id))
+    for acceptance in acceptances:
+        # What prefetch_related stores: the relation's queryset with its result cache filled
+        accepted = acceptance.accepted_findings.all()
+        accepted._result_cache = ids_by_acceptance.get(acceptance.pk, [])
+        accepted._prefetch_done = True
+        if not hasattr(acceptance, "_prefetched_objects_cache"):
+            acceptance._prefetched_objects_cache = {}
+        acceptance._prefetched_objects_cache["accepted_findings"] = accepted
+
+
+# Relations a prefetched model's serializer reads for some objects only, as (the serializer method that says whether
+# it reads them for an object, the function that loads them). They are loaded onto those objects alone:
+# accepted_risks is empty for a requester who may not edit the finding, and an acceptance can hold a very large
+# number of findings.
+_PREFETCH_PREFETCH_RELATED_WHEN_SHOWN = {
+    Finding: ("shows_accepted_risks", _load_accepted_risks),
+}
+
+
+def _prefetch_shown_relations(objects, serializer):
+    """Load the relations ``serializer`` reads for some objects only onto the ``objects`` it reads them for."""
+    if not objects or (entry := _PREFETCH_PREFETCH_RELATED_WHEN_SHOWN.get(type(objects[0]))) is None:
+        return
+    method_name, load = entry
+    # A list serializer asks its child; a serializer without the method reads the relations lazily, as before
+    if (shows := getattr(getattr(serializer, "child", serializer), method_name, None)) is None:
+        return
+    if shown := [obj for obj in objects if shows(obj)]:
+        load(shown)
+
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
@@ -151,6 +269,15 @@ class _Prefetcher:
             LocationProductReference: LocationProductReferenceSerializer,
         }.get(field_type)
 
+    def get_prefetch_lookup(self, model_instance, field_name):
+        """
+        The ``prefetch_related`` lookup that loads ``field_name`` on ``model_instance``, mirroring
+        ``get_field_value_override`` (under V3 a finding's ``endpoints`` are its ``locations``).
+        """
+        if locations_enabled() and isinstance(model_instance, Finding) and field_name == "endpoints":
+            return "locations"
+        return field_name
+
     def _prefetch(self, entry, fields_to_fetch):
         """
         Apply prefetching for the given field on the given entry
@@ -160,16 +287,62 @@ class _Prefetcher:
             field_to_fetch (list[string]): fields to prefetch
 
         """
+        self.prefetch_entries([entry], fields_to_fetch)
+
+    def prefetch_entries(self, entries, fields_to_fetch):
+        """
+        Apply prefetching for the given fields on a whole page of entries.
+
+        Authorization and serialization run once per page rather than once per entry: the related
+        ids of every entry are authorized with one query, and each distinct related object is
+        serialized once. Doing this per entry cost an ``exists()`` and a full serialization of the
+        same object on every row of a list response.
+
+        Args:
+            entries (list[ModelInstance]): Instances of a model as returned by a django queryset
+            fields_to_fetch (list[string]): fields to prefetch
+
+        """
+        entries = list(entries)
+        if not entries:
+            return
         user = getattr(self._request, "user", None) if self._request else None
-
         for field_to_fetch in fields_to_fetch:
-            # Get the field from the instance
-            field_value, many = self.get_field_value(entry, field_to_fetch)
-            if field_value is None:
-                continue
+            self._prefetch_field(entries, field_to_fetch, user)
 
+    def _load_relation(self, entries, field_to_fetch):
+        """
+        Load the relation behind ``field_to_fetch`` for every entry in one query, so reading it per entry
+        does not query once per row. A relation the queryset already loaded is left as it is.
+        """
+        lookup = self.get_prefetch_lookup(entries[0], field_to_fetch)
+        descriptor = getattr(type(entries[0]), lookup, None)
+        if not isinstance(descriptor, (related.ForwardManyToOneDescriptor, related.ReverseManyToOneDescriptor)):
+            return
+        # Same allowlist as get_field_value: an unbounded reverse relation is never loaded
+        if utils._is_one_to_many_relation(descriptor) and not utils.is_prefetchable_reverse_relation(type(entries[0]), lookup):
+            return
+        prefetch_related_objects(entries, lookup)
+
+    def _related_values(self, entries, field_to_fetch):
+        """The non-null related value of each entry, as ``(field_value, many)`` pairs in entry order."""
+        if len(entries) > 1:
+            self._load_relation(entries, field_to_fetch)
+        values = []
+        for entry in entries:
+            field_value, many = self.get_field_value(entry, field_to_fetch)
+            if field_value is not None:
+                values.append((field_value, many))
+        return values
+
+    def _prefetch_field(self, entries, field_to_fetch, user):
+        groups = {}
+        for field_value, many in self._related_values(entries, field_to_fetch):
             # Get the model related to the field
             model_type = getattr(field_value, "model", type(field_value))
+            groups.setdefault((model_type, many), []).append(field_value)
+
+        for (model_type, many), field_values in groups.items():
             extra_serializer = self._find_serializer(model_type)
             if extra_serializer is None:
                 continue
@@ -190,34 +363,72 @@ class _Prefetcher:
             # Serializers that read through a FK (``location.location_value``) would otherwise query once per row
             if select_related := _PREFETCH_SELECT_RELATED.get(model_type):
                 authorized_qs = authorized_qs.select_related(*select_related)
-
-            # Check related object authorizations
-            if many:
-                related_qs = field_value.all() if hasattr(field_value, "all") else field_value
-                related_ids = list(related_qs.values_list("pk", flat=True))
-                if not related_ids:
-                    continue
-                # Set `field_value` (what will be serialized later) to the set of objects the user has permission to
-                field_value = authorized_qs.filter(pk__in=related_ids)
-                if not field_value.exists():
-                    continue
-            # Only a single related item; check it's in the set of authorized objects. If not, skip it.
-            elif not authorized_qs.filter(pk=field_value.pk).exists():
-                continue
+            if prefetch_related := _prefetch_related_for(model_type):
+                authorized_qs = authorized_qs.prefetch_related(*prefetch_related)
 
             serializer_kwargs = {"many": many}
             if self._request is not None:
                 # Add in the request for the serializers to use if they want
                 serializer_kwargs["context"] = {"request": self._request}
-            field_data = extra_serializer(**serializer_kwargs).to_representation(
-                field_value,
-            )
-            # For convenience in processing we store the field data in a list
-            field_data_list = field_data if isinstance(field_data, list) else [field_data]
 
-            # Should not fail as django always generate an id field
-            for data in field_data_list:
+            if many:
+                self._prefetch_many(field_to_fetch, field_values, authorized_qs, extra_serializer, serializer_kwargs)
+            else:
+                self._prefetch_single(field_to_fetch, field_values, authorized_qs, extra_serializer, serializer_kwargs)
+
+    def _prefetch_many(self, field_to_fetch, field_values, authorized_qs, extra_serializer, serializer_kwargs):
+        related_ids_per_entry = []
+        for field_value in field_values:
+            related_qs = field_value.all() if hasattr(field_value, "all") else field_value
+            if getattr(related_qs, "_result_cache", None) is not None:
+                related_ids_per_entry.append([obj.pk for obj in related_qs])
+            else:
+                related_ids_per_entry.append(list(related_qs.values_list("pk", flat=True)))
+        all_ids = {pk for related_ids in related_ids_per_entry for pk in related_ids}
+        if not all_ids:
+            return
+        # Serialize the objects the user has permission to, each once, in the authorized queryset's order
+        authorized = list(authorized_qs.filter(pk__in=all_ids))
+        if not authorized:
+            return
+        serializer = extra_serializer(**serializer_kwargs)
+        _prefetch_shown_relations(authorized, serializer)
+        field_data = serializer.to_representation(authorized)
+        # Keyed by the serialized id: a list serializer that filters (VisibleNotesSerializer) may return fewer rows
+        # than it was given, and an object it dropped is then left out of the payload rather than mismatched
+        data_by_pk = {data["id"]: data for data in field_data}
+        position = {obj.pk: index for index, obj in enumerate(authorized)}
+        # Insert entry by entry, so the payload lists ids in the order a per-entry walk would
+        for related_ids in related_ids_per_entry:
+            for pk in sorted((pk for pk in set(related_ids) if pk in data_by_pk), key=position.__getitem__):
+                data = data_by_pk[pk]
                 self._prefetch_data[field_to_fetch][data["id"]] = data
+
+    def _prefetch_single(self, field_to_fetch, field_values, authorized_qs, extra_serializer, serializer_kwargs):
+        # Only a single related item per entry; keep the ones in the set of authorized objects
+        authorized_ids = set(authorized_qs.filter(pk__in={value.pk for value in field_values}).values_list("pk", flat=True))
+        # The entries' own instances are serialized, not authorized_qs rows, so its prefetch_related never reaches
+        # them: load the relations the serializer reads onto the instances, once for all of them
+        # Each authorized object once, as the first entry that names it: the instance serialized below
+        first_by_pk = {}
+        for value in field_values:
+            if value.pk in authorized_ids:
+                first_by_pk.setdefault(value.pk, value)
+        authorized = list(first_by_pk.values())
+        if prefetch_related := _prefetch_related_for(type(field_values[0])):
+            prefetch_related_objects(authorized, *prefetch_related)
+        # One serializer for all of them, as a list serializer reuses its child: building a serializer's fields is
+        # most of the cost of serializing a finding, and it does not depend on the object
+        serializer = extra_serializer(**serializer_kwargs)
+        _prefetch_shown_relations(authorized, serializer)
+        serialized = set()
+        for field_value in field_values:
+            if field_value.pk not in authorized_ids or field_value.pk in serialized:
+                continue
+            serialized.add(field_value.pk)
+            # Serialize the entry's own instance, which carries whatever the queryset prefetched on it
+            data = serializer.to_representation(field_value)
+            self._prefetch_data[field_to_fetch][data["id"]] = data
 
     @property
     def prefetched_data(self):

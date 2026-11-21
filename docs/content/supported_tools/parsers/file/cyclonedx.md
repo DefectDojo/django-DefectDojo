@@ -29,6 +29,9 @@ cyclonedx-py
     -j        - generate JSON instead of XML
 {{< /highlight >}}
 
+### CPE locations (Pro)
+With Locations enabled, a finding also carries a [CPE location](/asset_modelling/locations/pro__cpe_locations/) for the `cpe` of the component its vulnerability affects. Components without a vulnerability do not get one.
+
 ### Sample Scan Data
 Sample CycloneDX scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/cyclonedx).
 

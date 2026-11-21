@@ -464,6 +464,24 @@ def get_jira_connect_method():
     return connect_to_jira
 
 
+def get_jira_description_context_method():
+    """
+    Return the callable that may adjust the issue description's template context.
+
+    ``settings.JIRA_DESCRIPTION_CONTEXT_METHOD`` names it (``"module.function"``); it is called
+    as ``method(obj, context)`` and returns the context to render. Without the setting the
+    context is rendered as built.
+    """
+    if hasattr(settings, "JIRA_DESCRIPTION_CONTEXT_METHOD"):
+        try:
+            mn, _, fn = settings.JIRA_DESCRIPTION_CONTEXT_METHOD.rpartition(".")
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except (ModuleNotFoundError, AttributeError, ValueError):
+            pass
+    return lambda _obj, context: context
+
+
 def get_jira_connection_raw(jira_server, jira_username, jira_password):
     try:
         connect_method = get_jira_connect_method()
@@ -763,6 +781,7 @@ def jira_description(obj, **kwargs):
         kwargs["finding_group"] = obj
 
     kwargs["V3_FEATURE_LOCATIONS"] = locations_enabled()
+    kwargs = get_jira_description_context_method()(obj, kwargs)
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
@@ -1102,13 +1121,9 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             findings = obj.findings.all()
 
         for find in findings:
-            for pic in get_file_images(find):
-                # It doesn't look like the celery cotainer has anything in the media
-                # folder. Has this feature ever worked?
+            for image in get_file_images(find, return_objects=True):
                 try:
-                    jira_attachment(
-                        find, jira, new_issue,
-                        settings.MEDIA_ROOT + "/" + pic)
+                    jira_attachment(find, jira, new_issue, image.file)
                 except FileNotFoundError as e:
                     logger.info(e)
     except Exception as e:
@@ -1253,13 +1268,9 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             findings = obj.findings.all()
 
         for find in findings:
-            for pic in get_file_images(find):
-                # It doesn't look like the celery container has anything in the media
-                # folder. Has this feature ever worked?
+            for image in get_file_images(find, return_objects=True):
                 try:
-                    jira_attachment(
-                        find, jira, issue,
-                        settings.MEDIA_ROOT + "/" + pic)
+                    jira_attachment(find, jira, issue, image.file)
                 except FileNotFoundError as e:
                     logger.info(e)
     except Exception as e:
@@ -1529,9 +1540,15 @@ def is_jira_project_valid(jira_project):
 
 
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
+    """
+    Attach a file to a Jira issue.
+
+    ``file`` is a ``FieldFile`` (for example ``FileUpload.file``); it is read through
+    its storage backend rather than from a path on the local filesystem.
+    """
     basename = file
     if jira_filename is None:
-        basename = Path(file).name
+        basename = Path(file.name).name
 
     # Check to see if the file has been uploaded to Jira
     # TODO: JIRA: check for local existince of attachment as it currently crashes if local attachment doesn't exist
@@ -1544,8 +1561,8 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                     issue=issue, attachment=attachment, filename=jira_filename)
             else:
                 # read and upload a file
-                with Path(file).open("rb") as f:
-                    jira.add_attachment(issue=issue, attachment=f)
+                with file.open("rb") as f:
+                    jira.add_attachment(issue=issue, attachment=f, filename=basename)
         except JIRAError as e:
             logger.exception("Unable to add attachment")
             log_jira_alert("Attachment: " + e.text, finding)

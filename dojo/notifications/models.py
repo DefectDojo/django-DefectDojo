@@ -1,3 +1,5 @@
+import copy
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
@@ -69,7 +71,9 @@ class Notifications(models.Model):
         for notifications in notifications_list:
             if result is None:
                 # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
-                result = notifications
+                # A copy, not the instance: callers set .user on the result, and the first entry can be
+                # a shared row (the system notifications row a manager reuses for every notification).
+                result = copy.copy(notifications)
                 # result.pk = None # detach from db
             else:
                 result.product_type_added = {*result.product_type_added, *notifications.product_type_added}
@@ -121,6 +125,8 @@ class Notification_Webhooks(models.Model):
 
 
 class Alerts(models.Model):
+    # 64-bit: cleanup_alerts keeps the table small, but the id sequence counts every alert ever created.
+    id = models.BigAutoField(primary_key=True)
     title = models.CharField(max_length=250, default="", null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
     url = models.URLField(max_length=2000, null=True, blank=True)

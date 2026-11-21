@@ -157,8 +157,16 @@ def parse_endpoints(ipv4_field, ipv6_field):
     return [Endpoint(host=host) for host in _extract_hosts(ipv4_field, ipv6_field)]
 
 
-def parse_locations(ipv4_field, ipv6_field):
-    return [LocationData.url(host=host) for host in _extract_hosts(ipv4_field, ipv6_field)]
+def parse_locations(ipv4_field, ipv6_field, asset_name="", operating_system=""):
+    # Qualys VMDR keys an asset by its name, so the name is a host location. The IPs
+    # stay URL locations beside it: an install without the host location type keeps
+    # exactly the locations it had, and an existing URL location is not orphaned.
+    locations = []
+    if not is_qualys_null(asset_name):
+        os_version = "" if is_qualys_null(operating_system) else operating_system.strip()
+        locations.append(LocationData.host(hostname=asset_name.strip(), os_version=os_version))
+    locations.extend(LocationData.url(host=host) for host in _extract_hosts(ipv4_field, ipv6_field))
+    return locations
 
 
 def parse_tags(tags_field):

@@ -101,16 +101,16 @@ class TestOverdue(SimpleTestCase):
 
 
 class TestOpenSourceDeclarations(SimpleTestCase):
-    def test_the_pull_parser_features_go_in_3_5_0(self):
+    def test_the_pull_parser_features_go_in_3_6_0(self):
         for key in ("tool_type", "tool_configuration", "api_scan_configuration"):
             with self.subTest(key=key):
                 entry = get_deprecation(key)
-                self.assertEqual("3.5.0", entry.removal_version)
+                self.assertEqual("3.6.0", entry.removal_version)
                 self.assertEqual(UPGRADING_3_2, entry.notice_url)
 
     def test_the_classic_message_uses_one_sentence_and_one_date_form(self):
         self.assertEqual(
-            "Tool Types are deprecated and will be removed in DefectDojo 3.5.0 (November 2026). "
+            "Tool Types are deprecated and will be removed in DefectDojo 3.6.0 (December 2026). "
             "Please plan to migrate away from this feature.",
             get_deprecation("tool_type").message(),
         )
@@ -194,7 +194,7 @@ class TestDeprecationHeaders(SimpleTestCase):
     def test_a_declared_feature_sends_both_headers_from_the_calendar(self):
         response = ToolTypeProbe.as_view()(APIRequestFactory().get("/"))
         self.assertEqual("True", response["X-Deprecated"])
-        self.assertEqual("2026-11-02T00:00:00", response["X-End-Of-Life-Date"])
+        self.assertEqual("2026-12-07T00:00:00", response["X-End-Of-Life-Date"])
 
     def test_an_undeclared_key_sends_no_header(self):
         response = UndeclaredProbe.as_view()(APIRequestFactory().get("/"))

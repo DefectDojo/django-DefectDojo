@@ -48,7 +48,8 @@
 *Systems/Locations*:
 ||Location||Status||
 {% for location_ref in finding.locations.all %}|{{ location_ref.location }}|{{ location_ref.get_status_display }}|
-{% endfor %}
+{% endfor %}{% if locations_more %}{{ locations_more }}
+{% endif %}
 {% endif %}
 {% else %}
 {% comment %} TODO: Delete this after the move to Locations {% endcomment %}

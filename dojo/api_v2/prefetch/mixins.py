@@ -20,9 +20,9 @@ class PrefetchListMixin(ListModelMixin):
         # Stores the final JSON object
         results = []
 
-        for entry in queryset:
-            results.append(serializer.to_representation(entry))
-            prefetcher._prefetch(entry, prefetch_params)
+        results.extend(serializer.to_representation(entry) for entry in queryset)
+        # One pass over the whole page, so related objects are authorized and serialized once
+        prefetcher.prefetch_entries(queryset, prefetch_params)
 
         # Done in the original list method so we do it as well
         response = self.get_paginated_response(results)

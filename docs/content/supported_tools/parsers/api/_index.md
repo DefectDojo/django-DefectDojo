@@ -7,11 +7,11 @@ sidebar:
   collapsed: true
 exclude_search: true
 ---
-> **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
+> **⚠️ Deprecated: to be removed in DefectDojo 3.6.0.**
 >
-> The API-based (pull) parsers described here, and the **Tool Type** / **Tool Configuration** feature they depend on, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. These pull integrations are being consolidated into DefectDojo Pro's no-code [Connectors](/connectors/upstream/about/).
+> The API-based (pull) parsers described here, and the **Tool Type** / **Tool Configuration** feature they depend on, are deprecated as of **3.2.0** and will be **removed in 3.6.0 (December 2026)**. These pull integrations are being consolidated into DefectDojo Pro's no-code [Connectors](/connectors/upstream/about/).
 >
-> If you use the setup below, plan your migration before 3.5.0 — after that release these parsers and the API-pull import path no longer function, and imports that rely on a Tool Configuration stop working. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/) for the full list and timeline.
+> If you use the setup below, plan your migration before 3.6.0. After that release, these parsers and the API-pull import path no longer function, and imports that rely on a Tool Configuration stop working. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/) for the full list, and [Deprecations](/releases/deprecations/) for the current timeline.
 >
 > Importing these tools' reports as **files** is not affected by this deprecation.
 
