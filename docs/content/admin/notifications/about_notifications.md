@@ -127,6 +127,13 @@ None of these messages arrives once per run. A Connector with a dead credential 
 
 The notification is on **🔔 Alerts** by default. Set it to Email, Slack or Teams on your notification settings page, under **Connections**. A Connector that is set up correctly but has never seen any data is a separate case, and it warns you when you save it rather than later.
 
+### Syncs that run long
+
+Two separate checks time a Connector's Syncs. Both run hourly, so a message can arrive up to an hour after its threshold passed, and each sends one message per Sync, never one per check.
+
+* **One record's Sync runs long.** A single record's Sync (one record, scan type and branch) that is still queued or importing more than 12 hours after its data arrived sends a **Connector Sync Running Long** message. The 12 hours come from the `DD_CONNECTOR_SYNC_LONG_RUNNING_HOURS` environment variable (`0` turns this check off). It times one record's Sync, not the Connector's whole scheduled pass: a pass over thousands of quick records can take many hours without any single record crossing it.
+* **A scheduled Sync pass runs long (opt-in, per Connector).** Set **Long Synchronization Warning (Minutes)** under **Synchronization Configuration** when you [add or edit the Connector](/connectors/upstream/add_edit/) to be told when a whole scheduled Sync takes longer than that many minutes. The pass is measured from the scheduled Sync's start until the import of its last record finishes, or until now while it is still running, and sends a **Connector Sync Pass Running Long** message once per pass. The setting is empty by default, which turns the check off, so no Connector is measured until you set it. A **Sync Now** you start by hand is not counted, and neither is a Sync that fails or times out (the failure has its own message) or is stopped, by a person or by a save of the Connector's configuration. A pass that takes longer than the setting is announced while it runs or, if it ends between two checks, after it ends.
+
 ## Ingestion Health Notifications (Pro)
 
 With [Ingestion Health](/connectors/upstream/ingestion_health/) turned on, the **Ingestion Health Warning** notification covers the ways a source falls short that no other message reports:

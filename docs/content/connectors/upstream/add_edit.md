@@ -28,6 +28,8 @@ You can also edit an existing Connector under the **Configured Connectors** head
 ​
 6. Schedule the Connector's automatic discovery and sync under the **Discovery Configuration** and **Synchronization Configuration** sections. For each, pick a **Frequency** (every 6, 12, or 24 hours) and a **Time**. At *Every 24 hours* the connector runs once a day at that time; at *Every 6 hours* or *Every 12 hours* the time sets when the first run of the day happens, and the connector repeats from there. Times are shown in your browser's local timezone. You can change any of this later.  
 ​
+   Under **Synchronization Configuration**, **Long Synchronization Warning (Minutes)** is optional and empty by default. Enter a number of minutes to get a **Connector Health Warning** when a scheduled Sync takes longer than that, measured from its start until the import of its last record finishes. Leave it empty to turn the warning off. See [Connector Health Notifications](/admin/notifications/about_notifications/#connector-health-notifications-pro).  
+​
 7. Select whether you wish to **Enable Auto\-Mapping**. Enable Auto\-Mapping will create a new Asset in DefectDojo to store the data from this connector. Auto\-Mapping can be turned on or off at any time.  
 ​
 8. Click **Submit.**
