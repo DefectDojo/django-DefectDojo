@@ -82,7 +82,7 @@ class TestDeleteRelatedNotesInBulk(TestCase):
         self.assertEqual(len(ctx.captured_queries), 1, [q["sql"] for q in ctx.captured_queries])
 
     def test_other_notes_and_their_history_are_kept(self):
-        kept, kept_note_ids, kept_history_ids = self._finding_with_notes(2)
+        _, kept_note_ids, kept_history_ids = self._finding_with_notes(2)
         self._delete(3)
         self.assertEqual(
             (
