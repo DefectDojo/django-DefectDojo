@@ -1,4 +1,6 @@
 import logging
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from django.db.models import Prefetch, Q
 
@@ -56,8 +58,40 @@ def visible_notes(notes, user):
 
 
 def delete_related_notes(obj):
+    """
+    Delete ``obj``'s notes and their edit history in a fixed number of queries, however many notes there are.
+
+    A note's history rows belong to that note alone (``Notes.copy`` copies them), so they go with it. The per-note
+    ``pre_delete`` receiver (dojo.notes.signals) deletes them one note at a time, about four queries per note, which
+    made deleting a finding with a hundred notes cost some 500 queries. Here every history row is read once, the notes
+    are deleted with that receiver standing down, and the history rows are deleted in one batch.
+    """
     if not hasattr(obj, "notes"):
         logger.warning(f"Attempted to delete notes from object type {type(obj)} without 'notes' attribute.")
         return
-    logger.debug(f"Deleting {obj.notes.count()} notes for {type(obj).__name__} {obj.id}")
-    obj.notes.all().delete()
+    note_ids = list(obj.notes.values_list("id", flat=True))
+    logger.debug("Deleting %d notes for %s %s", len(note_ids), type(obj).__name__, obj.id)
+    if not note_ids:
+        return
+    history_ids = list(Notes.history.through.objects.filter(notes__in=note_ids).values_list("notehistory_id", flat=True))
+    with note_history_deleted_by_caller():
+        Notes.objects.filter(id__in=note_ids).delete()
+    if history_ids:
+        NoteHistory.objects.filter(id__in=history_ids).delete()
+
+
+_note_history_deleted_by_caller = ContextVar("note_history_deleted_by_caller", default=False)
+
+
+@contextmanager
+def note_history_deleted_by_caller():
+    """Notes deleted inside this block leave their history to the caller, which deletes it in one batch."""
+    token = _note_history_deleted_by_caller.set(True)
+    try:
+        yield
+    finally:
+        _note_history_deleted_by_caller.reset(token)
+
+
+def is_note_history_deleted_by_caller() -> bool:
+    return _note_history_deleted_by_caller.get()
