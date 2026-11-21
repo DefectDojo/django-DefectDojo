@@ -129,7 +129,10 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
             "notes",
             "tags",
             "endpoints",
-            "status_finding",
+            Prefetch(
+                "status_finding",
+                queryset=Endpoint_Status.objects.select_related("endpoint"),
+            ),
             "finding_group_set",
             "finding_group_set__jira_issue",  # Include both variants
             vulnerability_id_prefetch(),
