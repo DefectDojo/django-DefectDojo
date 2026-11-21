@@ -2,6 +2,11 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 
+class RegulationManager(models.Manager):
+    def get_by_natural_key(self, acronym):
+        return self.get(acronym=acronym)
+
+
 class Regulation(models.Model):
     PRIVACY_CATEGORY = "privacy"
     FINANCE_CATEGORY = "finance"
@@ -29,8 +34,13 @@ class Regulation(models.Model):
     description = models.TextField(blank=True, help_text=_("Information about the regulation's purpose."))
     reference = models.URLField(blank=True, help_text=_("An external URL for more information."))
 
+    objects = RegulationManager()
+
     class Meta:
         ordering = ["name"]
 
     def __str__(self):
         return self.acronym + " (" + self.jurisdiction + ")"
+
+    def natural_key(self):
+        return (self.acronym,)
