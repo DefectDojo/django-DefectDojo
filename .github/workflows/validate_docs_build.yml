@@ -63,7 +63,7 @@ jobs:
           fi
 
       - name: Refuse DefectDojo Pro pages
-        # The DefectDojo Pro pages live in DefectDojo-Inc/dojo-pro-docs, which
+        # The DefectDojo Pro pages live in the DefectDojo Pro documentation repository, which
         # builds docs.defectdojo.com from them together with the Open Source
         # pages here. A page marked for the Pro view (audience: pro or
         # pro-feature: true), a PRO__* file, or anything under releases/pro/
@@ -110,7 +110,7 @@ jobs:
               print("\n".join(found), file=sys.stderr)
               print(
                   "\nThese pages document DefectDojo Pro. Pro pages live in"
-                  " DefectDojo-Inc/dojo-pro-docs (content/), not in this repository:"
+                  " the DefectDojo Pro documentation repository, not in this repository:"
                   " open the change there.",
                   file=sys.stderr,
               )
