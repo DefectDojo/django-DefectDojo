@@ -1,0 +1,34 @@
+[
+  {
+    "RuleID": "generic-api-key",
+    "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+    "StartLine": 53,
+    "EndLine": 53,
+    "StartColumn": 9,
+    "EndColumn": 37,
+    "Match": "XXXXXXXXX",
+    "Secret": "XXXXXXXXX",
+    "Attributes": {
+      "confidence": "low",
+      "git.author_email": "XXXXXXX",
+      "git.author_name": "XXXXXXX",
+      "git.date": "2026-04-23T14:25:51Z",
+      "git.message": "",
+      "git.platform": "unknown",
+      "git.remote_url": "XXXXXXXX",
+      "git.sha": "XXXXXXXXX",
+      "path": "XXXXXXXXX",
+      "resource": "git.patch_content"
+    },
+    "Tags": [],
+    "Fingerprint": "XXXXXXX:file.cfg:generic-api-key:53",
+    "File": "file.cfg",
+    "SymlinkFile": "",
+    "Commit": "XXXXXXXX",
+    "Entropy": 3.625,
+    "Author": "XXXXXXXXXX",
+    "Email": "XXXXXXXXXX",
+    "Date": "2026-04-23T14:25:51Z",
+    "Message": ""
+  }
+]
