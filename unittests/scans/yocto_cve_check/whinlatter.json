@@ -1,0 +1,60 @@
+{
+  "version": "1",
+  "package": [
+    {
+      "name": "curl",
+      "layer": "meta",
+      "version": "8.14.1",
+      "products": [
+        {
+          "product": "curl",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2025-90004",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-90004",
+          "summary": "An example out-of-bounds read in curl when handling a crafted header.",
+          "scorev2": "0.0",
+          "scorev3": "7.5",
+          "scorev4": "0.0",
+          "modified": "2025-09-18 14:02:11.290",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "detail": "version-in-range"
+        },
+        {
+          "id": "CVE-2025-90005",
+          "status": "Unknown",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-90005",
+          "detail": "unknown"
+        },
+        {
+          "id": "CVE-2025-90006",
+          "status": "Ignored",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-90006",
+          "detail": "cpe-incorrect",
+          "description": "the CVE is for an unrelated product that is also called curl"
+        },
+        {
+          "id": "CVE-2025-90007",
+          "status": "Patched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-90007",
+          "summary": "An example use-after-free in curl.",
+          "scorev2": "0.0",
+          "scorev3": "9.1",
+          "scorev4": "0.0",
+          "modified": "2025-10-02 09:15:44.100",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+          "detail": "fix-file-included",
+          "patch-file": [
+            "/work/layers/meta/recipes-support/curl/curl/CVE-2025-90007.patch"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "version": "1",
+  "package": [
+    {
+      "name": "busybox",
+      "layer": "",
+      "version": "1.37.0",
+      "products": [
+        {
+          "product": "busybox",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2022-48174",
+          "status": "Patched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2022-48174",
+          "summary": "There is a stack overflow vulnerability in ash.c:6030 in busybox before 1.35.",
+          "scorev2": "0.0",
+          "scorev3": "9.8",
+          "scorev4": "0.0",
+          "modified": "2025-01-10T15:20:11.000",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "detail": "backported-patch",
+          "patch-file": [
+            "0001-ash-fix-stack-overflow.patch"
+          ]
+        },
+        {
+          "id": "CVE-2023-42366",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-42366",
+          "summary": "A heap-buffer-overflow was discovered in BusyBox v.1.36.1 in the next_token function at awk.c:1159.",
+          "scorev2": "0.0",
+          "scorev3": "5.5",
+          "scorev4": "0.0",
+          "modified": "2024-11-21T08:22:28.000",
+          "vector": "LOCAL",
+          "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+        },
+        {
+          "id": "CVE-2026-90003",
+          "status": null,
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2026-90003",
+          "summary": "",
+          "scorev2": "0.0",
+          "scorev3": "0.0",
+          "scorev4": "0.0",
+          "modified": null,
+          "vector": "UNKNOWN",
+          "vectorString": null
+        },
+        {
+          "id": "CVE-2021-42386",
+          "status": "Ignored",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2021-42386",
+          "summary": "A use-after-free in Busybox's awk applet leads to denial of service.",
+          "scorev2": "6.5",
+          "scorev3": "7.2",
+          "scorev4": "0.0",
+          "modified": "2024-11-21T06:27:44.000",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H",
+          "detail": "cpe-incorrect",
+          "description": "CPE matches an unrelated product"
+        }
+      ],
+      "cpes": [
+        "cpe:2.3:a:busybox:busybox:1.37.0:*:*:*:*:*:*:*"
+      ]
+    }
+  ]
+}
