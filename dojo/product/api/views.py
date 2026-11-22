@@ -83,6 +83,22 @@ class ProductViewSet(
         permissions.UserHasProductPermission,
     )
 
+    def paginate_queryset(self, queryset):
+        page = super().paginate_queryset(queryset)
+        if self.action == "list" and page:
+            products = {product.pk: product for product in page}
+            for product in page:
+                product.prefetched_active_finding_ids = []
+            # Load only IDs for the authorized, filtered page, without materializing
+            # Finding objects. Keep the model's ordering, as open_findings_list() does.
+            findings = Finding.objects.filter(
+                test__engagement__product_id__in=products,
+                active=True,
+            ).values_list("test__engagement__product_id", "id")
+            for product_id, finding_id in findings.iterator():
+                products[product_id].prefetched_active_finding_ids.append(finding_id)
+        return page
+
     def get_queryset(self):
         base_findings = Finding.objects.filter(
             test__engagement__product_id=OuterRef("pk"),
