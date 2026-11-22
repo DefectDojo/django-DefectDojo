@@ -972,9 +972,8 @@ class ReImportScanResultsView(View):
                 context["verified"] = True
             elif verifiedChoice == "force_to_false":
                 context["verified"] = False
-        # Override the tags and version
+        # Override the tags; metadata is applied by the importer.
         context.get("test").tags = context.get("tags")
-        context.get("test").version = context.get("version")
         return None
 
     def process_jira_form(

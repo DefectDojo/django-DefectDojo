@@ -546,13 +546,13 @@ class BaseImporter(ImporterOptions):
         fields used today are `version`, `branch_tag`, `build_id`, and `commit_hash`
         """
         # Add the extra fields to the test if they are specified here
-        if not self.version.isspace():
+        if self.version.strip():
             self.test.version = self.version
-        if not self.branch_tag.isspace():
+        if self.branch_tag.strip():
             self.test.branch_tag = self.branch_tag
-        if not self.build_id.isspace():
+        if self.build_id.strip():
             self.test.build_id = self.build_id
-        if not self.commit_hash.isspace():
+        if self.commit_hash.strip():
             self.test.commit_hash = self.commit_hash
 
     def update_timestamps(self):
