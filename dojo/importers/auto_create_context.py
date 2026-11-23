@@ -460,6 +460,42 @@ class AutoCreateContextManager:
                 source_code_management_uri=source_code_management_uri,
             )
 
+    def get_or_create_test(
+        self,
+        importer: Any,
+        engagement: Engagement,
+        scan: Any = None,
+        **kwargs: dict,
+    ) -> tuple[Test, bool]:
+        """
+        Fetches the test a reimport targets if one exists by now. If not, `importer`
+        creates it. Returns the test, and whether it was created.
+
+        Must run inside `importer.import_lock_scope()`: a new test is locked for this
+        import before any other request can see it, so a reimport that finds it waits
+        for the import to finish instead of running ahead of it.
+        """
+        # The importer checks this before it creates a test
+        importer.verify_tool_configuration_from_engagement()
+        # by default test_type == scan_type, a parser that names the test type takes it from the report
+        test_type_name = importer.scan_type
+        parser = importer.get_parser()
+        if hasattr(parser, "get_tests"):
+            if tests := importer.parse_dynamic_test_type_tests(scan, parser):
+                test_type_name = importer.resolve_dynamic_test_type_name(tests[0].type)
+            # The importer reads the report from the start
+            scan.seek(0)
+        with transaction.atomic():
+            # Lock the parent engagement row to serialize test creation per engagement
+            Engagement.objects.select_for_update().get(pk=engagement.pk)
+            # Re-check for an existing test now that we hold the lock
+            existing = self.get_target_test_if_exists(engagement=engagement, scan=scan, **kwargs)
+            if existing:
+                return existing, False
+            test = importer.create_test(test_type_name)
+            importer.lock_test_under_import(test)
+            return test, True
+
     """
     ===================================
     ------------ Utilities ------------
