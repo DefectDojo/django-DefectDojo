@@ -31,6 +31,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 from dojo.decorators import dojo_ratelimit_view
 from dojo.azure_devops_helper import create_azure_work_item_task
+from dojo.group.queries import get_users_for_group
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -1711,13 +1712,17 @@ def request_finding_review(request, fid):
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
             finding_ids = [f.id for f in findings]
-            create_azure_work_item_task.apply_async(args=(
-                    f"Request Peer Review {fid}",
-                    form.cleaned_data.get("entry"),
-                    user.username,
-                    form.cleaned_data.get("proof_file"),
-                    finding_ids,
-            ))
+            role, tag_name = finding_helper.get_group_reviewers_for_finding(findings[0])
+            groups = ["Reviewers_" + role.name, "Reviewers_" + tag_name]
+            grops_validation = GeneralSettings.get_value("GROUPS_SECURITY_PEER_REVIEW", ["Reviewers_Maintainer"])
+            if set(groups) & set(grops_validation):
+                create_azure_work_item_task.apply_async(args=(
+                        f"Request Peer Review {fid}",
+                        form.cleaned_data.get("entry"),
+                        user.username,
+                        form.cleaned_data.get("proof_file"),
+                        finding_ids,
+                ))
             
             for finding in findings:
                 finding.notes.add(new_note)
@@ -1804,7 +1809,11 @@ def clear_finding_review(request, fid):
     # If the user wanting to clear the review is not the user who requested
     # the review or one of the users requested to provide the review, then
     # do not allow the user to clear the review.
-    if user != finding.review_requested_by and user not in finding.reviewers.all():
+    role, tag_name = finding_helper.get_group_reviewers_for_finding(finding)
+    groups = [f"Reviewers_{role.name}", f"Reviewers_{tag_name}"]
+    if user in get_users_for_group(groups[0]) | get_users_for_group(groups[1]):
+       pass 
+    elif user != finding.review_requested_by and user not in finding.reviewers.all():
         raise PermissionDenied
 
     # in order to clear a review for a finding, we need to capture why and how it was reviewed
