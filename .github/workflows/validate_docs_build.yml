@@ -62,11 +62,76 @@ jobs:
             exit 1
           fi
 
+      - name: Refuse DefectDojo Pro pages
+        # The DefectDojo Pro pages live in the DefectDojo Pro documentation repository, which
+        # builds docs.defectdojo.com from them together with the Open Source
+        # pages here. A page marked for the Pro view (audience: pro or
+        # pro-feature: true), a PRO__* file, or anything under releases/pro/
+        # belongs there, not here. A section's _index.md is exempt, and a
+        # translation (Name.<lang>.md) is judged by its English page, the same
+        # ownership rule that repo's split_pro_docs.py applies.
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          CONTENT = Path("docs/content")
+          LANGS = ("de", "es", "fr", "it", "ja", "pt-br", "zh-hans")
+          FRONT = re.compile(r"\A---\n(.*?)\n---(?:\n|\Z)", re.DOTALL)
+          AUDIENCE = re.compile(r"^audience:\s*[\"']?(\w+)", re.MULTILINE)
+          PRO_FEATURE = re.compile(r"^pro-feature:\s*true", re.MULTILINE)
+
+          def english(page):
+              lang = next((l for l in LANGS if page.name.endswith(f".{l}.md")), None)
+              if lang is None:
+                  return page
+              twin = page.with_name(page.name[: -len(f".{lang}.md")] + ".md")
+              return twin if twin.exists() else page
+
+          def pro_owned(page):
+              front = FRONT.match(page.read_text(encoding="utf-8"))
+              front = front.group(1) if front else ""
+              audience = AUDIENCE.search(front)
+              return (
+                  (audience is not None and audience.group(1) == "pro")
+                  or PRO_FEATURE.search(front) is not None
+                  or page.name.startswith("PRO__")
+                  or page.relative_to(CONTENT).parts[:2] == ("releases", "pro")
+              )
+
+          found = sorted(
+              str(page)
+              for page in CONTENT.rglob("*.md")
+              if not page.name.startswith("_index.") and pro_owned(english(page))
+          )
+          if found:
+              print("\n".join(found), file=sys.stderr)
+              print(
+                  "\nThese pages document DefectDojo Pro. Pro pages live in"
+                  " the DefectDojo Pro documentation repository, not in this repository:"
+                  " open the change there.",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+          PY
+
       - name: Test the build process
         env:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Give links to the Pro docs a placeholder
+        # The published site adds the DefectDojo Pro pages from a separate repo,
+        # so this build lacks them. A link this build cannot resolve passes the
+        # checks below only if docs.defectdojo.com has it.
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(grep -rl 'docs\.defectdojo\.com' dojo/ \
+            --include='*.html' --include='*.py' --include='*.tpl')
+          python3 scripts/docs_live_link_stubs.py docs/public "${files[@]}"
 
       - name: Check internal links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
