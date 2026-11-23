@@ -1,5 +1,14 @@
 # Guide to Writing Documentation
 
+> **Where the site is built.** docs.defectdojo.com is built from these pages together
+> with the DefectDojo Pro pages and the site's theme, which live in a separate
+> repository. This directory keeps a preview on the stock Doks theme, so you can
+> check a change before you open a pull request: links to Pro pages resolve only on
+> the published site (the docs CI checks them there), and screenshots that only the
+> published site has show as a labelled placeholder. A page for DefectDojo Pro
+> (`audience: pro`, `pro-feature: true`, a `PRO__*` file, or anything under `releases/pro/`)
+> goes in that repository, and the docs CI here refuses one.
+
 When developing documentation, there are steps to take before submitting a pull request
 
 1. Writing your documentation with [hot reloading](#development-with-hot-reloading) live in your browser

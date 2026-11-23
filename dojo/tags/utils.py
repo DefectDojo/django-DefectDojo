@@ -15,7 +15,7 @@ import logging
 from collections.abc import Iterable
 
 from django.conf import settings
-from django.db import connection, models, transaction
+from django.db import connection, connections, models, router, transaction
 from django_tagulous.utils import parse_tags
 
 from dojo.models import Product  # local import to avoid circulars at import time
@@ -312,7 +312,7 @@ def bulk_add_tag_mapping(
     2. Bulk-create any missing tag objects (one INSERT + one re-fetch if needed).
     3. Fetch all pre-existing through-model rows for these (instance, tag) pairs in one query.
     4. Bulk-create all new relationships in one query (batched by ``batch_size``).
-    5. Update all tag counts in one ``UPDATE … CASE WHEN …`` query.
+    5. Update all tag counts in one ``UPDATE`` query, which locks the tag rows in id order.
 
     Args:
         tag_to_instances: mapping of tag_name -> list of instances that should receive
@@ -326,8 +326,6 @@ def bulk_add_tag_mapping(
 
     """
     from collections import defaultdict  # noqa: PLC0415
-
-    from django.db.models import Case, IntegerField, When  # noqa: PLC0415
 
     if not tag_to_instances:
         return 0
@@ -421,34 +419,52 @@ def bulk_add_tag_mapping(
         if tag is None:
             continue
         for instance in instances:
-            if (instance.pk, tag.pk) not in existing_pairs:
+            pair = (instance.pk, tag.pk)
+            if pair not in existing_pairs:
                 new_relationships.append(
                     through_model(**{source_field_name: instance, target_field_name: tag}),
                 )
                 created_per_tag[tag.pk] += 1
+                # One instance can reach the same tag twice in one call (a repeated name, or two case
+                # variants of it): queue and count the pair once.
+                existing_pairs.add(pair)
 
     if not new_relationships:
         return 0
 
     # --- Query 4: bulk-create all new relationships (batched for memory) ---
-    # Use len(new_relationships) for the count: existing pairs were already filtered out above,
-    # so every entry here is new. bulk_create return value is unreliable with ignore_conflicts.
+    # Use len(new_relationships) for the count: existing and already-queued pairs were filtered out
+    # above, so every entry here is new and unique. bulk_create return value is unreliable with ignore_conflicts.
     total_created = len(new_relationships)
     with transaction.atomic():
         for i in range(0, len(new_relationships), batch_size):
             batch = new_relationships[i : i + batch_size]
             through_model.objects.bulk_create(batch, ignore_conflicts=True)
 
-    # --- Query 5: update all tag counts in one UPDATE … CASE WHEN … ---
-    tag_model.objects.filter(pk__in=list(created_per_tag.keys())).update(
-        count=Case(
-            *[
-                When(pk=pk, then=models.F("count") + delta)
-                for pk, delta in created_per_tag.items()
-            ],
-            output_field=IntegerField(),
-        ),
-    )
+    # --- Query 5: update all tag counts in one UPDATE ---
+    # A bare UPDATE ... WHERE id IN (...) locks the rows in the order its plan reads them: id order
+    # for an index scan, but physical order for a sequential or bitmap heap scan (the plan a small
+    # tag table gets), and every count update moves a row. Another count writer takes the same rows
+    # in ascending id order (bulk_add_tags_to_instances, bulk_remove_all_tags, the importer's test
+    # tag write), so two imports sharing tags could each hold a row the other needed and deadlock
+    # (Postgres 40P01). The UPDATE therefore reaches its rows through a subquery that locks them
+    # ORDER BY id: it only updates a row the subquery has already locked, so the locks are taken in
+    # id order whatever plan either part gets, still in one statement (no transaction of its own,
+    # no extra query). FOR NO KEY UPDATE is the lock the UPDATE takes anyway, so this changes only
+    # when the locks are taken, not which. The ORM cannot say this: it refuses select_for_update
+    # outside a transaction even inside a subquery.
+    tag_ids = sorted(created_per_tag)
+    db = router.db_for_write(tag_model)
+    quote = connections[db].ops.quote_name
+    table, pk = quote(tag_model._meta.db_table), quote(tag_model._meta.pk.column)
+    with connections[db].cursor() as cursor:
+        cursor.execute(
+            f"UPDATE {table} SET count = {table}.count + delta.n"
+            " FROM unnest(%s::int[], %s::int[]) AS delta(id, n)"
+            f" WHERE {table}.{pk} = delta.id AND {table}.{pk} IN"
+            f" (SELECT {pk} FROM {table} WHERE {pk} = ANY(%s::int[]) ORDER BY {pk} FOR NO KEY UPDATE)",
+            [tag_ids, [created_per_tag[tag_id] for tag_id in tag_ids], tag_ids],
+        )
 
     for instance in all_instances:
         prefetch_cache = getattr(instance, "_prefetched_objects_cache", None)

@@ -29,11 +29,14 @@ import logging
 from typing import TYPE_CHECKING
 
 from crum import get_current_request
+from django.db import DatabaseError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from rest_framework.exceptions import ValidationError
+from rest_framework import status
+from rest_framework.exceptions import APIException, ValidationError
 
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.db_utils import is_foreign_key_conflict, is_vanished_row_error
 from dojo.finding.helper import (
     can_edit_mitigated_data,
     save_cwes,
@@ -57,6 +60,40 @@ _UNSET = object()
 # Scalar Finding fields consumed via **kwargs on create; relations/side-effect keys are handled
 # explicitly (popped) before this set is applied.
 _SPECIAL_KEYS = frozenset({"reporter", "mitigated_by", "found_by", "tags", "vulnerability_ids", "cwes", "push_to_jira", "test"})
+
+
+# --- concurrent-delete handling ------------------------------------------------------------------
+
+# The answer to an update of a finding a concurrent delete removed mid-write. One constant for the v2
+# FindingViewSet.perform_update and the v3 PATCH/PUT routes, so the two APIs cannot drift apart.
+FINDING_DELETED_MID_UPDATE_MESSAGE = "This finding was deleted while the update was being processed."
+
+
+class FindingDeletedDuringCreateError(APIException):
+
+    """
+    409: the finding a create had just saved was deleted before its child rows were written.
+
+    The request was valid and the collection it posted to still exists; it is the finding it
+    created that is gone, so this is a conflict with the current state rather than a 404.
+    """
+
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "This finding was deleted while it was being created."
+    default_code = "conflict"
+
+
+def finding_deleted_mid_write(exc: DatabaseError, finding_id: int) -> bool:
+    """
+    Whether ``exc`` is a write losing the race with a delete of finding ``finding_id``.
+
+    A finding write is not one transaction, so a delete that commits between the finding's save
+    and its child writes fails the write with a foreign-key violation on a child row, or with
+    Django's forced-update miss on the finding's own save. Only when the finding is really gone is
+    that the race; the same errors on a finding that is still there are a defect.
+    """
+    vanished = is_foreign_key_conflict(exc) or is_vanished_row_error(exc)
+    return vanished and not Finding.objects.filter(pk=finding_id).exists()
 
 
 # --- shared validation (ported from FindingSerializer.validate / FindingCreateSerializer.validate) --
@@ -188,19 +225,24 @@ def create_finding(*, test: Test, data: dict, user, push_to_jira: bool = False,
     new_finding.unsaved_vulnerability_ids = vulnerability_ids or []
     new_finding.save()
 
-    if found_by_ids:
-        set_found_by_locking_finding_first(new_finding, _resolve_test_types(found_by_ids))
-    if vulnerability_ids:
-        save_vulnerability_ids(new_finding, vulnerability_ids)
-    # Create always persists the primary Finding.cwe as a Finding_CWE row (mirror serializer); when a
-    # `cwes` list is supplied, save_cwes persists the full set (primary first, then the rest). `cwes`
-    # values are plain ints -- finding_cwe_labels/cwe_label accept ints and canonicalize to CWE-<n>.
-    if cwes is not None:
-        new_finding.unsaved_cwes = cwes
-    save_cwes(new_finding)
-    if tags is not None:
-        new_finding.tags = tags
-        new_finding.save()
+    try:
+        if found_by_ids:
+            set_found_by_locking_finding_first(new_finding, _resolve_test_types(found_by_ids))
+        if vulnerability_ids:
+            save_vulnerability_ids(new_finding, vulnerability_ids)
+        # Create always persists the primary Finding.cwe as a Finding_CWE row (mirror serializer); when a
+        # `cwes` list is supplied, save_cwes persists the full set (primary first, then the rest). `cwes`
+        # values are plain ints -- finding_cwe_labels/cwe_label accept ints and canonicalize to CWE-<n>.
+        if cwes is not None:
+            new_finding.unsaved_cwes = cwes
+        save_cwes(new_finding)
+        if tags is not None:
+            new_finding.tags = tags
+            new_finding.save()
+    except DatabaseError as exc:
+        if finding_deleted_mid_write(exc, new_finding.pk):
+            raise FindingDeletedDuringCreateError from exc
+        raise
 
     if push_to_jira:
         jira_services.push(new_finding)

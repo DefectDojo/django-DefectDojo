@@ -148,7 +148,7 @@ def _expire_now(risk_acceptance, user=None, reason=None, run=None):
         logger.info("Risk acceptance %i:%s was expired while this expiry waited, nothing to do", risk_acceptance.id, risk_acceptance)
         return None
     prefetch_related_objects([risk_acceptance], *EXPIRATION_PREFETCH)
-    logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+    logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, risk_acceptance.accepted_findings.count())
 
     reactivated_findings = []
     if risk_acceptance.reactivate_expired:
@@ -271,7 +271,7 @@ def _reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
                 len(closed_since),
             )
             risk_acceptance.accepted_findings.remove(*closed_since)
-        logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+        logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, risk_acceptance.accepted_findings.count())
 
         # The "Reinstate" button has no date to offer and passes the expiration date
         # unchanged, so fall back to the configured default for it. The edit form and
@@ -469,11 +469,11 @@ def expiration_handler(*args, **kwargs):
             try:
                 for risk_acceptance in risk_acceptances:
                     with warned.handling(risk_acceptance):
-                        logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
+                        logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, risk_acceptance.accepted_findings.count())
 
                         engagement = engagement_to_notify_about(risk_acceptance)
                         if engagement is not None:
-                            notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
+                            notification_title = "Risk acceptance with " + str(risk_acceptance.accepted_findings.count()) + " accepted findings will expire on " + \
                                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                                 str(engagement.product) + ": " + str(engagement.name)
 
@@ -513,21 +513,21 @@ def expiration_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has expired".format(
         jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()))
+        risk_acceptance.accepted_findings.count())
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
         jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()), heads_up_days)
+        risk_acceptance.accepted_findings.count(), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
         jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-        len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+        risk_acceptance.accepted_findings.count(), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
 
 def accepted_message_creator(risk_acceptance, heads_up_days=0):
@@ -535,7 +535,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
         return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
             jira_services.escape_text(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
-            len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
+            risk_acceptance.accepted_findings.count(), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     return "Finding has been risk accepted"
 
 

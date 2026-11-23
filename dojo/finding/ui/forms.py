@@ -314,7 +314,8 @@ class AddFindingForm(CweFormMixin, forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date")
+                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
+                   "sonarqube_issue")
 
 
 class AdHocFindingForm(CweFormMixin, forms.ModelForm):
@@ -421,7 +422,7 @@ class AdHocFindingForm(CweFormMixin, forms.ModelForm):
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
-                   "sla_expiration_date")
+                   "sla_expiration_date", "sonarqube_issue")
 
 
 class PromoteFindingForm(CweFormMixin, forms.ModelForm):
@@ -504,7 +505,8 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "cwe", "inherited_tags",
-                   "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing")
+                   "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing",
+                   "sonarqube_issue")
 
 
 class FindingForm(CweFormMixin, forms.ModelForm):
