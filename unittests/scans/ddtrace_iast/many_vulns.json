@@ -1,0 +1,224 @@
+[
+  {
+    "service": "demo",
+    "env": "synthetic",
+    "resource": "GET /path",
+    "trace_id": "5127409213216276842",
+    "span_id": "6716655703894392698",
+    "start": 1795433469015416875,
+    "iast": {
+      "sources": [
+        {
+          "origin": "http.request.parameter",
+          "name": "f",
+          "value": "../etc/passwd"
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "type": "PATH_TRAVERSAL",
+          "evidence": {
+            "valueParts": [
+              {
+                "value": "/tmp/"
+              },
+              {
+                "value": "../etc/passwd",
+                "source": 0
+              }
+            ]
+          },
+          "location": {
+            "spanId": 6716655703894392698,
+            "path": "app.py",
+            "line": 9,
+            "method": "path",
+            "stackId": "1"
+          },
+          "hash": 1212229541
+        }
+      ]
+    }
+  },
+  {
+    "service": "demo",
+    "env": "synthetic",
+    "resource": "GET /cmd",
+    "trace_id": "17894991939223264272",
+    "span_id": "10115317747557589358",
+    "start": 1795433469054816319,
+    "iast": {
+      "sources": [
+        {
+          "origin": "http.request.parameter",
+          "name": "c",
+          "redacted": true,
+          "pattern": "abcde"
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "type": "COMMAND_INJECTION",
+          "evidence": {
+            "valueParts": [
+              {
+                "value": "echo "
+              },
+              {
+                "redacted": true,
+                "source": 0,
+                "pattern": "abcde"
+              }
+            ]
+          },
+          "location": {
+            "spanId": 10115317747557589358,
+            "path": "app.py",
+            "line": 12,
+            "method": "cmd",
+            "stackId": "1"
+          },
+          "hash": 200487828
+        }
+      ]
+    }
+  },
+  {
+    "service": "demo",
+    "env": "synthetic",
+    "resource": "GET /sqli",
+    "trace_id": "6859907763198533562",
+    "span_id": "13170496397258556481",
+    "start": 1795433469096730763,
+    "iast": {
+      "sources": [
+        {
+          "origin": "http.request.parameter",
+          "name": "n",
+          "redacted": true,
+          "pattern": "a"
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "type": "SQL_INJECTION",
+          "evidence": {
+            "valueParts": [
+              {
+                "value": "select * from u where n='"
+              },
+              {
+                "redacted": true,
+                "source": 0,
+                "pattern": "a"
+              },
+              {
+                "value": "'"
+              }
+            ]
+          },
+          "location": {
+            "spanId": 13170496397258556481,
+            "path": "app.py",
+            "line": 6,
+            "method": "sqli",
+            "stackId": "1"
+          },
+          "hash": 651293933
+        }
+      ]
+    }
+  },
+  {
+    "service": "demo",
+    "env": "synthetic",
+    "resource": "GET /sqli",
+    "trace_id": "1111111111111111111",
+    "span_id": "2222222222222222222",
+    "start": 1795433529096730763,
+    "iast": {
+      "sources": [
+        {
+          "origin": "http.request.parameter",
+          "name": "n",
+          "redacted": true,
+          "pattern": "a"
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "type": "SQL_INJECTION",
+          "evidence": {
+            "valueParts": [
+              {
+                "value": "select * from u where n='"
+              },
+              {
+                "redacted": true,
+                "source": 0,
+                "pattern": "a"
+              },
+              {
+                "value": "'"
+              }
+            ]
+          },
+          "location": {
+            "spanId": 2222222222222222222,
+            "path": "app.py",
+            "line": 6,
+            "method": "sqli",
+            "stackId": "1"
+          },
+          "hash": 651293933
+        }
+      ]
+    }
+  },
+  {
+    "service": "demo-worker",
+    "env": "synthetic",
+    "resource": "GET /sqli",
+    "trace_id": "3333333333333333333",
+    "span_id": "4444444444444444444",
+    "start": 1795433469096730763,
+    "iast": {
+      "sources": [
+        {
+          "origin": "http.request.parameter",
+          "name": "n",
+          "redacted": true,
+          "pattern": "a"
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "type": "SQL_INJECTION",
+          "evidence": {
+            "valueParts": [
+              {
+                "value": "select * from u where n='"
+              },
+              {
+                "redacted": true,
+                "source": 0,
+                "pattern": "a"
+              },
+              {
+                "value": "'"
+              }
+            ]
+          },
+          "location": {
+            "spanId": 4444444444444444444,
+            "path": "app.py",
+            "line": 6,
+            "method": "sqli",
+            "stackId": "1"
+          },
+          "hash": 651293933
+        }
+      ]
+    }
+  }
+]
