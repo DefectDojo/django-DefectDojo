@@ -56,14 +56,6 @@ def get_product_type_groups_for_group(group):
 def get_group_member_roles():
     return Role.objects.exclude(name="API_Importer").exclude(name="Writer")
 
-def get_user_for_group_by_username(group_name, username):
-    group_member = Dojo_Group_Member.objects.filter(group__name=group_name, user__username=username)
-    return Dojo_User.objects.filter(id=group_member[0].user_id)
-
-def get_all_users_for_group(group_name):    
-    group_members = Dojo_Group_Member.objects.filter(group__name=group_name).values_list("user", flat=True)
-    return Dojo_User.objects.filter(id__in=group_members)
-
 def get_users_for_group(group_name):
     if group_name in GeneralSettings.get_value("GROUPS_SECURITY_PEER_REVIEW", []):
         group_members = Dojo_Group_Member.objects.filter(group__name=group_name).values_list("user", flat=True)[1]
