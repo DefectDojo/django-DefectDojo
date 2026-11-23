@@ -13,6 +13,8 @@ from django.utils import timezone
 from fieldsignals import pre_save_changed
 
 import dojo.jira_link.helper as jira_helper
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_users_authorized_role_permission
+from dojo.group.queries import get_users_for_group
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.endpoint.utils import save_endpoints_to_add
@@ -29,6 +31,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     GeneralSettings
 )
+from dojo.authorization.roles_permissions import Roles, Permissions
 from dojo.engine_tools.helpers import (
     calculate_priority_epss_kev_finding,
     get_severity_risk_map,
@@ -959,3 +962,42 @@ def bulk_edit_finding(findings, *args, **kwargs):
         raise ApiError.internal_server_error(
             detail=str(f"Error editing finding bulk: {str(e)}"))
     return True
+
+def get_group_reviewers_for_finding(finding):
+    """Get the role and tag name for group reviewers based on finding tags."""
+    role = None
+    tag_name = None
+
+    for tag in finding.tags.all():
+        if tag.name not in settings.DD_REVIEWERS_ROLE_TAG:
+            continue
+
+        reviewer_role_tag = settings.DD_REVIEWERS_ROLE_TAG[tag.name]
+        role = Roles(int(reviewer_role_tag)) if reviewer_role_tag != "-1" else None
+        tag_name = tag.name
+        break
+    return role, tag_name
+
+
+def get_reviewers_for_finding(finding):
+    """Get the reviewers for a finding based on group role or tag."""
+    product = finding.test.engagement.product
+    role, tag_name = get_group_reviewers_for_finding(finding)
+    if role:
+        permission_users = get_users_authorized_role_permission(
+            product,
+            Permissions.Finding_Code_Review,
+            role,
+        )
+        group_users = get_users_for_group(f"Reviewers_{role.name}")
+        users = permission_users | group_users
+    elif tag_name:
+        users = get_users_for_group(f"Reviewers_{tag_name}")
+    else:
+        users = get_authorized_users_for_product_and_product_type(
+            None,
+            product,
+            Permissions.Finding_Edit,
+        )
+
+    return users, role, tag_name

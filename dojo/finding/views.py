@@ -30,6 +30,8 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
 from dojo.decorators import dojo_ratelimit_view
+from dojo.azure_devops_helper import create_azure_work_item_task
+from dojo.group.queries import get_users_for_group
 from django.utils.decorators import method_decorator
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
@@ -1660,6 +1662,7 @@ def risk_unaccept(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def request_finding_review(request, fid):
+   
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
     form = ReviewFindingForm(finding=finding, user=user)
@@ -1667,6 +1670,8 @@ def request_finding_review(request, fid):
                                                  under_review=False,
                                                  test__engagement=finding.test.engagement,
                                                  active=True).order_by('title')
+
+
     if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
         finding_choices = exclude_test_or_finding_with_tag(
             objs=finding_choices,
@@ -1706,7 +1711,19 @@ def request_finding_review(request, fid):
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
-
+            finding_ids = [f.id for f in findings]
+            role, tag_name = finding_helper.get_group_reviewers_for_finding(findings[0])
+            groups = ["Reviewers_" + role.name, "Reviewers_" + tag_name]
+            grops_validation = GeneralSettings.get_value("GROUPS_SECURITY_PEER_REVIEW", ["Reviewers_Maintainer"])
+            if set(groups) & set(grops_validation):
+                create_azure_work_item_task.apply_async(args=(
+                        f"Request Peer Review {fid}",
+                        form.cleaned_data.get("entry"),
+                        user.username,
+                        form.cleaned_data.get("proof_file"),
+                        finding_ids,
+                ))
+            
             for finding in findings:
                 finding.notes.add(new_note)
                 # Attach uploaded file to finding if provided
@@ -1751,6 +1768,7 @@ def request_finding_review(request, fid):
                 if push_to_jira and finding_in_group:
                     jira_helper.push_to_jira(finding.finding_group)
 
+
                 create_notification(
                     event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                     title=f"Finding {finding.id} review requested - {finding.test.engagement.name}",
@@ -1791,7 +1809,11 @@ def clear_finding_review(request, fid):
     # If the user wanting to clear the review is not the user who requested
     # the review or one of the users requested to provide the review, then
     # do not allow the user to clear the review.
-    if user != finding.review_requested_by and user not in finding.reviewers.all():
+    role, tag_name = finding_helper.get_group_reviewers_for_finding(finding)
+    groups = [f"Reviewers_{role.name}", f"Reviewers_{tag_name}"]
+    if user in get_users_for_group(groups[0]) | get_users_for_group(groups[1]):
+       pass 
+    elif user != finding.review_requested_by and user not in finding.reviewers.all():
         raise PermissionDenied
 
     # in order to clear a review for a finding, we need to capture why and how it was reviewed

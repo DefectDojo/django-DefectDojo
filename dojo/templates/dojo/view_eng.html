@@ -62,6 +62,14 @@
                                     </li>
                                     {% endif %}
                                 {% endif %}
+                                {% if eng|has_object_permission:"Risk_Acceptance" and "RENDER_NEW_VIEWS_RISK_ACCEPTANCE"|general_settings_get_value:"False" %}":
+                                    <li role="presentation">
+                                        <a rel="noopener noreferrer" href="{% url 'view_risk_acceptance' eng.id %}">
+                                        <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptance
+                                        </a>
+                                    </li>
+                                {% endif %}
+
                                 <li role="presentation">
                                     <a rel="noopener noreferrer" href="{% url 'engagement_ics' eng.id %}">
                                     <i class="fa-solid fa-calendar-plus"></i> Add To Calendar

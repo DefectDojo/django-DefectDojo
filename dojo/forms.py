@@ -38,6 +38,7 @@ from dojo.authorization.authorization import user_has_global_permission
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
+from dojo.finding import helper as helper_f
 from dojo.transfer_findings.queries import get_products_for_transfer_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.models import (
@@ -2496,14 +2497,7 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            role = None
-            for tag in finding.tags.all():
-                if tag.name in settings.DD_REVIEWERS_ROLE_TAG:
-                    reviewer_role_tag = settings.DD_REVIEWERS_ROLE_TAG[tag.name]
-                    role = Roles(int(reviewer_role_tag)) if reviewer_role_tag != "-1" else None
-                    tag_name = tag.name
-                    break
-            users = get_users_authorized_role_permission(finding.test.engagement.product, Permissions.Finding_Code_Review, role) | get_users_for_group(f'Reviewers_{role.name}') if role else get_users_for_group(f'Reviewers_{tag_name}') if tag_name else get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+            users, __, __ = helper_f.get_reviewers_for_finding(finding)
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True
