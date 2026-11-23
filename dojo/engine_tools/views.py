@@ -93,14 +93,15 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 extra_tags="alert-success")
             relative_url = reverse("finding_exclusion", args=[str(duplicate_finding_exclusions.pk)])
             engagement_ids = duplicate_finding_exclusions.engagements.values_list('id', flat=True)
-            add_findings_to_whitelist.apply_async(
-                args=(
-                    duplicate_finding_exclusions.unique_id_from_tool,
-                    relative_url,
-                    list(engagement_ids),
-                    [duplicate_finding_exclusions.product.id] if duplicate_finding_exclusions.product else []
+            if duplicate_finding_exclusions.type == "white_list":
+                add_findings_to_whitelist.apply_async(
+                    args=(
+                        duplicate_finding_exclusions.unique_id_from_tool,
+                        relative_url,
+                        list(engagement_ids),
+                        [duplicate_finding_exclusions.product.id] if duplicate_finding_exclusions.product else []
+                    )
                 )
-            )
             
         else:
             messages.add_message(
