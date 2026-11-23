@@ -1098,7 +1098,7 @@ def check_priorization():
                 )
                 next_sprint_start_date = None
 
-        should_run_gated_tags = next_sprint_start_date == timezone.localdate()
+        should_run_gated_tags = next_sprint_start_date == timezone.localdate() or GeneralSettings.get_value("FORCE_RUN_GATED_PRIORITY_TAGS", False)
 
     if regular_priority_tags:
         regular_vulnerabilities = (
