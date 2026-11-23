@@ -12,13 +12,14 @@ logger = logging.getLogger(__name__)
 SEVERITY_LADDER = ["Info", "Low", "Medium", "High", "Critical"]
 
 # Probe families whose hits warrant nudging severity UP one rung: active attack,
-# code-execution, or jailbreak intent.
+# code-execution, or jailbreak intent. "xss" is what garak called web_injection before 0.13.1.
 SEVERITY_UP_FAMILIES = {
     "dan",
     "promptinject",
     "latentinjection",
     "exploitation",
     "malwaregen",
+    "web_injection",
     "xss",
 }
 
@@ -28,7 +29,7 @@ SEVERITY_DOWN_FAMILIES = {
     "misleading",
     "snowball",
     "continuation",
-    "toxicity",
+    "realtoxicityprompts",
 }
 
 # Starter probe-family -> CWE mapping. Verified against MITRE CWE 4.x:
@@ -42,6 +43,7 @@ PROBE_FAMILY_CWE = {
     "dan": 1427,
     "latentinjection": 1427,
     "goodside": 1427,
+    "web_injection": 79,
     "xss": 79,
     "leakreplay": 200,
     "divergence": 200,
@@ -61,8 +63,8 @@ class GarakParser:
 
     Consumes the JSON Lines hit log (``garak.<run_id>.hitlog.jsonl``) produced by a garak
     run. Every line in a hit log is, by construction, a detector hit, so each record maps to
-    (or aggregates into) a DefectDojo Finding. Verified against the garak 0.15.x hit-log
-    schema defined in garak/evaluators/base.py.
+    (or aggregates into) a DefectDojo Finding. Verified against the garak 0.15.x and 0.17.x
+    hit-log schema defined in garak/evaluators/base.py.
     """
 
     def get_scan_types(self):
@@ -74,15 +76,15 @@ class GarakParser:
     def get_description_for_scan_types(self, scan_type):
         return (
             "Import the JSON Lines hit log (garak.<run_id>.hitlog.jsonl) produced by garak, "
-            "NVIDIA's LLM vulnerability scanner. Each detector hit becomes a Finding; hits for "
-            "the same probe, target, and detector are aggregated into one Finding."
+            "NVIDIA's LLM vulnerability scanner. Hits for the same probe and target become one "
+            "Finding, which lists every detector that flagged them."
         )
 
     def get_findings(self, file, test):
-        self.dupes = {}
         if file is None:
             return []
         logger.debug("Garak parser: reading hit log %s", getattr(file, "name", file))
+        aggregates = {}
         for raw_line in file:
             # Decode with utf-8-sig and strip any leading BOM so a hit log re-saved by a
             # BOM-adding editor (common on Windows) does not break json parsing of line 1.
@@ -99,27 +101,36 @@ class GarakParser:
                 )
                 raise ValueError(msg) from e
             if isinstance(record, dict) and record.get("probe"):
-                self._process_hit(record, test)
-        return list(self.dupes.values())
+                self._process_hit(record, test, aggregates)
+        for finding, first_hit, detectors, _ in aggregates.values():
+            finding.description = self._build_description(first_hit, detectors)
+        return [finding for finding, _, _, _ in aggregates.values()]
 
-    def _process_hit(self, record, test):
+    def _process_hit(self, record, test, aggregates):
         probe = record.get("probe", "")
         detector = record.get("detector", "")
-        generator = record.get("generator", "")
+        generator = record.get("generator") or ""
         goal = record.get("goal", "")
         probe_family = probe.split(".")[0] if probe else ""
         detector_family = detector.split(".")[0] if detector else ""
         severity = self._severity(record.get("score"), probe_family)
+        output = (record.get("attempt_id"), record.get("attempt_idx"))
 
-        # Aggregate every hit of the same probe against the same target via the same detector
-        # into one Finding: bump the occurrence count and escalate to the most severe rung seen.
-        # The description/prompt/output are taken from the first hit; only severity is escalated.
-        dupe_key = f"{probe}::{generator}::{detector}"
-        if dupe_key in self.dupes:
-            finding = self.dupes[dupe_key]
-            finding.nb_occurences += 1
+        # Aggregate every hit of the same probe against the same target into one Finding, whichever
+        # detector flagged it (most DAN probes run dan.DAN and mitigation.MitigationBypass): count
+        # each flagged output once, escalate to the most severe rung seen and list every detector.
+        dupe_key = f"{probe}::{generator}"
+        if dupe_key in aggregates:
+            finding, _, detectors, outputs = aggregates[dupe_key]
+            if output[0] is None or output not in outputs:
+                outputs.add(output)
+                finding.nb_occurences += 1
             if SEVERITY_LADDER.index(severity) > SEVERITY_LADDER.index(finding.severity):
                 finding.severity = severity
+            if detector and detector not in detectors:
+                detectors.append(detector)
+                if detector_family and detector_family not in finding.unsaved_tags:
+                    finding.unsaved_tags.append(detector_family)
             return
 
         title = f"{probe}: {goal}".strip().rstrip(":").strip()
@@ -129,7 +140,6 @@ class GarakParser:
         finding = Finding(
             test=test,
             title=title,
-            description=self._build_description(record),
             severity=severity,
             cwe=PROBE_FAMILY_CWE.get(probe_family, DEFAULT_CWE),
             references=self._reference(probe_family),
@@ -141,7 +151,7 @@ class GarakParser:
             nb_occurences=1,
         )
         finding.unsaved_tags = [tag for tag in ["garak", probe_family, detector_family] if tag]
-        self.dupes[dupe_key] = finding
+        aggregates[dupe_key] = (finding, record, [detector] if detector else [], {output})
 
     def _severity(self, score, probe_family):
         try:
@@ -168,10 +178,9 @@ class GarakParser:
             return "https://reference.garak.ai/en/latest/probes.html"
         return f"https://reference.garak.ai/en/latest/garak.probes.{probe_family}.html"
 
-    def _build_description(self, record):
+    def _build_description(self, record, detectors):
         goal = record.get("goal")
         probe = record.get("probe")
-        detector = record.get("detector")
         score = record.get("score")
         generator = record.get("generator")
         triggers = record.get("triggers")
@@ -183,8 +192,9 @@ class GarakParser:
             parts.append(f"**Goal:** {goal}")
         if probe:
             parts.append(f"**Probe:** {probe}")
-        if detector:
-            parts.append(f"**Detector:** {detector}")
+        if detectors:
+            label = "Detector" if len(detectors) == 1 else "Detectors"
+            parts.append(f"**{label}:** {', '.join(detectors)}")
         if score is not None:
             parts.append(f"**Detector score:** {score}")
         if generator:
