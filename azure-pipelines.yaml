@@ -15,42 +15,62 @@ steps:
     inputs:
       hostedAgentService: $(hostedAgentService)
 
+  - task: UsePythonVersion@0
+    displayName: "Use Python 3.12"
+    inputs:
+      versionSpec: '3.12'
+      addToPath: true
+
   - bash: |
       echo "docker volume"
       docker volume create defectdojo_data_unit_tests
 
       echo "docker run"
-      docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=$(user_pg) -e POSTGRES_PASSWORD=$(password_pg) -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
+      docker run -d \
+        -p 5432:5432/tcp \
+        -e POSTGRES_DB=test_defectdojo \
+        -e POSTGRES_USER=$(user_pg) \
+        -e POSTGRES_PASSWORD=$(password_pg) \
+        -v defectdojo_data_unit_tests:/var/lib/postgresql/data \
+        $(image)
+
       docker ps
     displayName: "Start DB"
 
   - bash: |
       set -e
 
-      echo -e "\033[94m--------python virutalenv-----------\033[0m"
-      sudo apt-get update
-      sudo apt update
-      sudo apt install software-properties-common
-      sudo add-apt-repository ppa:deadsnakes/ppa
-      sudo apt update
-      sudo apt install python3.12 python3.12-venv
-      python3.12 -m venv dojodev
+      echo "-------- Python --------"
+      python --version
+
+      echo "-------- Python VirtualEnv --------"
+      python -m venv dojodev
       source dojodev/bin/activate
 
-      echo -e "\033[94m--------python install-----------\033[0m"
+      echo "-------- Upgrade Pip --------"
       python -m pip install --upgrade pip
-      sudo apt-get install libmysqlclient-dev
-      sudo apt-get install libmariadb-dev-compat
-      sudo apt-get install libcurl4-gnutls-dev
-      sudo apt-get install python3.12-dev
-      sudo apt-get install libgnutls28-dev
-      sudo apt-get install libgnutls28-dev
-      pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
+
+      echo "-------- System Dependencies --------"
+      sudo apt-get update
+
+      sudo apt-get install -y \
+        libmysqlclient-dev \
+        libmariadb-dev-compat \
+        libcurl4-gnutls-dev \
+        libgnutls28-dev
+
+      echo "-------- Python Dependencies --------"
+      pip install -r requirements.txt \
+        -i $(registry) \
+        --trusted-host $(trusted-host)
+
       pip install coverage
 
-      echo -e "\033[94m--------defectdojo unit test--------\033[0m"
+      echo "-------- DefectDojo Unit Tests --------"
+
       unset DD_DATABASE_URL
       unset DD_CELERY_BROKER_URL
+
       export DD_DATABASE_ENGINE=django.db.backends.postgresql
       export DD_DATABASE_HOST=127.0.0.1
       export DD_DATABASE_PORT=5432
@@ -64,15 +84,25 @@ steps:
       python manage.py makemigrations dojo
       python manage.py migrate
 
-      coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
-        exit 1;
-      }
+      coverage run --source='dojo' manage.py test \
+        unittests \
+        -v 3 \
+        --keepdb \
+        --no-input \
+        --exclude-tag="non-parallel"
+
       coverage report
-      coverage run -a --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
-        exit 1;
-      }
+
+      coverage run -a --source='dojo' manage.py test \
+        unittests \
+        -v 3 \
+        --keepdb \
+        --no-input \
+        --tag="non-parallel"
+
       coverage report
       coverage xml
+
     displayName: "Unit test"
 
   - task: SonarQubePrepare@7
@@ -92,12 +122,27 @@ steps:
         sonar.python.coverage.reportPaths=*coverage.xml
         sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**,**/unittests/**
         sonar.language=py
-        sonar.python.version=3.10
+        sonar.python.version=3.12
 
   - task: SonarQubeAnalyze@7
     displayName: "Run Code Analysis"
 
-  - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
+  - bash: |
+      cp -r \
+        dojo/ \
+        requirements.txt \
+        docker/ \
+        wsgi.py \
+        manage.py \
+        tests/ \
+        unittests/ \
+        components/ \
+        wsgi_params \
+        nginx/ \
+        Dockerfile.django-debian \
+        Dockerfile.integration-tests-debian \
+        Dockerfile.nginx-debian \
+        $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files"
     condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'refs/tags/v'))
 
