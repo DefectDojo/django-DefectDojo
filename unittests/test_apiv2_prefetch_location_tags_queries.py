@@ -10,6 +10,9 @@ These tests pin a page's query count as flat in the number of prefetched locatio
 that the prefetched payload still carries each location's own tags.
 """
 
+from unittest import skipUnless
+
+from django.conf import settings
 from django.db import connection
 from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
@@ -29,6 +32,7 @@ from dojo.models import (
 from unittests.dojo_test_case import DojoAPITestCase
 
 
+@skipUnless(settings.V3_FEATURE_LOCATIONS, "the location reference routes are mounted at import time")
 @override_settings(V3_FEATURE_LOCATIONS=True, SECURE_SSL_REDIRECT=False)
 class PrefetchLocationTagsQueryCountTest(DojoAPITestCase):
 
