@@ -6,8 +6,10 @@ from dojo.authorization.authorization import user_has_configuration_permission a
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission, user_has_role_permission
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.helper import get_reviewers_for_finding, get_group_reviewers_for_finding
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
 from dojo.utils import get_product
+from dojo.group.queries import get_users_for_group
 from dojo.request_cache import cache_for_request
 import dojo.risk_acceptance.helper as helper_ra
 import dojo.finding.helper as helper_f
@@ -79,10 +81,14 @@ def group_has_configuration_permission(group, codename):
 @register.simple_tag
 def user_can_clear_peer_review(finding, user):
     finding_under_review = finding.under_review
-    user_requesting_review = user == finding.review_requested_by
+    role, tag_name = get_group_reviewers_for_finding(finding)
+    groups = [f"Reviewers_{role.name}", f"Reviewers_{tag_name}"]
+    users = get_users_for_group(groups[0]) | get_users_for_group(groups[1])
+    user_requesting_review = False
+    if user == finding.review_requested_by or user in users:
+        user_requesting_review = True
     user_is_reviewer = user in finding.reviewers.all()
     return finding_under_review and (user_requesting_review or user_is_reviewer)
-
 
 @register.filter
 def enable_button(finding, button):

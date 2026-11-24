@@ -1610,6 +1610,7 @@ class ApiProductFilter(DojoFilter):
     prod_numeric_grade = NumberInFilter(field_name="prod_numeric_grade", lookup_expr="in")
     user_records = NumberInFilter(field_name="user_records", lookup_expr="in")
     regulations = NumberInFilter(field_name="regulations", lookup_expr="in")
+    sla_configuration = NumberInFilter(field_name="sla_configuration", lookup_expr="in")
 
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
     tags = CharFieldInFilter(

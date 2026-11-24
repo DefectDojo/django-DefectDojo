@@ -158,7 +158,7 @@ class UserHasCredentialPermission(permissions.BasePermission):
 class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "GET":
-            if request.query_params.get("name") in GeneralSettings.get_value("GROUP_USER_PERMISSION_VIEW", ["Approvers_Risk"]):
+            if request.query_params.get("name") in GeneralSettings.get_value("GROUP_USER_PERMISSION_VIEW", ["Approvers_Risk"]) or request.query_params.get("id") in GeneralSettings.get_value("GROUP_USER_PERMISSION_VIEW", ["Approvers_Risk"]):
                 return True
             else:
                 return user_has_configuration_permission(
@@ -1188,7 +1188,7 @@ class UserHasPermissionManagerCache(permissions.BasePermission):
         return False
 
 
-class UserHasPermissionMetrics(permissions.BasePermission):
+class UserHasPermissionMetricsIA(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_superuser:
             return True
@@ -1197,7 +1197,19 @@ class UserHasPermissionMetrics(permissions.BasePermission):
             if request.user.global_role:
                 return user_has_global_permission(
                     request.user,
-                    Permissions.Metrics_DevSecOps,)
+                    Permissions.Ia_Metrics,)
+        return False
+
+class UserHasPermissionMetricsPanel(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+
+        if hasattr(request.user, 'global_role'):
+            if request.user.global_role:
+                return user_has_global_permission(
+                    request.user,
+                    Permissions.Metrics_Panel_Admin,)
         return False
 
 class UserHasPermissionSendEmail(permissions.BasePermission):

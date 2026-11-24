@@ -21,6 +21,7 @@ class PrismaIdentityTests(SimpleTestCase):
         identity = "registry/app@sha256:old," + self.suffix
         return SimpleNamespace(
             unique_id_from_tool=base64.b64encode(identity.encode()).decode(),
+            mitigation="fixed",
             impact="Registry: registry\nRepository: app\nImage ID: sha256:old",
             description="<p><strong>Tag:</strong> v1</p><p><strong>Cloud Id:</strong> sha256:old</p>"
                         "<p><strong>Custom Id:</strong> " + identity + "</p><p>Keep this note</p>",
@@ -110,6 +111,50 @@ class PrismaIdentityTests(SimpleTestCase):
         self.assertEqual("registry/app@,,CVE-1,high,zlib1g,zlib1g-dev,1,9.00,fixed",
                          base64.b64decode(result["unique_id_from_tool"]).decode())
         self.assertIn("Data Packages:</strong> zlib1g,zlib1g-dev", result["description"])
+
+    def test_commas_in_fix_status_preserve_identity_and_packages(self):
+        fix_status = (
+            "fixed in 1.82.2, 1.83.2, 1.84.0-dev.0.20260825144003-d5a41119e0e3, "
+            "1.85.0-dev.0.20260825072537-93e31b48545e"
+        )
+        package = "google.golang.org/grpc/internal/transport"
+        for packages in (package, "zlib," + package):
+            for migration_type, prefix in (("ID", "registry/app@sha256:old,"),
+                                           ("DeploymentContainerName", "registry/app@,,")):
+                with self.subTest(packages=packages, migration_type=migration_type):
+                    finding = self.finding()
+                    finding.mitigation = fix_status
+                    suffix = f"CVE-2026-84445,high,{packages},v1.82.0,0.00,{fix_status}"
+                    finding.unique_id_from_tool = base64.b64encode(
+                        ("registry/app@sha256:old," + suffix).encode(),
+                    ).decode()
+                    finding.description += f"<p><strong>Data Packages:</strong> {packages}</p>"
+                    result = prepare_finding_identity(finding, [], {}, migration_type=migration_type)
+                    expected_packages = package if packages == package else package + ",zlib"
+                    identity = prefix + f"CVE-2026-84445,high,{expected_packages},v1.82.0,0.00,{fix_status}"
+                    self.assertEqual(identity, base64.b64decode(result["unique_id_from_tool"]).decode())
+                    self.assertIn("Custom Id:</strong> " + identity, result["description"])
+                    self.assertIn(f"Data Packages:</strong> {expected_packages}</p>", result["description"])
+                    finding.unique_id_from_tool = result["unique_id_from_tool"]
+                    finding.description = result["description"]
+                    finding.impact = result["impact"]
+                    self.assertEqual(result, prepare_finding_identity(finding, [], {}, migration_type=migration_type))
+
+    def test_empty_fix_status_preserves_identity(self):
+        for fix_status in ("", None):
+            with self.subTest(fix_status=fix_status):
+                finding = self.finding()
+                finding.mitigation = fix_status
+                suffix = "CVE-1,high,openssl,1,9.00,"
+                finding.unique_id_from_tool = base64.b64encode(("registry/app@sha256:old," + suffix).encode()).decode()
+                result = prepare_finding_identity(finding, [], {})
+                self.assertEqual("registry/app@,," + suffix, base64.b64decode(result["unique_id_from_tool"]).decode())
+
+    def test_mismatched_fix_status_is_rejected(self):
+        finding = self.finding()
+        finding.mitigation = "fixed in 1, 2"
+        with self.assertRaisesRegex(ValueError, "does not match the stored Fix Status"):
+            prepare_finding_identity(finding, [], {})
 
     def test_deployment_identity_can_be_migrated_back_to_cloud_id(self):
         finding = self.finding()
@@ -307,7 +352,7 @@ class PrismaIdentityMigrationApiTests(APITestCase):
         source = PrismaIdentityTests().finding()
         Finding.objects.filter(pk=self.finding.pk).update(
             active=True, is_mitigated=False, description=source.description,
-            impact=source.impact, unique_id_from_tool=source.unique_id_from_tool,
+            impact=source.impact, unique_id_from_tool=source.unique_id_from_tool, mitigation=source.mitigation,
         )
         self.finding.refresh_from_db()
         self.finding.tags = ["prisma", "images"]
@@ -492,7 +537,7 @@ class PrismaIdentityMigrationApiTests(APITestCase):
         Engagement.objects.filter(pk=other.test.engagement_id).update(description="ITEM: ECR")
         Finding.objects.filter(pk=other.pk).update(
             active=True, is_mitigated=False, unique_id_from_tool=self.old_id,
-            description=self.finding.description, impact=self.finding.impact,
+            description=self.finding.description, impact=self.finding.impact, mitigation=self.finding.mitigation,
         )
         other.refresh_from_db()
         other.tags = ["prisma", "images"]

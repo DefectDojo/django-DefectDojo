@@ -344,6 +344,28 @@ class ImportReimportMixin:
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
 
+    def test_sonar_reimport_preserves_sla_expiration_date(self):
+        import0 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
+        test_id = import0["test"]
+        finding = Finding.objects.filter(
+            test_id=test_id,
+            unique_id_from_tool__isnull=False,
+        ).exclude(severity="Low").first()
+        self.assertIsNotNone(finding)
+
+        original_severity = finding.severity
+        sla_expiration_date = datetime(2099, 1, 1).date()
+        Finding.objects.filter(id=finding.id).update(
+            severity="Low",
+            sla_expiration_date=sla_expiration_date,
+        )
+
+        self.reimport_scan_with_params(test_id, self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
+
+        finding.refresh_from_db()
+        self.assertEqual(finding.severity, original_severity)
+        self.assertEqual(finding.sla_expiration_date, sla_expiration_date)
+
     # Test re-import with unique_id_from_tool_or_hash_code algorithm
     # import veracode scan, testing:
     # - import

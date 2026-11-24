@@ -29,3 +29,17 @@ def view_all_risk_acceptance(request: HttpRequest) -> HttpResponse:
         'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/acceptance/list{base_params}",
         'user': user})
 
+@dojo_ratelimit_view()
+def view_risk_acceptance(request: HttpRequest, eid) -> HttpResponse:
+    page_name = ('view_risk_acceptance')
+    user = request.user.id
+    cookie_csrftoken = get_token(request)
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    base_params = f"?csrftoken={cookie_csrftoken}&sessionid={cookie_sessionid}"
+    base_params = f"{base_params}&engagement={eid}"
+    add_breadcrumb(title=page_name, request=request, top_level=True)
+    return render(request, 'dojo/generic_view.html', {
+        'actions': page_name,
+        'url': f"{settings.MF_FRONTEND_DEFECT_DOJO_URL}/acceptance/{base_params}",
+        'user': user})
+

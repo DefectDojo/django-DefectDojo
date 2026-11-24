@@ -1,8 +1,8 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef
-
 from dojo.authorization.authorization import get_roles_for_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.models import GeneralSettings
 from dojo.models import Dojo_User, Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
 
 
@@ -57,6 +57,8 @@ def get_group_member_roles():
     return Role.objects.exclude(name="API_Importer").exclude(name="Writer")
 
 def get_users_for_group(group_name):
+    if group_name in GeneralSettings.get_value("GROUPS_SECURITY_PEER_REVIEW", []):
+        group_members = Dojo_Group_Member.objects.filter(group__name=group_name).values_list("user", flat=True)[1]
     group_members = Dojo_Group_Member.objects.filter(group__name=group_name).values_list("user", flat=True)
     return Dojo_User.objects.filter(id__in=group_members)
 
@@ -71,4 +73,7 @@ def users_with_permissions_to_approve_long_term_findings(group_name, role_with_p
     user_ids = ([user.id for user in user_dict.values() if user is not None])
     user_contacts = Dojo_User.objects.filter(id__in=user_ids)
     users = users_group.union(user_contacts)
-    return users 
+    return users
+
+
+

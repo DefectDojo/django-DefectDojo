@@ -47,6 +47,7 @@ class TestMetricsDevicesWithoutFindingsApiView(APITestCase):
             self.assertEqual(
                 set(result),
                 {
+                    "idEngagement",
                     "name",
                     "product_name",
                     "product_type_name",
@@ -55,6 +56,7 @@ class TestMetricsDevicesWithoutFindingsApiView(APITestCase):
                     "item_class_id",
                 },
             )
+            self.assertEqual(result["idEngagement"], engagement.id)
             self.assertEqual(result["provider"], engagement.provider)
 
     def test_provider_filter_and_validation(self):
