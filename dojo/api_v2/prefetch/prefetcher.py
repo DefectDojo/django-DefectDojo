@@ -18,6 +18,7 @@ from dojo.location.api.serializers import (
 )
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.queries import mark_tags_readable
 from dojo.models import Endpoint, FileUpload, Finding, Notes, Test
 from dojo.notes.helper import notes_prefetch
 from dojo.vulnerability.queries import vulnerability_id_prefetch
@@ -59,6 +60,8 @@ _PREFETCH_SELECT_RELATED = {
 _PREFETCH_PREFETCH_RELATED = {
     Endpoint: ("endpoint_params", "findings", "tags"),
     Finding: _finding_prefetch_related,
+    # LocationSerializer returns tags and inherited_tags through Location.readable_tags
+    Location: ("tags", "inherited_tags"),
     Notes: ("history__current_editor", "history__note_type"),
     # TestSerializer nests every finding group in the test with its JIRA issue and that issue's url, and every note
     Test: (
@@ -391,6 +394,7 @@ class _Prefetcher:
         authorized = list(authorized_qs.filter(pk__in=all_ids))
         if not authorized:
             return
+        self._mark_location_tags_readable(authorized)
         serializer = extra_serializer(**serializer_kwargs)
         _prefetch_shown_relations(authorized, serializer)
         field_data = serializer.to_representation(authorized)
@@ -417,6 +421,7 @@ class _Prefetcher:
         authorized = list(first_by_pk.values())
         if prefetch_related := _prefetch_related_for(type(field_values[0])):
             prefetch_related_objects(authorized, *prefetch_related)
+        self._mark_location_tags_readable(authorized)
         # One serializer for all of them, as a list serializer reuses its child: building a serializer's fields is
         # most of the cost of serializing a finding, and it does not depend on the object
         serializer = extra_serializer(**serializer_kwargs)
@@ -429,6 +434,11 @@ class _Prefetcher:
             # Serialize the entry's own instance, which carries whatever the queryset prefetched on it
             data = serializer.to_representation(field_value)
             self._prefetch_data[field_to_fetch][data["id"]] = data
+
+    def _mark_location_tags_readable(self, objects):
+        # Location.readable_tags checks per row whether the caller may read its tag set: check the page at once
+        if objects and isinstance(objects[0], Location):
+            mark_tags_readable(objects, user=getattr(self._request, "user", None))
 
     @property
     def prefetched_data(self):
