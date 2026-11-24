@@ -44,6 +44,7 @@ from dojo.forms import (
 from dojo.labels import get_labels
 from dojo.middleware import set_language_cookie
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
+from dojo.user import email_ownership
 from dojo.user.authentication import reset_token_for_user, revoke_api_token, token_expires_at
 from dojo.user.ui.filters import UserFilter
 from dojo.user.ui.forms import (
@@ -269,6 +270,8 @@ def view_profile(request):
                                  messages.SUCCESS,
                                  _("Profile updated successfully."),
                                  extra_tags="alert-success")
+            if form.pending_email:
+                _send_email_confirmation(request, user, form.pending_email)
             # Redirect so the response renders against a fresh request, reading
             # the just-saved usercontactinfo instead of any state cached on the
             # POST request. Also prevents form resubmission on refresh.
@@ -282,6 +285,37 @@ def view_profile(request):
         "user": user,
         "form": form,
         "contact_form": contact_form})
+
+
+def _send_email_confirmation(request, user, new_email):
+    """Send the link that confirms ``new_email`` for ``user``, and say on the page what happened."""
+    if email_ownership.send_confirmation(request, user, new_email):
+        messages.add_message(
+            request,
+            messages.INFO,
+            _("We sent a confirmation link to %(email)s. Your email address changes when you open it.") % {"email": new_email},
+            extra_tags="alert-info",
+        )
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _("The confirmation email could not be sent, so your email address was not changed. Try again later."),
+            extra_tags="alert-danger",
+        )
+
+
+def confirm_email_change(request, token):
+    """Open a confirmation link: the signed-in account takes the email the link was sent to."""
+    user = get_object_or_404(Dojo_User, pk=request.user.id)
+    if refusal := email_ownership.confirm(user, token):
+        logger.warning("Refused an email change confirmation for user %s: %s", user.pk, refusal)
+        messages.add_message(request, messages.ERROR, refusal, extra_tags="alert-danger")
+    else:
+        messages.add_message(
+            request, messages.SUCCESS, _("Your email address is now %(email)s.") % {"email": user.email}, extra_tags="alert-success",
+        )
+    return HttpResponseRedirect(reverse("view_profile"))
 
 
 def change_password(request):

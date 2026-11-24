@@ -6,15 +6,50 @@ from django.utils.translation import gettext_lazy as _
 
 from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
 from dojo.models import Dojo_User, User, UserContactInfo
+from dojo.user.email_ownership import is_new_email, self_service_refusal, taken_email_error
 from dojo.utils import get_password_requirements_string, get_system_setting
 
 
+def _clean_new_email(form):
+    """The submitted email, refused when another account already holds it (an unchanged one never is)."""
+    email = form.cleaned_data.get("email")
+    if error := taken_email_error(form.instance, email):
+        raise forms.ValidationError(error)
+    return email
+
+
 class DojoUserForm(forms.ModelForm):
+
+    """
+    A user's own profile. A superuser sets their email directly; anyone else proves a new address first.
+
+    For anyone else a changed email is not saved: it is left in :attr:`pending_email` for the view to send
+    a confirmation link to (``dojo.user.email_ownership``), and the account keeps its current address.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not get_current_user().is_superuser and not get_system_setting("enable_user_profile_editable"):
+        self.pending_email = None
+        current_user = get_current_user()
+        self.acting_is_superuser = bool(current_user and current_user.is_superuser)
+        if not self.acting_is_superuser and not get_system_setting("enable_user_profile_editable"):
             for field in self.fields:
                 self.fields[field].disabled = True
+        if (
+            not self.acting_is_superuser
+            and "email" in self.fields
+            and self.instance.pk is not None
+            and (refusal := self_service_refusal(self.instance))
+        ):
+            self.fields["email"].disabled = True
+            self.fields["email"].help_text = refusal
+
+    def clean_email(self):
+        email = _clean_new_email(self)
+        if self.acting_is_superuser or not is_new_email(self.instance, email):
+            return email
+        self.pending_email = email
+        return self.instance.email
 
     class Meta:
         model = Dojo_User
@@ -42,6 +77,9 @@ class AddDojoUserForm(forms.ModelForm):
             self.fields["is_superuser"].disabled = True
         self.fields["password"].help_text = get_password_requirements_string()
 
+    def clean_email(self):
+        return _clean_new_email(self)
+
 
 class EditDojoUserForm(forms.ModelForm):
     email = forms.EmailField(required=True)
@@ -56,6 +94,9 @@ class EditDojoUserForm(forms.ModelForm):
         if not current_user.is_superuser:
             self.fields["is_staff"].disabled = True
             self.fields["is_superuser"].disabled = True
+
+    def clean_email(self):
+        return _clean_new_email(self)
 
     def clean(self):
         cleaned_data = super().clean()

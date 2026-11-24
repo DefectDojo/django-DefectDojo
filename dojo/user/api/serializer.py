@@ -9,6 +9,7 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from dojo.models import Dojo_User, UserContactInfo
 from dojo.user.authentication import token_expires_at
+from dojo.user.email_ownership import taken_email_error
 from dojo.user.utils import get_configuration_permissions_codenames
 
 User = get_user_model()
@@ -219,6 +220,10 @@ class UserSerializer(serializers.ModelSerializer):
                 if identity_field in data and data[identity_field] != getattr(self.instance, identity_field):
                     msg = "Only superusers are allowed to change the username or email of another user."
                     raise ValidationError(msg)
+
+        # A new email is unique, ignoring case (dojo.user.email_ownership); an unchanged one is never refused.
+        if "email" in data and (error := taken_email_error(self.instance, data["email"])):
+            raise ValidationError({"email": [error]})
 
         if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"

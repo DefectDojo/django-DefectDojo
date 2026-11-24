@@ -274,6 +274,9 @@ env = environ.FileAwareEnv(
     DD_RATE_LIMITER_ENABLED=(bool, False),
     # Account-recovery emails (password reset, forgot username) sent to one address per hour. 0 disables the limit.
     DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR=(int, 5),
+    # A user changing their own email confirms the new address through a link sent to it. Needs a working
+    # DD_EMAIL_URL. Off (the default), only an administrator changes a user's email.
+    DD_EMAIL_CHANGE_CONFIRMATION_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
     DD_RATE_LIMITER_RATE=(str, "5/m"),
     # Block the requests after rate limit is exceeded
@@ -699,6 +702,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://django-ratelimit.readthedocs.io/en/stable/index.html
 RATE_LIMITER_ENABLED = env("DD_RATE_LIMITER_ENABLED")
 ACCOUNT_RECOVERY_EMAILS_PER_HOUR = env("DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR")
+EMAIL_CHANGE_CONFIRMATION_ENABLED = env("DD_EMAIL_CHANGE_CONFIRMATION_ENABLED")
 RATE_LIMITER_RATE = env("DD_RATE_LIMITER_RATE")  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
 RATE_LIMITER_BLOCK = env("DD_RATE_LIMITER_BLOCK")  # Block the requests after rate limit is exceeded
 RATE_LIMITER_ACCOUNT_LOCKOUT = env("DD_RATE_LIMITER_ACCOUNT_LOCKOUT")  # Forces the user to change password on next login.

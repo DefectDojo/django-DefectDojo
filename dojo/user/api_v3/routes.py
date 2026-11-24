@@ -51,6 +51,7 @@ from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.models import Dojo_User
 from dojo.user.api_v3.schemas import UserDetail, UserSlim, UserUpdate, UserWrite
+from dojo.user.email_ownership import taken_email_error
 from dojo.user.queries import get_authorized_users
 from dojo.user.utils import user_may_delete_account
 
@@ -149,6 +150,12 @@ def _enforce_identity_field_rules(request: HttpRequest, *, current: Dojo_User | 
             )
 
 
+def _enforce_unique_email(*, current: Dojo_User | None, data: dict) -> None:
+    """Port ``UserSerializer.validate()``'s email rule: a new email no other account holds, ignoring case."""
+    if "email" in data and (error := taken_email_error(current, data["email"])):
+        raise validation_problem({"email": [error]})
+
+
 def _validate_password_or_400(password: str) -> None:
     try:
         validate_password(password)
@@ -224,6 +231,7 @@ def build_users_router(
             raise validation_problem({"password": ["Passwords must be supplied for new users"]})
         if Dojo_User.objects.filter(username=data["username"]).exists():
             raise validation_problem({"username": ["A user with that username already exists."]})
+        _enforce_unique_email(current=None, data=data)
 
         instance = Dojo_User(**data)
         if password:
@@ -246,6 +254,7 @@ def build_users_router(
             raise validation_problem({"password": ["Update of password though API is not allowed"]})
         _enforce_superuser_staff_rules(request, current=instance, data=data)
         _enforce_identity_field_rules(request, current=instance, data=data)
+        _enforce_unique_email(current=instance, data=data)
         for key, value in data.items():
             setattr(instance, key, value)
         instance.save()
@@ -273,6 +282,7 @@ def build_users_router(
             raise validation_problem({"password": ["Update of password though API is not allowed"]})
         _enforce_superuser_staff_rules(request, current=instance, data=data)
         _enforce_identity_field_rules(request, current=instance, data=data)
+        _enforce_unique_email(current=instance, data=data)
         for key, value in data.items():
             setattr(instance, key, value)
         instance.save()
