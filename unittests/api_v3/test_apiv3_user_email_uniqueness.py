@@ -2,7 +2,7 @@
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 
-from dojo.models import Dojo_User
+from dojo.models import Dojo_User, Product, Product_Type
 
 from .base import ApiV3TestCase
 
@@ -49,6 +49,12 @@ class TestApiV3UserEmailUniqueness(ApiV3TestCase):
                 content_type__app_label="auth", codename__in=("view_user", "add_user", "change_user"),
             ),
         )
+        # The view_user-scoped queryset lists co-members of the caller's products: give the manager one, so
+        # its own record resolves instead of answering 404 before the email rule.
+        product = Product.objects.create(
+            name="v3_uniq_prod", description="d", prod_type=Product_Type.objects.create(name="v3_uniq_pt"),
+        )
+        product.authorized_users.add(manager.pk)
         client = self.token_client(user=manager)
         url = self.v3_url(f"users/{manager.pk}")
         patched = client.patch(url, {"email": "fresh@example.com"}, format="json")
