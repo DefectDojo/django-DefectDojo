@@ -30,7 +30,8 @@ CACHE_KEY = "os_message:v2"
 # Raw Ed25519 public keys (base64) a banner may be signed with. More than one lets the publisher
 # rotate keys without a gap. With none, no banner is shown.
 PUBLIC_KEYS = (
-    "__OS_MESSAGE_PUBLIC_KEY__",
+    # DefectDojo banner-signing key, version 1.
+    "PMxyX1pO0ig0xz2zO4gDkYI6Sk3mhRfYCs+BjeYy2WQ=",
 )
 # Domain-separates banner signatures from anything else the key could sign.
 SIGNING_PREFIX = b"defectdojo-os-message-v1\n"
