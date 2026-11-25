@@ -5,6 +5,7 @@ from itertools import batched
 from django.conf import settings
 from django.core.exceptions import EmptyResultSet
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.db import router, transaction
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
@@ -373,6 +374,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # via persist_new_findings, then post-processed) once per matching batch -- see
         # _drain_pending_new_findings.
         self._pending_new_findings: list[tuple[Finding, Finding, bool]] = []
+        # Notes for the findings process_matched_mitigated_finding reactivated, by note text,
+        # written once per matching batch -- see _flush_reactivation_notes.
+        self._pending_reactivation_notes: dict[str, list[Finding]] = {}
 
         logger.debug(f"starting reimport of {len(parsed_findings) if parsed_findings else 0} items.")
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
@@ -563,6 +567,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         # finishes -- see _drain_pending_new_findings.
                         self._pending_new_findings.append((finding, unsaved_finding, finding_will_be_grouped))
 
+            self._flush_reactivation_notes()
             # Persist this matching batch's new findings (bulk, via persist_new_findings) and
             # run their post-processing before the NEXT matching batch's
             # get_reimport_match_candidates_for_batch() queries the database -- otherwise a
@@ -1295,15 +1300,45 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             note_entry = f"Un-mitigated by {self.scan_type} re-upload but kept inactive because the finding is a duplicate."
         else:
             note_entry = f"Re-activated by {self.scan_type} re-upload."
-        note = Notes(entry=note_entry, author=self.user)
-        note.save()
         self.location_handler.record_reactivations_for_finding(existing_finding)
-        existing_finding.notes.add(note)
+        self.queue_reactivation_note(existing_finding, note_entry)
         self.reactivated_items.append(existing_finding.id)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
         # be updated in some way
         # Return False here to make sure further processing happens
         return existing_finding, False
+
+    def queue_reactivation_note(self, finding: Finding, note_entry: str) -> None:
+        """
+        Leave ``note_entry`` on a finding this reimport reactivated, written with the rest of
+        its matching batch's reactivation notes by _flush_reactivation_notes.
+
+        Writing it here took three statements per finding (the note, then the link's existence
+        check and INSERT), so a reimport that reopened hundreds of findings cost hundreds of
+        round trips for the notes alone.
+        """
+        pending = getattr(self, "_pending_reactivation_notes", None)
+        if pending is None:
+            # An importer built without process_findings (a subclass's own matching driver)
+            pending = self._pending_reactivation_notes = {}
+        pending.setdefault(note_entry, []).append(finding)
+
+    def _flush_reactivation_notes(self) -> None:
+        """
+        Write the notes queue_reactivation_note held, one bulk write per note text.
+
+        Through _add_note_to_findings, the close's batched writer, so each finding still gets a
+        note of its own and every receiver of the note's save and the link's m2m_changed signals
+        runs as it did for notes.add(). Runs once per matching batch, before the batch's new
+        findings are post-processed.
+        """
+        pending, self._pending_reactivation_notes = getattr(self, "_pending_reactivation_notes", None) or {}, {}
+        if not pending:
+            return
+        db = router.db_for_write(Finding)
+        with transaction.atomic(using=db):
+            for note_entry, findings in pending.items():
+                self._add_note_to_findings(findings, note_entry, db)
 
     def process_matched_active_finding(
         self,
