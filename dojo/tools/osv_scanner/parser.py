@@ -3,6 +3,7 @@ import json
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
+from dojo.utils import parse_cvss_data
 
 OSV_ECOSYSTEM_TO_PURL = {
     "npm": "npm", "pypi": "pypi", "go": "golang", "maven": "maven",
@@ -68,6 +69,49 @@ class OSVScannerParser:
 
     def classify_severity(self, severity_input):
         return ("Medium" if severity_input == "MODERATE" else severity_input.lower().capitalize()) if severity_input else "Low"
+
+    @staticmethod
+    def _severity_from_score(score):
+        score = float(score)
+
+        if score >= 9.0:
+            return "Critical"
+        if score >= 7.0:
+            return "High"
+        if score >= 4.0:
+            return "Medium"
+        if score > 0:
+            return "Low"
+
+        return "Info"
+
+    def _resolve_severity(self, vulnerability, package):
+        # Prefer the severity provided by the vulnerability database.
+        database_specific = vulnerability.get("database_specific") or {}
+        database_severity = database_specific.get("severity")
+
+        if database_severity:
+            return self.classify_severity(database_severity)
+
+        # Fall back to the score of the matching vulnerability group.
+        vulnerability_id = vulnerability.get("id", "")
+
+        for group in package.get("groups") or []:
+            if vulnerability_id in group.get("ids", []):
+                score = group.get("max_severity")
+
+                if score not in {None, ""}:
+                    return self._severity_from_score(score)
+
+        # Fall back to the advisory's CVSS vectors.
+        for entry in vulnerability.get("severity") or []:
+            cvss_data = parse_cvss_data(entry.get("score", ""))
+
+            if severity := cvss_data.get("severity"):
+                return "Info" if severity == "None" else severity
+
+        # Preserve the existing default when no severity is available.
+        return "Low"
 
     def get_findings(self, file, test):
         try:
@@ -138,12 +182,12 @@ class OSVScannerParser:
                     description += f"**Package ecosystem**: {package_ecosystem}\n"
                     description += f"**Vulnerability details**: {vulnerabilitydetails}\n"
                     description += f"**Vulnerability package purl**: {vulnerabilitypackagepurl}\n"
-                    sev = vulnerability.get("database_specific", {}).get("severity", "")
+                    sev = self._resolve_severity(vulnerability, package)
                     finding = Finding(
                         title=f"{vulnerabilityid}_{package_name}",
                         test=test,
                         description=description,
-                        severity=self.classify_severity(sev),
+                        severity=sev,
                         static_finding=True,
                         dynamic_finding=False,
                         component_name=package_name,

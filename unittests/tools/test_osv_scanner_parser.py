@@ -95,3 +95,247 @@ class TestOSVScannerParser(DojoTestCase):
         for name, expected in cases.items():
             with self.subTest(name):
                 self.assertEqual(expected, parse(inputs[name]))
+
+    def _parse_severity_report(self, vulnerabilities, groups=None):
+        package = {
+            "package": {
+                "name": "example-package",
+                "version": "1.0.0",
+                "ecosystem": "PyPI",
+            },
+            "vulnerabilities": vulnerabilities,
+        }
+
+        if groups is not None:
+            package["groups"] = groups
+
+        report = {
+            "results": [
+                {
+                    "source": {
+                        "path": "/example/uv.lock",
+                        "type": "lockfile",
+                    },
+                    "packages": [package],
+                },
+            ],
+        }
+
+        return OSVScannerParser().get_findings(
+            io.StringIO(json.dumps(report)),
+            Test(),
+        )
+
+    def test_database_severity_takes_precedence(self):
+        vulnerability = {
+            "id": "TEST-001",
+            "database_specific": {
+                "severity": "HIGH",
+            },
+            "severity": [
+                {
+                    "type": "CVSS_V4",
+                    "score": (
+                        "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/"
+                        "VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+                    ),
+                },
+            ],
+        }
+
+        groups = [
+            {
+                "ids": ["TEST-001"],
+                "max_severity": "9.2",
+            },
+        ]
+
+        findings = self._parse_severity_report(
+            [vulnerability], groups,
+        )
+
+        self.assertEqual(1, len(findings))
+        self.assertEqual("High", findings[0].severity)
+
+    def test_group_severity_fallback(self):
+        cases = [
+            ("10.0", "Critical"),
+            ("9.2", "Critical"),
+            ("9.0", "Critical"),
+            ("8.9", "High"),
+            ("7.5", "High"),
+            ("7.0", "High"),
+            ("6.9", "Medium"),
+            ("5.5", "Medium"),
+            ("4.0", "Medium"),
+            ("3.9", "Low"),
+            ("0.1", "Low"),
+            ("0.0", "Info"),
+        ]
+
+        database_cases = [
+            ("missing_database_specific", {}),
+            ("missing_severity", {"database_specific": {}}),
+            ("null_severity", {
+                "database_specific": {"severity": None},
+            }),
+        ]
+
+        for database_case, metadata in database_cases:
+            for score, expected in cases:
+                with self.subTest(
+                    database_case=database_case,
+                    score=score,
+                ):
+                    vulnerability = {
+                        "id": "TEST-001",
+                        **metadata,
+                    }
+
+                    groups = [
+                        {
+                            "ids": ["TEST-001"],
+                            "max_severity": score,
+                        },
+                    ]
+
+                    findings = self._parse_severity_report(
+                        [vulnerability], groups,
+                    )
+
+                    self.assertEqual(1, len(findings))
+                    self.assertEqual(
+                        expected,
+                        findings[0].severity,
+                    )
+
+    def test_group_severity_matches_vulnerability_id(self):
+        vulnerabilities = [
+            {"id": "TEST-001"},
+            {"id": "TEST-002"},
+            {"id": "TEST-003"},
+        ]
+
+        groups = [
+            {
+                "ids": ["TEST-002"],
+                "max_severity": "9.2",
+            },
+            {
+                "ids": ["TEST-001"],
+                "max_severity": "5.5",
+            },
+        ]
+
+        findings = self._parse_severity_report(
+            vulnerabilities, groups,
+        )
+
+        self.assertEqual(3, len(findings))
+        self.assertEqual("Medium", findings[0].severity)
+        self.assertEqual("Critical", findings[1].severity)
+        self.assertEqual("Low", findings[2].severity)
+
+    def test_group_severity_takes_precedence_over_vector(self):
+        vulnerability = {
+            "id": "TEST-001",
+            "severity": [
+                {
+                    "type": "CVSS_V4",
+                    "score": (
+                        "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/"
+                        "VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+                    ),
+                },
+            ],
+        }
+
+        groups = [
+            {
+                "ids": ["TEST-001"],
+                "max_severity": "7.5",
+            },
+        ]
+
+        findings = self._parse_severity_report(
+            [vulnerability], groups,
+        )
+
+        self.assertEqual(1, len(findings))
+        self.assertEqual("High", findings[0].severity)
+
+    def test_cvss_vector_severity_fallback(self):
+        cases = [
+            (
+                "CVSS_V2",
+                "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+                "High",
+            ),
+            (
+                "CVSS_V3",
+                "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "High",
+            ),
+            (
+                "CVSS_V4",
+                (
+                    "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/"
+                    "VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+                ),
+                "Critical",
+            ),
+        ]
+
+        for version, vector, expected in cases:
+            with self.subTest(version=version):
+                vulnerability = {
+                    "id": "TEST-001",
+                    "severity": [
+                        {
+                            "type": version,
+                            "score": vector,
+                        },
+                    ],
+                }
+
+                findings = self._parse_severity_report(
+                    [vulnerability],
+                )
+
+                self.assertEqual(1, len(findings))
+                self.assertEqual(
+                    expected,
+                    findings[0].severity,
+                )
+
+    def test_cvss_vector_fallback_when_group_score_missing(self):
+        vulnerability = {
+            "id": "TEST-001",
+            "database_specific": {
+                "severity": None,
+            },
+            "severity": [
+                {
+                    "type": "CVSS_V3",
+                    "score": (
+                        "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/"
+                        "S:U/C:N/I:N/A:H"
+                    ),
+                },
+            ],
+        }
+
+        cases = [
+            [{"ids": ["TEST-001"]}],
+            [{"ids": ["TEST-001"], "max_severity": None}],
+            [{"ids": ["TEST-002"], "max_severity": "9.2"}],
+        ]
+
+        for groups in cases:
+            with self.subTest(groups=groups):
+                findings = self._parse_severity_report(
+                    [vulnerability], groups,
+                )
+
+                self.assertEqual(1, len(findings))
+                self.assertEqual("High", findings[0].severity)
