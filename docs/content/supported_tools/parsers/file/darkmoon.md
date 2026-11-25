@@ -29,4 +29,4 @@ Sample Darkmoon scans can be found [here](https://github.com/DefectDojo/django-D
 See [Dark-Moon on GitHub](https://github.com/ASCIT31/Dark-Moon).
 
 ### Deduplication
-This parser uses the hash_code [deduplication algorithm](/triage_findings/finding_deduplication/about_deduplication/), computed from `title`, `severity` and `component_name`.
+This parser uses the hash_code [deduplication algorithm](/triage_findings/finding_deduplication/about_deduplication/), computed from `title`, `severity`, `component_name` and the finding's endpoints, so the same issue reported on two URLs stays two findings.

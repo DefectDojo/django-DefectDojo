@@ -1178,7 +1178,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "SonarQube API Import": ["title", "file_path", "line"],
     "Sonatype Application Scan": ["title", "cwe", "file_path", "component_name", "component_version", "vulnerability_ids"],
     "Dependency Check Scan": ["title", "cwe", "file_path"],
-    "Darkmoon Scan": ["title", "severity", "component_name"],
+    "Darkmoon Scan": ["title", "severity", "component_name", "endpoints"],
     "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
     "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
     "Horusec Scan": ["title", "description", "file_path", "line"],

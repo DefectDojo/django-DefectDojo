@@ -1,3 +1,6 @@
+import io
+import json
+
 from dojo.models import Finding, Test
 from dojo.tools.darkmoon.parser import DarkmoonParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -122,3 +125,33 @@ class TestDarkmoonParser(DojoTestCase):
             with_locations = [f for f in findings if self.locations_of(f)]
             self.assertEqual(3, len(with_locations))
             self.validate_locations(with_locations)
+
+    def parse_items(self, items):
+        return DarkmoonParser().get_findings(io.StringIO(json.dumps(items)), Test())
+
+    def test_code_fence_in_evidence_is_escaped(self):
+        finding = self.parse_items([{
+            "title": "Fence breakout",
+            "severity": "low",
+            "evidence": {"commands": ["echo ```", "id"], "logs": ["```\n# Injected heading"]},
+        }])[0]
+        steps = finding.steps_to_reproduce
+        # Two blocks, each with one opening and one closing fence: the payload's fences are
+        # escaped, so they add none.
+        self.assertEqual(4, steps.count("```"))
+        self.assertNotIn("echo ```", steps)
+        self.assertIn("echo \\`\\`\\`", steps)
+
+    def test_cvss_score_goes_to_the_vector_version(self):
+        v4 = "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+        v3 = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+        v4_finding, v3_finding, bare_finding = self.parse_items([
+            {"title": "v4", "severity": "critical", "cvss_vector": v4, "cvss_score": 9.3},
+            {"title": "v3", "severity": "critical", "cvss_vector": v3, "cvss_score": 9.8},
+            {"title": "bare", "severity": "medium", "cvss_score": 5.0},
+        ])
+        self.assertEqual(9.3, v4_finding.cvssv4_score)
+        self.assertIsNone(v4_finding.cvssv3_score)
+        self.assertEqual(9.8, v3_finding.cvssv3_score)
+        self.assertIsNone(v3_finding.cvssv4_score)
+        self.assertEqual(5.0, bare_finding.cvssv3_score)

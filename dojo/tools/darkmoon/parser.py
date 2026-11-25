@@ -111,19 +111,28 @@ class DarkmoonParser:
         # CVSS: use the vector when present (DefectDojo validates it and derives
         # the score), otherwise fall back to the numeric score from the report.
         cvss_vector = item.get("cvss_vector")
+        cvss_version = None
         if cvss_vector:
             cvss_data = parse_cvss_data(cvss_vector)
             if cvss_data:
+                cvss_version = cvss_data.get("major_version")
                 if cvss_data.get("cvssv3"):
                     finding.cvssv3 = cvss_data["cvssv3"]
                 if cvss_data.get("cvssv4"):
                     finding.cvssv4 = cvss_data["cvssv4"]
+        # The report's score belongs to whichever CVSS version its vector is. Without a
+        # vector it is taken as v3; a v2 score has no field to go to.
         cvss_score = item.get("cvss_score")
-        if cvss_score is not None:
+        if cvss_score is not None and cvss_version != 2:
             try:
-                finding.cvssv3_score = float(cvss_score)
+                score = float(cvss_score)
             except (TypeError, ValueError):
                 logger.debug("Ignoring non-numeric cvss_score %s", cvss_score)
+            else:
+                if cvss_version == 4:
+                    finding.cvssv4_score = score
+                else:
+                    finding.cvssv3_score = score
 
         if item.get("cve"):
             finding.unsaved_vulnerability_ids = [str(item.get("cve")).upper()]
@@ -191,18 +200,25 @@ class DarkmoonParser:
 
         return "\n\n".join(parts)
 
+    @staticmethod
+    def _fenced(lines):
+        # A ``` inside a command or a log line would close the fence early and let the
+        # rest render as Markdown, so it is escaped.
+        body = "\n".join(lines).replace("```", "\\`\\`\\`")
+        return "```\n" + body + "\n```"
+
     def _build_steps_to_reproduce(self, evidence):
         parts = []
         commands = evidence.get("commands") or []
         if isinstance(commands, str):
             commands = [commands]
         if commands:
-            parts.append("**Commands:**\n```\n" + "\n".join(commands) + "\n```")
+            parts.append("**Commands:**\n" + self._fenced(commands))
         logs = evidence.get("logs") or []
         if isinstance(logs, str):
             logs = [logs]
         if logs:
-            parts.append("**Logs:**\n```\n" + "\n".join(logs) + "\n```")
+            parts.append("**Logs:**\n" + self._fenced(logs))
         return "\n\n".join(parts)
 
     def _build_tags(self, item, status):
