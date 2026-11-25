@@ -113,6 +113,19 @@ class TestOSVScannerParser(DojoTestCase):
                 finding = OSVScannerParser().get_findings(io.StringIO(json.dumps(report)), Test())[0]
                 self.assertEqual(severity, finding.severity)
 
+    def test_cvss_v2_vector_sets_severity_without_failing_import(self):
+        # Finding has no CVSS v2 fields: a v2-only advisory takes its severity from the
+        # vector and keeps the v3 and v4 fields empty.
+        finding = self.parse_vulnerability({
+            "id": "PYSEC-2014-1",
+            "database_specific": {},
+            "severity": [{"type": "CVSS_V2", "score": "AV:N/AC:L/Au:N/C:C/I:C/A:C"}],
+        })
+
+        self.assertEqual("High", finding.severity)
+        self.assertIsNone(finding.cvssv3)
+        self.assertIsNone(finding.cvssv4)
+
     def test_invalid_cvss_vector_does_not_fail_import(self):
         finding = self.parse_vulnerability({
             "id": "PYSEC-2026-4322",

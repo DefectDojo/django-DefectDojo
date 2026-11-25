@@ -16,9 +16,9 @@ OSV_ECOSYSTEM_TO_PURL = {
     "alpine": "apk", "debian": "deb",
 }
 CVSS_SEVERITY_TYPES = {"CVSS_V2", "CVSS_V3", "CVSS_V4"}
-CVSS_FIELDS = (
-    "cvssv2", "cvssv2_score", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
-)
+# Finding stores CVSS v3 and v4 only. A v2 vector still sets the severity (below), but its
+# vector and score have no field to go to, and passing them to Finding() raises TypeError.
+CVSS_FIELDS = ("cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score")
 
 
 class OSVScannerParser:
