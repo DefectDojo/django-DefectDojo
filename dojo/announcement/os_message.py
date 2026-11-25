@@ -127,7 +127,14 @@ def fetch_os_message():
 
 
 def verify_signed_message(body):
-    """Return the banner markdown in body if one of PUBLIC_KEYS signed it, else None."""
+    """
+    Return the banner markdown in body if one of PUBLIC_KEYS signed it, else None.
+
+    Accepted risk: a signature carries no expiry, so whoever can write the bucket object can serve
+    any banner DefectDojo ever signed, even after a takedown, until the key is rotated. That replays
+    only DefectDojo's own past wording, with links still limited to is_allowed_link, so it cannot
+    put a link of the writer's choice on an install, which is what the signature exists to stop.
+    """
     try:
         envelope = json.loads(body)
     except ValueError:
