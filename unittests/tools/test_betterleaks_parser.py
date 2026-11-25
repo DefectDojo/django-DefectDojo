@@ -12,24 +12,30 @@ class TestBetterleaksParser(DojoTestCase):
 
     def test_parse_file_legacy_with_one_finding(self):
         with (get_unit_tests_scans_path("betterleaks") / "betterleaks_one_vuln.json").open(
-            encoding="utf-8"
+            encoding="utf-8",
         ) as testfile:
             parser = BetterleaksParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("generic-api-key", finding.title)
+                self.assertEqual(
+                    "Hard coded Detected a Generic API Key, potentially exposing access to various services and sensitive operations. found in file.cfg",
+                    finding.title,
+                )
                 self.assertEqual("file.cfg", finding.file_path)
 
     def test_parse_file_legacy_with_multiple_finding(self):
         with (get_unit_tests_scans_path("betterleaks") / "betterleaks_many_vulns.json").open(
-            encoding="utf-8"
+            encoding="utf-8",
         ) as testfile:
             parser = BetterleaksParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("generic-password", finding.title)
+                self.assertEqual(
+                    "Hard coded Detected a potential hardcoded password literal, which may expose account credentials. found in XXXXXXXXXX",
+                    finding.title,
+                )
                 self.assertEqual("XXXXXXXXXX", finding.file_path)
