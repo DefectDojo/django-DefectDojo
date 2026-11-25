@@ -68,7 +68,7 @@ def get_component_name_version(name):
 
 
 def get_dependency_info(name):
-    match = re.match(r"([a-z]+)://([a-z\d\.:]+):([a-z\d\.\-]+)", name, re.IGNORECASE)
+    match = re.match(r"([a-z]+)://([a-z\d\.:\-_]+):([a-z\d\.\-]+)", name, re.IGNORECASE)
     if match is None:
         return None
     return match[1], match[2], match[3]

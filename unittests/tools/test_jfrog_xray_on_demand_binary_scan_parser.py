@@ -3,6 +3,7 @@ from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import (
     JFrogXrayOnDemandBinaryScanParser,
     clean_title,
     get_component_name_version,
+    get_dependency_info,
 )
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -49,6 +50,14 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertEqual(("gav://com.typesafe.akka:akka-actor_2.13", "2.6.20"), get_component_name_version("gav://com.typesafe.akka:akka-actor_2.13:2.6.20"))
         with self.subTest("npm://tough-cookie:2.2.2"):
             self.assertEqual(("npm://tough-cookie", "2.2.2"), get_component_name_version("npm://tough-cookie:2.2.2"))
+
+    def test_dependency_info_keeps_hyphens_and_underscores(self):
+        # get_dependency_info builds the dependency location's purl, so it must split a
+        # hyphenated or underscored name the same way get_component_name_version does.
+        self.assertEqual(("npm", "tough-cookie", "2.2.2"), get_dependency_info("npm://tough-cookie:2.2.2"))
+        self.assertEqual(("gav", "com.typesafe.akka:akka-actor_2.13", "2.6.20"), get_dependency_info("gav://com.typesafe.akka:akka-actor_2.13:2.6.20"))
+        self.assertEqual(("pypi", "django", "4.1.4"), get_dependency_info("pypi://django:4.1.4"))
+        self.assertIsNone(get_dependency_info("npm://desopmo"))
 
     def test_clean_title(self):
         with self.subTest(""):
