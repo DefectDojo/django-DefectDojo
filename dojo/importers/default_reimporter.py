@@ -309,7 +309,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # `post_process_findings_batch` dispatch) so rules/dedup see inherited
         # tags on `finding.tags`.
         with tag_inheritance.suppress_tag_inheritance():
-            return self._process_findings_internal(parsed_findings, **kwargs)
+            try:
+                return self._process_findings_internal(parsed_findings, **kwargs)
+            except BaseException:
+                # The findings reactivated before the failure keep their reactivation, as
+                # they did when each note was written with its finding: write their notes too.
+                self._flush_reactivation_notes_after_failure()
+                raise
 
     def get_original_findings(self):
         """
@@ -1339,6 +1345,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         with transaction.atomic(using=db):
             for note_entry, findings in pending.items():
                 self._add_note_to_findings(findings, note_entry, db)
+
+    def _flush_reactivation_notes_after_failure(self) -> None:
+        """
+        Write the notes still queued when matching fails part way through a batch.
+
+        A failure while writing them is logged rather than raised, so it never replaces the
+        error that stopped the reimport.
+        """
+        try:
+            self._flush_reactivation_notes()
+        except Exception:
+            logger.exception("could not write the reactivation notes of a reimport that failed")
 
     def process_matched_active_finding(
         self,

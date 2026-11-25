@@ -10,6 +10,7 @@ through the same batched writer the close uses.
 
 import json
 from datetime import datetime
+from unittest.mock import patch
 
 from crum import impersonate
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -160,3 +161,33 @@ class TestReimportReactivationNotes(DojoTestCase):
         # Flushed once: a second flush writes nothing more
         reimporter._flush_reactivation_notes()
         self.assertEqual(1, second.notes.filter(entry__startswith="Un-").count())
+
+    def test_a_failure_part_way_keeps_the_notes_of_findings_already_reactivated(self):
+        # The notes are written at the end of a matching batch. Before, each was written with its
+        # finding, so a reimport that failed part way left every finding it had reactivated with
+        # its note. It still must: those findings stay reactivated.
+        test = self._closed_test("reactivation-failure", 4)
+        original = DefaultReImporter.process_matched_mitigated_finding
+        calls = []
+
+        def fail_on_third(reimporter, unsaved_finding, existing_finding):
+            calls.append(existing_finding.pk)
+            if len(calls) == 3:
+                msg = "matching failed"
+                raise RuntimeError(msg)
+            return original(reimporter, unsaved_finding, existing_finding)
+
+        with (
+            patch.object(DefaultReImporter, "process_matched_mitigated_finding", autospec=True, side_effect=fail_on_third),
+            self.assertRaisesMessage(RuntimeError, "matching failed"),
+        ):
+            self._reimport(test, 5)
+
+        reopened = Finding.objects.filter(test=test, active=True, is_mitigated=False).exclude(unique_id_from_tool="reactivation-0")
+        self.assertEqual(2, reopened.count(), msg=f"reactivated before the failure: {list(reopened.values_list('id', flat=True))}")
+        for finding in reopened:
+            with self.subTest(finding=finding.unique_id_from_tool):
+                self.assertEqual(1, finding.notes.filter(entry=REACTIVATED_NOTE).count())
+        still_closed = Finding.objects.filter(test=test, is_mitigated=True)
+        self.assertEqual(2, still_closed.count())
+        self.assertEqual(0, sum(f.notes.filter(entry=REACTIVATED_NOTE).count() for f in still_closed))
