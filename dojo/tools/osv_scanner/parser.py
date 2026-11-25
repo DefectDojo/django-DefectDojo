@@ -97,7 +97,7 @@ class OSVScannerParser:
         aliases = vulnerability.get("aliases") or []
         if not isinstance(aliases, list):
             aliases = []
-        vulnerability_ids = {
+        advisory_ids = {
             identifier for identifier in [vulnerability.get("id"), *aliases]
             if isinstance(identifier, str) and identifier
         }
@@ -109,7 +109,7 @@ class OSVScannerParser:
                 identifiers = group.get(field)
                 if isinstance(identifiers, list):
                     group_ids.update(identifier for identifier in identifiers if isinstance(identifier, str))
-            if not vulnerability_ids.intersection(group_ids):
+            if not advisory_ids.intersection(group_ids):
                 continue
             try:
                 score = float(group.get("max_severity"))
