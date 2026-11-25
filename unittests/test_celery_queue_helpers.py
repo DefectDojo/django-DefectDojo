@@ -13,6 +13,8 @@ import json
 from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
+from kombu.transport import redis as kombu_redis
+
 from dojo.utils import get_celery_queue_details, get_celery_queue_length, purge_celery_queue_by_task_name
 
 from .dojo_test_case import DojoTestCase
@@ -45,6 +47,13 @@ class _FakeRedis:
     def lrange(self, key, start, end):
         items = self.lists.get(key, [])
         return items[start:] if end == -1 else items[start:end + 1]
+
+    def lpush(self, key, value):
+        self.lists.setdefault(key, []).insert(0, value)
+
+    def rpop(self, key):
+        items = self.lists.get(key)
+        return items.pop() if items else None
 
     def lrem(self, key, count, value):
         items = self.lists.get(key, [])
@@ -89,6 +98,32 @@ class TestCeleryQueueHelpersUseTheAppConnection(DojoTestCase):
             [(d["task_name"], d["count"], d["oldest_position"], d["newest_position"]) for d in details],
         )
         self.connection_for_read.assert_called_once()
+
+    def test_queue_details_position_one_is_the_message_a_worker_takes_next(self):
+        # kombu's Redis transport adds each message at the head of the list (LPUSH) and workers
+        # take them from the tail (BRPOP), so position 1, the oldest, is the last element.
+        # Publish and consume with kombu's own Redis channel code over the in-memory list, so the
+        # order is pinned against the ends kombu really uses.
+        channel = kombu_redis.Channel.__new__(kombu_redis.Channel)
+        channel._expires = {}  # set in __init__, which would connect to a server
+        channel.conn_or_acquire = contextmanager(lambda: (yield _FakeRedis(self.lists)))
+        self.lists["celery"] = []
+        for task, eta in [("a.task", "2026-01-01T00:00:00"), ("b.task", None), ("a.task", "2026-01-03T00:00:00")]:
+            channel._put("celery", {"body": "", "headers": {"task": task, "eta": eta}, "properties": {}})
+
+        details = get_celery_queue_details()
+        self.assertEqual(
+            [
+                ("a.task", 2, 1, "2026-01-01T00:00:00", 3, "2026-01-03T00:00:00"),
+                ("b.task", 1, 2, None, 2, None),
+            ],
+            [
+                (d["task_name"], d["count"], d["oldest_position"], d["oldest_eta"], d["newest_position"], d["newest_eta"])
+                for d in details
+            ],
+        )
+        taken = channel._get("celery")["headers"]
+        self.assertEqual((details[0]["task_name"], details[0]["oldest_eta"]), (taken["task"], taken["eta"]))
 
     def test_purge_by_task_name(self):
         self.assertEqual(2, purge_celery_queue_by_task_name("a.task"))

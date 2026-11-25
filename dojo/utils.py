@@ -1335,12 +1335,18 @@ def purge_celery_queue_by_task_name(task_name):
 
 
 def get_celery_queue_details():
-    """Per-task breakdown of the celery queue. O(N) — expensive for large queues."""
+    """
+    Per-task breakdown of the celery queue. O(N) — expensive for large queues.
+
+    Position 1 is the oldest message, the next one a worker takes. kombu's Redis transport adds
+    messages at the head of the list (LPUSH) and workers take them from the tail (BRPOP), so the
+    list is read tail first.
+    """
     tasks = {}
     try:
         with _broker_connection() as conn:
             client = conn.default_channel.client
-            for i, msg_raw in enumerate(client.lrange("celery", 0, -1)):
+            for i, msg_raw in enumerate(reversed(client.lrange("celery", 0, -1))):
                 try:
                     msg = json.loads(msg_raw)
                     headers = msg.get("headers", {})
