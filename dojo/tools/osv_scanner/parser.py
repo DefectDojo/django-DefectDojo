@@ -1,6 +1,7 @@
 import json
 from typing import NoReturn
 
+from dojo.finding.cwe import cwe_number
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
@@ -137,7 +138,8 @@ class OSVScannerParser:
                             # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
                                 unsaved_cwes = [entry["cweId"] for entry in cwe if entry.get("cweId")]
-                                cwe = cwe[0]["cweId"]
+                                # Finding.cwe is an integer column: "CWE-506" would fail the import.
+                                cwe = cwe_number(cwe[0].get("cweId"))
                             # Extraction of corrected versions by type
                             ranges = affected[0].get("ranges", [])
                             for range_item in ranges:

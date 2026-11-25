@@ -87,7 +87,7 @@ class TestOSVScannerParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual(finding.cwe, "CWE-506")
+            self.assertEqual(finding.cwe, 506)
             self.assertEqual(finding.title, "MAL-2023-1035_flot-axis")
             self.assertEqual(finding.cve, None)
             self.assertEqual(finding.unsaved_vulnerability_ids[0], "MAL-2023-1035")
@@ -99,7 +99,7 @@ class TestOSVScannerParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual(finding.cwe, "CWE-79")
+            self.assertEqual(finding.cwe, 79)
             self.assertEqual(["CWE-79", "CWE-89"], finding.unsaved_cwes)
 
     def test_many_findings(self):
