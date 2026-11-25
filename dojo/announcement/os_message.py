@@ -3,7 +3,7 @@ import binascii
 import hashlib
 import json
 import logging
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 import bleach
 import markdown
@@ -66,6 +66,14 @@ def is_allowed_link(url):
     except ValueError:
         return False
     if parts.scheme.lower() != "https" or parts.username is not None or parts.password is not None or port is not None:
+        return False
+    # Browsers resolve "." and ".." segments, percent-encoded or not, before they send the request, so
+    # https://github.com/DefectDojo/../evil-org lands outside the allowed organization. A path that
+    # decodes to such a segment, or hides a slash or backslash behind an escape, is refused.
+    decoded_path = unquote(parts.path)
+    if "\\" in decoded_path or "%2f" in parts.path.lower() or any(
+        segment in {".", ".."} for segment in decoded_path.split("/")
+    ):
         return False
     host = (parts.hostname or "").lower().rstrip(".")
     if any(host == domain or host.endswith("." + domain) for domain in ALLOWED_LINK_DOMAINS):
