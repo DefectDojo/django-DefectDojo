@@ -13,7 +13,6 @@ SECTION = re.compile(r"^\*{3}(?P<title>.+?)\*{3}\s*$")
 # firmwalker writes subsection headers two ways: "##################################### passwd" for
 # file searches and "-------------------- admin --------------------" for content searches.
 HASH_SUBSECTION = re.compile(r"^#{5,}\s*(?P<name>.*?)\s*$")
-DASH_SUBSECTION = re.compile(r"^-{5,}\s*(?P<name>.*?)\s*-{5,}\s*$")
 
 # The section naming the directory that was scanned; it holds the path, not a hit.
 FIRMWARE_DIRECTORY = "firmware directory"
@@ -54,8 +53,8 @@ class FirmwalkerParser:
                 section = re.sub(r"^Search for\s+", "", section).strip()
                 subsection = None
                 continue
-            if header := DASH_SUBSECTION.match(line):
-                subsection = header.group("name")
+            if (name := self.dash_subsection_name(line)) is not None:
+                subsection = name
                 continue
             if header := HASH_SUBSECTION.match(line):
                 subsection = header.group("name")
@@ -80,6 +79,18 @@ class FirmwalkerParser:
                 findings[key]["patterns"].append(subsection)
 
         return [self.build_finding(entry, test) for entry in findings.values()]
+
+    def dash_subsection_name(self, line):
+        """Return the name in a "----- name -----" header, or None if the line is not one."""
+        body = line.lstrip("-")
+        if len(line) - len(body) < 5:
+            return None
+        if not body:
+            return "" if len(line) >= 10 else None
+        name = body.rstrip("-")
+        if len(body) - len(name) < 5:
+            return None
+        return name.strip()
 
     def is_skipped(self, section):
         lowered = section.lower()
