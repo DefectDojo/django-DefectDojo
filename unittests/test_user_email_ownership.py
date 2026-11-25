@@ -224,12 +224,14 @@ class ApiUserEmailUniquenessTest(DojoTestCase):
         self.assertEqual(mail.outbox, [])
 
     def test_v2_a_user_manager_edits_their_own_other_fields(self):
+        Dojo_User.objects.filter(pk=self.manager.pk).update(email="manager@example.com")
         response = self.api.patch(
             reverse("user-detail", args=(self.manager.pk,)),
-            {"first_name": "Kept", "email": self.manager.email},
+            {"first_name": "Kept", "email": "Manager@example.com"},
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(Dojo_User.objects.get(pk=self.manager.pk).first_name, "Kept")
 
     def test_v2_a_superuser_changes_their_own_email(self):
         admin = Dojo_User.objects.create(username="api_uniq_admin", email="admin@example.com", is_superuser=True)

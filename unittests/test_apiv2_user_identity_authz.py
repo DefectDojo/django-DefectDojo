@@ -53,11 +53,19 @@ class UserIdentityFieldAuthzTest(APITestCase):
         self.target.refresh_from_db()
         self.assertEqual(self.target.username, "identity_authz_target")
 
-    def test_delegate_can_change_own_email(self):
+    def test_delegate_cannot_change_own_email_through_the_api(self):
+        # The users API saves at once and sends no confirmation link, so the delegate's own new email goes
+        # through the profile (dojo.user.email_ownership.api_self_change_refusal).
         r = self.client.patch(self._user_url(self.delegate.id), {"email": "mynew@example.com"})
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.delegate.refresh_from_db()
+        self.assertEqual(self.delegate.email, "")
+
+    def test_delegate_can_change_own_username(self):
+        r = self.client.patch(self._user_url(self.delegate.id), {"username": "identity_authz_renamed"})
         self.assertEqual(r.status_code, 200, r.content[:1000])
         self.delegate.refresh_from_db()
-        self.assertEqual(self.delegate.email, "mynew@example.com")
+        self.assertEqual(self.delegate.username, "identity_authz_renamed")
 
     @staticmethod
     def _perm_id(codename):
