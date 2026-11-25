@@ -105,13 +105,12 @@ class OSVScannerParser:
                 if not isinstance(package, dict):
                     msg = "Invalid OSV scan report: each package must be a JSON object"
                     _invalid_report(msg)
-                package_info = package.get("package")
-                if (
-                    not isinstance(package_info, dict)
-                    or not isinstance(package_info.get("name"), str)
-                    or not package_info["name"]
-                ):
-                    msg = "Invalid OSV scan report: each package must contain a package 'name'"
+                # A package identified only by a git commit has an empty name, ecosystem and
+                # version (osv-scanner emits these for source repositories), so the name is
+                # optional: only a "package" that is not an object makes the report invalid.
+                package_info = package.get("package", {})
+                if not isinstance(package_info, dict):
+                    msg = "Invalid OSV scan report: each package's 'package' must be a JSON object"
                     _invalid_report(msg)
                 package_name = package_info.get("name")
                 package_version = package_info.get("version")

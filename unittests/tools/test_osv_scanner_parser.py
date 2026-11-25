@@ -24,9 +24,8 @@ class TestOSVScannerParser(DojoTestCase):
             "empty result": {"results": [{}]},
             "result without packages": {"results": [{"source": {"path": "x"}}]},
             "null packages": {"results": [{"packages": None}]},
-            "empty package": {"results": [{"packages": [{}]}]},
             "null package": {"results": [{"packages": [{"package": None}]}]},
-            "package without name": {"results": [{"packages": [{"package": {}}]}]},
+            "package as a string": {"results": [{"packages": [{"package": "pkg"}]}]},
             "null vulnerabilities": {"results": [{"packages": [{"package": {"name": "pkg"}, "vulnerabilities": None}]}]},
         }
         for name, payload in cases.items():
@@ -42,11 +41,29 @@ class TestOSVScannerParser(DojoTestCase):
             "empty packages": {"results": [{"packages": []}]},
             "package without vulnerabilities": {"results": [{"packages": [{"package": {"name": "pkg"}}]}]},
             "package with empty vulnerabilities": {"results": [{"packages": [{"package": {"name": "pkg", "version": "1.0.0", "ecosystem": "npm"}, "vulnerabilities": []}]}]},
+            "empty package": {"results": [{"packages": [{}]}]},
+            "package without name": {"results": [{"packages": [{"package": {}}]}]},
         }
         for name, payload in cases.items():
             with self.subTest(name=name):
                 findings = OSVScannerParser().get_findings(io.StringIO(json.dumps(payload)), Test())
                 self.assertEqual([], findings)
+
+    def test_commit_only_package_is_imported(self):
+        # osv-scanner reports a source repository as a package with an empty name, version
+        # and ecosystem and only a commit. Rejecting it would fail the whole import.
+        payload = {
+            "results": [{
+                "source": {"path": "/repo", "type": "git"},
+                "packages": [{
+                    "package": {"name": "", "version": "", "ecosystem": "", "commit": "f5f3c22f3ed5a6804a2a8d9ee9fa43044cfa24a6"},
+                    "vulnerabilities": [{"id": "OSV-2020-1", "summary": "A commit-level advisory", "details": "details"}],
+                }],
+            }],
+        }
+        findings = OSVScannerParser().get_findings(io.StringIO(json.dumps(payload)), Test())
+        self.assertEqual(1, len(findings))
+        self.assertEqual("OSV-2020-1_", findings[0].title)
 
     def test_malformed_json_is_rejected(self):
         fixtures = (
