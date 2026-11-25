@@ -249,6 +249,16 @@ class TestFetchOsMessageSignature(SimpleTestCase):
         envelope["version"] = 2
         self.assert_rejected(_Resp(200, json.dumps(envelope)))
 
+    def test_unencodable_message_is_rejected_and_cached(self):
+        # A lone surrogate is valid JSON but cannot be encoded to UTF-8 for verification. It must
+        # count as no banner and be cached like any other rejection, not raise on every request.
+        body = json.dumps({"version": 1, "message": "# Hello \ud800\n", "signature": base64.b64encode(b"x" * 64).decode()})
+        with _with_test_key, patch("dojo.announcement.os_message.requests.get", return_value=_Resp(200, body)) as mock_get:
+            self.assertIsNone(os_message.fetch_os_message())
+            self.assertIsNone(os_message.fetch_os_message())
+        self.assertEqual(mock_get.call_count, 1)
+        self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
+
     def test_signed_empty_message_is_no_banner(self):
         self.assert_rejected(_signed_resp(""))
 

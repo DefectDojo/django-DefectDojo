@@ -118,7 +118,13 @@ def fetch_os_message():
 
     message = None
     if response.status_code == 200 and response.text.strip():
-        message = verify_signed_message(response.text)
+        try:
+            message = verify_signed_message(response.text)
+        except Exception:
+            # Whatever the object holds, the result is cached: a body that breaks the check must
+            # not make every page render fetch it again.
+            logger.warning("os_message: could not check the banner signature", exc_info=True)
+            message = None
         if message is None:
             logger.warning("os_message: banner signature did not verify; not showing it")
 
@@ -148,7 +154,11 @@ def verify_signed_message(body):
         signature_bytes = base64.b64decode(signature, validate=True)
     except (binascii.Error, ValueError):
         return None
-    signed_bytes = SIGNING_PREFIX + message.encode("utf-8")
+    try:
+        signed_bytes = SIGNING_PREFIX + message.encode("utf-8")
+    except UnicodeEncodeError:
+        # A lone surrogate is valid JSON but not UTF-8, so it can never have been signed.
+        return None
     for public_key in PUBLIC_KEYS:
         try:
             Ed25519PublicKey.from_public_bytes(base64.b64decode(public_key, validate=True)).verify(
