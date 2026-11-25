@@ -9,7 +9,7 @@ defusedxml==0.7.1
 django_celery_results==2.6.0
 django-auditlog==3.2.1
 django-pghistory==3.9.2
-django-dbbackup==5.4.0
+django-dbbackup==5.4.1
 django-environ==0.14.0
 django-filter==26.2
 django-htmx==1.29.0
@@ -34,7 +34,7 @@ lxml==6.1.3
 Markdown==3.11.3
 openpyxl==3.1.5
 Pillow==13.0.0  # required by django-imagekit
-psycopg[c]==3.3.6
+psycopg[c]==3.3.9
 cryptography==50.0.2
 python-dateutil==2.9.0.post0
 redis==8.1.0
@@ -67,7 +67,7 @@ django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3
 netaddr==1.3.0
-vulners==4.4.0
+vulners==4.5.0
 Brotli==1.2.1  # via vulners
 fontawesomefree==6.6.0
 PyYAML==6.0.3
