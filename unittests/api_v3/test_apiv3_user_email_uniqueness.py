@@ -1,4 +1,5 @@
 # Regression: user create and update accepted an email another account already held.
+from django.contrib.auth.models import Permission
 from django.test import override_settings
 
 from dojo.models import Dojo_User
@@ -40,3 +41,20 @@ class TestApiV3UserEmailUniqueness(ApiV3TestCase):
             self.v3_url(f"users/{self.other.pk}"), {"first_name": "Kept", "email": "HOLDER@example.com"}, format="json",
         )
         self.assertEqual(response.status_code, 200, response.content)
+
+    def test_a_user_manager_cannot_change_their_own_email(self):
+        manager = Dojo_User.objects.create(username="v3_uniq_manager", email="manager@example.com", is_active=True)
+        manager.user_permissions.add(
+            *Permission.objects.filter(
+                content_type__app_label="auth", codename__in=("view_user", "add_user", "change_user"),
+            ),
+        )
+        client = self.token_client(user=manager)
+        url = self.v3_url(f"users/{manager.pk}")
+        patched = client.patch(url, {"email": "fresh@example.com"}, format="json")
+        self.assertEqual(patched.status_code, 400, patched.content)
+        replaced = client.put(url, {"username": "v3_uniq_manager", "email": "fresh@example.com"}, format="json")
+        self.assertEqual(replaced.status_code, 400, replaced.content)
+        self.assertEqual(Dojo_User.objects.get(pk=manager.pk).email, "manager@example.com")
+        kept = client.patch(url, {"first_name": "Kept", "email": "manager@example.com"}, format="json")
+        self.assertEqual(kept.status_code, 200, kept.content)

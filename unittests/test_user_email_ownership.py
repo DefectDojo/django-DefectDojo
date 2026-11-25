@@ -211,6 +211,34 @@ class ApiUserEmailUniquenessTest(DojoTestCase):
             persisted = Dojo_User.objects.get(pk=user.pk).email
             self.assertNotEqual(persisted.lower(), "holder@example.com", msg=f"persisted={persisted}")
 
+    def test_v2_a_user_manager_cannot_change_their_own_email(self):
+        # The user API has no confirmation link: a non-superuser changes their own email from the profile.
+        for confirmation in (False, True):
+            with self.subTest(confirmation=confirmation), override_settings(EMAIL_CHANGE_CONFIRMATION_ENABLED=confirmation):
+                response = self.api.patch(
+                    reverse("user-detail", args=(self.manager.pk,)), {"email": "fresh@example.com"}, format="json",
+                )
+                self.assertEqual(response.status_code, 400, response.content)
+                self.assertIn("email", response.json())
+                self.assertNotEqual(Dojo_User.objects.get(pk=self.manager.pk).email, "fresh@example.com")
+        self.assertEqual(mail.outbox, [])
+
+    def test_v2_a_user_manager_edits_their_own_other_fields(self):
+        response = self.api.patch(
+            reverse("user-detail", args=(self.manager.pk,)),
+            {"first_name": "Kept", "email": self.manager.email},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_v2_a_superuser_changes_their_own_email(self):
+        admin = Dojo_User.objects.create(username="api_uniq_admin", email="admin@example.com", is_superuser=True)
+        api = APIClient()
+        api.force_authenticate(admin)
+        response = api.patch(reverse("user-detail", args=(admin.pk,)), {"email": "admin2@example.com"}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(Dojo_User.objects.get(pk=admin.pk).email, "admin2@example.com")
+
     def test_v2_update_of_other_fields_keeps_a_shared_email(self):
         Dojo_User.objects.filter(pk=self.other.pk).update(email="HOLDER@example.com")
         response = self.api.patch(

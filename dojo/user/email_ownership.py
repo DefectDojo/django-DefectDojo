@@ -84,6 +84,22 @@ def self_service_refusal(user, *, sso_user=None):
     return None
 
 
+def api_self_change_refusal(acting_user, user, email):
+    """
+    Why ``acting_user`` may not set ``email`` on ``user`` through a user API, or ``None``.
+
+    The user APIs save at once and send no confirmation link, so a non-superuser editing their own record
+    there (they hold the user-management permissions) changes their email from the profile instead, where the
+    rules above apply. A superuser, another account (gated by the identity-field rule) and an unchanged address
+    are not this rule's business.
+    """
+    if user is None or acting_user.is_superuser or user.pk != acting_user.pk or not is_new_email(user, email):
+        return None
+    return self_service_refusal(user) or _(
+        "Change your own email address from your profile, which sends a confirmation link to the new address.",
+    )
+
+
 def make_token(user, new_email):
     """A signed, expiring link token that moves ``user`` from their current email to ``new_email``."""
     return signing.dumps({"user": user.pk, "from": user.email or "", "to": new_email}, salt=TOKEN_SALT, compress=True)
