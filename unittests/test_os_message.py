@@ -1,9 +1,13 @@
+import base64
 import hashlib
+import json
 import re
 from types import SimpleNamespace
 from unittest.mock import patch
 
 import requests
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from django.core.cache import cache
 from django.template import Context, Template
 from django.test import RequestFactory, SimpleTestCase, override_settings
@@ -19,6 +23,30 @@ class _Resp:
     def __init__(self, status_code=200, text=""):
         self.status_code = status_code
         self.text = text
+
+
+_TEST_KEY = Ed25519PrivateKey.generate()
+_TEST_PUBLIC_KEY = base64.b64encode(
+    _TEST_KEY.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw),
+).decode()
+
+
+def _signed(message, key=_TEST_KEY, prefix=b"defectdojo-os-message-v1\n"):
+    """The body of the signed banner object, as the publisher writes it."""
+    signature = key.sign(prefix + message.encode("utf-8"))
+    return json.dumps({
+        "version": 1,
+        "message": message,
+        "signature": base64.b64encode(signature).decode(),
+    })
+
+
+def _signed_resp(message, **kwargs):
+    return _Resp(200, _signed(message, **kwargs))
+
+
+# Every test in this module verifies against the throwaway key above, not the shipped one.
+_with_test_key = patch("dojo.announcement.os_message.PUBLIC_KEYS", (_TEST_PUBLIC_KEY,))
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
@@ -46,10 +74,10 @@ class TestParseOsMessage(SimpleTestCase):
         self.assertIsNone(os_message.parse_os_message(text))
 
     def test_headline_inline_markdown(self):
-        text = "# Read the **release notes** at [link](https://example.com)\n"
+        text = "# Read the **release notes** at [link](https://docs.defectdojo.com/)\n"
         result = os_message.parse_os_message(text)
         self.assertIn("<strong>release notes</strong>", result["message"])
-        self.assertIn('<a href="https://example.com">link</a>', result["message"])
+        self.assertIn('<a href="https://docs.defectdojo.com/">link</a>', result["message"])
         self.assertIsNone(result["expanded_html"])
 
     def test_headline_strips_disallowed_html(self):
@@ -103,6 +131,7 @@ class TestParseOsMessage(SimpleTestCase):
         self.assertLessEqual(len(result["message"]), 100)
 
 
+@_with_test_key
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 class TestFetchOsMessage(SimpleTestCase):
 
@@ -111,18 +140,18 @@ class TestFetchOsMessage(SimpleTestCase):
 
     def test_200_with_body_caches_body(self):
         body = "# headline\n"
-        with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(200, body)) as mock_get:
+        with patch("dojo.announcement.os_message.requests.get", return_value=_signed_resp(body)) as mock_get:
             result = os_message.fetch_os_message()
         self.assertEqual(result, body)
         self.assertEqual(cache.get(os_message.CACHE_KEY), body)
-        mock_get.assert_called_once()
+        mock_get.assert_called_once_with(os_message.SIGNED_URL, timeout=os_message.HTTP_TIMEOUT_SECONDS)
 
     def test_body_decoded_as_utf8_without_charset_header(self):
-        body = "# Headline\n\n## Expanded Message\n\n[Compare plans →](https://example.com)\n"
+        body = "# Headline\n\n## Expanded Message\n\n[Compare plans →](https://defectdojo.com/pricing)\n"
         response = requests.Response()
         response.status_code = 200
-        response._content = body.encode("utf-8")
-        response.headers["Content-Type"] = "text/markdown"
+        response._content = _signed(body).encode("utf-8")
+        response.headers["Content-Type"] = "application/json"
         # Mirror what the requests adapter does for a text/* type with no charset.
         response.encoding = requests.utils.get_encoding_from_headers(response.headers)
         with patch("dojo.announcement.os_message.requests.get", return_value=response):
@@ -155,7 +184,7 @@ class TestFetchOsMessage(SimpleTestCase):
         self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
 
     def test_second_call_hits_cache(self):
-        with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(200, "# h\n")) as mock_get:
+        with patch("dojo.announcement.os_message.requests.get", return_value=_signed_resp("# h\n")) as mock_get:
             os_message.fetch_os_message()
             os_message.fetch_os_message()
         self.assertEqual(mock_get.call_count, 1)
@@ -168,10 +197,167 @@ class TestFetchOsMessage(SimpleTestCase):
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+class TestFetchOsMessageSignature(SimpleTestCase):
+
+    """An install shows only a banner signed with a key it ships; anything else is cached as no banner."""
+
+    def setUp(self):
+        cache.clear()
+
+    def _fetch(self, response):
+        with _with_test_key, patch("dojo.announcement.os_message.requests.get", return_value=response):
+            return os_message.fetch_os_message()
+
+    def assert_rejected(self, response):
+        self.assertIsNone(self._fetch(response))
+        self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
+
+    def test_valid_signature_is_accepted(self):
+        self.assertEqual(self._fetch(_signed_resp("# Hello\n")), "# Hello\n")
+
+    def test_unsigned_markdown_is_rejected(self):
+        self.assert_rejected(_Resp(200, "# Visit [us](https://evil.example)\n"))
+
+    def test_altered_message_is_rejected(self):
+        envelope = json.loads(_signed("# Hello\n"))
+        envelope["message"] = "# Hello [there](https://evil.example)\n"
+        self.assert_rejected(_Resp(200, json.dumps(envelope)))
+
+    def test_signature_from_another_key_is_rejected(self):
+        self.assert_rejected(_signed_resp("# Hello\n", key=Ed25519PrivateKey.generate()))
+
+    def test_signature_without_domain_prefix_is_rejected(self):
+        self.assert_rejected(_signed_resp("# Hello\n", prefix=b""))
+
+    def test_missing_or_malformed_signature_is_rejected(self):
+        for signature in (None, "", "not base64!", base64.b64encode(b"short").decode(), 42):
+            with self.subTest(signature=signature):
+                cache.clear()
+                envelope = json.loads(_signed("# Hello\n"))
+                envelope["signature"] = signature
+                self.assert_rejected(_Resp(200, json.dumps(envelope)))
+
+    def test_malformed_envelopes_are_rejected(self):
+        for body in ("{", "[]", "null", json.dumps({"version": 2, "message": "# h\n", "signature": ""}),
+                     json.dumps({"version": 1, "message": 7, "signature": ""})):
+            with self.subTest(body=body):
+                cache.clear()
+                self.assert_rejected(_Resp(200, body))
+
+    def test_unsupported_version_is_rejected_even_when_signed(self):
+        envelope = json.loads(_signed("# Hello\n"))
+        envelope["version"] = 2
+        self.assert_rejected(_Resp(200, json.dumps(envelope)))
+
+    def test_signed_empty_message_is_no_banner(self):
+        self.assert_rejected(_signed_resp(""))
+
+    def test_no_shipped_key_shows_nothing(self):
+        with patch("dojo.announcement.os_message.PUBLIC_KEYS", ()), \
+             patch("dojo.announcement.os_message.requests.get", return_value=_signed_resp("# Hello\n")):
+            self.assertIsNone(os_message.fetch_os_message())
+
+    def test_any_shipped_key_verifies(self):
+        other = base64.b64encode(
+            Ed25519PrivateKey.generate().public_key().public_bytes(Encoding.Raw, PublicFormat.Raw),
+        ).decode()
+        with patch("dojo.announcement.os_message.PUBLIC_KEYS", (other, _TEST_PUBLIC_KEY)), \
+             patch("dojo.announcement.os_message.requests.get", return_value=_signed_resp("# Hello\n")):
+            self.assertEqual(os_message.fetch_os_message(), "# Hello\n")
+
+    def test_shipped_keys_are_valid_ed25519_keys(self):
+        for key in os_message.PUBLIC_KEYS:
+            with self.subTest(key=key):
+                self.assertEqual(len(base64.b64decode(key, validate=True)), 32)
+
+
+class TestOsMessageLinkHosts(SimpleTestCase):
+
+    """A signed banner can still only link to company hosts; any other link keeps its text and loses its href."""
+
+    ALLOWED = (
+        "https://defectdojo.com",
+        "https://defectdojo.com/pricing",
+        "https://www.defectdojo.com/a?b=c#d",
+        "https://docs.defectdojo.com/en/latest/",
+        "https://DefectDojo.ORG/",
+        "https://documentation.defectdojo.org/x",
+        "https://github.com/DefectDojo",
+        "https://github.com/DefectDojo/django-DefectDojo/releases",
+        "https://github.com/defectdojo/django-DefectDojo",
+        "https://github.com/DefectDojo-Inc/",
+    )
+    DENIED = (
+        "http://defectdojo.com/",
+        "https://evil.example/",
+        "https://defectdojo.com.evil.example/",
+        "https://evildefectdojo.com/",
+        "https://defectdojo.com@evil.example/",
+        "https://evil.example\\@defectdojo.com/",
+        "https://defectdojo.com:8443/",
+        "https://github.com/",
+        "https://github.com/DefectDojoEvil/x",
+        "https://github.com/someone/DefectDojo",
+        "https://gist.github.com/DefectDojo/x",
+        "javascript:alert(1)",
+        "data:text/html,hi",
+        "mailto:hello@defectdojo.com",
+        "//evil.example/",
+        "/relative",
+        "",
+    )
+
+    def test_allowed_link_hosts(self):
+        for url in self.ALLOWED:
+            with self.subTest(url=url):
+                self.assertTrue(os_message.is_allowed_link(url))
+
+    def test_denied_link_hosts(self):
+        for url in self.DENIED:
+            with self.subTest(url=url):
+                self.assertFalse(os_message.is_allowed_link(url))
+
+    def test_headline_drops_foreign_href_keeps_text(self):
+        result = os_message.parse_os_message("# Read [this](https://evil.example/x) and [docs](https://docs.defectdojo.com/)\n")
+        self.assertNotIn("evil.example", result["message"])
+        self.assertIn("this", result["message"])
+        self.assertIn('href="https://docs.defectdojo.com/"', result["message"])
+
+    def test_expanded_drops_foreign_hrefs_including_autolinks(self):
+        text = (
+            "# h\n\n## Expanded Message\n\n"
+            "[a](https://evil.example/a) <https://evil.example/b> "
+            '<a href="https://evil.example/c">c</a> [ok](https://github.com/DefectDojo/django-DefectDojo)\n'
+        )
+        html = os_message.parse_os_message(text)["expanded_html"]
+        self.assertNotIn('href="https://evil.example', html)
+        self.assertEqual(html.count("href="), 1)
+        self.assertIn('href="https://github.com/DefectDojo/django-DefectDojo"', html)
+
+
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 class TestGetOsBanner(SimpleTestCase):
 
     def setUp(self):
         cache.clear()
+        os_message._parsed_banner = None
+
+    def test_same_text_is_parsed_once(self):
+        with patch("dojo.announcement.os_message.fetch_os_message", return_value="# Headline\n"), \
+             patch("dojo.announcement.os_message.parse_os_message", wraps=os_message.parse_os_message) as mock_parse:
+            first = os_message.get_os_banner()
+            second = os_message.get_os_banner()
+            # Each caller gets its own dict, so one request cannot change what the next one sees.
+            first["message"] = "changed"
+            third = os_message.get_os_banner()
+        self.assertEqual(mock_parse.call_count, 1)
+        self.assertEqual(second["message"], "Headline")
+        self.assertEqual(third["message"], "Headline")
+
+    def test_new_text_is_parsed_again(self):
+        with patch("dojo.announcement.os_message.fetch_os_message", side_effect=["# One\n", "# Two\n"]):
+            self.assertEqual(os_message.get_os_banner()["message"], "One")
+            self.assertEqual(os_message.get_os_banner()["message"], "Two")
 
     def test_returns_none_when_fetch_returns_none(self):
         with patch("dojo.announcement.os_message.fetch_os_message", return_value=None):
