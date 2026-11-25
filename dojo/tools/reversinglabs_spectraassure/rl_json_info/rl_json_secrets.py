@@ -198,25 +198,3 @@ class SecretsExtractor:
 def extract_secrets(violations: Json | None, components: Json | None, secrets: Json | None) -> SecretsTree:
     """Convenience wrapper around :class:`SecretsExtractor`."""
     return SecretsExtractor(violations, components, secrets).extract()
-
-
-if __name__ == "__main__":
-    import sys
-    from pathlib import Path
-
-    if len(sys.argv) != 2:
-        sys.stderr.write(f"usage: {sys.argv[0]} <report.rl.json>\n")
-        raise SystemExit(2)
-
-    with Path(sys.argv[1]).open(encoding="utf-8") as handle:
-        metadata = json.load(handle)["report"]["metadata"]
-
-    extractor = SecretsExtractor(
-        violations=metadata.pop("violations", None),
-        components=metadata.pop("components", None),
-        secrets=metadata.pop("secrets", None),
-    )
-    del metadata
-
-    # sys.stdout.write, not print(): upstream's ruff config selects T20, which forbids print
-    sys.stdout.write(extractor.to_json() + "\n")
