@@ -1,6 +1,7 @@
 import base64
 import binascii
 import hashlib
+import html
 import json
 import logging
 from urllib.parse import unquote, urlsplit
@@ -56,6 +57,9 @@ BLOCK_TAGS = [
 
 def is_allowed_link(url):
     """True when url is an https link to a company host (see ALLOWED_LINK_DOMAINS / ALLOWED_GITHUB_ORGS)."""
+    # Browsers decode character references in an href once before following it, so the rule judges
+    # the decoded URL: "&#46;&#46;" is a ".." segment to a browser.
+    url = html.unescape(url or "")
     # A backslash, whitespace or control character parses differently in browsers than in urlsplit
     # (https://evil.example\\@defectdojo.com goes to evil.example), so any of them is refused.
     if not url or any(ch == "\\" or ord(ch) <= 0x20 or ord(ch) == 0x7F for ch in url):

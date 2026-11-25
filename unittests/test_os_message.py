@@ -316,6 +316,9 @@ class TestOsMessageLinkHosts(SimpleTestCase):
         "https://github.com/DefectDojo/x%5c..%5cevil-org",
         "https://github.com/DefectDojo/./x",
         "https://defectdojo.com/a/../b",
+        "https://github.com/DefectDojo/&#46;&#46;/evil-org/repo",
+        "https://github.com/DefectDojo/x/..&#x5c;evil-org",
+        "https://github.com/DefectDojo/&period;&period;/evil-org",
         "javascript:alert(1)",
         "data:text/html,hi",
         "mailto:hello@defectdojo.com",
@@ -339,6 +342,15 @@ class TestOsMessageLinkHosts(SimpleTestCase):
         self.assertNotIn("evil.example", result["message"])
         self.assertIn("this", result["message"])
         self.assertIn('href="https://docs.defectdojo.com/"', result["message"])
+
+    def test_character_references_are_decoded_before_the_check(self):
+        # Browsers decode character references in an href before following it, so the rule
+        # judges the decoded URL: encoded dot segments are refused, an encoded query separator
+        # in an allowed link is fine.
+        md = "# h\n\n## Expanded Message\n\n[a](https://github.com/DefectDojo/&#46;&#46;/evil-org/repo) [b](https://defectdojo.com/p?x=1&amp;y=2)\n"
+        html = os_message.parse_os_message(md)["expanded_html"]
+        hrefs = re.findall(r'href="([^"]*)"', html)
+        self.assertEqual(hrefs, ["https://defectdojo.com/p?x=1&amp;y=2"])
 
     def test_expanded_drops_foreign_hrefs_including_autolinks(self):
         text = (
