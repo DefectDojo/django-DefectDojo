@@ -131,3 +131,15 @@ def user_may_delete_account(acting_user, target_user):
     if acting_user.is_superuser:
         return True
     return not (target_user.is_superuser or target_user.is_staff)
+
+
+# Keyed by model label: single_session cannot be imported when its app is not installed.
+_HIDDEN_DELETE_PREVIEW_ROWS = {
+    "authtoken.Token": "<APITokenIsHidden>",
+    "single_session.UserSession": "<SessionIsHidden>",
+}
+
+
+def delete_preview_label(obj):
+    """The text a delete preview shows for obj. Rows whose str() is a credential are hidden."""
+    return _HIDDEN_DELETE_PREVIEW_ROWS.get(obj._meta.label) or str(obj)

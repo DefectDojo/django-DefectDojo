@@ -54,7 +54,7 @@ from dojo.user.ui.forms import (
     EditDojoUserForm,
     UserContactInfoForm,
 )
-from dojo.user.utils import user_may_delete_account
+from dojo.user.utils import delete_preview_label, user_may_delete_account
 from dojo.utils import (
     add_breadcrumb,
     get_page_items,
@@ -518,35 +518,36 @@ def delete_user(request, uid):
                              extra_tags="alert-danger")
         return HttpResponseRedirect(reverse("edit_user", args=(user.id,)))
 
+    if not user_may_delete_account(request.user, user):
+        messages.add_message(request,
+                             messages.ERROR,
+                             _("Only superusers are allowed to delete superusers or staff users. User was not removed."),
+                             extra_tags="alert-danger")
+        return HttpResponseRedirect(reverse("view_user", args=(user.id,)))
+
     if request.method == "POST":
         if "id" in request.POST and str(user.id) == request.POST["id"]:
             form = DeleteUserForm(request.POST, instance=user)
             if form.is_valid():
-                if not user_may_delete_account(request.user, user):
+                try:
+                    user.delete()
                     messages.add_message(request,
-                                        messages.ERROR,
-                                        _("Only superusers are allowed to delete superusers or staff users. User was not removed."),
-                                        extra_tags="alert-danger")
-                else:
-                    try:
-                        user.delete()
-                        messages.add_message(request,
-                                            messages.SUCCESS,
-                                            _("User and relationships removed."),
-                                            extra_tags="alert-success")
-                    except RestrictedError as err:
-                        messages.add_message(request,
-                                            messages.WARNING,
-                                            _("User cannot be deleted: %(error)s") % {"error": restricted_delete_reason(err)},
-                                            extra_tags="alert-warning")
-                    return HttpResponseRedirect(reverse("users"))
+                                         messages.SUCCESS,
+                                         _("User and relationships removed."),
+                                         extra_tags="alert-success")
+                except RestrictedError as err:
+                    messages.add_message(request,
+                                         messages.WARNING,
+                                         _("User cannot be deleted: %(error)s") % {"error": restricted_delete_reason(err)},
+                                         extra_tags="alert-warning")
+                return HttpResponseRedirect(reverse("users"))
 
     rels = ["Previewing the relationships has been disabled.", ""]
     display_preview = get_setting("DELETE_PREVIEW")
     if display_preview:
         collector = NestedObjects(using=DEFAULT_DB_ALIAS)
         collector.collect([user])
-        rels = collector.nested()
+        rels = collector.nested(delete_preview_label)
 
     add_breadcrumb(title=_("Delete User"), top_level=False, request=request)
     return render(request, "dojo/delete_user.html",
