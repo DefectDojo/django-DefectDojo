@@ -165,8 +165,8 @@ env = environ.FileAwareEnv(
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_DATA_UPLOAD_MAX_NUMBER_FIELDS=(int, 10240),  # Max number of GET/POST parameters in a request
     DD_MAX_ZIP_MEMBERS=(int, 1000),
-    DD_MAX_ZIP_MEMBER_SIZE=(int, 512 * 1024 * 1024),  # 512 MB per member (uncompressed)
-    DD_MAX_ZIP_TOTAL_SIZE=(int, 1 * 1024 * 1024 * 1024),  # 1 GB total (uncompressed)
+    DD_MAX_ZIP_MEMBER_SIZE=(int, 128 * 1024 * 1024),  # 128 MB per member (uncompressed)
+    DD_MAX_ZIP_TOTAL_SIZE=(int, 128 * 1024 * 1024),  # 128 MB total (uncompressed)
     DD_MAX_ZIP_RATIO=(int, 100),  # max compression ratio (uncompressed / compressed)
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
@@ -274,6 +274,9 @@ env = environ.FileAwareEnv(
     DD_RATE_LIMITER_ENABLED=(bool, False),
     # Account-recovery emails (password reset, forgot username) sent to one address per hour. 0 disables the limit.
     DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR=(int, 5),
+    # A user changing their own email confirms the new address through a link sent to it. Needs a working
+    # DD_EMAIL_URL. Off (the default), only an administrator changes a user's email.
+    DD_EMAIL_CHANGE_CONFIRMATION_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
     DD_RATE_LIMITER_RATE=(str, "5/m"),
     # Block the requests after rate limit is exceeded
@@ -699,6 +702,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://django-ratelimit.readthedocs.io/en/stable/index.html
 RATE_LIMITER_ENABLED = env("DD_RATE_LIMITER_ENABLED")
 ACCOUNT_RECOVERY_EMAILS_PER_HOUR = env("DD_ACCOUNT_RECOVERY_EMAILS_PER_HOUR")
+EMAIL_CHANGE_CONFIRMATION_ENABLED = env("DD_EMAIL_CHANGE_CONFIRMATION_ENABLED")
 RATE_LIMITER_RATE = env("DD_RATE_LIMITER_RATE")  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
 RATE_LIMITER_BLOCK = env("DD_RATE_LIMITER_BLOCK")  # Block the requests after rate limit is exceeded
 RATE_LIMITER_ACCOUNT_LOCKOUT = env("DD_RATE_LIMITER_ACCOUNT_LOCKOUT")  # Forces the user to change password on next login.

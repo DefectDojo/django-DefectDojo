@@ -42,7 +42,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-2",
-            "email": "admin@dojo.com",
+            "email": "api-user-2@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -57,7 +57,7 @@ class UserTest(APITestCase):
         # user with weak password
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-3",
-            "email": "admin@dojo.com",
+            "email": "api-user-3@example.com",
             "password": "weakPassword",
         }, format="json")
         self.assertEqual(r.status_code, 400, r.content[:1000])
@@ -91,7 +91,7 @@ class UserTest(APITestCase):
         # some user
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-4",
-            "email": "admin@dojo.com",
+            "email": "api-user-4@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -100,19 +100,19 @@ class UserTest(APITestCase):
         r = self.client.put("{}{}/".format(reverse("user-list"), user_id), {
             "username": "api-user-4",
             "first_name": "first",
-            "email": "admin@dojo.com",
+            "email": "api-user-4@example.com",
         }, format="json")
         self.assertEqual(r.status_code, 200, r.content[:1000])
 
         r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
             "last_name": "last",
-            "email": "admin@dojo.com",
+            "email": "api-user-4@example.com",
         }, format="json")
         self.assertEqual(r.status_code, 200, r.content[:1000])
 
         r = self.client.put("{}{}/".format(reverse("user-list"), user_id), {
             "username": "api-user-4",
-            "email": "admin@dojo.com",
+            "email": "api-user-4@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 400, r.content[:1000])
@@ -120,7 +120,7 @@ class UserTest(APITestCase):
 
         r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
             "password": "testTEST1234!@#$",
-            "email": "admin@dojo.com",
+            "email": "api-user-4@example.com",
         }, format="json")
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Update of password though API is not allowed", r.content.decode("utf-8"))
@@ -130,7 +130,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-10",
-            "email": "admin@dojo.com",
+            "email": "api-user-10@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -139,7 +139,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-2",
-            "email": "admin@dojo.com",
+            "email": "api-user-2@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -166,7 +166,7 @@ class UserTest(APITestCase):
     def test_user_reset_api_token_as_superuser(self):
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-reset-1",
-            "email": "admin@dojo.com",
+            "email": "api-user-reset-1@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -202,7 +202,7 @@ class UserTest(APITestCase):
         # Create a target
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-reset-target",
-            "email": "admin@dojo.com",
+            "email": "api-user-reset-target@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -212,7 +212,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-nonpriv",
-            "email": "admin@dojo.com",
+            "email": "api-user-nonpriv@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -242,7 +242,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-mgr",
-            "email": "admin@dojo.com",
+            "email": "api-user-mgr@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -275,7 +275,7 @@ class UserTest(APITestCase):
         # Target-escalation: setting is_staff on another user must be rejected.
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-target",
-            "email": "admin@dojo.com",
+            "email": "api-user-target@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -291,7 +291,7 @@ class UserTest(APITestCase):
         # Create-time escalation must also be rejected.
         r = mgr_client.post(reverse("user-list"), {
             "username": "api-user-staff-on-create",
-            "email": "admin@dojo.com",
+            "email": "api-user-staff-on-create@example.com",
             "password": password,
             "is_staff": True,
         }, format="json")
@@ -307,7 +307,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-mgr2",
-            "email": "admin@dojo.com",
+            "email": "api-user-mgr2@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -331,7 +331,7 @@ class UserTest(APITestCase):
         """Positive control: a superuser is still allowed to toggle is_staff."""
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-promotable",
-            "email": "admin@dojo.com",
+            "email": "api-user-promotable@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -355,7 +355,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-cfgperm-mgr",
-            "email": "admin@dojo.com",
+            "email": "api-cfgperm-mgr@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -393,7 +393,7 @@ class UserTest(APITestCase):
         # must be rejected.
         r = self.client.post(reverse("user-list"), {
             "username": "api-cfgperm-target",
-            "email": "admin@dojo.com",
+            "email": "api-cfgperm-target@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -408,7 +408,7 @@ class UserTest(APITestCase):
         # Create-time escalation must also be rejected.
         r = mgr_client.post(reverse("user-list"), {
             "username": "api-cfgperm-on-create",
-            "email": "admin@dojo.com",
+            "email": "api-cfgperm-on-create@example.com",
             "password": password,
             "configuration_permissions": [delete_user.id],
         }, format="json")
@@ -425,7 +425,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-cfgperm-mgr2",
-            "email": "admin@dojo.com",
+            "email": "api-cfgperm-mgr2@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -458,7 +458,7 @@ class UserTest(APITestCase):
         """Positive control: a superuser may still assign configuration permissions."""
         r = self.client.post(reverse("user-list"), {
             "username": "api-cfgperm-grantable",
-            "email": "admin@dojo.com",
+            "email": "api-cfgperm-grantable@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -480,7 +480,7 @@ class UserTest(APITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-global-owner",
-            "email": "admin@dojo.com",
+            "email": "api-user-global-owner@example.com",
             "password": password,
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])
@@ -495,7 +495,7 @@ class UserTest(APITestCase):
         # Create target
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-reset-2",
-            "email": "admin@dojo.com",
+            "email": "api-user-reset-2@example.com",
             "password": "testTEST1234!@#$",
         }, format="json")
         self.assertEqual(r.status_code, 201, r.content[:1000])

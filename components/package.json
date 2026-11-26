@@ -6,7 +6,7 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.2",
     "@fontsource-variable/jetbrains-mono": "^5.2",
-    "@scalar/api-reference": "1.78.1",
+    "@scalar/api-reference": "1.82.1",
     "bootstrap-wysiwyg": "^2.0.0",
     "chart.js": "^4.6",
     "chartjs-adapter-moment": "^1.0",
@@ -19,12 +19,12 @@
     "easymde": "^2.21.0",
     "flatpickr": "^4.6",
     "fullcalendar": "^3.10.2",
-    "jquery": "^3.7.1",
+    "jquery": "^3.8.0",
     "jquery-ui": "1.14.2",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
     "jszip": "^3.10.2",
     "moment": "^2.31.0",
-    "pdfmake": "^0.3.14"
+    "pdfmake": "^0.3.15"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3",

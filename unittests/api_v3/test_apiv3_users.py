@@ -399,13 +399,24 @@ class TestApiV3UsersIdentityFieldAuthz(ApiV3TestCase):
         self.target.refresh_from_db()
         self.assertEqual("target@example.com", self.target.email)
 
-    def test_delegate_can_change_own_email(self):
+    def test_delegate_cannot_change_own_email_through_the_api(self):
+        # The users API saves at once and sends no confirmation link, so the delegate's own new email goes
+        # through the profile (dojo.user.email_ownership.api_self_change_refusal).
         response = self.delegate_client.patch(
             self.v3_url(f"users/{self.delegate.id}"), {"email": "mynew@example.com"}, format="json",
         )
+        self.assertEqual(400, response.status_code, response.content[:500])
+        self.assertEqual("application/problem+json", response["Content-Type"])
+        self.delegate.refresh_from_db()
+        self.assertEqual("", self.delegate.email)
+
+    def test_delegate_can_change_own_username(self):
+        response = self.delegate_client.patch(
+            self.v3_url(f"users/{self.delegate.id}"), {"username": "v3_identity_renamed"}, format="json",
+        )
         self.assertEqual(200, response.status_code, response.content[:500])
         self.delegate.refresh_from_db()
-        self.assertEqual("mynew@example.com", self.delegate.email)
+        self.assertEqual("v3_identity_renamed", self.delegate.username)
 
     def test_superuser_can_change_another_users_email(self):
         # Positive control: the admin (superuser, default client) is unrestricted.

@@ -15,6 +15,7 @@ urlpatterns = [
     re_path(r"^alerts/partial$", views.alerts_partial, name="alerts_partial"),
     re_path(r"^delete_alerts$", views.delete_alerts, name="delete_alerts"),
     re_path(r"^profile$", views.view_profile, name="view_profile"),
+    re_path(r"^profile/email/confirm/(?P<token>[\w:.-]+)$", views.confirm_email_change, name="confirm_email_change"),
     re_path(r"^change_password$", views.change_password, name="change_password"),
     re_path(r"^user$", views.user, name="users"),
     re_path(r"^user/add$", views.add_user, name="add_user"),
