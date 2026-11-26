@@ -552,6 +552,17 @@ class JIRATransitionFieldsTest(TestCase):
 
         jira.transition_issue.assert_called_once_with(issue, 41, fields=self.CLOSE_FIELDS)
 
+    def test_jira_transition_ignores_fields_that_are_not_a_json_object(self):
+        # A transition ID stored by mistake in the fields setting must not reach JIRA as `fields`.
+        for bad_fields in (141, "141", [141]):
+            with self.subTest(fields=bad_fields):
+                jira = Mock()
+                issue = Mock()
+
+                self.assertTrue(jira_helper.jira_transition(jira, issue, 491, fields=bad_fields))
+
+                jira.transition_issue.assert_called_once_with(issue, 491)
+
     @patch("dojo.jira.helper.jira_transition", return_value=True)
     @patch("dojo.jira.helper._safely_get_obj_status_for_jira", return_value=["Mitigated"])
     def test_push_status_to_jira_close_sends_close_transition_fields(self, status_mock, jira_transition):
@@ -652,6 +663,42 @@ class JIRATransitionFieldsTest(TestCase):
         get_jira_project.return_value = Mock(
             enable_engagement_epic_mapping=True,
             close_transition_fields=None,
+        )
+        get_jira_instance.return_value = Mock(
+            url="https://jira.example.com",
+            username="user",
+            password="pass",  # noqa: S106 - test fixture credential
+            close_status_key=41,
+        )
+        get_jira_issue.return_value = Mock(jira_id="10001")
+        requests_post.return_value = Mock(status_code=204)
+
+        self.assertTrue(jira_helper.close_epic(5, push_to_jira=True))
+
+        _args, kwargs = requests_post.call_args
+        self.assertEqual({"transition": {"id": 41}}, kwargs["json"])
+
+    @patch("dojo.jira.helper.requests.post")
+    @patch("dojo.jira.helper.get_jira_issue")
+    @patch("dojo.jira.helper.get_jira_instance")
+    @patch("dojo.jira.helper.get_jira_project")
+    @patch("dojo.jira.helper.is_jira_configured_and_enabled", return_value=True)
+    @patch("dojo.jira.helper.is_jira_enabled", return_value=True)
+    @patch("dojo.jira.helper.get_object_or_none")
+    def test_close_epic_omits_fields_that_are_not_a_json_object(
+        self,
+        get_object_or_none,
+        is_jira_enabled,
+        is_jira_configured_and_enabled,
+        get_jira_project,
+        get_jira_instance,
+        get_jira_issue,
+        requests_post,
+    ):
+        get_object_or_none.return_value = Mock(id=5)
+        get_jira_project.return_value = Mock(
+            enable_engagement_epic_mapping=True,
+            close_transition_fields=141,
         )
         get_jira_instance.return_value = Mock(
             url="https://jira.example.com",
