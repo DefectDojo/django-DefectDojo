@@ -84,8 +84,6 @@ class TestDeferredChoiceField(DojoTestCase):
 
 class TestConfigurationPermissionsPerRequest(DojoTestCase):
 
-    fixtures = ["dojo_testdata.json"]
-
     def codenames(self, serializer):
         field = serializer.fields["configuration_permissions"]
         self.assertEqual(list(field.queryset), list(field.child_relation.queryset))

@@ -36,6 +36,7 @@ from dojo.filters import (
     ReportRiskAcceptanceFilter,
     custom_vulnerability_id_filter,
     cwe_options,
+    drop_disabled_finding_filters,
     filter_endpoints_base,
     filter_endpoints_host_base,
     get_finding_filterset_fields,
@@ -69,7 +70,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
 from dojo.user.queries import get_authorized_users
-from dojo.utils import get_system_setting, get_visible_scan_types, is_finding_groups_enabled
+from dojo.utils import get_visible_scan_types
 
 labels = get_labels()
 
@@ -155,33 +156,32 @@ class FindingFilterHelper(FilterSet):
         exclude=True,
         label="Has notes")
 
-    if is_finding_groups_enabled():
-        has_finding_group = BooleanFilter(
-            field_name="finding_group",
-            lookup_expr="isnull",
-            exclude=True,
-            label="Is Grouped")
+    # The finding group and JIRA filters are declared whatever the settings say; each instance drops the ones
+    # its settings have off (drop_disabled_finding_filters in __init__).
+    has_finding_group = BooleanFilter(
+        field_name="finding_group",
+        lookup_expr="isnull",
+        exclude=True,
+        label="Is Grouped")
 
-    if get_system_setting("enable_jira"):
-        has_jira_issue = BooleanFilter(
-            field_name="jira_issue",
-            lookup_expr="isnull",
-            exclude=True,
-            label="Has JIRA")
-        jira_creation = DateRangeFilter(field_name="jira_issue__jira_creation", label="JIRA Creation")
-        jira_change = DateRangeFilter(field_name="jira_issue__jira_change", label="JIRA Updated")
-        jira_issue__jira_key = CharFilter(field_name="jira_issue__jira_key", lookup_expr="icontains", label="JIRA issue")
+    has_jira_issue = BooleanFilter(
+        field_name="jira_issue",
+        lookup_expr="isnull",
+        exclude=True,
+        label="Has JIRA")
+    jira_creation = DateRangeFilter(field_name="jira_issue__jira_creation", label="JIRA Creation")
+    jira_change = DateRangeFilter(field_name="jira_issue__jira_change", label="JIRA Updated")
+    jira_issue__jira_key = CharFilter(field_name="jira_issue__jira_key", lookup_expr="icontains", label="JIRA issue")
 
-        if is_finding_groups_enabled():
-            has_jira_group_issue = BooleanFilter(
-                field_name="finding_group__jira_issue",
-                lookup_expr="isnull",
-                exclude=True,
-                label="Has Group JIRA")
-        has_any_jira_issue = FindingHasJIRAFilter(
-            label="Has Any JIRA Issue",
-            help_text="Matches JIRA issues linked to the finding itself or to the finding's group.",
-        )
+    has_jira_group_issue = BooleanFilter(
+        field_name="finding_group__jira_issue",
+        lookup_expr="isnull",
+        exclude=True,
+        label="Has Group JIRA")
+    has_any_jira_issue = FindingHasJIRAFilter(
+        label="Has Any JIRA Issue",
+        help_text="Matches JIRA issues linked to the finding itself or to the finding's group.",
+    )
 
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
@@ -252,6 +252,7 @@ class FindingFilterHelper(FilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        drop_disabled_finding_filters(self)
         if "test__test_type" in self.form.fields:
             self.form.fields["test__test_type"].queryset = get_visible_scan_types()
 
@@ -379,21 +380,20 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         label="Test name Contains",
         help_text="Search for Test names that contain a given pattern")
 
-    if is_finding_groups_enabled():
-        finding_group__name = CharFilter(
-            field_name="finding_group__name",
-            lookup_expr="iexact",
-            label="Finding Group Name",
-            help_text="Search for Finding Group names that are an exact match")
-        finding_group__name_contains = CharFilter(
-            field_name="finding_group__name",
-            lookup_expr="icontains",
-            label="Finding Group Name Contains",
-            help_text="Search for Finding Group names that contain a given pattern")
+    finding_group__name = CharFilter(
+        field_name="finding_group__name",
+        lookup_expr="iexact",
+        label="Finding Group Name",
+        help_text="Search for Finding Group names that are an exact match")
+    finding_group__name_contains = CharFilter(
+        field_name="finding_group__name",
+        lookup_expr="icontains",
+        label="Finding Group Name Contains",
+        help_text="Search for Finding Group names that contain a given pattern")
 
     class Meta:
         model = Finding
-        fields = get_finding_filterset_fields(filter_string_matching=True)
+        fields = get_finding_filterset_fields(filter_string_matching=True, all_features=True)
 
         exclude = ["url", "description", "mitigation", "impact",
                    "endpoints", "references",
@@ -463,14 +463,13 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         queryset=Test.objects.none(),
         label="Test")
 
-    if is_finding_groups_enabled():
-        finding_group = ModelMultipleChoiceFilter(
-            queryset=Finding_Group.objects.none(),
-            label="Finding Group")
+    finding_group = ModelMultipleChoiceFilter(
+        queryset=Finding_Group.objects.none(),
+        label="Finding Group")
 
     class Meta:
         model = Finding
-        fields = get_finding_filterset_fields()
+        fields = get_finding_filterset_fields(all_features=True)
 
         exclude = ["url", "description", "mitigation", "impact",
                    "endpoints", "references",
@@ -670,7 +669,7 @@ class SimilarFindingFilter(FindingFilter, SimilarFindingHelper):
     class Meta(FindingFilter.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filterset_fields(similar=True)
+        fields = get_finding_filterset_fields(similar=True, all_features=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -688,7 +687,7 @@ class SimilarFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
     class Meta(FindingFilterWithoutObjectLookups.Meta):
         model = Finding
         # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
-        fields = get_finding_filterset_fields(similar=True, filter_string_matching=True)
+        fields = get_finding_filterset_fields(similar=True, filter_string_matching=True, all_features=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -802,7 +801,7 @@ class MetricsFindingFilter(FindingFilter):
 
     class Meta(FindingFilter.Meta):
         model = Finding
-        fields = get_finding_filterset_fields(metrics=True)
+        fields = get_finding_filterset_fields(metrics=True, all_features=True)
 
 
 class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups):
@@ -832,7 +831,7 @@ class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
 
     class Meta(FindingFilterWithoutObjectLookups.Meta):
         model = Finding
-        fields = get_finding_filterset_fields(metrics=True, filter_string_matching=True)
+        fields = get_finding_filterset_fields(metrics=True, filter_string_matching=True, all_features=True)
 
 
 class ReportFindingFilterHelper(FilterSet):
