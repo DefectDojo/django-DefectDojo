@@ -37,6 +37,7 @@ from dojo.models import (
     FileUpload,
     Finding,
     Finding_Group,
+    Finding_Template,
     General_Survey,
     JIRA_Instance,
     JIRA_Issue,
@@ -275,11 +276,18 @@ class TestProductExportQueryCount(DojoAPITestCase):
 
     def test_manifest_query_count_is_constant(self):
         url = reverse("export-manifest")
+        self.add_finding_templates(1, "t")
         before = self.measure(url)
         self.add_findings(self.product, 8, "e")
         self.create_product("perf", prod_type=self.product.prod_type)
+        self.add_finding_templates(20, "u")
         after = self.measure(url)
         self.assertEqual(before, after, f"The manifest issues {before} queries before the added data and {after} after.")
+
+    def add_finding_templates(self, count, prefix):
+        for i in range(count):
+            template = Finding_Template.objects.create(title=f"{prefix} template {i}", severity="High")
+            template.tags.add(f"{prefix}-tag-{i}")
 
     def test_manifest_query_count_is_constant_with_group_permissions(self):
         url = reverse("export-manifest")

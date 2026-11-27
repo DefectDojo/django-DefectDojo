@@ -1752,11 +1752,33 @@ class TestExportThreatModelAndLinks(DojoAPITestCase):
         manifest = self.manifest()
         entry = next(row for row in manifest["reference"]["users"] if row["username"] == "user1")
         self.assertEqual(["auth.add_user"], entry["configuration_permissions"])
-        helper = {f"{field.app}.{codename}" for field in get_configuration_permissions_fields() for codename in field.codenames()}
+        helper = {
+            f"{field.app}.{codename}"
+            for field in get_configuration_permissions_fields(include_disabled=True)
+            for codename in field.codenames()
+        }
         stored = {f"{app}.{codename}" for app, codename in Permission.objects.values_list("content_type__app_label", "codename")}
         expected = sorted(helper & stored)
         self.assertEqual(expected, manifest["reference"]["configuration_permissions"])
         self.assertIn("auth.add_user", expected)
+
+    def test_configuration_permissions_of_a_switched_off_feature_still_cross(self):
+        settings_row = System_Settings.objects.get(no_cache=True)
+        settings_row.enable_jira = False
+        settings_row.enable_github = False
+        settings_row.enable_questionnaires = False
+        settings_row.save()
+        user = Dojo_User.objects.get(username="user1")
+        user.user_permissions.set(
+            Permission.objects.filter(codename__in=["add_jira_instance", "view_github_conf", "add_question"]),
+        )
+        manifest = self.manifest()
+        entry = next(row for row in manifest["reference"]["users"] if row["username"] == "user1")
+        self.assertEqual(
+            ["dojo.add_jira_instance", "dojo.add_question", "dojo.view_github_conf"], entry["configuration_permissions"],
+        )
+        for name in ("dojo.add_jira_instance", "dojo.view_github_conf", "dojo.add_question"):
+            self.assertIn(name, manifest["reference"]["configuration_permissions"])
 
     def test_user_configuration_permissions_include_group_permissions(self):
         user = Dojo_User.objects.get(username="user1")

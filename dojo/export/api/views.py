@@ -157,6 +157,10 @@ REFERENCE_SERIALIZERS = {
     "report_types": ExportReportTypeSerializer,
     "general_surveys": ExportGeneralSurveySerializer,
 }
+#: Relations a reference serializer reads per row, prefetched so the manifest does not query once per row.
+REFERENCE_PREFETCHES = {
+    "finding_templates": ("tags",),
+}
 
 
 class NDJSONRenderer(BaseRenderer):
@@ -832,7 +836,10 @@ def build_manifest(
         ),
         "reference": {
             **{
-                key: serializer(serializer.Meta.model.objects.order_by("id"), many=True).data
+                key: serializer(
+                    serializer.Meta.model.objects.order_by("id").prefetch_related(*REFERENCE_PREFETCHES.get(key, ())),
+                    many=True,
+                ).data
                 for key, serializer in REFERENCE_SERIALIZERS.items()
             },
             "users": user_serializer.data,

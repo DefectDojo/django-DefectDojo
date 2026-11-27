@@ -198,7 +198,7 @@ def readable_threat_model(path: Path) -> Path | None:
 
 
 def configuration_permission_names() -> set[str]:
-    wanted = {f"{field.app}.{codename}" for field in get_configuration_permissions_fields() for codename in field.codenames()}
+    wanted = {f"{field.app}.{codename}" for field in get_configuration_permissions_fields(include_disabled=True) for codename in field.codenames()}
     rows = Permission.objects.filter(codename__in={name.split(".")[1] for name in wanted}).values_list(
         "content_type__app_label", "codename",
     )
