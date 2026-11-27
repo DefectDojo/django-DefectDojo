@@ -3,7 +3,7 @@ import json
 import logging
 import zipfile
 
-from django.conf import settings
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 logger = logging.getLogger(__name__)
 
@@ -28,32 +28,32 @@ def safe_open_zip(file):
 
     infos = zf.infolist()
 
-    if len(infos) > settings.MAX_ZIP_MEMBERS:
+    if len(infos) > get_behaviour_setting("MAX_ZIP_MEMBERS"):
         zf.close()
-        msg = f"Zip file contains {len(infos)} members, exceeding the limit of {settings.MAX_ZIP_MEMBERS}."
+        msg = f"Zip file contains {len(infos)} members, exceeding the limit of {get_behaviour_setting("MAX_ZIP_MEMBERS")}."
         raise ValueError(msg)
 
     total_size = 0
     for info in infos:
-        if info.file_size > settings.MAX_ZIP_MEMBER_SIZE:
+        if info.file_size > get_behaviour_setting("MAX_ZIP_MEMBER_SIZE"):
             zf.close()
             msg = (
                 f"Zip member '{info.filename}' has uncompressed size {info.file_size} bytes, "
-                f"exceeding the per-member limit of {settings.MAX_ZIP_MEMBER_SIZE} bytes."
+                f"exceeding the per-member limit of {get_behaviour_setting("MAX_ZIP_MEMBER_SIZE")} bytes."
             )
             raise ValueError(msg)
-        if info.compress_size > 0 and (info.file_size / info.compress_size) > settings.MAX_ZIP_RATIO:
+        if info.compress_size > 0 and (info.file_size / info.compress_size) > get_behaviour_setting("MAX_ZIP_RATIO"):
             zf.close()
             ratio = info.file_size / info.compress_size
             msg = (
                 f"Zip member '{info.filename}' has a compression ratio of "
-                f"{ratio:.1f}:1, exceeding the limit of {settings.MAX_ZIP_RATIO}:1."
+                f"{ratio:.1f}:1, exceeding the limit of {get_behaviour_setting("MAX_ZIP_RATIO")}:1."
             )
             raise ValueError(msg)
         total_size += info.file_size
-        if total_size > settings.MAX_ZIP_TOTAL_SIZE:
+        if total_size > get_behaviour_setting("MAX_ZIP_TOTAL_SIZE"):
             zf.close()
-            msg = f"Zip file total uncompressed size exceeds the limit of {settings.MAX_ZIP_TOTAL_SIZE} bytes."
+            msg = f"Zip file total uncompressed size exceeds the limit of {get_behaviour_setting("MAX_ZIP_TOTAL_SIZE")} bytes."
             raise ValueError(msg)
 
     return zf

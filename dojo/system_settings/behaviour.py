@@ -19,9 +19,14 @@ already stored; run ``manage.py dedupe --hash_code_only`` for the scan types it 
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as translate
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Django setting -> System_Settings field. None stored in the field means "use the setting".
 SETTING_FIELDS = {
@@ -58,6 +63,14 @@ FIELD_ONLY = {
     "FEATURE_FINDING_GROUPS": "enable_finding_groups",
 }
 
+#: What a resolver returns for a name it does not hold a value for.
+NOT_RESOLVED = object()
+
+# Resolvers an installed app registers (register_setting_resolver) for settings it keeps somewhere
+# other than System Settings, for example a value an operator stores for each database. Consulted,
+# in registration order, for every name outside SETTING_FIELDS and FIELD_ONLY.
+_resolvers: list[Callable[[str], object]] = []
+
 # One merged map per setting, rebuilt only when the stored overrides object changes. Holding the
 # overrides object keeps its id from being reused, so an identity check is enough.
 _merged: dict[str, tuple[object, object, dict]] = {}
@@ -78,6 +91,22 @@ def _merge(name: str, base: dict, overrides: dict) -> dict:
     return merged
 
 
+def register_setting_resolver(resolver: Callable[[str], object]) -> None:
+    """
+    Let an installed app answer :func:`get_setting` for names it holds a value for.
+
+    ``resolver(name)`` returns the value, or :data:`NOT_RESOLVED` to leave the name to the next
+    resolver and finally to the Django setting. Registering the same resolver twice is a no-op.
+    """
+    if resolver not in _resolvers:
+        _resolvers.append(resolver)
+
+
+def unregister_setting_resolver(resolver: Callable[[str], object]) -> None:
+    if resolver in _resolvers:
+        _resolvers.remove(resolver)
+
+
 def get_setting(name: str):
     """Return the instance's value for ``name``: its System Settings field, else the setting."""
     field = FIELD_ONLY.get(name)
@@ -85,6 +114,10 @@ def get_setting(name: str):
         return getattr(_system_settings(), field)
     field = SETTING_FIELDS.get(name)
     if field is None:
+        for resolver in _resolvers:
+            value = resolver(name)
+            if value is not NOT_RESOLVED:
+                return value
         return getattr(settings, name)
     value = getattr(_system_settings(), field, None)
     if value is None or (isinstance(value, str) and not value):
@@ -115,7 +148,11 @@ def validate_hashcode_fields_per_scanner(value) -> None:
         isinstance(scan_type, str) and isinstance(fields, list) and all(isinstance(f, str) for f in fields)
         for scan_type, fields in value.items()
     ):
-        raise ValidationError(translate('Enter an object that maps a scan type to a list of field names, for example {"Scanner": ["title", "cwe"]}.'))
+        raise ValidationError(
+            translate(
+                'Enter an object that maps a scan type to a list of field names, for example {"Scanner": ["title", "cwe"]}.',
+            ),
+        )
 
 
 def validate_deduplication_algorithm_per_parser(value) -> None:

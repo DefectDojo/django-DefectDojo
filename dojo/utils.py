@@ -1607,7 +1607,7 @@ def file_size_mb(file_obj):
 def is_scan_file_too_large(scan_file):
     if hasattr(settings, "SCAN_FILE_MAX_SIZE"):
         size = file_size_mb(scan_file)
-        if size > settings.SCAN_FILE_MAX_SIZE:
+        if size > get_setting("SCAN_FILE_MAX_SIZE"):
             return True
     return False
 

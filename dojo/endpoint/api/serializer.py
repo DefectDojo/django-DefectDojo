@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from rest_framework import serializers
@@ -12,6 +11,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.models import Product, get_current_date
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.utils import is_scan_file_too_large
 
 logger = logging.getLogger(__name__)
@@ -197,7 +197,7 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
     def validate(self, data):
         file = data.get("file")
         if file and is_scan_file_too_large(file):
-            msg = f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
+            msg = f"Report file is too large. Maximum supported size is {get_behaviour_setting("SCAN_FILE_MAX_SIZE")} MB"
             raise serializers.ValidationError(msg)
 
         return data
