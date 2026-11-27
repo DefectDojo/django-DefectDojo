@@ -281,7 +281,7 @@ Ein Bericht wird mit einer `POST`-Anfrage an eine `generate_report/`-Aktion erst
 | `POST /api/v2/product_types/{id}/generate_report/` | Ein Produkttyp |
 | `POST /api/v2/endpoints/{id}/generate_report/` | Ein Endpunkt |
 
-Die Pro-Objekt-Aliase bieten dieselbe Aktion: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/` und `/api/v2/location/{id}/generate_report/`.
+Die Pro-Objekt-Aliase bieten dieselbe Aktion: `/api/v2/assets/{id}/generate_report/` und `/api/v2/organizations/{id}/generate_report/`.
 
 ### Anfrageoptionen
 

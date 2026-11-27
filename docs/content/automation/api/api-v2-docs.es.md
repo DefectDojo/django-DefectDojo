@@ -281,7 +281,7 @@ Un informe se genera con una solicitud `POST` a una acción `generate_report/`. 
 | `POST /api/v2/product_types/{id}/generate_report/` | Un tipo de producto |
 | `POST /api/v2/endpoints/{id}/generate_report/` | Un endpoint |
 
-Los alias de objetos Pro exponen la misma acción: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, y `/api/v2/location/{id}/generate_report/`.
+Los alias de objetos Pro exponen la misma acción: `/api/v2/assets/{id}/generate_report/` y `/api/v2/organizations/{id}/generate_report/`.
 
 ### Request options
 

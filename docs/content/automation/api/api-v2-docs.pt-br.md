@@ -281,7 +281,7 @@ Um relatório é gerado com uma requisição `POST` para uma ação `generate_re
 | `POST /api/v2/product_types/{id}/generate_report/` | Um tipo de produto |
 | `POST /api/v2/endpoints/{id}/generate_report/` | Um endpoint |
 
-Os aliases de objeto do Pro expõem a mesma ação: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/` e `/api/v2/location/{id}/generate_report/`.
+Os aliases de objeto do Pro expõem a mesma ação: `/api/v2/assets/{id}/generate_report/` e `/api/v2/organizations/{id}/generate_report/`.
 
 ### Opções da requisição
 
