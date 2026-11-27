@@ -318,7 +318,7 @@ def product_endpoint_report(request, pid):
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
         endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product, user=request.user)
-        endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
+        endpoints = EndpointReportFilter(request.GET, queryset=endpoints, product=product)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
     report_format = request.GET.get("report_type", "HTML")

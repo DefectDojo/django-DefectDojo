@@ -1568,8 +1568,15 @@ class EndpointReportFilter(DojoFilter):
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
 
     def __init__(self, *args, **kwargs):
+        # The product endpoint report covers one product, so only that product's
+        # findings are useful choices. Filtering on the product id keeps the
+        # option query to one product instead of every finding the user can view.
+        self.product = kwargs.pop("product", None)
         super().__init__(*args, **kwargs)
-        self.form.fields["findings"].queryset = get_authorized_findings("view")
+        findings = get_authorized_findings("view")
+        if self.product is not None:
+            findings = findings.filter(test__engagement__product=self.product)
+        self.form.fields["findings"].queryset = findings
 
     class Meta:
         model = Endpoint

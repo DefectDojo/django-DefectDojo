@@ -2,6 +2,7 @@ from django.test import Client
 from django.utils.timezone import now
 
 from dojo.authorization.roles_permissions import Roles
+from dojo.finding.queries import get_authorized_findings
 from dojo.models import (
     Dojo_User,
     Endpoint,
@@ -175,3 +176,40 @@ class TestProductEndpointReportScoping(DojoTestCase):
         self.assertEqual(response.status_code, 200, response.content[:500])
         self.assertContains(response, f'<option value="{self.finding_a.id}">{self.finding_a.title}</option>', html=True)
         self.assertNotContains(response, "Finding for B")
+
+    def test_product_endpoint_report_finding_choices_are_limited_to_report_product(self):
+        # The report covers one product, so a finding from another product must
+        # not be offered even when the user is allowed to view it.
+        product_c = Product.objects.create(
+            name="Scoping Test Product C",
+            description="Second product the reader can view",
+            prod_type=self.prod_type,
+        )
+        finding_c = self._create_finding_with_endpoint(
+            product_c, "Finding for C", "Second product finding", host="c.example.com",
+        )
+        Product_Member.objects.create(
+            user=self.restricted_user,
+            product=product_c,
+            role=Role.objects.get(id=Roles.Reader),
+        )
+        product_c.authorized_users.add(Dojo_User.objects.get(pk=self.restricted_user.pk))
+        self.assertTrue(
+            get_authorized_findings("view", user=self.restricted_user).filter(pk=finding_c.pk).exists(),
+            "The reader must be able to view Product C's finding for this test to mean anything",
+        )
+
+        restricted_client = Client()
+        restricted_client.force_login(self.restricted_user)
+        response = restricted_client.get(f"/asset/{self.product_a.id}/endpoint/report")
+        self.assertEqual(response.status_code, 200, response.content[:500])
+        self.assertContains(response, f'<option value="{self.finding_a.id}">{self.finding_a.title}</option>', html=True)
+        self.assertNotContains(response, "Finding for C")
+        self.assertNotContains(response, "Finding for B")
+
+        # A superuser can view every finding, and still only gets the report product's findings.
+        response = self.client.get(f"/asset/{self.product_a.id}/endpoint/report")
+        self.assertEqual(response.status_code, 200, response.content[:500])
+        self.assertContains(response, f'<option value="{self.finding_a.id}">{self.finding_a.title}</option>', html=True)
+        self.assertNotContains(response, "Finding for B")
+        self.assertNotContains(response, "Finding for C")
