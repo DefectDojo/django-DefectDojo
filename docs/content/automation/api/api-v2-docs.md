@@ -53,7 +53,8 @@ In DefectDojo Pro, a [service user](/admin/user_management/pro__service_users/) 
 
 If you use [an alternative authentication method](/admin/sso/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
-Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
+Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`; the endpoint then answers `404`.
+Both can also be set in System Settings (`api_tokens_enabled` and `api_token_auth_endpoint_enabled` on `/api/v2/system_settings/`), which take precedence over the environment variables (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
 
 With API tokens disabled, DefectDojo Pro hides the token controls: **API v2 Token** leaves the account menu (an old link to the page shows Not Found), **Force Token Reset** leaves each user's menu, **Reset API Tokens** leaves the Users list's bulk actions, the API Access walkthrough cannot be started, and the **MCP Service** page says that an AI provider cannot connect, because the MCP server signs in with an API token.
 With only the `api/v2/api-token-auth/` endpoint disabled, the **API v2 Token** page leaves out the instructions for that endpoint and keeps everything else.
@@ -105,6 +106,8 @@ DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=90
 ```
 
 When set to a value greater than `0`, every token expires that many days after it was created. This is measured from the token's own creation time and is evaluated when the token is used, so it applies to every token on the instance, including ones that already exist and ones obtained through `POST /api/v2/api-token-auth/` or the UI key page. The default is `0`, meaning tokens do not expire unless a per-user expiry is set.
+
+The same default can be saved in System Settings (`api_token_default_expiry_days`), which takes precedence over the environment variable (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
 
 A per-user `token_expiry` takes precedence over this default, in either direction: it can pin a shorter life for one user, or grant a longer one.
 

@@ -47,7 +47,7 @@ The fields that can be used are listed in `HASHCODE_ALLOWED_FIELDS`: title, cwe,
 
 If a tool has no entry, or its entry names a field that is not allowed, DefectDojo falls back to a legacy hash of title, CWE, line, file path and description. The same fallback applies to a Finding with no CWE when `HASHCODE_ALLOWS_NULL_CWE` is false for that tool.
 
-You can override the per-tool algorithm and hash code fields with the `DD_DEDUPLICATION_ALGORITHM_PER_PARSER` and `DD_HASHCODE_FIELDS_PER_SCANNER` environment variables. Existing Findings keep their old hash codes until you run the `dedupe` management command. [Deduplication Tuning (Open Source)](/triage_findings/finding_deduplication/os__deduplication_tuning/) has examples of both.
+You can override the per-tool algorithm and hash code fields with the `DD_DEDUPLICATION_ALGORITHM_PER_PARSER` and `DD_HASHCODE_FIELDS_PER_SCANNER` environment variables, or with the matching System Settings fields, which take precedence over them (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)). Existing Findings keep their old hash codes until you run the `dedupe` management command. [Deduplication Tuning (Open Source)](/triage_findings/finding_deduplication/os__deduplication_tuning/) has examples of both.
 
 In DefectDojo Pro the same choices are made in the UI at **Settings > Finding Workflow > Matching Configuration**, where each tool has separate settings for same tool, cross tool and reimport matching. See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/).
 

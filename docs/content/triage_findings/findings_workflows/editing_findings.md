@@ -50,7 +50,7 @@ Editing can be turned on with the `DD_EDITABLE_MITIGATED_DATA` server setting. W
 
 * **Why it's off by default:** allowing a mitigation to be backdated can misrepresent SLA compliance — a Finding that was actually remediated *outside* its SLA window could be recorded as though it had been mitigated *within* SLA. Enabling the setting is forward-looking only; it does **not** change the Mitigated Date or age of any existing Findings.
 * **Everything stays auditable:** every change to a Finding, including edits to the Mitigated Date and Mitigated By, is captured in the Finding's history log — who made the change, when, and the previous and new values.
-* **Applying the setting:** `DD_EDITABLE_MITIGATED_DATA` is a server-level environment variable (see [Configuration](/get_started/open_source/configuration/)). Changing it requires a service restart to take effect.
+* **Applying the setting:** `DD_EDITABLE_MITIGATED_DATA` is a server-level environment variable (see [Configuration](/get_started/open_source/configuration/)). Changing it requires a service restart to take effect. A superuser can instead set **Editable mitigated data** in System Settings, which takes precedence over the variable and needs no restart (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
 * **DefectDojo Cloud / Pro:** this setting cannot be changed from the UI. Contact DefectDojo Support to have it enabled for your instance.
 
 ## Change a Field in Place
