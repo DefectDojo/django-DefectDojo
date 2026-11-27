@@ -73,9 +73,17 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # duplicate, so it is active again unless it is closed for a reason of its own. is_mitigated and
 # mitigated stay its own. verified is its own OR the deleted original's: a promoted finding stays
 # as eligible for the verified-only workflows (Jira "Push All Issues") as the finding it
-# replaces (#14911), and is never made unverified.
+# replaces (#14911), and is never made unverified. A false positive never takes the deleted
+# original's verified: a finding cannot be both (the API refuses every later edit of it).
 PROMOTED_ORIGINAL_ACTIVE = Case(
     When(Q(is_mitigated=True) | Q(false_p=True) | Q(out_of_scope=True) | Q(risk_accepted=True), then=Value(False)),  # noqa: FBT003
+    default=Value(True),  # noqa: FBT003
+    output_field=BooleanField(),
+)
+# The verified of a promoted finding whose deleted original was verified: its own when it is a
+# false positive, else True.
+PROMOTED_ORIGINAL_INHERITED_VERIFIED = Case(
+    When(false_p=True, then=F("verified")),
     default=Value(True),  # noqa: FBT003
     output_field=BooleanField(),
 )
@@ -905,6 +913,24 @@ def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_
         jira_instance_id,
         comment,
     )
+    push_reassigned_jira_status(deleted_finding, new_original.id)
+    return True
+
+
+def push_reassigned_jira_status(deleted_finding, new_original_id):
+    """
+    Push a reassigned Jira issue's new finding when its status differs from the deleted one's.
+
+    The issue was kept in step with the deleted finding. The new original keeps its own status
+    (reconfigure_duplicate_cluster), so an issue closed for a mitigated finding could otherwise
+    sit on an active one, or an open issue on a mitigated one. Returns whether a push was queued.
+    """
+    new_original = Finding.objects.filter(id=new_original_id).first()
+    if new_original is None:
+        return False
+    if (new_original.active, new_original.is_mitigated) == (deleted_finding.active, deleted_finding.is_mitigated):
+        return False
+    jira_services.push(new_original)
     return True
 
 
@@ -934,7 +960,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
             duplicate=False,
             duplicate_finding=None,
             active=PROMOTED_ORIGINAL_ACTIVE,
-            **({"verified": True} if original.verified else {}),
+            **({"verified": PROMOTED_ORIGINAL_INHERITED_VERIFIED} if original.verified else {}),
         )
         new_original.found_by.set(original.found_by.all())
 
@@ -1338,7 +1364,7 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
             duplicate=False,
             active=PROMOTED_ORIGINAL_ACTIVE,
             **({"verified": Case(
-                When(id__in=inherit_verified, then=Value(True)),  # noqa: FBT003
+                When(id__in=inherit_verified, false_p=False, then=Value(True)),  # noqa: FBT003
                 default=F("verified"),
             )} if inherit_verified else {}),
         )

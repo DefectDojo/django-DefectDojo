@@ -10,12 +10,17 @@ is_mitigated and mitigated. Its verified is its own OR the deleted original's (#
 """
 
 import datetime
+from unittest.mock import patch
 
 from crum import impersonate
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from dojo.finding.helper import prepare_duplicates_for_delete, resolve_inbound_duplicate_references
+from dojo.finding.helper import (
+    prepare_duplicates_for_delete,
+    push_reassigned_jira_status,
+    resolve_inbound_duplicate_references,
+)
 from dojo.models import (
     Engagement,
     Finding,
@@ -47,7 +52,8 @@ CASES = [
     ("unverified_duplicate_of_unverified_original", MITIGATED, {"verified": False},
      {"active": True, "verified": False, "is_mitigated": False, "mitigated": None}),
     # Closed for another reason of its own: false positive, out of scope, risk accepted.
-    ("false_positive_duplicate", OPEN, {"false_p": True}, {"active": False, "is_mitigated": False}),
+    # A false positive never takes the verified original's verified: a finding cannot be both.
+    ("false_positive_duplicate", OPEN, {"false_p": True}, {"active": False, "verified": False, "is_mitigated": False}),
     ("out_of_scope_duplicate", OPEN, {"out_of_scope": True}, {"active": False, "is_mitigated": False}),
     ("risk_accepted_duplicate", OPEN, {"risk_accepted": True}, {"active": False, "is_mitigated": False}),
     # Control: an open duplicate of an open, verified original is open and verified, as before.
@@ -133,3 +139,22 @@ class TestPromotedDuplicateKeepsItsOwnStatus(DojoTestCase):
                 self.assertEqual(resolve_inbound_duplicate_references([original.id], [original.id]), 1)
                 self._assert_promoted(duplicate, expected)
                 Finding.objects.filter(id=original.id).delete()
+
+    def test_reassigned_jira_issue_is_pushed_when_the_status_differs(self):
+        """A Jira issue moved to the new original is pushed only when its status differs from the deleted one's."""
+        for name, deleted_status, own_status, pushed in [
+            ("open_after_mitigated", MITIGATED, {}, True),
+            ("mitigated_after_open", OPEN, {"is_mitigated": True, "mitigated": MITIGATED_AT, "active": False}, True),
+            ("same_status", OPEN, {}, False),
+        ]:
+            with self.subTest(name):
+                deleted = Finding(**{k: v for k, v in deleted_status.items() if k in {"active", "is_mitigated"}})
+                new_original = self._finding(self.tests[1], "New original", **own_status)
+                with patch("dojo.finding.helper.jira_services.push") as push:
+                    self.assertEqual(push_reassigned_jira_status(deleted, new_original.id), pushed)
+                self.assertEqual(push.call_count, int(pushed))
+                if pushed:
+                    self.assertEqual(push.call_args.args[0].id, new_original.id)
+        with patch("dojo.finding.helper.jira_services.push") as push:
+            self.assertFalse(push_reassigned_jira_status(Finding(active=True), 2_147_483_000))
+        push.assert_not_called()
