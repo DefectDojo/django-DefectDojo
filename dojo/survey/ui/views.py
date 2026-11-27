@@ -19,6 +19,7 @@ from dojo.authorization.authorization import (
     user_has_configuration_permission_or_403,
     user_has_permission_or_403,
 )
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.forms import (
     AddEngagementForm,
     ExistingEngagementForm,
@@ -299,6 +300,11 @@ def delete_questionnaire(request, sid):
     form = Delete_Eng_Survey_Form(instance=survey)
     rels = ["Previewing the relationships has been disabled.", ""]
     display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview and Answered_Survey.objects.filter(survey=survey, engagement__isnull=False).exclude(
+        engagement__in=get_authorized_engagements("view"),
+    ).exists():
+        display_preview = False
+        rels = [_("The preview is hidden because some answers to this questionnaire belong to engagements you cannot view."), ""]
     if display_preview:
         collector = NestedObjects(using=DEFAULT_DB_ALIAS)
         collector.collect([survey])
