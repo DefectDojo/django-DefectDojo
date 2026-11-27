@@ -33,9 +33,9 @@ if [ -n "$result" ]; then
     -H "Authorization: Token $DEFECTDOJO_API_KEY" \
     -F "scan_type=Talisman Scan" \
     -F "file=@$TALISMAN_RESULTS_DIR/talisman_reports/data/report.json" \
-    -F "product_type_name=$DEFECTDOJO_PRODUCT_TYPE_NAME" \
-    -F "product_name=$DEFECTDOJO_PRODUCT_NAME" \
-    -F "engagement_name=$DEFECTDOJO_ENGAGEMENT_NAME" \
+    --form-string "product_type_name=$DEFECTDOJO_PRODUCT_TYPE_NAME" \
+    --form-string "product_name=$DEFECTDOJO_PRODUCT_NAME" \
+    --form-string "engagement_name=$DEFECTDOJO_ENGAGEMENT_NAME" \
     -F "auto_create_context=true" \
     "$DEFECTDOJO_URL/api/v2/reimport-scan/"
 
