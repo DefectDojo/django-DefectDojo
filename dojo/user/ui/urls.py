@@ -59,5 +59,5 @@ if settings.FORGOT_USERNAME:
         ), name="forgot_username"),
     ])
 
-if settings.API_TOKENS_ENABLED:
-    urlpatterns += [re_path(r"^api/key-v2$", views.api_v2_key, name="api_v2_key")]
+# Always mounted: api_v2_key refuses when the instance's API_TOKENS_ENABLED is off (per request).
+urlpatterns += [re_path(r"^api/key-v2$", views.api_v2_key, name="api_v2_key")]

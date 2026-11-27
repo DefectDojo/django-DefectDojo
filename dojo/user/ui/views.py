@@ -115,7 +115,7 @@ class DojoLoginView(LoginView):
 
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
-    if not settings.API_TOKENS_ENABLED:
+    if not get_behaviour_setting("API_TOKENS_ENABLED"):
         raise PermissionDenied
     api_key = ""
     form = APIKeyForm(instance=request.user)
@@ -666,7 +666,7 @@ def account_email_allowed(kind, to_email):
     The forms answer the same way whether or not a message is sent, so an address that has
     reached the limit just stops receiving mail for the rest of the window.
     """
-    limit = settings.ACCOUNT_RECOVERY_EMAILS_PER_HOUR
+    limit = get_behaviour_setting("ACCOUNT_RECOVERY_EMAILS_PER_HOUR")
     if limit <= 0:
         return True
     key = "dojo:account-email:" + salted_hmac(f"dojo.account-email.{kind}", (to_email or "").lower()).hexdigest()

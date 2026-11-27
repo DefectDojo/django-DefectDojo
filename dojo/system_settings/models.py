@@ -10,6 +10,7 @@ from dojo.system_settings.behaviour import (
     validate_hashcode_fields_per_scanner,
     validate_language_code,
     validate_notifications_system_level_trump,
+    validate_retention_period,
 )
 
 
@@ -462,6 +463,51 @@ class System_Settings(models.Model):
         validators=[validate_language_code],
         verbose_name=_("Default language"),
         help_text=_("The language for people who have not chosen one. Empty uses DD_LANGUAGE_CODE."))
+    api_tokens_enabled = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("API tokens enabled"),
+        help_text=_("Let users sign API requests with a personal token. Empty uses DD_API_TOKENS_ENABLED."))
+    api_token_auth_endpoint_enabled = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("API token endpoint enabled"),
+        help_text=_("Let users fetch their token with a username and password at /api/v2/api-token-auth/. Empty uses DD_API_TOKEN_AUTH_ENDPOINT_ENABLED."))
+    api_token_default_expiry_days = models.IntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("API token expiry (days)"),
+        help_text=_("Days a new API token stays valid; 0 never expires. Empty uses DD_API_TOKEN_DEFAULT_EXPIRY_DAYS."))
+    auditlog_flush_retention_period = models.IntegerField(
+        null=True, blank=True, default=None,
+        validators=[validate_retention_period],
+        verbose_name=_("Audit log retention (months)"),
+        help_text=_("Months of audit log the nightly flush keeps; -1 keeps all of it. Empty uses DD_AUDITLOG_FLUSH_RETENTION_PERIOD."))
+    jira_ssl_verify = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Verify Jira TLS certificates"),
+        help_text=_("Turn off only for a Jira server with a self-signed certificate. Empty uses DD_JIRA_SSL_VERIFY."))
+    jira_connect_timeout = models.PositiveIntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(1)],
+        verbose_name=_("Jira connect timeout (seconds)"),
+        help_text=_("Empty uses DD_JIRA_CONNECT_TIMEOUT."))
+    jira_read_timeout = models.PositiveIntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(1)],
+        verbose_name=_("Jira read timeout (seconds)"),
+        help_text=_("Empty uses DD_JIRA_READ_TIMEOUT."))
+    jira_max_retries = models.PositiveIntegerField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Jira retries"),
+        help_text=_("Times a failed Jira request is retried. Empty uses DD_JIRA_MAX_RETRIES."))
+    jira_description_max_length = models.PositiveIntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(1000)],
+        verbose_name=_("Jira description length limit"),
+        help_text=_("Characters of a Jira issue description before it is cut short. Empty uses DD_JIRA_DESCRIPTION_MAX_LENGTH."))
+    jira_extra_issue_types = models.CharField(
+        max_length=1000, null=True, blank=True, default=None,
+        verbose_name=_("Extra Jira issue types"),
+        help_text=_("Issue types to offer besides the built-in ones, separated by commas. Added to DD_JIRA_EXTRA_ISSUE_TYPES."))
     install_id = models.UUIDField(
         default=uuid4,
         editable=False,

@@ -38,6 +38,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
+from dojo.system_settings.behaviour import jira_timeout
 from dojo.utils import (
     add_error_message_to_response,
     get_file_images,
@@ -439,8 +440,8 @@ def has_jira_configured(obj):
 
 
 def connect_to_jira(jira_server, jira_username, jira_password):
-    max_retries = getattr(settings, "JIRA_MAX_RETRIES", 3)
-    timeout = getattr(settings, "JIRA_TIMEOUT", (10, 30))
+    max_retries = get_behaviour_setting("JIRA_MAX_RETRIES")
+    timeout = jira_timeout()
 
     return JIRA(
         server=jira_server,
@@ -448,7 +449,7 @@ def connect_to_jira(jira_server, jira_username, jira_password):
         max_retries=max_retries,
         timeout=timeout,
         options={
-            "verify": settings.JIRA_SSL_VERIFY,
+            "verify": get_behaviour_setting("JIRA_SSL_VERIFY"),
             "headers": settings.ADDITIONAL_HEADERS,
         },
     )
@@ -785,7 +786,7 @@ def jira_description(obj, **kwargs):
     kwargs = get_jira_description_context_method()(obj, kwargs)
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
-    max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
+    max_length = get_behaviour_setting("JIRA_DESCRIPTION_MAX_LENGTH")
     suffix = f"\n\nIssue Description Too Long: See [DefectDojo|{defect_dojo_obj_url}] for full description."
     if len(description) > max_length:
         # suffix can be longer after rendering do to urlenocoding, so we take twice the length of the suffix as a buffer

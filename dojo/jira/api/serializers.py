@@ -11,6 +11,7 @@ from dojo.models import (
     JIRA_Issue,
     JIRA_Project,
 )
+from dojo.system_settings.behaviour import jira_issue_type_choices
 
 
 class JIRAIssueSerializer(serializers.ModelSerializer):
@@ -74,6 +75,16 @@ class JIRAInstanceSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},
         }
+
+    def get_fields(self):
+        fields = super().get_fields()
+        # The issue types are this instance's, read per request (jira_issue_type_choices).
+        fields["default_issue_type"] = serializers.ChoiceField(
+            choices=jira_issue_type_choices(),
+            required=False,
+            help_text=JIRA_Instance._meta.get_field("default_issue_type").help_text,
+        )
+        return fields
 
     def validate(self, data):
         # Keep the stored password only while the URL stays the same, as the UI does.

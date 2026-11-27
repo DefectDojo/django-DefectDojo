@@ -10,6 +10,7 @@ from dojo.labels import get_labels
 from dojo.location.feature import locations_enabled
 from dojo.middleware import READ_ONLY_MODE_MESSAGE
 from dojo.models import System_Settings, UserAnnouncement
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 
 def globalize_vars(request):
@@ -19,8 +20,8 @@ def globalize_vars(request):
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
         "CLASSIC_AUTH_ENABLED": settings.CLASSIC_AUTH_ENABLED,
         "DOCUMENTATION_URL": settings.DOCUMENTATION_URL,
-        "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
-        "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
+        "API_TOKENS_ENABLED": get_behaviour_setting("API_TOKENS_ENABLED"),
+        "API_TOKEN_AUTH_ENDPOINT_ENABLED": get_behaviour_setting("API_TOKEN_AUTH_ENDPOINT_ENABLED"),
         # The user-menu Pro link follows the same switch as the promo banner, so
         # DD_OS_MESSAGE_ENABLED=False turns both off.
         "SHOW_PLG_LINK": settings.OS_MESSAGE_ENABLED,

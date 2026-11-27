@@ -19,10 +19,12 @@ already stored; run ``manage.py dedupe --hash_code_only`` for the scan types it 
 
 from __future__ import annotations
 
+from functools import wraps
 from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.http import Http404
 from django.utils.translation import gettext as translate
 
 if TYPE_CHECKING:
@@ -51,6 +53,15 @@ SETTING_FIELDS = {
     "HASHCODE_FIELDS_PER_SCANNER": "hashcode_fields_per_scanner",
     "DEDUPLICATION_ALGORITHM_PER_PARSER": "deduplication_algorithm_per_parser",
     "LANGUAGE_CODE": "default_language_code",
+    "API_TOKENS_ENABLED": "api_tokens_enabled",
+    "API_TOKEN_AUTH_ENDPOINT_ENABLED": "api_token_auth_endpoint_enabled",
+    "API_TOKEN_DEFAULT_EXPIRY_DAYS": "api_token_default_expiry_days",
+    "AUDITLOG_FLUSH_RETENTION_PERIOD": "auditlog_flush_retention_period",
+    "JIRA_SSL_VERIFY": "jira_ssl_verify",
+    "JIRA_CONNECT_TIMEOUT": "jira_connect_timeout",
+    "JIRA_READ_TIMEOUT": "jira_read_timeout",
+    "JIRA_MAX_RETRIES": "jira_max_retries",
+    "JIRA_DESCRIPTION_MAX_LENGTH": "jira_description_max_length",
 }
 
 # Settings whose stored value is merged over the deployment's map instead of replacing it.
@@ -127,6 +138,56 @@ def get_setting(name: str):
     return value
 
 
+def require_settings(*names: str):
+    """
+    Answer 404 unless every named behaviour setting is on for this instance.
+
+    For a route that used to be mounted only when a deployment setting was on: the route is now
+    always mounted, and this asks the setting per request, so each database (each tenant) gets its own.
+    """
+
+    def decorator(view):
+        @wraps(view)
+        def wrapped(request, *args, **kwargs):
+            if not all(get_setting(name) for name in names):
+                raise Http404
+            return view(request, *args, **kwargs)
+
+        return wrapped
+
+    return decorator
+
+
+def jira_timeout() -> tuple:
+    """The Jira client's (connect, read) timeout: this instance's, else DD_JIRA_CONNECT/READ_TIMEOUT."""
+    return (get_setting("JIRA_CONNECT_TIMEOUT"), get_setting("JIRA_READ_TIMEOUT"))
+
+
+DEFAULT_JIRA_ISSUE_TYPES = (
+    ("Task", "Task"),
+    ("Story", "Story"),
+    ("Epic", "Epic"),
+    ("Spike", "Spike"),
+    ("Bug", "Bug"),
+    ("Security", "Security"),
+)
+
+
+def jira_issue_type_choices() -> tuple:
+    """
+    The issue types a Jira configuration may default to: the deployment's (which include
+    DD_JIRA_EXTRA_ISSUE_TYPES), then this instance's own extra types, without repeats.
+    """
+    choices = tuple(getattr(settings, "JIRA_ISSUE_TYPE_CHOICES_CONFIG", DEFAULT_JIRA_ISSUE_TYPES))
+    known = {value for value, _label in choices}
+    extra = _system_settings().jira_extra_issue_types or ""
+    for issue_type in (part.strip() for part in extra.split(",")):
+        if issue_type and issue_type not in known:
+            known.add(issue_type)
+            choices += ((issue_type, issue_type),)
+    return choices
+
+
 def team_name() -> str:
     """The team name reports and the API show: the System Settings field, else ``DD_TEAM_NAME``."""
     return _system_settings().team_name or settings.TEAM_NAME
@@ -180,3 +241,9 @@ def validate_language_code(value) -> None:
         return
     if value not in {code for code, _name in settings.LANGUAGES}:
         raise ValidationError(translate("Choose one of the languages this instance offers."))
+
+
+def validate_retention_period(value) -> None:
+    if value is None or value == -1 or (isinstance(value, int) and value >= 1):
+        return
+    raise ValidationError(translate("Enter -1 to keep everything, or at least 1."))

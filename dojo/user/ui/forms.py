@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
 from dojo.models import Dojo_User, User, UserContactInfo
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.user.email_ownership import is_new_email, self_service_refusal, taken_email_error
 from dojo.utils import get_password_requirements_string, get_system_setting
 
@@ -184,5 +185,5 @@ class UserContactInfoForm(forms.ModelForm):
                     self.fields[field].disabled = True
 
         # Only show reset_api_token to superusers or global owners, and only if API tokens are enabled
-        if not settings.API_TOKENS_ENABLED or not user_is_superuser_or_global_owner(current_user):
+        if not get_behaviour_setting("API_TOKENS_ENABLED") or not user_is_superuser_or_global_owner(current_user):
             self.fields.pop("reset_api_token", None)

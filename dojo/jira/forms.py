@@ -15,6 +15,7 @@ from dojo.models import (
     JIRA_Issue,
     JIRA_Project,
 )
+from dojo.system_settings.behaviour import jira_issue_type_choices
 from dojo.utils import (
     get_system_setting,
     is_finding_groups_enabled,
@@ -52,6 +53,18 @@ class JIRA_IssueForm(forms.ModelForm):
 
 class BaseJiraForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True, help_text=JIRA_Instance._meta.get_field("password").help_text, label=JIRA_Instance._meta.get_field("password").verbose_name)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The issue types are this instance's, read per request (jira_issue_type_choices).
+        if "default_issue_type" in self.fields:
+            field = JIRA_Instance._meta.get_field("default_issue_type")
+            self.fields["default_issue_type"] = forms.ChoiceField(
+                choices=jira_issue_type_choices(),
+                initial=field.default,
+                help_text=field.help_text,
+                label=field.verbose_name.capitalize(),
+            )
 
     def test_jira_connection(self):
         try:

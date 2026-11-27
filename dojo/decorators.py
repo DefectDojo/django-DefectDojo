@@ -12,6 +12,7 @@ from django_ratelimit.exceptions import Ratelimited
 
 from dojo.deprecations import get_deprecation
 from dojo.models import Dojo_User
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 logger = logging.getLogger(__name__)
 
@@ -148,9 +149,9 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
-            limiter_block = getattr(settings, "RATE_LIMITER_BLOCK", block)
-            limiter_rate = getattr(settings, "RATE_LIMITER_RATE", rate)
-            limiter_lockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT", False)
+            limiter_block = get_behaviour_setting("RATE_LIMITER_BLOCK")
+            limiter_rate = get_behaviour_setting("RATE_LIMITER_RATE")
+            limiter_lockout = get_behaviour_setting("RATE_LIMITER_ACCOUNT_LOCKOUT")
             old_limited = getattr(request, "limited", False)
             ratelimited = is_ratelimited(request=request, fn=fn,
                                          key=key, rate=limiter_rate, method=method,
