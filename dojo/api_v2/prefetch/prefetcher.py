@@ -11,6 +11,7 @@ from dojo.api_v2.prefetch import (
 )
 from dojo.api_v2.prefetch import utils
 from dojo.api_v2.prefetch.authorized_querysets import get_authorized_queryset
+from dojo.api_v2.prefetch_registry import registered_serializer
 from dojo.location.api.serializers import (
     LocationFindingReferenceSerializer,
     LocationProductReferenceSerializer,
@@ -263,6 +264,8 @@ class _Prefetcher:
         :param field_type: the model field type
         :return: a serializer for the given model field type, or None if no override exists
         """
+        if registered := registered_serializer(field_type):
+            return registered
         return {
             Location: LocationSerializer,
             LocationFindingReference: LocationFindingReferenceSerializer,
@@ -391,6 +394,7 @@ class _Prefetcher:
         authorized = list(authorized_qs.filter(pk__in=all_ids))
         if not authorized:
             return
+        serializer_kwargs.setdefault("context", {})["prefetched_objects"] = authorized
         serializer = extra_serializer(**serializer_kwargs)
         _prefetch_shown_relations(authorized, serializer)
         field_data = serializer.to_representation(authorized)
@@ -419,6 +423,7 @@ class _Prefetcher:
             prefetch_related_objects(authorized, *prefetch_related)
         # One serializer for all of them, as a list serializer reuses its child: building a serializer's fields is
         # most of the cost of serializing a finding, and it does not depend on the object
+        serializer_kwargs.setdefault("context", {})["prefetched_objects"] = authorized
         serializer = extra_serializer(**serializer_kwargs)
         _prefetch_shown_relations(authorized, serializer)
         serialized = set()
