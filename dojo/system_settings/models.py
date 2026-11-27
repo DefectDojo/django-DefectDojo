@@ -386,12 +386,43 @@ class System_Settings(models.Model):
     def clean(self):
         super().clean()
 
+        # Only the strict ">" here: ModelForm validation runs this before the
+        # settings view, and the view answers min == max (with the other rules)
+        # as a "Settings cannot be saved" warning. The full rules live in
+        # cross_field_errors(), which the view and the API serializer both apply.
         if (
             self.minimum_password_length is not None
             and self.maximum_password_length is not None
+            and self.minimum_password_length > self.maximum_password_length
         ):
-            if self.minimum_password_length > self.maximum_password_length:
-                msg = "Minimum required password length must be larger than the maximum required password length."
-                raise ValidationError({
-                    "minimum_password_length": msg,
-                })
+            raise ValidationError({
+                "minimum_password_length": _(
+                    "Settings cannot be saved: Minimum required password length must be less than maximum required password length.",
+                ),
+            })
+
+    @staticmethod
+    def cross_field_errors(values):
+        """
+        Return the settings rules that ``values`` breaks, as ``{field: message}``.
+
+        ``values`` maps field names to the values the settings would hold after
+        the save. A missing or ``None`` value never breaks a rule. The order is
+        the order the settings page reports them in.
+        """
+        errors = {}
+        minimum = values.get("minimum_password_length")
+        maximum = values.get("maximum_password_length")
+        if minimum is not None and maximum is not None and minimum >= maximum:
+            errors["minimum_password_length"] = _(
+                "Settings cannot be saved: Minimum required password length must be less than maximum required password length.",
+            )
+        if values.get("enable_deduplication") is True and values.get("false_positive_history") is True:
+            errors["false_positive_history"] = _(
+                "Settings cannot be saved: Deduplicate findings and False positive history can not be set at the same time.",
+            )
+        if values.get("retroactive_false_positive_history") is True and values.get("false_positive_history") is False:
+            errors["retroactive_false_positive_history"] = _(
+                "Settings cannot be saved: Retroactive false positive history can not be set without False positive history.",
+            )
+        return errors
