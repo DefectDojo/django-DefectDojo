@@ -315,15 +315,17 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertFalse(dupe_of_b.duplicate)
         self.assertIsNone(dupe_of_b.duplicate_finding)
 
-    def test_original_status_copied_to_new_original_active_verified(self):
+    def test_new_original_inherits_verified_and_keeps_its_own_mitigation(self):
         """
-        New original inherits active/verified/is_mitigated from deleted original.
+        New original takes verified from the deleted original, and keeps its own active/is_mitigated.
 
-        Positive case: original is an open, verified, not-mitigated finding.
-        Duplicate starts with the opposite of each field so every copy is observable.
+        Positive case: original is an open, verified, not-mitigated finding; the duplicate is
+        unverified and mitigated.
 
         Regression test for issue #14911: promoted duplicates kept verified=False
         even when the original was verified, blocking Jira "Push All Issues".
+        The duplicate's own mitigation is not overwritten by the original's open status
+        (copying it left mitigated findings active, and open ones is_mitigated with no date).
         """
         original = self._create_finding(self.test1, "Original")
         original.active = True
@@ -341,16 +343,17 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
 
         outside_dupe.refresh_from_db()
         self.assertFalse(outside_dupe.duplicate)
-        self.assertTrue(outside_dupe.active)
+        self.assertFalse(outside_dupe.active)
         self.assertTrue(outside_dupe.verified)
-        self.assertFalse(outside_dupe.is_mitigated)
+        self.assertTrue(outside_dupe.is_mitigated)
 
-    def test_original_status_copied_to_new_original_inactive_mitigated(self):
+    def test_new_original_keeps_its_own_status_when_original_is_mitigated(self):
         """
-        New original inherits active/verified/is_mitigated from deleted original.
+        New original keeps its own active/verified/is_mitigated when the deleted original is closed.
 
-        Negative case: original is closed, unverified, mitigated.
-        Duplicate starts with the opposite of each field so every copy is observable.
+        Negative case: original is closed, unverified, mitigated; the duplicate is open and verified.
+        It stays open, verified and unmitigated: never is_mitigated with no mitigation date, and
+        never made unverified.
         """
         original = self._create_finding(self.test1, "Original")
         original.active = False
@@ -362,18 +365,16 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         outside_dupe.verified = True
         super(Finding, outside_dupe).save(skip_validation=True)
         self._make_duplicate(outside_dupe, original)
-        # _make_duplicate forces active=False; flip to True so the copy is observable
-        outside_dupe.active = True
-        super(Finding, outside_dupe).save(skip_validation=True)
+        # _make_duplicate forces active=False, as deduplication does
 
         with impersonate(self.testuser):
             prepare_duplicates_for_delete(self.test1)
 
         outside_dupe.refresh_from_db()
         self.assertFalse(outside_dupe.duplicate)
-        self.assertFalse(outside_dupe.active)
-        self.assertFalse(outside_dupe.verified)
-        self.assertTrue(outside_dupe.is_mitigated)
+        self.assertTrue(outside_dupe.active)
+        self.assertTrue(outside_dupe.verified)
+        self.assertFalse(outside_dupe.is_mitigated)
 
     def test_found_by_copied_to_new_original(self):
         """New original inherits found_by from deleted original."""
