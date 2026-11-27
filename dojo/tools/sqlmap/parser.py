@@ -32,7 +32,7 @@ CSV_TECHNIQUE_LETTERS = {
 #   Parameter: id (GET)
 LOG_PARAMETER_PREFIX = "Parameter:"
 LOG_FIELD = re.compile(r"^\s*(?P<field>Type|Title|Payload):\s*(?P<value>.*)$")
-LOG_DBMS = re.compile(r"^back-end DBMS:\s*(?P<dbms>.+?)\s*$")
+LOG_DBMS_PREFIX = "back-end DBMS:"
 
 
 class SqlmapParser:
@@ -105,6 +105,12 @@ class SqlmapParser:
             start = rest.find("(", start + 1)
         return None
 
+    def dbms_line(self, line):
+        """Return the DBMS from a stripped "back-end DBMS: MySQL >= 5.0" line, or None if the line is not one."""
+        if not line.startswith(LOG_DBMS_PREFIX):
+            return None
+        return line[len(LOG_DBMS_PREFIX):].strip() or None
+
     def parse_log(self, content, test):
         """
         Parse the per-target log file, which carries the payload sqlmap confirmed.
@@ -132,8 +138,8 @@ class SqlmapParser:
                 else:
                     techniques = findings[key]
                 continue
-            if match := LOG_DBMS.match(line.strip()):
-                dbms = match.group("dbms")
+            if backend := self.dbms_line(line.strip()):
+                dbms = backend
                 continue
             if parameter and (field := LOG_FIELD.match(line)):
                 name = field.group("field").lower()

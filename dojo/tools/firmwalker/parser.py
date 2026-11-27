@@ -12,7 +12,7 @@ DEFAULT_SEVERITY = "Info"
 SECTION = re.compile(r"^\*{3}(?P<title>.+?)\*{3}\s*$")
 # firmwalker writes subsection headers two ways: "##################################### passwd" for
 # file searches and "-------------------- admin --------------------" for content searches.
-HASH_SUBSECTION = re.compile(r"^#{5,}\s*(?P<name>.*?)\s*$")
+HASH_SUBSECTION_PREFIX = "#####"
 
 # The section naming the directory that was scanned; it holds the path, not a hit.
 FIRMWARE_DIRECTORY = "firmware directory"
@@ -56,8 +56,8 @@ class FirmwalkerParser:
             if (name := self.dash_subsection_name(line)) is not None:
                 subsection = name
                 continue
-            if header := HASH_SUBSECTION.match(line):
-                subsection = header.group("name")
+            if (name := self.hash_subsection_name(line)) is not None:
+                subsection = name
                 continue
 
             if section is None or self.is_skipped(section):
@@ -91,6 +91,12 @@ class FirmwalkerParser:
         if len(body) - len(name) < 5:
             return None
         return name.strip()
+
+    def hash_subsection_name(self, line):
+        """Return the name in a "##### name" header, or None if the line is not one."""
+        if not line.startswith(HASH_SUBSECTION_PREFIX):
+            return None
+        return line.lstrip("#").strip()
 
     def is_skipped(self, section):
         lowered = section.lower()
