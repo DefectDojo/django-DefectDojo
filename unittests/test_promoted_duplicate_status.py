@@ -5,7 +5,8 @@ Regression: deleting an original copied its active, verified and is_mitigated on
 duplicate (but not mitigated or mitigated_by), so an open duplicate of a mitigated original came
 back is_mitigated=True with no mitigation date, and a mitigated duplicate of an open original came
 back active. The promoted finding keeps its own status: it is active unless it is closed for a
-reason of its own (mitigated, false positive, out of scope or risk accepted).
+reason of its own (mitigated, false positive, out of scope or risk accepted), and keeps its own
+is_mitigated and mitigated. Its verified is its own OR the deleted original's (#14911).
 """
 
 import datetime
@@ -14,7 +15,7 @@ from crum import impersonate
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from dojo.finding.helper import _bulk_delete_findings_internal, prepare_duplicates_for_delete
+from dojo.finding.helper import prepare_duplicates_for_delete, resolve_inbound_duplicate_references
 from dojo.models import (
     Engagement,
     Finding,
@@ -34,19 +35,24 @@ MITIGATED_AT = datetime.datetime(2026, 1, 2, 3, 4, 5, tzinfo=datetime.UTC)
 OPEN = {"active": True, "verified": True, "is_mitigated": False, "mitigated": None}
 MITIGATED = {"active": False, "verified": False, "is_mitigated": True, "mitigated": MITIGATED_AT}
 CASES = [
-    # The reported case: an open duplicate of a mitigated original stays open and unmitigated.
+    # The reported case: an open duplicate of a mitigated, unverified original stays open, unmitigated
+    # and verified (never made unverified).
     ("open_duplicate_of_mitigated_original", MITIGATED, {"verified": True},
      {"active": True, "verified": True, "is_mitigated": False, "mitigated": None}),
-    # The mirror case: a mitigated duplicate of an open original stays mitigated, with its date.
+    # The mirror case: a mitigated duplicate of an open original stays mitigated, with its date, and
+    # takes the verified original's verified (#14911).
     ("mitigated_duplicate_of_open_original", OPEN, {"is_mitigated": True, "mitigated": MITIGATED_AT, "verified": False},
-     {"active": False, "verified": False, "is_mitigated": True, "mitigated": MITIGATED_AT}),
+     {"active": False, "verified": True, "is_mitigated": True, "mitigated": MITIGATED_AT}),
+    # Neither verified: the promoted finding is not made verified.
+    ("unverified_duplicate_of_unverified_original", MITIGATED, {"verified": False},
+     {"active": True, "verified": False, "is_mitigated": False, "mitigated": None}),
     # Closed for another reason of its own: false positive, out of scope, risk accepted.
     ("false_positive_duplicate", OPEN, {"false_p": True}, {"active": False, "is_mitigated": False}),
     ("out_of_scope_duplicate", OPEN, {"out_of_scope": True}, {"active": False, "is_mitigated": False}),
     ("risk_accepted_duplicate", OPEN, {"risk_accepted": True}, {"active": False, "is_mitigated": False}),
-    # Control: an open duplicate of an open original is open after the promotion, as before.
+    # Control: an open duplicate of an open, verified original is open and verified, as before.
     ("open_duplicate_of_open_original", OPEN, {"verified": False},
-     {"active": True, "verified": False, "is_mitigated": False, "mitigated": None}),
+     {"active": True, "verified": True, "is_mitigated": False, "mitigated": None}),
 ]
 
 
@@ -120,11 +126,10 @@ class TestPromotedDuplicateKeepsItsOwnStatus(DojoTestCase):
                 Finding.objects.filter(id=original.id).delete()
 
     def test_bulk_delete(self):
-        """Bulk deleting the original (resolve_inbound_duplicate_references promotes the survivor)."""
+        """Bulk deleting the original: each chunk's resolve_inbound_duplicate_references promotes the survivor."""
         for name, original_status, duplicate_status, expected in CASES:
             with self.subTest(name):
                 original, duplicate = self._cluster(original_status, duplicate_status)
-                with impersonate(self.user):
-                    _bulk_delete_findings_internal(Finding.objects.filter(id=original.id))
-                self.assertFalse(Finding.objects.filter(id=original.id).exists())
+                self.assertEqual(resolve_inbound_duplicate_references([original.id], [original.id]), 1)
                 self._assert_promoted(duplicate, expected)
+                Finding.objects.filter(id=original.id).delete()
