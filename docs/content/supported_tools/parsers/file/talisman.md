@@ -14,7 +14,7 @@ Example:
 # Set DefectDojo API credential and other variables
 DEFECTDOJO_API_KEY="your-api-key"
 DEFECTDOJO_URL="https://your-defectdojo-url.com"
-DEFECTDOJO_PRODUCT_TYPE_NAME="your-product-type-name"
+DEFECTDOJO_PRODUCT_TYPE_NAME="your-product-type-name"  # must match the product's existing product type
 DEFECTDOJO_PRODUCT_NAME="your-product-name"
 DEFECTDOJO_ENGAGEMENT_NAME="your-engagement-name"
 TALISMAN_RESULTS_DIR="$HOME"
@@ -29,7 +29,7 @@ result=$(jq '.results[].filename' "${TALISMAN_RESULTS_DIR}/talisman_reports/data
 # Check if result is not empty
 if [ -n "$result" ]; then
   # If talisman found issues, send the JSON output to DefectDojo API endpoint
-  curl -X POST \
+  curl -sS --fail-with-body -X POST \
     -H "Authorization: Token $DEFECTDOJO_API_KEY" \
     -F "scan_type=Talisman Scan" \
     -F "file=@$TALISMAN_RESULTS_DIR/talisman_reports/data/report.json" \
@@ -37,7 +37,7 @@ if [ -n "$result" ]; then
     -F "product_name=$DEFECTDOJO_PRODUCT_NAME" \
     -F "engagement_name=$DEFECTDOJO_ENGAGEMENT_NAME" \
     -F "auto_create_context=true" \
-    "$DEFECTDOJO_URL/api/v2/import-scan/"
+    "$DEFECTDOJO_URL/api/v2/reimport-scan/"
 
   # Exit with a non-zero status code to indicate that the commit should be rejected
   exit 1

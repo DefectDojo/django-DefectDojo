@@ -274,7 +274,7 @@ DefectDojoは、API経由で**JSON**、**HTML**、**CSV**、または**Excel**�
 | `POST /api/v2/product_types/{id}/generate_report/` | 1つの製品タイプ |
 | `POST /api/v2/endpoints/{id}/generate_report/` | 1つのエンドポイント |
 
-Proオブジェクトのエイリアスも同じアクションを公開しています: `/api/v2/assets/{id}/generate_report/`、`/api/v2/organizations/{id}/generate_report/`、および`/api/v2/location/{id}/generate_report/`。
+Proオブジェクトのエイリアスも同じアクションを公開しています: `/api/v2/assets/{id}/generate_report/`および`/api/v2/organizations/{id}/generate_report/`。
 
 ### Request options
 

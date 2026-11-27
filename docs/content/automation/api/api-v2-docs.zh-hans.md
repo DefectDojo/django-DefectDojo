@@ -279,7 +279,7 @@ DefectDojo 可以通过 API 生成 **JSON**、**HTML**、**CSV** 或 **Excel** �
 | `POST /api/v2/product_types/{id}/generate_report/` | 单个产品类型 |
 | `POST /api/v2/endpoints/{id}/generate_report/` | 单个端点 |
 
-Pro 版的对象别名提供相同的操作：`/api/v2/assets/{id}/generate_report/`、`/api/v2/organizations/{id}/generate_report/` 以及 `/api/v2/location/{id}/generate_report/`。
+Pro 版的对象别名提供相同的操作：`/api/v2/assets/{id}/generate_report/` 以及 `/api/v2/organizations/{id}/generate_report/`。
 
 ### Request options
 
