@@ -1306,7 +1306,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         # deleting before instantiating the form otherwise django messes up and we end up with an empty path value
         if len(request.FILES) > 0:
             logger.debug("new proof uploaded")
-            risk_acceptance.path.delete()
+            ra_helper.delete_proof(risk_acceptance)
 
         if "decision" in request.POST:
             old_expiration_date = risk_acceptance.expiration_date

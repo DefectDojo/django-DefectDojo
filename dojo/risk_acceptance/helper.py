@@ -366,8 +366,17 @@ def delete(eng, risk_acceptance):
     eng.risk_acceptance.remove(risk_acceptance)
     eng.save()
 
-    risk_acceptance.path.delete()
+    delete_proof(risk_acceptance)
     risk_acceptance.delete()
+
+
+def delete_proof(risk_acceptance):
+    proof = risk_acceptance.path
+    if proof and Risk_Acceptance.objects.filter(path=proof.name).exclude(pk=risk_acceptance.pk).exists():
+        risk_acceptance.path = None
+        risk_acceptance.save()
+        return
+    proof.delete()
 
 
 def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, finding: Finding) -> None:
