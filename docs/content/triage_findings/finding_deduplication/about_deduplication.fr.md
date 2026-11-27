@@ -32,6 +32,8 @@ Par défaut, ces Tests doivent être imbriqués sous le même Produit pour que l
 
 Les Constatations en double sont définies comme Inactives par défaut. Cela ne signifie pas que la Constatation en double elle-même est inactive. Il s'agit plutôt de faire en sorte que votre équipe n'ait qu'une seule Constatation active sur laquelle travailler et à corriger, ce qui implique qu'une fois la Constatation originale Atténuée, les doublons seront également Atténués.
 
+Dans DefectDojo Pro, un doublon situé dans un autre Test ou Asset est libéré lorsque son original est fermé. Dès que la Constatation originale est Atténuée, par un Reimport ou manuellement, chacun de ses doublons ouverts dans un autre Test ou Asset (dans un [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/), par exemple) redevient Actif et est à nouveau dédupliqué dans son propre périmètre : il devient le doublon d'une autre Constatation ouverte, ou le nouvel original. Cette Constatation signale toujours la vulnérabilité, elle reste donc ouverte jusqu'à ce qu'elle soit elle-même Atténuée. Un doublon déjà Atténué reste tel quel, et un original fermé comme Faux positif ou Hors périmètre conserve ses doublons.
+
 ## Déduplication lors du réimport
 
 La Déduplication et le Réimport sont des processus similaires, mais ils utilisent des algorithmes différents pour identifier les correspondances entre Constatations.

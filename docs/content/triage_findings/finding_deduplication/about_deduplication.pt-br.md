@@ -32,6 +32,8 @@ Por padrão, esses Testes precisam estar aninhados sob o mesmo Produto para que 
 
 Os Achados duplicados são definidos como Inativos por padrão. Isso não significa que o próprio Achado duplicado esteja Inativo. Em vez disso, isso serve para que sua equipe tenha apenas um único Achado ativo para trabalhar e corrigir, com a implicação de que, quando o Achado original for Mitigado, os Duplicados também serão Mitigados.
 
+No DefectDojo Pro, um Duplicado em outro Teste ou Asset é liberado quando seu original é fechado. Assim que o Achado original é Mitigado, por uma Reimportação ou manualmente, cada um de seus Duplicados abertos em outro Teste ou Asset (em um [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/), por exemplo) volta a ficar Ativo e é deduplicado novamente em seu próprio escopo: torna-se Duplicado de outro Achado aberto, ou o novo original. Esse Achado ainda relata a vulnerabilidade, então permanece aberto até ser Mitigado por si mesmo. Um Duplicado que já está Mitigado permanece como está, e um original fechado como Falso positivo ou Fora do escopo mantém seus Duplicados.
+
 ## Deduplicação de Reimportação
 
 Deduplicação e Reimportação são processos semelhantes, mas usam algoritmos diferentes para identificar correspondências de Achados.

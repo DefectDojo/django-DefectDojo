@@ -32,6 +32,8 @@ De forma predeterminada, estos Tests deben estar anidados bajo el mismo Producto
 
 Los Hallazgos duplicados se establecen como Inactivos de forma predeterminada. Esto no significa que el propio Hallazgo duplicado esté inactivo. Más bien, esto permite que su equipo tenga un único Hallazgo activo en el que trabajar y remediar, lo que implica que, una vez que el Hallazgo original se Mitigue, los Duplicados también se Mitigarán.
 
+En DefectDojo Pro, un Duplicado en otro Test o Asset se libera cuando se cierra su original. Una vez que el Hallazgo original se Mitiga, mediante una Reimportación o manualmente, cada uno de sus Duplicados abiertos en otro Test o Asset (por ejemplo, en un [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/)) vuelve a estar Activo y se deduplica de nuevo en su propio ámbito: pasa a ser Duplicado de otro Hallazgo abierto, o el nuevo original. Ese Hallazgo sigue reportando la vulnerabilidad, por lo que permanece abierto hasta que se Mitigue por sí mismo. Un Duplicado que ya está Mitigado no cambia, y un original cerrado como Falso positivo o Fuera de alcance conserva sus Duplicados.
+
 ## Deduplicación de Reimportación
 
 La Deduplicación y la Reimportación son procesos similares, pero utilizan algoritmos diferentes para identificar coincidencias entre Hallazgos.
