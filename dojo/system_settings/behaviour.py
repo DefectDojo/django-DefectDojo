@@ -160,6 +160,10 @@ def require_settings(*names: str):
 
 def jira_timeout() -> tuple:
     """The Jira client's (connect, read) timeout: this instance's, else DD_JIRA_CONNECT/READ_TIMEOUT."""
+    row = _system_settings()
+    if row.jira_connect_timeout is None and row.jira_read_timeout is None:
+        # Nothing saved: the deployment's pair, which an operator may also set as JIRA_TIMEOUT directly.
+        return getattr(settings, "JIRA_TIMEOUT", (settings.JIRA_CONNECT_TIMEOUT, settings.JIRA_READ_TIMEOUT))
     return (get_setting("JIRA_CONNECT_TIMEOUT"), get_setting("JIRA_READ_TIMEOUT"))
 
 
