@@ -63,7 +63,8 @@ class UserSerializer(serializers.ModelSerializer):
         # class body, so its __init__ runs at import. get_fields() runs the first time self.fields is read.
         fields = super().get_fields()
         field = fields.get("configuration_permissions")
-        if field is not None:
+        # A subclass may declare its own configuration_permissions (the export manifest's is a method field).
+        if isinstance(field, serializers.ManyRelatedField):
             # many=True makes a ManyRelatedField that resolves each id through its child_relation, so the
             # queryset goes on both.
             queryset = Permission.objects.filter(codename__in=get_configuration_permissions_codenames())

@@ -10,6 +10,7 @@ afterwards stayed selectable, and a permission switched on afterwards stayed unk
 from django.contrib.auth.models import Permission
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from dojo.api_v2.serializers import DeferredChoiceField, ImportScanSerializer, ReImportScanSerializer
@@ -108,3 +109,14 @@ class TestConfigurationPermissionsPerRequest(DojoTestCase):
 
     def test_the_declared_field_holds_no_query(self):
         self.assertFalse(UserSerializer._declared_fields["configuration_permissions"].child_relation.queryset.exists())
+
+    def test_a_subclass_that_redeclares_the_field_keeps_its_own(self):
+        # The export manifest's user serializer declares configuration_permissions as a method field.
+        class Redeclared(UserSerializer):
+            configuration_permissions = serializers.SerializerMethodField()
+
+            def get_configuration_permissions(self, obj):
+                return []
+
+        field = Redeclared().fields["configuration_permissions"]
+        self.assertIsInstance(field, serializers.SerializerMethodField)
