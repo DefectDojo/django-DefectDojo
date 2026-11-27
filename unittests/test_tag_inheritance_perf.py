@@ -661,9 +661,12 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # and across all import actions) instead of an extra aggregate per set.
     # +2 on every path (measured, both modes): an import takes its test's one-import-at-a-time
     # lock before the first finding and releases it when it ends (dojo/importers/import_lock.py).
-    EXPECTED_ZAP_IMPORT_V2 = 287
-    EXPECTED_ZAP_IMPORT_V3 = 313
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 66
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 77
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 145
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 174
+    # +1 on every path (measured, both modes): the serializer reads the inactive test types for its
+    # scan_type choices per request (DeferredChoiceField in dojo/api_v2/serializers.py), a read that
+    # used to run once at import, outside any request.
+    EXPECTED_ZAP_IMPORT_V2 = 288
+    EXPECTED_ZAP_IMPORT_V3 = 314
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 67
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 78
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 146
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 175
