@@ -106,3 +106,14 @@ class TestBehaviourSettings(DojoTestCase):
             behaviour.validate_language_code,
         ):
             validator(None)
+
+    @override_settings(MAX_ALERTS_PER_USER=999)
+    def test_pinned_settings_resolve_each_name_once(self):
+        with behaviour.pinned_settings():
+            self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 999)
+            self._save(max_alerts_per_user=5)
+            # Pinned for the batch: the value read first holds until the block ends.
+            self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 999)
+            with behaviour.pinned_settings():
+                self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 999)
+        self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 5)

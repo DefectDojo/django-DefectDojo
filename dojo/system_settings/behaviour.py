@@ -19,6 +19,8 @@ already stored; run ``manage.py dedupe --hash_code_only`` for the scan types it 
 
 from __future__ import annotations
 
+import threading
+from contextlib import contextmanager
 from functools import wraps
 from typing import TYPE_CHECKING
 
@@ -118,8 +120,40 @@ def unregister_setting_resolver(resolver: Callable[[str], object]) -> None:
         _resolvers.remove(resolver)
 
 
+# A batch that reads the same setting once per row (a bulk save firing each row's signals) pins them:
+# inside pinned_settings() each name is resolved once, on first use, and reused until the block ends.
+_pinned = threading.local()
+
+
+@contextmanager
+def pinned_settings():
+    """
+    Resolve each behaviour setting at most once for the enclosed batch.
+
+    The per-request settings cache is reset at every task boundary, and a task run inline (an eager
+    Celery task inside a bulk save) would otherwise make every row re-read System Settings. A batch runs
+    for one instance (one tenant), so one value per name is right for all of its rows. Nested blocks share
+    the outer block's values.
+    """
+    outer = getattr(_pinned, "values", None)
+    _pinned.values = {} if outer is None else outer
+    try:
+        yield
+    finally:
+        _pinned.values = outer
+
+
 def get_setting(name: str):
     """Return the instance's value for ``name``: its System Settings field, else the setting."""
+    values = getattr(_pinned, "values", None)
+    if values is None:
+        return _resolve(name)
+    if name not in values:
+        values[name] = _resolve(name)
+    return values[name]
+
+
+def _resolve(name: str):
     field = FIELD_ONLY.get(name)
     if field is not None:
         return getattr(_system_settings(), field)
