@@ -47,6 +47,8 @@ else
 fi
 ```
 
+The example needs curl 7.76.0 or later, for `--fail-with-body`.
+
 ### Sample Scan Data
 Sample Talisman scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/talisman).
 
