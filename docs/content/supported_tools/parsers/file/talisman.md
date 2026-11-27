@@ -14,6 +14,9 @@ Example:
 # Set DefectDojo API credential and other variables
 DEFECTDOJO_API_KEY="your-api-key"
 DEFECTDOJO_URL="https://your-defectdojo-url.com"
+DEFECTDOJO_PRODUCT_TYPE_NAME="your-product-type-name"
+DEFECTDOJO_PRODUCT_NAME="your-product-name"
+DEFECTDOJO_ENGAGEMENT_NAME="your-engagement-name"
 TALISMAN_RESULTS_DIR="$HOME"
 
 # Run talisman in CLI mode and output the result in JSON format
@@ -28,8 +31,12 @@ if [ -n "$result" ]; then
   # If talisman found issues, send the JSON output to DefectDojo API endpoint
   curl -X POST \
     -H "Authorization: Token $DEFECTDOJO_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d "@$TALISMAN_RESULTS_DIR/talisman_reports/data/report.json" \
+    -F "scan_type=Talisman Scan" \
+    -F "file=@$TALISMAN_RESULTS_DIR/talisman_reports/data/report.json" \
+    -F "product_type_name=$DEFECTDOJO_PRODUCT_TYPE_NAME" \
+    -F "product_name=$DEFECTDOJO_PRODUCT_NAME" \
+    -F "engagement_name=$DEFECTDOJO_ENGAGEMENT_NAME" \
+    -F "auto_create_context=true" \
     "$DEFECTDOJO_URL/api/v2/import-scan/"
 
   # Exit with a non-zero status code to indicate that the commit should be rejected

@@ -342,7 +342,7 @@ A report is generated with a `POST` request to a `generate_report/` action. The 
 | `POST /api/v2/product_types/{id}/generate_report/` | One Organization |
 | `POST /api/v2/endpoints/{id}/generate_report/` | One endpoint |
 
-The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, and `/api/v2/location/{id}/generate_report/`.
+The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/` and `/api/v2/organizations/{id}/generate_report/`.
 
 ### Request options
 
