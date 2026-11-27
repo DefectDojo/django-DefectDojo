@@ -26,7 +26,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from dojo.api_v2 import serializers
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
-from dojo.api_v2.views import report_generate
+from dojo.api_v2.views import report_generate_response
 from dojo.authorization.api_permissions import check_object_permission
 from dojo.filters import OrderingFilter
 from dojo.location.api.tag_filters import (
@@ -226,14 +226,13 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, endpoint, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, endpoint, options)
 
 
 ##########
