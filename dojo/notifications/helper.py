@@ -14,6 +14,7 @@ from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage, get_connection
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q, QuerySet
+from django.db.models.functions import Upper
 from django.db.utils import InterfaceError, OperationalError
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
@@ -1348,6 +1349,39 @@ class NotificationManager(NotificationManagerHelpers):
                     logger.exception("Failed to send Webhooks notification for event %s", event)
 
 
+def _resolve_mentioned_users(mentioned):
+    """
+    Map the names written after "@" to active users, ignoring case.
+
+    Usernames are stored case-sensitively, so "Alice" and "alice" can be two accounts. A name that
+    matches an account exactly (same case) gets that account, found through the username index in
+    one query. Only the names left over are matched case-insensitively, in one more query, and a
+    name that matches several accounts only by case notifies none of them rather than guess.
+    """
+    if not mentioned:
+        return []
+    users = {}
+    exact = {user.username: user for user in Dojo_User.objects.filter(is_active=True, username__in=mentioned)}
+    for user in exact.values():
+        users[user.pk] = user
+
+    unmatched = {name.upper(): name for name in mentioned if name not in exact}
+    if unmatched:
+        candidates = {}
+        for user in Dojo_User.objects.alias(upper_username=Upper("username")).filter(
+            is_active=True,
+            upper_username__in=list(unmatched),
+        ):
+            candidates.setdefault(user.username.upper(), []).append(user)
+        for key, name in unmatched.items():
+            matches = candidates.get(key, [])
+            if len(matches) == 1:
+                users[matches[0].pk] = matches[0]
+            elif matches:
+                logger.debug("@%s matches %d users only by case; not notifying any of them", name, len(matches))
+    return list(users.values())
+
+
 def process_tag_notifications(request, note, parent_url, parent_title, parent=None):
     # Django usernames may contain "@ . + - _" in addition to word characters (see
     # Django's username validators), so capture that whole set instead of only \w.
@@ -1356,13 +1390,9 @@ def process_tag_notifications(request, note, parent_url, parent_title, parent=No
     # ("thanks @alice.") still resolves to the username.
     regex = re.compile(r"(?:\A|\s)@([\w.@+-]+)")
 
-    usernames_to_check = {un.lower().rstrip(".") for un in regex.findall(note.entry)}
-
-    users_to_notify = [
-        Dojo_User.objects.filter(username=username).get()
-        for username in usernames_to_check
-        if Dojo_User.objects.filter(is_active=True, username=username).exists()
-    ]
+    mentioned = {un.rstrip(".") for un in regex.findall(note.entry)}
+    mentioned.discard("")
+    users_to_notify = _resolve_mentioned_users(mentioned)
     if parent is not None:
         # Only users who can see the object the note is attached to get the mention.
         from dojo.authorization.authorization import user_has_permission  # noqa: PLC0415 -- lazy import, avoids circular dependency
