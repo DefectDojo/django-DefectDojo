@@ -1086,6 +1086,14 @@ class Finding(BaseModel):
         logger.debug("fields_to_hash lower: %s", fields_to_hash.lower())
         return hashlib.sha256(fields_to_hash.casefold().encode("utf-8").strip()).hexdigest()
 
+    @property
+    def duplicate_finding_in_product(self):
+        """The original this finding is a duplicate of, or None when it sits in another product."""
+        original = self.duplicate_finding
+        if original is not None and original.test.engagement.product_id == self.test.engagement.product_id:
+            return original
+        return None
+
     def duplicate_finding_set(self):
         if self.duplicate:
             if self.duplicate_finding is not None:

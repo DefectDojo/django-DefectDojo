@@ -72,7 +72,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
             "risk_acceptance_set",
             "risk_acceptance_set__accepted_findings",
             "original_finding",
-            "duplicate_finding",
+            "duplicate_finding__test__engagement",
         )
 
     # Import actions - configurable filtering

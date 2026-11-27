@@ -174,3 +174,48 @@ class FindingViewFollowupsTest(DojoTestCase):
         self.assertNotIn(self.other_finding.id, ids)
         # The fixture's own-product duplicates of finding 2 are still listed.
         self.assertIn(3, ids)
+
+    # --- original in another product ----------------------------------------------------------
+
+    def _point_at_other_product(self):
+        # The state an engagement move leaves behind: finding 2 is a duplicate of a finding in another product.
+        finding = Finding.objects.get(id=2)
+        Engagement.objects.filter(id=finding.test.engagement_id).update(deduplication_on_engagement=False)
+        finding.duplicate = True
+        finding.duplicate_finding = self.other_finding
+        finding.active = False
+        finding.save(dedupe_option=False)
+        own = Finding.objects.create(
+            title="followups own finding", test=finding.test, severity="High", reporter=self.admin, active=True,
+        )
+        return finding, own
+
+    def _assert_other_finding_untouched(self):
+        self.other_finding.refresh_from_db()
+        self.assertFalse(self.other_finding.duplicate)
+        self.assertIsNone(self.other_finding.duplicate_finding)
+        self.assertTrue(self.other_finding.active)
+
+    def test_set_as_original_refuses_an_original_in_another_product(self):
+        finding, own = self._point_at_other_product()
+        self.client.force_login(self.member)
+        response = self.client.post(reverse("set_finding_as_original", args=(finding.id, own.id)))
+        self.assertEqual(404, response.status_code)
+        self._assert_other_finding_untouched()
+
+    def test_set_as_original_api_refuses_an_original_in_another_product(self):
+        finding, own = self._point_at_other_product()
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + Token.objects.get_or_create(user=self.member)[0].key)
+        response = client.post(reverse("finding-set-finding-as-original", args=(finding.id, own.id)))
+        self.assertEqual(404, response.status_code, response.content[:500])
+        self._assert_other_finding_untouched()
+
+    def test_finding_pages_hide_an_original_in_another_product(self):
+        finding, _ = self._point_at_other_product()
+        self.client.force_login(self.member)
+        for name in ("view_finding", "edit_finding"):
+            response = self.client.get(reverse(name, args=(finding.id,)))
+            self.assertEqual(200, response.status_code, name)
+            self.assertNotContains(response, "Followups Other Finding", msg_prefix=name)
+            self.assertNotContains(response, f'href="{reverse("view_finding", args=(self.other_finding.id,))}"', msg_prefix=name)

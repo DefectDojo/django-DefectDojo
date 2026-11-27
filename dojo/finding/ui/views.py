@@ -3366,6 +3366,8 @@ def set_finding_as_original_with_reason(user, finding_id, new_original_id):
 
     # The finding itself, and the cluster root it currently points at, both end up under new_original.
     old_root = finding.duplicate_finding if finding.duplicate else None
+    if old_root is not None and old_root.test.engagement.product_id != finding.test.engagement.product_id:
+        raise Http404
     # The finding that heads the cluster until now: the old root, or the page finding when it is the root or in no
     # cluster yet.
     head = old_root or finding
@@ -3597,7 +3599,7 @@ def calculate_possible_related_actions_for_similar_finding(
     page_separated = is_deduplication_on_engagement_mismatch(similar_finding, finding)
     root_separated = page_separated if root is finding else is_deduplication_on_engagement_mismatch(similar_finding, root)
     blocked = set()
-    if page_separated:
+    if page_separated or (finding.duplicate_finding and not finding.duplicate_finding_in_product):
         blocked.add("set_finding_as_original")
     # The mark route also refuses a root that is itself a duplicate (a chain, or an orphan whose original is gone).
     if root_separated or root.duplicate:

@@ -40,7 +40,7 @@
             {% block additional_forms %}
             {% endblock additional_forms %}
             <span id="original_finding" class="small">
-                {% if finding.duplicate_finding %}
+                {% if finding.duplicate_finding_in_product %}
                     [original:
                     <a href="{% url 'view_finding' finding.duplicate_finding.id %}">{{ finding.duplicate_finding.id }} : {{ finding.duplicate_finding.title }}</a>/
                     <a href="{% url 'view_product' finding.duplicate_finding.test.engagement.product.id %}">{{ finding.duplicate_finding.test.engagement.product.name }}</a>/
