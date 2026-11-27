@@ -140,6 +140,7 @@ A few details worth knowing:
 
 * The `@` must be at the **start of the note or come right after a space**. This is deliberate — it stops email addresses written mid-sentence (like `alice@example.com`) from firing accidental mentions.
 * The name after `@` must match an **existing, active** DefectDojo username. Mentions of unknown or deactivated users are ignored.
+* Case does not matter: `@alice`, `@Alice` and `@ALICE` all reach the user `Alice`. If two usernames differ only in case (`Alice` and `alice`), type the one you mean exactly; a mention that matches both only by case notifies neither.
 * A trailing period is ignored, so a mention that ends a sentence (`thanks @alice.`) still resolves.
 * You can mention more than one user in a single note.
 
