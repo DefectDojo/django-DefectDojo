@@ -3,11 +3,11 @@ from datetime import datetime
 
 import html2text
 from defusedxml import ElementTree
-from django.conf import settings
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 
@@ -132,7 +132,7 @@ class NexposeParser:
                             ] += "\n\n" + self.parse_html_type(desc)
                         else:
                             vuln["pluginOutput"] = self.parse_html_type(desc)
-                    if settings.USE_FIRST_SEEN and (date := test.get("vulnerable-since")):
+                    if get_behaviour_setting("USE_FIRST_SEEN") and (date := test.get("vulnerable-since")):
                         date = datetime.fromisoformat(date)
                         # It would be nice to be able to define it per Endpoint_Status but for now, we use the oldest known information
                         if not vuln.get("vulnerableSince") or (date < vuln["vulnerableSince"]):

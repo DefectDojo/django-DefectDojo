@@ -1,0 +1,108 @@
+from django.core.exceptions import ValidationError
+from django.template import Context, Template
+from django.test import override_settings
+
+from dojo.models import System_Settings
+from dojo.system_settings import behaviour
+from dojo.system_settings.behaviour import SETTING_FIELDS, get_setting, team_name
+from dojo.utils import get_setting as utils_get_setting
+
+from .dojo_test_case import DojoTestCase
+
+
+class TestBehaviourSettings(DojoTestCase):
+
+    """A behaviour setting reads the System Settings field when saved, else the DD_* setting."""
+
+    def _save(self, **fields):
+        row = System_Settings.objects.get(no_cache=True)
+        for name, value in fields.items():
+            setattr(row, name, value)
+        row.save()
+
+    def test_every_field_exists_and_starts_empty(self):
+        row = System_Settings.objects.get(no_cache=True)
+        for field in SETTING_FIELDS.values():
+            self.assertIsNone(getattr(row, field), field)
+
+    @override_settings(DELETE_PREVIEW=True, MAX_ALERTS_PER_USER=999)
+    def test_an_empty_field_uses_the_setting(self):
+        self.assertTrue(get_setting("DELETE_PREVIEW"))
+        self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 999)
+        self.assertTrue(utils_get_setting("DELETE_PREVIEW"))
+
+    @override_settings(DELETE_PREVIEW=True, MAX_ALERTS_PER_USER=999)
+    def test_a_saved_field_wins_over_the_setting(self):
+        self._save(delete_preview=False, max_alerts_per_user=5)
+        self.assertFalse(get_setting("DELETE_PREVIEW"))
+        self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 5)
+        self.assertFalse(utils_get_setting("DELETE_PREVIEW"))
+
+    @override_settings(LANGUAGE_CODE="en-us")
+    def test_an_empty_string_language_uses_the_setting(self):
+        self._save(default_language_code="")
+        self.assertEqual(get_setting("LANGUAGE_CODE"), "en-us")
+
+    def test_a_setting_outside_the_family_is_the_django_setting(self):
+        with override_settings(SOME_OTHER_SETTING="x"):
+            self.assertEqual(get_setting("SOME_OTHER_SETTING"), "x")
+
+    def test_finding_groups_reads_only_the_field(self):
+        self._save(enable_finding_groups=False)
+        with override_settings(FEATURE_FINDING_GROUPS=True):
+            self.assertFalse(get_setting("FEATURE_FINDING_GROUPS"))
+
+    def test_a_stored_map_is_merged_over_the_deployment_map(self):
+        base = {"Scanner A": ["title"], "Scanner B": ["cwe"]}
+        with override_settings(HASHCODE_FIELDS_PER_SCANNER=base):
+            self._save(hashcode_fields_per_scanner={"Scanner B": ["title", "cwe"], "Scanner C": ["severity"]})
+            merged = get_setting("HASHCODE_FIELDS_PER_SCANNER")
+            self.assertEqual(merged, {"Scanner A": ["title"], "Scanner B": ["title", "cwe"], "Scanner C": ["severity"]})
+            # The deployment's map is not changed in place.
+            self.assertEqual(base, {"Scanner A": ["title"], "Scanner B": ["cwe"]})
+
+    def test_the_merged_map_is_reused_while_nothing_changes(self):
+        base = {"Scanner A": "hash_code"}
+        overrides = {"Scanner B": "legacy"}
+        first = behaviour._merge("DEDUPLICATION_ALGORITHM_PER_PARSER", base, overrides)
+        self.assertIs(behaviour._merge("DEDUPLICATION_ALGORITHM_PER_PARSER", base, overrides), first)
+        self.assertIsNot(behaviour._merge("DEDUPLICATION_ALGORITHM_PER_PARSER", base, {"Scanner B": "legacy"}), first)
+
+    @override_settings(TEAM_NAME="Env Team")
+    def test_team_name_prefers_the_field(self):
+        self._save(team_name="")
+        self.assertEqual(team_name(), "Env Team")
+        self._save(team_name="Saved Team")
+        self.assertEqual(team_name(), "Saved Team")
+
+    @override_settings(DISABLE_FINDING_MERGE=False)
+    def test_setting_enabled_filter_reads_the_field(self):
+        template = Template("{% load display_tags %}{% if 'DISABLE_FINDING_MERGE'|setting_enabled %}off{% else %}on{% endif %}")
+        self.assertEqual(template.render(Context({})), "on")
+        self._save(disable_finding_merge=True)
+        self.assertEqual(template.render(Context({})), "off")
+
+    def test_validators_refuse_malformed_values(self):
+        cases = [
+            (behaviour.validate_hashcode_fields_per_scanner, {"Scanner": "title"}),
+            (behaviour.validate_hashcode_fields_per_scanner, ["title"]),
+            (behaviour.validate_deduplication_algorithm_per_parser, {"Scanner": "not-an-algorithm"}),
+            (behaviour.validate_notifications_system_level_trump, "scan_added"),
+            (behaviour.validate_language_code, "xx-not-a-language"),
+        ]
+        for validator, value in cases:
+            with self.subTest(validator=validator.__name__, value=value), self.assertRaises(ValidationError):
+                validator(value)
+
+    def test_validators_accept_well_formed_and_empty_values(self):
+        behaviour.validate_hashcode_fields_per_scanner({"Scanner": ["title", "cwe"]})
+        behaviour.validate_deduplication_algorithm_per_parser({"Scanner": "hash_code"})
+        behaviour.validate_notifications_system_level_trump(["scan_added"])
+        behaviour.validate_language_code("en")
+        for validator in (
+            behaviour.validate_hashcode_fields_per_scanner,
+            behaviour.validate_deduplication_algorithm_per_parser,
+            behaviour.validate_notifications_system_level_trump,
+            behaviour.validate_language_code,
+        ):
+            validator(None)

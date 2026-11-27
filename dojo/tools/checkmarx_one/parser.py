@@ -3,10 +3,10 @@ import json
 import re
 
 from dateutil import parser
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Test
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 
@@ -80,7 +80,7 @@ class CheckmarxOneParser:
                 # Iterate over the individual issues
                 for instance in query.get("resultsList"):
                     # Set the date depending on the first seen flag
-                    if settings.USE_FIRST_SEEN:
+                    if get_behaviour_setting("USE_FIRST_SEEN"):
                         date = self._parse_date(instance.get("firstDetectionDate"))
                     else:
                         date = self._parse_date(instance.get("lastDetectionDate"))
@@ -177,7 +177,7 @@ class CheckmarxOneParser:
             # Iterate over the individual issues
             for instance in result.get("vulnerabilities"):
                 # Set the date depending on the first seen flag
-                if settings.USE_FIRST_SEEN:
+                if get_behaviour_setting("USE_FIRST_SEEN"):
                     date = self._parse_date(instance.get("firstFoundDate"))
                 else:
                     date = self._parse_date(instance.get("foundDate"))

@@ -37,6 +37,7 @@ from dojo.models import (
     User,
 )
 from dojo.notifications.helper import create_notification
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.utils import (
     add_error_message_to_response,
     get_file_images,
@@ -2212,7 +2213,7 @@ def process_resolution_from_jira(
             finding.false_p = False
             ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True
-    elif not finding.active and (finding_group is None or settings.JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN):
+    elif not finding.active and (finding_group is None or get_behaviour_setting("JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN")):
         # Reopen / Open Jira issue
         logger.debug(f"Re-opening related finding of {jira_issue.jira_key}")
         finding.active = True

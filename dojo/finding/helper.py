@@ -53,6 +53,7 @@ from dojo.models import (
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools import tool_issue_updater
 from dojo.url.models import URL
 from dojo.utils import (
@@ -228,7 +229,7 @@ def deleted_finding_ids(finding_ids) -> set[int]:
 
 
 def can_edit_mitigated_data(user):
-    return settings.EDITABLE_MITIGATED_DATA and user and getattr(user, "is_superuser", False)
+    return get_behaviour_setting("EDITABLE_MITIGATED_DATA") and user and getattr(user, "is_superuser", False)
 
 
 def create_finding_group(finds, finding_group_name):
@@ -751,7 +752,7 @@ def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     jira_issue_reassigned = False
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
-        if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+        if get_behaviour_setting("DUPLICATE_CLUSTER_CASCADE_DELETE"):
             # Lock the original and its cluster's finding rows, in id order, before the delete
             # touches any of their child rows: the order the excess-duplicate delete and
             # bulk_delete_findings take them in (lock_findings_for_delete). The queryset delete
@@ -904,7 +905,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     if original is None or cluster_outside is None or len(cluster_outside) == 0:
         return None
 
-    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+    if get_behaviour_setting("DUPLICATE_CLUSTER_CASCADE_DELETE"):
         # Don't delete here: the caller deletes the outside-scope duplicates itself
         # (prepare_duplicates_for_delete via bulk_delete_findings, finding_delete via a
         # locked queryset delete).
@@ -951,7 +952,7 @@ def prepare_duplicates_for_delete(obj, *, preview_only=False):
         return 0 if preview_only else None
 
     if preview_only:
-        if not settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+        if not get_behaviour_setting("DUPLICATE_CLUSTER_CASCADE_DELETE"):
             return 0
         scope_ids_subquery = Finding.objects.filter(**{scope_field: obj}).values_list("id", flat=True)
         return Finding.objects.filter(
@@ -1006,7 +1007,7 @@ def prepare_duplicates_for_delete(obj, *, preview_only=False):
     # Match legacy finding_delete(): delete outside-scope cluster members that point at
     # in-scope originals (duplicate_cluster.order_by("-id").delete()). Transitive duplicate
     # chains do not need a separate expansion pass — fix_loop_duplicates above normalizes them.
-    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+    if get_behaviour_setting("DUPLICATE_CLUSTER_CASCADE_DELETE"):
         outside_cascade_qs = Finding.objects.filter(
             duplicate_finding_id__in=scope_ids_subquery,
         ).exclude(id__in=scope_ids_subquery)

@@ -3,10 +3,11 @@ import time
 from django.conf import settings
 
 from dojo.notifications.models import Alerts
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 
 def bind_alert_count(request):
-    if not settings.DISABLE_ALERT_COUNTER:
+    if not get_behaviour_setting("DISABLE_ALERT_COUNTER"):
 
         if hasattr(request, "user") and request.user.is_authenticated:
             return {"alert_count": Alerts.objects.filter(user_id=request.user).count()}

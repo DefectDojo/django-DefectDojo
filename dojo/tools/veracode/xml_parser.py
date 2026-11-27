@@ -3,10 +3,10 @@ import uuid
 from datetime import datetime
 
 from defusedxml import ElementTree
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
@@ -169,7 +169,7 @@ class VeracodeXMLParser:
 
         # Get the date based on the first_seen setting
         try:
-            if settings.USE_FIRST_SEEN:
+            if get_behaviour_setting("USE_FIRST_SEEN"):
                 if date := xml_node.get("date_first_occurrence", None):
                     finding.date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %Z")
             elif date := xml_node.get("date_last_occurrence", None):

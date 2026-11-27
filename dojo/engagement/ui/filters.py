@@ -1,4 +1,3 @@
-from django.conf import settings
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -23,6 +22,7 @@ from dojo.models import (
 )
 from dojo.product_attributes.choices import lifecycle_value_choices
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.user.queries import get_authorized_users
 
 labels = get_labels()
@@ -290,7 +290,7 @@ class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper,
 
 class EngagementTestFilterHelper(FilterSet):
     version = CharFilter(lookup_expr="icontains", label="Version")
-    if settings.TRACK_IMPORT_HISTORY:
+    if get_behaviour_setting("TRACK_IMPORT_HISTORY"):
         test_import__version = CharFilter(field_name="test_import__version", lookup_expr="icontains", label="Reimported Version")
     target_start = DateRangeFilter()
     target_end = DateRangeFilter()

@@ -5,13 +5,13 @@ import textwrap
 import bleach
 import html2text
 import markdown
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from lxml import etree
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 from .api_client import SonarQubeAPI
@@ -66,7 +66,7 @@ class SonarQubeApiImporter:
 
     def get_findings(self, filename, test):
         items = self.import_issues(test)
-        if settings.SONARQUBE_API_PARSER_HOTSPOTS:
+        if get_behaviour_setting("SONARQUBE_API_PARSER_HOTSPOTS"):
             if items:
                 items.extend(self.import_hotspots(test))
             else:

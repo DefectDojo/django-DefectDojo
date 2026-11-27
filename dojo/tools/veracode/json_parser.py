@@ -3,10 +3,10 @@ import re
 
 from cvss import CVSS3
 from dateutil import parser
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 
@@ -88,7 +88,7 @@ class VeracodeJSONParser:
                 continue
             # Set the date of the finding from the report if it is present
             if finding_status := vuln.get("finding_status"):
-                if settings.USE_FIRST_SEEN:
+                if get_behaviour_setting("USE_FIRST_SEEN"):
                     if first_found_date := finding_status.get("first_found_date"):
                         finding.date = parser.parse(first_found_date)
                 elif last_found_date := finding_status.get("last_found_date"):

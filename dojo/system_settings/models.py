@@ -5,6 +5,13 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext as _
 
+from dojo.system_settings.behaviour import (
+    validate_deduplication_algorithm_per_parser,
+    validate_hashcode_fields_per_scanner,
+    validate_language_code,
+    validate_notifications_system_level_trump,
+)
+
 
 class System_Settings(models.Model):
     enable_deduplication = models.BooleanField(
@@ -358,6 +365,103 @@ class System_Settings(models.Model):
             "Superusers can still change System Settings, so they can turn this off. "
             "Turn it on to freeze this instance before a migration.",
         ))
+    # Behaviour settings that used to come only from the environment. Empty (None) means "use the
+    # deployment's DD_* setting", so an instance that never saves one behaves as before. Read them
+    # through dojo.system_settings.behaviour.get_setting, never as settings.NAME.
+    editable_mitigated_data = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Editable mitigated data"),
+        help_text=_("Let superusers edit when a finding was mitigated and by whom. Empty uses DD_EDITABLE_MITIGATED_DATA."))
+    disable_finding_merge = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Disable finding merge"),
+        help_text=_("Hide merging findings from the findings list. Empty uses DD_DISABLE_FINDING_MERGE."))
+    track_import_history = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Track import history"),
+        help_text=_("Record which findings each import and reimport touched. Empty uses DD_TRACK_IMPORT_HISTORY."))
+    delete_preview = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Delete preview"),
+        help_text=_("List the objects a delete removes before it runs. Empty uses DD_DELETE_PREVIEW."))
+    duplicate_cluster_cascade_delete = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Delete duplicate clusters"),
+        help_text=_("Deleting an original finding also deletes its duplicates. Empty uses DD_DUPLICATE_CLUSTER_CASCADE_DELETE."))
+    use_first_seen = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Use first seen date"),
+        help_text=_("Parsers that report both dates use the first-seen date as the finding date. Empty uses DD_USE_FIRST_SEEN."))
+    qualys_legacy_severity_parsing = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Qualys legacy severity parsing"),
+        help_text=_("Map Qualys severities with the legacy 1 to 5 table. Empty uses DD_QUALYS_LEGACY_SEVERITY_PARSING."))
+    qualys_was_unique_id = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Qualys WAS unique id"),
+        help_text=_("Give Qualys WAS findings a unique id from the tool. Empty uses DD_QUALYS_WAS_UNIQUE_ID."))
+    qualys_was_weakness_is_vuln = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Qualys WAS weakness is a vulnerability"),
+        help_text=_("Import Qualys WAS weaknesses as findings. Empty uses DD_QUALYS_WAS_WEAKNESS_IS_VULN."))
+    sonarqube_api_parser_hotspots = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("SonarQube API hotspots"),
+        help_text=_("Import security hotspots from the SonarQube API. Empty uses DD_SONARQUBE_API_PARSER_HOTSPOTS."))
+    jira_webhook_allow_finding_group_reopen = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Jira webhook reopens finding groups"),
+        help_text=_("Let a Jira webhook reopen a finding group's findings. Empty uses DD_JIRA_WEBHOOK_ALLOW_FINDING_GROUP_REOPEN."))
+    alert_refresh = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Refresh alerts"),
+        help_text=_("Refresh the alert list in the page header. Empty uses DD_ALERT_REFRESH."))
+    disable_alert_counter = models.BooleanField(
+        null=True, blank=True, default=None,
+        verbose_name=_("Disable alert counter"),
+        help_text=_("Hide the unread alert count. Empty uses DD_DISABLE_ALERT_COUNTER."))
+    max_alerts_per_user = models.IntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(-1)],
+        verbose_name=_("Maximum alerts per user"),
+        help_text=_("Alerts kept for each user; -1 keeps all of them. Empty uses DD_MAX_ALERTS_PER_USER."))
+    notification_scan_added_max_findings = models.IntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("Findings listed in a scan notification"),
+        help_text=_("Findings a scan-added notification lists. Empty uses DD_NOTIFICATION_SCAN_ADDED_MAX_FINDINGS."))
+    notifications_system_level_trump = models.JSONField(
+        null=True, blank=True, default=None,
+        validators=[validate_notifications_system_level_trump],
+        verbose_name=_("System notifications that override personal ones"),
+        help_text=_("Notification events whose system setting wins over each person's own. Empty uses DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP."))
+    sla_notify_pre_breach = models.IntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("Days before an SLA breach to notify"),
+        help_text=_("Empty uses DD_SLA_NOTIFY_PRE_BREACH."))
+    sla_notify_post_breach = models.IntegerField(
+        null=True, blank=True, default=None,
+        validators=[MinValueValidator(0)],
+        verbose_name=_("Days after an SLA breach to keep notifying"),
+        help_text=_("Empty uses DD_SLA_NOTIFY_POST_BREACH."))
+    hashcode_fields_per_scanner = models.JSONField(
+        null=True, blank=True, default=None,
+        validators=[validate_hashcode_fields_per_scanner],
+        verbose_name=_("Hash code fields per scanner"),
+        help_text=_("Entries that replace or add to the deployment's map of scan type to hash code fields. "
+                    "Stored hash codes are not recomputed. Empty uses DD_HASHCODE_FIELDS_PER_SCANNER."))
+    deduplication_algorithm_per_parser = models.JSONField(
+        null=True, blank=True, default=None,
+        validators=[validate_deduplication_algorithm_per_parser],
+        verbose_name=_("Deduplication algorithm per parser"),
+        help_text=_("Entries that replace or add to the deployment's map of scan type to deduplication algorithm. "
+                    "Empty uses DD_DEDUPLICATION_ALGORITHM_PER_PARSER."))
+    default_language_code = models.CharField(
+        max_length=16, null=True, blank=True, default=None,
+        validators=[validate_language_code],
+        verbose_name=_("Default language"),
+        help_text=_("The language for people who have not chosen one. Empty uses DD_LANGUAGE_CODE."))
     install_id = models.UUIDField(
         default=uuid4,
         editable=False,

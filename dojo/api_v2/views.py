@@ -86,6 +86,7 @@ from dojo.reports.ui.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
 )
+from dojo.system_settings.behaviour import team_name as behaviour_team_name
 from dojo.test.queries import get_authorized_tests
 from dojo.url.models import URL
 from dojo.user.utils import get_configuration_permissions_codenames
@@ -759,7 +760,7 @@ def report_generate(request, obj, options):
         "include_disclaimer": get_system_setting("disclaimer_reports_forced", 0),
         "disclaimer": get_system_setting("disclaimer_reports"),
         "user": user,
-        "team_name": settings.TEAM_NAME,
+        "team_name": behaviour_team_name(),
         "title": report_title,
         "user_id": request.user.id,
         "host": report_url_resolver(request),

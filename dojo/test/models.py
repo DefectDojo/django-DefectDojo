@@ -12,6 +12,7 @@ from django_extensions.db.models import TimeStampedModel
 from django_tagulous.models import TagField
 
 from dojo.query_hooks import HookedManager, UnfilteredManager
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -169,12 +170,12 @@ class Test(models.Model):
         deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
 
         if hasattr(settings, "DEDUPLICATION_ALGORITHM_PER_PARSER"):
-            if (self.test_type.name in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+            if (self.test_type.name in get_behaviour_setting("DEDUPLICATION_ALGORITHM_PER_PARSER")):
                 deduplicationLogger.debug(f"using DEDUPLICATION_ALGORITHM_PER_PARSER for test_type.name: {self.test_type.name}")
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.test_type.name]
-            elif (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
+                deduplicationAlgorithm = get_behaviour_setting("DEDUPLICATION_ALGORITHM_PER_PARSER")[self.test_type.name]
+            elif (self.scan_type in get_behaviour_setting("DEDUPLICATION_ALGORITHM_PER_PARSER")):
                 deduplicationLogger.debug(f"using DEDUPLICATION_ALGORITHM_PER_PARSER for scan_type: {self.scan_type}")
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.scan_type]
+                deduplicationAlgorithm = get_behaviour_setting("DEDUPLICATION_ALGORITHM_PER_PARSER")[self.scan_type]
         else:
             deduplicationLogger.debug("Section DEDUPLICATION_ALGORITHM_PER_PARSER not found in settings.dist.py")
 
@@ -187,12 +188,12 @@ class Test(models.Model):
         hashCodeFields = None
 
         if hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER"):
-            if (self.test_type.name in settings.HASHCODE_FIELDS_PER_SCANNER):
+            if (self.test_type.name in get_behaviour_setting("HASHCODE_FIELDS_PER_SCANNER")):
                 deduplicationLogger.debug(f"using HASHCODE_FIELDS_PER_SCANNER for test_type.name: {self.test_type.name}")
-                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.test_type.name]
-            elif (self.scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
+                hashCodeFields = get_behaviour_setting("HASHCODE_FIELDS_PER_SCANNER")[self.test_type.name]
+            elif (self.scan_type in get_behaviour_setting("HASHCODE_FIELDS_PER_SCANNER")):
                 deduplicationLogger.debug(f"using HASHCODE_FIELDS_PER_SCANNER for scan_type: {self.scan_type}")
-                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.scan_type]
+                hashCodeFields = get_behaviour_setting("HASHCODE_FIELDS_PER_SCANNER")[self.scan_type]
             else:
                 deduplicationLogger.warning(f"test_type name {self.test_type.name} and scan_type {self.scan_type} not found in HASHCODE_FIELDS_PER_SCANNER")
         else:

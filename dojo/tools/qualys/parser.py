@@ -4,10 +4,10 @@ import logging
 import html2text
 from cvss import CVSS3
 from defusedxml import ElementTree
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 from dojo.tools.qualys import csv_parser
 from dojo.utils import parse_cvss_data
@@ -164,7 +164,7 @@ def get_severity(severity_value_str: str | None) -> str:
     sev: str = LEGACY_SEVERITY_LOOKUP.get(severity_value, "Unknown")
 
     # Non legacy severity is a subset of legacy severity, retrieve it from lookup
-    if not settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+    if not get_behaviour_setting("USE_QUALYS_LEGACY_SEVERITY_PARSING"):
         sev: str = NON_LEGACY_SEVERITY_LOOKUP.get(sev, "Unknown")
 
     # If we still don't have a severity, default to Informational
@@ -230,7 +230,7 @@ def parse_finding(host, glossary):
 
         # Get the date based on the first_seen setting
         try:
-            if settings.USE_FIRST_SEEN:
+            if get_behaviour_setting("USE_FIRST_SEEN"):
                 if date := vuln_details.findtext("FIRST_FOUND"):
                     temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
             elif date := vuln_details.findtext("LAST_FOUND"):

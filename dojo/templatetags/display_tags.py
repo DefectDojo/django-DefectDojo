@@ -30,6 +30,8 @@ from dojo import __docs__, __version__
 from dojo.jira import services as jira_services
 from dojo.location.feature import locations_enabled
 from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
+from dojo.system_settings.behaviour import SETTING_FIELDS
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view, schedule_product_grade
 
 logger = logging.getLogger(__name__)
@@ -780,6 +782,8 @@ def full_url(url):
 # use 'DISABLE_FINDING_MERGE'|setting_enabled
 @register.filter
 def setting_enabled(name):
+    if name in SETTING_FIELDS:
+        return get_behaviour_setting(name)
     return getattr(settings, name, False)
 
 
@@ -1134,7 +1138,7 @@ def import_settings_tag(test_import, *, autoescape=True):
 
 @register.filter(needs_autoescape=True)
 def import_history(finding, *, autoescape=True):
-    if not finding or not settings.TRACK_IMPORT_HISTORY:
+    if not finding or not get_behaviour_setting("TRACK_IMPORT_HISTORY"):
         return ""
 
     # prefetched, so no filtering here

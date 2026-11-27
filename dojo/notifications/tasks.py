@@ -2,7 +2,6 @@ import logging
 from datetime import timedelta
 
 from celery.utils.log import get_task_logger
-from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -25,6 +24,7 @@ from dojo.notifications.helper import (
     sla_compute_and_notify,
 )
 from dojo.notifications.models import Alerts, Notification_Webhooks
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -91,7 +91,7 @@ def add_alerts(self, *args, **kwargs):
 @app.task(bind=True)
 def cleanup_alerts(*args, **kwargs):
     try:
-        max_alerts_per_user = settings.MAX_ALERTS_PER_USER
+        max_alerts_per_user = get_behaviour_setting("MAX_ALERTS_PER_USER")
     except System_Settings.DoesNotExist:
         max_alerts_per_user = -1
 
