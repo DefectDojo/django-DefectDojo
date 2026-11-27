@@ -25,7 +25,15 @@ from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.jira import services as jira_services
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
-from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    get_page_items,
+    get_setting,
+    get_system_setting,
+    get_words_for_field,
+    parse_ids,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -259,9 +267,9 @@ class ListFindingGroups(View):
         if name_filter:
             q_objects &= Q(name__icontains=name_filter)
         if product_filter:
-            q_objects &= Q(test__engagement__product__id__in=product_filter)
+            q_objects &= Q(test__engagement__product__id__in=parse_ids(product_filter))
         if engagement_filter:
-            q_objects &= Q(test__engagement__id__in=engagement_filter)
+            q_objects &= Q(test__engagement__id__in=parse_ids(engagement_filter))
         if min_severity_filter:
             min_severity_order_value = self.SEVERITY_ORDER.get(min_severity_filter, -1)
             valid_severities_for_filter = [

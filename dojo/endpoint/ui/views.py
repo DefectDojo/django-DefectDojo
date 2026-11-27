@@ -39,6 +39,7 @@ from dojo.utils import (
     get_setting,
     get_system_setting,
     is_scan_file_too_large,
+    parse_ids,
     redirect,
     schedule_product_grade,
 )
@@ -85,12 +86,10 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     add_breadcrumb(title=view_name, top_level=not len(request.GET), request=request)
 
     product_tab = None
-    if "product" in request.GET:
-        p = request.GET.getlist("product", [])
-        if len(p) == 1:
-            product = get_object_or_404(Product, id=p[0])
-            user_has_permission_or_403(request.user, product, "view")
-            product_tab = Product_Tab(product, view_name, tab="endpoints")
+    if len(product_ids := parse_ids(request.GET.getlist("product"))) == 1:
+        product = get_object_or_404(Product, id=product_ids[0])
+        user_has_permission_or_403(request.user, product, "view")
+        product_tab = Product_Tab(product, view_name, tab="endpoints")
 
     return render(
         request, "dojo/endpoints.html", {
