@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 from django.conf import settings
 from django.db import OperationalError, connection, router, transaction
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import BooleanField, Case, Count, Exists, F, OuterRef, Value, When
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.db.utils import IntegrityError
@@ -66,6 +66,27 @@ from dojo.vulnerability.manager import persist_for_finding
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# The active flag of a duplicate promoted to an original because its original was deleted
+# (reconfigure_duplicate_cluster, resolve_inbound_duplicate_references). The promoted finding
+# keeps its own status, never the deleted original's: a duplicate is inactive because it is a
+# duplicate, so it is active again unless it is closed for a reason of its own. is_mitigated and
+# mitigated stay its own. verified is its own OR the deleted original's: a promoted finding stays
+# as eligible for the verified-only workflows (Jira "Push All Issues") as the finding it
+# replaces (#14911), and is never made unverified. A false positive never takes the deleted
+# original's verified: a finding cannot be both (the API refuses every later edit of it).
+PROMOTED_ORIGINAL_ACTIVE = Case(
+    When(Q(is_mitigated=True) | Q(false_p=True) | Q(out_of_scope=True) | Q(risk_accepted=True), then=Value(False)),  # noqa: FBT003
+    default=Value(True),  # noqa: FBT003
+    output_field=BooleanField(),
+)
+# The verified of a promoted finding whose deleted original was verified: its own when it is a
+# false positive, else True.
+PROMOTED_ORIGINAL_INHERITED_VERIFIED = Case(
+    When(false_p=True, then=F("verified")),
+    default=Value(True),  # noqa: FBT003
+    output_field=BooleanField(),
+)
 
 OPEN_FINDINGS_QUERY = Q(active=True)
 VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
@@ -892,6 +913,24 @@ def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_
         jira_instance_id,
         comment,
     )
+    push_reassigned_jira_status(deleted_finding, new_original.id)
+    return True
+
+
+def push_reassigned_jira_status(deleted_finding, new_original_id):
+    """
+    Push a reassigned Jira issue's new finding when its status differs from the deleted one's.
+
+    The issue was kept in step with the deleted finding. The new original keeps its own status
+    (reconfigure_duplicate_cluster), so an issue closed for a mitigated finding could otherwise
+    sit on an active one, or an open issue on a mitigated one. Returns whether a push was queued.
+    """
+    new_original = Finding.objects.filter(id=new_original_id).first()
+    if new_original is None:
+        return False
+    if (new_original.active, new_original.is_mitigated) == (deleted_finding.active, deleted_finding.is_mitigated):
+        return False
+    jira_services.push(new_original)
     return True
 
 
@@ -915,13 +954,13 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     if new_original:
         logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
 
-        # Use .update() to avoid triggering Finding.save() signals
+        # Use .update() to avoid triggering Finding.save() signals. The new original keeps its own
+        # status: copying the deleted original's left it is_mitigated with no mitigation date.
         Finding.objects.filter(id=new_original.id).update(
             duplicate=False,
             duplicate_finding=None,
-            active=original.active,
-            verified=original.verified,
-            is_mitigated=original.is_mitigated,
+            active=PROMOTED_ORIGINAL_ACTIVE,
+            **({"verified": PROMOTED_ORIGINAL_INHERITED_VERIFIED} if original.verified else {}),
         )
         new_original.found_by.set(original.found_by.all())
 
@@ -1263,7 +1302,8 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     finding to another goes away with the row that holds it.
 
     Each survivor is re-pointed at its chain's first ancestor outside the delete set, and
-    promoted to an original (``duplicate_finding = None, duplicate = False``) when the
+    promoted to an original (``duplicate_finding = None, duplicate = False``, its own status:
+    ``PROMOTED_ORIGINAL_ACTIVE``) when the
     chain dead-ends inside it or circles back to the survivor -- mirroring how
     fix_loop_duplicates treats parentless duplicates rather than fabricating a self-loop.
 
@@ -1311,7 +1351,23 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     for root_id, survivor_ids in repoint_groups.items():
         Finding.objects.filter(id__in=survivor_ids).update(duplicate_finding_id=root_id)
     if promote_ids:
-        Finding.objects.filter(id__in=promote_ids).update(duplicate_finding=None, duplicate=False)
+        # Like reconfigure_duplicate_cluster: a survivor whose deleted original was verified stays verified.
+        parent_of = dict(survivors)
+        verified_parents = set(
+            Finding.objects
+            .filter(id__in={parent_of[survivor_id] for survivor_id in promote_ids}, verified=True)
+            .values_list("id", flat=True),
+        )
+        inherit_verified = [survivor_id for survivor_id in promote_ids if parent_of[survivor_id] in verified_parents]
+        Finding.objects.filter(id__in=promote_ids).update(
+            duplicate_finding=None,
+            duplicate=False,
+            active=PROMOTED_ORIGINAL_ACTIVE,
+            **({"verified": Case(
+                When(id__in=inherit_verified, false_p=False, then=Value(True)),  # noqa: FBT003
+                default=F("verified"),
+            )} if inherit_verified else {}),
+        )
 
     return len(survivors)
 
