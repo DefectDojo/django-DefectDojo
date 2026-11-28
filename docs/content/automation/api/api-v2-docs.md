@@ -327,6 +327,23 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 }
 ```
 
+## Finding the Findings an import touched (`test_import_id`)
+
+A synchronous import or reimport response includes `test_import_id`: the ID of the Test Import record that request
+created. That record lists every Finding the request created, closed, reactivated or left untouched, so a pipeline can
+report on exactly what one scan changed:
+
+```
+POST /api/v2/reimport-scan/                  -> test_id, test_import_id, statistics, ...
+GET  /api/v2/test_imports/{test_import_id}/  -> test_import_finding_action_set: [{"finding": 12, "action": "N"}, ...]
+```
+
+The `action` of each entry is `N` (created), `C` (closed), `R` (reactivated) or `U` (untouched).
+
+`test_import_id` is `null` when import history tracking is turned off (`DD_TRACK_IMPORT_HISTORY=False`), because no
+Test Import record is created. Reading the newest Test Import of the Test instead is not a safe substitute: when two
+imports into the same Test run at the same time, the newest record can belong to the other one.
+
 ## Generating Reports
 
 DefectDojo can generate a findings report through the API in **JSON**, **HTML**, **CSV**, or **Excel** format.
@@ -438,7 +455,7 @@ A background response contains:
 - `message` — the same information as `status` and `findings_parsed`, in prose. Prefer
   the structured fields.
 
-It does **not** contain `statistics`, and it does not contain `deduplication_complete`.
+It does **not** contain `statistics`, `deduplication_complete` or `test_import_id`.
 Those keys are absent rather than zero, because at that point no findings have been
 created and reporting zeros would misdescribe the import. A client that reads
 `response["statistics"]` unconditionally will fail on a background import — read

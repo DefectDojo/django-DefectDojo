@@ -529,6 +529,15 @@ class CommonImportScanSerializer(serializers.Serializer):
         read_only=True,
         help_text=_("Also referred to as 'Organization' ID."),
     )
+    # Deliberately not allow_null: a response that never set the key (a background
+    # import, which has no Test_Import yet) omits it instead of reporting null.
+    test_import_id = serializers.IntegerField(
+        read_only=True,
+        required=False,
+        help_text=_("ID of the Test_Import record this import or reimport created, "
+        "which lists the findings it created, closed, reactivated and left untouched "
+        "(see /api/v2/test_imports/). Null when import history tracking is disabled."),
+    )
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
     deduplication_complete = serializers.BooleanField(
         read_only=True,
@@ -598,13 +607,14 @@ class CommonImportScanSerializer(serializers.Serializer):
             logger.debug("process_scan called with context: %s", context)
             start_time = time.perf_counter()
             importer = self.get_importer(**context)
-            context["test"], _, _, _, _, _, _ = importer.process_scan(
+            context["test"], _, _, _, _, _, test_import = importer.process_scan(
                 context.pop("scan", None),
             )
             # Update the response body with some new data
             if test := context.get("test"):
                 data["test"] = test.id
                 data["test_id"] = test.id
+                data["test_import_id"] = test_import.id if test_import else None
                 data["engagement_id"] = test.engagement.id
                 data["product_id"] = test.engagement.product.id
                 data["product_type_id"] = test.engagement.product.prod_type.id
@@ -894,6 +904,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
             logger.debug("process_scan called with context: %s", context)
             start_time = time.perf_counter()
             processor = None
+            test_import = None
             if test := context.get("test"):
                 statistics_before = test.statistics
                 processor = self.get_reimporter(**context)
@@ -912,7 +923,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 processor = self.get_importer(
                     **{**context, "close_old_findings": False},
                 )
-                context["test"], _, _, _, _, _, _ = processor.process_scan(
+                context["test"], _, _, _, _, _, test_import = processor.process_scan(
                     context.pop("scan", None),
                 )
             else:
@@ -922,6 +933,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
             if test := context.get("test"):
                 data["test"] = test
                 data["test_id"] = test.id
+                data["test_import_id"] = test_import.id if test_import else None
                 data["engagement_id"] = test.engagement.id
                 data["product_id"] = test.engagement.product.id
                 data["product_type_id"] = test.engagement.product.prod_type.id
