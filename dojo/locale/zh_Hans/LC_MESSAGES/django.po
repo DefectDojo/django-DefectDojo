@@ -9449,3 +9449,7 @@ msgstr "文件更新成功。"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "请检查表单数据后重试。"
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "已存在同名条目。"

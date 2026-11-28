@@ -9948,3 +9948,7 @@ msgstr "Файли успішно оновлено."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Будь ласка, перевірте дані форми та спробуйте ще раз."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Запис із такою назвою вже існує."

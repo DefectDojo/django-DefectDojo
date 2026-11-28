@@ -9947,3 +9947,7 @@ msgstr "Đã cập nhật tệp thành công."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Vui lòng kiểm tra dữ liệu biểu mẫu và thử lại."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Đã tồn tại một mục có tên này."

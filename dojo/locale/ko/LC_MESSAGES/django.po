@@ -9522,3 +9522,7 @@ msgstr "파일이 성공적으로 업데이트되었습니다."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "양식 데이터를 확인하고 다시 시도하십시오."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "이 이름의 항목이 이미 있습니다."

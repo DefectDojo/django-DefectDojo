@@ -9838,3 +9838,7 @@ msgstr "อัปเดตไฟล์สำเร็จแล้ว"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "โปรดตรวจสอบข้อมูลแบบฟอร์มและลองอีกครั้ง"
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "มีรายการที่ใช้ชื่อนี้อยู่แล้ว"

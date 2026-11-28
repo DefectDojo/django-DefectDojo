@@ -9944,3 +9944,7 @@ msgstr "ফাইল সফলভাবে হালনাগাদ করা �
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "অনুগ্রহ করে ফর্ম ডেটা চেক করে আবার চেষ্টা করুন।"
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "এই নামে একটি এন্ট্রি ইতিমধ্যে বিদ্যমান।"

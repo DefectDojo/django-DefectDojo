@@ -6,6 +6,7 @@ from pathlib import Path
 
 from django.apps import apps
 from django.conf import settings
+from django.utils import translation
 
 from dojo.models import Dojo_User, Product, Product_Type, SLA_Configuration
 from dojo.product.ui.forms import ProductForm
@@ -20,6 +21,7 @@ NEW_DESCRIPTION = "The Default SLA Configuration, used wherever no other SLA Con
 OLD_NO_SLA_DESCRIPTION = "No SLA is enforced for a product which uses this SLA configuration."
 NEW_NO_SLA_DESCRIPTION = "No SLA is enforced for anything that uses this SLA configuration."
 UNIQUE_NAME_MESSAGE = "An entry with this name already exists."
+UNIQUE_NAME_MESSAGE_DE = "Ein Eintrag mit diesem Namen existiert bereits."
 ENTITY_WORDS = ("product", "asset", "organization")
 SEED_FIXTURES = ("sla_configurations.json", "defect_dojo_sample_data.json", "defect_dojo_sample_data_locations.json")
 
@@ -66,6 +68,24 @@ class TestRelabelNeutralUniqueName(DojoAPITestCase):
         product_type_form = Product_TypeForm(data={"name": "Relabel neutral PT"})
         self.assertFalse(product_type_form.is_valid())
         self.assertEqual(product_type_form.errors["name"], [UNIQUE_NAME_MESSAGE])
+
+    def test_duplicate_name_message_is_translated(self):
+        # The message replaced Django's own unique error, which every catalog translated, so it must stay translated.
+        # The API takes the language from Accept-Language. A request switches the test thread's language, so each
+        # check runs in its own override(), which restores the language on exit and keeps it out of the other tests.
+        with translation.override("de"):
+            response = self.client.post(
+                "/api/v2/product_types/", {"name": "Relabel neutral PT"}, format="json", HTTP_ACCEPT_LANGUAGE="de",
+            )
+        with translation.override("de"):
+            product_form = ProductForm(
+                data={"name": "Relabel neutral product", "description": "d", "prod_type": self.product_type.id},
+            )
+            # The errors are lazy: render them while German is active.
+            product_form_errors = [str(error) for error in product_form.errors["name"]]
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.json()["name"], [UNIQUE_NAME_MESSAGE_DE])
+        self.assertEqual(product_form_errors, [UNIQUE_NAME_MESSAGE_DE])
 
 
 class TestRelabelNeutralDefaultSLADescription(DojoAPITestCase):

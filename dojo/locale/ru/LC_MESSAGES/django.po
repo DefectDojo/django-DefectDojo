@@ -11249,3 +11249,7 @@ msgstr "Пожалуйста, проверьте данные формы и по
 #~ msgstr ""
 #~ "Только суперпользователи могут удалять пользователей с глобальной ролью. "
 #~ "Пользователь не был удалён."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Запись с таким именем уже существует."

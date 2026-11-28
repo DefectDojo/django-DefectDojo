@@ -11287,3 +11287,7 @@ msgstr "Verifique os dados do formulário e tente novamente."
 #~ msgstr ""
 #~ "Somente superusuários têm permissão para excluir usuários com função global."
 #~ " O usuário não foi removido."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Já existe um registro com este nome."
