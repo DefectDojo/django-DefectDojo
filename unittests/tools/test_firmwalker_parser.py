@@ -1,4 +1,5 @@
 import io
+import time
 
 from dojo.models import Finding, Test
 from dojo.tools.firmwalker.parser import FirmwalkerParser
@@ -184,3 +185,35 @@ class TestFirmwalkerParser(DojoTestCase):
             b"/etc/passwd\n",
         )
         self.assertEqual(1, len(list(FirmwalkerParser().get_findings(report, Test()))))
+
+    def test_a_long_unclosed_dash_header_parses_in_linear_time(self):
+        report = io.StringIO("***Search for password files***\n-----" + " " * 3000 + "x\n")
+        start = time.perf_counter()
+        findings = list(FirmwalkerParser().get_findings(report, Test()))
+        self.assertLess(time.perf_counter() - start, 1)
+        self.assertEqual(1, len(findings))
+
+    def test_dash_header_names(self):
+        parser = FirmwalkerParser()
+        self.assertEqual("admin", parser.dash_subsection_name("-------------------- admin --------------------"))
+        self.assertEqual("foo-bar", parser.dash_subsection_name("-----foo-bar-----"))
+        self.assertEqual("", parser.dash_subsection_name("----------"))
+        self.assertIsNone(parser.dash_subsection_name("---------"))
+        self.assertIsNone(parser.dash_subsection_name("----- admin"))
+        self.assertIsNone(parser.dash_subsection_name(" ----- admin -----"))
+
+    def test_a_long_hash_header_parses_in_linear_time(self):
+        report = io.StringIO("***Search for password files***\n#####x" + " " * 30000 + "x\n/etc/passwd\n")
+        start = time.perf_counter()
+        findings = list(FirmwalkerParser().get_findings(report, Test()))
+        self.assertLess(time.perf_counter() - start, 1)
+        self.assertEqual(1, len(findings))
+
+    def test_hash_header_names(self):
+        parser = FirmwalkerParser()
+        self.assertEqual("passwd", parser.hash_subsection_name("##################################### passwd"))
+        self.assertEqual("*.pem", parser.hash_subsection_name("#####*.pem"))
+        self.assertEqual("##x", parser.hash_subsection_name("#####  ##x"))
+        self.assertEqual("", parser.hash_subsection_name("#####"))
+        self.assertIsNone(parser.hash_subsection_name("#### passwd"))
+        self.assertIsNone(parser.hash_subsection_name(" ##### passwd"))

@@ -12,7 +12,12 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
-from dojo.api_v2.views import DeprecationNoticeMixin, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import (
+    DeprecationNoticeMixin,
+    PrefetchDojoModelViewSet,
+    report_generate_response,
+    schema_with_prefetch,
+)
 from dojo.asset.api import serializers
 from dojo.asset.api.filters import (
     ApiAssetFilter,
@@ -148,11 +153,10 @@ class AssetViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, product, options)
-        report = ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, product, options)

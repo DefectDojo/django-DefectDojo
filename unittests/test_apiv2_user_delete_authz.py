@@ -1,7 +1,9 @@
 from django.contrib.auth.models import Permission
+from django.contrib.sessions.backends.db import SessionStore
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
+from single_session.models import UserSession
 
 from dojo.models import User
 from unittests.dojo_test_case import versioned_fixtures
@@ -86,3 +88,40 @@ class UserDeleteAuthzTest(APITestCase):
         r = self._superuser_client().delete(self._user_url(self.staff_target.id))
         self.assertEqual(r.status_code, 204, r.content[:1000])
         self.assertFalse(User.objects.filter(pk=self.staff_target.pk).exists())
+
+    def _preview_url(self, user_id):
+        return reverse("user-delete-preview", args=(user_id,))
+
+    def _give_credentials(self, user):
+        session = SessionStore()
+        session.create()
+        UserSession.objects.create(session_id=session.session_key, user=user)
+        return Token.objects.get_or_create(user=user)[0].key, session.session_key
+
+    def test_delegate_cannot_preview_superuser_delete(self):
+        token, session_key = self._give_credentials(self.superuser_target)
+        r = self.client.get(self._preview_url(self.superuser_target.id))
+        self.assertEqual(r.status_code, 403, r.content[:1000])
+        self.assertNotIn(token, r.content.decode())
+        self.assertNotIn(session_key, r.content.decode())
+
+    def test_delegate_cannot_preview_staff_delete(self):
+        r = self.client.get(self._preview_url(self.staff_target.id))
+        self.assertEqual(r.status_code, 403, r.content[:1000])
+
+    def test_delete_preview_hides_token_and_session(self):
+        token, session_key = self._give_credentials(self.regular_target)
+        r = self.client.get(self._preview_url(self.regular_target.id))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        names = {row["model"]: row["name"] for row in r.json()["results"]}
+        self.assertEqual(names["Token"], "<APITokenIsHidden>")
+        self.assertEqual(names["UserSession"], "<SessionIsHidden>")
+        self.assertNotIn(token, r.content.decode())
+        self.assertNotIn(session_key, r.content.decode())
+
+    def test_superuser_preview_hides_token_and_session(self):
+        token, session_key = self._give_credentials(self.superuser_target)
+        r = self._superuser_client().get(self._preview_url(self.superuser_target.id))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertNotIn(token, r.content.decode())
+        self.assertNotIn(session_key, r.content.decode())

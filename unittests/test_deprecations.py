@@ -42,6 +42,10 @@ class TestDeprecationSchedule(SimpleTestCase):
     def test_the_date_comes_from_the_release_calendar(self):
         self.assertEqual(date(2026, 11, 2), widgets().removal_date)
 
+    def test_the_calendar_reaches_the_february_2027_minor(self):
+        self.assertEqual(date(2027, 1, 4), widgets(removal_version="3.7.0").removal_date)
+        self.assertEqual("3.8.0 (February 2027)", widgets(removal_version="3.8.0").removal_label)
+
     def test_people_read_the_version_and_the_month(self):
         self.assertEqual("3.5.0 (November 2026)", widgets().removal_label)
 

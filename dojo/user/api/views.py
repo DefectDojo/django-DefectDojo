@@ -57,6 +57,14 @@ class UsersViewSet(
             .order_by("id")
         )
 
+    def get_object(self):
+        instance = super().get_object()
+        # delete_preview also runs its checks with the action set to "destroy".
+        if self.action == "destroy" and instance != self.request.user and not user_may_delete_account(self.request.user, instance):
+            msg = "Only superusers are allowed to delete superusers or staff users."
+            raise PermissionDenied(msg)
+        return instance
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if request.user == instance:
@@ -64,9 +72,6 @@ class UsersViewSet(
                 "Users may not delete themselves",
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if not user_may_delete_account(request.user, instance):
-            msg = "Only superusers are allowed to delete superusers or staff users."
-            raise PermissionDenied(msg)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

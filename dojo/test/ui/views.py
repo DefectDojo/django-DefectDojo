@@ -1,17 +1,15 @@
 # #  tests
 import base64
 import logging
-import operator
 import time
 from datetime import datetime, timedelta
-from functools import reduce
 
 import pghistory
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
@@ -75,6 +73,7 @@ from dojo.utils import (
     add_success_message_to_response,
     async_delete,
     get_cal_event,
+    get_lead_filter,
     get_page_items,
     get_page_items_and_count,
     get_setting,
@@ -357,16 +356,9 @@ def test_calendar(request):
     if not get_system_setting("enable_calendar"):
         raise Resolver404
 
-    if "lead" not in request.GET or "0" in request.GET.getlist("lead"):
-        tests = get_authorized_tests("view")
-    else:
-        filters = []
-        leads = request.GET.getlist("lead", "")
-        if "-1" in request.GET.getlist("lead"):
-            leads.remove("-1")
-            filters.append(Q(lead__isnull=True))
-        filters.append(Q(lead__in=leads))
-        tests = get_authorized_tests("view").filter(reduce(operator.or_, filters))
+    tests = get_authorized_tests("view")
+    if (lead_filter := get_lead_filter(request.GET.getlist("lead"))) is not None:
+        tests = tests.filter(lead_filter)
 
     tests = tests.prefetch_related("test_type", "lead", "engagement__product")
 

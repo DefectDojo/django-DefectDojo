@@ -359,7 +359,7 @@ A report is generated with a `POST` request to a `generate_report/` action. The 
 | `POST /api/v2/product_types/{id}/generate_report/` | One Organization |
 | `POST /api/v2/endpoints/{id}/generate_report/` | One endpoint |
 
-The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, and `/api/v2/location/{id}/generate_report/`.
+The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/` and `/api/v2/organizations/{id}/generate_report/`.
 
 ### Request options
 
@@ -472,6 +472,16 @@ Repeat the `GET` until `status` is `Processed` (the import finished, and the tes
 finding counts are now meaningful) or `Failed` (the import did not complete). While the
 import is running, `processing` is `true` and `status` reports which phase it is in. Use
 a few seconds between polls; a large report can spend minutes in post-processing.
+
+A background import whose worker stops before it records a result (the worker was
+restarted or ran out of memory, or the queued job was lost) does not stay `Processing`
+forever. In DefectDojo Pro the test records when the import must have ended, and a
+scheduled check marks it `Failed` once that time has passed, with an `error` that says to
+submit the scan again. That time is 24 hours after the request while the job waits in the
+queue (`DD_IMPORT_PROCESSING_QUEUE_ALLOWANCE_HOURS`), and the worker time limit
+(`DD_CELERY_TASK_TIME_LIMIT`, 12 hours by default) plus 5 minutes once a worker starts it.
+A client that sees `Failed` resubmits the scan. Administrators can also clear stuck
+imports straight away; see [Diagnostics](/admin/diagnostics/pro__diagnostics/#stuck-imports).
 
 A synchronous import (`background_import` omitted or `false`) is unchanged: it returns
 once the findings have been written, includes `statistics`, and does not include `status`

@@ -6,12 +6,12 @@ from django.db.models import Q, Subquery
 from django.db.models.deletion import get_candidate_relations_to_delete
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.request import clone_request
 
 from dojo.api_v2 import serializers
 from dojo.models import Endpoint
+from dojo.user.utils import delete_preview_label
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ class DeletePreviewRows:
         return {
             "model": type(x).__name__,
             "id": x.id if hasattr(x, "id") else None,
-            "name": str(x) if not isinstance(x, Token) else "<APITokenIsHidden>",
+            "name": delete_preview_label(x),
         }
 
 

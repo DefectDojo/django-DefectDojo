@@ -1,4 +1,5 @@
 import io
+import time
 
 from dojo.models import Finding, Test
 from dojo.tools.sqlmap.parser import SqlmapParser
@@ -196,3 +197,33 @@ class TestSqlmapParser(DojoTestCase):
             b"---\n",
         )
         self.assertEqual(1, len(list(SqlmapParser().get_findings(report, Test()))))
+
+    def test_a_long_unclosed_parameter_line_parses_in_linear_time(self):
+        report = io.StringIO("Parameter:" + " " * 3000 + "(x\n")
+        start = time.perf_counter()
+        findings = list(SqlmapParser().get_findings(report, Test()))
+        self.assertLess(time.perf_counter() - start, 1)
+        self.assertEqual([], findings)
+
+    def test_parameter_header(self):
+        parser = SqlmapParser()
+        self.assertEqual(("id", "GET"), parser.parameter_header("Parameter: id (GET)"))
+        self.assertEqual(("#1*", "URI"), parser.parameter_header("Parameter:#1*   (URI)"))
+        self.assertEqual(("f(x)", "POST"), parser.parameter_header("Parameter: f(x) (POST)"))
+        self.assertEqual(("a", "b(c"), parser.parameter_header("Parameter: a (b(c)"))
+        self.assertIsNone(parser.parameter_header("Parameter: id ()"))
+        self.assertIsNone(parser.parameter_header("Parameter: id GET"))
+
+    def test_a_long_dbms_line_parses_in_linear_time(self):
+        report = io.StringIO("back-end DBMS: x" + " " * 30000 + "x\n")
+        start = time.perf_counter()
+        findings = list(SqlmapParser().get_findings(report, Test()))
+        self.assertLess(time.perf_counter() - start, 1)
+        self.assertEqual([], findings)
+
+    def test_dbms_line(self):
+        parser = SqlmapParser()
+        self.assertEqual("SQLite", parser.dbms_line("back-end DBMS: SQLite"))
+        self.assertEqual("MySQL >= 5.0", parser.dbms_line("back-end DBMS:MySQL >= 5.0"))
+        self.assertIsNone(parser.dbms_line("back-end DBMS:"))
+        self.assertIsNone(parser.dbms_line("web server operating system: Linux"))

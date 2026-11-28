@@ -1,7 +1,9 @@
+import hmac
 import json
 
 # from unittest import skip
 import logging
+from unittest import mock
 
 from django.urls import reverse
 
@@ -447,6 +449,35 @@ class JIRAWebhookTest(DojoTestCase):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
         response = self.client.post(reverse("jira_web_hook_secret", args=(self.incorrect_secret, )))
         self.assertEqual(200, response.status_code, response.content[:1000])
+
+    # The secret in the webhook URL was compared with "!=", whose run time depends on how many
+    # leading characters match; it is now compared in constant time.
+    def test_webhook_secret_is_compared_in_constant_time(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+        with mock.patch("dojo.jira.views.hmac.compare_digest", wraps=hmac.compare_digest) as compare:
+            self.client.post(reverse("jira_web_hook_secret", args=(self.incorrect_secret, )))
+        compare.assert_called_once_with(self.incorrect_secret.encode(), self.correct_secret.encode())
+
+    def test_webhook_secret_incorrect_secret_is_rejected(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+        with self.assertLogs("dojo.jira.views", level="INFO") as logs:
+            response = self.client.post(reverse("jira_web_hook_secret", args=(self.incorrect_secret, )))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertIn("Invalid or no secret provided to JIRA Webhook", "\n".join(logs.output))
+
+    def test_webhook_secret_non_ascii_secret_is_rejected_not_an_error(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+        with self.assertLogs("dojo.jira.views", level="INFO") as logs:
+            response = self.client.post(reverse("jira_web_hook_secret", args=("\u00fcn\u00efc\u00f6d\u00e9", )))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertIn("Invalid or no secret provided to JIRA Webhook", "\n".join(logs.output))
+
+    def test_webhook_secret_enabled_no_secret_is_rejected(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+        with self.assertLogs("dojo.jira.views", level="INFO") as logs:
+            response = self.client.post(reverse("jira_web_hook"))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertIn("Invalid or no secret provided to JIRA Webhook", "\n".join(logs.output))
 
     def test_webhook_secret_enabled_correct_secret(self):
         self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)

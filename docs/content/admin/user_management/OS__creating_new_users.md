@@ -14,7 +14,7 @@ The admin who creates the account is responsible for delivering the initial cred
 1. **Create the user account** in DefectDojo (Superuser only):
    * Navigate to **👤 Users → Users** to open the All Users table.
    * Click the 🛠️ (crossed wrench and screwdriver) icon.
-   * Enter the new user's name and email address.
+   * Enter the new user's name and email address. The address must not already belong to another account (compared ignoring case).
    * Set a temporary password.
    * Submit the form.
 
@@ -35,3 +35,14 @@ The admin who creates the account is responsible for delivering the initial cred
 Open-source DefectDojo supports local accounts only. SSO (SAML, OIDC, OAuth), LDAP, and MFA are available in [DefectDojo Pro](/admin/sso/).
 
 If you have upgraded to open-source DefectDojo 3.x and existing SSO users can no longer log in, see [Re-enabling login for SSO users](../os__sso_user_local_login_fallback/).
+
+## Email addresses
+
+An account's email address is where password resets are sent, so DefectDojo treats it as part of who the account is:
+
+* **A new email address must be unique.** Creating a user, editing a user and editing your own profile, through the UI or the API, refuse an address another account already uses, compared ignoring case. Accounts that already share an address are not changed: they keep signing in and can still edit everything else.
+* **An administrator changes any user's email address** from the user's page or the API, subject to the rule above.
+* **Users change their own email address only by proving they own the new one.** With `DD_EMAIL_CHANGE_CONFIRMATION_ENABLED=True`, changing the email on **Profile** sends a confirmation link to the new address, and the account keeps its old address until the link is opened. The link works once, only for the account that asked for it, and expires after `DD_PASSWORD_RESET_TIMEOUT` (3 days by default). This needs a working mail server in `DD_EMAIL_URL`.
+* **With the setting off (the default)**, users cannot change their own email address on **Profile**; an administrator changes it for them. DefectDojo does not ship a mail server, so this is the safe default.
+* **The user API (v2 and v3) does not change your own email address** unless you are a superuser, even if you hold the permissions to manage users: it saves at once and sends no link, so it answers `400` with an `email` error. Change your own address on **Profile**.
+* **Users who sign in through single sign-on** never change their own email address: it comes from the identity provider.

@@ -63,23 +63,28 @@ class Permission_Helper:
         return codenames
 
 
-def get_configuration_permissions_fields():
+def get_configuration_permissions_fields(*, include_disabled=False):
+    """
+    The configuration permissions a user or group can be granted.
 
-    if get_system_setting("enable_github"):
+    The GitHub, Jira and questionnaire permissions are listed only while their feature is on, unless
+    ``include_disabled`` asks for every one of them.
+    """
+    if include_disabled or get_system_setting("enable_github"):
         github_permissions = [
             Permission_Helper(name="github conf", app="dojo", view=True, add=True, delete=True),
         ]
     else:
         github_permissions = []
 
-    if get_system_setting("enable_jira"):
+    if include_disabled or get_system_setting("enable_jira"):
         jira_permissions = [
             Permission_Helper(name="jira instance", app="dojo", view=True, add=True, change=True, delete=True),
         ]
     else:
         jira_permissions = []
 
-    if get_system_setting("enable_questionnaires"):
+    if include_disabled or get_system_setting("enable_questionnaires"):
         questionnaire_permissions = [
             Permission_Helper(name="engagement survey", app="dojo", view=True, add=True, change=True, delete=True),
             Permission_Helper(name="question", app="dojo", view=True, add=True, change=True),
@@ -131,3 +136,15 @@ def user_may_delete_account(acting_user, target_user):
     if acting_user.is_superuser:
         return True
     return not (target_user.is_superuser or target_user.is_staff)
+
+
+# Keyed by model label: single_session cannot be imported when its app is not installed.
+_HIDDEN_DELETE_PREVIEW_ROWS = {
+    "authtoken.Token": "<APITokenIsHidden>",
+    "single_session.UserSession": "<SessionIsHidden>",
+}
+
+
+def delete_preview_label(obj):
+    """The text a delete preview shows for obj. Rows whose str() is a credential are hidden."""
+    return _HIDDEN_DELETE_PREVIEW_ROWS.get(obj._meta.label) or str(obj)

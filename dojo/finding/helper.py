@@ -2,13 +2,14 @@ import logging
 from collections import defaultdict
 from contextlib import suppress
 from datetime import datetime
+from functools import lru_cache
 from itertools import batched
 from time import sleep, strftime
 from types import SimpleNamespace
 
 from django.conf import settings
 from django.db import OperationalError, connection, router, transaction
-from django.db.models import Count
+from django.db.models import BooleanField, Case, Count, Exists, F, OuterRef, Value, When
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.db.utils import IntegrityError
@@ -65,6 +66,27 @@ from dojo.vulnerability.manager import persist_for_finding
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# The active flag of a duplicate promoted to an original because its original was deleted
+# (reconfigure_duplicate_cluster, resolve_inbound_duplicate_references). The promoted finding
+# keeps its own status, never the deleted original's: a duplicate is inactive because it is a
+# duplicate, so it is active again unless it is closed for a reason of its own. is_mitigated and
+# mitigated stay its own. verified is its own OR the deleted original's: a promoted finding stays
+# as eligible for the verified-only workflows (Jira "Push All Issues") as the finding it
+# replaces (#14911), and is never made unverified. A false positive never takes the deleted
+# original's verified: a finding cannot be both (the API refuses every later edit of it).
+PROMOTED_ORIGINAL_ACTIVE = Case(
+    When(Q(is_mitigated=True) | Q(false_p=True) | Q(out_of_scope=True) | Q(risk_accepted=True), then=Value(False)),  # noqa: FBT003
+    default=Value(True),  # noqa: FBT003
+    output_field=BooleanField(),
+)
+# The verified of a promoted finding whose deleted original was verified: its own when it is a
+# false positive, else True.
+PROMOTED_ORIGINAL_INHERITED_VERIFIED = Case(
+    When(false_p=True, then=F("verified")),
+    default=Value(True),  # noqa: FBT003
+    output_field=BooleanField(),
+)
 
 OPEN_FINDINGS_QUERY = Q(active=True)
 VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
@@ -325,7 +347,21 @@ def update_finding_group(finding, finding_group):
         finding.finding_group.findings.remove(finding)
 
 
-def get_group_by_group_name(finding, finding_group_by_option):
+@lru_cache(maxsize=4096)
+def _persisted_title(title):
+    # titlecase() costs about a third of a millisecond, and a reimport grouped by title
+    # names many new findings that share each title: transform each title once.
+    return Finding.persisted_title(title)
+
+
+def get_group_by_group_name(finding, finding_group_by_option, *, unsaved=False):
+    """
+    Return the name of the auto group a finding belongs to, or None.
+
+    The import names a group from a saved finding, whose title save() has already
+    title-cased and truncated. A reimport names a new finding's group before it is saved:
+    unsaved=True gives the title the stored row will carry, so both name the group alike.
+    """
     group_name = None
 
     if finding_group_by_option == "component_name":
@@ -337,7 +373,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
     elif finding_group_by_option == "finding_title":
-        group_name = finding.title
+        group_name = _persisted_title(finding.title) if unsaved and finding.title else finding.title
     elif finding_group_by_option == "vuln_id_from_tool":
         if finding.vuln_id_from_tool:
             group_name = f"Vulnerability ID {finding.vuln_id_from_tool}" if finding.vuln_id_from_tool else "None"
@@ -390,28 +426,41 @@ def group_findings_by(finds, finding_group_by_option):
 
 
 def _test_finding_ids_by_group_name(test_id, group_by, names):
-    """Ids of the test's findings per group name, for the given names only, read in one pass."""
+    """
+    Ids of the test's ungrouped findings per group name, for the given names only, read in one pass.
+
+    A finding already in a group (the one finding.finding_group reads) is left out: a finding
+    belongs to one group at most, so a new auto group cannot take it, and it does not count as a
+    peer that makes a lone finding form a group.
+    """
     fields = ("id", "title", "component_name", "component_version", "file_path", "vuln_id_from_tool")
     by_name = {}
+    in_a_group = Exists(Finding_Group.objects.filter(findings=OuterRef("pk")))
     # Plain values, not Finding instances: get_group_by_group_name only reads these attributes, and
     # building a model instance per row is what made a large test expensive to scan.
-    for row in Finding.objects.filter(test_id=test_id).order_by("id").values(*fields).iterator(chunk_size=2000):
+    ungrouped = Finding.objects.filter(test_id=test_id).filter(~in_a_group)
+    for row in ungrouped.order_by("id").values(*fields).iterator(chunk_size=2000):
         group_name = get_group_by_group_name(SimpleNamespace(**row), group_by)
         if group_name in names:
             by_name.setdefault(group_name, []).append(row["id"])
     return by_name
 
 
-def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
+def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_finding_groups_for_all_findings=True, legacy_names=None, **kwargs):
     """
     Put the findings of one (re)import into their auto groups, all names at once.
 
     For each name: reuse the oldest group of that (test, name), else create one (unless
     create_finding_groups_for_all_findings is off and the name has a lone finding no other
-    finding of the test shares). A newly created group also takes the test's other findings
-    with the same name. The cost does not grow with the number of groups: existing groups
-    are read in one query, the test's findings once (and only when some name has no group
-    yet), and new groups and memberships are written in bulk.
+    ungrouped finding of the test shares). A newly created group also takes the test's other
+    findings with the same name that are not in a group yet. The cost does not grow with the
+    number of groups: existing groups are read in one query, the test's findings once (and
+    only when some name has no group yet), and new groups and memberships are written in bulk.
+
+    legacy_names maps a name to other names the same group may carry: a reimport named a new
+    finding's finding_title group from the report's raw title before it named it from the stored
+    one. A name with no group of its own joins the oldest group under one of those names (the
+    group its JIRA issue hangs off) instead of starting a second group beside it.
 
     bulk_create sends no post_save, so it is replayed once per new group with
     ``bulk_created_instances`` set to the whole batch: a receiver keeps working one group at
@@ -423,9 +472,16 @@ def add_findings_to_auto_groups(group_names_to_findings, group_by, *, create_fin
     test_id = next(iter(group_names_to_findings.values()))[0].test_id
 
     # Groups are one per (test, name[:255]); the oldest wins where duplicates exist.
+    legacy_names = legacy_names or {}
+    lookup = {name[:255] for name in group_names_to_findings}
+    lookup.update(legacy[:255] for name in group_names_to_findings for legacy in legacy_names.get(name, ()))
     groups = {}
-    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in={name[:255] for name in group_names_to_findings}).order_by("id"):
+    for finding_group in Finding_Group.objects.filter(test_id=test_id, name__in=lookup).order_by("id"):
         groups.setdefault(finding_group.name, finding_group)
+    for name in group_names_to_findings:
+        legacy_groups = [groups[legacy[:255]] for legacy in legacy_names.get(name, ()) if legacy[:255] in groups]
+        if name[:255] not in groups and legacy_groups:
+            groups[name[:255]] = min(legacy_groups, key=lambda finding_group: finding_group.id)
     # A name without a group needs the test's other findings of that name: they decide
     # whether a lone finding forms a group, and a new group takes them in.
     missing = {name for name in group_names_to_findings if name[:255] not in groups}
@@ -857,6 +913,24 @@ def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_
         jira_instance_id,
         comment,
     )
+    push_reassigned_jira_status(deleted_finding, new_original.id)
+    return True
+
+
+def push_reassigned_jira_status(deleted_finding, new_original_id):
+    """
+    Push a reassigned Jira issue's new finding when its status differs from the deleted one's.
+
+    The issue was kept in step with the deleted finding. The new original keeps its own status
+    (reconfigure_duplicate_cluster), so an issue closed for a mitigated finding could otherwise
+    sit on an active one, or an open issue on a mitigated one. Returns whether a push was queued.
+    """
+    new_original = Finding.objects.filter(id=new_original_id).first()
+    if new_original is None:
+        return False
+    if (new_original.active, new_original.is_mitigated) == (deleted_finding.active, deleted_finding.is_mitigated):
+        return False
+    jira_services.push(new_original)
     return True
 
 
@@ -880,13 +954,13 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     if new_original:
         logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
 
-        # Use .update() to avoid triggering Finding.save() signals
+        # Use .update() to avoid triggering Finding.save() signals. The new original keeps its own
+        # status: copying the deleted original's left it is_mitigated with no mitigation date.
         Finding.objects.filter(id=new_original.id).update(
             duplicate=False,
             duplicate_finding=None,
-            active=original.active,
-            verified=original.verified,
-            is_mitigated=original.is_mitigated,
+            active=PROMOTED_ORIGINAL_ACTIVE,
+            **({"verified": PROMOTED_ORIGINAL_INHERITED_VERIFIED} if original.verified else {}),
         )
         new_original.found_by.set(original.found_by.all())
 
@@ -1228,7 +1302,8 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     finding to another goes away with the row that holds it.
 
     Each survivor is re-pointed at its chain's first ancestor outside the delete set, and
-    promoted to an original (``duplicate_finding = None, duplicate = False``) when the
+    promoted to an original (``duplicate_finding = None, duplicate = False``, its own status:
+    ``PROMOTED_ORIGINAL_ACTIVE``) when the
     chain dead-ends inside it or circles back to the survivor -- mirroring how
     fix_loop_duplicates treats parentless duplicates rather than fabricating a self-loop.
 
@@ -1276,7 +1351,23 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     for root_id, survivor_ids in repoint_groups.items():
         Finding.objects.filter(id__in=survivor_ids).update(duplicate_finding_id=root_id)
     if promote_ids:
-        Finding.objects.filter(id__in=promote_ids).update(duplicate_finding=None, duplicate=False)
+        # Like reconfigure_duplicate_cluster: a survivor whose deleted original was verified stays verified.
+        parent_of = dict(survivors)
+        verified_parents = set(
+            Finding.objects
+            .filter(id__in={parent_of[survivor_id] for survivor_id in promote_ids}, verified=True)
+            .values_list("id", flat=True),
+        )
+        inherit_verified = [survivor_id for survivor_id in promote_ids if parent_of[survivor_id] in verified_parents]
+        Finding.objects.filter(id__in=promote_ids).update(
+            duplicate_finding=None,
+            duplicate=False,
+            active=PROMOTED_ORIGINAL_ACTIVE,
+            **({"verified": Case(
+                When(id__in=inherit_verified, false_p=False, then=Value(True)),  # noqa: FBT003
+                default=F("verified"),
+            )} if inherit_verified else {}),
+        )
 
     return len(survivors)
 

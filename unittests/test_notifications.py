@@ -1528,6 +1528,142 @@ class TestProcessTagNotifications(DojoTestCase):
             "an email-like token in prose (no whitespace before '@') must not notify",
         )
 
+    def test_mention_matches_a_mixed_case_username_as_typed(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="MixedCase", is_active=True)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, "@MixedCase please take a look")
+
+        self.assertEqual(
+            1,
+            Alerts.objects.filter(user_id=mentioned, source="User Mentioned").count(),
+            "a username with capital letters must be matched when typed with the same case",
+        )
+
+    def test_mention_matches_a_mixed_case_username_in_another_case(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="MixedCase", is_active=True)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, "@mixedcase please take a look")
+
+        self.assertEqual(
+            1,
+            Alerts.objects.filter(user_id=mentioned, source="User Mentioned").count(),
+            "an @mention must match the username regardless of the case it was typed in",
+        )
+
+    def test_mention_of_an_inactive_mixed_case_user_does_not_notify(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="MixedCase", is_active=False)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, "@MixedCase and @mixedcase please take a look")
+
+        self.assertFalse(Alerts.objects.filter(user_id=mentioned).exists())
+
+    def test_mention_prefers_the_exact_case_when_usernames_differ_only_in_case(self):
+        author = Dojo_User.objects.get(username="admin")
+        upper = Dojo_User.objects.create(username="Casey", is_active=True)
+        lower = Dojo_User.objects.create(username="casey", is_active=True)
+        self._enable_mention_alerts(upper)
+        self._enable_mention_alerts(lower)
+
+        self._mention(author, "@Casey please take a look")
+
+        self.assertEqual(1, Alerts.objects.filter(user_id=upper, source="User Mentioned").count())
+        self.assertFalse(Alerts.objects.filter(user_id=lower).exists())
+
+    def test_ambiguous_case_insensitive_mention_notifies_nobody(self):
+        author = Dojo_User.objects.get(username="admin")
+        upper = Dojo_User.objects.create(username="Casey", is_active=True)
+        lower = Dojo_User.objects.create(username="casey", is_active=True)
+        self._enable_mention_alerts(upper)
+        self._enable_mention_alerts(lower)
+
+        self._mention(author, "@CASEY please take a look")
+
+        self.assertFalse(
+            Alerts.objects.filter(user_id__in=[upper, lower]).exists(),
+            "a mention that matches two users only case-insensitively must not guess between them",
+        )
+
+    def test_mention_reaches_each_user_once_however_often_mentioned(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="MixedCase", is_active=True)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, "@MixedCase @mixedcase @MIXEDCASE.")
+
+        self.assertEqual(1, Alerts.objects.filter(user_id=mentioned, source="User Mentioned").count())
+
+    def _recipients_and_queries(self, entry, expected_queries):
+        author = Dojo_User.objects.get(username="admin")
+        note = Notes.objects.create(entry=entry, author=author)
+        request = RequestFactory().get("/")
+        request.user = author
+        with patch("dojo.notifications.helper.create_notification") as notify, self.assertNumQueries(expected_queries):
+            process_tag_notifications(request, note, parent_url="/finding/1", parent_title="Finding: Example")
+        return sorted(notify.call_args.kwargs["recipients"])
+
+    def test_mentions_typed_in_the_stored_case_are_resolved_in_one_query(self):
+        for username in ("Alpha", "bravo", "Charlie"):
+            Dojo_User.objects.create(username=username, is_active=True)
+
+        recipients = self._recipients_and_queries("@Alpha @bravo @Charlie", expected_queries=1)
+
+        self.assertEqual(["Alpha", "Charlie", "bravo"], recipients)
+
+    def test_mentions_in_another_case_add_one_query_however_many_there_are(self):
+        for username in ("Alpha", "bravo", "Charlie"):
+            Dojo_User.objects.create(username=username, is_active=True)
+
+        recipients = self._recipients_and_queries("@alpha @Bravo @Charlie @nobody", expected_queries=2)
+
+        self.assertEqual(["Alpha", "Charlie", "bravo"], recipients)
+
+
+@versioned_fixtures
+class TestMentionNotificationsApi(APITestCase):
+
+    """A note posted through /api/v2/ notifies a mentioned user whatever the case of their username."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        token = Token.objects.get(user__username="admin")
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.finding = Finding.objects.get(id=2)
+
+    def _user_who_can_see_the_finding(self, *, is_active=True):
+        user = Dojo_User.objects.create(username="MixedCase", is_active=is_active)
+        self.finding.test.engagement.product.authorized_users.add(user)
+        notifications, _ = Notifications.objects.get_or_create(user=user, product=None)
+        notifications.user_mentioned = ["alert"]
+        notifications.save()
+        return user
+
+    def _post_note(self, entry):
+        response = self.client.post(f"/api/v2/findings/{self.finding.id}/notes/", {"entry": entry}, format="json")
+        self.assertEqual(201, response.status_code, response.content[:1000])
+
+    @parameterized.expand([("@MixedCase hi",), ("@mixedcase hi",)])
+    def test_note_mention_creates_an_alert(self, entry):
+        user = self._user_who_can_see_the_finding()
+
+        self._post_note(entry)
+
+        self.assertEqual(1, Alerts.objects.filter(user_id=user, source="User Mentioned").count())
+
+    def test_note_mention_of_an_inactive_user_creates_no_alert(self):
+        user = self._user_who_can_see_the_finding(is_active=False)
+
+        self._post_note("@MixedCase @mixedcase hi")
+
+        self.assertFalse(Alerts.objects.filter(user_id=user).exists())
+
 
 @versioned_fixtures
 class TestReviewRequestedWebhookTemplate(DojoTestCase):

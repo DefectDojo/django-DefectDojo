@@ -1,0 +1,18 @@
+{
+    "findings": [
+        {
+            "title": "group jira rule 0",
+            "description": "first finding of rule 0",
+            "severity": "High",
+            "active": true,
+            "verified": true
+        },
+        {
+            "title": "group jira rule 1",
+            "description": "first finding of rule 1",
+            "severity": "High",
+            "active": true,
+            "verified": true
+        }
+    ]
+}

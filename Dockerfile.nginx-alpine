@@ -37,7 +37,8 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements-dev.txt
 
 FROM build AS collectstatic
 RUN apk add nodejs npm
-RUN npm install -g yarn --force
+# Pinned: an unpinned global install takes whatever npm serves on the day of the build.
+RUN npm install -g yarn@1.22.22 --force
 
 
 # installing DefectDojo packages
@@ -56,15 +57,17 @@ RUN pip3 install \
 
 # generate static files
 COPY components/ ./components/
+# --frozen-lockfile: install exactly what components/yarn.lock records, and fail the build
+# when package.json and the lockfile disagree instead of resolving new versions silently.
 RUN \
   cd components && \
-  yarn
+  yarn install --frozen-lockfile
 COPY manage.py ./
 COPY dojo/ ./dojo/
 # Build Tailwind CSS
 RUN cd components && yarn build:css
 # the CSS is built, so drop the dev-only toolchain (tailwind cli, lightningcss and their native binaries) before static is collected
-RUN cd components && yarn install --production --ignore-scripts
+RUN cd components && yarn install --production --ignore-scripts --frozen-lockfile
 # always collect static for debug toolbar as we can't make it dependant on env variables or build arguments without breaking docker layer caching
 # skip files the pages never load: source maps, typescript sources and declarations, and the npm lockfiles some packages ship
 # in their tarballs

@@ -280,7 +280,7 @@ Un rapport est généré via une requête `POST` vers une action `generate_repor
 | `POST /api/v2/product_types/{id}/generate_report/` | Un type de produit |
 | `POST /api/v2/endpoints/{id}/generate_report/` | Un point de terminaison |
 
-Les alias d'objets Pro exposent la même action : `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, et `/api/v2/location/{id}/generate_report/`.
+Les alias d'objets Pro exposent la même action : `/api/v2/assets/{id}/generate_report/` et `/api/v2/organizations/{id}/generate_report/`.
 
 ### Request options
 

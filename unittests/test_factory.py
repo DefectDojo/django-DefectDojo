@@ -1,11 +1,14 @@
+import io
+import json
 import logging
 from importlib import import_module
 from importlib.util import find_spec
 from inspect import isclass
 from pathlib import Path
+from unittest.mock import patch
 
 from dojo.models import Test, Test_Type
-from dojo.tools.factory import get_parser
+from dojo.tools.factory import PARSERS, get_parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 logger = logging.getLogger(__name__)
@@ -60,6 +63,34 @@ class TestFactory(DojoTestCase):
         )
         parser = get_parser(scan_type)
         self.assertIsNotNone(parser)
+
+    def test_overlapping_parses_keep_their_own_findings(self):
+        def report(name):
+            return io.StringIO(json.dumps({"cves": [{"name": name, "file": "/app", "score": "5.0", "description": name}]}))
+
+        first, second = get_parser("Aqua Scan"), get_parser("Aqua Scan")
+        real_get_item = first.get_item_v2
+        second_findings = None
+
+        # Starts the second parse while the first is halfway through its report, as a second
+        # request thread would.
+        def start_second_parse_midway(cve, test):
+            nonlocal second_findings
+            if second_findings is None:
+                second_findings = []
+                second_findings += second.get_findings(report("CVE-SECOND"), Test())
+            return real_get_item(cve, test)
+
+        with patch.object(first, "get_item_v2", side_effect=start_second_parse_midway):
+            first_findings = first.get_findings(report("CVE-FIRST"), Test())
+
+        self.assertEqual(["CVE-FIRST: /app"], [finding.title for finding in first_findings])
+        self.assertEqual(["CVE-SECOND: /app"], [finding.title for finding in second_findings])
+
+    def test_get_parser_works_for_every_registered_scan_type(self):
+        for scan_type, registered in PARSERS.items():
+            with self.subTest(scan_type=scan_type):
+                self.assertIsInstance(get_parser(scan_type), type(registered))
 
     def test_parser_name_matches_module(self):
         """Test to ensure that parsers' class names match their module names"""

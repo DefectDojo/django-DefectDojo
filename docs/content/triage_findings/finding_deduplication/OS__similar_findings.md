@@ -60,13 +60,15 @@ If you have edit permission on a Finding, the **Action** column offers a dropdow
 
 ![The Similar Findings row action menu](images/similar_findings_actions.png)
 
-- **Mark as duplicate**: link the similar Finding into the current Finding's duplicate cluster, as a duplicate of the cluster's original. With Engagement-level deduplication enabled, it is offered only when the similar Finding is in the same Engagement as that original.
+- **Mark as duplicate**: link the similar Finding into the current Finding's duplicate cluster, as a duplicate of the cluster's original. With Engagement-level deduplication enabled, it is offered only when the similar Finding is in the same Engagement as that original. It is not offered while the cluster's original is itself marked as a duplicate, for example of a Finding outside the cluster: use **Set as original** on the similar Finding instead, or uncheck **Duplicate** on that original's Edit Finding page first.
 - **Set as original**: promote a Finding to be the original (cluster root).
 - **Reset finding duplicate status**: remove a Finding from its cluster.
 
 An action may be unavailable (shown as **None**) when it is not valid, for example when the similar Finding lives in a different Engagement and Engagement-level deduplication is enabled, or when it is already the original of a different cluster. These actions manipulate the same duplicate relationships that automatic deduplication uses, so a Finding you mark here behaves exactly like an automatically detected duplicate.
 
 Marking a Finding as a duplicate also moves that Finding's own duplicates into the cluster. If one of them sits in a different Engagement from the cluster's original while Engagement-level deduplication is enabled for either Engagement, the mark is refused and the message names that duplicate. That duplicate's row in the similar findings table still offers **Reset duplicate status**: use it first, then mark again.
+
+Setting a Finding as the original moves the current Finding's whole cluster under it: the cluster's previous original and all of its duplicates. The same Engagement rule applies to each of them. If one sits in a different Engagement from the new original while Engagement-level deduplication is enabled for either Engagement, the action is refused and the message names that Finding and the Finding whose duplicate status to reset first. The previous original becomes an inactive duplicate, like the rest of the cluster, and the new original takes over its status: an open, verified original leaves an open, verified new original, and a mitigated one leaves a mitigated one. When the previous original was closed as a false positive, out of scope or risk accepted, the new original keeps its own status. A Finding that is a duplicate in another cluster cannot be set as the original: reset its duplicate status first.
 
 ## Enabling and disabling Similar Findings
 

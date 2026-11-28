@@ -1118,6 +1118,50 @@ class ReportGenerateFormatAPITest(DojoAPITestCase):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:1000])
         self.assertIn("report_type", response.data)
 
+    # Every generate_report route honours report_type, not just the product one.
+    # (url, filename stem) pairs; the stem is the model the route reports on.
+    OTHER_REPORT_ROUTES = (
+        ("/api/v2/assets/1/generate_report/", "product_1"),
+        ("/api/v2/organizations/1/generate_report/", "product_type_1"),
+        ("/api/v2/product_types/1/generate_report/", "product_type_1"),
+    )
+
+    def _assert_report_formats(self, url, stem):
+        response = self.client.post(url, {}, format="json")
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("application/json", response["Content-Type"])
+        self.assertIn("findings", response.data)
+
+        response = self.client.post(url, {"report_type": "HTML"}, format="json")
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("text/html", response["Content-Type"])
+
+        response = self.client.post(url, {"report_type": "CSV"}, format="json")
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("text/csv", response["Content-Type"])
+        self.assertIn(f"attachment; filename={stem}_findings.csv", response["Content-Disposition"])
+
+        response = self.client.post(url, {"report_type": "Excel"}, format="json")
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response["Content-Type"],
+        )
+        self.assertIn(f"attachment; filename={stem}_findings.xlsx", response["Content-Disposition"])
+
+        response = self.client.post(url, {"report_type": "PDF"}, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:1000])
+        self.assertIn("report_type", response.data)
+
+    def test_generate_report_formats_on_every_route(self):
+        for url, stem in self.OTHER_REPORT_ROUTES:
+            with self.subTest(url=url):
+                self._assert_report_formats(url, stem)
+
+    @skip_unless_v2
+    def test_generate_report_formats_on_endpoint_route(self):
+        self._assert_report_formats("/api/v2/endpoints/1/generate_report/", "endpoint_1")
+
 
 @versioned_fixtures
 class EngagementCloseReopenAPITest(DojoAPITestCase):
