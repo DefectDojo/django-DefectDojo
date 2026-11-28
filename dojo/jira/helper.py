@@ -541,6 +541,14 @@ def jira_get_resolution_id(jira, issue, status):
 def jira_transition(jira, issue, transition_id, fields=None):
     try:
         if issue and transition_id:
+            if fields and not isinstance(fields, dict):
+                # The transition ID is not part of `fields`; JIRA rejects anything but an object there.
+                logger.warning(
+                    "Ignoring transition fields %r for jira issue %s: expected a JSON object",
+                    fields,
+                    issue.key,
+                )
+                fields = None
             if fields:
                 jira.transition_issue(issue, transition_id, fields=fields)
             else:
@@ -1612,7 +1620,7 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
                 req_url = jira_instance.url + "/rest/api/latest/issue/" + \
                     jissue.jira_id + "/transitions"
                 json_data = {"transition": {"id": jira_instance.close_status_key}}
-                if jira_project.close_transition_fields:
+                if jira_project.close_transition_fields and isinstance(jira_project.close_transition_fields, dict):
                     json_data["fields"] = jira_project.close_transition_fields
                 r = requests.post(
                     url=req_url,

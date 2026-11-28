@@ -167,8 +167,26 @@ class JIRA_Project(models.Model):
         if not self.jira_instance:
             msg = "Cannot save JIRA Project Configuration without JIRA Instance"
             raise ValidationError(msg)
+        errors = {}
         if sla_notification_conflict(self.product_jira_sla_notification, self.suppress_sla_notification_comments):
-            raise ValidationError({"suppress_sla_notification_comments": sla_notification_conflict_message()})
+            errors["suppress_sla_notification_comments"] = sla_notification_conflict_message()
+        for field_name in ("close_transition_fields", "reopen_transition_fields"):
+            if not is_valid_transition_fields(getattr(self, field_name)):
+                errors[field_name] = transition_fields_message()
+        if errors:
+            raise ValidationError(errors)
+
+
+def is_valid_transition_fields(value):
+    """Transition fields are sent as the JIRA `fields` object, so they must be a JSON object (or empty)."""
+    return value is None or (isinstance(value, str) and not value) or isinstance(value, dict)
+
+
+def transition_fields_message():
+    return _(
+        'Must be a JSON object of JIRA fields, e.g. {"resolution": {"name": "Done"}}. '
+        "The transition ID itself is set on the JIRA configuration (Close/Reopen Transition ID), not here.",
+    )
 
 
 def sla_notification_conflict(send, suppress):
