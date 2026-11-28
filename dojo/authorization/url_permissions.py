@@ -55,7 +55,7 @@ URL_PERMISSIONS = {
     "engagement_presets": [("object", Product, "view", "pid")],
     "edit_engagement_presets": [("object", Product, "edit", "pid")],
     "add_engagement_presets": [("object", Product, "edit", "pid")],
-    "delete_engagement_presets": [("object", Product, "edit", "pid")],
+    "delete_engagement_presets": [("object", Product, "delete", "pid")],
     "add_api_scan_configuration": [("object", Product, "add", "pid")],
     "view_api_scan_configurations": [("object", Product, "view", "pid")],
     "edit_api_scan_configuration": [("object", Product_API_Scan_Configuration, "edit", "pascid")],
