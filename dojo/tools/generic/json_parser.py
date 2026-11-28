@@ -259,11 +259,14 @@ class GenericJSONParser:
                 component_name = item.get("component_name")
                 component_version = item.get("component_version")
                 file_path = item.get("file_path")
-                if not (purl or component_name or component_version or file_path) and (purl_type or namespace):
+                if not (purl or component_name or component_version) and (purl_type or namespace):
                     logger.warning(
                         "Generic Findings Import: ignoring purl_type and namespace, the finding names no component",
                     )
-                if purl or component_name or component_version or file_path:
+                # Only a finding that names a package gets a dependency location. A bare
+                # file_path is a code coordinate (the code location below), not a package:
+                # building a dependency from it stored an unnamed placeholder component.
+                if purl or component_name or component_version:
                     finding.unsaved_locations.append(
                         LocationData.dependency(
                             purl=purl.to_string() if purl else "",

@@ -156,7 +156,7 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 | `payload` | String<br>`"' OR 1=1 --"` | The input that triggers the issue. |
 | `line` | Integer<br>`42`, `"42"` | Line number in `file_path`. |
 | `file_path` | String (max 4000 characters)<br>`"src/auth/login.py"` | Setting this marks a new finding as static (see `static_finding`). |
-| `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. In DefectDojo Pro with Locations enabled, together with `component_version` and `file_path` it also creates a dependency location on the finding. Send a Package URL in `purl`, not here (see [Package details](#package-details)). |
+| `component_name` | String (max 500 characters)<br>`"xz-utils"` | The affected package or library. A blank or whitespace-only value is stored as empty. In DefectDojo Pro with Locations enabled, it also creates a dependency location on the finding, together with `component_version` (and `file_path`, when set). Send a Package URL in `purl`, not here (see [Package details](#package-details)). |
 | `component_version` | String (max 100 characters)<br>`"5.6.0"` | The affected version of `component_name`. A blank or whitespace-only value is stored as empty. |
 | `purl` | String<br>`"pkg:maven/commons-collections/commons-collections@3.2.1"` | The component as a [Package URL](https://github.com/package-url/purl-spec). Fills in `component_name` (and `component_version`, for the same package) when they are not set. In DefectDojo Pro with Locations enabled, it also identifies the dependency location, after the normalization the Package URL specification defines. Takes precedence over `purl_type` and `namespace`. See [Package details](#package-details). |
 | `purl_type` | String<br>`"maven"`, `"npm"`, `"pypi"` | The package ecosystem of `component_name`, for a tool that reports the parts instead of a `purl`. Without it (and without `purl`) the dependency location gets the type `generic`. |
@@ -213,7 +213,7 @@ Every finding must have `title`, `severity` and `description`. A finding with a 
 
 #### Package details
 
-In DefectDojo Pro with Locations enabled, a finding that sets `component_name`, `component_version`, `file_path` or `purl` gets a dependency location, identified by a Package URL. The open-source edition stores no dependency locations; there, `purl` only fills in `component_name` and `component_version`. Without package details that Package URL is built from the component fields alone with the type `generic`: `"component_name": "commons-collections"` becomes `pkg:generic/commons-collections`.
+In DefectDojo Pro with Locations enabled, a finding that sets `component_name`, `component_version` or `purl` gets a dependency location, identified by a Package URL, and its `file_path` is recorded on that location. A `file_path` on its own names a file, not a package: it gives the finding a code location and no dependency location. The open-source edition stores no dependency locations; there, `purl` only fills in `component_name` and `component_version`. Without package details that Package URL is built from the component fields alone with the type `generic`: `"component_name": "commons-collections"` becomes `pkg:generic/commons-collections`.
 
 Send the package details in one of two ways:
 
@@ -252,7 +252,7 @@ A package field never stops the import. A value that cannot be used is left out,
 - A `purl` that is not a valid Package URL is ignored. `purl_type` and `namespace`, if sent, are used instead.
 - A `purl_type` that is not a valid Package URL type (letters, digits, `.`, `+` and `-`, not starting with a digit) is ignored, so the type is `generic`. It is read in lowercase.
 - A valid `purl` sent with `purl_type` or `namespace` wins, and the other two are ignored.
-- `purl_type` and `namespace` on a finding that has no `component_name`, `component_version`, `file_path` or `purl` are ignored: there is no component for them to describe.
+- `purl_type` and `namespace` on a finding that has no `component_name`, `component_version` or `purl` are ignored: there is no component for them to describe.
 - A name or version in the `purl` that is longer than `component_name` or `component_version` allows is not copied into them.
 - A dependency location with a part too long to store is left off the finding, and the rest of the finding imports.
 
