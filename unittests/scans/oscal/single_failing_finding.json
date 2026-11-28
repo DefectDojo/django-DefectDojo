@@ -1,0 +1,40 @@
+{
+  "assessment-results": {
+    "metadata": {
+      "title": "Prowler Cloud Security Assessment Results",
+      "oscal-version": "1.2.3"
+    },
+    "results": [
+      {
+        "uuid": "res-1234-5678",
+        "title": "AWS Assessment Scan",
+        "observations": [
+          {
+            "uuid": "obs-001",
+            "title": "Check s3_bucket_public_access_block",
+            "description": "S3 bucket has public access block disabled"
+          }
+        ],
+        "findings": [
+          {
+            "uuid": "find-001",
+            "title": "Ensure S3 bucket public access block is enabled",
+            "description": "S3 bucket test-bucket allows public read",
+            "target": {
+              "target-id": "arn:aws:s3:::test-bucket",
+              "status": "fail"
+            },
+            "related-observations": [
+              {"observation-uuid": "obs-001"}
+            ],
+            "props": [
+              {"name": "severity", "value": "high"},
+              {"name": "control_id", "value": "AC-3"},
+              {"name": "check_id", "value": "s3_bucket_public_access_block"}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

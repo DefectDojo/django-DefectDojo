@@ -1,0 +1,24 @@
+{
+  "assessment-results": {
+    "results": [
+      {
+        "uuid": "res-pass",
+        "findings": [
+          {
+            "uuid": "find-pass-001",
+            "title": "IAM Root MFA Enabled",
+            "description": "Root account has MFA enabled",
+            "target": {
+              "target-id": "arn:aws:iam::123456789012:root",
+              "status": "pass"
+            },
+            "props": [
+              {"name": "severity", "value": "low"},
+              {"name": "control_id", "value": "IA-2"}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
