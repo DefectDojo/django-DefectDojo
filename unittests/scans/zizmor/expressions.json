@@ -1,0 +1,1609 @@
+[
+  {
+    "ident": "dangerous-triggers",
+    "desc": "use of fundamentally insecure workflow trigger",
+    "url": "https://docs.zizmor.sh/audits/#dangerous-triggers",
+    "determinations": {
+      "confidence": "Medium",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this workflow",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 19
+            },
+            "offset_span": {
+              "start": 10,
+              "end": 56
+            }
+          },
+          "feature": "on:\n  pull_request_target:\n    types: [opened]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "pull_request_target is almost always used insecurely",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              },
+              {
+                "Key": "pull_request_target"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 2,
+              "column": 2
+            },
+            "end_point": {
+              "row": 2,
+              "column": 21
+            },
+            "offset_span": {
+              "start": 16,
+              "end": 35
+            }
+          },
+          "feature": "pull_request_target",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 12,
+              "column": 44
+            },
+            "offset_span": {
+              "start": 200,
+              "end": 258
+            }
+          },
+          "feature": "name: Secrets\n        run: echo \"${{ toJSON( secrets ) }}\"",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 6,
+              "fragment": {
+                "Regex": "toJSON\\(\\s+secrets\\s+\\)"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 23
+            },
+            "end_point": {
+              "row": 12,
+              "column": 40
+            },
+            "offset_span": {
+              "start": 237,
+              "end": 254
+            }
+          },
+          "feature": "echo \"${{ toJSON( secrets ) }}\"",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 8
+            },
+            "end_point": {
+              "row": 12,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 222,
+              "end": 225
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 13,
+              "column": 8
+            },
+            "end_point": {
+              "row": 15,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 267,
+              "end": 343
+            }
+          },
+          "feature": "name: Title\n        run: echo \"${{ github.event.pull_request[ 'title' ] }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 7,
+              "fragment": {
+                "Regex": "github\\.event\\.pull_request\\[\\s+'title'\\s+\\]"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 14,
+              "column": 23
+            },
+            "end_point": {
+              "row": 14,
+              "column": 59
+            },
+            "offset_span": {
+              "start": 302,
+              "end": 338
+            }
+          },
+          "feature": "echo \"${{ github.event.pull_request[ 'title' ] }}\"",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 1
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 14,
+              "column": 8
+            },
+            "end_point": {
+              "row": 14,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 287,
+              "end": 290
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "replace expression with environment variable",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/bot.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "bot-conditions",
+    "desc": "spoofable bot actor check",
+    "url": "https://docs.zizmor.sh/audits/#bot-conditions",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "name"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 7,
+              "column": 4
+            },
+            "end_point": {
+              "row": 7,
+              "column": 19
+            },
+            "offset_span": {
+              "start": 96,
+              "end": 111
+            }
+          },
+          "feature": "    name: automerge",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "actor context may be spoofable",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "if"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 0,
+              "fragment": {
+                "Regex": "github\\.actor\\s+==\\s+'dependabot\\[bot\\]'"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 9,
+              "column": 8
+            },
+            "end_point": {
+              "row": 9,
+              "column": 41
+            },
+            "offset_span": {
+              "start": 147,
+              "end": 180
+            }
+          },
+          "feature": "github.actor == 'dependabot[bot]'",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "replace spoofable actor context",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/bot.yml"
+          }
+        },
+        "disposition": "safe"
+      }
+    ]
+  },
+  {
+    "ident": "overprovisioned-secrets",
+    "desc": "excessively provisioned secrets",
+    "url": "https://docs.zizmor.sh/audits/#overprovisioned-secrets",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "injects the entire secrets context into the runner",
+          "route": {
+            "route": []
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 19
+            },
+            "end_point": {
+              "row": 12,
+              "column": 43
+            },
+            "offset_span": {
+              "start": 233,
+              "end": 257
+            }
+          },
+          "feature": "${{ toJSON( secrets ) }}",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "concurrency-limits",
+    "desc": "insufficient job-level concurrency limits",
+    "url": "https://docs.zizmor.sh/audits/#concurrency-limits",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "workflow is missing concurrency setting",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 19
+            },
+            "offset_span": {
+              "start": 10,
+              "end": 56
+            }
+          },
+          "feature": "on:\n  pull_request_target:\n    types: [opened]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "job affected by missing workflow concurrency",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              },
+              {
+                "Key": "name"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 7,
+              "column": 4
+            },
+            "end_point": {
+              "row": 7,
+              "column": 19
+            },
+            "offset_span": {
+              "start": 96,
+              "end": 111
+            }
+          },
+          "feature": "    name: automerge",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "secrets-outside-env",
+    "desc": "secrets referenced without a dedicated environment",
+    "url": "https://docs.zizmor.sh/audits/#secrets-outside-env",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Medium",
+      "persona": "Auditor"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 2
+            },
+            "end_point": {
+              "row": 15,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 81,
+              "end": 343
+            }
+          },
+          "feature": "  automerge:\n    name: automerge\n    runs-on: ubuntu-latest\n    if: github.actor == 'dependabot[bot]'\n    steps:\n      - name: Secrets\n        run: echo \"${{ toJSON( secrets ) }}\"\n      - name: Title\n        run: echo \"${{ github.event.pull_request[ 'title' ] }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "this job",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 6,
+              "column": 2
+            },
+            "end_point": {
+              "row": 6,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 81,
+              "end": 90
+            }
+          },
+          "feature": "automerge",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/bot.yml"
+            }
+          },
+          "annotation": "secret is accessed outside of a dedicated environment",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "automerge"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 31
+            },
+            "end_point": {
+              "row": 12,
+              "column": 38
+            },
+            "offset_span": {
+              "start": 245,
+              "end": 252
+            }
+          },
+          "feature": "secrets",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 17,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 142,
+              "end": 400
+            }
+          },
+          "feature": "name: Label\n        run: |\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 28,
+              "fragment": {
+                "Raw": "github.event.issue.title"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 41
+            },
+            "end_point": {
+              "row": 12,
+              "column": 65
+            },
+            "offset_span": {
+              "start": 210,
+              "end": 234
+            }
+          },
+          "feature": "|\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 11,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 162,
+              "end": 165
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 17,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 142,
+              "end": 400
+            }
+          },
+          "feature": "name: Label\n        run: |\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 68,
+              "fragment": {
+                "Raw": "github.event.issue.body"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 13,
+              "column": 20
+            },
+            "end_point": {
+              "row": 13,
+              "column": 43
+            },
+            "offset_span": {
+              "start": 260,
+              "end": 283
+            }
+          },
+          "feature": "|\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 11,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 162,
+              "end": 165
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "replace expression with environment variable",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/triage.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 17,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 142,
+              "end": 400
+            }
+          },
+          "feature": "name: Label\n        run: |\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 109,
+              "fragment": {
+                "Raw": "github.event.issue.body"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 13,
+              "column": 61
+            },
+            "end_point": {
+              "row": 13,
+              "column": 84
+            },
+            "offset_span": {
+              "start": 301,
+              "end": 324
+            }
+          },
+          "feature": "|\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 11,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 162,
+              "end": 165
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "replace expression with environment variable",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/triage.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "template-injection",
+    "desc": "code injection via template expansion",
+    "url": "https://docs.zizmor.sh/audits/#template-injection",
+    "determinations": {
+      "confidence": "High",
+      "severity": "High",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this step",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Hidden"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 10,
+              "column": 8
+            },
+            "end_point": {
+              "row": 17,
+              "column": 0
+            },
+            "offset_span": {
+              "start": 142,
+              "end": 400
+            }
+          },
+          "feature": "name: Label\n        run: |\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "may expand into attacker-controllable code",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": {
+            "Subfeature": {
+              "after": 149,
+              "fragment": {
+                "Raw": "github.event.issue.title"
+              }
+            }
+          },
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 15,
+              "column": 12
+            },
+            "end_point": {
+              "row": 15,
+              "column": 36
+            },
+            "offset_span": {
+              "start": 361,
+              "end": 385
+            }
+          },
+          "feature": "|\n          echo \"${{ format('Issue: {0}', github.event.issue.title) }}\"\n          echo \"${{ github.event.issue.body }} and again ${{ github.event.issue.body }}\"\n          echo \"${{\n            github.event.issue.title\n          }}\"\n",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "this run block",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              },
+              {
+                "Key": "run"
+              }
+            ]
+          },
+          "feature_kind": "KeyOnly",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 11,
+              "column": 8
+            },
+            "end_point": {
+              "row": 11,
+              "column": 11
+            },
+            "offset_span": {
+              "start": 162,
+              "end": 165
+            }
+          },
+          "feature": "run",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "replace expression with environment variable",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/triage.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  },
+  {
+    "ident": "concurrency-limits",
+    "desc": "insufficient job-level concurrency limits",
+    "url": "https://docs.zizmor.sh/audits/#concurrency-limits",
+    "determinations": {
+      "confidence": "High",
+      "severity": "Low",
+      "persona": "Pedantic"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "workflow is missing concurrency setting",
+          "route": {
+            "route": [
+              {
+                "Key": "on"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 1,
+              "column": 0
+            },
+            "end_point": {
+              "row": 3,
+              "column": 19
+            },
+            "offset_span": {
+              "start": 13,
+              "end": 46
+            }
+          },
+          "feature": "on:\n  issues:\n    types: [opened]",
+          "comments": []
+        }
+      },
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/triage.yml"
+            }
+          },
+          "annotation": "job affected by missing workflow concurrency",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "triage"
+              },
+              {
+                "Key": "name"
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Related"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 7,
+              "column": 4
+            },
+            "end_point": {
+              "row": 7,
+              "column": 16
+            },
+            "offset_span": {
+              "start": 83,
+              "end": 95
+            }
+          },
+          "feature": "    name: triage",
+          "comments": []
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": []
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "ident": "artipacked",
+    "desc": "credential persistence through GitHub Actions artifacts",
+    "url": "https://docs.zizmor.sh/audits/#artipacked",
+    "determinations": {
+      "confidence": "Low",
+      "severity": "Medium",
+      "persona": "Regular"
+    },
+    "locations": [
+      {
+        "symbolic": {
+          "key": {
+            "Local": {
+              "verbatim_path": "./.github/workflows/ci.yml"
+            }
+          },
+          "annotation": "does not set persist-credentials: false",
+          "route": {
+            "route": [
+              {
+                "Key": "jobs"
+              },
+              {
+                "Key": "test"
+              },
+              {
+                "Key": "steps"
+              },
+              {
+                "Index": 0
+              }
+            ]
+          },
+          "feature_kind": "Normal",
+          "kind": "Primary"
+        },
+        "concrete": {
+          "location": {
+            "start_point": {
+              "row": 12,
+              "column": 8
+            },
+            "end_point": {
+              "row": 12,
+              "column": 80
+            },
+            "offset_span": {
+              "start": 171,
+              "end": 243
+            }
+          },
+          "feature": "uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2",
+          "comments": [
+            "# v4.2.2"
+          ]
+        }
+      }
+    ],
+    "ignored": false,
+    "fixes": [
+      {
+        "title": "set persist-credentials: false",
+        "key": {
+          "Local": {
+            "verbatim_path": "./.github/workflows/ci.yml"
+          }
+        },
+        "disposition": "unsafe"
+      }
+    ]
+  }
+]
