@@ -40,6 +40,9 @@ on:
 jobs:
   release-chart:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
 
       - name: Checkout
@@ -109,3 +112,11 @@ jobs:
           git add ./index.yaml
           git commit -m "Update index.yaml - ${{ inputs.release_number }}"
           git push -u origin helm-charts
+
+      - name: Publish Helm chart to GHCR
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GITHUB_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          helm push "./build/defectdojo-${chart_version}.tgz" oci://ghcr.io/defectdojo
