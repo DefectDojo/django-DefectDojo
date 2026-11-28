@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load navigation_tags %}
 {% load get_config_setting %}
+{% load authorization_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -51,8 +52,10 @@
                                 <div class="btn-group">
                                     <a class="btn btn-sm btn-warning"
                                        href="{% url 'edit_engagement_presets' preset.product.id preset.id  %}">Edit</a>
+                                    {% if preset.product|has_object_permission:"delete" %}
                                     <a class="btn btn-sm btn-danger delete-finding"
                                        href="{% url 'delete_engagement_presets' preset.product.id preset.id  %}">Delete</a>
+                                    {% endif %}
                                 </div>
                             </td>
                           </tr>

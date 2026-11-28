@@ -1095,6 +1095,9 @@ class TestEngagementPresetsCrossProductIDOR(LegacyAuthMirrorMixin, DojoTestCase)
 
     def test_delete_preset_cross_product(self):
         """Deleting a preset from product A via product B's URL must return 404."""
+        # Deleting a preset needs staff, so the scoped lookup is only reached by a staff user.
+        self.user.is_staff = True
+        self.user.save()
         client = self._login()
         url = reverse("delete_engagement_presets", args=(
             self.product_b.id, self.preset.id,
