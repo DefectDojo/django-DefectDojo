@@ -106,6 +106,19 @@ This page allows you to add a **Full Risk Acceptance** to the selected Findings.
 
 ![image](images/Bulk_Editing_Findings_3.png)
 
+### Who Is Offered the Risk Acceptance Actions
+
+In DefectDojo Pro, accepting risk and removing a Risk Acceptance are permissions of their own, separate from editing a Finding. They sit in the **Risk Acceptance** row of the [role permission grid](/admin/user_management/pro__custom_rbac_roles/#choosing-permissions): **Add** to accept risk, **Edit** to remove a Finding from its Risk Acceptance. The built-in Writer, Maintainer and Owner roles hold both. Reader and API Importer hold neither. A user who can edit a Finding but lacks these permissions can still change everything else on it.
+
+A permission counts when a role grants it on the Organization or Asset involved, or through a global role. The UI offers each action only to a user who holds the permission it needs:
+
+* **Risk Acceptances page:** **New Risk Acceptance**, in the toolbar and in an empty list, needs **Risk Acceptance > Add** on at least one Organization or Asset. A user who can only view Risk Acceptances still sees the list, each Risk Acceptance and its history, and is offered nothing that changes them.
+* **Finding ⋮ menu:** **Add Risk Acceptance** needs **Risk Acceptance > Add** on the Finding's Asset, and **Remove Risk Acceptance** needs **Risk Acceptance > Edit** on it.
+* **Risk Acceptance button** on a Findings list: it needs **Risk Acceptance > Add** on every selected Finding's Asset. When that permission is what is missing, the message beside the button says so.
+* **Bulk Edit:** in **Simple Risk Acceptance Status**, **Accept Risk** needs **Risk Acceptance > Add** and **Unaccept Risk** needs **Risk Acceptance > Edit**, each on at least one Organization or Asset. With neither, the field is not shown.
+
+The bulk update checks every selected Finding again when it runs. A Finding you may edit, but whose Asset does not give you the permission the chosen status needs, keeps its risk acceptance status. The rest of the update still applies to it, and a warning says how many Findings were skipped.
+
 ### Finding Group Actions
 
 This page allows you to create a new Finding Group from the Selected Findings, or add them to an existing Finding Group.
