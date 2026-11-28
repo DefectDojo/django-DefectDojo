@@ -1,6 +1,7 @@
 import logging
 from unittest import mock
 
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 import dojo.risk_acceptance.helper as ra_helper
@@ -399,6 +400,89 @@ class TestReimportCloseOldVanishedFindings(DojoTestCase):
             {finding.pk for finding in closed_findings},
         )
         self.assertIsNone(unsaved_finding.pk, msg="close_old_findings must not save a new finding")
+
+
+class TestReimportMalformedOSVScan(DojoTestCase):
+
+    """Rejecting unparseable OSV JSON must happen before close-old-findings."""
+
+    def setUp(self):
+        super().setUp()
+        self.user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="osv_invalid_json")
+        self.environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        product, _ = Product.objects.get_or_create(
+            name="TestReimportMalformedOSVScan",
+            description="Test",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Malformed OSV Reimport",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        self.reimport_options = {
+            "user": self.user,
+            "lead": self.user,
+            "scan_date": None,
+            "environment": self.environment,
+            "active": True,
+            "verified": False,
+            "scan_type": "OSV Scan",
+        }
+        with (get_unit_tests_scans_path("osv_scanner") / "some_findings.json").open(encoding="utf-8") as scan:
+            importer = DefaultImporter(
+                close_old_findings=False,
+                engagement=engagement,
+                **self.reimport_options,
+            )
+            self.test_obj, _, len_new_findings, _, _, _, _ = importer.process_scan(scan)
+        self.assertEqual(1, len_new_findings)
+        self.finding = self.test_obj.finding_set.get()
+
+    def test_invalid_json_reimport_keeps_findings_open(self):
+        with (get_unit_tests_scans_path("osv_scanner") / "truncated.json").open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=self.test_obj,
+                close_old_findings=True,
+                **self.reimport_options,
+            )
+            with self.assertRaises(ValidationError):
+                reimporter.process_scan(scan)
+
+        self.finding.refresh_from_db()
+        self.assertTrue(self.finding.active)
+        self.assertFalse(self.finding.is_mitigated)
+
+    def test_structurally_invalid_reimport_keeps_findings_open(self):
+        with (get_unit_tests_scans_path("osv_scanner") / "missing_results.json").open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=self.test_obj,
+                close_old_findings=True,
+                **self.reimport_options,
+            )
+            with self.assertRaises(ValidationError):
+                reimporter.process_scan(scan)
+
+        self.finding.refresh_from_db()
+        self.assertTrue(self.finding.active)
+        self.assertFalse(self.finding.is_mitigated)
+
+    def test_valid_empty_reimport_closes_findings(self):
+        with (get_unit_tests_scans_path("osv_scanner") / "no_findings.json").open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=self.test_obj,
+                close_old_findings=True,
+                **self.reimport_options,
+            )
+            _, _, len_new_findings, len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+
+        self.assertEqual(0, len_new_findings)
+        self.assertEqual(1, len_closed_findings)
+        self.finding.refresh_from_db()
+        self.assertFalse(self.finding.active)
+        self.assertTrue(self.finding.is_mitigated)
 
 
 class TestReimportCloseOldSkipsAlreadyClosedFindings(DojoTestCase):
