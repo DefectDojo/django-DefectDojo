@@ -32,6 +32,8 @@ Standardmäßig müssten diese Tests unter demselben Produkt verschachtelt sein,
 
 Doppelte Befunde werden standardmäßig auf Inaktiv gesetzt. Das bedeutet nicht, dass der doppelte Befund selbst inaktiv ist. Vielmehr soll dadurch sichergestellt werden, dass Ihr Team nur an einem einzigen aktiven Befund arbeitet und diesen behebt, mit der Konsequenz, dass die Duplikate ebenfalls als Behoben markiert werden, sobald der Original-Befund Behoben ist.
 
+In DefectDojo Pro ist das für Duplikate in einem anderen Test oder Asset anders. Sobald der Original-Befund Behoben ist, ob durch einen Reimport oder von Hand, wird jedes seiner offenen Duplikate in einem anderen Test oder Asset (zum Beispiel in einem [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/)) freigegeben und in seinem eigenen Bereich erneut dedupliziert: Es wird zum Duplikat eines anderen offenen Befunds oder zum neuen Original, das Aktiv ist, sofern es nicht Risiko akzeptiert, Falsch-positiv oder Außerhalb des Geltungsbereichs ist. Dieser Befund meldet die Schwachstelle weiterhin und bleibt daher offen, bis er selbst Behoben ist. Ein Duplikat, das bereits Behoben ist, bleibt unverändert, und ein Original, das als Falsch-positiv oder Außerhalb des Geltungsbereichs geschlossen wird, behält seine Duplikate. Duplikate im eigenen Test des Originals folgen dem Reimport, der es geschlossen hat: Die Duplikate, die der Bericht noch enthält, werden freigegeben, die übrigen bleiben beim geschlossenen Original.
+
 ## Reimport-Deduplizierung
 
 Deduplizierung und Reimport sind ähnliche Prozesse, verwenden jedoch unterschiedliche Algorithmen, um übereinstimmende Befunde zu identifizieren.

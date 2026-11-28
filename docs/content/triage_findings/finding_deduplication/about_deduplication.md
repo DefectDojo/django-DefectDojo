@@ -36,6 +36,8 @@ DefectDojo Pro can also widen it. A [Dedupe Pool](/triage_findings/finding_dedup
 
 Duplicate Findings are set as Inactive by default. This does not mean the Duplicate Finding itself is Inactive. Rather, this is so that your team only has a single active Finding to work on and remediate, with the implication being that once the original Finding is Mitigated, the Duplicates will also be Mitigated.
 
+In DefectDojo Pro this works differently for Duplicates in another Test or Asset. Once the original Finding is Mitigated, by a Reimport or by hand, each of its open Duplicates in another Test or Asset (in a [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/), for example) is released and deduplicated afresh in its own scope: it becomes a Duplicate of another open Finding, or the new original, which is Active unless it is Risk Accepted, a False Positive or Out of Scope. That Finding still reports the vulnerability, so it stays open until it is Mitigated in its own right. A Duplicate that is already Mitigated stays as it is, and an original closed as False Positive or Out of Scope keeps its Duplicates. Duplicates in the original's own Test follow the Reimport that closed it: the ones the report still has are released, and the others stay with the closed original.
+
 ## Reimport Deduplication
 
 Deduplication and Reimport are similar processes, but they use different algorithms to identify Finding matches.

@@ -32,6 +32,8 @@ Per impostazione predefinita, questi Test devono essere annidati sotto lo stesso
 
 Per impostazione predefinita, i Riscontri duplicati vengono impostati su Inattivo. Questo non significa che il Riscontro duplicato in sé sia inattivo: piuttosto, serve a garantire che il team abbia un solo Riscontro attivo su cui lavorare e da correggere, con l'implicazione che, una volta Mitigato il Riscontro originale, anche i Duplicati verranno Mitigati.
 
+In DefectDojo Pro questo funziona diversamente per i Duplicati in un altro Test o Asset. Quando il Riscontro originale viene Mitigato, tramite una Reimportazione o manualmente, ciascuno dei suoi Duplicati aperti in un altro Test o Asset (ad esempio in un [Dedupe Pool](/triage_findings/finding_deduplication/pro__dedupe_pools/)) viene rilasciato e deduplicato di nuovo nel proprio ambito: diventa Duplicato di un altro Riscontro aperto, oppure il nuovo originale, che è Attivo a meno che non sia a rischio accettato, Falso positivo o Fuori ambito. Quel Riscontro segnala ancora la vulnerabilità, quindi resta aperto finché non viene Mitigato a sua volta. Un Duplicato già Mitigato resta com'è, e un originale chiuso come Falso positivo o Fuori ambito mantiene i propri Duplicati. I Duplicati nel Test dell'originale seguono la Reimportazione che lo ha chiuso: quelli che il report contiene ancora vengono rilasciati, gli altri restano con l'originale chiuso.
+
 ## Deduplicazione in fase di reimportazione
 
 La Deduplicazione e la Reimportazione sono processi simili, ma utilizzano algoritmi diversi per identificare le corrispondenze tra Riscontri.
