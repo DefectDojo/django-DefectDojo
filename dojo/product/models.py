@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from django_tagulous.models import TagField
 
 from dojo.base_models.base import BaseManager, BaseModel
@@ -76,7 +77,7 @@ class Product(BaseModel):
         (NONE_CRITICALITY, _("None")),
     )
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, error_messages={"unique": gettext_lazy("An entry with this name already exists.")})
     description = models.CharField(max_length=4000)
 
     product_manager = models.ForeignKey("dojo.Dojo_User", null=True, blank=True,

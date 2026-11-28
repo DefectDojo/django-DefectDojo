@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "name": "Default",
-            "description": "The Default SLA Configuration. Products not using an explicit SLA Configuration will use this one.",
+            "description": "The Default SLA Configuration, used wherever no other SLA Configuration is assigned.",
             "critical": 7,
             "enforce_critical": true,
             "high": 30,
@@ -20,7 +20,7 @@
         "model": "dojo.sla_configuration",
         "fields": {
             "name": "No SLA Enforced",
-            "description": "No SLA is enforced for a product which uses this SLA configuration.",
+            "description": "No SLA is enforced for anything that uses this SLA configuration.",
             "critical": 7,
             "enforce_critical": false,
             "high": 30,
