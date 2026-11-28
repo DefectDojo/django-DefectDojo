@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.template import Context, Template
 from django.test import override_settings
+from django.utils import timezone
 
 from dojo.engagement.ui.filters import EngagementTestFilterWithoutObjectLookups
 from dojo.models import Engagement, Product, Product_Type, System_Settings, Test
@@ -120,7 +121,7 @@ class TestEngagementTestFilterFollowsImportHistory(DojoTestCase):
 
     def setUp(self):
         product = Product.objects.create(name="Filter Product", description="x", prod_type=Product_Type.objects.create(name="Filter Type"))
-        self.engagement = Engagement.objects.create(name="Filter Engagement", product=product, target_start="2026-01-01", target_end="2026-01-02")
+        self.engagement = Engagement.objects.create(name="Filter Engagement", product=product, target_start=timezone.now(), target_end=timezone.now())
 
     def _filters(self):
         return EngagementTestFilterWithoutObjectLookups(
