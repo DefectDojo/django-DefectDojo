@@ -1,8 +1,8 @@
 import logging
 
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DeprecationNoticeMixin, PrefetchDojoModelViewSet, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.tool_config.api.serializer import ToolConfigurationSerializer
@@ -20,7 +20,7 @@ class ToolConfigurationsViewSet(
     deprecation = "tool_configuration"
     serializer_class = ToolConfigurationSerializer
     queryset = Tool_Configuration.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "id",
         "name",

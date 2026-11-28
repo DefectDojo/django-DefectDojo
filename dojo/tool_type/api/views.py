@@ -1,7 +1,6 @@
 import logging
 
-from django_filters.rest_framework import DjangoFilterBackend
-
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DeprecationNoticeMixin, DojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 from dojo.tool_type.api.serializer import ToolTypeSerializer
@@ -18,7 +17,7 @@ class ToolTypesViewSet(
     deprecation = "tool_type"
     serializer_class = ToolTypeSerializer
     queryset = Tool_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "name", "description"]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 

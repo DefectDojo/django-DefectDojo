@@ -1,7 +1,7 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import DjangoModelPermissions
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.authorization import api_permissions as permissions
 from dojo.notes.api.serializer import NoteSerializer
 from dojo.notes.models import Notes
@@ -14,7 +14,7 @@ class NotesViewSet(
 ):
     serializer_class = NoteSerializer
     queryset = Notes.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "id",
         "entry",

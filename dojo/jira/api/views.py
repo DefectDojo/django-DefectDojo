@@ -1,7 +1,7 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view
 from rest_framework.permissions import IsAuthenticated
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.jira.api.serializers import (
@@ -25,7 +25,7 @@ class JiraInstanceViewSet(
 ):
     serializer_class = JIRAInstanceSerializer
     queryset = JIRA_Instance.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "url"]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
@@ -41,7 +41,7 @@ class JiraIssuesViewSet(
 ):
     serializer_class = JIRAIssueSerializer
     queryset = JIRA_Issue.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "id",
         "jira_id",
@@ -67,7 +67,7 @@ class JiraProjectViewSet(
 ):
     serializer_class = JIRAProjectSerializer
     queryset = JIRA_Project.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "id",
         "jira_instance",

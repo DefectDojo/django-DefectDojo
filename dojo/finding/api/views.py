@@ -8,7 +8,6 @@ from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -34,6 +33,7 @@ from dojo.api_v2 import (
 from dojo.api_v2 import (
     serializers as api_v2_serializers,
 )
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import (
     DojoModelViewSet,
     get_request_boolean,
@@ -91,7 +91,7 @@ class FindingTemplatesViewSet(
 ):
     serializer_class = FindingTemplateSerializer
     queryset = Finding_Template.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiTemplateFindingFilter
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
 
@@ -182,7 +182,7 @@ class FindingViewSet(
 ):
     serializer_class = FindingSerializer
     queryset = Finding.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiFindingFilter
     permission_classes = (
         IsAuthenticated,
@@ -944,7 +944,7 @@ class BurpRawRequestResponseViewSet(
 ):
     serializer_class = BurpRawRequestResponseMultiSerializer
     queryset = BurpRawRequestResponse.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["finding"]
     permission_classes = (
         IsAuthenticated,

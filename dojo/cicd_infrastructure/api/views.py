@@ -1,6 +1,6 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 from dojo.cicd_infrastructure.api.serializers import CICDInfrastructureSerializer
@@ -13,7 +13,7 @@ class CICDInfrastructureViewSet(
 ):
     serializer_class = CICDInfrastructureSerializer
     queryset = CICDInfrastructure.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "name", "infrastructure_type"]
     permission_classes = (IsAuthenticated, permissions.UserHasCICDInfrastructurePermission)
 

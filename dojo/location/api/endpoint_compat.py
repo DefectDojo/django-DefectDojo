@@ -9,7 +9,7 @@ import datetime
 from django.db.models import OuterRef, Prefetch, Subquery, Value
 from django.db.models.functions import Coalesce
 from django_filters import BooleanFilter, CharFilter, ModelChoiceFilter, NumberFilter
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import FilterSet
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -26,6 +26,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from dojo.api_v2 import serializers
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import report_generate_response
 from dojo.authorization.api_permissions import check_object_permission
 from dojo.filters import OrderingFilter
@@ -165,7 +166,7 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
 
     serializer_class = V3EndpointCompatibleSerializer
     queryset = LocationProductReference.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = V3EndpointCompatibleFilterSet
 
     permission_classes = (
@@ -353,7 +354,7 @@ class V3EndpointStatusCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin
 
     serializer_class = V3EndpointStatusCompatibleSerializer
     queryset = LocationFindingReference.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = V3EndpointStatusCompatibleFilterSet
 
     permission_classes = (
