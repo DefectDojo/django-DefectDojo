@@ -1,0 +1,38 @@
+[
+  {
+    "service": "demo",
+    "env": "synthetic",
+    "resource": "GET /hash",
+    "trace_id": "5555555555555555555",
+    "span_id": "6666666666666666666",
+    "start": 1795433469120000000,
+    "iast": {
+      "vulnerabilities": [
+        {
+          "type": "WEAK_HASH",
+          "evidence": {"value": "md5"},
+          "location": {"path": "crypto.py", "line": 3, "method": "digest"},
+          "hash": 1003001
+        },
+        {
+          "type": "PATH_TRAVERSAL",
+          "evidence": {"valueParts": [{"value": "/tmp/"}, {"redacted": true, "source": 1, "pattern": "abc"}]},
+          "location": {"path": "files.py", "line": 11},
+          "hash": 1003002
+        },
+        {
+          "type": "SOME_FUTURE_TYPE",
+          "hash": 1003003
+        }
+      ],
+      "sources": [
+        {"origin": "http.request.parameter", "name": "f", "value": "../etc/passwd"}
+      ]
+    }
+  },
+  {
+    "service": "demo",
+    "resource": "GET /",
+    "iast": {"sources": []}
+  }
+]

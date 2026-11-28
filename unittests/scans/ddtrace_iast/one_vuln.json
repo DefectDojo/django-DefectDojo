@@ -1,0 +1,48 @@
+[
+  {
+    "service": "demo",
+    "env": "synthetic",
+    "resource": "GET /sqli",
+    "trace_id": "6859907763198533562",
+    "span_id": "13170496397258556481",
+    "start": 1795433469096730763,
+    "iast": {
+      "sources": [
+        {
+          "origin": "http.request.parameter",
+          "name": "n",
+          "redacted": true,
+          "pattern": "a"
+        }
+      ],
+      "vulnerabilities": [
+        {
+          "type": "SQL_INJECTION",
+          "evidence": {
+            "valueParts": [
+              {
+                "value": "select * from u where n='"
+              },
+              {
+                "redacted": true,
+                "source": 0,
+                "pattern": "a"
+              },
+              {
+                "value": "'"
+              }
+            ]
+          },
+          "location": {
+            "spanId": 13170496397258556481,
+            "path": "app.py",
+            "line": 6,
+            "method": "sqli",
+            "stackId": "1"
+          },
+          "hash": 651293933
+        }
+      ]
+    }
+  }
+]
