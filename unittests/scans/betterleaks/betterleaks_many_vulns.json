@@ -1,0 +1,178 @@
+[
+ {
+  "RuleID": "generic-password",
+  "Description": "Detected a potential hardcoded password literal, which may expose account credentials.",
+  "StartLine": 84,
+  "EndLine": 84,
+  "StartColumn": 44,
+  "EndColumn": 64,
+  "Match": "password: \"XXXXXXXXX\"",
+  "Secret": "XXXXXXXXXX",
+  "Attributes": {
+   "confidence": "low",
+   "git.author_email": "XXXXXXXXXX",
+   "git.author_name": "XXXXXXXXXX",
+   "git.date": "2026-03-05T08:05:41Z",
+   "git.message": "XXXXXXXXX",
+   "git.platform": "unknown",
+   "git.remote_url": "https://XXXXXXXXXXX",
+   "git.sha": "XXXXXXXXXX",
+   "path": "XXXXXXXXXX",
+   "resource": "git.patch_content"
+  },
+  "Tags": [],
+  "Fingerprint": "XXXXXXXX:XXXXXXXX:generic-password:84",
+  "File": "XXXXXXXXXX",
+  "SymlinkFile": "",
+  "Commit": "XXXXXXXX",
+  "Entropy": 3.169925,
+  "Author": "XXXXXXXX",
+  "Email": "XXXXXXXXX",
+  "Date": "2026-03-05T08:05:41Z",
+  "Message": "XXXXXXXXXXX"
+ },
+ {
+  "RuleID": "generic-password",
+  "Description": "Detected a potential hardcoded password literal, which may expose account credentials.",
+  "StartLine": 57,
+  "EndLine": 57,
+  "StartColumn": 40,
+  "EndColumn": 64,
+  "Match": "password: \"XXXXXXXXXXXXX\"",
+  "Secret": "XXXXXXXXXXXXX",
+  "Attributes": {
+   "confidence": "medium",
+   "git.author_email": "XXXXXXXXXXXX",
+   "git.author_name": "XXXXXXXXXXXX",
+   "git.date": "2026-02-16T13:19:18Z",
+   "git.message": "XXXXXXXXXXXXXXXXX",
+   "git.platform": "unknown",
+   "git.remote_url": "https://XXXXXXXXXXX",
+   "git.sha": "XXXXXXXXXX",
+   "path": "XXXXXXXXXXXX",
+   "resource": "git.patch_content"
+  },
+  "Tags": [],
+  "ComponentSets": [
+   {
+    "components": [
+     {
+      "RuleID": "generic-username",
+      "Optional": true,
+      "StartLine": 56,
+      "EndLine": 56,
+      "StartColumn": 39,
+      "EndColumn": 52,
+      "Match": "_user: \"XXXXXXX\"",
+      "Secret": "XXXXXXX"
+     }
+    ]
+   }
+  ],
+  "Fingerprint": "XXXXXXXX:XXXXXXXXXXXX:generic-password:57",
+  "File": "XXXXXXXXXX",
+  "SymlinkFile": "",
+  "Commit": "XXXXXXXXX",
+  "Entropy": 3.085055,
+  "Author": "XXXXXXXXXX",
+  "Email": "XXXXXXXXXX",
+  "Date": "2026-02-16T13:19:18Z",
+  "Message": "XXXXXXXXXXXXXXXX"
+ },
+ {
+  "RuleID": "generic-password",
+  "Description": "Detected a potential hardcoded password literal, which may expose account credentials.",
+  "StartLine": 77,
+  "EndLine": 77,
+  "StartColumn": 22,
+  "EndColumn": 46,
+  "Match": "password: \"XXXXXXXX\"",
+  "Secret": "XXXXXXX",
+  "Attributes": {
+   "confidence": "medium",
+   "git.author_email": "XXXXXXXXXX",
+   "git.author_name": "XXXXXXXXXX",
+   "git.date": "2026-02-24T14:59:53Z",
+   "git.message": "XXXXXXXXXXXXXXXXX",
+   "git.platform": "unknown",
+   "git.remote_url": "https://XXXXXXXXXXX",
+   "git.sha": "XXXXXXXXXX",
+   "path": "XXXXXXXXXX",
+   "resource": "git.patch_content"
+  },
+  "Tags": [],
+  "ComponentSets": [
+   {
+    "components": [
+     {
+      "RuleID": "generic-username",
+      "Optional": true,
+      "StartLine": 76,
+      "EndLine": 76,
+      "StartColumn": 21,
+      "EndColumn": 32,
+      "Match": "_user: XXXXXX",
+      "Secret": "XXXXXX"
+     }
+    ]
+   }
+  ],
+  "Fingerprint": "XXXXXXXXXXX:XXXXXXXXXX:generic-password:77",
+  "File": "XXXXXXXXXX",
+  "SymlinkFile": "",
+  "Commit": "XXXXXXXXXXXXXX",
+  "Entropy": 3.085055,
+  "Author": "XXXXXXXXXXX",
+  "Email": "XXXXXXXXXXXXX",
+  "Date": "2026-02-24T14:59:53Z",
+  "Message": "XXXXXXXXXXXXXXXX"
+ },
+ {
+  "RuleID": "generic-password",
+  "Description": "Detected a potential hardcoded password literal, which may expose account credentials.",
+  "StartLine": 12,
+  "EndLine": 12,
+  "StartColumn": 22,
+  "EndColumn": 46,
+  "Match": "password: \"XXXXXXXXXX\"",
+  "Secret": "XXXXXXXXX",
+  "Attributes": {
+   "confidence": "medium",
+   "git.author_email": "XXXXXXXXXXXX",
+   "git.author_name": "XXXXXXXXXXXX",
+   "git.date": "2026-02-27T14:00:30Z",
+   "git.message": "XXXXXXXXXXXXXXXXX",
+   "git.platform": "unknown",
+   "git.remote_url": "https://XXXXXXXXXXX",
+   "git.sha": "XXXXXXXXXX",
+   "path": "XXXXXXXXXXXX",
+   "resource": "git.patch_content"
+  },
+  "Tags": [],
+  "ComponentSets": [
+   {
+    "components": [
+     {
+      "RuleID": "generic-username",
+      "Optional": true,
+      "StartLine": 11,
+      "EndLine": 11,
+      "StartColumn": 21,
+      "EndColumn": 32,
+      "Match": "_user: XXXXXX",
+      "Secret": "XXXXXXX"
+     }
+    ]
+   }
+  ],
+  "Fingerprint": "XXXXXXXXX:XXXXXXXXXX:generic-password:12",
+  "File": "XXXXXXXXXX",
+  "SymlinkFile": "",
+  "Commit": "XXXXXXXXX",
+  "Entropy": 3.085055,
+  "Author": "XXXXXXXXXX",
+  "Email": "XXXXXXXXXXXXX",
+  "Date": "2026-02-27T14:00:30Z",
+  "Message": "XXXXXXXXXXXXXXXX"
+ }
+]
