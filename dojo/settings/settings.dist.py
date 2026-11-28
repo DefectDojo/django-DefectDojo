@@ -1561,6 +1561,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # is what every result family assigns to "title" as well.
     "Checkmarx One Scan": ["unique_id_from_tool"],
     "OPF Scan": ["title", "cwe", "severity", "description"],
+    "ReversingLabs Spectra Assure": ["unique_id_from_tool", "component_name", "component_version"],
 }
 HASHCODE_FIELDS_PER_SCANNER_SHIPPED = copy.deepcopy(HASHCODE_FIELDS_PER_SCANNER)
 
@@ -2027,6 +2028,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # The parser builds a stable unique_id_from_tool for every finding (detector, kind, target, path and the
     # certificate or image that tells findings at one path apart), so no hash_code fallback is needed.
     "Early Light Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "ReversingLabs Spectra Assure": DEDUPE_ALGO_HASH_CODE,
 }
 DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED = copy.deepcopy(DEDUPLICATION_ALGORITHM_PER_PARSER)
 
