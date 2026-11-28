@@ -6,7 +6,7 @@ from pathlib import Path
 
 from django.apps import apps
 from django.conf import settings
-from django.utils import translation
+from django.test import SimpleTestCase
 
 from dojo.models import Dojo_User, Product, Product_Type, SLA_Configuration
 from dojo.product.ui.forms import ProductForm
@@ -21,7 +21,6 @@ NEW_DESCRIPTION = "The Default SLA Configuration, used wherever no other SLA Con
 OLD_NO_SLA_DESCRIPTION = "No SLA is enforced for a product which uses this SLA configuration."
 NEW_NO_SLA_DESCRIPTION = "No SLA is enforced for anything that uses this SLA configuration."
 UNIQUE_NAME_MESSAGE = "An entry with this name already exists."
-UNIQUE_NAME_MESSAGE_DE = "Ein Eintrag mit diesem Namen existiert bereits."
 ENTITY_WORDS = ("product", "asset", "organization")
 SEED_FIXTURES = ("sla_configurations.json", "defect_dojo_sample_data.json", "defect_dojo_sample_data_locations.json")
 
@@ -69,23 +68,42 @@ class TestRelabelNeutralUniqueName(DojoAPITestCase):
         self.assertFalse(product_type_form.is_valid())
         self.assertEqual(product_type_form.errors["name"], [UNIQUE_NAME_MESSAGE])
 
-    def test_duplicate_name_message_is_translated(self):
-        # The message replaced Django's own unique error, which every catalog translated, so it must stay translated.
-        # The API takes the language from Accept-Language. A request switches the test thread's language, so each
-        # check runs in its own override(), which restores the language on exit and keeps it out of the other tests.
-        with translation.override("de"):
-            response = self.client.post(
-                "/api/v2/product_types/", {"name": "Relabel neutral PT"}, format="json", HTTP_ACCEPT_LANGUAGE="de",
-            )
-        with translation.override("de"):
-            product_form = ProductForm(
-                data={"name": "Relabel neutral product", "description": "d", "prod_type": self.product_type.id},
-            )
-            # The errors are lazy: render them while German is active.
-            product_form_errors = [str(error) for error in product_form.errors["name"]]
-        self.assertEqual(response.status_code, 400, response.content)
-        self.assertEqual(response.json()["name"], [UNIQUE_NAME_MESSAGE_DE])
-        self.assertEqual(product_form_errors, [UNIQUE_NAME_MESSAGE_DE])
+
+class TestUniqueNameMessageCatalogs(SimpleTestCase):
+
+    """
+    The neutral message replaced Django's own unique error, which Django's catalogs translate.
+
+    Every dojo/locale catalog has to carry it, translated everywhere but in the English source catalog, or a
+    German or Japanese user reads English. The .po files are checked directly: unit tests run on a checkout
+    mounted over the image, so the .mo files the image build compiles are not there to render from.
+    """
+
+    def _entry(self, path):
+        for block in path.read_text(encoding="utf-8").split("\n\n"):
+            lines = block.strip().splitlines()
+            if f'msgid "{UNIQUE_NAME_MESSAGE}"' in lines:
+                msgstr = next(line for line in lines if line.startswith("msgstr "))
+                return msgstr[len('msgstr "'):-1], any(line.startswith("#,") and "fuzzy" in line for line in lines)
+        return None, False
+
+    def test_every_catalog_translates_the_unique_name_message(self):
+        locale_dir = next(
+            (Path(p) for p in settings.LOCALE_PATHS if str(p).endswith("dojo/locale")),
+            Path(settings.LOCALE_PATHS[0]),
+        )
+        catalogs = sorted(locale_dir.glob("*/LC_MESSAGES/django.po"))
+        self.assertGreater(len(catalogs), 1)
+        for path in catalogs:
+            language = path.parent.parent.name
+            with self.subTest(language=language):
+                msgstr, fuzzy = self._entry(path)
+                self.assertIsNotNone(msgstr, f"{language}: no entry for {UNIQUE_NAME_MESSAGE!r}")
+                self.assertFalse(fuzzy, f"{language}: the entry is marked fuzzy")
+                if language == "en":
+                    self.assertEqual(msgstr, "", "the English source catalog keeps an empty msgstr")
+                else:
+                    self.assertNotIn(msgstr, ("", UNIQUE_NAME_MESSAGE), f"{language}: not translated")
 
 
 class TestRelabelNeutralDefaultSLADescription(DojoAPITestCase):
