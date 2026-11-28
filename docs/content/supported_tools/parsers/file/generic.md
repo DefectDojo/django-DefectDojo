@@ -379,3 +379,8 @@ By default, DefectDojo identifies duplicate Findings using these [hashcode field
 - line
 - file path
 - description
+
+## Write a converter with an AI assistant
+
+<!-- The prompt lives in content/prompts/generic-findings-converter.md. Edit it there: the Prompt Recipes page shows it too. -->
+{{< prompt "generic-findings-converter" >}}
