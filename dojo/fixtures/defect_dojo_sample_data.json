@@ -2489,7 +2489,7 @@
     "fields": {
       "async_updating": false,
       "critical": 7,
-      "description": "The Default SLA Configuration. Products not using an explicit SLA Configuration will use this one.",
+      "description": "The Default SLA Configuration, used wherever no other SLA Configuration is assigned.",
       "enforce_critical": true,
       "enforce_high": true,
       "enforce_low": true,

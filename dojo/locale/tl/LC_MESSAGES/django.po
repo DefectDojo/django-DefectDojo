@@ -10128,3 +10128,7 @@ msgstr "Matagumpay na na-update ang mga file."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Mangyaring suriin ang datos ng form at subukang muli."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "May entry na sa pangalang ito."

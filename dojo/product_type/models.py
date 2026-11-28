@@ -3,6 +3,7 @@ from django.contrib.postgres.search import SearchVector
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy
 
 from dojo.base_models.base import BaseManager, BaseModel
 from dojo.query_hooks import HookedBaseManager
@@ -20,7 +21,7 @@ class Product_Type(BaseModel):
          * San Francisco / New York offices
     """
 
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True, error_messages={"unique": gettext_lazy("An entry with this name already exists.")})
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)

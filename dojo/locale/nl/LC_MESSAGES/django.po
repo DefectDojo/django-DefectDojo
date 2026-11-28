@@ -10042,3 +10042,7 @@ msgstr "Bestanden succesvol bijgewerkt."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Controleer de formuliergegevens en probeer het opnieuw."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Er bestaat al een item met deze naam."

@@ -9970,3 +9970,7 @@ msgstr "Pliki zaktualizowane pomyślnie."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Sprawdź dane formularza i spróbuj ponownie."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Wpis o tej nazwie już istnieje."

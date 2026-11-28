@@ -10098,3 +10098,7 @@ msgstr "Dateien erfolgreich aktualisiert."
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "Bitte überprüfen Sie die Formulardaten und versuchen Sie es erneut."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "Ein Eintrag mit diesem Namen existiert bereits."

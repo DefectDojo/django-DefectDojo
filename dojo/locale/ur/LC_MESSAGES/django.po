@@ -9883,3 +9883,7 @@ msgstr "فائلیں کامیابی سے اپ ڈیٹ ہو گئیں۔"
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "براہ کرم فارم ڈیٹا چیک کریں اور دوبارہ کوشش کریں۔"
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "اس نام کا اندراج پہلے سے موجود ہے۔"

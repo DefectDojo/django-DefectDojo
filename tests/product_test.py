@@ -60,7 +60,7 @@ class ProductTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
         self.assertTrue(self.is_success_message_present(text="Asset added successfully")
-            or self.is_success_message_present(text="Product with this Name already exists."))
+            or self.is_success_message_present(text="An entry with this name already exists."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -103,7 +103,7 @@ class ProductTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Asset updated successfully")
-            or self.is_success_message_present(text="Product with this Name already exists."))
+            or self.is_success_message_present(text="An entry with this name already exists."))
         self.assertFalse(self.is_error_message_present())
 
     # For product consistency sake, We won't be editting the product title
@@ -131,7 +131,7 @@ class ProductTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Asset updated successfully")
-            or self.is_success_message_present(text="Product with this Name already exists."))
+            or self.is_success_message_present(text="An entry with this name already exists."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger

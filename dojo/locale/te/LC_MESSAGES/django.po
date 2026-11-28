@@ -9966,3 +9966,7 @@ msgstr "ఫైల్‌లు విజయవంతంగా నవీకరి�
 #: dojo/views.py
 msgid "Please check form data and try again."
 msgstr "దయచేసి ఫారమ్ డేటాను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి."
+
+#: dojo/product/models.py dojo/product_type/models.py
+msgid "An entry with this name already exists."
+msgstr "ఈ పేరుతో ఒక ఎంట్రీ ఇప్పటికే ఉంది."
