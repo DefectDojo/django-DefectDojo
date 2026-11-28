@@ -103,6 +103,25 @@ class TestApiV3AssetsQueryCount(ApiV3TestCase):
 
 class TestApiV3AssetsWrite(ApiV3TestCase):
 
+    def test_patch_engagement_number_format(self):
+        product = Product.objects.first()
+        response = self.client.patch(
+            self.v3_url(f"assets/{product.id}"),
+            {"engagement_number_format": "ENG-{number:04d}"},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.assertEqual("ENG-{number:04d}", response.json()["engagement_number_format"])
+        product.refresh_from_db()
+        self.assertEqual("ENG-{number:04d}", product.engagement_number_format)
+
+        rejected = self.client.patch(
+            self.v3_url(f"assets/{product.id}"),
+            {"engagement_number_format": "{number.__class__}"},
+            format="json",
+        )
+        self.assertEqual(400, rejected.status_code, rejected.content[:500])
+
     def test_create_happy_path(self):
         pt = Product_Type.objects.first()
         response = self.client.post(

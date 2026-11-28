@@ -721,6 +721,7 @@
             <div class="panel panel-default-secondary">
                 <div class="panel-heading">
                     <h3 class="panel-title"><span class="fa-solid fa-circle-info fa-fw dd-card-icon" aria-hidden="true"></span>
+                        {% if eng.engagement_number %}{{ eng.engagement_number }} · {% endif %}
                         {% if eng.name %}
                             {{ eng.name }}
                         {% else %}

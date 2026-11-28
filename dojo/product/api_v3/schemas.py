@@ -84,6 +84,7 @@ class AssetDetail(AssetSlim):
     }
 
     business_criticality: str | None
+    engagement_number_format: str
     platform: str | None
     origin: str | None
     external_audience: bool | None
@@ -121,6 +122,7 @@ class AssetWrite(Schema):
 
     name: str
     description: str
+    engagement_number_format: str = ""
     organization: int
     business_criticality: str | None = None
     platform: str | None = None
@@ -143,6 +145,7 @@ class AssetUpdate(Schema):
 
     name: str | None = None
     description: str | None = None
+    engagement_number_format: str | None = None
     organization: int | None = None
     business_criticality: str | None = None
     platform: str | None = None
@@ -177,6 +180,7 @@ class AssetReplace(Schema):
 
     name: str
     description: str
+    engagement_number_format: str = ""
     organization: int
     business_criticality: str | None = None
     platform: str | None = None

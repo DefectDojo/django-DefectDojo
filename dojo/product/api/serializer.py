@@ -45,6 +45,7 @@ class ProductSerializer(ActiveUserContactGuardMixin, AuthorizedUsersMemberGuardM
         model = Product
         exclude = (
             "tid",
+            "engagement_number_counter",
             "updated",
             "async_updating",
         )
