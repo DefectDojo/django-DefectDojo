@@ -1,0 +1,199 @@
+{
+  "version": "1",
+  "package": [
+    {
+      "name": "openssh",
+      "layer": "meta",
+      "version": "9.6p1",
+      "products": [
+        {
+          "product": "openssh",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2023-38408",
+          "summary": "The PKCS#11 feature in ssh-agent in OpenSSH before 9.3p2 has an insufficiently trustworthy search path.",
+          "scorev2": "0.0",
+          "scorev3": "9.8",
+          "scorev4": "0.0",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "status": "Patched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-38408",
+          "detail": "fixed-version"
+        },
+        {
+          "id": "CVE-2023-51767",
+          "summary": "OpenSSH through 9.6, when common types of DRAM are used, might allow row hammer attacks.",
+          "scorev2": "0.0",
+          "scorev3": "7.0",
+          "scorev4": "0.0",
+          "vector": "LOCAL",
+          "vectorString": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+          "status": "Ignored",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-51767",
+          "detail": "upstream-wontfix",
+          "description": "upstream does not consider this a realistic attack model for OpenSSH"
+        },
+        {
+          "id": "CVE-2024-6387",
+          "summary": "A signal handler race condition was found in OpenSSH's server (sshd).",
+          "scorev2": "0.0",
+          "scorev3": "8.1",
+          "scorev4": "0.0",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2024-6387"
+        }
+      ]
+    },
+    {
+      "name": "busybox",
+      "layer": "meta",
+      "version": "1.36.1",
+      "products": [
+        {
+          "product": "busybox",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2022-48174",
+          "summary": "There is a stack overflow vulnerability in ash.c:6030 in busybox before 1.35.",
+          "scorev2": "0.0",
+          "scorev3": "9.8",
+          "scorev4": "0.0",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "status": "Ignored",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2022-48174",
+          "detail": "not-applicable-config",
+          "description": "ash is not enabled in this image's busybox configuration"
+        },
+        {
+          "id": "CVE-2023-42366",
+          "summary": "A heap-buffer-overflow was discovered in BusyBox v.1.36.1 in the next_token function at awk.c:1159.",
+          "scorev2": "0.0",
+          "scorev3": "5.5",
+          "scorev4": "0.0",
+          "vector": "LOCAL",
+          "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-42366"
+        }
+      ]
+    },
+    {
+      "name": "zlib",
+      "layer": "meta",
+      "version": "1.2.2",
+      "products": [
+        {
+          "product": "zlib",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2005-2096",
+          "summary": "zlib 1.2 and later versions allows remote attackers to cause a denial of service (crash) via a crafted compressed stream.",
+          "scorev2": "7.5",
+          "scorev3": "0.0",
+          "scorev4": "0.0",
+          "vector": "NETWORK",
+          "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2005-2096"
+        }
+      ]
+    },
+    {
+      "name": "expat",
+      "layer": "meta",
+      "version": "2.4.1",
+      "products": [
+        {
+          "product": "libexpat",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2022-25235",
+          "summary": "xmltok_impl.c in Expat before 2.4.5 lacks certain validation of encoding, such as checks for whether a UTF-8 character is valid in a certain context.",
+          "scorev2": "7.5",
+          "scorev3": "9.8",
+          "scorev4": "0.0",
+          "vector": "NETWORK",
+          "vectorString": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2022-25235"
+        }
+      ]
+    },
+    {
+      "name": "libexample",
+      "layer": "meta-custom",
+      "version": "2.4.0",
+      "products": [
+        {
+          "product": "libexample",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2025-90001",
+          "summary": "A remote code execution flaw in libexample allows unauthenticated attackers to run arbitrary code.",
+          "scorev2": "0.0",
+          "scorev3": "0.0",
+          "scorev4": "9.3",
+          "vector": "NETWORK",
+          "vectorString": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2025-90001"
+        }
+      ]
+    },
+    {
+      "name": "linux-yocto",
+      "layer": "meta",
+      "version": "6.6.21+git",
+      "products": [
+        {
+          "product": "linux_kernel",
+          "cvesInRecord": "Yes"
+        }
+      ],
+      "issue": [
+        {
+          "id": "CVE-2026-90002",
+          "summary": "In the Linux kernel, a use-after-free in an example driver has been resolved.",
+          "scorev2": "0.0",
+          "scorev3": "0.0",
+          "scorev4": "0.0",
+          "vector": "UNKNOWN",
+          "vectorString": "UNKNOWN",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2026-90002"
+        }
+      ]
+    },
+    {
+      "name": "zstd",
+      "layer": "meta",
+      "version": "1.5.6",
+      "products": [
+        {
+          "product": "zstandard",
+          "cvesInRecord": "No"
+        }
+      ],
+      "issue": []
+    }
+  ]
+}

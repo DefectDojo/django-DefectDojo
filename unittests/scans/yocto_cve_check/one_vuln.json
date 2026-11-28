@@ -1,0 +1,22 @@
+{
+  "version": "1",
+  "package": [
+    {
+      "name": "busybox",
+      "layer": "meta",
+      "version": "1.35.0",
+      "products": [{"product": "busybox", "cvesInRecord": "Yes"}],
+      "issue": [
+        {
+          "id": "CVE-2023-42366",
+          "summary": "A heap-buffer-overflow was discovered in BusyBox v.1.36.1 in the next_token function at awk.c:1159.",
+          "scorev2": "0.0",
+          "scorev3": "5.5",
+          "vector": "LOCAL",
+          "status": "Unpatched",
+          "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-42366"
+        }
+      ]
+    }
+  ]
+}
