@@ -912,9 +912,16 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 processor = self.get_importer(
                     **{**context, "close_old_findings": False},
                 )
-                context["test"], _, _, _, _, _, _ = processor.process_scan(
-                    context.pop("scan", None),
-                )
+                with processor.import_lock_scope():
+                    context["test"], created = auto_create_manager.get_or_create_test(processor, **context)
+                    if created:
+                        context["test"], _, _, _, _, _, _ = processor.process_scan(
+                            context.pop("scan", None),
+                        )
+                if not created:
+                    # A concurrent request created the test first, so this one reimports into it
+                    self.process_scan(auto_create_manager, data, context)
+                    return
             else:
                 msg = "A test could not be found!"
                 raise NotFound(msg)
