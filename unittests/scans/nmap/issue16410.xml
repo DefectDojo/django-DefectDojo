@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<nmaprun scanner="nmap" args="nmap -Pn -p 80 192.0.2.2 -oX -" start="1700000000" version="7.94">
+<scaninfo type="connect" protocol="tcp" numservices="1" services="80"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host>
+    <status state="up" reason="syn-ack"/>
+    <address addr="192.0.2.2" addrtype="ipv4"/>
+    <ports>
+        <port protocol="tcp" portid="80">
+            <state state="open" reason="syn-ack"/>
+            <service name="http" method="table" conf="3"/>
+        </port>
+    </ports>
+</host>
+<runstats>
+    <finished time="1700000005" exit="success"/>
+    <hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>
