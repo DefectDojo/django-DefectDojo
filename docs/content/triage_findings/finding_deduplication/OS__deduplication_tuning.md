@@ -23,6 +23,8 @@ See also: [Open Source Configuration](/get_started/open_source/configuration/) f
 
 All defaults are defined in `dojo/settings/settings.dist.py`. Override via environment or `local_settings.py`.
 
+`DEDUPLICATION_ALGORITHM_PER_PARSER` and `HASHCODE_FIELDS_PER_SCANNER` can also be set in System Settings (**Deduplication algorithm per parser** and **Hash code fields per scanner**, or `deduplication_algorithm_per_parser` and `hashcode_fields_per_scanner` on `/api/v2/system_settings/`). Entries saved there replace or add to the environment's map and take precedence over it; leave the field empty to use the environment variable alone. Saving them does not recompute existing hash codes, so run the `dedupe` command below afterwards (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
+
 ### Algorithm per parser
 
 - Setting: `DEDUPLICATION_ALGORITHM_PER_PARSER`

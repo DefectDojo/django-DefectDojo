@@ -4,10 +4,10 @@ import json
 import html2text
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 
@@ -75,7 +75,7 @@ class NetsparkerParser:
             dupe_key = title
             request = item["HttpRequest"].get("Content", None)
             response = item["HttpResponse"].get("Content", None)
-            finding_date = (_parse_date(item.get("FirstSeenDate")) or scan_date) if settings.USE_FIRST_SEEN else scan_date
+            finding_date = (_parse_date(item.get("FirstSeenDate")) or scan_date) if get_behaviour_setting("USE_FIRST_SEEN") else scan_date
 
             finding = Finding(
                 title=title,

@@ -4,7 +4,6 @@ from datetime import datetime
 from tempfile import NamedTemporaryFile
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import Exists, OuterRef
 from django.http import Http404, HttpRequest, HttpResponse, QueryDict
@@ -51,6 +50,7 @@ from dojo.reports.widgets import (
     WYSIWYGContent,
     report_widget_factory,
 )
+from dojo.system_settings.behaviour import team_name as behaviour_team_name
 from dojo.url.filters import URLFilter
 from dojo.utils import (
     Product_Tab,
@@ -452,7 +452,7 @@ def generate_report(request, obj, *, host_view=False):
                    "include_disclaimer": include_disclaimer,
                    "disclaimer": disclaimer,
                    "user": user,
-                   "team_name": settings.TEAM_NAME,
+                   "team_name": behaviour_team_name(),
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
@@ -484,7 +484,7 @@ def generate_report(request, obj, *, host_view=False):
                    "include_disclaimer": include_disclaimer,
                    "disclaimer": disclaimer,
                    "user": user,
-                   "team_name": settings.TEAM_NAME,
+                   "team_name": behaviour_team_name(),
                    "title": report_title,
                    "endpoints": endpoints,
                    "host": report_url_resolver(request),
@@ -518,7 +518,7 @@ def generate_report(request, obj, *, host_view=False):
                    "include_disclaimer": include_disclaimer,
                    "disclaimer": disclaimer,
                    "user": user,
-                   "team_name": settings.TEAM_NAME,
+                   "team_name": behaviour_team_name(),
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id,
@@ -542,7 +542,7 @@ def generate_report(request, obj, *, host_view=False):
                    "include_disclaimer": include_disclaimer,
                    "disclaimer": disclaimer,
                    "user": user,
-                   "team_name": settings.TEAM_NAME,
+                   "team_name": behaviour_team_name(),
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
@@ -638,7 +638,7 @@ def generate_report(request, obj, *, host_view=False):
                    "include_disclaimer": include_disclaimer,
                    "disclaimer": disclaimer,
                    "user": user,
-                   "team_name": settings.TEAM_NAME,
+                   "team_name": behaviour_team_name(),
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
@@ -668,7 +668,7 @@ def generate_report(request, obj, *, host_view=False):
                            "include_disclaimer": include_disclaimer,
                            "disclaimer": disclaimer,
                            "user": user,
-                           "team_name": settings.TEAM_NAME,
+                           "team_name": behaviour_team_name(),
                            "title": report_title,
                            "user_id": request.user.id,
                            "host": "",
@@ -835,7 +835,7 @@ class QuickReportView(View):
                         "test": test,
                         "findings": findings,
                         "user": request.user,
-                        "team_name": settings.TEAM_NAME,
+                        "team_name": behaviour_team_name(),
                         "title": "Finding Report",
                         "user_id": request.user.id,
                   })

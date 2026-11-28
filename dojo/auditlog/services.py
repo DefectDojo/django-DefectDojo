@@ -150,7 +150,10 @@ def run_flush_auditlog(retention_period: int | None = None,
 
     Returns a tuple of (deleted_total, batches_done, reached_limit).
     """
-    retention_period = retention_period if retention_period is not None else getattr(settings, "AUDITLOG_FLUSH_RETENTION_PERIOD", -1)
+    # Deferred: this module loads while settings load, before the models can.
+    from dojo.system_settings.behaviour import get_setting as get_behaviour_setting  # noqa: PLC0415
+
+    retention_period = retention_period if retention_period is not None else get_behaviour_setting("AUDITLOG_FLUSH_RETENTION_PERIOD")
     if retention_period < 0:
         logger.info("Flushing audit logs is disabled")
         return 0, 0, False

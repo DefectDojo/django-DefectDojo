@@ -54,6 +54,8 @@ dojo-compose-cli environment add --key DD_SONARQUBE_API_PARSER_HOTSPOTS --value 
 dojo-compose-cli app stop && dojo-compose-cli app start
 ```
 
+You can instead turn off **SonarQube API hotspots** in System Settings, which takes precedence over the environment variable and needs no restart (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
+
 Note that this setting is instance-wide and affects all SonarQube API imports. There is currently no per-tool-configuration or per-import toggle for hotspots. If you need hotspots for some projects but not others, you will need to build a custom middleware to filter results before importing.
 
 ## Multiple SonarQube API Configurations

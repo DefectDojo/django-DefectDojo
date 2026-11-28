@@ -61,6 +61,7 @@ from dojo.models import (
     User,
 )
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.utils import (
@@ -363,7 +364,7 @@ class ImportScanForm(forms.Form):
             msg = _("Uploading a Report File is required for %s") % scan_type
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
+            msg = _("Report file is too large. Maximum supported size is %d MB") % get_behaviour_setting("SCAN_FILE_MAX_SIZE")
             raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get("api_scan_configuration")
@@ -493,7 +494,7 @@ class ReImportScanForm(forms.Form):
             msg = _("Uploading a report file is required for re-uploading findings.")
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
+            msg = _("Report file is too large. Maximum supported size is %d MB") % get_behaviour_setting("SCAN_FILE_MAX_SIZE")
             raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:

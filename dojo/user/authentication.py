@@ -1,6 +1,5 @@
 from datetime import timedelta
 
-from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 from django_ratelimit import ALL
@@ -13,12 +12,13 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, Th
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
 from dojo.models import Dojo_User, UserContactInfo
 from dojo.notifications.helper import create_notification
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 
 
 def default_expiry_days() -> int:
     """Instance-wide token lifetime in days. 0 (the default) means tokens never expire."""
     try:
-        days = int(getattr(settings, "API_TOKEN_DEFAULT_EXPIRY_DAYS", 0) or 0)
+        days = int(get_behaviour_setting("API_TOKEN_DEFAULT_EXPIRY_DAYS") or 0)
     except (TypeError, ValueError):
         return 0
     return max(days, 0)
@@ -57,6 +57,15 @@ class ExpiringTokenAuthentication(TokenAuthentication):
 
     """Token auth that also rejects expired tokens and accounts that owe a forced password reset."""
 
+    def authenticate(self, request):
+        # Declined (None, as if token authentication were not configured) while this instance has API
+        # tokens off: its System Settings, else DD_API_TOKENS_ENABLED. Asked per request.
+        from dojo.system_settings.behaviour import get_setting  # noqa: PLC0415 circular import
+
+        if not get_setting("API_TOKENS_ENABLED"):
+            return None
+        return super().authenticate(request)
+
     def authenticate_credentials(self, key):
         user, token = super().authenticate_credentials(key)
         if token_is_expired(token):
@@ -85,12 +94,12 @@ class DojoBasicAuthentication(BasicAuthentication):
                 request=request,
                 group="dojo.api.basic_auth",
                 key=lambda _group, _request: (userid or "").lower(),
-                rate=getattr(settings, "RATE_LIMITER_RATE", None),
+                rate=get_behaviour_setting("RATE_LIMITER_RATE"),
                 method=ALL,
                 increment=increment,
             )
 
-        block = getattr(settings, "RATE_LIMITER_BLOCK", False)
+        block = get_behaviour_setting("RATE_LIMITER_BLOCK")
         if block and limited(increment=False):
             raise Throttled
         try:
@@ -127,7 +136,7 @@ def revoke_api_token(user) -> None:
 
 
 def reset_token_for_user(*, acting_user: Dojo_User, target_user: Dojo_User, allow_self_reset: bool = False) -> None:
-    if not settings.API_TOKENS_ENABLED:
+    if not get_behaviour_setting("API_TOKENS_ENABLED"):
         msg = "API tokens are disabled."
         raise PermissionDenied(msg)
 

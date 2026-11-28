@@ -25,6 +25,8 @@ Two optional settings change how the parser builds Findings. Both default to `Fa
 | `DD_QUALYS_WAS_WEAKNESS_IS_VULN` | `False` | Gives "Security Weaknesses" (Information Gathered QIDs outside the `DIAG` and `IG` groups) their Qualys severity instead of importing them as Info. |
 | `DD_QUALYS_WAS_UNIQUE_ID` | `False` | Creates one Finding per Qualys `UNIQUE_ID` and stores it in `unique_id_from_tool`. When this is off, all instances of a QID are grouped into a single Finding. |
 
+Both can also be set in System Settings (**Qualys WAS weakness is a vulnerability** and **Qualys WAS unique id**), which take precedence over the environment variables (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
+
 #### Why pair `DD_QUALYS_WAS_UNIQUE_ID` with a deduplication change
 
 This scan type uses the legacy deduplication algorithm, and on reimport it matches Findings by title and severity. With `DD_QUALYS_WAS_UNIQUE_ID` on, several Findings can share a title and severity (the same QID at different locations), so reimport cannot tell them apart. To match each Finding by its Qualys unique ID instead, also set:

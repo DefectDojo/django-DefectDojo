@@ -40,6 +40,7 @@ from dojo.models import (
 from dojo.notifications.models import Alerts, Notification_Webhooks, Notifications
 from dojo.notifications.render_cache import NotificationRenderCache
 from dojo.notifications.ticket_comments import dispatch_ticket_comments, ticket_link_filter
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.user.queries import (
     get_authorized_users_for_product_and_product_type,
     get_authorized_users_for_product_type,
@@ -1085,7 +1086,7 @@ class NotificationManager(NotificationManagerHelpers):
         # Callers pass usernames or Dojo_User instances; the lookup needs usernames.
         recipients = [getattr(recipient, "username", recipient) for recipient in kwargs["recipients"]]
         for recipient_notifications in self._get_recipient_notifications(recipients):
-            if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
+            if event in get_behaviour_setting("NOTIFICATIONS_SYSTEM_LEVEL_TRUMP"):
                 # merge the system level notifications with the personal level
                 # this allows for system to trump the personal
                 merged_notifications = Notifications.merge_notifications_list(
@@ -1580,7 +1581,7 @@ def sla_compute_and_notify(*args, **kwargs):
     try:
         if system_settings.enable_finding_sla:
             logger.info("About to process findings for SLA notifications.")
-            logger.debug(f"Active {system_settings.enable_notify_sla_active}, Verified {system_settings.enable_notify_sla_active_verified}, Has JIRA {system_settings.enable_notify_sla_jira_only}, pre-breach {settings.SLA_NOTIFY_PRE_BREACH}, post-breach {settings.SLA_NOTIFY_POST_BREACH}")
+            logger.debug(f"Active {system_settings.enable_notify_sla_active}, Verified {system_settings.enable_notify_sla_active_verified}, Has JIRA {system_settings.enable_notify_sla_jira_only}, pre-breach {get_behaviour_setting("SLA_NOTIFY_PRE_BREACH")}, post-breach {get_behaviour_setting("SLA_NOTIFY_POST_BREACH")}")
 
             query = None
             if system_settings.enable_notify_sla_active_verified:
@@ -1607,8 +1608,8 @@ def sla_compute_and_notify(*args, **kwargs):
                 Q(sla_expiration_date__isnull=True)
                 | Q(mitigated__isnull=False)
                 | Q(
-                    sla_expiration_date__gte=today - timedelta(days=settings.SLA_NOTIFY_POST_BREACH),
-                    sla_expiration_date__lte=today + timedelta(days=settings.SLA_NOTIFY_PRE_BREACH),
+                    sla_expiration_date__gte=today - timedelta(days=get_behaviour_setting("SLA_NOTIFY_POST_BREACH")),
+                    sla_expiration_date__lte=today + timedelta(days=get_behaviour_setting("SLA_NOTIFY_PRE_BREACH")),
                 )
             )
 
@@ -1673,7 +1674,7 @@ def sla_compute_and_notify(*args, **kwargs):
                             if sla_age is None:
                                 sla_age = 0
 
-                            if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
+                            if (sla_age < 0) and (abs(sla_age) > get_behaviour_setting("SLA_NOTIFY_POST_BREACH")):
                                 post_breach_no_notify_count += 1
                                 # Skip finding notification if breached for too long
                                 logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
@@ -1725,7 +1726,7 @@ def sla_compute_and_notify(*args, **kwargs):
                                 else:
                                     logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
                             # The finding is within the pre-breach period
-                            elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                            elif (sla_age > 0) and (sla_age <= get_behaviour_setting("SLA_NOTIFY_PRE_BREACH")):
                                 pre_breach_count += 1
                                 logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
                                 kind = "prebreach"

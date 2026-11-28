@@ -2,7 +2,6 @@ import logging
 from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -36,6 +35,7 @@ from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
 from dojo.product.queries import get_authorized_products
 from dojo.reports.ui.views import generate_report
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.url.filters import URLFilter
 from dojo.url.models import URL
 from dojo.url.queries import annotate_host_contents
@@ -495,7 +495,7 @@ def import_endpoint_meta(request, product_id):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB",
+                    f"Report file is too large. Maximum supported size is {get_behaviour_setting("SCAN_FILE_MAX_SIZE")} MB",
                     extra_tags="alert-danger",
                 )
             # Get import options from the cleaned form data

@@ -44,6 +44,7 @@ from dojo.forms import (
 from dojo.labels import get_labels
 from dojo.middleware import set_language_cookie
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.user import email_ownership
 from dojo.user.authentication import reset_token_for_user, revoke_api_token, token_expires_at
 from dojo.user.ui.filters import UserFilter
@@ -114,7 +115,7 @@ class DojoLoginView(LoginView):
 
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
-    if not settings.API_TOKENS_ENABLED:
+    if not get_behaviour_setting("API_TOKENS_ENABLED"):
         raise PermissionDenied
     api_key = ""
     form = APIKeyForm(instance=request.user)
@@ -227,7 +228,7 @@ def alerts_json(request, limit=None):
 
 
 def alertcount(request):
-    if not settings.DISABLE_ALERT_COUNTER:
+    if not get_behaviour_setting("DISABLE_ALERT_COUNTER"):
         count = Alerts.objects.filter(user_id=request.user).count()
         return JsonResponse({"count": count})
     return JsonResponse({"count": 0})
@@ -235,7 +236,7 @@ def alertcount(request):
 
 def alertcount_text(request):
     """Return alert count as plain text for htmx polling."""
-    count = Alerts.objects.filter(user_id=request.user).count() if not settings.DISABLE_ALERT_COUNTER else 0
+    count = Alerts.objects.filter(user_id=request.user).count() if not get_behaviour_setting("DISABLE_ALERT_COUNTER") else 0
     return HttpResponse(str(count), content_type="text/plain")
 
 
@@ -665,7 +666,7 @@ def account_email_allowed(kind, to_email):
     The forms answer the same way whether or not a message is sent, so an address that has
     reached the limit just stops receiving mail for the rest of the window.
     """
-    limit = settings.ACCOUNT_RECOVERY_EMAILS_PER_HOUR
+    limit = get_behaviour_setting("ACCOUNT_RECOVERY_EMAILS_PER_HOUR")
     if limit <= 0:
         return True
     key = "dojo:account-email:" + salted_hmac(f"dojo.account-email.{kind}", (to_email or "").lower()).hexdigest()

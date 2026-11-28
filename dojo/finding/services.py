@@ -105,7 +105,7 @@ def _validate_severity(severity: str) -> None:
 
 
 def _validate_mitigated_editable(data: dict, user) -> None:
-    """Mirror the serializer's mitigated-field editability gate (settings.EDITABLE_MITIGATED_DATA)."""
+    """Mirror the serializer's mitigated-field editability gate (get_behaviour_setting("EDITABLE_MITIGATED_DATA"))."""
     attempting = any(
         (field in data) and (data.get(field) is not None)
         for field in ("mitigated", "mitigated_by")

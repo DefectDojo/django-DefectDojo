@@ -4,10 +4,10 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from defusedxml import ElementTree
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 # Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
@@ -527,8 +527,8 @@ class QualysWebAppParser:
         # Read the settings at parse time (not import time) so the env-driven values
         # in settings.dist.py, and override_settings in tests, are honoured.
         if enable_weakness is None:
-            enable_weakness = getattr(settings, "QUALYS_WAS_WEAKNESS_IS_VULN", False)
-        unique = getattr(settings, "QUALYS_WAS_UNIQUE_ID", False)
+            enable_weakness = get_behaviour_setting("QUALYS_WAS_WEAKNESS_IS_VULN")
+        unique = get_behaviour_setting("QUALYS_WAS_UNIQUE_ID")
         return qualys_webapp_parser(
             file, test, unique, enable_weakness=enable_weakness,
         )

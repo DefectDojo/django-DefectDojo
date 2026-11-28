@@ -5,11 +5,11 @@ from datetime import datetime
 
 from cvss import parser as cvss_parser
 from dateutil import parser
-from django.conf import settings
 from django.utils import timezone
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 
 VERACODE_TYPE_TO_PURL = {
@@ -68,7 +68,7 @@ class VeracodeScaParser:
 
             # Get the date based on the first_seen setting
             try:
-                if settings.USE_FIRST_SEEN:
+                if get_behaviour_setting("USE_FIRST_SEEN"):
                     date = parser.parse(issue.get("created_date"))
                 else:
                     date = parser.parse(issue.get("created_date"))
@@ -203,7 +203,7 @@ class VeracodeScaParser:
             cvss_score = float(row.get("CVSS score", 0))
             # Get the date based on the first_seen setting
             try:
-                if settings.USE_FIRST_SEEN:
+                if get_behaviour_setting("USE_FIRST_SEEN"):
                     date = datetime.strptime(
                         row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z",
                     )

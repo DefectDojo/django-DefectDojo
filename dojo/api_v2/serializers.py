@@ -6,7 +6,6 @@ from datetime import datetime
 
 import django_tagulous as tagulous
 import six
-from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -58,6 +57,7 @@ from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
 )
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -627,7 +627,7 @@ class CommonImportScanSerializer(serializers.Serializer):
             msg = f"Uploading a Report File is required for {scan_type}"
             raise serializers.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
+            msg = f"Report file is too large. Maximum supported size is {get_behaviour_setting("SCAN_FILE_MAX_SIZE")} MB"
             raise serializers.ValidationError(msg)
         tool_type = requires_tool_type(scan_type)
         if tool_type:
@@ -1039,7 +1039,7 @@ class ImportLanguagesSerializer(serializers.Serializer):
 
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):
-            msg = f"File is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
+            msg = f"File is too large. Maximum supported size is {get_behaviour_setting("SCAN_FILE_MAX_SIZE")} MB"
             raise serializers.ValidationError(msg)
         return data
 

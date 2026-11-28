@@ -75,6 +75,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.ui.urls import urlpatterns as survey_urls
 from dojo.system_settings.api.urls import add_system_settings_urls
+from dojo.system_settings.behaviour import require_settings
 from dojo.system_settings.ui.urls import urlpatterns as system_settings_urls
 from dojo.test.api.urls import add_test_urls
 from dojo.test.ui.urls import urlpatterns as test_urls
@@ -220,16 +221,19 @@ api_v2_urls = [
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
-    if settings.API_TOKENS_ENABLED and settings.API_TOKEN_AUTH_ENDPOINT_ENABLED:
-        # Keyed on IP: API clients post JSON, which leaves request.POST empty.
-        token_auth_view = dojo_ratelimit(key="ip")(ForcedResetObtainAuthToken.as_view())
-        api_v2_urls += [
-            re_path(
-                f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
-                token_auth_view,
-                name="api-token-auth",
-            ),
-        ]
+    # Always mounted: whether tokens and this endpoint are on is each instance's System Settings
+    # (DD_API_TOKENS_ENABLED and DD_API_TOKEN_AUTH_ENDPOINT_ENABLED are the default), asked per request.
+    # Keyed on IP: API clients post JSON, which leaves request.POST empty.
+    token_auth_view = require_settings("API_TOKENS_ENABLED", "API_TOKEN_AUTH_ENDPOINT_ENABLED")(
+        dojo_ratelimit(key="ip")(ForcedResetObtainAuthToken.as_view()),
+    )
+    api_v2_urls += [
+        re_path(
+            f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
+            token_auth_view,
+            name="api-token-auth",
+        ),
+    ]
 
 # API v3 (alpha) -- mounted conditionally on V3_FEATURE_LOCATIONS (D5/§4.1). With the flag off the
 # whole /api/v3/ tree is absent. The prefix and version live in settings (single source).

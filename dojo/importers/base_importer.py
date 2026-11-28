@@ -73,6 +73,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.notifications.helper import async_create_notification
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools import tool_issue_updater
 from dojo.tools.factory import get_parser
@@ -706,7 +707,7 @@ class BaseImporter(ImporterOptions):
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
-        if settings.TRACK_IMPORT_HISTORY is False:
+        if get_behaviour_setting("TRACK_IMPORT_HISTORY") is False:
             return None
 
         if untouched_findings is None:
@@ -1744,7 +1745,7 @@ class BaseImporter(ImporterOptions):
             # duplicates of an existing finding (they are not genuinely new activity).
             updated_count = len(new_findings) + len(findings_reactivated) + len(findings_mitigated)
 
-        max_findings = settings.NOTIFICATION_SCAN_ADDED_MAX_FINDINGS
+        max_findings = get_behaviour_setting("NOTIFICATION_SCAN_ADDED_MAX_FINDINGS")
 
         def _capped(ids):
             # The capped, severity-ordered slice the notification lists, as ids: the

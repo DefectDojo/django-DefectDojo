@@ -5,10 +5,10 @@ import re
 from datetime import datetime
 
 from dateutil import parser
-from django.conf import settings
 
 from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
@@ -172,7 +172,7 @@ def get_severity(value: str) -> str:
         "5": "High",
     }
 
-    if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+    if get_behaviour_setting("USE_QUALYS_LEGACY_SEVERITY_PARSING"):
         return legacy_severity_lookup.get(value, "Info")
     return qualys_severity_lookup.get(value, "Info")
 
@@ -202,7 +202,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     )
         # Get the date based on the first_seen setting
         try:
-            if settings.USE_FIRST_SEEN:
+            if get_behaviour_setting("USE_FIRST_SEEN"):
                 if date := report_finding.get("First Detected"):
                     date = datetime.strptime(date, "%m/%d/%Y %H:%M:%S").date()
             elif date := report_finding.get("Last Detected"):
@@ -251,7 +251,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
         elif report_finding.get("VULN TITLE"):
             # Get the date based on the first_seen setting
             try:
-                if settings.USE_FIRST_SEEN:
+                if get_behaviour_setting("USE_FIRST_SEEN"):
                     if date := report_finding.get("LAST SCAN"):
                         date = parser.parse(date.replace("Z", ""))
                 elif date := report_finding.get("LAST SCAN"):

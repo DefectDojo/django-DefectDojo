@@ -1151,7 +1151,11 @@ def get_lead_filter(lead_values: list[str]) -> Q | None:
 
 
 def get_setting(setting):
-    return getattr(settings, setting)
+    # A behaviour setting the System Settings row can hold (dojo.system_settings.behaviour) reads the
+    # row first; every other name is the Django setting.
+    from dojo.system_settings.behaviour import get_setting as get_behaviour_setting  # noqa: PLC0415 circular import
+
+    return get_behaviour_setting(setting)
 
 
 def grade_product(crit, high, med, low):
@@ -1603,7 +1607,7 @@ def file_size_mb(file_obj):
 def is_scan_file_too_large(scan_file):
     if hasattr(settings, "SCAN_FILE_MAX_SIZE"):
         size = file_size_mb(scan_file)
-        if size > settings.SCAN_FILE_MAX_SIZE:
+        if size > get_setting("SCAN_FILE_MAX_SIZE"):
             return True
     return False
 

@@ -147,7 +147,7 @@ System notification settings (scope: system) describe the sending of notificatio
 
 However, there is a specific use-case when the user decides to disable notifications (to decrease noise) but the system setting is used to override this behavior. These overrides apply only to `user_mentioned` and `review_requested` by default.
 
-The scope of this setting is customizable (see environment variable `DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP`).
+The scope of this setting is customizable (see environment variable `DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP`, or the **System notifications that override personal ones** field in System Settings, which takes precedence over it; see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
 
 For more information about this behavior see the [related pull request #9699](https://github.com/DefectDojo/django-DefectDojo/pull/9699/)
 

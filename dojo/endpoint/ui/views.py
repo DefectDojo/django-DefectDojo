@@ -3,7 +3,6 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.apps import apps
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
@@ -30,6 +29,7 @@ from dojo.forms import (
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
 from dojo.query_utils import build_count_subquery
 from dojo.reports.ui.views import generate_report
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -473,7 +473,7 @@ def import_endpoint_meta(request, pid):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB",
+                    f"Report file is too large. Maximum supported size is {get_behaviour_setting("SCAN_FILE_MAX_SIZE")} MB",
                     extra_tags="alert-danger")
 
             create_endpoints = form.cleaned_data["create_endpoints"]

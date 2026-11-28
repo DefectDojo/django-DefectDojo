@@ -198,6 +198,8 @@ The following environment variables control JIRA connection behavior:
 
 - **`DD_JIRA_READ_TIMEOUT`** (default: `30` seconds): Read timeout for waiting for a response from the JIRA server after the connection is established.
 
+These values, along with `DD_JIRA_SSL_VERIFY`, `DD_JIRA_DESCRIPTION_MAX_LENGTH` and extra issue types (added to `DD_JIRA_EXTRA_ISSUE_TYPES`), can also be set in System Settings. A value saved there takes precedence over the environment variable; an empty field keeps using the variable (see [Configuration](/get_started/open_source/configuration/#environment-settings-that-system-settings-can-override)).
+
 **Note on Rate Limiting**: The jira library has a built-in maximum wait time of 60 seconds for rate limiting retries. If JIRA's `Retry-After` header indicates a wait time longer than 60 seconds, the request will fail and not be retried. This is a limitation of the jira library version currently in use.
 
 ### Why Conservative Values Matter
