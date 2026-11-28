@@ -242,7 +242,7 @@
                         {% if finding.risk_acceptance_set.all %}
                             <th>Risk Acceptance</th>
                         {% endif %}
-                        {% if finding.duplicate_finding %}
+                        {% if finding.duplicate_finding_in_product %}
                         <th>Original</th>
                         {% endif %}
                         {% if duplicate_cluster and not finding.duplicate %}
@@ -329,7 +329,7 @@
                                 {% endfor %}
                             </td>
                         {% endif %}
-                        {% if finding.duplicate_finding %}
+                        {% if finding.duplicate_finding_in_product %}
                             <td>
                                 <div class="align-top">
                                     <div class="dropdown">
@@ -748,7 +748,7 @@
             </div>
             <div id="duplicate_tree" class="panel-body collapse">
                 {% if finding.duplicate_finding %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster prefix='duplicate' %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding_in_product finding_list=duplicate_cluster prefix='duplicate' %}
                 {% else %}
                     {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% endif %}

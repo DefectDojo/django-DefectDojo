@@ -810,10 +810,10 @@ def finding_display_status(finding):
     if finding.duplicate:
         url = "#"
         name = "unknown"
-        if finding.duplicate_finding:
-            url = reverse("view_finding", args=(finding.duplicate_finding.id,))
-            name = finding.duplicate_finding.title + ", " + \
-                   finding.duplicate_finding.created.strftime("%b %d, %Y, %H:%M:%S")
+        original = finding.duplicate_finding_in_product
+        if original:
+            url = reverse("view_finding", args=(original.id,))
+            name = original.title + ", " + original.created.strftime("%b %d, %Y, %H:%M:%S")
 
         link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(
             name) + '">Duplicate</a>'
