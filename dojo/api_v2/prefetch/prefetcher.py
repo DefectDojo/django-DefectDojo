@@ -64,11 +64,13 @@ _PREFETCH_PREFETCH_RELATED = {
     # TestSerializer nests every finding group in the test with its JIRA issue and that issue's url, and every note
     Test: (
         "finding_group_set__jira_issue__jira_project__jira_instance",
+        "files",
         "notes__author",
         "notes__editor",
         "notes__note_type",
         "notes__history__current_editor",
         "notes__history__note_type",
+        "tags",
     ),
 }
 
