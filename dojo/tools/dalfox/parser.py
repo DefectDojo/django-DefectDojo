@@ -12,11 +12,11 @@ class DalfoxParser:
     """
     Parser for Dalfox, an XSS scanner.
 
-    ``dalfox --format json`` writes a JSON array of results. Each result records the parameter
-    Dalfox injected into, the payload it used, the proof of concept URL and the evidence it saw
-    reflected back.
+    Dalfox v2 writes a JSON array; v3 wraps the results in a ``findings`` list. Each result records
+    the parameter Dalfox injected into, the payload it used, the proof of concept URL and the
+    evidence it saw reflected back.
 
-    Two quirks of the real output are handled here. Dalfox appends an empty object to the end of
+    Two quirks of the v2 output are handled here. Dalfox appends an empty object to the end of
     the array, which is not a result and is skipped. And Dalfox reports the same parameter many
     times with different payloads, because each payload is a separate attempt; those are all kept,
     and deduplication folds them together on the parameter and the endpoint afterwards.
@@ -31,12 +31,13 @@ class DalfoxParser:
         "info": "Info",
     }
 
-    # Dalfox result types: V is a verified injection (it ran the payload in a browser and saw it
-    # execute), R is a reflected payload it did not verify, G is a pattern it grepped for.
+    # Keep the legacy v2 labels; v3 supplies its own descriptions and has no headless browser.
     TYPE_LABELS = {
         "V": "Verified — payload executed",
         "R": "Reflected — payload echoed but not verified",
         "G": "Grep — matched a configured pattern",
+        "A": "AST-detected DOM XSS — static JavaScript analysis",
+        "I": "Informational — outdated or known-vulnerable component",
     }
 
     def get_scan_types(self):
@@ -46,14 +47,19 @@ class DalfoxParser:
         return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Dalfox reports in JSON format, generated with 'dalfox url <target> --format json'."
+        return "Import Dalfox v2 JSON arrays or v3 reports generated with 'dalfox scan <target> -f json -o report.json'."
 
     def get_findings(self, file, test):
         data = json.load(file)
+        if isinstance(data, dict):
+            data = data.get("findings")
+        if not isinstance(data, list):
+            msg = "Expected a Dalfox JSON array or an object with a findings list."
+            raise ValueError(msg)  # noqa: TRY004 -- the importer converts ValueError to a validation error
         findings = []
-        for result in data if isinstance(data, list) else [data]:
-            # Dalfox terminates its array with an empty object.
-            if not result:
+        for result in data:
+            # Skip the v2 trailing empty object and malformed non-object entries.
+            if not isinstance(result, dict) or not result:
                 continue
             findings.append(self._to_finding(result, test))
         return findings
@@ -67,16 +73,29 @@ class DalfoxParser:
         title = result.get("message_str") or f"XSS in parameter {parameter}"
         if parameter:
             title = f"{parameter}: {title}"
+        component = parameter or None
+        if result_type == "I" and not parameter:
+            # Library advisories have no parameter; keep different libraries apart during deduplication.
+            component = title
 
         description = []
         if result.get("message_str"):
             description.append(result["message_str"])
         if result_type:
-            description.append(f"**Result type:** {result_type} ({self.TYPE_LABELS.get(result_type, 'unknown')})")
+            type_label = result.get("type_description") or self.TYPE_LABELS.get(result_type, "unknown")
+            description.append(f"**Result type:** {result_type} ({type_label})")
         if parameter:
             description.append(f"**Parameter:** {parameter}")
         if result.get("method"):
             description.append(f"**Method:** {result['method']}")
+        for field, label in (
+            ("detection_method", "Detection method"),
+            ("location", "Location"),
+            ("confidence", "Confidence"),
+            ("confidence_reason", "Confidence reason"),
+        ):
+            if result.get(field):
+                description.append(f"**{label}:** {result[field]}")
         if inject_type:
             description.append(f"**Injection point:** {inject_type}")
         if result.get("poc_type"):
@@ -96,9 +115,8 @@ class DalfoxParser:
             description=(description and "\n".join(description)) or title,
             severity=self.SEVERITY.get((result.get("severity") or "").lower(), "Medium"),
             param=parameter or None,
-            # The parameter is also the component: it is the injectable thing being reported, and
-            # it is what deduplication needs to tell two parameters on one URL apart.
-            component_name=parameter or None,
+            # XSS findings keep the parameter as their component for legacy deduplication.
+            component_name=component,
             payload=result.get("payload") or None,
             vuln_id_from_tool=f"{result_type}-{inject_type}" if result_type or inject_type else None,
             static_finding=False,
