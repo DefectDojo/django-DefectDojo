@@ -10,7 +10,7 @@ from jira.exceptions import JIRAError
 import dojo.finding.helper as finding_helper
 import dojo.jira.helper as jira_helper
 from dojo.jira import services as jira_services
-from dojo.models import Finding, JIRA_Instance, JIRA_Issue, JIRA_Project, Test_Type
+from dojo.models import Finding, JIRA_Instance, JIRA_Issue, JIRA_Project, Test_Type, User
 from unittests.dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
@@ -345,6 +345,94 @@ class JIRADeleteCascadeTest(DojoTestCase):
             f"DefectDojo finding {finding_id} was deleted. This Jira issue was closed automatically.",
         )
         self.assertFalse(JIRA_Issue.objects.filter(jira_id="10001").exists())
+
+
+@patch("dojo.jira.helper.get_issuetype_fields", return_value=[])
+@patch("dojo.jira.helper.jira_description", return_value="description")
+@patch("dojo.jira.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+@patch("dojo.jira.helper.get_jira_connection")
+class JIRAConcurrentCreateTest(DojoTestCase):
+
+    """
+    Two push tasks for the same unlinked finding can both pass the "has no Jira issue" check and
+    both create a ticket. The second one to save its JIRA_Issue row hits the unique finding link.
+    These tests run inside the test case's transaction, like a push made from an atomic caller.
+    """
+
+    def setUp(self):
+        self.system_settings(enable_jira=True)
+        product_type = self.create_product_type("JIRA concurrent create")
+        product = self.create_product("JIRA concurrent create product", prod_type=product_type)
+        engagement = self.create_engagement("JIRA concurrent create engagement", product)
+        test_type = Test_Type.objects.create(name="JIRA Concurrent Create Scan")
+        test = self.create_test(engagement=engagement, scan_type=test_type.name, title="JIRA concurrent create test")
+        reporter = User.objects.create(username="jira-concurrent-reporter")
+        self.finding = Finding.objects.create(test=test, title="JIRA concurrent finding", severity="High", reporter=reporter)
+        jira_instance = JIRA_Instance.objects.create(
+            configuration_name="JIRA concurrent create instance",
+            url="https://jira.example.com",
+            username="jira",
+            password="jira",  # noqa: S106 - test fixture credential
+            epic_name_id=1,
+            open_status_key=2,
+            close_status_key=3,
+            info_mapping_severity="Info",
+            low_mapping_severity="Low",
+            medium_mapping_severity="Medium",
+            high_mapping_severity="High",
+            critical_mapping_severity="Critical",
+            finding_jira_sync=True,
+        )
+        self.jira_project = JIRA_Project.objects.create(
+            jira_instance=jira_instance,
+            project_key="DD",
+            product=product,
+            push_all_issues=True,
+            enabled=True,
+        )
+
+    def _jira_where_another_push_links_first(self, get_jira_connection):
+        """Jira whose create_issue lets a concurrent push link the finding before this one saves."""
+        jira = Mock()
+        duplicate = Mock(id="10002", key="DD-2")
+
+        def create_issue(_fields):
+            JIRA_Issue.objects.create(
+                jira_project=self.jira_project, jira_id="10001", jira_key="DD-1", finding_id=self.finding.id,
+            )
+            return duplicate
+
+        jira.create_issue.side_effect = create_issue
+        get_jira_connection.return_value = jira
+        return jira, duplicate
+
+    def test_losing_a_concurrent_create_keeps_the_winning_link_and_the_transaction_usable(self, get_jira_connection, *_mocks):
+        _jira, _duplicate = self._jira_where_another_push_links_first(get_jira_connection)
+        finding = Finding.objects.get(id=self.finding.id)
+
+        success, _message = jira_helper.add_jira_issue(finding)
+
+        self.assertTrue(success)
+        # The transaction is still usable: before the fix this raised TransactionManagementError.
+        links = list(JIRA_Issue.objects.filter(finding_id=self.finding.id).values_list("jira_key", flat=True))
+        self.assertEqual(["DD-1"], links)
+        self.assertEqual("DD-1", jira_helper.get_jira_issue(finding).jira_key)
+
+    def test_losing_a_concurrent_create_deletes_its_own_duplicate_ticket(self, get_jira_connection, *_mocks):
+        _jira, duplicate = self._jira_where_another_push_links_first(get_jira_connection)
+
+        jira_helper.add_jira_issue(Finding.objects.get(id=self.finding.id))
+
+        duplicate.delete.assert_called_once_with()
+
+    def test_failing_to_delete_the_duplicate_ticket_still_succeeds(self, get_jira_connection, *_mocks):
+        _jira, duplicate = self._jira_where_another_push_links_first(get_jira_connection)
+        duplicate.delete.side_effect = JIRAError("no delete permission")
+
+        success, _message = jira_helper.add_jira_issue(Finding.objects.get(id=self.finding.id))
+
+        self.assertTrue(success)
+        self.assertEqual(1, JIRA_Issue.objects.filter(finding_id=self.finding.id).count())
 
 
 class JIRAEpicFormAsyncDispatchTest(TestCase):

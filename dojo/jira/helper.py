@@ -9,6 +9,7 @@ import requests
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
+from django.db import IntegrityError, transaction
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -986,6 +987,27 @@ def prepare_jira_issue_fields(
     return fields
 
 
+def _jira_issue_linked_in_db(obj) -> JIRA_Issue | None:
+    """Read the object's JIRA_Issue link from the database, ignoring any cached relation."""
+    link_field = {Finding: "finding", Finding_Group: "finding_group", Engagement: "engagement"}.get(type(obj))
+    if link_field is None:
+        return None
+    # set_obj cached the unsaved JIRA_Issue on obj; drop it so later reads see the saved link.
+    obj._state.fields_cache.pop("jira_issue", None)
+    return JIRA_Issue.objects.filter(**{link_field: obj}).first()
+
+
+def _discard_duplicate_jira_issue(new_issue, obj, winner: JIRA_Issue) -> None:
+    logger.warning(
+        "%s was linked to %s by a concurrent push; deleting duplicate JIRA issue %s",
+        to_str_typed(obj), winner.jira_key, new_issue.key,
+    )
+    try:
+        new_issue.delete()
+    except Exception:
+        logger.exception("could not delete duplicate JIRA issue %s for %s", new_issue.key, to_str_typed(obj))
+
+
 def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
     def failure_to_add_message(message: str, exception: Exception, _: Any) -> tuple[str, bool]:
         if exception:
@@ -1095,7 +1117,18 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         j_issue.set_obj(obj)
         j_issue.jira_creation = timezone.now()
         j_issue.jira_change = timezone.now()
-        j_issue.save()
+        try:
+            # A savepoint, so a lost race below leaves the caller's transaction usable.
+            with transaction.atomic():
+                j_issue.save()
+        except IntegrityError:
+            winner = _jira_issue_linked_in_db(obj)
+            if winner is None:
+                raise
+            # Another push linked this object between our "has no Jira issue" check and this
+            # save. Keep its link and remove the ticket we just filed so Jira holds one ticket.
+            _discard_duplicate_jira_issue(new_issue, obj, winner)
+            return True, f"JIRA issue {winner.jira_key} was already linked by a concurrent push."
         jira.issue(new_issue.id)
         logger.info("Created the following jira issue for %d:%s", obj.id, to_str_typed(obj))
         # The configuration works, so a previously remembered failure is stale.
