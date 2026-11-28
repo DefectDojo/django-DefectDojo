@@ -112,6 +112,7 @@ from dojo.product_attributes.api.serializer import (
     ProductPlatformSerializer,
 )
 from dojo.regulations.api.serializer import RegulationSerializer
+from dojo.system_settings.behaviour import get_setting as get_behaviour_setting
 from dojo.tool_type.api.serializer import ToolTypeSerializer
 from dojo.user.authentication import token_expires_at
 from dojo.utils import get_system_setting
@@ -731,12 +732,12 @@ def _set_by_customer(current: dict, shipped: dict, *, fallback) -> dict:
 def deduplication_rules() -> dict:
     return {
         "algorithm_per_parser": _set_by_customer(
-            settings.DEDUPLICATION_ALGORITHM_PER_PARSER,
+            get_behaviour_setting("DEDUPLICATION_ALGORITHM_PER_PARSER"),
             settings.DEDUPLICATION_ALGORITHM_PER_PARSER_SHIPPED,
             fallback=settings.DEDUPE_ALGO_LEGACY,
         ),
         "hashcode_fields_per_scanner": _set_by_customer(
-            settings.HASHCODE_FIELDS_PER_SCANNER, settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, fallback=[],
+            get_behaviour_setting("HASHCODE_FIELDS_PER_SCANNER"), settings.HASHCODE_FIELDS_PER_SCANNER_SHIPPED, fallback=[],
         ),
         "hashcode_allows_null_cwe": _set_by_customer(
             settings.HASHCODE_ALLOWS_NULL_CWE, settings.HASHCODE_ALLOWS_NULL_CWE_SHIPPED, fallback=True,
