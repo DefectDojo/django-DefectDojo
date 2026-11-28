@@ -75,7 +75,7 @@ interface rather than to that one screen.
 
 ## For administrators
 
-The instance's default language is `DD_LANGUAGE_CODE` (default `en-us`), unless a **Default language** is saved in System Settings, which takes precedence. It applies to anyone who
+The instance's default language is `DD_LANGUAGE_CODE` (default `en-us`). It applies to anyone who
 has not chosen a language and to places that run without a signed-in user, such as a scheduled
 notification.
 

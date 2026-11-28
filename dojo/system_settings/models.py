@@ -8,7 +8,6 @@ from django.utils.translation import gettext as _
 from dojo.system_settings.behaviour import (
     validate_deduplication_algorithm_per_parser,
     validate_hashcode_fields_per_scanner,
-    validate_language_code,
     validate_notifications_system_level_trump,
     validate_retention_period,
 )
@@ -458,11 +457,6 @@ class System_Settings(models.Model):
         verbose_name=_("Deduplication algorithm per parser"),
         help_text=_("Entries that replace or add to the deployment's map of scan type to deduplication algorithm. "
                     "Empty uses DD_DEDUPLICATION_ALGORITHM_PER_PARSER."))
-    default_language_code = models.CharField(
-        max_length=16, null=True, blank=True, default=None,
-        validators=[validate_language_code],
-        verbose_name=_("Default language"),
-        help_text=_("The language for people who have not chosen one. Empty uses DD_LANGUAGE_CODE."))
     api_tokens_enabled = models.BooleanField(
         null=True, blank=True, default=None,
         verbose_name=_("API tokens enabled"),

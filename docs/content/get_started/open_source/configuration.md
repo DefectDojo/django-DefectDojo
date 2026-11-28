@@ -68,7 +68,6 @@ The settings below can also be saved for the instance in System Settings, in the
 | `DD_SLA_NOTIFY_POST_BREACH` | Days after an SLA breach to keep notifying (`sla_notify_post_breach`) |
 | `DD_HASHCODE_FIELDS_PER_SCANNER` | Hash code fields per scanner (`hashcode_fields_per_scanner`) |
 | `DD_DEDUPLICATION_ALGORITHM_PER_PARSER` | Deduplication algorithm per parser (`deduplication_algorithm_per_parser`) |
-| `DD_LANGUAGE_CODE` | Default language (`default_language_code`) |
 | `DD_API_TOKENS_ENABLED` | API tokens enabled (`api_tokens_enabled`) |
 | `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` | API token endpoint enabled (`api_token_auth_endpoint_enabled`) |
 | `DD_API_TOKEN_DEFAULT_EXPIRY_DAYS` | API token expiry (days) (`api_token_default_expiry_days`) |

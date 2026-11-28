@@ -2,7 +2,8 @@ from django.core.exceptions import ValidationError
 from django.template import Context, Template
 from django.test import override_settings
 
-from dojo.models import System_Settings
+from dojo.engagement.ui.filters import EngagementTestFilterWithoutObjectLookups
+from dojo.models import Engagement, Product, Product_Type, System_Settings, Test
 from dojo.system_settings import behaviour
 from dojo.system_settings.behaviour import SETTING_FIELDS, get_setting, team_name
 from dojo.utils import get_setting as utils_get_setting
@@ -37,11 +38,6 @@ class TestBehaviourSettings(DojoTestCase):
         self.assertFalse(get_setting("DELETE_PREVIEW"))
         self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 5)
         self.assertFalse(utils_get_setting("DELETE_PREVIEW"))
-
-    @override_settings(LANGUAGE_CODE="en-us")
-    def test_an_empty_string_language_uses_the_setting(self):
-        self._save(default_language_code="")
-        self.assertEqual(get_setting("LANGUAGE_CODE"), "en-us")
 
     def test_a_setting_outside_the_family_is_the_django_setting(self):
         with override_settings(SOME_OTHER_SETTING="x"):
@@ -86,9 +82,10 @@ class TestBehaviourSettings(DojoTestCase):
         cases = [
             (behaviour.validate_hashcode_fields_per_scanner, {"Scanner": "title"}),
             (behaviour.validate_hashcode_fields_per_scanner, ["title"]),
+            # A field outside HASHCODE_ALLOWED_FIELDS would let a saved map hash on anything.
+            (behaviour.validate_hashcode_fields_per_scanner, {"Scanner": ["title", "not_an_allowed_field"]}),
             (behaviour.validate_deduplication_algorithm_per_parser, {"Scanner": "not-an-algorithm"}),
             (behaviour.validate_notifications_system_level_trump, "scan_added"),
-            (behaviour.validate_language_code, "xx-not-a-language"),
         ]
         for validator, value in cases:
             with self.subTest(validator=validator.__name__, value=value), self.assertRaises(ValidationError):
@@ -98,12 +95,10 @@ class TestBehaviourSettings(DojoTestCase):
         behaviour.validate_hashcode_fields_per_scanner({"Scanner": ["title", "cwe"]})
         behaviour.validate_deduplication_algorithm_per_parser({"Scanner": "hash_code"})
         behaviour.validate_notifications_system_level_trump(["scan_added"])
-        behaviour.validate_language_code("en")
         for validator in (
             behaviour.validate_hashcode_fields_per_scanner,
             behaviour.validate_deduplication_algorithm_per_parser,
             behaviour.validate_notifications_system_level_trump,
-            behaviour.validate_language_code,
         ):
             validator(None)
 
@@ -117,3 +112,30 @@ class TestBehaviourSettings(DojoTestCase):
             with behaviour.pinned_settings():
                 self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 999)
         self.assertEqual(get_setting("MAX_ALERTS_PER_USER"), 5)
+
+
+class TestEngagementTestFilterFollowsImportHistory(DojoTestCase):
+
+    """The Reimported Version filter is offered only where the instance tracks import history, per request."""
+
+    def setUp(self):
+        product = Product.objects.create(name="Filter Product", description="x", prod_type=Product_Type.objects.create(name="Filter Type"))
+        self.engagement = Engagement.objects.create(name="Filter Engagement", product=product, target_start="2026-01-01", target_end="2026-01-02")
+
+    def _filters(self):
+        return EngagementTestFilterWithoutObjectLookups(
+            {}, queryset=Test.objects.filter(engagement=self.engagement), engagement=self.engagement,
+        ).filters
+
+    def test_the_filter_follows_the_saved_setting(self):
+        row = System_Settings.objects.get(no_cache=True)
+        row.track_import_history = True
+        row.save()
+        self.assertIn("test_import__version", self._filters())
+        row.track_import_history = False
+        row.save()
+        self.assertNotIn("test_import__version", self._filters())
+        # The class keeps its declaration: the next instance that tracks history gets the filter back.
+        row.track_import_history = True
+        row.save()
+        self.assertIn("test_import__version", self._filters())

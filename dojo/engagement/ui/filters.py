@@ -290,8 +290,9 @@ class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper,
 
 class EngagementTestFilterHelper(FilterSet):
     version = CharFilter(lookup_expr="icontains", label="Version")
-    if get_behaviour_setting("TRACK_IMPORT_HISTORY"):
-        test_import__version = CharFilter(field_name="test_import__version", lookup_expr="icontains", label="Reimported Version")
+    # Declared always and dropped per request when the instance does not track import history
+    # (_drop_untracked_filters): a class body runs once per process.
+    test_import__version = CharFilter(field_name="test_import__version", lookup_expr="icontains", label="Reimported Version")
     target_start = DateRangeFilter()
     target_end = DateRangeFilter()
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
@@ -311,6 +312,10 @@ class EngagementTestFilterHelper(FilterSet):
             "name": "Test Name",
         },
     )
+
+    def _drop_untracked_filters(self):
+        if not get_behaviour_setting("TRACK_IMPORT_HISTORY"):
+            self.filters.pop("test_import__version", None)
 
 
 class EngagementTestFilter(EngagementTestFilterHelper, DojoFilter):
@@ -339,6 +344,7 @@ class EngagementTestFilter(EngagementTestFilterHelper, DojoFilter):
     def __init__(self, *args, **kwargs):
         self.engagement = kwargs.pop("engagement")
         super(DojoFilter, self).__init__(*args, **kwargs)
+        self._drop_untracked_filters()
         self.form.fields["test_type"].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by("name")
         self.form.fields["api_scan_configuration"].queryset = Product_API_Scan_Configuration.objects.filter(product=self.engagement.product).distinct()
         self.form.fields["lead"].queryset = get_authorized_users("view") \
@@ -399,4 +405,5 @@ class EngagementTestFilterWithoutObjectLookups(EngagementTestFilterHelper):
     def __init__(self, *args, **kwargs):
         self.engagement = kwargs.pop("engagement")
         super().__init__(*args, **kwargs)
+        self._drop_untracked_filters()
         self.form.fields["test_type"].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by("name")

@@ -863,8 +863,9 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "dojo.api_v2.exception_handler.custom_exception_handler",
 }
 
-if API_TOKENS_ENABLED:
-    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("dojo.user.authentication.ExpiringTokenAuthentication",)
+# Always installed: whether tokens are on is each instance's System Settings (DD_API_TOKENS_ENABLED is the
+# default), asked per request by ExpiringTokenAuthentication.authenticate.
+REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("dojo.user.authentication.ExpiringTokenAuthentication",)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DefectDojo API v2",

@@ -57,6 +57,15 @@ class ExpiringTokenAuthentication(TokenAuthentication):
 
     """Token auth that also rejects expired tokens and accounts that owe a forced password reset."""
 
+    def authenticate(self, request):
+        # Declined (None, as if token authentication were not configured) while this instance has API
+        # tokens off: its System Settings, else DD_API_TOKENS_ENABLED. Asked per request.
+        from dojo.system_settings.behaviour import get_setting  # noqa: PLC0415 circular import
+
+        if not get_setting("API_TOKENS_ENABLED"):
+            return None
+        return super().authenticate(request)
+
     def authenticate_credentials(self, key):
         user, token = super().authenticate_credentials(key)
         if token_is_expired(token):

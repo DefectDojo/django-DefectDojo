@@ -17,7 +17,7 @@ class JIRA_Instance(models.Model):
     # (dojo.system_settings.behaviour.jira_issue_type_choices), checked by the form and the API.
     default_issue_type = models.CharField(max_length=255,
                                           default="Bug",
-                                          help_text=_("You can define extra issue types in settings.py"))
+                                          help_text=_("Extra issue types are set in System Settings (Extra Jira issue types), added to the deployment's DD_JIRA_EXTRA_ISSUE_TYPES."))
     issue_template_dir = models.CharField(max_length=255,
                                       null=True,
                                       blank=True,

@@ -54,7 +54,6 @@ SETTING_FIELDS = {
     "SLA_NOTIFY_POST_BREACH": "sla_notify_post_breach",
     "HASHCODE_FIELDS_PER_SCANNER": "hashcode_fields_per_scanner",
     "DEDUPLICATION_ALGORITHM_PER_PARSER": "deduplication_algorithm_per_parser",
-    "LANGUAGE_CODE": "default_language_code",
     "API_TOKENS_ENABLED": "api_tokens_enabled",
     "API_TOKEN_AUTH_ENDPOINT_ENABLED": "api_token_auth_endpoint_enabled",
     "API_TOKEN_DEFAULT_EXPIRY_DAYS": "api_token_default_expiry_days",
@@ -153,6 +152,24 @@ def get_setting(name: str):
     return values[name]
 
 
+# The value a reader used when a deployment's settings module does not define the name at all, kept from
+# the getattr(settings, NAME, default) each reader used before it read through get_setting.
+SETTING_DEFAULTS = {
+    "AUDITLOG_FLUSH_RETENTION_PERIOD": -1,
+    "API_TOKEN_DEFAULT_EXPIRY_DAYS": 0,
+    "JIRA_MAX_RETRIES": 3,
+    "JIRA_DESCRIPTION_MAX_LENGTH": 32767,
+    "QUALYS_WAS_UNIQUE_ID": False,
+    "QUALYS_WAS_WEAKNESS_IS_VULN": False,
+}
+
+
+def _deployment_value(name: str):
+    if name in SETTING_DEFAULTS:
+        return getattr(settings, name, SETTING_DEFAULTS[name])
+    return getattr(settings, name)
+
+
 def _resolve(name: str):
     field = FIELD_ONLY.get(name)
     if field is not None:
@@ -166,7 +183,7 @@ def _resolve(name: str):
         return getattr(settings, name)
     value = getattr(_system_settings(), field, None)
     if value is None or (isinstance(value, str) and not value):
-        return getattr(settings, name)
+        return _deployment_value(name)
     if name in MERGED_SETTINGS:
         return _merge(name, getattr(settings, name), value)
     return value
@@ -252,6 +269,14 @@ def validate_hashcode_fields_per_scanner(value) -> None:
                 'Enter an object that maps a scan type to a list of field names, for example {"Scanner": ["title", "cwe"]}.',
             ),
         )
+    allowed = set(getattr(settings, "HASHCODE_ALLOWED_FIELDS", ()))
+    for scan_type, fields in value.items():
+        unknown = [field for field in fields if field not in allowed]
+        if unknown:
+            raise ValidationError(
+                translate("%(fields)s for %(scan_type)s is not in the allowed list HASHCODE_ALLOWED_FIELDS.")
+                % {"fields": ", ".join(unknown), "scan_type": scan_type},
+            )
 
 
 def validate_deduplication_algorithm_per_parser(value) -> None:
@@ -272,13 +297,6 @@ def validate_notifications_system_level_trump(value) -> None:
         return
     if not isinstance(value, list) or not all(isinstance(event, str) for event in value):
         raise ValidationError(translate('Enter a list of notification event names, for example ["user_mentioned"].'))
-
-
-def validate_language_code(value) -> None:
-    if value in {None, ""}:
-        return
-    if value not in {code for code, _name in settings.LANGUAGES}:
-        raise ValidationError(translate("Choose one of the languages this instance offers."))
 
 
 def validate_retention_period(value) -> None:
