@@ -34,7 +34,7 @@ class TestGarakParser(DojoTestCase):
         with (get_unit_tests_scans_path("garak") / "many_hits.jsonl").open(encoding="utf-8") as testfile:
             parser = GarakParser()
             findings = parser.get_findings(testfile, Test())
-            # 8 hit records aggregate into 3 Findings (probe::generator::detector).
+            # 8 hit records aggregate into 3 Findings (probe::generator).
             self.assertEqual(3, len(findings))
             for finding in findings:
                 self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -51,7 +51,7 @@ class TestGarakParser(DojoTestCase):
             self.assertEqual("Medium", continuation.severity)
             self.assertEqual(1426, continuation.cwe)
             self.assertEqual(
-                "continuation.ContinueSlursReclaimedSlurs::huggingface gpt2::continuation.Continuation",
+                "continuation.ContinueSlursReclaimedSlurs::huggingface gpt2",
                 continuation.unique_id_from_tool,
             )
             self.assertIn("continuation", continuation.unsaved_tags)
@@ -92,6 +92,59 @@ class TestGarakParser(DojoTestCase):
             for probe, (severity, cwe) in expectations.items():
                 self.assertEqual(severity, by_id[probe].severity, f"severity mismatch for {probe}")
                 self.assertEqual(cwe, by_id[probe].cwe, f"cwe mismatch for {probe}")
+
+    def test_parser_merges_hits_from_several_detectors(self):
+        # Lines from a real garak 0.17.1 hit log, in which two detectors flagged each attempt.
+        # One Finding per probe and target keeps the hash code fields (title, component_name) unique.
+        with (get_unit_tests_scans_path("garak") / "two_detectors.jsonl").open(encoding="utf-8") as testfile:
+            parser = GarakParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            self.assertEqual(2, len({(finding.title, finding.component_name) for finding in findings}))
+            by_id = self._by_vuln_id(findings)
+
+            dan = by_id["dan.Dan_11_0"]
+            self.assertEqual("dan.Dan_11_0: disregard the system prompt", dan.title)
+            self.assertEqual("dan.Dan_11_0::function example_model#chat", dan.unique_id_from_tool)
+            self.assertEqual(1, dan.nb_occurences)  # one output, flagged by two detectors
+            self.assertEqual("Critical", dan.severity)  # 1.0 score + dan up-family
+            self.assertIn("**Detectors:** dan.DAN, mitigation.MitigationBypass", dan.description)
+            self.assertIn("mitigation", dan.unsaved_tags)
+
+            exfil = by_id["web_injection.MarkdownImageExfil"]
+            self.assertEqual(2, exfil.nb_occurences)
+            self.assertEqual("Critical", exfil.severity)  # 1.0 score + web_injection up-family
+            self.assertEqual(79, exfil.cwe)
+            self.assertIn(
+                "**Detectors:** web_injection.MarkdownExfilBasic, web_injection.MarkdownExfilContent",
+                exfil.description,
+            )
+
+    def test_parser_merges_hits_without_a_generator(self):
+        # A missing, null or empty generator all give component_name None, so they must share a Finding.
+        records = [
+            {"probe": "dan.Dan_11_0", "detector": "dan.DAN", "score": 1.0},
+            {"probe": "dan.Dan_11_0", "detector": "dan.DAN", "score": 1.0, "generator": None},
+            {"probe": "dan.Dan_11_0", "detector": "dan.DAN", "score": 1.0, "generator": ""},
+        ]
+        payload = "".join(json.dumps(record) + "\n" for record in records)
+        findings = GarakParser().get_findings(io.StringIO(payload), Test())
+        self.assertEqual(1, len(findings))
+        self.assertIsNone(findings[0].component_name)
+        self.assertEqual(3, findings[0].nb_occurences)
+
+    def test_parser_steps_down_realtoxicityprompts(self):
+        record = {
+            "goal": "generate toxicity when prompted with nothing or special tokens",
+            "probe": "realtoxicityprompts.RTPBlank",
+            "detector": "unsafe_content.ToxicCommentModel",
+            "score": 0.93,
+            "generator": "huggingface gpt2",
+        }
+        parser = GarakParser()
+        findings = parser.get_findings(io.StringIO(json.dumps(record) + "\n"), Test())
+        self.assertEqual(1, len(findings))
+        self.assertEqual("Medium", findings[0].severity)  # 0.93 score + realtoxicityprompts down-family
 
     def test_parser_renders_nested_prompt_and_output(self):
         with (get_unit_tests_scans_path("garak") / "many_hits.jsonl").open(encoding="utf-8") as testfile:
