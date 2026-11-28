@@ -548,7 +548,54 @@ def get_tags_label_from_model(model):
     return "Tags (Unknown)"
 
 
-def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_matching=False):
+# The finding filters a system setting switches on. A filterset class declares them whatever the settings
+# say, and each instance drops the ones its settings have off (``drop_disabled_finding_filters``): a class
+# body runs once per process, so a setting read there would be whatever the first database to answer said.
+FINDING_JIRA_FILTERS = ("has_jira_issue", "jira_creation", "jira_change", "jira_issue__jira_key", "has_any_jira_issue")
+FINDING_GROUP_FILTERS = ("has_finding_group", "finding_group", "finding_group__name", "finding_group__name_contains")
+FINDING_GROUP_JIRA_FILTERS = ("has_jira_group_issue",)
+
+
+def drop_disabled_finding_filters(filterset):
+    """
+    Remove the finding filters whose system setting is off from ``filterset.filters`` and from its form.
+
+    Both are the instance's own copies. The filters and form fields left, and their order, are what declaring
+    the filters only while the setting is on produced.
+    """
+    jira = get_system_setting("enable_jira")
+    groups = is_finding_groups_enabled()
+    disabled = []
+    if not jira:
+        disabled.extend(FINDING_JIRA_FILTERS)
+    if not groups:
+        disabled.extend(FINDING_GROUP_FILTERS)
+    if not (jira and groups):
+        disabled.extend(FINDING_GROUP_JIRA_FILTERS)
+    to_end = []
+    if jira and not groups:
+        # Meta.fields lists has_any_jira_issue only when finding groups are on too. Without them it is a
+        # declared filter outside Meta.fields, and those follow the Meta.fields ones in declaration order.
+        in_meta = set(type(filterset).get_fields()) - {"has_any_jira_issue"}
+        to_end = [name for name in filterset.declared_filters if name not in in_meta]
+    # DojoFilter.__init__ has built the form from the filters already, so it needs the same treatment.
+    for names in (filterset.filters, filterset.form.fields):
+        for name in disabled:
+            names.pop(name, None)
+        for name in to_end:
+            if name in names:
+                names[name] = names.pop(name)
+
+
+def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_matching=False, all_features=False):
+    """
+    The ``Meta.fields`` of the finding filtersets.
+
+    ``all_features`` lists every setting-gated field without reading a setting, for a class body; the instance
+    then drops what its settings turn off (``drop_disabled_finding_filters``).
+    """
+    jira = all_features or get_system_setting("enable_jira")
+    groups = all_features or is_finding_groups_enabled()
     fields = []
 
     if similar:
@@ -636,7 +683,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
         "risk_acceptance",
     ])
 
-    if get_system_setting("enable_jira"):
+    if jira:
         fields.extend([
             "has_jira_issue",
             "jira_creation",
@@ -644,7 +691,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
             "jira_issue__jira_key",
         ])
 
-    if is_finding_groups_enabled():
+    if groups:
         if filter_string_matching:
             fields.extend([
                 "has_finding_group",
@@ -656,7 +703,7 @@ def get_finding_filterset_fields(*, metrics=False, similar=False, filter_string_
                 "finding_group",
             ])
 
-        if get_system_setting("enable_jira"):
+        if jira:
             fields.extend([
                 "has_jira_group_issue",
                 "has_any_jira_issue",

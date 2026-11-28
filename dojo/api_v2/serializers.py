@@ -421,6 +421,56 @@ from dojo.test.api.serializer import (  # noqa: E402, F401 -- backward compat re
 )
 
 
+class DeferredChoiceField(serializers.ChoiceField):
+
+    """
+    A ChoiceField whose choices come from ``choices_source``, a callable, read the first time they are needed.
+
+    The scan type choices leave out the inactive ``Test_Type`` rows, which live in the database. Built in the
+    class body they were read once, when the module was imported, so every later request saw whatever the
+    database said then. Deferred, each serializer instance reads them when it first validates or describes the
+    field (DRF deep-copies the declared field for every instance). Setting ``choices`` directly, as a subclass
+    may in ``__init__``, replaces them without calling ``choices_source``.
+    """
+
+    def __init__(self, choices_source, **kwargs):
+        self._choices_source = choices_source
+        super().__init__(choices=(), **kwargs)
+        self._deferred = True
+
+    def _resolve(self):
+        if self._deferred:
+            self.choices = self._choices_source()
+
+    def _get_choices(self):
+        self._resolve()
+        return self._choices
+
+    def _set_choices(self, choices):
+        self._deferred = False
+        super()._set_choices(choices)
+
+    choices = property(_get_choices, _set_choices)
+
+    @property
+    def grouped_choices(self):
+        self._resolve()
+        return self._grouped_choices
+
+    @grouped_choices.setter
+    def grouped_choices(self, value):
+        self._grouped_choices = value
+
+    @property
+    def choice_strings_to_values(self):
+        self._resolve()
+        return self._choice_strings_to_values
+
+    @choice_strings_to_values.setter
+    def choice_strings_to_values(self, value):
+        self._choice_strings_to_values = value
+
+
 class CommonImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField(
         required=False,
@@ -720,7 +770,7 @@ class CommonImportScanSerializer(serializers.Serializer):
 
 
 class ImportScanSerializer(CommonImportScanSerializer):
-    scan_type = serializers.ChoiceField(choices=get_choices_sorted())
+    scan_type = DeferredChoiceField(get_choices_sorted)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False,
     )
@@ -805,9 +855,7 @@ class ReImportScanSerializer(CommonImportScanSerializer):
     do_not_reactivate = serializers.BooleanField(
         default=False, required=False, help_text=help_do_not_reactivate,
     )
-    scan_type = serializers.ChoiceField(
-        choices=get_choices_sorted(), required=True,
-    )
+    scan_type = DeferredChoiceField(get_choices_sorted, required=True)
     test = serializers.PrimaryKeyRelatedField(
         required=False, queryset=Test.objects.all(),
     )

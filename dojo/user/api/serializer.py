@@ -28,11 +28,11 @@ class UserSerializer(serializers.ModelSerializer):
         required=False,
         validators=[validate_password],
     )
+    # The queryset is set per instance in get_fields(): which permissions count follows System_Settings
+    # (enable_github, enable_jira, enable_questionnaires), which a class-body query read only once, at import.
     configuration_permissions = serializers.PrimaryKeyRelatedField(
         allow_null=True,
-        queryset=Permission.objects.filter(
-            codename__in=get_configuration_permissions_codenames(),
-        ),
+        queryset=Permission.objects.none(),
         many=True,
         required=False,
         source="user_permissions",
@@ -57,6 +57,20 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "configuration_permissions",
         )
+
+    def get_fields(self):
+        # Not __init__: a serializer declared as a field of another serializer is constructed in that
+        # class body, so its __init__ runs at import. get_fields() runs the first time self.fields is read.
+        fields = super().get_fields()
+        field = fields.get("configuration_permissions")
+        # A subclass may declare its own configuration_permissions (the export manifest's is a method field).
+        if isinstance(field, serializers.ManyRelatedField):
+            # many=True makes a ManyRelatedField that resolves each id through its child_relation, so the
+            # queryset goes on both.
+            queryset = Permission.objects.filter(codename__in=get_configuration_permissions_codenames())
+            field.queryset = queryset
+            field.child_relation.queryset = queryset
+        return fields
 
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_token_last_reset(self, instance):
