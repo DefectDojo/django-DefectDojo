@@ -1,4 +1,3 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import action
@@ -6,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.models import Endpoint, Product_Type
@@ -23,7 +23,7 @@ class ProductTypeViewSet(
 ):
     serializer_class = ProductTypeSerializer
     queryset = Product_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "id",
         "name",

@@ -2,7 +2,6 @@ from functools import partial
 
 from django.db.models import OuterRef, Value
 from django.db.models.functions import Coalesce
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -12,6 +11,7 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import (
     DeprecationNoticeMixin,
     PrefetchDojoModelViewSet,
@@ -47,7 +47,7 @@ class AssetAPIScanConfigurationViewSet(
     deprecation = "api_scan_configuration"
     serializer_class = serializers.AssetAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = AssetAPIScanConfigurationFilterSet
     permission_classes = (
         IsAuthenticated,
@@ -73,7 +73,7 @@ class AssetViewSet(
 ):
     serializer_class = serializers.AssetSerializer
     queryset = Product.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiAssetFilter
     permission_classes = (
         IsAuthenticated,

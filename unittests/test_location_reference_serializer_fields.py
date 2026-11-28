@@ -75,7 +75,7 @@ class LocationReferenceSerializerFieldsTest(APITestCase):
                 )
 
     def test_location_products_list_and_detail(self):
-        response = self.client.get(reverse("location_products-list"), {"product": self.product.id})
+        response = self.client.get(reverse("location_products-list"), {"product_equals": self.product.id})
         self.assertEqual(response.status_code, 200, response.content[:1000])
         rows = [r for r in response.json()["results"] if r["id"] == self.product_ref.id]
         self.assertEqual(len(rows), 1, response.content[:1000])
@@ -94,7 +94,7 @@ class LocationReferenceSerializerFieldsTest(APITestCase):
         self.assert_location_fields(response.json(), "location_products create")
 
     def test_location_findings_list_and_detail(self):
-        response = self.client.get(reverse("location_findings-list"), {"finding": self.finding.id})
+        response = self.client.get(reverse("location_findings-list"), {"finding_equals": self.finding.id})
         self.assertEqual(response.status_code, 200, response.content[:1000])
         rows = [r for r in response.json()["results"] if r["id"] == self.finding_ref.id]
         self.assertEqual(len(rows), 1, response.content[:1000])

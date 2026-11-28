@@ -1,7 +1,6 @@
-from django_filters.rest_framework import DjangoFilterBackend
-
 from dojo.announcement.api.serializer import AnnouncementSerializer
 from dojo.announcement.models import Announcement
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 
@@ -12,7 +11,7 @@ class AnnouncementViewSet(
 ):
     serializer_class = AnnouncementSerializer
     queryset = Announcement.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
 

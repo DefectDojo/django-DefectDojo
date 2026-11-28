@@ -122,9 +122,10 @@ class TestApiFindingRelationFilters(DojoTestCase):
         self.assertIsNone(page2.data["next"])
         ids = {f["id"] for f in page1.data["results"]} | {f["id"] for f in page2.data["results"]}
         self.assertEqual(ids, self.findings["b"])
-        # A parameter that is not a filter is still ignored rather than rejected.
+        # A parameter that is not a filter is refused, so it can never widen the page (DD_API_UNKNOWN_QUERY_PARAMS).
         unknown = client.get(url, {"engagement": self.eng_b.id, "not_a_filter": "1", "limit": 100}, secure=True)
-        self.assertEqual({f["id"] for f in unknown.data["results"]}, self.findings["b"])
+        self.assertEqual(unknown.status_code, 400, unknown.content[:500])
+        self.assertIn("not_a_filter", unknown.json())
 
     def test_api_does_not_widen_for_a_member_of_one_product(self):
         # A Reader of product A only. The short names narrow what the caller may already see, so asking for

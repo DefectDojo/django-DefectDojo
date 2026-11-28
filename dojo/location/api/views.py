@@ -1,9 +1,9 @@
 from django.db.models import QuerySet
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet
 from dojo.authorization.api_permissions import (
     LocationFindingReferencePermission,
@@ -39,7 +39,7 @@ class LocationViewSet(ReadOnlyModelViewSet):
     serializer_class = LocationSerializer
     queryset = Location.objects.none()
     filterset_class = LocationFilter
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [StrictDjangoFilterBackend]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self) -> QuerySet[Location]:
@@ -65,7 +65,7 @@ class LocationFindingReferenceViewSet(PrefetchDojoModelViewSet):
     serializer_class = LocationFindingReferenceSerializer
     queryset = LocationFindingReference.objects.none()
     filterset_class = LocationFindingReferenceFilter
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [StrictDjangoFilterBackend]
     permission_classes = [
         IsAuthenticated,
         LocationFindingReferencePermission,
@@ -83,7 +83,7 @@ class LocationProductReferenceViewSet(PrefetchDojoModelViewSet):
     serializer_class = LocationProductReferenceSerializer
     queryset = LocationProductReference.objects.none()
     filterset_class = LocationProductReferenceFilter
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [StrictDjangoFilterBackend]
     permission_classes = [
         IsAuthenticated,
         LocationProductReferencePermission,

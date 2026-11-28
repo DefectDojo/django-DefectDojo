@@ -1,8 +1,8 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view
 from rest_framework.permissions import DjangoModelPermissions
 
 from dojo.api_v2 import permissions
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet, schema_with_prefetch
 from dojo.notifications.api.serializer import (
     NotificationsSerializer,
@@ -18,7 +18,7 @@ class NotificationsViewSet(
 ):
     serializer_class = NotificationsSerializer
     queryset = Notifications.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "user", "product", "template"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
@@ -31,6 +31,6 @@ class NotificationWebhooksViewSet(
 ):
     serializer_class = NotificationWebhooksSerializer
     queryset = Notification_Webhooks.objects.all()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users

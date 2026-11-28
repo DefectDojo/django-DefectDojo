@@ -13,7 +13,6 @@ from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.shortcuts import render
 from django.utils import timezone
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -36,6 +35,7 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.deprecations import get_deprecation
@@ -206,7 +206,7 @@ class AppAnalysisViewSet(
 ):
     serializer_class = serializers.AppAnalysisSerializer
     queryset = App_Analysis.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiAppAnalysisFilter
 
     permission_classes = (
@@ -224,7 +224,7 @@ class SonarqubeIssueViewSet(
 ):
     serializer_class = serializers.SonarqubeIssueSerializer
     queryset = Sonarqube_Issue.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "key", "status", "type"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
@@ -238,7 +238,7 @@ class SonarqubeIssueTransitionViewSet(
 ):
     serializer_class = serializers.SonarqubeIssueTransitionSerializer
     queryset = Sonarqube_Issue_Transition.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "id",
         "sonarqube_issue",
@@ -260,7 +260,7 @@ class DojoMetaViewSet(
 ):
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiDojoMetaFilter
     permission_classes = (
         IsAuthenticated,
@@ -429,7 +429,7 @@ class LanguageTypeViewSet(
 ):
     serializer_class = serializers.LanguageTypeSerializer
     queryset = Language_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "language", "color"]
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
 
@@ -444,7 +444,7 @@ class LanguageViewSet(
 ):
     serializer_class = serializers.LanguageSerializer
     queryset = Languages.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "language", "product"]
     permission_classes = (
         IsAuthenticated,
@@ -997,7 +997,7 @@ class NetworkLocationsViewset(
 ):
     serializer_class = serializers.NetworkLocationsSerializer
     queryset = Network_Locations.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "location"]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
@@ -1011,7 +1011,7 @@ class ConfigurationPermissionViewSet(
 ):
     serializer_class = serializers.ConfigurationPermissionSerializer
     queryset = Permission.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "name", "codename"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
@@ -1026,7 +1026,7 @@ class SLAConfigurationViewset(
 ):
     serializer_class = serializers.SLAConfigurationSerializer
     queryset = SLA_Configuration.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     permission_classes = (IsAuthenticated, permissions.UserHasSLAPermission)
 
     def get_queryset(self):

@@ -3,7 +3,6 @@ import logging
 from crum import get_current_user
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -14,6 +13,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.models import UserContactInfo
@@ -40,7 +40,7 @@ class UsersViewSet(
 ):
     serializer_class = UserSerializer
     queryset = User.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiUserFilter
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
@@ -96,7 +96,7 @@ class UserContactInfoViewSet(
 ):
     serializer_class = UserContactInfoSerializer
     queryset = UserContactInfo.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiUserContactInfoFilter
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 

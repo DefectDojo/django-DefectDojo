@@ -2,7 +2,6 @@ import logging
 
 from django.db.models import OuterRef, Value
 from django.db.models.functions import Coalesce
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -11,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
 from dojo.endpoint.api.filters import ApiEndpointFilter
@@ -40,7 +40,7 @@ class EndPointViewSet(
 ):
     serializer_class = EndpointSerializer
     queryset = Endpoint.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiEndpointFilter
 
     permission_classes = (
@@ -106,7 +106,7 @@ class EndpointStatusViewSet(
 ):
     serializer_class = EndpointStatusSerializer
     queryset = Endpoint_Status.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "mitigated",
         "false_positive",

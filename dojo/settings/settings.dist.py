@@ -305,6 +305,10 @@ env = environ.FileAwareEnv(
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
+    # What an /api/v2 list does with a query parameter no filter declares: "enforce" answers 400
+    # naming it, "warn" serves the request and names it in the X-DefectDojo-Unknown-Query-Params
+    # response header and a log line, "off" ignores it.
+    DD_API_UNKNOWN_QUERY_PARAMS=(str, "enforce"),
     # Enable endpoint which allow user to get API token when user+pass is provided
     DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
     # Default token lifetime in days. 0 = no expiry (tokens last forever).
@@ -845,6 +849,8 @@ API_TOKENS_ENABLED = env("DD_API_TOKENS_ENABLED")
 
 API_TOKEN_AUTH_ENDPOINT_ENABLED = env("DD_API_TOKEN_AUTH_ENDPOINT_ENABLED")
 API_TOKEN_DEFAULT_EXPIRY_DAYS = env("DD_API_TOKEN_DEFAULT_EXPIRY_DAYS")
+# enforce | warn | off: see dojo/api_v2/strict_filters.py.
+API_UNKNOWN_QUERY_PARAMS = env("DD_API_UNKNOWN_QUERY_PARAMS")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",

@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils.timezone import now
@@ -82,4 +84,6 @@ class TestNotesListNPlusOne(APITestCase):
         self._assert_count_independent_of_notes(self.test, f"/api/v2/tests/?id={self.test.id}")
 
     def test_risk_acceptance_list_query_count_independent_of_notes(self):
-        self._assert_count_independent_of_notes(self.risk_acceptance, f"/api/v2/risk_acceptance/?id={self.risk_acceptance.id}")
+        # The risk acceptance list declares no ``id`` filter (an undeclared one is refused), so it is scoped by name.
+        url = f"/api/v2/risk_acceptance/?name={quote(self.risk_acceptance.name)}"
+        self._assert_count_independent_of_notes(self.risk_acceptance, url)

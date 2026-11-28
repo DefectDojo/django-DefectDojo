@@ -1,6 +1,6 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 from dojo.development_environment.api.serializer import DevelopmentEnvironmentSerializer
@@ -13,7 +13,7 @@ class DevelopmentEnvironmentViewSet(
 ):
     serializer_class = DevelopmentEnvironmentSerializer
     queryset = Development_Environment.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     permission_classes = (IsAuthenticated, permissions.UserHasDevelopmentEnvironmentPermission)
 
     def get_queryset(self):

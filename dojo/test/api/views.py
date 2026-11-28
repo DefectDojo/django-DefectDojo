@@ -1,5 +1,4 @@
 from django.urls import reverse
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -8,6 +7,7 @@ from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
 from dojo.jira import services as jira_services
@@ -50,7 +50,7 @@ class TestsViewSet(
 ):
     serializer_class = TestSerializer
     queryset = Test.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiTestFilter
     permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
 
@@ -280,7 +280,7 @@ class TestTypesViewSet(
 ):
     serializer_class = TestTypeSerializer
     queryset = Test_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = [
         "name",
     ]
@@ -302,7 +302,7 @@ class TestImportViewSet(
 ):
     serializer_class = TestImportSerializer
     queryset = Test_Import.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
 
     filterset_class = TestImportAPIFilter
 

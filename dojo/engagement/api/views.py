@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.urls import reverse
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
@@ -11,6 +10,7 @@ from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate_response, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
@@ -55,7 +55,7 @@ class EngagementViewSet(
 ):
     serializer_class = EngagementSerializer
     queryset = Engagement.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiEngagementFilter
 
     permission_classes = (
@@ -387,7 +387,7 @@ class EngagementPresetsViewset(
 ):
     serializer_class = EngagementPresetsSerializer
     queryset = Engagement_Presets.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_fields = ["id", "title", "product"]
     permission_classes = (
         IsAuthenticated,

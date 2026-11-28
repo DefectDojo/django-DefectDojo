@@ -1,8 +1,8 @@
 from django.db.models import OuterRef, QuerySet, Value
 from django.db.models.functions import Coalesce
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import DjangoModelPermissions
 
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet
 from dojo.authorization.api_permissions import IsSuperUser
 from dojo.location.models import LocationFindingReference
@@ -20,7 +20,7 @@ class URLViewSet(PrefetchDojoModelViewSet):
     serializer_class = URLSerializer
     queryset = URL.objects.none()
     filterset_class = URLFilter
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [StrictDjangoFilterBackend]
     permission_classes = (IsSuperUser, DjangoModelPermissions)
     lookup_field = "location_id"
     lookup_url_kwarg = "pk"

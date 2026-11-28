@@ -2,7 +2,6 @@ import mimetypes
 
 from django.http import FileResponse
 from django.urls import reverse
-from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
+from dojo.api_v2.strict_filters import StrictDjangoFilterBackend
 from dojo.api_v2.views import PrefetchDojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 from dojo.models import NoteHistory, Notes, Risk_Acceptance
@@ -33,7 +33,7 @@ class RiskAcceptanceViewSet(
 ):
     serializer_class = RiskAcceptanceSerializer
     queryset = Risk_Acceptance.objects.none()
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (StrictDjangoFilterBackend,)
     filterset_class = ApiRiskAcceptanceFilter
 
     permission_classes = (
