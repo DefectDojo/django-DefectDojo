@@ -23,6 +23,11 @@ A key is known when it is one of:
 ``X-DefectDojo-Unknown-Query-Params`` response header and a log line, and ``off`` ignores them as
 django-filter always did. A detail route is never checked: it returns one object whatever the
 query string says.
+
+Only a view open source defines (a class in the ``dojo`` package) is checked. A plugin's view,
+including a plugin subclass of an open source viewset, may read parameters open source does not know
+about, so the plugin decides when its own views become strict: installing a newer open source never
+changes how a plugin's views answer.
 """
 
 import logging
@@ -143,6 +148,10 @@ def _is_detail_request(view):
     return bool(lookup) and lookup in kwargs
 
 
+def _defined_by_open_source(view):
+    return type(view).__module__.split(".", 1)[0] == "dojo"
+
+
 def check_unknown_query_params(request, view, known):
     """
     Apply the configured mode to the query keys of ``request`` that are not known.
@@ -178,7 +187,7 @@ class StrictDjangoFilterBackend(DjangoFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         filterset = self.get_filterset(request, queryset, view)
-        if not _is_detail_request(view):
+        if _defined_by_open_source(view) and not _is_detail_request(view):
             check_unknown_query_params(request, view, lambda: known_query_params(view, filterset))
         if filterset is None:
             return queryset

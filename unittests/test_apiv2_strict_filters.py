@@ -155,6 +155,38 @@ class StrictFilterListTest(DojoAPITestCase):
         self.assertNotIn(UNKNOWN_QUERY_PARAMS_HEADER, response)
 
 
+class StrictFilterPluginViewTest(DojoTestCase):
+
+    """A plugin's view (any class outside the ``dojo`` package) is left to the plugin."""
+
+    def test_a_view_defined_outside_open_source_is_not_checked(self):
+        from rest_framework.request import Request  # noqa: PLC0415
+        from rest_framework.test import APIRequestFactory  # noqa: PLC0415
+
+        from dojo.finding.api.views import FindingViewSet  # noqa: PLC0415
+
+        plugin_view_class = type("PluginFindingViewSet", (FindingViewSet,), {"__module__": "plugin.views"})
+        view = plugin_view_class()
+        view.kwargs = {}
+        view.request = Request(APIRequestFactory().get("/", {"not_a_filter": "x"}))
+        backend = strict_filters.StrictDjangoFilterBackend()
+        queryset = Finding.objects.none()
+        self.assertEqual(list(backend.filter_queryset(view.request, queryset, view)), [])
+
+    def test_a_view_defined_by_open_source_is_checked(self):
+        from rest_framework.exceptions import ValidationError  # noqa: PLC0415
+        from rest_framework.request import Request  # noqa: PLC0415
+        from rest_framework.test import APIRequestFactory  # noqa: PLC0415
+
+        from dojo.finding.api.views import FindingViewSet  # noqa: PLC0415
+
+        view = FindingViewSet()
+        view.kwargs = {}
+        view.request = Request(APIRequestFactory().get("/", {"not_a_filter": "x"}))
+        with self.assertRaises(ValidationError):
+            strict_filters.StrictDjangoFilterBackend().filter_queryset(view.request, Finding.objects.none(), view)
+
+
 class _RangeFilterSet(django_filters.FilterSet):
     created = django_filters.DateFromToRangeFilter()
     pair = django_filters.Filter(widget=forms.MultiWidget(widgets=[forms.TextInput, forms.TextInput]))
